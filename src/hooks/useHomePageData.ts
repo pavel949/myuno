@@ -35,9 +35,10 @@ interface FeaturedTour {
 // Fetch functions for different data types
 const fetchFeaturedTours = async (): Promise<FeaturedTour[]> => {
   const { data, error } = await supabase
-    .from('tours')
+    .from('experiences')
     .select('id, title_en, title_ru, cover_image, rating, price')
     .eq('is_active', true)
+    .eq('experience_type', 'tour')
     .order('rating', { ascending: false })
     .limit(8);
   

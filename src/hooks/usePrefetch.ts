@@ -72,14 +72,15 @@ export function usePrefetchPopularData() {
       ...CACHE_PROFILES.SEMI_STATIC,
     });
 
-    // Prefetch featured tours - uses same key as useSmartRecommendations to share cache
+    // Prefetch featured tours (from experiences table)
     await queryClient.prefetchQuery({
       queryKey: ['tours', { featured: true }],
       queryFn: async () => {
         const { data } = await supabase
-          .from('tours')
+          .from('experiences')
           .select('id, title_en, title_ru, cover_image, price, rating, category')
           .eq('is_active', true)
+          .eq('experience_type', 'tour')
           .eq('is_featured', true)
           .limit(6);
         return data || [];
@@ -177,9 +178,10 @@ export function usePrefetchRoute() {
           queryKey: ['tours', {}],
           queryFn: async () => {
             const { data } = await supabase
-              .from('tours')
+              .from('experiences')
               .select('*')
               .eq('is_active', true)
+              .eq('experience_type', 'tour')
               .order('rating', { ascending: false })
               .limit(20);
             return data || [];

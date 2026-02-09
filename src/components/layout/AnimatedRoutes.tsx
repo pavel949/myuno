@@ -365,7 +365,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/investor-demo" element={<Pages.InvestorDemo />} />
           <Route path="/admin/operations" element={<Pages.AdminOperations />} />
           <Route path="/admin/yachts" element={<Pages.AdminYachts />} />
-          <Route path="/admin/tours" element={<Pages.AdminTours />} />
+          <Route path="/admin/tours" element={<Navigate to="/admin/experiences" replace />} />
           <Route path="/admin/activities" element={<Pages.AdminActivities />} />
           <Route path="/admin/properties" element={<Pages.AdminProperties />} />
           <Route path="/admin/projects" element={<Pages.AdminProjects />} />
@@ -463,7 +463,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/analytics" element={<Pages.VendorAnalytics />} />
           <Route path="/vendor/payouts" element={<Pages.VendorPayouts />} />
           <Route path="/vendor/properties" element={<Pages.VendorProperties />} />
-          <Route path="/vendor/tours" element={<Pages.VendorTours />} />
+          <Route path="/vendor/tours" element={<Navigate to="/vendor/experiences" replace />} />
           <Route path="/vendor/activities" element={<Pages.VendorActivities />} />
           <Route path="/vendor/experiences" element={<Pages.VendorExperiences />} />
           <Route path="/vendor/yachts" element={<Pages.VendorYachts />} />

@@ -66,7 +66,7 @@ async function fetchCategoryCounts(): Promise<CategoryCounts> {
     petsResult,
   ] = await Promise.all([
     supabase.from('yachts').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('tours').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('experiences').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('experience_type', 'tour'),
     supabase.from('restaurants').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('properties').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true),
