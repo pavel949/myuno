@@ -121,7 +121,7 @@ export default function CleaningIndex() {
               priceUnit={service.price_per_hour ? '/hr' : ''}
               currency={currencyInfo.symbol}
               badge={service.is_verified 
-                ? { text: language === 'ru' ? 'Проверено' : 'Verified', className: 'bg-green-500 text-white' }
+                ? { text: language === 'ru' ? 'Проверено' : 'Verified', className: 'bg-primary text-primary-foreground' }
                 : undefined
               }
               tags={[service.service_type, duration].filter(Boolean) as string[]}

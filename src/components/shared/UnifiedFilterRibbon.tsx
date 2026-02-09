@@ -1,6 +1,7 @@
 import React, { memo, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
 
 export interface FilterRibbonItem {
   id: string;
@@ -76,23 +77,21 @@ const RibbonButton = memo(function RibbonButton({ item, isActive, onClick }: Rib
   
   const variantClasses = {
     default: cn(
-      "bg-white/80 dark:bg-white/10",
-      "backdrop-blur-md",
-      "border border-white/50 dark:border-white/20",
-      "shadow-sm hover:shadow-md",
-      isActive && "bg-primary/15 text-primary border-primary/30 shadow-primary/10"
+      "bg-secondary",
+      "border border-border",
+      isActive && "bg-primary/15 text-primary border-primary/30"
     ),
     primary: cn(
-      "bg-gradient-to-r from-primary/10 to-amber-500/10",
+      "bg-primary/10",
       "border border-primary/20 hover:border-primary/40",
       "text-primary",
       isActive && "bg-primary text-primary-foreground border-primary"
     ),
     accent: cn(
-      "bg-gradient-to-r from-orange-500/15 to-amber-500/15",
-      "border border-amber-500/30 hover:border-amber-500/50",
-      "text-amber-700 dark:text-amber-300",
-      isActive && "ring-2 ring-orange-400"
+      "bg-accent",
+      "border border-border hover:border-primary/30",
+      "text-accent-foreground",
+      isActive && "bg-primary/15 text-primary border-primary/30"
     ),
   };
 
@@ -102,15 +101,14 @@ const RibbonButton = memo(function RibbonButton({ item, isActive, onClick }: Rib
       className={cn(baseClasses, variantClasses[item.variant || 'default'])}
     >
       {item.image && (
-        <div className="w-5 h-5 rounded-md overflow-hidden shadow-sm">
+        <div className="w-5 h-5 rounded-md overflow-hidden">
           <img src={item.image} alt="" className="w-full h-full object-cover" />
         </div>
       )}
-      {item.emoji && (
-        <div className="w-5 h-5 rounded-md bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
-          <span className="text-xs">{item.emoji}</span>
-        </div>
-      )}
+      {item.emoji && (() => {
+        const EmojiIcon = resolveIcon(item.emoji);
+        return <EmojiIcon className="w-4 h-4" />;
+      })()}
       {Icon && <Icon className="w-4 h-4" />}
       <span className="whitespace-nowrap">{item.label}</span>
     </button>
