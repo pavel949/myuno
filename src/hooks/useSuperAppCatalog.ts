@@ -79,7 +79,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
   },
   salons: { 
     primaryTaxonomy: 'salon_type', 
-    path: '/salons',
+    path: '/beauty',
     queryParam: 'type',
   },
   pets: { 
@@ -119,7 +119,7 @@ const VALID_ROUTE_PREFIXES = [
   '/property',
   '/transport',
   '/services',
-  '/salons',
+  '/beauty',
   '/medical',
   '/pets',
   '/events',
@@ -127,6 +127,13 @@ const VALID_ROUTE_PREFIXES = [
   '/invest',
   '/offplan',
   '/complexes',
+  '/fitness',
+  '/education',
+  '/cleaning',
+  '/babysitter',
+  '/legal',
+  '/flowers',
+  '/insurance',
 ];
 
 // Validate and sanitize path

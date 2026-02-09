@@ -78,7 +78,7 @@
    CLEANING: {
      id: 'cleaning',
      plural: 'cleaning',
-     table: 'cleaning_providers',
+     table: 'cleaning_services',
      icon: '🧹',
      labelEn: 'Cleaning',
      labelRu: 'Уборка',

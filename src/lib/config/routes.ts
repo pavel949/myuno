@@ -83,6 +83,54 @@ export const APP_ROUTES = {
 
   // Cart
   CART: '/cart',
+
+  // Beauty & Spa (canonical for salons/spa/wellness)
+  BEAUTY: '/beauty',
+  BEAUTY_SALON: (id: string) => `/beauty/salon/${id}`,
+
+  // Medical
+  MEDICAL: '/medical',
+  MEDICAL_CLINIC: (id: string) => `/medical/clinic/${id}`,
+
+  // Fitness
+  FITNESS: '/fitness',
+  FITNESS_GYM: (id: string) => `/fitness/gym/${id}`,
+
+  // Education
+  EDUCATION: '/education',
+
+  // Legal
+  LEGAL: '/legal',
+
+  // Pets
+  PETS: '/pets',
+  PET_SERVICE: (id: string) => `/pets/${id}`,
+
+  // Babysitter
+  BABYSITTER: '/babysitter',
+
+  // Flowers
+  FLOWERS: '/flowers',
+
+  // Events
+  EVENTS: '/events',
+
+  // Restaurants
+  RESTAURANTS: '/restaurants',
+  RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
+
+  // Banking & Expat
+  BANKING: '/banking',
+  VETERINARY: '/veterinary',
+
+  // Pharmacy
+  PHARMACY: '/pharmacy',
+
+  // Investment
+  INVEST: '/invest',
+
+  // Life Flow
+  LIFE_FLOW: (code: string) => `/life-flow/${code}`,
 } as const;
 
 /**
@@ -141,6 +189,12 @@ export function isValidRoute(path: string): boolean {
     /^\/market\/product\/[^/]+$/,
     /^\/yachts\/[^/]+$/,
     /^\/yachts\/[^/]+\/booking$/,
+    /^\/beauty\/salon\/[^/]+$/,
+    /^\/medical\/clinic\/[^/]+$/,
+    /^\/fitness\/gym\/[^/]+$/,
+    /^\/restaurants\/[^/]+$/,
+    /^\/pets\/[^/]+$/,
+    /^\/life-flow\/[^/]+$/,
   ];
   
   return dynamicPatterns.some(pattern => pattern.test(path));
