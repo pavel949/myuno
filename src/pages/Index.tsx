@@ -1,7 +1,7 @@
 /**
  * Index page — P0.1: LifeOS-First Home
  * Primary entry: Life Situations ("What's happening in your life?")
- * Secondary: Vertical access only after situation selection or explicit bypass
+ * Secondary: Vertical access always visible, situation prompt is non-blocking
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,13 +12,13 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
-import { LifeSituationGate } from '@/components/life-os/LifeSituationGate';
+import { LifeSituationSelector } from '@/components/home/LifeSituationSelector';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load secondary components (shown only with active context)
+// Lazy load secondary components
 const QuickActionsGrid = lazy(() => import('@/components/home/QuickActionsGrid').then(m => ({ default: m.QuickActionsGrid })));
 const DiscoveryCarousel = lazy(() => import('@/components/home/DiscoveryCarousel').then(m => ({ default: m.DiscoveryCarousel })));
 const PersonaChips = lazy(() => import('@/components/home/PersonaChips').then(m => ({ default: m.PersonaChips })));
@@ -78,23 +78,24 @@ const Index = () => {
           {/* Hero: Brand + Search + SOS */}
           <HeroBlock />
 
-          {/* P0.1: Life Situation Gate — PRIMARY ENTRY POINT */}
-          {/* If no context: shows life situation selector */}
-          {/* If context active: shows persona chips + quick actions + discovery */}
-          <LifeSituationGate allowBypass={true}>
-            {/* Secondary content — only visible with active life situation */}
+          {/* Life Situation prompt — non-blocking suggestion */}
+          {!hasContext && <LifeSituationSelector />}
+
+          {/* Persona chips when context is active */}
+          {hasContext && (
             <Suspense fallback={null}>
               <PersonaChips />
             </Suspense>
+          )}
 
-            <Suspense fallback={<SectionSkeleton />}>
-              <QuickActionsGrid contentMode="services" />
-            </Suspense>
+          {/* Quick Actions & Discovery — always visible */}
+          <Suspense fallback={<SectionSkeleton />}>
+            <QuickActionsGrid contentMode="services" />
+          </Suspense>
 
-            <Suspense fallback={<SectionSkeleton />}>
-              <DiscoveryCarousel />
-            </Suspense>
-          </LifeSituationGate>
+          <Suspense fallback={<SectionSkeleton />}>
+            <DiscoveryCarousel />
+          </Suspense>
 
         </div>
       </PullToRefresh>

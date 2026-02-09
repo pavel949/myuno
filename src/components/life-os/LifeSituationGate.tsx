@@ -4,7 +4,7 @@
  * Shows life situation selection with "I know what I need" bypass.
  */
 import React, { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
@@ -44,7 +44,7 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
   allowBypass: boolean;
 }) {
   const { language } = useLanguage();
-  const navigate = useNavigate();
+  const location = useLocation();
   const { setLifeSituation } = useLifeSituationContext();
   const { data: situations, isLoading } = useLifeSituations();
   const isRu = language === 'ru';
@@ -62,7 +62,7 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
   }) => {
     const title = isRu ? situation.title_ru : situation.title_en;
     setLifeSituation(situation.code, title, situation.color);
-    navigate(`/life-flow/${situation.code}`);
+    // Stay on current page — context is now set, children will render
   };
 
   const handleBypass = () => {
