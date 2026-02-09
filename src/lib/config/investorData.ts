@@ -75,7 +75,7 @@ export const PAIN_POINTS = [
 export const SERVICE_VERTICALS = [
   { name: 'Transport', nameRu: 'Транспорт', icon: 'Car', color: 'bg-blue-500', category: 'travel' },
   { name: 'Tours', nameRu: 'Туры', icon: 'Palmtree', color: 'bg-green-500', category: 'travel' },
-  { name: 'Yachts', nameRu: 'Яхты', icon: 'Ship', color: 'bg-cyan-500', category: 'travel' },
+  { name: 'Boat Charters', nameRu: 'Чартер', icon: 'Ship', color: 'bg-cyan-500', category: 'travel' },
   { name: 'Property', nameRu: 'Недвижимость', icon: 'Home', color: 'bg-indigo-500', category: 'lifestyle' },
   { name: 'Restaurants', nameRu: 'Рестораны', icon: 'UtensilsCrossed', color: 'bg-orange-500', category: 'lifestyle' },
   { name: 'Spa & Beauty', nameRu: 'Спа и красота', icon: 'Sparkles', color: 'bg-pink-500', category: 'lifestyle' },

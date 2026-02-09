@@ -74,7 +74,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     labelEn: 'Boat Charter',
     labelRu: 'Чартер',
     pluralEn: 'Boat Charters',
-    pluralRu: 'Аренда яхт и катеров',
+    pluralRu: 'Чартер',
     priority: 'secondary',
   },
   restaurant: {

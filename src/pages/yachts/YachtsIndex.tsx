@@ -24,7 +24,7 @@ export default function YachtsIndex() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-lg font-bold">
-            {isRu ? 'Аренда яхт' : 'Boat Charters'}
+            {isRu ? 'Чартер' : 'Boat Charters'}
           </h1>
         </div>
 

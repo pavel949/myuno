@@ -31,7 +31,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/analytics': { en: 'Analytics', ru: 'Аналитика' },
   '/admin/providers': { en: 'Providers', ru: 'Провайдеры' },
   '/admin/services': { en: 'Services', ru: 'Услуги' },
-  '/admin/yachts': { en: 'Yachts', ru: 'Яхты' },
+  '/admin/yachts': { en: 'Boat Charters', ru: 'Чартер' },
   '/admin/tours': { en: 'Tours', ru: 'Туры' },
   '/admin/activities': { en: 'Activities', ru: 'Активности' },
   '/admin/properties': { en: 'Properties', ru: 'Недвижимость' },

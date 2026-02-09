@@ -21,7 +21,7 @@ export interface CrossSellLink {
 
 export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
   water: [
-    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Yacht Rentals', labelRu: 'Аренда яхт', descriptionEn: 'Private charters', descriptionRu: 'Приватные туры', gradient: 'from-cyan-500 to-blue-600' },
+    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Boat Charters', labelRu: 'Чартер', descriptionEn: 'Private charters', descriptionRu: 'Приватные туры', gradient: 'from-cyan-500 to-blue-600' },
     { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', descriptionEn: 'Dinner after diving', descriptionRu: 'Ужин после дайвинга', gradient: 'from-orange-400 to-red-500' },
     { id: 'transport', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Трансфер', descriptionEn: 'Get a ride', descriptionRu: 'Заказать машину', gradient: 'from-slate-500 to-slate-700' },
     { id: 'market', icon: ShoppingCart, path: '/market', labelEn: 'Market', labelRu: 'Маркет', descriptionEn: 'Snacks & drinks', descriptionRu: 'Снеки и напитки', gradient: 'from-green-500 to-emerald-600' },
@@ -45,7 +45,7 @@ export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
     { id: 'water', icon: Waves, path: '/experiences?type=activity', labelEn: 'Water Sports', labelRu: 'Водный спорт', descriptionEn: 'Beach activities', descriptionRu: 'Активности на воде', gradient: 'from-blue-400 to-cyan-500' },
   ],
   experiences: [
-    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Yacht Rentals', labelRu: 'Аренда яхт', descriptionEn: 'Private charters', descriptionRu: 'Приватные туры', gradient: 'from-cyan-500 to-blue-600' },
+    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Boat Charters', labelRu: 'Чартер', descriptionEn: 'Private charters', descriptionRu: 'Приватные туры', gradient: 'from-cyan-500 to-blue-600' },
     { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', descriptionEn: 'Local cuisine', descriptionRu: 'Местная кухня', gradient: 'from-orange-400 to-red-500' },
     { id: 'transport', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Трансфер', descriptionEn: 'Get there easy', descriptionRu: 'Удобный трансфер', gradient: 'from-slate-500 to-slate-700' },
     { id: 'market', icon: ShoppingCart, path: '/market', labelEn: 'Market', labelRu: 'Маркет', descriptionEn: 'Snacks & drinks', descriptionRu: 'Снеки и напитки', gradient: 'from-green-500 to-emerald-600' },
@@ -66,7 +66,7 @@ export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
     { id: 'restaurants', icon: UtensilsCrossed, path: '/restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', descriptionEn: 'Romantic dinner', descriptionRu: 'Романтический ужин', gradient: 'from-orange-400 to-red-500' },
     { id: 'beauty', icon: Smile, path: '/beauty', labelEn: 'Beauty & SPA', labelRu: 'Красота и СПА', descriptionEn: 'Pamper yourself', descriptionRu: 'Побаловать себя', gradient: 'from-rose-400 to-pink-500' },
     { id: 'events', icon: PartyPopper, path: '/events', labelEn: 'Events', labelRu: 'События', descriptionEn: 'Special occasions', descriptionRu: 'Особые события', gradient: 'from-purple-500 to-pink-500' },
-    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Yachts', labelRu: 'Яхты', descriptionEn: 'Romantic cruise', descriptionRu: 'Романтический круиз', gradient: 'from-cyan-500 to-blue-600' },
+    { id: 'yachts', icon: Ship, path: '/yachts', labelEn: 'Boat Charters', labelRu: 'Чартер', descriptionEn: 'Romantic cruise', descriptionRu: 'Романтический круиз', gradient: 'from-cyan-500 to-blue-600' },
   ],
   medical: [
     { id: 'pharmacy', icon: Pill, path: '/pharmacy', labelEn: 'Pharmacy', labelRu: 'Аптека', descriptionEn: 'Medications', descriptionRu: 'Лекарства', gradient: 'from-green-500 to-teal-500' },

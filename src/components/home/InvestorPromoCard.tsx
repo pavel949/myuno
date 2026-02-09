@@ -21,7 +21,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
     { icon: <Building2 className="w-3.5 h-3.5" />, labelEn: 'Real Estate', labelRu: 'Недвижимость' },
     { icon: <Hotel className="w-3.5 h-3.5" />, labelEn: 'Hotels', labelRu: 'Отели' },
     { icon: <Briefcase className="w-3.5 h-3.5" />, labelEn: 'Business', labelRu: 'Бизнес' },
-    { icon: <Anchor className="w-3.5 h-3.5" />, labelEn: 'Yachts', labelRu: 'Яхты' },
+    { icon: <Anchor className="w-3.5 h-3.5" />, labelEn: 'Boat Charters', labelRu: 'Чартер' },
   ];
 
   const trustIndicators = [

@@ -89,7 +89,7 @@ export function VendorCommandPalette({ triggerClassName }: VendorCommandPaletteP
     
     // Verticals
     { id: 'properties', titleEn: 'Properties', titleRu: 'Недвижимость', icon: Store, action: () => navigate('/vendor/properties'), keywords: ['real estate'], group: 'verticals' },
-    { id: 'yachts', titleEn: 'Yachts', titleRu: 'Яхты', icon: Ship, action: () => navigate('/vendor/yachts'), keywords: ['boats'], group: 'verticals' },
+    { id: 'yachts', titleEn: 'Boat Charters', titleRu: 'Чартер', icon: Ship, action: () => navigate('/vendor/yachts'), keywords: ['boats', 'yachts'], group: 'verticals' },
     { id: 'transport', titleEn: 'Transport', titleRu: 'Транспорт', icon: Car, action: () => navigate('/vendor/transport'), keywords: ['cars', 'авто'], group: 'verticals' },
     { id: 'beauty', titleEn: 'Beauty', titleRu: 'Красота', icon: Sparkles, action: () => navigate('/vendor/beauty'), keywords: ['spa', 'салон'], group: 'verticals' },
     { id: 'clinics', titleEn: 'Clinics', titleRu: 'Клиники', icon: Stethoscope, action: () => navigate('/vendor/clinics'), keywords: ['medical', 'медицина'], group: 'verticals' },

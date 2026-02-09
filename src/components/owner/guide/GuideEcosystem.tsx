@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 const services = [
   { icon: Car, labelRu: 'Транспорт', labelEn: 'Transport' },
   { icon: MapPin, labelRu: 'Туры', labelEn: 'Tours' },
-  { icon: Ship, labelRu: 'Яхты', labelEn: 'Yachts' },
+  { icon: Ship, labelRu: 'Чартер', labelEn: 'Boat Charters' },
   { icon: Utensils, labelRu: 'Рестораны', labelEn: 'Restaurants' },
   { icon: Ticket, labelRu: 'Мероприятия', labelEn: 'Events' },
   { icon: Home, labelRu: 'Аренда жилья', labelEn: 'Rentals' },
