@@ -53,7 +53,7 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
       ru: 'Часто используется в повседневной жизни',
     },
   },
-  medical: {
+  health: {
     default: {
       en: 'Trusted providers for medical situations',
       ru: 'Проверенные специалисты для медицинских ситуаций',
@@ -65,7 +65,7 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
       ru: 'Хороший выбор, если цените впечатления и комфорт',
     },
   },
-  investment: {
+  property: {
     property: {
       en: 'Reviewed for investment potential — data-backed',
       ru: 'Оценено с точки зрения инвестиций — подкреплено данными',
@@ -73,6 +73,24 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
     default: {
       en: 'Selected for predictable outcomes',
       ru: 'Выбрано для предсказуемых результатов',
+    },
+  },
+  family: {
+    default: {
+      en: 'Family-friendly and tested by parents',
+      ru: 'Подходит для семей — проверено родителями',
+    },
+  },
+  business: {
+    default: {
+      en: 'Convenient for remote workers and entrepreneurs',
+      ru: 'Удобно для удалёнщиков и предпринимателей',
+    },
+  },
+  relocation: {
+    default: {
+      en: 'Helpful for those settling in long-term',
+      ru: 'Полезно для тех, кто обустраивается надолго',
     },
   },
 };

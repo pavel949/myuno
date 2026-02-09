@@ -16,20 +16,20 @@ import { cn } from '@/lib/utils';
 /** Routes where the insurance block is contextually relevant */
 const INSURANCE_ROUTES = [
   'pre_trip_planning',
-  'family_with_children', 
-  'arrival_first_day',
-  'emergency_medical',
-  'vacation_leisure',
+  'family',
+  'arrival',
+  'health',
+  'leisure',
 ] as const;
 
 type InsuranceContext = 'pre_trip' | 'family' | 'arrival' | 'emergency' | 'leisure';
 
 const contextMap: Record<string, InsuranceContext> = {
   pre_trip_planning: 'pre_trip',
-  family_with_children: 'family',
-  arrival_first_day: 'arrival',
-  emergency_medical: 'emergency',
-  vacation_leisure: 'leisure',
+  family: 'family',
+  arrival: 'arrival',
+  health: 'emergency',
+  leisure: 'leisure',
 };
 
 const contextContent: Record<InsuranceContext, { 

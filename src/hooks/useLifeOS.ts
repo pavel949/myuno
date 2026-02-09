@@ -192,14 +192,20 @@ export function getLifeOSAIContext(
 } {
   // Map situation code to AI contract fields
   const intentMap: Record<string, { intent: string; time_horizon: string; risk_level: string }> = {
-    arrival_first_day: { intent: 'settle', time_horizon: '24h', risk_level: 'high' },
-    long_term_living: { intent: 'establish', time_horizon: '30d', risk_level: 'medium' },
-    family_with_children: { intent: 'care', time_horizon: '7d', risk_level: 'high' },
-    emergency_medical: { intent: 'urgent_help', time_horizon: '1h', risk_level: 'critical' },
-    investment_property: { intent: 'invest', time_horizon: '90d', risk_level: 'medium' },
-    departure_day: { intent: 'depart', time_horizon: '12h', risk_level: 'medium' },
-    wedding_event: { intent: 'celebrate', time_horizon: '30d', risk_level: 'medium' },
-    retirement_living: { intent: 'settle_long_term', time_horizon: '180d', risk_level: 'low' },
+    arrival: { intent: 'settle', time_horizon: '24h', risk_level: 'high' },
+    living: { intent: 'establish', time_horizon: '30d', risk_level: 'medium' },
+    family: { intent: 'care', time_horizon: '7d', risk_level: 'high' },
+    health: { intent: 'urgent_help', time_horizon: '1h', risk_level: 'critical' },
+    property: { intent: 'invest', time_horizon: '90d', risk_level: 'medium' },
+    leisure: { intent: 'explore', time_horizon: '7d', risk_level: 'low' },
+    business: { intent: 'work', time_horizon: '30d', risk_level: 'medium' },
+    relocation: { intent: 'relocate', time_horizon: '90d', risk_level: 'medium' },
+    visa_travel: { intent: 'travel', time_horizon: '14d', risk_level: 'medium' },
+    sports: { intent: 'train', time_horizon: '7d', risk_level: 'low' },
+    nightlife: { intent: 'socialize', time_horizon: '1d', risk_level: 'low' },
+    shopping: { intent: 'purchase', time_horizon: '1d', risk_level: 'low' },
+    education: { intent: 'learn', time_horizon: '90d', risk_level: 'low' },
+    pets: { intent: 'pet_care', time_horizon: '7d', risk_level: 'medium' },
   };
 
   const defaults = { intent: 'explore', time_horizon: '7d', risk_level: 'low' };
