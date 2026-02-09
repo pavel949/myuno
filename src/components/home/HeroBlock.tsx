@@ -56,7 +56,7 @@ export const HeroBlock = memo(function HeroBlock() {
       <h1 className="text-center lg:text-left text-xl sm:text-2xl lg:text-2xl font-display font-bold text-foreground">
         {isRu ? 'Дом вдали от дома' : 'Home Away From Home'}
       </h1>
-      <p className="text-center lg:text-left text-[13px] text-muted-foreground -mt-1.5">
+      <p className="text-center lg:text-left text-sm text-muted-foreground">
         {isRu ? 'Все решения в одном приложении' : 'All solutions in one app'}
       </p>
 

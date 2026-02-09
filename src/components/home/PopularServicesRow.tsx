@@ -16,15 +16,15 @@ interface ServiceItem {
   path: string;
 }
 
-const services: ServiceItem[] = [
-  { id: 'yacht', icon: Anchor, labelEn: 'Yachts', labelRu: 'Яхты', path: '/yachts' },
-  { id: 'beauty', icon: Scissors, labelEn: 'Beauty', labelRu: 'Красота', path: '/beauty' },
-  { id: 'restaurant', icon: UtensilsCrossed, labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants' },
-  { id: 'fitness', icon: Dumbbell, labelEn: 'Fitness', labelRu: 'Фитнес', path: '/fitness' },
-  { id: 'flower', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers' },
-  { id: 'water', icon: Waves, labelEn: 'Water Sports', labelRu: 'Водный спорт', path: '/water' },
-  { id: 'event', icon: CalendarDays, labelEn: 'Events', labelRu: 'Мероприятия', path: '/events' },
-  { id: 'insurance', icon: Shield, labelEn: 'Insurance', labelRu: 'Страхование', path: '/insurance' },
+const services: (ServiceItem & { color: string; bg: string })[] = [
+  { id: 'yacht', icon: Anchor, labelEn: 'Yachts', labelRu: 'Яхты', path: '/yachts', color: 'text-sky-600', bg: 'bg-sky-100 dark:bg-sky-900/30' },
+  { id: 'beauty', icon: Scissors, labelEn: 'Beauty', labelRu: 'Красота', path: '/beauty', color: 'text-pink-600', bg: 'bg-pink-100 dark:bg-pink-900/30' },
+  { id: 'restaurant', icon: UtensilsCrossed, labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30' },
+  { id: 'fitness', icon: Dumbbell, labelEn: 'Fitness', labelRu: 'Фитнес', path: '/fitness', color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+  { id: 'flower', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers', color: 'text-rose-600', bg: 'bg-rose-100 dark:bg-rose-900/30' },
+  { id: 'water', icon: Waves, labelEn: 'Water Sports', labelRu: 'Водный спорт', path: '/water', color: 'text-cyan-600', bg: 'bg-cyan-100 dark:bg-cyan-900/30' },
+  { id: 'event', icon: CalendarDays, labelEn: 'Events', labelRu: 'Мероприятия', path: '/events', color: 'text-violet-600', bg: 'bg-violet-100 dark:bg-violet-900/30' },
+  { id: 'insurance', icon: Shield, labelEn: 'Insurance', labelRu: 'Страхование', path: '/insurance', color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
 ];
 
 export const PopularServicesRow = memo(function PopularServicesRow() {
@@ -54,12 +54,12 @@ export const PopularServicesRow = memo(function PopularServicesRow() {
               className="flex flex-col items-center gap-1.5 group"
             >
               <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center",
-                "bg-muted/50 group-hover:bg-primary/10 transition-colors"
+                "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
+                svc.bg
               )}>
-                <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Icon className={cn("w-5 h-5 transition-colors", svc.color)} />
               </div>
-              <span className="text-[11px] text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight">
+              <span className="text-xs text-foreground/70 group-hover:text-foreground transition-colors text-center leading-tight">
                 {isRu ? svc.labelRu : svc.labelEn}
               </span>
             </button>
