@@ -1,9 +1,6 @@
 /**
  * LifeSituationSelector - "What do you need right now?" entry point
- * Per UX Contract §2: 
- * - Horizontal scroll or 2×N cards
- * - Max 6-8 situations
- * - No nesting, no filters
+ * 2-column grid layout with show more toggle
  */
 import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +10,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import * as LucideIcons from 'lucide-react';
-import { LucideIcon, Sparkles } from 'lucide-react';
+import { LucideIcon, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface LifeSituationSelectorProps {
   className?: string;
@@ -37,7 +34,6 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
     title_ru: string;
     color: string;
   }) => {
-    // Per UX Contract §3.1: Set context, then navigate
     const title = isRussian ? situation.title_ru : situation.title_en;
     setLifeSituation(situation.code, title, situation.color);
     
@@ -48,7 +44,6 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
     }
   };
 
-  // Dynamic icon resolver with safe type casting
   const getIcon = (iconName: string): LucideIcon => {
     const icons = LucideIcons as unknown as Record<string, LucideIcon>;
     return icons[iconName] || LucideIcons.Compass;
@@ -58,9 +53,9 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
     return (
       <div className={cn("space-y-3", className)}>
         <Skeleton className="h-6 w-48" />
-        <div className="flex gap-3 overflow-x-auto pb-2">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-20 w-28 rounded-xl flex-shrink-0" />
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
         </div>
       </div>
@@ -75,7 +70,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
 
   return (
     <section className={cn("space-y-3", className)}>
-      {/* Header per UX Contract §2.1 */}
+      {/* Header */}
       <div className="flex items-center gap-2">
         <Sparkles className="w-5 h-5 text-primary" />
         <h2 className="text-[15px] font-bold">
@@ -83,8 +78,8 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
         </h2>
       </div>
 
-      {/* Horizontal scroll chips - UX Contract §2.2 */}
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide scroll-x-container touch-pan-y snap-x snap-proximity" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* 2-column grid */}
+      <div className="grid grid-cols-2 gap-2.5">
         {displayedSituations.map((situation) => {
           const Icon = getIcon(situation.icon);
           const isSelected = isActive(situation.code);
@@ -94,11 +89,9 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
               key={situation.id}
               onClick={() => handleSelect(situation)}
               className={cn(
-                "flex-shrink-0 flex flex-col items-center justify-center gap-2",
-                "w-24 h-20 rounded-xl border transition-all duration-200",
+                "flex items-center gap-2.5 p-3 rounded-xl border transition-all duration-200",
                 "bg-card hover:bg-accent/50 hover:border-primary/30",
-                "shadow-sm hover:shadow-md",
-                "snap-start",
+                "shadow-sm hover:shadow-md text-left",
                 isSelected && "ring-2 ring-primary border-primary"
               )}
               style={{
@@ -106,37 +99,41 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
               }}
             >
               <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${situation.color}15` }}
               >
                 <Icon
-                  className="w-5 h-5"
+                  className="w-4.5 h-4.5"
                   style={{ color: situation.color }}
                 />
               </div>
-              <span className="text-xs font-medium text-center leading-tight px-1 line-clamp-2">
+              <span className="text-xs font-medium leading-tight line-clamp-2">
                 {isRussian ? situation.title_ru : situation.title_en}
               </span>
             </button>
           );
         })}
-        {!showAll && hiddenCount > 0 && (
-          <button
-            onClick={() => setShowAll(true)}
-            className={cn(
-              "flex-shrink-0 flex flex-col items-center justify-center gap-1",
-              "w-20 h-20 rounded-xl border border-dashed border-muted-foreground/30",
-              "bg-muted/30 hover:bg-accent/50 transition-all duration-200",
-              "snap-start"
-            )}
-          >
-            <span className="text-lg font-semibold text-muted-foreground">+{hiddenCount}</span>
-            <span className="text-[10px] text-muted-foreground">
-              {isRussian ? 'Ещё' : 'More'}
-            </span>
-          </button>
-        )}
       </div>
+
+      {/* Show more / less toggle */}
+      {hiddenCount > 0 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="flex items-center justify-center gap-1 w-full py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {showAll ? (
+            <>
+              {isRussian ? 'Свернуть' : 'Show less'}
+              <ChevronUp className="w-3.5 h-3.5" />
+            </>
+          ) : (
+            <>
+              {isRussian ? `Ещё ${hiddenCount}` : `${hiddenCount} more`}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </>
+          )}
+        </button>
+      )}
     </section>
   );
 });
