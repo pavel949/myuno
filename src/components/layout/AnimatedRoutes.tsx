@@ -162,6 +162,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/spa" element={<Navigate to="/beauty" replace />} />
         
         {/* ── Property ── */}
+        <Route path="/properties" element={<Navigate to="/property" replace />} />
         <Route path="/property" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
         <Route path="/property/consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
         <Route path="/property/deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
