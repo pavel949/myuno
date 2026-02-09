@@ -40,15 +40,26 @@ const VERTICAL_GRADIENTS: Record<string, string> = {
 interface ExploreVerticalsSheetProps {
   trigger?: ReactNode;
   className?: string;
+  /** Controlled open state (optional) */
+  open?: boolean;
+  /** Controlled open change handler (optional) */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
   trigger,
   className,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: ExploreVerticalsSheetProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const { language } = useLanguage();
   const navigate = useNavigate();
+
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
 
   const allVerticals = Object.values(VERTICALS);
 
@@ -57,20 +68,25 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
     navigate(`/${plural}`);
   };
 
+  // When used as controlled (no trigger), render only the drawer content
+  const drawerTrigger = trigger !== undefined || !isControlled ? (
+    <DrawerTrigger asChild className={className}>
+      {trigger || (
+        <button className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95">
+          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+            <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <span className="text-[10px] font-medium text-muted-foreground">
+            {language === 'ru' ? 'Ещё' : 'More'}
+          </span>
+        </button>
+      )}
+    </DrawerTrigger>
+  ) : null;
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild className={className}>
-        {trigger || (
-          <button className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-              <LayoutGrid className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {language === 'ru' ? 'Ещё' : 'More'}
-            </span>
-          </button>
-        )}
-      </DrawerTrigger>
+      {drawerTrigger}
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="pb-2">
           <DrawerTitle>
