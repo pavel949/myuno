@@ -119,7 +119,7 @@ export default function LifeFlowPage() {
                     <SituationIcon className="w-7 h-7" style={{ color: currentSituation.color }} />
                   </div>
                   <div className="flex-1 min-w-0 pt-0.5">
-                    <h1 className="text-lg font-bold mb-0.5">
+                    <h1 className="text-xl font-bold mb-0.5">
                       {isRussian ? currentSituation.title_ru : currentSituation.title_en}
                     </h1>
                   </div>
@@ -185,10 +185,10 @@ export default function LifeFlowPage() {
               )}
 
               {/* 7: Next routes */}
-              <RouteNextSteps
+                <RouteNextSteps
                 nextRoutes={route.next_routes}
                 labels={isRussian ? route.next_routes_labels_ru : route.next_routes_labels_en}
-                currentLabel={isRussian ? 'После этого вам может понадобиться' : 'After this, you may need'}
+                currentLabel={isRussian ? 'Что может понадобиться дальше' : 'What you may need next'}
               />
 
               {/* Quick actions: Transfer + Trip Planner */}
@@ -263,8 +263,8 @@ export default function LifeFlowPage() {
                 className="text-center text-xs text-muted-foreground/60 pt-4 pb-2"
               >
                 {isRussian 
-                  ? 'Мы с вами. Если нужна помощь — напишите нам.'
-                  : "We're with you. If you need help — reach out."}
+                  ? 'Мы рядом. Если нужна помощь — напишите нам в любое время.'
+                  : "We're here for you. Reach out anytime you need help."}
               </motion.p>
             </>
           )}

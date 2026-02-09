@@ -58,8 +58,8 @@ export function RouteRecommendedBlock({
       className="space-y-4"
     >
       {/* Section label */}
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {isRu ? 'Мы рекомендуем' : 'We recommend'}
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {isRu ? 'Наша рекомендация' : 'Our recommendation'}
       </p>
 
       {/* Primary recommendation card — large, prominent */}
@@ -98,7 +98,7 @@ export function RouteRecommendedBlock({
         )}
         
         <div className="p-4 space-y-2">
-          <h3 className="text-base font-bold leading-tight">{title}</h3>
+          <h3 className="text-[15px] font-bold leading-tight">{title}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{why}</p>
           
           {/* Price if available */}
