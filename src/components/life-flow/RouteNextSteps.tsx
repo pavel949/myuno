@@ -52,7 +52,7 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
           return (
             <button
               key={routeCode}
-              onClick={() => navigate(`/life-flow/${routeCode}`)}
+              onClick={() => navigate(`/life/${routeCode}`)}
               className={cn(
                 "w-full flex items-center gap-3 p-3 rounded-xl",
                 "border bg-card hover:bg-accent/50 hover:border-primary/30",
