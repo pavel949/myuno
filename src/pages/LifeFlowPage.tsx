@@ -2,9 +2,11 @@
  * LifeFlowPage - LifeOS Guided Path
  * Structure: Recognition → Reassurance → What Matters → Recommended → Alternatives → CTA → Next Routes
  * Philosophy: Pain relief & friction removal, not catalog browsing
+ * 
+ * Visual: Calm, no gradients, no decorative shadows, trust-first.
  */
 import React from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations, useResolveLifeOSContext } from '@/hooks/useLifeOS';
@@ -19,7 +21,7 @@ import { RouteRecognitionBlock } from '@/components/life-flow/RouteRecognitionBl
 import { RouteRecommendedBlock } from '@/components/life-flow/RouteRecommendedBlock';
 import { RouteNextSteps } from '@/components/life-flow/RouteNextSteps';
 import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
-import { ArrowLeft, Compass, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Compass, ArrowRight, Car, Palmtree } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
@@ -35,14 +37,10 @@ export default function LifeFlowPage() {
   const { data: situations } = useLifeSituations();
   const currentSituation = situations?.find((s) => s.code === code);
 
-  // Fetch route data
   const { data: route, isLoading: routeLoading } = useLifeOSRoute(currentSituation?.id || null);
-  
-  // Fetch catalog items for enriching recommended + alternatives
   const { data: catalogItems } = useResolveLifeOSContext(code || null, { limit: 50 });
   const { data: enrichedItems } = useEnrichCatalogItems(catalogItems);
 
-  // Set context when page loads
   React.useEffect(() => {
     if (currentSituation) {
       const title = isRussian ? currentSituation.title_ru : currentSituation.title_en;
@@ -50,7 +48,6 @@ export default function LifeFlowPage() {
     }
   }, [currentSituation, isRussian, setLifeSituation]);
 
-  // Find recommended and alternative items from enriched data
   const recommendedItem = React.useMemo(() => {
     if (!route?.recommended_entity_id || !enrichedItems) return null;
     return enrichedItems.find(item => item.entity_id === route.recommended_entity_id) || null;
@@ -74,63 +71,41 @@ export default function LifeFlowPage() {
   return (
     <AppLayout>
       <div className="min-h-screen bg-background">
-        {/* HERO HEADER — compact, empathetic */}
-        <div
-          className="relative overflow-hidden"
-          style={{
-            background: currentSituation?.color
-              ? `linear-gradient(135deg, ${currentSituation.color}15 0%, ${currentSituation.color}05 50%, transparent 100%)`
-              : undefined,
-          }}
-        >
-          <div className="absolute inset-0 opacity-30">
-            <div
-              className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl"
-              style={{ backgroundColor: currentSituation?.color || 'hsl(var(--primary))' }}
-            />
+        {/* HEADER — calm, no gradients */}
+        <div className="border-b border-border/50">
+          <div className="flex items-center gap-3 p-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
           </div>
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 p-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="shrink-0 bg-background/80 backdrop-blur-sm"
+          {currentSituation && (
+            <div className="px-4 pb-5">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-4"
               >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+                <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                  <SituationIcon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <h1 className="text-xl font-bold">
+                    {isRussian ? currentSituation.title_ru : currentSituation.title_en}
+                  </h1>
+                </div>
+              </motion.div>
             </div>
-
-            {currentSituation && (
-              <div className="px-4 pb-5">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-start gap-4"
-                >
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${currentSituation.color}30, ${currentSituation.color}10)`,
-                      boxShadow: `0 8px 24px ${currentSituation.color}20`,
-                    }}
-                  >
-                    <SituationIcon className="w-7 h-7" style={{ color: currentSituation.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <h1 className="text-xl font-bold mb-0.5">
-                      {isRussian ? currentSituation.title_ru : currentSituation.title_en}
-                    </h1>
-                  </div>
-                </motion.div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* GUIDED PATH CONTENT */}
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-6 max-w-lg mx-auto">
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-16 w-full rounded-xl" />
@@ -153,7 +128,7 @@ export default function LifeFlowPage() {
             />
           ) : (
             <>
-              {/* 1-3: Recognition → Reassurance → What Matters */}
+              {/* Recognition → Reassurance → What Matters */}
               <RouteRecognitionBlock
                 recognition={isRussian ? route.recognition_ru : route.recognition_en}
                 reassurance={isRussian ? route.reassurance_ru : route.reassurance_en}
@@ -161,10 +136,9 @@ export default function LifeFlowPage() {
                 accentColor={currentSituation?.color}
               />
 
-              {/* Soft separator */}
-              <div className="h-px bg-border" />
+              <div className="h-px bg-border/50" />
 
-              {/* 4-5: Recommended + Alternatives */}
+              {/* Recommended + Alternatives */}
               <RouteRecommendedBlock
                 title={isRussian ? route.recommended_title_ru : route.recommended_title_en}
                 why={isRussian ? route.recommended_why_ru : route.recommended_why_en}
@@ -176,7 +150,7 @@ export default function LifeFlowPage() {
                 alternatives={alternativeItems}
               />
 
-              {/* Insurance prompt — contextual, between recommended and next steps */}
+              {/* Insurance prompt */}
               {code && shouldShowInsurancePrompt(code) && (
                 <InsurancePromptBlock
                   routeCode={code}
@@ -184,83 +158,76 @@ export default function LifeFlowPage() {
                 />
               )}
 
-              {/* 7: Next routes */}
-                <RouteNextSteps
+              {/* Next routes */}
+              <RouteNextSteps
                 nextRoutes={route.next_routes}
                 labels={isRussian ? route.next_routes_labels_ru : route.next_routes_labels_en}
                 currentLabel={isRussian ? 'Что может понадобиться дальше' : 'What you may need next'}
               />
 
-              {/* Quick actions: Transfer + Trip Planner */}
+              {/* Quick actions — calm cards */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55 }}
+                transition={{ delay: 0.4 }}
                 className="space-y-2"
               >
-                {/* Book Transfer CTA */}
-                <div
-                  className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 cursor-pointer hover:shadow-md hover:border-primary/40 transition-all"
+                {/* Book Transfer */}
+                <button
+                  className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
                   onClick={() => navigate('/transport/airport-transfer')}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
-                      <LucideIcons.Car className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                      <Car className="w-5 h-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold">
                         {isRussian ? 'Забронировать трансфер' : 'Book Airport Transfer'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {isRussian
-                          ? 'Машина будет ждать вас у выхода из аэропорта'
-                          : 'Your car will be waiting at the airport exit'}
+                          ? 'Машина будет ждать вас у выхода'
+                          : 'Your car will be waiting at the exit'}
                       </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-primary shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                   </div>
-                </div>
+                </button>
 
-                {/* Trip Planner CTA */}
-                <div
-                  className="rounded-2xl border border-border bg-card p-4 cursor-pointer hover:shadow-md transition-shadow"
+                {/* Trip Planner */}
+                <button
+                  className="w-full rounded-2xl border border-border/60 bg-card p-4 text-left hover:shadow-sm active:scale-[0.99] transition-all touch-manipulation"
                   onClick={() => navigate('/trip-planner')}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: currentSituation?.color
-                          ? `linear-gradient(135deg, ${currentSituation.color}25, ${currentSituation.color}10)`
-                          : undefined,
-                      }}
-                    >
-                      <LucideIcons.Palmtree className="w-5 h-5" style={{ color: currentSituation?.color || 'hsl(var(--primary))' }} />
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                      <Palmtree className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold">
                         {isRussian ? 'Полный план поездки' : 'Full Trip Planner'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {isRussian
                           ? 'Билеты, страховка, Arrival Card — всё в одном месте'
                           : 'Flights, insurance, Arrival Card — all in one place'}
                       </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                   </div>
-                </div>
+                </button>
               </motion.div>
 
-              {/* WhatsApp concierge CTA */}
+              {/* WhatsApp concierge */}
               <WhatsAppConciergeBlock context="trip" />
 
-              {/* Quiet footer — not a CTA, just an escape hatch */}
+              {/* Footer */}
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="text-center text-xs text-muted-foreground/60 pt-4 pb-2"
+                transition={{ delay: 0.6 }}
+                className="text-center text-xs text-muted-foreground/50 pt-4 pb-2"
               >
                 {isRussian 
                   ? 'Мы рядом. Если нужна помощь — напишите нам в любое время.'
