@@ -1,125 +1,113 @@
 
+# Аудит дизайна Home-экрана: проблемы и решения
 
-# Обогащение Home-экрана: из "пустой страницы" в "живой суперапп"
+## Общая оценка
 
-## Проблема
-
-Сейчас Home (`/`) содержит только:
-
-```text
-1. Hero (логотип + поиск + SOS)
-2. LifeSituation Selector (сетка ситуаций)
-3. DiscoveryCarousel (1 карусель экспириенсов)
-```
-
-Три блока -- это не главная страница суперапп-платформы с 29 сервисами. Пользователь видит "пустоту" и не понимает масштаб возможностей.
-
-## Решение: +4 новых секции
-
-Итоговая структура сверху вниз:
-
-```text
-1. Hero (логотип + поиск + SOS)             -- уже есть
-2. LifeSituation Selector / PersonaChips     -- уже есть
-3. [NEW] Quick Access Strip                  -- горизонтальная строка 5 популярных сервисов
-4. [NEW] Concierge Banner                   -- "Нужна помощь? Напишите менеджеру"
-5. DiscoveryCarousel                         -- уже есть
-6. [NEW] Popular Services Row               -- "Популярные услуги" (2 строки по 4)
-7. [NEW] Trust & Stats Banner               -- "500+ услуг / 100+ партнёров / 24/7"
-```
+Home-экран сейчас выглядит как набор блоков с разным "весом" — некоторые слишком бледные и теряются, а иерархия внимания не ведёт взгляд. Основные проблемы: низкий контраст в light mode, монотонная цветовая палитра и отсутствие визуальных акцентов.
 
 ---
 
-## Блок 3: Quick Access Strip
+## Проблема 1: Бледный Quick Access Strip
 
-Горизонтальная полоса из 5 pill-кнопок для самых частых запросов.
+**Что не так:** `bg-primary/10` (золотой на 10% прозрачности) на белом фоне практически не виден. Pill-кнопки сливаются с фоном.
 
-| Сервис | Иконка | Маршрут |
-|--------|--------|---------|
-| Transfers | Plane | /transfers |
-| Real Estate | Home | /properties |
-| Healthcare | Stethoscope | /medical |
-| Things To Do | Compass | /experiences |
-| Car Rental | Car | /vehicles |
+**Решение:**
+- Увеличить фон до `bg-primary/15` и бордер до `border-primary/25`
+- Текст сделать `font-semibold` для лучшей читаемости
 
-Стиль: компактные pill (иконка + label), горизонтальный scroll на мобильных, wrap на десктопе.
-
-**Новый файл**: `src/components/home/QuickAccessStrip.tsx`
+**Файл:** `src/components/home/QuickAccessStrip.tsx`
 
 ---
 
-## Блок 4: Concierge Banner
+## Проблема 2: Иконки Popular Services слишком тусклые
 
-Компактный баннер-карточка с CTA на WhatsApp (+66922407355):
-- Иконка MessageCircle
-- Текст: "Need help? Our manager will reply in 15 min" / "Нужна помощь? Менеджер ответит за 15 минут"
-- Кнопка: "Write to WhatsApp" / "Написать в WhatsApp"
-- Стиль: мягкий gradient, rounded-2xl, border
+**Что не так:** Иконки `text-muted-foreground` на фоне `bg-muted/50` дают минимальный контраст. Подписи `text-[11px] text-muted-foreground` плохо читаются.
 
-**Новый файл**: `src/components/home/ConciergeBanner.tsx`
+**Решение:**
+- Каждой категории назначить свой мягкий цвет фона (teal, coral, purple и т.д.) вместо одинакового серого
+- Подписи: увеличить до `text-xs` и `text-foreground/70`
+- Иконки: убрать `text-muted-foreground`, дать конкретные цвета
 
----
-
-## Блок 6: Popular Services Row
-
-Сетка 2x4 (8 иконок) из самых ходовых категорий, выбранных из VERTICAL_GROUPS:
-- Yacht Charter, Beauty, Restaurants, Fitness
-- Flower Delivery, Water Sports, Events, Insurance
-
-Каждый item: иконка в круге + label снизу. По клику -- навигация на вертикаль.
-Внизу -- кнопка "All Services" ведущая на /discover.
-
-**Новый файл**: `src/components/home/PopularServicesRow.tsx`
+**Файл:** `src/components/home/PopularServicesRow.tsx`
 
 ---
 
-## Блок 7: Trust & Stats Banner
+## Проблема 3: Trust Banner без визуального веса
 
-Статическая полоска с 3 метриками:
+**Что не так:** Числа `text-base font-bold` и подписи `text-[11px] text-muted-foreground` на `bg-muted/30` — весь блок выглядит как пустое место.
 
-| Метрика | EN | RU |
-|---------|----|----|
-| 500+ | Services | Услуг |
-| 100+ | Verified Partners | Проверенных партнёров |
-| 24/7 | Support | Поддержка |
+**Решение:**
+- Числа: увеличить до `text-lg font-bold`
+- Фон: `bg-muted/50` для большей заметности
+- Иконки: дать им `text-primary` вместо `text-muted-foreground`
 
-Стиль: горизонтальная строка с разделителями, text-muted, компактный.
-
-**Новый файл**: `src/components/home/TrustBanner.tsx`
+**Файл:** `src/components/home/TrustBanner.tsx`
 
 ---
 
-## Изменения в Index.tsx
+## Проблема 4: Concierge Banner — слабый CTA
 
-Добавляем 4 новых lazy-компонента в существующую структуру:
+**Что не так:** Баннер использует стандартную Card без выделения. Зелёная кнопка маленькая и теряется.
 
-```text
-<HeroBlock />
-<LifeSituationSelector /> / <PersonaChips />
-<QuickAccessStrip />        -- NEW
-<ConciergeBanner />          -- NEW
-<DiscoveryCarousel />
-<PopularServicesRow />       -- NEW
-<TrustBanner />              -- NEW
-```
+**Решение:**
+- Фон: добавить лёгкий зелёный градиент `bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30`
+- Бордер: `border-green-200 dark:border-green-800/40`
+- Кнопка: увеличить `size="default"`
+
+**Файл:** `src/components/home/ConciergeBanner.tsx`
 
 ---
 
-## Файлы
+## Проблема 5: Глобальный `--muted-foreground` слишком бледный
 
-| Файл | Действие |
-|------|----------|
-| `src/components/home/QuickAccessStrip.tsx` | Создать |
-| `src/components/home/ConciergeBanner.tsx` | Создать |
-| `src/components/home/PopularServicesRow.tsx` | Создать |
-| `src/components/home/TrustBanner.tsx` | Создать |
-| `src/pages/Index.tsx` | Добавить 4 компонента |
+**Что не так:** В light mode `--muted-foreground: 220 10% 38%` — это ~38% lightness, что на белом фоне даёт слабый контраст (WCAG AA не проходит для мелкого текста).
+
+**Решение:**
+- Изменить на `220 10% 32%` — более тёмный серый, лучше читается
+
+**Файл:** `src/index.css`, строка 77
+
+---
+
+## Проблема 6: Подзаголовок Hero слишком мелкий
+
+**Что не так:** "Все решения в одном приложении" — `text-[13px] text-muted-foreground` практически не читается.
+
+**Решение:**
+- Увеличить до `text-sm` и убрать отрицательный margin `-mt-1.5`
+
+**Файл:** `src/components/home/HeroBlock.tsx`
+
+---
+
+## Проблема 7: LifeSituation карточки — бледный бордер
+
+**Что не так:** `border-border/60` на белом фоне почти невидим. Карточки выглядят "плавающими".
+
+**Решение:**
+- Бордер: `border-border` (полная непрозрачность)
+- Добавить `shadow-sm` для лёгкой глубины
+
+**Файл:** `src/components/home/LifeSituationSelector.tsx`
+
+---
+
+## Сводка изменений
+
+| Файл | Изменения |
+|------|-----------|
+| `src/index.css` | `--muted-foreground` lightness 38% -> 32% |
+| `src/components/home/HeroBlock.tsx` | Подзаголовок text-sm, убрать -mt-1.5 |
+| `src/components/home/QuickAccessStrip.tsx` | bg-primary/15, border-primary/25, font-semibold |
+| `src/components/home/ConciergeBanner.tsx` | Зелёный градиентный фон, больше кнопка |
+| `src/components/home/PopularServicesRow.tsx` | Индивидуальные цвета иконок, text-xs подписи |
+| `src/components/home/TrustBanner.tsx` | Крупнее числа, primary иконки, bg-muted/50 |
+| `src/components/home/LifeSituationSelector.tsx` | border-border + shadow-sm |
 
 ## Что НЕ меняется
 
-- Роуты
-- Навигация (4 таба)
-- Verticals / Groups
+- Структура и порядок блоков
+- Роуты и навигация
+- Dark mode (там контраст в порядке)
+- Шрифты и типографика
 - База данных
-- LifeOS логика
-
