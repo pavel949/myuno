@@ -15,83 +15,42 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get all projects with fazwaz cover images
+    // Get all projects with external cover images (non-supabase URLs)
     const { data: projects, error: fetchError } = await supabase
       .from("property_projects")
       .select("id, name_en, cover_image, images")
-      .like("cover_image", "%fazwaz%")
       .eq("is_active", true);
 
     if (fetchError) throw fetchError;
-    if (!projects || projects.length === 0) {
-      return new Response(JSON.stringify({ message: "No FazWaz images to process" }), {
+
+    // Filter to only projects with external (non-supabase) cover images
+    const externalProjects = (projects || []).filter(p => 
+      p.cover_image && !p.cover_image.includes("supabase")
+    );
+
+    if (externalProjects.length === 0) {
+      return new Response(JSON.stringify({ message: "No external images to process" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const results: { id: string; name: string; status: string; newUrl?: string; error?: string }[] = [];
 
-    for (const project of projects) {
+    for (const project of externalProjects) {
       try {
-        // Download from FazWaz with browser-like headers
         const response = await fetch(project.cover_image, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Referer": "https://www.fazwaz.com/",
             "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
           },
         });
 
         if (!response.ok) {
-          // Try alternative: use a smaller size URL
-          const altUrl = project.cover_image.replace("2850x1515", "800x450");
-          const altResponse = await fetch(altUrl, {
-            headers: {
-              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-              "Referer": "https://www.fazwaz.com/",
-              "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
-            },
-          });
-
-          if (!altResponse.ok) {
-            results.push({
-              id: project.id,
-              name: project.name_en,
-              status: "failed",
-              error: `HTTP ${response.status} (also tried alt: ${altResponse.status})`,
-            });
-            continue;
-          }
-
-          // Use alt response
-          const blob = await altResponse.blob();
-          const ext = getExtension(project.cover_image);
-          const filePath = `covers/${project.id}.${ext}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from("project-images")
-            .upload(filePath, blob, {
-              contentType: blob.type || "image/jpeg",
-              upsert: true,
-            });
-
-          if (uploadError) throw uploadError;
-
-          const { data: urlData } = supabase.storage
-            .from("project-images")
-            .getPublicUrl(filePath);
-
-          // Update project cover_image
-          await supabase
-            .from("property_projects")
-            .update({ cover_image: urlData.publicUrl })
-            .eq("id", project.id);
-
           results.push({
             id: project.id,
             name: project.name_en,
-            status: "success_alt",
-            newUrl: urlData.publicUrl,
+            status: "failed",
+            error: `HTTP ${response.status}`,
           });
           continue;
         }
@@ -113,7 +72,6 @@ Deno.serve(async (req) => {
           .from("project-images")
           .getPublicUrl(filePath);
 
-        // Update project cover_image
         await supabase
           .from("property_projects")
           .update({ cover_image: urlData.publicUrl })
@@ -135,11 +93,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    const succeeded = results.filter((r) => r.status.startsWith("success")).length;
-    const failed = results.filter((r) => !r.status.startsWith("success")).length;
+    const succeeded = results.filter((r) => r.status === "success").length;
+    const failed = results.filter((r) => r.status !== "success").length;
 
     return new Response(
-      JSON.stringify({ total: projects.length, succeeded, failed, results }),
+      JSON.stringify({ total: externalProjects.length, succeeded, failed, results }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
