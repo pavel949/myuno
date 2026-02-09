@@ -149,6 +149,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── LifeOS ── */}
         <Route path="/life-flow/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
+        <Route path="/life/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/trip-planner" element={<LazyPage><Pages.TripPlannerPage /></LazyPage>} />
         <Route path="/list-with-us" element={<Pages.ListWithUsPage />} />
         
@@ -211,7 +212,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transport/taxi" element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         <Route path="/transfers" element={<Navigate to="/transfer" replace />} />
-        <Route path="/life" element={<Navigate to="/experiences" replace />} />
+        <Route path="/life" element={<Navigate to="/discover" replace />} />
         <Route path="/transport/:id" element={<TransportIdRedirect />} />
         
         {/* ── Fitness ── */}
