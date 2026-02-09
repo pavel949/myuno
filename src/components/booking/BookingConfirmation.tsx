@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { AftercareBanner } from '@/components/trust/AftercareBanner';
 
 interface BookingConfirmationProps {
   bookingId: string;
@@ -18,6 +19,9 @@ interface BookingConfirmationProps {
   continueLabel?: string;
   continuePath?: string;
   paymentMethod?: string;
+  /** P2.4 — Aftercare */
+  actionType?: 'booking' | 'order' | 'request' | 'inquiry';
+  preparationTips?: string[];
 }
 
 export function BookingConfirmation({
@@ -33,6 +37,8 @@ export function BookingConfirmation({
   continueLabel,
   continuePath,
   paymentMethod,
+  actionType = 'booking',
+  preparationTips,
 }: BookingConfirmationProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -167,6 +173,19 @@ export function BookingConfirmation({
               : 'Our manager will contact you shortly to confirm'}
           </p>
         )}
+      </motion.div>
+
+      {/* P2.4 — Aftercare: next steps + cross-sell */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.38 }}
+        className="w-full max-w-sm mb-6"
+      >
+        <AftercareBanner
+          actionType={actionType}
+          preparationTips={preparationTips}
+        />
       </motion.div>
 
       <motion.div

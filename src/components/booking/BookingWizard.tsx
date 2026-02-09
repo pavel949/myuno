@@ -24,6 +24,7 @@ import { BookingBottomBar } from '@/components/booking/BookingBottomBar';
 import { BookingConfirmation } from '@/components/booking/BookingConfirmation';
 import { BackButton } from '@/components/uno/BackButton';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
+import { PreBookingClarity } from '@/components/trust/PreBookingClarity';
 import { cn } from '@/lib/utils';
 
 // ────────────────────────────────────
@@ -43,6 +44,11 @@ export interface BookingWizardConfig {
   continuePath: string;
   continueLabelEn?: string;
   continueLabelRu?: string;
+  /** P2.3 — Pre-booking clarity */
+  included?: string[];
+  excluded?: string[];
+  afterPaymentNote?: string;
+  confirmationTime?: string;
 }
 
 export interface BookingWizardPricing {
@@ -215,6 +221,13 @@ export function BookingWizard({
         // Payment + Summary step
         return (
           <div className="space-y-6">
+            {/* P2.3 — Expectation clarity before payment */}
+            <PreBookingClarity
+              included={config.included}
+              excluded={config.excluded}
+              afterPayment={config.afterPaymentNote}
+              confirmationTime={config.confirmationTime}
+            />
             <BookingSummary
               title={config.title}
               image={config.image}
