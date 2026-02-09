@@ -40,7 +40,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
     if (onSelect) {
       onSelect(situation.code);
     } else {
-      navigate(`/life-flow/${situation.code}`);
+      navigate(`/life/${situation.code}`);
     }
   };
 

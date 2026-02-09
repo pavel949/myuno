@@ -1,16 +1,14 @@
 /**
  * WhatsAppConciergeBlock — "Let myUNO handle everything" CTA
- * Warm, trust-building block that opens WhatsApp with a pre-filled message.
+ * Calm, trust-building block. No gradients, no glow.
  */
 import { useLanguage } from '@/contexts/LanguageContext';
 import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 import { MessageCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 interface WhatsAppConciergeBlockProps {
-  /** Custom WhatsApp message context */
   context?: 'trip' | 'general';
   className?: string;
 }
@@ -35,50 +33,40 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.4 }}
+      transition={{ delay: 0.4 }}
       className={className}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/15 dark:border-emerald-500/10 p-5">
-        {/* Subtle glow */}
-        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-500/8 blur-2xl" />
-
-        <div className="relative z-10 space-y-3">
-          {/* Icon + Title */}
-          <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/15">
-              <MessageCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div className="flex-1 pt-0.5">
-              <h3 className="text-sm font-bold">
-                {isRu ? 'Пусть myUNO всё сделает' : 'Let myUNO handle everything'}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                {isRu
-                  ? 'Напишите нам — и мы спланируем поездку за вас. Отвечает живой человек, не бот.'
-                  : "Message us and we'll plan your trip. A real person will reply, not a bot."}
-              </p>
-            </div>
+      <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+            <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
-
-          {/* CTA Button */}
-          <Button
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500"
-            onClick={() => window.open(whatsappUrl, '_blank')}
-          >
-            <MessageCircle className="w-4 h-4" />
-            {isRu ? 'Написать в WhatsApp' : 'Message on WhatsApp'}
-          </Button>
-
-          {/* Response time badge */}
-          <div className="flex justify-center">
-            <Badge variant="secondary" className="gap-1.5 text-[10px] font-normal bg-emerald-500/8 text-muted-foreground border-0">
-              <Clock className="w-3 h-3" />
-              {isRu ? 'Обычно отвечаем за 15 минут' : 'Usually reply within 15 minutes'}
-            </Badge>
+          <div className="flex-1 pt-0.5">
+            <h3 className="text-sm font-semibold">
+              {isRu ? 'Пусть myUNO всё сделает' : 'Let myUNO handle everything'}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              {isRu
+                ? 'Напишите нам — и мы спланируем поездку за вас. Отвечает живой человек, не бот.'
+                : "Message us and we'll plan your trip. A real person will reply, not a bot."}
+            </p>
           </div>
         </div>
+
+        <Button
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          onClick={() => window.open(whatsappUrl, '_blank')}
+        >
+          <MessageCircle className="w-4 h-4" />
+          {isRu ? 'Написать в WhatsApp' : 'Message on WhatsApp'}
+        </Button>
+
+        <p className="text-center text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+          <Clock className="w-3 h-3" />
+          {isRu ? 'Обычно отвечаем за 15 минут' : 'Usually reply within 15 minutes'}
+        </p>
       </div>
     </motion.div>
   );

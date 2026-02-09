@@ -105,7 +105,7 @@ export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {
             </div>
           </div>
           <button
-            onClick={() => navigate(`/life-flow/${activeCode}`)}
+            onClick={() => navigate(`/life/${activeCode}`)}
             className="text-xs font-medium text-primary flex items-center gap-0.5 hover:underline"
           >
             {isRu ? 'Подробнее' : 'Details'}
