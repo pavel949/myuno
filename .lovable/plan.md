@@ -1,87 +1,78 @@
 
-# План улучшений семантического ядра LifeOS
 
-## Обзор проблем
+# Консолидация Tours в Experiences — удаление дублирования
 
-| # | Проблема | Приоритет | Тип |
-|---|----------|-----------|-----|
-| 1 | 6 ситуаций без маппингов в каталоге (0 рекомендаций) | P0 | БД |
-| 2 | 287 маппингов привязаны к 5 неактивным ситуациям | P1 | БД |
-| 3 | `transfer` и `page` отсутствуют в entityTypes.ts (62+5 записей используют их) | P1 | Код |
-| 4 | `tours` таблица пуста (0 записей), но 7 маппингов ссылаются на tour | P1 | БД |
-| 5 | Слабое покрытие каталога: 78% experiences и 60% yachts не привязаны к LifeOS | P2 | БД |
+## Проблема
 
----
+Таблица `tours` содержит 0 активных записей. Все реальные данные (88 активных туров) хранятся в `experiences` с `experience_type = 'tour'`. При этом ~9 файлов и ~15 запросов продолжают обращаться к мёртвой таблице `tours`, создавая путаницу в Admin/Vendor панелях и ложные нули в статистике.
 
-## Шаг 1: Заполнить catalog_life_map для 6 пустых ситуаций (P0)
+## План
 
-Добавить маппинги на основе реальных данных в БД. Логика подбора:
+### Шаг 1: Перенаправить Admin и Vendor экраны
 
-| Ситуация | Релевантные entity_type | Кол-во реальных записей |
-|----------|------------------------|------------------------|
-| `visa_travel` | transfer (40), legal_service (9), insurance, property | ~60 записей |
-| `sports` | gym (13), experience (88), water_activity, salon | ~110 записей |
-| `nightlife` | event (15), restaurant (25), experience | ~128 записей |
-| `shopping` | flower_shop (4), marketplace_product, restaurant | ~29 записей |
-| `education` | education (14), babysitter (5), kindergarten | ~19 записей |
-| `pets` | pet_service (5), clinic (16), cleaning (15) | ~36 записей |
+**AdminTours.tsx** — переписать на использование `useAdminExperiences({ experienceType: 'tour' })` вместо `useAdminTours()`. Форма останется та же, но данные будут из `experiences`.
 
-Для каждой ситуации будет добавлено 8-15 маппингов с весами по governance-правилам:
-- Primary блоки: вес 70-85
-- Secondary блоки: вес 40-60
+**VendorTours.tsx** — переписать на использование `useVendorExperiences(providerId, 'tour')` вместо `useVendorTours()`.
 
-## Шаг 2: Перенести маппинги неактивных ситуаций (P1)
+### Шаг 2: Очистить хуки-запросы к `tours`
 
-287 записей привязаны к 5 неактивным ситуациям. Варианты:
-- `digital_nomad` -> перенести в `business`
-- `pre_trip_planning` -> перенести в `arrival`
-- `wedding_event` -> перенести в `leisure`
-- `departure_day` -> перенести в `arrival`
-- `retirement_living` -> перенести в `living`
+Удалить/переключить обращения к `from('tours')` в:
+- `useCategoryCounts.ts` — заменить на `from('experiences').eq('experience_type', 'tour')`
+- `useHomePageData.ts` — заменить на `from('experiences').eq('experience_type', 'tour')`
+- `usePrefetch.ts` — удалить/заменить два запроса к tours
+- `useTodayEvents.ts` — заменить на experiences
+- `useRecommendations.ts` — заменить на experiences
+- `routePrefetch.ts` — заменить на experiences
+- `useAdminDashboardStats.ts` — заменить на experiences с фильтром
 
-Миграция: UPDATE life_situation_id для каждой группы, затем удаление дубликатов.
+### Шаг 3: Пометить legacy-файлы как deprecated
 
-## Шаг 3: Добавить `transfer` и `page` в entityTypes.ts (P1)
+Файлы, которые станут неиспользуемыми после шагов 1-2:
+- `src/hooks/useTours.ts` — удалить (полностью заменён `useExperiences`)
+- `src/hooks/useVendorTours.ts` — удалить (заменён `useVendorExperiences`)
+- `src/hooks/useAdminContent.ts` (`useAdminTours` функция) — удалить функцию
 
-62 маппинга используют entity_type `transfer`, но его нет в `ENTITY_TYPES`. Добавить:
+### Шаг 4: Консолидировать роуты
 
-```text
-transfer: { type: 'transfer', icon: Car, route: '/transport/airport-transfer', ... }
-page:     { type: 'page', icon: FileText, route: '/', ... }
-```
+- `/admin/tours` — редирект на `/admin/experiences?type=tour`
+- `/vendor/tours` — редирект на `/vendor/experiences?type=tour`
+- Убрать `AdminTours` и `VendorTours` из pageRegistry (или оставить как редиректы)
 
-## Шаг 4: Очистить пустые tour маппинги (P1)
+### Шаг 5: Домашняя страница
 
-Таблица `tours` содержит 0 активных записей. Действия:
-- Удалить 7 маппингов entity_type=`tour` из catalog_life_map (ведут в пустоту)
-- Или перенести их на entity_type=`experience` (консолидация по архитектурному стандарту "Experiences = Tours + Activities")
+`ToursSection.tsx` — уже использует `useExperiences`, но само название файла вводит в заблуждение. Переименовать не обязательно (косметика), но можно объединить с `ExperiencesSection.tsx` в будущем.
 
-## Шаг 5: Расширить покрытие каталога (P2)
+### Шаг 6: Обновить E2E тесты
 
-Добавить маппинги для неподключённых записей:
-- 69 из 88 experiences не в LifeOS -> привязать к `leisure`, `sports`, `family`
-- 58 из 97 yachts не в LifeOS -> привязать к `leisure`, `arrival`
-- 18 из 33 vehicles не в LifeOS -> привязать к `living`, `arrival`
+`tour-booking.spec.ts` — убедиться, что навигация идёт на `/experiences?type=tour`, а не на `/tours`.
 
----
+## Что НЕ меняется
+
+- Таблица `tours` в БД остаётся (не удаляем, чтобы не ломать миграции)
+- Публичные роуты `/tours` уже редиректят на `/experiences?type=tour` (это уже сделано)
+- UI карточек и фильтров
+- Таблица `experiences` и её структура
 
 ## Технические детали
 
-### Миграция БД (один SQL-файл):
+### Файлы для изменения (~10 файлов):
 
-1. INSERT INTO catalog_life_map для 6 пустых ситуаций (~60 записей)
-2. UPDATE catalog_life_map SET life_situation_id для 287 записей неактивных ситуаций
-3. DELETE дубликатов после переноса
-4. DELETE или UPDATE 7 маппингов tour -> experience
+| Файл | Действие |
+|------|----------|
+| `src/pages/admin/AdminTours.tsx` | Переписать на `useAdminExperiences` |
+| `src/pages/vendor/VendorTours.tsx` | Переписать на `useVendorExperiences` |
+| `src/hooks/useCategoryCounts.ts` | Заменить `from('tours')` на `from('experiences')` |
+| `src/hooks/useHomePageData.ts` | Заменить запрос |
+| `src/hooks/usePrefetch.ts` | Заменить 2 запроса |
+| `src/hooks/useTodayEvents.ts` | Заменить запрос |
+| `src/hooks/useRecommendations.ts` | Заменить запрос |
+| `src/lib/routePrefetch.ts` | Заменить запрос |
+| `src/hooks/useAdminDashboardStats.ts` | Заменить 2 запроса |
+| `src/components/layout/AnimatedRoutes.tsx` | Добавить редиректы admin/vendor tours |
 
-### Код (один файл):
+### Файлы для удаления (3 файла):
 
-- `src/lib/config/entityTypes.ts`: добавить `transfer` и `page`
+- `src/hooks/useTours.ts`
+- `src/hooks/useVendorTours.ts`
+- Функция `useAdminTours` из `src/hooks/useAdminContent.ts`
 
-### Что НЕ меняется:
-
-- Мобильный UX
-- Десктопный UX
-- Компоненты карточек
-- Роутинг
-- LifeOS фронтенд-логика (только данные)
