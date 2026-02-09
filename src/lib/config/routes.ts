@@ -1,136 +1,258 @@
 /**
  * Centralized Route Registry
  * Single source of truth for all application routes
+ * 
+ * P3 — synchronized with AnimatedRoutes.tsx
  */
 
 export const APP_ROUTES = {
-  // Home
+  // ── Core ──
   HOME: '/',
-  
-  // Auth
   AUTH: '/auth',
-  
-  // Services Hub
-  SERVICES: '/services',
-  DISCOVER: '/discover',
-  SERVICE_PROVIDER: (id: string) => `/services/provider/${id}`,
-  SERVICE_BOOKING: (providerId: string) => `/services/booking/${providerId}`,
-  
-  // Cleaning
-  CLEANING: '/cleaning',
-  CLEANING_DETAIL: (id: string) => `/cleaning/${id}`,
-  
-  // Experiences (unified hub for tours + water activities)
-  EXPERIENCES: '/experiences',
-  EXPERIENCE_DETAIL: (id: string) => `/experiences/${id}`,
-  
-  // Transport
-  TRANSPORT: '/transport',
-  
-  // Delivery
-  DELIVERY: '/delivery',
-  
-  // Property
-  PROPERTY: '/property',
-  PROPERTY_DETAIL: (id: string) => `/property/${id}`,
-  COMPLEXES: '/complexes',
-  
-  // Marketplace
-  MARKET: '/market',
-  MARKET_CATEGORY: (slug: string) => `/market/category/${slug}`,
-  MARKET_PRODUCT: (id: string) => `/market/product/${id}`,
-  
-  // Vendor/Provider Portal
-  VENDOR: '/vendor',
-  VENDOR_ONBOARDING: '/vendor/onboarding',
-  VENDOR_DASHBOARD: '/vendor',
-  VENDOR_BOOKINGS: '/vendor/bookings',
-  VENDOR_SETTINGS: '/vendor/settings',
-  
-  // Owner Portal
-  OWNER: '/owner',
-  OWNER_ONBOARDING: '/owner/onboarding',
-  
-  // Partner/Become Provider
-  BECOME_PARTNER: '/become-partner',
-  PARTNERS: '/info/partners',
-  
-  // Trust & Verification
-  G_TRUST: '/g-trust',
-  
-  // Info Pages
-  ABOUT: '/about',
-  FAQ: '/faq',
-  CONTACT: '/contact',
-  
-  // User
-  PROFILE: '/profile',
-  BOOKINGS: '/bookings',
-  FAVORITES: '/favorites',
-  WALLET: '/wallet',
-  
-  // Insurance
-  INSURANCE: '/insurance',
-  INSURANCE_TRAVEL: '/insurance/travel',
+  AUTH_ACCOUNT_TYPE: '/auth/account-type',
+  AUTH_FORGOT_PASSWORD: '/auth/forgot-password',
+  AUTH_RESET_PASSWORD: '/auth/reset-password',
 
-  // Trip Planner
+  // ── Discovery & Navigation ──
+  DISCOVER: '/discover',
+  MAP: '/map',
+  SEARCH: '/search',
+  
+  // ── User ──
+  PROFILE: '/profile',
+  PROFILE_EDIT: '/profile/edit',
+  PROFILE_SETTINGS: '/profile/settings',
+  ACCOUNT: '/account',
+  BOOKINGS: '/bookings',
+  BOOKING_DETAIL: (id: string) => `/bookings/${id}`,
+  FAVORITES: '/favorites',
+  NOTIFICATIONS: '/notifications',
+  NOTIFICATION_SETTINGS: '/profile/notifications',
+  MESSAGES: '/messages',
+  TRIP_DETAIL: (id: string) => `/trip/${id}`,
+  VIEW_HISTORY: '/history',
+  CART: '/cart',
+  WALLET: '/wallet',
+  WALLET_HISTORY: '/wallet/history',
+  WALLET_CARDS: '/wallet/cards',
+  SOS: '/sos',
+  VIP_CONCIERGE: '/vip-concierge',
+  SUPPORT: '/support',
+  SUPPORT_NEW_TICKET: '/support/new-ticket',
+  SUPPORT_TICKETS: '/support/tickets',
+  SUPPORT_TICKET_DETAIL: (ticketId: string) => `/support/tickets/${ticketId}`,
+  ORDER_TRACKING: (id: string) => `/orders/${id}/tracking`,
+  BOOKING_ADVANCE_REQUESTED: '/booking/advance-requested',
+  INSTALL: '/install',
+
+  // ── LifeOS ──
+  LIFE_FLOW: (code: string) => `/life-flow/${code}`,
   TRIP_PLANNER: '/trip-planner',
 
-  // Yachts
+  // ── List With Us ──
+  LIST_WITH_US: '/list-with-us',
+  BECOME_PARTNER: '/become-partner',
+
+  // ── Beauty & Spa ──
+  BEAUTY: '/beauty',
+  BEAUTY_SALON: (id: string) => `/beauty/salon/${id}`,
+  BEAUTY_BOOKING: (id: string) => `/beauty/booking/${id}`,
+  BEAUTY_SERVICES: '/beauty/services',
+  BEAUTY_MAP: '/beauty/map',
+
+  // ── Property ──
+  PROPERTY: '/property',
+  PROPERTY_DETAIL: (id: string) => `/property/${id}`,
+  PROPERTY_INQUIRY: (id: string) => `/property/${id}/inquiry`,
+  PROPERTY_MAP: '/property/map',
+  PROPERTY_CONSULTATION: '/property/consultation',
+  PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
+  PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
+  COMPLEXES: '/complexes',
+
+  // ── Offplan & Developers ──
+  OFFPLAN: '/offplan',
+  OFFPLAN_DETAIL: (id: string) => `/offplan/${id}`,
+  DEVELOPERS: '/developers',
+  DEVELOPER_DETAIL: (id: string) => `/developers/${id}`,
+
+  // ── Investment ──
+  INVEST: '/invest',
+  INVEST_DASHBOARD: '/invest/dashboard',
+  INVEST_RAISE: '/invest/raise',
+  INVEST_DETAIL: (id: string) => `/invest/${id}`,
+
+  // ── Restaurants ──
+  RESTAURANTS: '/restaurants',
+  RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
+  RESTAURANT_RESERVE: (id: string) => `/restaurants/${id}/reserve`,
+  RESTAURANT_DELIVERY: (id: string) => `/restaurants/${id}/delivery`,
+  RESTAURANT_EXPERIENCE: (id: string, setId: string) => `/restaurants/${id}/experience/${setId}`,
+  RESTAURANT_MAP: '/restaurants/map',
+
+  // ── Transport ──
+  TRANSPORT: '/transport',
+  VEHICLE_DETAIL: (id: string) => `/transport/vehicle/${id}`,
+  TRANSPORT_BOOKING: (id: string) => `/transport/booking/${id}`,
+  AIRPORT_TRANSFER: '/transport/airport-transfer',
+  TRANSFER_SUCCESS: '/transport/transfer-success',
+  FAST_TRACK: '/transport/fast-track',
+  TAXI: '/transport/taxi',
+
+  // ── Fitness ──
+  FITNESS: '/fitness',
+  FITNESS_GYM: (id: string) => `/fitness/gym/${id}`,
+  FITNESS_BOOKING: (id: string) => `/fitness/booking/${id}`,
+
+  // ── Medical ──
+  MEDICAL: '/medical',
+  MEDICAL_CLINIC: (id: string) => `/medical/clinic/${id}`,
+  MEDICAL_APPOINTMENT: (id: string) => `/medical/appointment/${id}`,
+
+  // ── Events ──
+  EVENTS: '/events',
+  EVENT_DETAIL: (id: string) => `/events/${id}`,
+  EVENT_BOOKING: (id: string) => `/events/${id}/book`,
+  VENUE_DETAIL: (id: string) => `/events/venue/${id}`,
+
+  // ── Education ──
+  EDUCATION: '/education',
+  COURSE_DETAIL: (id: string) => `/education/course/${id}`,
+  TUTOR_DETAIL: (id: string) => `/education/tutor/${id}`,
+  EDUCATION_BOOKING: (id: string) => `/education/booking/${id}`,
+
+  // ── Flowers ──
+  FLOWERS: '/flowers',
+  FLOWER_SHOP: (id: string) => `/flowers/shop/${id}`,
+  FLOWERS_ORDER: (id: string) => `/flowers/order/${id}`,
+  BOUQUET_DETAIL: (id: string) => `/flowers/bouquet/${id}`,
+  FLOWERS_SUCCESS: '/flowers/success',
+
+  // ── Home Services ──
+  SERVICES: '/services',
+  SERVICE_PROVIDER: (id: string) => `/services/provider/${id}`,
+  SERVICE_BOOKING: (providerId: string) => `/services/booking/${providerId}`,
+  SERVICES_MAP: '/services/map',
+  SERVICE_FUNCTION_ORDER: '/services/function-order',
+  SERVICE_ORDER_SUCCESS: '/services/order-success',
+
+  // ── Legal ──
+  LEGAL: '/legal',
+  LEGAL_PROVIDER: (id: string) => `/legal/provider/${id}`,
+  LEGAL_BOOKING: (id: string) => `/legal/booking/${id}`,
+  VISA_SERVICE: (id: string) => `/legal/visa/${id}`,
+  VISA_IMMIGRATION: '/legal/visa-immigration',
+
+  // ── Insurance ──
+  INSURANCE: '/insurance',
+  INSURANCE_DETAIL: (id: string) => `/insurance/${id}`,
+  INSURANCE_QUOTE: '/insurance/quote',
+  INSURANCE_PLAN: (id: string) => `/insurance/plan/${id}`,
+  INSURANCE_TRAVEL: '/insurance/travel',
+
+  // ── Expat Services ──
+  BANKING: '/banking',
+  VETERINARY: '/veterinary',
+
+  // ── Experiences (tours + activities) ──
+  EXPERIENCES: '/experiences',
+  EXPERIENCE_DETAIL: (id: string) => `/experiences/${id}`,
+  EXPERIENCE_BOOKING: (id: string) => `/experiences/${id}/book`,
+
+  // ── Pharmacy ──
+  PHARMACY: '/pharmacy',
+  PHARMACY_DETAIL: (id: string) => `/pharmacy/${id}`,
+
+  // ── Pets ──
+  PETS: '/pets',
+  PET_SERVICE: (id: string) => `/pets/${id}`,
+  PET_BOOKING: (id: string) => `/pets/${id}/booking`,
+  PET_TRANSPORT: '/pets/transport',
+
+  // ── Yachts ──
   YACHTS: '/yachts',
   YACHT_DETAIL: (id: string) => `/yachts/${id}`,
   YACHT_BOOKING: (id: string) => `/yachts/${id}/booking`,
 
-  // Cart
-  CART: '/cart',
+  // ── Cleaning ──
+  CLEANING: '/cleaning',
+  CLEANING_DETAIL: (id: string) => `/cleaning/${id}`,
+  CLEANING_BOOKING: (id: string) => `/cleaning/${id}/book`,
 
-  // Beauty & Spa (canonical for salons/spa/wellness)
-  BEAUTY: '/beauty',
-  BEAUTY_SALON: (id: string) => `/beauty/salon/${id}`,
-
-  // Medical
-  MEDICAL: '/medical',
-  MEDICAL_CLINIC: (id: string) => `/medical/clinic/${id}`,
-
-  // Fitness
-  FITNESS: '/fitness',
-  FITNESS_GYM: (id: string) => `/fitness/gym/${id}`,
-
-  // Education
-  EDUCATION: '/education',
-
-  // Legal
-  LEGAL: '/legal',
-
-  // Pets
-  PETS: '/pets',
-  PET_SERVICE: (id: string) => `/pets/${id}`,
-
-  // Babysitter
+  // ── Babysitter ──
   BABYSITTER: '/babysitter',
+  BABYSITTER_DETAIL: (id: string) => `/babysitter/${id}`,
+  BABYSITTER_BOOKING: (id: string) => `/babysitter/${id}/book`,
 
-  // Flowers
-  FLOWERS: '/flowers',
+  // ── Delivery ──
+  DELIVERY: '/delivery',
 
-  // Events
-  EVENTS: '/events',
+  // ── Market ──
+  MARKET: '/market',
+  MARKET_CATEGORIES: '/market/categories',
+  MARKET_CATEGORY: (categoryId: string) => `/market/category/${categoryId}`,
+  MARKET_PRODUCT: (productId: string) => `/market/product/${productId}`,
+  MARKET_VENDOR: (slug: string) => `/market/vendor/${slug}`,
+  MARKET_WISHLIST: '/market/wishlist',
+  MARKET_STORE: (id: string) => `/market/store/${id}`,
+  MARKET_CHECKOUT: '/market/checkout',
+  SELL: '/sell',
 
-  // Restaurants
-  RESTAURANTS: '/restaurants',
-  RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
+  // ── Knowledge ──
+  KNOWLEDGE: '/knowledge',
+  KNOWLEDGE_SECTION: (section: string) => `/knowledge/${section}`,
+  KNOWLEDGE_ARTICLE: (section: string, slug: string) => `/knowledge/${section}/${slug}`,
 
-  // Banking & Expat
-  BANKING: '/banking',
-  VETERINARY: '/veterinary',
+  // ── Landing Pages ──
+  LANDING_AIRPORT_TRANSFER: '/transfer',
+  LANDING_FLOWER_DELIVERY: '/flower-delivery',
+  LANDING_RENTAL: '/rent-phuket',
+  LANDING_NEW_DEVELOPMENTS: '/new-developments',
 
-  // Pharmacy
-  PHARMACY: '/pharmacy',
+  // ── Info Pages ──
+  ABOUT: '/about',
+  HOW_IT_WORKS: '/how-it-works',
+  FAQ: '/faq',
+  PARTNERS: '/partners',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
+  COOKIES: '/cookies',
+  REFUND_POLICY: '/refund-policy',
+  CONTACT: '/contact',
+  G_TRUST: '/g-trust',
+  IP_POLICY: '/ip-policy',
+  PARTNER_AGREEMENT: '/partner-agreement',
+  DISPUTE_RESOLUTION: '/dispute-resolution',
 
-  // Investment
-  INVEST: '/invest',
+  // ── Vendor Portal ──
+  VENDOR: '/vendor',
+  VENDOR_ONBOARDING: '/vendor/onboarding',
+  VENDOR_BOOKINGS: '/vendor/bookings',
+  VENDOR_SERVICES: '/vendor/services',
+  VENDOR_SETTINGS: '/vendor/settings',
 
-  // Life Flow
-  LIFE_FLOW: (code: string) => `/life-flow/${code}`,
+  // ── Owner Portal ──
+  OWNER: '/owner',
+  OWNER_LANDING: '/owner/landing',
+  OWNER_GUIDE: '/owner/guide',
+
+  // ── Provider Onboarding ──
+  PROVIDER_ONBOARDING: '/provider/onboarding',
+
+  // ── Guest ──
+  MY_STAY: '/my-stay',
+  GUEST_CHECK_IN: (bookingId: string) => `/guest/check-in/${bookingId}`,
+  GUEST_GUIDEBOOK: (propertyId: string) => `/guest/guidebook/${propertyId}`,
+
+  // ── Manager ──
+  MANAGER: '/manager',
+  MANAGER_PROPERTIES: '/manager/properties',
+
+  // ── Team ──
+  TEAM: '/team',
+
+  // ── Admin ──
+  ADMIN: '/admin',
 } as const;
 
 /**
@@ -138,47 +260,58 @@ export const APP_ROUTES = {
  * Maps old paths to new paths for backward compatibility
  */
 export const LEGACY_REDIRECTS: Record<string, string> = {
-  // Provider → Vendor migration
   '/provider/onboarding': APP_ROUTES.VENDOR_ONBOARDING,
-  '/provider/dashboard': APP_ROUTES.VENDOR_DASHBOARD,
+  '/provider/dashboard': APP_ROUTES.VENDOR,
   '/become-provider': APP_ROUTES.BECOME_PARTNER,
-  
-  // Tours/Water → Experiences
   '/tours': `${APP_ROUTES.EXPERIENCES}?type=tour`,
   '/water': `${APP_ROUTES.EXPERIENCES}?type=activity`,
-  
-  // Transfers → Transfer landing
   '/transfers': '/transfer',
-  
-  // Life → Experiences (contextual discovery)
   '/life': APP_ROUTES.EXPERIENCES,
-  
-  // Legacy /info/* → root-level info pages
   '/info/about': APP_ROUTES.ABOUT,
   '/info/faq': APP_ROUTES.FAQ,
   '/info/contact': APP_ROUTES.CONTACT,
   '/info/partners': '/partners',
   '/info/become-partner': APP_ROUTES.BECOME_PARTNER,
   '/info/g-trust': APP_ROUTES.G_TRUST,
-  
-  // Legacy /orders → /bookings
   '/orders': APP_ROUTES.BOOKINGS,
-  
-  // Legacy /salons → /beauty
   '/salons': '/beauty',
   '/spa': '/beauty',
+  '/categories': '/discover',
+  '/food': '/restaurants',
+  '/view-history': '/history',
+  '/demo': '/',
 } as const;
 
 /**
- * Route validation helper for development mode
+ * Route ownership classification
+ */
+export const ROUTE_OWNERSHIP = {
+  PUBLIC: ['/', '/auth', '/discover', '/beauty', '/property', '/restaurants', '/transport',
+    '/experiences', '/yachts', '/cleaning', '/babysitter', '/delivery', '/market',
+    '/flowers', '/fitness', '/medical', '/events', '/education', '/legal', '/insurance',
+    '/pets', '/pharmacy', '/banking', '/veterinary', '/knowledge', '/about', '/faq',
+    '/contact', '/become-partner', '/g-trust', '/install', '/transfer', '/flower-delivery',
+    '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
+    '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
+    '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
+    '/list-with-us', '/invest', '/offplan', '/developers', '/complexes'],
+  AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
+    '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
+  VENDOR: ['/vendor'],
+  OWNER: ['/owner'],
+  ADMIN: ['/admin'],
+  TEAM: ['/team'],
+  MANAGER: ['/manager'],
+  GUEST: ['/my-stay', '/guest'],
+} as const;
+
+/**
+ * Route validation helper
  */
 export function isValidRoute(path: string): boolean {
   const staticRoutes = Object.values(APP_ROUTES).filter(r => typeof r === 'string') as string[];
-  
-  // Check static routes
   if (staticRoutes.includes(path)) return true;
   
-  // Check dynamic route patterns
   const dynamicPatterns = [
     /^\/services\/provider\/[^/]+$/,
     /^\/services\/booking\/[^/]+$/,
@@ -195,6 +328,19 @@ export function isValidRoute(path: string): boolean {
     /^\/restaurants\/[^/]+$/,
     /^\/pets\/[^/]+$/,
     /^\/life-flow\/[^/]+$/,
+    /^\/offplan\/[^/]+$/,
+    /^\/developers\/[^/]+$/,
+    /^\/invest\/[^/]+$/,
+    /^\/pharmacy\/[^/]+$/,
+    /^\/flowers\/[^/]+$/,
+    /^\/babysitter\/[^/]+$/,
+    /^\/events\/[^/]+$/,
+    /^\/education\/[^/]+$/,
+    /^\/legal\/[^/]+$/,
+    /^\/insurance\/[^/]+$/,
+    /^\/knowledge\/[^/]+$/,
+    /^\/transport\/vehicle\/[^/]+$/,
+    /^\/transport\/booking\/[^/]+$/,
   ];
   
   return dynamicPatterns.some(pattern => pattern.test(path));
