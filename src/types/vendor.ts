@@ -15,7 +15,7 @@ export type { VendorPetService } from '@/hooks/useVendorPets';
 // export type { VendorProperty } from '@/hooks/useVendorProperties';
 export type { VendorRestaurant } from '@/hooks/useVendorRestaurants';
 export type { VendorSalon } from '@/hooks/useVendorSalons';
-export type { VendorTour } from '@/hooks/useVendorTours';
+// VendorTour — REMOVED: consolidated into AdminExperience from useAdminExperiences
 export type { VendorVehicle } from '@/hooks/useVendorVehicles';
 
 // Common vendor entity base interface

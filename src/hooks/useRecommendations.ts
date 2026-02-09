@@ -38,9 +38,10 @@ const fetchRecommendations = async (userId?: string): Promise<RecommendedItem[]>
   // Parallel fetch all data sources
   const [toursRes, propertiesRes, eventsRes, waterActivitiesRes] = await Promise.all([
     supabase
-      .from('tours')
+      .from('experiences')
       .select('id, title_en, title_ru, cover_image, rating, price')
       .eq('is_active', true)
+      .eq('experience_type', 'tour')
       .order('rating', { ascending: false })
       .limit(8),
     supabase

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Yacht } from './useYachts';
-import { VendorTour } from './useVendorTours';
 import { VendorActivity } from './useVendorActivities';
 import { VendorProperty } from './useVendorProperties';
 
@@ -77,75 +76,7 @@ export function useAdminYachts(filterProviderId?: string) {
   return { yachts, isLoading, createYacht, updateYacht, deleteYacht, refetch: fetchYachts };
 }
 
-// Admin hook for tours
-export function useAdminTours(filterProviderId?: string) {
-  const { user } = useAuth();
-  const [tours, setTours] = useState<VendorTour[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchTours = useCallback(async (isMounted?: () => boolean) => {
-    const checkMounted = isMounted || (() => true);
-    if (!user) return;
-    if (checkMounted()) setIsLoading(true);
-    
-    let query = supabase.from('tours').select('*');
-    
-    if (filterProviderId) {
-      query = query.eq('provider_id', filterProviderId);
-    }
-    
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (!error && data && checkMounted()) setTours(data as VendorTour[]);
-    if (checkMounted()) setIsLoading(false);
-  }, [user, filterProviderId]);
-
-  useEffect(() => {
-    let isMounted = true;
-    fetchTours(() => isMounted);
-    return () => { isMounted = false; };
-  }, [fetchTours]);
-
-  const createTour = async (tourData: Partial<VendorTour> & { provider_id: string }) => {
-    if (!user) return { error: new Error('Not authenticated') };
-    
-    const { data, error } = await supabase
-      .from('tours')
-      .insert({
-        ...tourData,
-        is_active: true,
-      } as any)
-      .select()
-      .single();
-    
-    if (!error) await fetchTours();
-    return { data, error };
-  };
-
-  const updateTour = async (id: string, tourData: Partial<VendorTour>) => {
-    const { data, error } = await supabase
-      .from('tours')
-      .update(tourData as any)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (!error) await fetchTours();
-    return { data, error };
-  };
-
-  const deleteTour = async (id: string) => {
-    const { error } = await supabase
-      .from('tours')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) await fetchTours();
-    return { error };
-  };
-
-  return { tours, isLoading, createTour, updateTour, deleteTour, refetch: fetchTours };
-}
+// useAdminTours — REMOVED: consolidated into useAdminExperiences({ experienceType: 'tour' })
 
 // Admin hook for activities
 export function useAdminActivities(filterProviderId?: string) {

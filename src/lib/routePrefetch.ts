@@ -51,9 +51,10 @@ const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
       queryKey: ['tours', 'all', undefined, undefined],
       queryFn: async () => {
         const { data } = await supabase
-          .from('tours')
+          .from('experiences')
           .select('*')
           .eq('is_active', true)
+          .eq('experience_type', 'tour')
           .order('rating', { ascending: false })
           .limit(20);
         return data || [];

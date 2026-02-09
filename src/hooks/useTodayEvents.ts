@@ -57,9 +57,10 @@ export function useSmartRecommendations() {
       // Parallel fetch all data sources for better performance
       const [toursResult, restaurantsResult, salonsResult] = await Promise.all([
         supabase
-          .from('tours')
-          .select('id, title_en, title_ru, cover_image, rating, price, duration_hours')
+          .from('experiences')
+          .select('id, title_en, title_ru, cover_image, rating, price, duration_minutes')
           .eq('is_active', true)
+          .eq('experience_type', 'tour')
           .order('rating', { ascending: false })
           .limit(2),
         supabase
@@ -86,8 +87,8 @@ export function useSmartRecommendations() {
             type: 'tour',
             title_en: tour.title_en,
             title_ru: tour.title_ru,
-            subtitle_en: tour.duration_hours ? `${tour.duration_hours}h adventure` : 'Popular tour',
-            subtitle_ru: tour.duration_hours ? `${tour.duration_hours}ч приключения` : 'Популярный тур',
+            subtitle_en: tour.duration_minutes ? `${Math.round(tour.duration_minutes / 60)}h adventure` : 'Popular tour',
+            subtitle_ru: tour.duration_minutes ? `${Math.round(tour.duration_minutes / 60)}ч приключения` : 'Популярный тур',
             cover_image: tour.cover_image,
             icon: '🏝️',
             path: `/tours/${tour.id}`,

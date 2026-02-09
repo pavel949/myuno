@@ -55,7 +55,7 @@ export function useAdminDashboardStats() {
         supabase.from('providers').select('id', countOptions).limit(1),
         supabase.from('services').select('id', countOptions).limit(1),
         supabase.from('yachts').select('id', countOptions).limit(1),
-        supabase.from('tours').select('id', countOptions).limit(1),
+        supabase.from('experiences').select('id', countOptions).eq('experience_type', 'tour').limit(1),
         supabase.from('properties').select('id', countOptions).limit(1),
         supabase.from('restaurants').select('id', countOptions).limit(1),
         supabase.from('salons').select('id', countOptions).limit(1),
@@ -72,7 +72,7 @@ export function useAdminDashboardStats() {
       const [pendingPropertiesRes, pendingYachtsRes, pendingToursRes] = await Promise.all([
         supabase.from('owner_properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('yachts').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('tours').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        supabase.from('experiences').select('id', countOptions).eq('experience_type', 'tour').eq('approval_status', 'pending').limit(1),
       ]);
 
       // Get active/pending providers counts
