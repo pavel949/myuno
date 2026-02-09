@@ -45,13 +45,13 @@ export const QuickAccessStrip = memo(function QuickAccessStrip() {
             onClick={() => handleClick(item.path)}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 rounded-full snap-start",
-              "bg-primary/10 hover:bg-primary/20 text-primary",
+              "bg-primary/15 hover:bg-primary/25 text-primary",
               "transition-all active:scale-95 flex-shrink-0",
-              "border border-primary/15"
+              "border border-primary/25"
             )}
           >
             <Icon className="w-4 h-4" />
-            <span className="text-sm font-medium whitespace-nowrap">
+            <span className="text-sm font-semibold whitespace-nowrap">
               {isRu ? item.labelRu : item.labelEn}
             </span>
           </button>

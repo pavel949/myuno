@@ -14,7 +14,7 @@ export const ConciergeBanner = memo(function ConciergeBanner() {
   );
 
   return (
-    <Card variant="surface" className="p-4 flex items-center gap-4">
+    <Card variant="surface" className="p-4 flex items-center gap-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800/40">
       <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
         <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
       </div>
@@ -26,7 +26,7 @@ export const ConciergeBanner = memo(function ConciergeBanner() {
           {isRu ? 'Менеджер ответит за 15 минут' : 'Our manager will reply in 15 min'}
         </p>
       </div>
-      <Button size="sm" className="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white" asChild>
+      <Button size="default" className="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white" asChild>
         <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
           {isRu ? 'Написать' : 'Message'}
         </a>

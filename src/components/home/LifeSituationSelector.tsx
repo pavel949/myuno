@@ -92,7 +92,7 @@ export const LifeSituationSelector = memo(function LifeSituationSelector({
                 "flex items-center gap-2.5 p-2.5 rounded-xl border transition-all duration-150",
                 "bg-card hover:bg-accent/50 active:scale-[0.98]",
                 "text-left",
-                isSelected ? "ring-2 ring-primary border-primary" : "border-border/60"
+                isSelected ? "ring-2 ring-primary border-primary" : "border-border shadow-sm"
               )}
               style={{
                 borderColor: isSelected ? situation.color : undefined,
