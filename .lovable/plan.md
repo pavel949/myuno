@@ -1,163 +1,125 @@
 
 
-# Global Information Architecture Overhaul
-## 4 User Modes, Normalized Naming, Grouped Services Hub
+# Обогащение Home-экрана: из "пустой страницы" в "живой суперапп"
 
----
+## Проблема
 
-## What Changes
-
-This is a **UX/IA/naming-layer-only** refactoring. No routes, database tables, or APIs are modified. The changes affect how content is labeled, grouped, and navigated.
-
----
-
-## 1. Bottom Navigation: 4 Tabs
-
-Current (5 tabs): `Home | Discover | Services (drawer) | Bookings | Account`
-
-New (4 tabs): `Life | Services | Marketplace | Me`
-
-| Tab | Icon | Route | Purpose |
-|-----|------|-------|---------|
-| Life | Sparkles | `/` (Home) | LifeOS situations, context-driven guidance |
-| Services | LayoutGrid | `/discover` (reused) | Grouped service catalog |
-| Marketplace | ShoppingBag | `/market` | Products, transactions |
-| Me | User | `/account` | Orders, properties, settings |
-
-**File**: `src/components/layout/AdaptiveBottomNav.tsx`
-- Replace 5 `guestNavItems` with 4
-- Remove `isServicesSheet` logic and `ExploreVerticalsSheet` import
-- Remove `/bookings` tab (accessible from Me section)
-- Labels: EN `Life / Services / Marketplace / Me`, RU `Жизнь / Услуги / Маркет / Мой`
-
----
-
-## 2. Global Naming Normalization
-
-Update `labelEn` and `labelRu` in `src/lib/verticals.ts`:
-
-| Internal ID | Old labelEn | New labelEn | New labelRu |
-|-------------|-------------|-------------|-------------|
-| property | Property | Real Estate | Недвижимость |
-| yacht | Boat Charters | Yacht Charter | Яхт-чартер |
-| vehicle | Transport | Car & Bike Rental | Аренда авто и мото |
-| experience | Experiences | Things To Do | Чем заняться |
-| cleaning | Cleaning | Home Cleaning | Клининг |
-| babysitter | Babysitters | Childcare | Присмотр за детьми |
-| beauty | Beauty & Spa | Beauty & Wellness | Красота и велнес |
-| medical | Medical | Healthcare | Здоровье |
-| legal | Legal | Legal Services | Юридические услуги |
-| education | Education | Education & Courses | Образование |
-| fitness | Fitness | Fitness & Gyms | Фитнес и залы |
-| water_activity | Water Activities | Water Sports | Водный спорт |
-| pet_service | Pet Services | Pet Care | Уход за питомцами |
-| flower | Flowers | Flower Delivery | Доставка цветов |
-| transfer | Transfers | Airport & City Transfers | Трансферы |
-| insurance | Insurance | Insurance | Страхование |
-| restaurant | Restaurants | Restaurants | Рестораны |
-| event | Events | Events | События |
-
-**Also remove TOUR entry** from `VERTICALS` (deprecated; data lives in experiences).
-
-**Also update** `src/lib/config/entityTypes.ts` to match the same canonical names.
-
----
-
-## 3. Services Hub: Grouped Catalog
-
-Create `src/lib/verticalGroups.ts` — the grouping registry:
+Сейчас Home (`/`) содержит только:
 
 ```text
-Transport & Mobility:
-  - transfer (Airport & City Transfers)
-  - vehicle (Car & Bike Rental)
-  - [airport_fast_track] (Fast Track)
-
-Home & Living:
-  - property (Real Estate)
-  - cleaning (Home Cleaning)
-  - babysitter (Childcare)
-  - pet_service (Pet Care)
-  - [expat] (Relocation Services)
-
-Leisure & Lifestyle:
-  - experience (Things To Do)
-  - event (Events)
-  - water_activity (Water Sports)
-  - yacht (Yacht Charter)
-  - fitness (Fitness & Gyms)
-  - beauty (Beauty & Wellness)
-  - restaurant (Restaurants)
-  - flower (Flower Delivery)
-
-Health & Administration:
-  - medical (Healthcare)
-  - [pharmacy] (Pharmacy)
-  - insurance (Insurance)
-  - legal (Legal Services)
-  - education (Education & Courses)
-
-Premium & Assistance:
-  - [vip_concierge] (Concierge)
-  - [sos] (Emergency Help)
+1. Hero (логотип + поиск + SOS)
+2. LifeSituation Selector (сетка ситуаций)
+3. DiscoveryCarousel (1 карусель экспириенсов)
 ```
 
-Items in `[brackets]` are standalone screens (not in `VERTICALS`); they are mapped by route.
+Три блока -- это не главная страница суперапп-платформы с 29 сервисами. Пользователь видит "пустоту" и не понимает масштаб возможностей.
 
-**Refactor** `src/pages/Discover.tsx` (which already serves as the services discovery screen) to render grouped sections instead of the current flat Klook-style layout. Each group gets a collapsible section header with verticals displayed as icon+label buttons.
+## Решение: +4 новых секции
 
-**Remove** `ExploreVerticalsSheet` flat grid usage from the bottom nav (the sheet component itself stays for other uses).
+Итоговая структура сверху вниз:
 
----
-
-## 4. Home Page = Life Mode
-
-`src/pages/Index.tsx` changes:
-- Remove `QuickActionsGrid` (services now live on Services tab)
-- Keep: `HeroBlock`, `LifeSituationSelector`, `ActiveSituationBanner`, `PersonaChips`, `DiscoveryCarousel` (promotions only)
-- The page focuses on: "What's happening in your life?" + contextual recommendations
-
----
-
-## 5. Me Tab Consolidation
-
-The `/account` route already exists. Bookings (previously a separate tab) become a section within Me. No new page needed — just the tab removal from bottom nav. Users still access `/bookings` via the account menu.
+```text
+1. Hero (логотип + поиск + SOS)             -- уже есть
+2. LifeSituation Selector / PersonaChips     -- уже есть
+3. [NEW] Quick Access Strip                  -- горизонтальная строка 5 популярных сервисов
+4. [NEW] Concierge Banner                   -- "Нужна помощь? Напишите менеджеру"
+5. DiscoveryCarousel                         -- уже есть
+6. [NEW] Popular Services Row               -- "Популярные услуги" (2 строки по 4)
+7. [NEW] Trust & Stats Banner               -- "500+ услуг / 100+ партнёров / 24/7"
+```
 
 ---
 
-## Files to Create
+## Блок 3: Quick Access Strip
 
-| File | Purpose |
-|------|---------|
-| `src/lib/verticalGroups.ts` | Canonical grouping registry with labels EN/RU |
+Горизонтальная полоса из 5 pill-кнопок для самых частых запросов.
 
-## Files to Modify
+| Сервис | Иконка | Маршрут |
+|--------|--------|---------|
+| Transfers | Plane | /transfers |
+| Real Estate | Home | /properties |
+| Healthcare | Stethoscope | /medical |
+| Things To Do | Compass | /experiences |
+| Car Rental | Car | /vehicles |
 
-| File | Change |
-|------|--------|
-| `src/lib/verticals.ts` | Update all `labelEn`/`labelRu`, remove TOUR |
-| `src/lib/config/entityTypes.ts` | Align labels with new canonical names |
-| `src/components/layout/AdaptiveBottomNav.tsx` | 4 tabs, remove sheet logic |
-| `src/pages/Discover.tsx` | Grouped services hub layout |
-| `src/pages/Index.tsx` | Remove QuickActionsGrid |
-| `src/components/shared/ExploreVerticalsSheet.tsx` | Remove TOUR, use new labels |
-| `src/components/home/QuickActionsGrid.tsx` | Update labels to match canonical names |
+Стиль: компактные pill (иконка + label), горизонтальный scroll на мобильных, wrap на десктопе.
 
-## Files NOT Changed
-
-- All route definitions (AnimatedRoutes.tsx)
-- All database hooks and queries
-- All mini-app pages (pages/flowers, pages/yachts, etc.)
-- Database schema and tables
-- Authentication and authorization
+**Новый файл**: `src/components/home/QuickAccessStrip.tsx`
 
 ---
 
-## Summary
+## Блок 4: Concierge Banner
 
-- **4 clear modes**: Life (situations) / Services (grouped catalog) / Marketplace (products) / Me (control center)
-- **29 services** organized into **5 logical groups** instead of a flat list
-- **Consistent naming** across all screens — no more "Boat Charters" vs "Yacht" vs "Charter" confusion
-- **Zero route changes**, zero DB changes, zero API changes
-- User never sees words: mini-app, vertical, hub, engine
+Компактный баннер-карточка с CTA на WhatsApp (+66922407355):
+- Иконка MessageCircle
+- Текст: "Need help? Our manager will reply in 15 min" / "Нужна помощь? Менеджер ответит за 15 минут"
+- Кнопка: "Write to WhatsApp" / "Написать в WhatsApp"
+- Стиль: мягкий gradient, rounded-2xl, border
+
+**Новый файл**: `src/components/home/ConciergeBanner.tsx`
+
+---
+
+## Блок 6: Popular Services Row
+
+Сетка 2x4 (8 иконок) из самых ходовых категорий, выбранных из VERTICAL_GROUPS:
+- Yacht Charter, Beauty, Restaurants, Fitness
+- Flower Delivery, Water Sports, Events, Insurance
+
+Каждый item: иконка в круге + label снизу. По клику -- навигация на вертикаль.
+Внизу -- кнопка "All Services" ведущая на /discover.
+
+**Новый файл**: `src/components/home/PopularServicesRow.tsx`
+
+---
+
+## Блок 7: Trust & Stats Banner
+
+Статическая полоска с 3 метриками:
+
+| Метрика | EN | RU |
+|---------|----|----|
+| 500+ | Services | Услуг |
+| 100+ | Verified Partners | Проверенных партнёров |
+| 24/7 | Support | Поддержка |
+
+Стиль: горизонтальная строка с разделителями, text-muted, компактный.
+
+**Новый файл**: `src/components/home/TrustBanner.tsx`
+
+---
+
+## Изменения в Index.tsx
+
+Добавляем 4 новых lazy-компонента в существующую структуру:
+
+```text
+<HeroBlock />
+<LifeSituationSelector /> / <PersonaChips />
+<QuickAccessStrip />        -- NEW
+<ConciergeBanner />          -- NEW
+<DiscoveryCarousel />
+<PopularServicesRow />       -- NEW
+<TrustBanner />              -- NEW
+```
+
+---
+
+## Файлы
+
+| Файл | Действие |
+|------|----------|
+| `src/components/home/QuickAccessStrip.tsx` | Создать |
+| `src/components/home/ConciergeBanner.tsx` | Создать |
+| `src/components/home/PopularServicesRow.tsx` | Создать |
+| `src/components/home/TrustBanner.tsx` | Создать |
+| `src/pages/Index.tsx` | Добавить 4 компонента |
+
+## Что НЕ меняется
+
+- Роуты
+- Навигация (4 таба)
+- Verticals / Groups
+- База данных
+- LifeOS логика
 
