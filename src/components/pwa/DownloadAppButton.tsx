@@ -67,8 +67,6 @@ export function DownloadAppButton() {
       }
       setInstallState('idle');
     }
-    // iOS or fallback - go to install page with instructions
-    window.location.href = '/install';
   };
 
   return (
