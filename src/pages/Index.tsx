@@ -70,7 +70,7 @@ const Index = () => {
       <ActiveSituationBanner />
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 py-5 pb-24 space-y-6 overflow-x-visible">
+        <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 space-y-6 md:space-y-8 overflow-x-visible max-w-7xl mx-auto w-full">
           
           {/* PWA Install */}
           <InstallBanner />

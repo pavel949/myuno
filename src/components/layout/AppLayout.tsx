@@ -42,7 +42,9 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
             contentClassName
           )}
         >
-          {children}
+          <div className="max-w-7xl mx-auto w-full">
+            {children}
+          </div>
         </main>
         
         {showFooter && <Footer />}

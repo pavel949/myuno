@@ -15,7 +15,7 @@ export default function AdminDashboard() {
   const isRussian = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 space-y-4 overflow-x-hidden max-w-full">
+    <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 overflow-x-hidden max-w-full max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="mb-2">
         <h1 className="text-xl font-bold">

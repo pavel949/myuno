@@ -624,9 +624,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
       userActions = getActionsForUserType(profile?.user_type);
     }
     
-    // Limit to 5 actions + dynamic "More" button based on contentMode
+    // Show 6 on mobile (3-col grid x 2 rows), up to 8 on desktop (wider grid)
     const moreAction = getMoreAction(contentMode);
-    return [...userActions.slice(0, 5), moreAction];
+    const maxItems = 5; // 5 + More = 6 items
+    return [...userActions.slice(0, maxItems), moreAction];
   }, [activeRole, roleLoading, personas, profile?.user_type, contentMode]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -642,7 +643,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   }, [queryClient]);
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3">
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
