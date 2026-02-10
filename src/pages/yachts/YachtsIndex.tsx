@@ -2,7 +2,7 @@
  * YachtsIndex — Airbnb-style yacht catalog
  * Clean header, type pills, sort, responsive grid
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -119,6 +119,16 @@ export default function YachtsIndex() {
   const [typeFilter, setTypeFilter] = useState<YachtTypeFilter>('all');
   const [sortKey, setSortKey] = useState<SortKey>('featured');
   const [showSort, setShowSort] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSort) return;
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSort(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showSort]);
 
   const { yachts, isLoading } = useYachts(typeFilter === 'all' ? undefined : typeFilter);
 
@@ -164,7 +174,7 @@ export default function YachtsIndex() {
             <p className="text-sm text-muted-foreground">
               {sorted.length} {isRu ? 'судов' : 'vessels'}
             </p>
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}

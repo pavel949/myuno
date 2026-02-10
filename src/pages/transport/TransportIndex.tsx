@@ -2,7 +2,7 @@
  * TransportIndex — Airbnb-style vehicle catalog
  * Clean header, category pills, sort, responsive grid
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Car, SlidersHorizontal, MapPin, Loader2, Plane, Bike } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -49,6 +49,16 @@ export default function TransportIndex() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('price_asc');
   const [showSort, setShowSort] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSort) return;
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSort(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showSort]);
 
   const filtered = useMemo(() => {
     let results = vehicles.filter(v => {
@@ -101,7 +111,7 @@ export default function TransportIndex() {
             <p className="text-sm text-muted-foreground">
               {filtered.length} {isRu ? 'вариантов' : 'options'}
             </p>
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}
