@@ -67,36 +67,36 @@ body {
   :root {
     /* Calm Light — warm off-white, trust-first palette */
     --background: 40 20% 98%;
-    --foreground: 220 20% 12%;
+    --foreground: 220 15% 18%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 12%;
+    --card-foreground: 220 15% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
-    /* Primary — warm gold, single accent */
-    --primary: 42 65% 48%;
+    --popover-foreground: 220 15% 18%;
+    /* Primary — warm indigo, single accent */
+    --primary: 230 45% 46%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 42 60% 62%;
+    --primary-light: 230 40% 60%;
     --secondary: 40 15% 95%;
     --secondary-foreground: 220 15% 18%;
-    --muted: 40 12% 93%;
-    --muted-foreground: 220 8% 46%;
+    --muted: 40 10% 94%;
+    --muted-foreground: 220 10% 46%;
     /* Accent = primary (single accent rule) */
     --accent: 40 15% 95%;
     --accent-foreground: 220 15% 18%;
     /* Semantic accents */
-    --accent-coral: 16 70% 56%;
+    --accent-coral: 12 60% 58%;
     --accent-teal: 180 50% 42%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
     --border: 40 10% 88%;
     --input: 40 10% 84%;
-    --ring: 42 65% 48%;
+    --ring: 230 45% 46%;
     --radius: 0.75rem;
 
     /* Semantic colors */
-    --gold: 42 65% 48%;
-    --gold-light: 42 60% 62%;
-    --gold-dark: 43 60% 34%;
+    --gold: 230 45% 46%;
+    --gold-light: 230 40% 60%;
+    --gold-dark: 230 45% 34%;
     --success: 152 60% 38%;
     --warning: 38 80% 50%;
     --info: 210 70% 50%;
@@ -116,12 +116,12 @@ body {
 
     --sidebar-background: 40 15% 97%;
     --sidebar-foreground: 220 15% 25%;
-    --sidebar-primary: 42 65% 48%;
+    --sidebar-primary: 230 45% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 40 12% 95%;
     --sidebar-accent-foreground: 220 15% 12%;
     --sidebar-border: 40 10% 88%;
-    --sidebar-ring: 42 65% 48%;
+    --sidebar-ring: 230 45% 46%;
   }
 
   .dark {
@@ -135,9 +135,9 @@ body {
     --popover: 220 12% 8%;
     --popover-foreground: 40 10% 92%;
     
-    --primary: 42 60% 52%;
-    --primary-foreground: 220 12% 6%;
-    --primary-light: 42 55% 64%;
+    --primary: 230 40% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 230 38% 68%;
     
     --secondary: 220 8% 14%;
     --secondary-foreground: 40 10% 90%;
@@ -147,7 +147,7 @@ body {
     
     --accent: 220 8% 14%;
     --accent-foreground: 40 10% 90%;
-    --accent-coral: 16 70% 60%;
+    --accent-coral: 12 60% 62%;
     --accent-teal: 180 50% 48%;
     
     --destructive: 0 60% 48%;
@@ -155,11 +155,11 @@ body {
     
     --border: 220 8% 18%;
     --input: 220 8% 22%;
-    --ring: 42 60% 52%;
+    --ring: 230 40% 58%;
 
-    --gold: 42 60% 52%;
-    --gold-light: 42 55% 64%;
-    --gold-dark: 43 60% 38%;
+    --gold: 230 40% 58%;
+    --gold-light: 230 38% 68%;
+    --gold-dark: 230 40% 42%;
     --success: 152 55% 40%;
     --warning: 38 80% 50%;
     --info: 210 65% 50%;
@@ -174,12 +174,12 @@ body {
 
     --sidebar-background: 220 12% 7%;
     --sidebar-foreground: 40 10% 88%;
-    --sidebar-primary: 42 60% 52%;
-    --sidebar-primary-foreground: 220 12% 6%;
+    --sidebar-primary: 230 40% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 8% 14%;
     --sidebar-accent-foreground: 40 10% 92%;
     --sidebar-border: 220 8% 16%;
-    --sidebar-ring: 42 60% 52%;
+    --sidebar-ring: 230 40% 58%;
   }
 }
 
@@ -250,7 +250,7 @@ body {
   
   /* Premium gradient backgrounds */
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(43 74% 49%) 0%, hsl(38 92% 50%) 100%);
+    background: linear-gradient(135deg, hsl(230 45% 46%) 0%, hsl(230 40% 56%) 100%);
   }
 
   .gradient-dark {
@@ -268,13 +268,13 @@ body {
 
   .glass-gold {
     @apply backdrop-blur-xl border;
-    background: hsl(43 74% 49% / 0.1);
-    border-color: hsl(43 74% 49% / 0.2);
+    background: hsl(230 45% 46% / 0.1);
+    border-color: hsl(230 45% 46% / 0.2);
   }
 
   /* Premium shadows */
   .shadow-gold {
-    box-shadow: 0 4px 20px -4px hsl(43 74% 49% / 0.3);
+    box-shadow: 0 4px 20px -4px hsl(230 45% 46% / 0.3);
   }
 
   .shadow-elevated {
@@ -285,11 +285,11 @@ body {
   /* Адаптивный золотой градиент: тёмный в light mode, светлый в dark */
   .text-gradient-gold {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(35 85% 38%) 0%, hsl(43 74% 42%) 50%, hsl(38 92% 40%) 100%);
+    background-image: linear-gradient(135deg, hsl(230 45% 38%) 0%, hsl(230 45% 46%) 50%, hsl(230 40% 52%) 100%);
   }
 
   .dark .text-gradient-gold {
-    background-image: linear-gradient(135deg, hsl(43 74% 65%) 0%, hsl(43 74% 55%) 50%, hsl(38 92% 58%) 100%);
+    background-image: linear-gradient(135deg, hsl(230 40% 68%) 0%, hsl(230 40% 58%) 50%, hsl(230 38% 62%) 100%);
   }
 
   /* Animations */
@@ -299,10 +299,10 @@ body {
 
   @keyframes glow {
     from {
-      box-shadow: 0 0 10px -5px hsl(43 74% 49% / 0.5);
+      box-shadow: 0 0 10px -5px hsl(230 45% 46% / 0.5);
     }
     to {
-      box-shadow: 0 0 20px -5px hsl(43 74% 49% / 0.8);
+      box-shadow: 0 0 20px -5px hsl(230 45% 46% / 0.8);
     }
   }
 
