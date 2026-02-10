@@ -119,8 +119,8 @@ function ExploreCard({ item, language }: { item: ExploreItem; language: string }
         "transition-all active:scale-[0.98] text-left w-full"
       )}
     >
-      <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-primary" />
+      <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+        <Icon className="w-6 h-6 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground line-clamp-1">
