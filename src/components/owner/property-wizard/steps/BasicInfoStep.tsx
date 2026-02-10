@@ -167,8 +167,7 @@ function BasicInfoStepInner({
         </CardContent>
       </Card>
 
-      {/* Project Selection — only for multi-unit types */}
-      {!['villa', 'house', 'townhouse'].includes(formData.property_type) && (
+      {/* Project Selection — for all types (villas can be in compounds too) */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">
@@ -203,7 +202,6 @@ function BasicInfoStepInner({
           />
         </CardContent>
       </Card>
-      )}
 
       {/* Unit Fields — always shown after type is selected */}
       <UnitFields
