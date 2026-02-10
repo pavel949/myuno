@@ -1,137 +1,123 @@
+/**
+ * YachtsIndex — Airbnb-style yacht catalog
+ * Clean header, type pills, sort, responsive grid
+ */
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, Star, Users, Clock, Ruler, MapPin, Ship, Filter } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
-import { Badge } from '@/components/ui/badge';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
-import { IconBadge } from '@/components/ui/IconBadge';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
-import { useYachts, Yacht } from '@/hooks/useYachts';
-import { mapYachtToCardProps } from '@/lib/adapters/yachtAdapters';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
+import { useYachts, Yacht } from '@/hooks/useYachts';
+import { mapYachtToCardProps } from '@/lib/adapters/yachtAdapters';
 import { cn } from '@/lib/utils';
 
 type YachtTypeFilter = 'all' | 'motor_yacht' | 'catamaran' | 'speedboat' | 'superyacht';
-type SortOption = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
+type SortKey = 'featured' | 'price_asc' | 'price_desc' | 'rating' | 'capacity';
 
-const YACHT_TYPES: { id: YachtTypeFilter; labelEn: string; labelRu: string; icon?: string }[] = [
+const YACHT_TYPES: { id: YachtTypeFilter; labelEn: string; labelRu: string }[] = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'motor_yacht', labelEn: 'Motor Yachts', labelRu: 'Моторные', icon: '🚤' },
-  { id: 'catamaran', labelEn: 'Catamarans', labelRu: 'Катамараны', icon: '⛵' },
-  { id: 'speedboat', labelEn: 'Speedboats', labelRu: 'Спидботы', icon: '🏎️' },
-  { id: 'superyacht', labelEn: 'Superyachts', labelRu: 'Суперяхты', icon: '💎' },
+  { id: 'motor_yacht', labelEn: 'Motor Yachts', labelRu: 'Моторные' },
+  { id: 'catamaran', labelEn: 'Catamarans', labelRu: 'Катамараны' },
+  { id: 'speedboat', labelEn: 'Speedboats', labelRu: 'Спидботы' },
+  { id: 'superyacht', labelEn: 'Superyachts', labelRu: 'Суперяхты' },
 ];
 
-const SORT_OPTIONS: { id: SortOption; labelEn: string; labelRu: string }[] = [
-  { id: 'featured', labelEn: 'Featured', labelRu: 'Рекомендуемые' },
+const SORT_OPTIONS: { id: SortKey; labelEn: string; labelRu: string }[] = [
+  { id: 'featured', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
   { id: 'price_asc', labelEn: 'Price ↑', labelRu: 'Цена ↑' },
   { id: 'price_desc', labelEn: 'Price ↓', labelRu: 'Цена ↓' },
-  { id: 'rating', labelEn: 'Rating', labelRu: 'Рейтинг' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'Рейтинг' },
   { id: 'capacity', labelEn: 'Capacity', labelRu: 'Вместимость' },
 ];
 
-const YachtCard = React.memo(({ yacht, language }: { yacht: Yacht; language: string }) => {
+function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
   const navigate = useNavigate();
   const card = mapYachtToCardProps(yacht, language);
   const isRu = language === 'ru';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="bg-card rounded-2xl overflow-hidden border hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+    <div
+      className="cursor-pointer group"
       onClick={() => navigate(`/yachts/${yacht.id}`)}
     >
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
         <OptimizedImage
           src={card.image}
           alt={card.title}
           width={400}
-          height={192}
-          className="w-full h-full group-hover:scale-[1.03] transition-transform duration-300"
+          height={300}
+          className="w-full h-full group-hover:scale-105 transition-transform duration-300"
           quality={80}
         />
-
         {card.badge && (
-          <Badge className="absolute top-3 left-3 bg-gradient-to-r from-warning to-primary text-primary-foreground text-xs">
-            <Star className="w-3 h-3 mr-1 fill-current" />
+          <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+            <Star className="w-3 h-3 mr-0.5 fill-current" />
             {card.badge.text}
           </Badge>
         )}
-
         {card.isVerified && (
-          <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs">
+          <span className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-full">
             ✓ {isRu ? 'Проверено' : 'Verified'}
-          </Badge>
+          </span>
         )}
-
         {card.experienceLabel && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-            <span className="text-white text-sm font-medium">{card.experienceLabel}</span>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6">
+            <span className="text-white text-xs font-medium">{card.experienceLabel}</span>
           </div>
         )}
       </div>
 
-      <div className="p-4">
-        <h3 className="font-semibold text-base line-clamp-1 mb-1">{card.title}</h3>
-        {card.subtitle && (
-          <p className="text-xs text-muted-foreground mb-2">{card.subtitle}</p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-3">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {card.rating && card.rating > 0 && (
             <>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-0.5">
                 <Star className="w-3.5 h-3.5 fill-warning text-warning" />
-                {card.rating.toFixed(1)}
-                {card.reviewCount ? <span className="text-xs">({card.reviewCount})</span> : null}
+                <span className="font-medium text-foreground">{card.rating.toFixed(1)}</span>
+                {card.reviewCount ? <span>({card.reviewCount})</span> : null}
               </span>
-              <span>•</span>
+              <span>·</span>
             </>
           )}
-          {card.meta.slice(0, 3).map((m, i) => (
-            <span key={i} className="flex items-center gap-1">
-              <m.icon className="w-3.5 h-3.5" />
+          {card.meta.slice(0, 2).map((m, i) => (
+            <span key={i} className="flex items-center gap-0.5">
+              <m.icon className="w-3 h-3" />
               {m.label}
-              {i < Math.min(card.meta.length, 3) - 1 && <span className="ml-1">•</span>}
+              {i < 1 && card.meta.length > 1 && <span className="ml-1">·</span>}
             </span>
           ))}
         </div>
 
+        <h3 className="font-medium text-sm leading-tight line-clamp-2">{card.title}</h3>
+
         {card.location && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="w-3 h-3" />
             <span className="truncate">{card.location}</span>
-          </div>
+          </p>
         )}
 
-        <div className="flex items-center justify-between">
-          <p className="text-primary font-bold text-lg">
-            {card.currency}{card.price?.toLocaleString()}
-            <span className="text-sm font-normal text-muted-foreground ml-1">
-              {card.priceLabel}
-            </span>
-          </p>
-          <Button size="sm" variant="outline" className="text-xs">
-            {isRu ? 'Подробнее' : 'Details'}
-          </Button>
-        </div>
+        <p className="text-sm font-semibold text-foreground">
+          {card.currency}{card.price?.toLocaleString()}
+          <span className="text-xs font-normal text-muted-foreground ml-1">{card.priceLabel}</span>
+        </p>
       </div>
-    </motion.div>
+    </div>
   );
-});
-
-YachtCard.displayName = 'YachtCard';
+}
 
 export default function YachtsIndex() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [typeFilter, setTypeFilter] = useState<YachtTypeFilter>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('featured');
+  const [sortKey, setSortKey] = useState<SortKey>('featured');
   const [showSort, setShowSort] = useState(false);
 
   const { yachts, isLoading } = useYachts(typeFilter === 'all' ? undefined : typeFilter);
@@ -139,7 +125,7 @@ export default function YachtsIndex() {
   const sorted = useMemo(() => {
     if (!yachts) return [];
     const list = [...yachts];
-    switch (sortBy) {
+    switch (sortKey) {
       case 'price_asc':
         return list.sort((a, b) => {
           const pa = Math.min(...[a.price_half_day, a.price_full_day, a.price_sunset].filter(Boolean) as number[]);
@@ -156,128 +142,106 @@ export default function YachtsIndex() {
         return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       case 'capacity':
         return list.sort((a, b) => (b.capacity || 0) - (a.capacity || 0));
-      case 'featured':
       default:
         return list.sort((a, b) => (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0));
     }
-  }, [yachts, sortBy]);
-
-  const typeCounts = useMemo(() => {
-    if (!yachts) return {};
-    const counts: Record<string, number> = { all: yachts.length };
-    yachts.forEach(y => {
-      counts[y.yacht_type] = (counts[y.yacht_type] || 0) + 1;
-    });
-    return counts;
-  }, [yachts]);
+  }, [yachts, sortKey]);
 
   return (
-    <MiniAppLayout
-      title={isRu ? 'Чартер' : 'Boat Charters'}
-      fallbackPath="/"
-      showHero={false}
-      showFilter={false}
-      showCategories={false}
-    >
-      <div className="space-y-4 pb-24">
-        {/* Hero */}
-        <div className="bg-gradient-to-br from-primary/10 via-info/10 to-accent/10 rounded-2xl p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <IconBadge icon={Anchor} size="lg" variant="gradient" className="w-12 h-12" />
-            <div>
-              <h1 className="font-bold text-xl">
-                {isRu ? 'Чартер на Пхукете' : 'Phuket Boat Charters'}
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="min-h-screen bg-background">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
+          <div className="container max-w-7xl mx-auto px-4 pt-3">
+            <div className="flex items-center gap-3">
+              <BackButton fallbackPath="/" variant="ghost" size="sm" />
+              <h1 className="text-lg font-bold truncate">
+                {isRu ? 'Чартер яхт' : 'Boat Charters'}
               </h1>
-              <p className="text-sm text-muted-foreground">
-                {isRu
-                  ? `${sorted.length} судов доступно`
-                  : `${sorted.length} vessels available`}
-              </p>
             </div>
           </div>
 
-          {/* Type filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            {YACHT_TYPES.map(type => (
-              <button
-                key={type.id}
-                onClick={() => setTypeFilter(type.id)}
-                className={cn(
-                  "flex-shrink-0 py-2 px-3 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 whitespace-nowrap",
-                  typeFilter === type.id
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-background/50 text-muted-foreground hover:bg-background"
-                )}
-              >
-                {type.icon && <span>{type.icon}</span>}
-                {isRu ? type.labelRu : type.labelEn}
-              </button>
-            ))}
+          {/* Type pills */}
+          <div className="container max-w-7xl mx-auto px-4">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {YACHT_TYPES.map(type => (
+                <button
+                  key={type.id}
+                  onClick={() => setTypeFilter(type.id)}
+                  className={cn(
+                    "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap",
+                    typeFilter === type.id
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background text-foreground border-border hover:border-foreground/50"
+                  )}
+                >
+                  {isRu ? type.labelRu : type.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* Count + sort */}
+        <div className="container max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {sorted.length} {isRu ? 'судов' : 'vessels'}
+            </p>
+            <div className="relative">
+              <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}
+              </Button>
+              {showSort && (
+                <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-xl shadow-lg py-1 min-w-[160px]">
+                  {SORT_OPTIONS.map(opt => (
+                    <button
+                      key={opt.id}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors",
+                        sortKey === opt.id && "text-primary font-medium"
+                      )}
+                      onClick={() => { setSortKey(opt.id); setShowSort(false); }}
+                    >
+                      {isRu ? opt.labelRu : opt.labelEn}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Sort bar */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {sorted.length} {isRu ? 'результатов' : 'results'}
-          </p>
-          <div className="relative">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs gap-1.5"
-              onClick={() => setShowSort(!showSort)}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              {isRu
-                ? SORT_OPTIONS.find(s => s.id === sortBy)?.labelRu
-                : SORT_OPTIONS.find(s => s.id === sortBy)?.labelEn}
-            </Button>
-            {showSort && (
-              <div className="absolute right-0 top-full mt-1 z-20 bg-popover border rounded-xl shadow-lg py-1 min-w-[160px]">
-                {SORT_OPTIONS.map(opt => (
-                  <button
-                    key={opt.id}
-                    className={cn(
-                      "w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors",
-                      sortBy === opt.id && "text-primary font-medium"
-                    )}
-                    onClick={() => { setSortBy(opt.id); setShowSort(false); }}
-                  >
-                    {isRu ? opt.labelRu : opt.labelEn}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Results */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-muted rounded-2xl h-80 animate-pulse" />
-            ))}
-          </div>
-        ) : sorted.length === 0 ? (
-          <EmptyState
-            icon={Ship}
-            title={isRu ? 'Ничего не найдено' : 'No boats found'}
-            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
-          />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
+        {/* Grid */}
+        <main className="container max-w-7xl mx-auto px-4 pb-24">
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="aspect-[4/3] rounded-xl" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : sorted.length === 0 ? (
+            <EmptyState
+              icon={Ship}
+              title={isRu ? 'Ничего не найдено' : 'No boats found'}
+              description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+            />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
               {sorted.map(yacht => (
                 <YachtCard key={yacht.id} yacht={yacht} language={language} />
               ))}
-            </AnimatePresence>
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Cross-sell */}
-        <CrossSellSection currentVertical="yachts" />
+          <CrossSellSection currentVertical="yachts" className="mt-8" />
+        </main>
       </div>
-    </MiniAppLayout>
+    </AppLayout>
   );
 }

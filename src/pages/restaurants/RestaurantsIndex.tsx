@@ -1,52 +1,39 @@
 /**
- * RestaurantsIndex - Restaurant catalog with reservation-first UX
- * 
- * Uses real restaurant data: cuisine_tags, price_band, area, reservation_provider.
- * Filters by area, cuisine, price band.
+ * RestaurantsIndex — Airbnb-style restaurant catalog
+ * Clean header, cuisine pills, area filters, grid cards
  */
-
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Clock, Star, MapPin, Phone, ExternalLink, CalendarDays } from 'lucide-react';
+import { UtensilsCrossed, SlidersHorizontal, Star, MapPin, Phone, CalendarDays } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useRestaurants } from '@/hooks/useRestaurants';
-import { MiniAppLayout, ItemCard, type MiniAppCategory, type QuickFilterSection } from '@/components/miniapp';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { triggerRipple } from '@/hooks/useRipple';
-import { 
-  reservationFilterConfig,
-  type FilterValues 
-} from '@/components/filters';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { useRestaurants } from '@/hooks/useRestaurants';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { cn } from '@/lib/utils';
 
-const CUISINE_CATEGORIES: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🍽️' },
-  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская', icon: '🍜' },
-  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты', icon: '🦐' },
-  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская', icon: '🍣' },
-  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская', icon: '🍝' },
-  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская', icon: '🍛' },
-  { id: 'steak', labelEn: 'Steak', labelRu: 'Стейк', icon: '🥩' },
-  { id: 'international', labelEn: 'International', labelRu: 'Международная', icon: '🌍' },
+const CUISINES = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская' },
+  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты' },
+  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская' },
+  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская' },
+  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская' },
+  { id: 'steak', labelEn: 'Steak', labelRu: 'Стейк' },
+  { id: 'international', labelEn: 'International', labelRu: 'Международная' },
 ];
 
-const AREA_QUICK_FILTERS: QuickFilterSection[] = [
-  {
-    id: 'location',
-    options: [
-      { id: 'Patong', labelEn: 'Patong', labelRu: 'Патонг', icon: '📍' },
-      { id: 'Kata', labelEn: 'Kata', labelRu: 'Ката', icon: '📍' },
-      { id: 'Karon', labelEn: 'Karon', labelRu: 'Карон', icon: '📍' },
-      { id: 'Kamala', labelEn: 'Kamala', labelRu: 'Камала', icon: '📍' },
-      { id: 'Phuket Town', labelEn: 'Phuket Town', labelRu: 'Пхукет Таун', icon: '📍' },
-      { id: 'Mai Khao', labelEn: 'Mai Khao', labelRu: 'Май Кхао', icon: '📍' },
-      { id: 'Cherngtalay', labelEn: 'Bang Tao', labelRu: 'Банг Тао', icon: '📍' },
-      { id: 'Cape Panwa', labelEn: 'Cape Panwa', labelRu: 'Кейп Панва', icon: '📍' },
-      { id: 'Layan', labelEn: 'Layan', labelRu: 'Лаян', icon: '📍' },
-    ],
-  },
+const AREAS = [
+  { id: 'Patong', label: 'Patong' },
+  { id: 'Kata', label: 'Kata' },
+  { id: 'Kamala', label: 'Kamala' },
+  { id: 'Cherngtalay', label: 'Bang Tao' },
+  { id: 'Phuket Town', label: 'Phuket Town' },
 ];
 
 const PRICE_BAND_LABEL: Record<string, string> = {
@@ -56,148 +43,195 @@ const PRICE_BAND_LABEL: Record<string, string> = {
   premium: '฿฿฿฿',
 };
 
-function getReservationCTA(provider?: string | null, language: string = 'en') {
-  switch (provider) {
-    case 'chope':
-    case 'tablecheck':
-    case 'sevenrooms':
-      return language === 'ru' ? 'Забронировать' : 'Reserve a Table';
-    case 'website':
-      return language === 'ru' ? 'На сайте' : 'Book on Website';
-    case 'phone':
-      return language === 'ru' ? 'Позвонить' : 'Call to Reserve';
-    default:
-      return language === 'ru' ? 'Забронировать' : 'Reserve';
-  }
-}
-
 export default function RestaurantsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCuisine, setSelectedCuisine] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const isRu = language === 'ru';
 
-  const selectedLocations = (filterValues.location as string[]) || [];
-  const selectedLocation = selectedLocations.length === 1 ? selectedLocations[0] : undefined;
+  const [selectedCuisine, setSelectedCuisine] = useState('all');
+  const [selectedArea, setSelectedArea] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { restaurants, isLoading } = useRestaurants({
     cuisine: selectedCuisine === 'all' ? undefined : selectedCuisine,
-    district: selectedLocation,
+    district: selectedArea || undefined,
     searchQuery: searchQuery || undefined,
   });
 
-  // Client-side filtering for cuisine_tags (since DB uses old `cuisine` field)
-  const filteredRestaurants = useMemo(() => {
+  const filtered = useMemo(() => {
     return restaurants.filter(rest => {
-      // Cuisine tag matching
       if (selectedCuisine !== 'all') {
         const tags = (rest as any).cuisine_tags as string[] | null;
         const cuisineField = rest.cuisine?.toLowerCase() || '';
-        const matchesCuisine = tags?.some(t => t.toLowerCase().includes(selectedCuisine.toLowerCase()))
+        const matches = tags?.some(t => t.toLowerCase().includes(selectedCuisine.toLowerCase()))
           || cuisineField.includes(selectedCuisine.toLowerCase());
-        if (!matchesCuisine) return false;
+        if (!matches) return false;
       }
-      
-      // Multi-location filter
-      if (selectedLocations.length > 1) {
-        const area = (rest as any).area as string | null;
-        if (!area || !selectedLocations.includes(area)) return false;
-      }
-      
       return true;
     });
-  }, [restaurants, selectedCuisine, selectedLocations]);
+  }, [restaurants, selectedCuisine]);
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Рестораны Пхукета' : 'Phuket Restaurants'}
-      subtitle={language === 'ru' ? `${filteredRestaurants.length} мест` : `${filteredRestaurants.length} places`}
-      heroIcon={UtensilsCrossed}
-      heroTitle={language === 'ru' ? 'Забронировать столик' : 'Reserve a Table'}
-      heroSubtitle={language === 'ru' ? '20 лучших ресторанов с бронированием' : '20 top restaurants with verified reservations'}
-      heroImage="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"
-      heroGradient={{ from: 'from-orange-500/20', via: 'via-red-500/20', to: 'to-primary/20' }}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск ресторанов...' : 'Search restaurants...'}
-      categories={CUISINE_CATEGORIES}
-      selectedCategory={selectedCuisine}
-      onCategoryChange={setSelectedCuisine}
-      quickFilters={AREA_QUICK_FILTERS}
-      filterConfig={reservationFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      showMapButton
-      onMapClick={() => navigate('/restaurants/map')}
-      isLoading={isLoading}
-      isEmpty={filteredRestaurants.length === 0}
-      emptyIcon={UtensilsCrossed}
-      emptyText={language === 'ru' ? 'Ресторанов не найдено' : 'No restaurants found'}
-    >
-      <div className="grid gap-4">
-        {filteredRestaurants.map((restaurant) => {
-          const r = restaurant as any;
-          const cuisineTags = r.cuisine_tags as string[] | null;
-          const priceBand = r.price_band as string | null;
-          const reservationProvider = r.reservation_provider as string | null;
-          const reservationUrl = r.reservation_url as string | null;
-          const heroImage = r.hero_image_url || restaurant.cover_image;
-          const area = r.area as string | null;
-
-          const subtitle = [
-            cuisineTags?.join(' · ') || restaurant.cuisine,
-            priceBand ? PRICE_BAND_LABEL[priceBand] : '฿'.repeat(restaurant.price_range || 2),
-          ].filter(Boolean).join(' • ');
-
-          return (
-            <div key={restaurant.id} className="relative">
-              <ItemCard
-                image={heroImage || undefined}
-                title={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
-                subtitle={subtitle}
-                rating={restaurant.rating ?? undefined}
-                location={area || restaurant.district || undefined}
-                isVerified={!r.needs_manual_verification}
-                tags={cuisineTags?.slice(0, 3) || []}
-                onClick={() => navigate(`/restaurants/${restaurant.id}`)}
-              />
-              {/* Reservation CTA */}
-              {reservationUrl && (
-                <div className="flex gap-2 px-3 pb-3 -mt-2">
-                  <Button
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      triggerRipple(e as any);
-                      window.open(reservationUrl, '_blank', 'noopener');
-                    }}
-                    className="flex-1 gap-1.5"
-                  >
-                    <CalendarDays className="w-4 h-4" />
-                    {getReservationCTA(reservationProvider, language)}
-                  </Button>
-                  {restaurant.phone && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `tel:${restaurant.phone}`;
-                      }}
-                      className="gap-1.5"
-                    >
-                      <Phone className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              )}
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="min-h-screen bg-background">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
+          <div className="container max-w-7xl mx-auto px-4 pt-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <BackButton fallbackPath="/" variant="ghost" size="sm" />
+                <h1 className="text-lg font-bold truncate">
+                  {isRu ? 'Рестораны' : 'Restaurants'}
+                </h1>
+              </div>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/restaurants/map')}>
+                <MapPin className="w-4 h-4" />
+                <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+              </Button>
             </div>
-          );
-        })}
+          </div>
+
+          {/* Cuisine pills */}
+          <div className="container max-w-7xl mx-auto px-4">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {CUISINES.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCuisine(c.id)}
+                  className={cn(
+                    "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap",
+                    selectedCuisine === c.id
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background text-foreground border-border hover:border-foreground/50"
+                  )}
+                >
+                  {isRu ? c.labelRu : c.labelEn}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Area filters */}
+          <div className="container max-w-7xl mx-auto px-4">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {AREAS.map(a => (
+                <button
+                  key={a.id}
+                  onClick={() => setSelectedArea(selectedArea === a.id ? null : a.id)}
+                  className={cn(
+                    "flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors whitespace-nowrap",
+                    selectedArea === a.id
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "bg-background text-muted-foreground border-border hover:border-foreground/30"
+                  )}
+                >
+                  <MapPin className="w-3 h-3" />
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* Results count */}
+        <div className="container max-w-7xl mx-auto px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} {isRu ? 'ресторанов' : 'restaurants'}
+          </p>
+        </div>
+
+        {/* Grid */}
+        <main className="container max-w-7xl mx-auto px-4 pb-24">
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="aspect-[4/3] rounded-xl" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={UtensilsCrossed}
+              title={isRu ? 'Ничего не найдено' : 'No restaurants found'}
+              description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+            />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+              {filtered.map((restaurant) => {
+                const r = restaurant as any;
+                const cuisineTags = r.cuisine_tags as string[] | null;
+                const priceBand = r.price_band as string | null;
+                const reservationUrl = r.reservation_url as string | null;
+                const heroImage = r.hero_image_url || restaurant.cover_image;
+                const area = r.area as string | null;
+
+                return (
+                  <div
+                    key={restaurant.id}
+                    className="cursor-pointer group"
+                    onClick={() => navigate(`/restaurants/${restaurant.id}`)}
+                  >
+                    <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+                      <OptimizedImage
+                        src={heroImage || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'}
+                        alt={isRu ? restaurant.name_ru : restaurant.name_en}
+                        width={400}
+                        height={300}
+                        className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                        quality={80}
+                      />
+                      {priceBand && (
+                        <span className="absolute top-2 left-2 bg-background/90 text-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                          {PRICE_BAND_LABEL[priceBand] || '฿฿'}
+                        </span>
+                      )}
+                      {reservationUrl && (
+                        <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px]">
+                          <CalendarDays className="w-3 h-3 mr-0.5" />
+                          {isRu ? 'Бронь' : 'Reserve'}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        {restaurant.rating && restaurant.rating > 0 && (
+                          <>
+                            <Star className="w-3.5 h-3.5 fill-warning text-warning" />
+                            <span className="font-medium text-foreground">{restaurant.rating.toFixed(1)}</span>
+                          </>
+                        )}
+                        {cuisineTags && cuisineTags.length > 0 && (
+                          <>
+                            <span>·</span>
+                            <span className="truncate">{cuisineTags.slice(0, 2).join(', ')}</span>
+                          </>
+                        )}
+                      </div>
+
+                      <h3 className="font-medium text-sm leading-tight line-clamp-2">
+                        {isRu ? restaurant.name_ru : restaurant.name_en}
+                      </h3>
+
+                      {area && (
+                        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="w-3 h-3" />
+                          <span className="truncate">{area}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <CrossSellSection currentVertical="restaurants" className="mt-8" />
+        </main>
       </div>
-      <VerticalCTA vertical="restaurants" className="my-6" />
-      <CrossSellSection currentVertical="restaurants" />
-    </MiniAppLayout>
+    </AppLayout>
   );
 }
