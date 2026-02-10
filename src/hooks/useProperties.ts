@@ -146,6 +146,7 @@ export interface PropertyFilters {
   maxPrice?: number;
   bedrooms?: string;
   amenities?: string[];
+  managementCompanyId?: string;
 }
 
 const PAGE_SIZE = 20;
@@ -190,6 +191,9 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         } else {
           query = query.eq('bedrooms', parseInt(filters.bedrooms));
         }
+      }
+      if (filters.managementCompanyId) {
+        query = query.eq('management_company_id', filters.managementCompanyId);
       }
 
       const { data, error } = await query;
