@@ -407,6 +407,7 @@ export default function SOS() {
         {emergencyCategories.map((category) => {
           const CatIcon = category.icon;
           return (
+            <div id={category.id} className="scroll-mt-20">
             <SectionCard key={category.id} className="mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <CatIcon className={cn("w-5 h-5", category.color)} />
@@ -443,6 +444,7 @@ export default function SOS() {
                 ))}
               </div>
             </SectionCard>
+            </div>
           );
         })}
 

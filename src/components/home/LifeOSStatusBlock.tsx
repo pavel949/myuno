@@ -52,6 +52,51 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Legal help', labelRu: 'Юридическая помощь', path: '/legal', icon: 'Scale' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],
+  business: [
+    { labelEn: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', icon: 'Building' },
+    { labelEn: 'Legal help', labelRu: 'Юрист', path: '/legal', icon: 'Scale' },
+    { labelEn: 'Banks', labelRu: 'Банки', path: '/banks', icon: 'Landmark' },
+  ],
+  relocation: [
+    { labelEn: 'Visa & docs', labelRu: 'Виза', path: '/visa', icon: 'FileText' },
+    { labelEn: 'Find housing', labelRu: 'Жильё', path: '/properties', icon: 'Home' },
+    { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
+  ],
+  pets: [
+    { labelEn: 'Vet clinic', labelRu: 'Ветклиника', path: '/services?category=vet', icon: 'Stethoscope' },
+    { labelEn: 'Pet shops', labelRu: 'Зоомагазин', path: '/services?category=pet-shop', icon: 'ShoppingBag' },
+    { labelEn: 'Pet sitting', labelRu: 'Передержка', path: '/services?category=pet-sitting', icon: 'Heart' },
+  ],
+  education: [
+    { labelEn: 'Schools', labelRu: 'Школы', path: '/education', icon: 'School' },
+    { labelEn: 'Tutors', labelRu: 'Репетиторы', path: '/services?category=tutors', icon: 'BookOpen' },
+    { labelEn: 'Courses', labelRu: 'Курсы', path: '/services?category=courses', icon: 'GraduationCap' },
+  ],
+  shopping: [
+    { labelEn: 'Markets', labelRu: 'Маркеты', path: '/market', icon: 'ShoppingCart' },
+    { labelEn: 'Delivery', labelRu: 'Доставка', path: '/services?category=delivery', icon: 'Truck' },
+    { labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers', icon: 'Flower2' },
+  ],
+  nightlife: [
+    { labelEn: 'Clubs & bars', labelRu: 'Клубы и бары', path: '/nightlife', icon: 'Music' },
+    { labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants', icon: 'UtensilsCrossed' },
+    { labelEn: 'Taxi', labelRu: 'Такси', path: '/transfers', icon: 'Car' },
+  ],
+  sports: [
+    { labelEn: 'Gyms', labelRu: 'Залы', path: '/services?category=gym', icon: 'Dumbbell' },
+    { labelEn: 'Pools', labelRu: 'Бассейны', path: '/services?category=pool', icon: 'Waves' },
+    { labelEn: 'Yoga', labelRu: 'Йога', path: '/services?category=yoga', icon: 'Leaf' },
+  ],
+  visa_travel: [
+    { labelEn: 'Visa services', labelRu: 'Визовые услуги', path: '/visa', icon: 'FileText' },
+    { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
+    { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfers', icon: 'Plane' },
+  ],
+  planning: [
+    { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'ListChecks' },
+    { labelEn: 'Housing', labelRu: 'Жильё', path: '/properties', icon: 'Home' },
+    { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
+  ],
 };
 
 export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {

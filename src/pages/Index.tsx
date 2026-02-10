@@ -23,8 +23,10 @@ import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanne
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { LifeOSFocusBar } from '@/components/home/LifeOSFocusBar';
+import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
 
 // Lazy load secondary components
+const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
 const LifeSituationSelector = lazy(() => import('@/components/home/LifeSituationSelector'));
 const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
@@ -78,6 +80,11 @@ const Index = () => {
           {/* Quick Actions — role-adaptive icon row */}
           <QuickActionsGrid />
 
+          {/* Smart Widget — weather, events, recommendations */}
+          <Suspense fallback={null}>
+            <SmartWidget />
+          </Suspense>
+
           {/* LifeOS Focus Bar — top-priority active route */}
           <LifeOSFocusBar />
 
@@ -100,6 +107,9 @@ const Index = () => {
               <LifeSituationSelector />
             </Suspense>
           )}
+
+          {/* Emergency Quick Access — always visible */}
+          <EmergencyQuickAccess />
 
           {/* Support — always visible */}
           <Suspense fallback={null}>
