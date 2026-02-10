@@ -232,21 +232,24 @@ export default function PropertySearchPage() {
           {/* Unified filter chips row — Airbnb style */}
           <div className="px-4 pb-2 overflow-x-auto scrollbar-hide">
             <div className="flex items-center gap-2 touch-pan-y">
-              {/* Property type chips: Villa, Condo */}
-              {(['villa', 'condo'] as const).map(typeId => {
+              {/* Property type chips: Villa, Condo, Hotel */}
+              {(['villa', 'condo', 'hotel'] as const).map(typeId => {
                 const typeOpt = propertyTypes.find(t => t.id.toLowerCase() === typeId);
-                if (!typeOpt) return null;
-                const label = language === 'ru' ? typeOpt.labelRu : typeOpt.labelEn;
+                // Fallback for hotel if not in DB yet
+                const label = typeOpt
+                  ? (language === 'ru' ? typeOpt.labelRu : typeOpt.labelEn)
+                  : (typeId === 'hotel' ? (language === 'ru' ? 'Отель' : 'Hotel') : typeId);
+                const id = typeOpt?.id || typeId;
                 return (
                   <FilterChip
                     key={typeId}
                     label={label}
-                    isActive={selectedTypes.includes(typeOpt.id)}
+                    isActive={selectedTypes.includes(id)}
                     onToggle={() => {
                       setSelectedTypes(prev =>
-                        prev.includes(typeOpt.id)
-                          ? prev.filter(t => t !== typeOpt.id)
-                          : [...prev, typeOpt.id]
+                        prev.includes(id)
+                          ? prev.filter(t => t !== id)
+                          : [...prev, id]
                       );
                     }}
                     size="sm"
@@ -257,7 +260,7 @@ export default function PropertySearchPage() {
               {/* More types dropdown */}
               {(() => {
                 const otherTypes = propertyTypes.filter(
-                  t => !['villa', 'condo'].includes(t.id.toLowerCase())
+                  t => !['villa', 'condo', 'hotel'].includes(t.id.toLowerCase())
                 );
                 if (!otherTypes.length) return null;
                 const activeOtherCount = otherTypes.filter(t => selectedTypes.includes(t.id)).length;
@@ -270,12 +273,12 @@ export default function PropertySearchPage() {
                           ? "bg-primary text-primary-foreground border-primary"
                           : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
                       )}>
-                        <span>{language === 'ru' ? 'Тип' : 'Type'}</span>
+                        <span>{language === 'ru' ? 'Ещё' : 'More'}</span>
                         {activeOtherCount > 0 && <span>({activeOtherCount})</span>}
                         <ChevronDown className="w-3 h-3" />
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-52 p-2" align="start" sideOffset={6}>
+                    <PopoverContent className="w-52 p-2 bg-popover z-50" align="start" sideOffset={6}>
                       <div className="space-y-1">
                         {otherTypes.map(type => (
                           <button
@@ -311,7 +314,7 @@ export default function PropertySearchPage() {
               {/* Divider */}
               <div className="w-px h-5 bg-border shrink-0" />
 
-              {/* Bedroom chips */}
+              {/* Bedroom chips — multi-select */}
               {[
                 { id: '1', label: '1+' },
                 { id: '2', label: '2+' },
@@ -326,7 +329,7 @@ export default function PropertySearchPage() {
                     setSelectedBedrooms(prev =>
                       prev.includes(bed.id)
                         ? prev.filter(b => b !== bed.id)
-                        : [bed.id] // single select for bedrooms (1+ means 1 or more)
+                        : [...prev, bed.id]
                     );
                   }}
                   size="sm"
