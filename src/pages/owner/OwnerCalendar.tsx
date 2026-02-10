@@ -2,17 +2,16 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { UnifiedPropertyCalendar } from '@/components/owner/UnifiedPropertyCalendar';
-import { BookingCalendar } from '@/components/owner/BookingCalendar';
+import { AirbnbCalendarGrid } from '@/components/owner/AirbnbCalendarGrid';
+import { CalendarTodayTasks } from '@/components/owner/CalendarTodayTasks';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
 import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDialog';
 import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromCalendarDialog';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
-import { CalendarDays, RefreshCw, ClipboardList, Plus, CalendarPlus } from 'lucide-react';
+import { CalendarDays, CalendarPlus, Plus, RefreshCw } from 'lucide-react';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -21,13 +20,11 @@ export default function OwnerCalendar() {
   const isRu = language === 'ru';
   
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
-  const [activeTab, setActiveTab] = useState('calendar');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   
   const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
 
-  // Auto-select first property when properties load
   useEffect(() => {
     if (properties?.length && !selectedPropertyId) {
       setSelectedPropertyId(properties[0].id);
@@ -42,9 +39,7 @@ export default function OwnerCalendar() {
           {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
         </h1>
         <p className="text-muted-foreground mb-6">
-          {isRu 
-            ? 'Войдите, чтобы просмотреть календарь' 
-            : 'Sign in to view the calendar'}
+          {isRu ? 'Войдите, чтобы просмотреть календарь' : 'Sign in to view the calendar'}
         </p>
         <Button onClick={() => navigate('/auth')}>
           {isRu ? 'Войти' : 'Sign In'}
@@ -68,7 +63,7 @@ export default function OwnerCalendar() {
         />
       </div>
       
-      {/* Quick Action Buttons - Full width on mobile */}
+      {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-2">
         <Button 
           onClick={() => setShowAddBookingDialog(true)}
@@ -90,51 +85,33 @@ export default function OwnerCalendar() {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="calendar" className="gap-2">
-            <CalendarDays className="h-4 w-4" />
-            {isRu ? 'Календарь' : 'Calendar'}
-          </TabsTrigger>
-          <TabsTrigger value="operations" className="gap-2">
-            <ClipboardList className="h-4 w-4" />
-            {isRu ? 'Задачи' : 'Tasks'}
-          </TabsTrigger>
-          <TabsTrigger value="sync" className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            {isRu ? 'Синхр.' : 'Sync'}
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="calendar" className="mt-4">
-          <UnifiedPropertyCalendar 
-            propertyId={selectedPropertyId || undefined}
-            properties={properties || []}
-          />
-        </TabsContent>
+      {/* Airbnb-style Calendar Grid */}
+      <AirbnbCalendarGrid
+        propertyId={selectedPropertyId || undefined}
+        properties={properties || []}
+      />
 
-        <TabsContent value="operations" className="mt-4">
-          <BookingCalendar 
-            propertyId={selectedPropertyId || undefined} 
-            showPropertySelector={false} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="sync" className="mt-4">
-          {selectedPropertyId ? (
-            <CalendarSyncManager propertyId={selectedPropertyId} />
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <RefreshCw className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>{isRu ? 'Выберите объект для настройки синхронизации' : 'Select a property to configure sync'}</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+      {/* Today's Tasks */}
+      <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
 
-      {/* Create Task Dialog */}
+      {/* iCal Sync - Collapsible */}
+      {selectedPropertyId && (
+        <Accordion type="single" collapsible>
+          <AccordionItem value="sync" className="border rounded-lg">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <RefreshCw className="h-4 w-4" />
+                {isRu ? 'Синхронизация iCal' : 'iCal Sync'}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <CalendarSyncManager propertyId={selectedPropertyId} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
+      {/* Dialogs */}
       <CreateServiceTaskDialog
         open={showCreateTaskDialog}
         onOpenChange={setShowCreateTaskDialog}
@@ -143,7 +120,6 @@ export default function OwnerCalendar() {
         defaultDate={new Date()}
       />
 
-      {/* Add Booking Dialog */}
       {selectedPropertyId && (
         <AddBookingFromCalendarDialog
           open={showAddBookingDialog}
