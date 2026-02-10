@@ -1,15 +1,21 @@
-import React, { useState, useMemo } from 'react';
+/**
+ * FitnessIndex — Airbnb-style fitness & gyms catalog
+ */
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, Star, MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory } from '@/components/miniapp';
-import { ActiveFilters, fitnessFilterConfig, FilterValues } from '@/components/filters';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useGyms } from '@/hooks/useGyms';
-import { matchesFilter, matchesPriceLevel, matchesMembership, isOpenNow } from '@/lib/filterUtils';
-import { CrossSellSection } from '@/components/crosssell';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { cn } from '@/lib/utils';
 
-const GYM_CATEGORIES: MiniAppCategory[] = [
+const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
   { id: 'gym', labelEn: 'Gym', labelRu: 'Зал' },
   { id: 'yoga', labelEn: 'Yoga', labelRu: 'Йога' },
@@ -18,154 +24,136 @@ const GYM_CATEGORIES: MiniAppCategory[] = [
   { id: 'swimming', labelEn: 'Swimming', labelRu: 'Бассейн' },
 ];
 
-const quickItems = [
-  { icon: '🏋️', label: 'Gym', labelRu: 'Зал' },
-  { icon: '🧘', label: 'Yoga', labelRu: 'Йога' },
-  { icon: '🥊', label: 'Muay Thai', labelRu: 'Муай Тай' },
-  { icon: '🏊', label: 'Pool', labelRu: 'Бассейн' },
-];
-
 export default function FitnessIndex() {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const { gyms, isLoading } = useGyms();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-
-  const activeFilterCount = useMemo(() => {
-    return Object.values(filterValues).filter(v => 
-      Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null
-    ).length;
-  }, [filterValues]);
-
-  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const newValues = { ...prev };
-      if (optionId && Array.isArray(newValues[sectionId])) {
-        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
-        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
-      } else {
-        delete newValues[sectionId];
-      }
-      return newValues;
-    });
-  };
+  const isRu = language === 'ru';
 
   const filteredGyms = useMemo(() => {
     return gyms.filter(gym => {
-      // Category filter
       if (selectedCategory !== 'all' && gym.gym_type !== selectedCategory) return false;
-      
-      // Search filter
       if (searchQuery) {
-        const name = language === 'ru' ? gym.name_ru : gym.name_en;
+        const name = isRu ? gym.name_ru : gym.name_en;
         if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       }
-      
-      // Price level filter
-      const lowestPrice = gym.price_day_pass || gym.price_week_pass || gym.price_month_pass;
-      if (!matchesPriceLevel(lowestPrice, filterValues.priceLevel as string)) return false;
-      
-      // Amenities filter (multi-select)
-      const amenitiesFilter = Array.isArray(filterValues.amenities) ? filterValues.amenities : [];
-      if (!matchesFilter(gym.amenities, amenitiesFilter)) return false;
-      
-      // Membership type filter
-      if (!matchesMembership(gym, filterValues.membership as string)) return false;
-      
-      // Schedule/availability filter
-      const scheduleFilter = Array.isArray(filterValues.schedule) ? filterValues.schedule : [];
-      if (scheduleFilter.includes('open-now') && !isOpenNow(gym.working_hours as Record<string, string>)) {
-        return false;
-      }
-      
       return true;
     });
-  }, [gyms, selectedCategory, searchQuery, language, filterValues]);
+  }, [gyms, selectedCategory, searchQuery, isRu]);
 
   const getPriceLabel = (gym: typeof gyms[0]) => {
-    if (gym.price_day_pass) return { price: gym.price_day_pass, label: language === 'ru' ? '/день' : '/day' };
-    if (gym.price_month_pass) return { price: gym.price_month_pass, label: language === 'ru' ? '/мес' : '/month' };
-    if (gym.price_week_pass) return { price: gym.price_week_pass, label: language === 'ru' ? '/нед' : '/week' };
-    return { price: 0, label: '' };
+    if (gym.price_day_pass) return `${formatPrice(gym.price_day_pass)}/${isRu ? 'день' : 'day'}`;
+    if (gym.price_month_pass) return `${formatPrice(gym.price_month_pass)}/${isRu ? 'мес' : 'mo'}`;
+    return '';
   };
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Фитнес и Спорт' : 'Fitness & Sports'}
-      subtitle={language === 'ru' ? `${filteredGyms.length} залов` : `${filteredGyms.length} gyms`}
-      fallbackPath="/"
-      
-      heroIcon={Dumbbell}
-      heroTitle={language === 'ru' ? 'Фитнес и спорт' : 'Fitness & Sports'}
-      heroSubtitle={language === 'ru' ? 'Залы, тренеры, занятия' : 'Gyms, trainers, classes'}
-      heroImage="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800"
-      heroGradient={{ from: 'from-orange-500/20', via: 'via-red-500/20', to: 'to-primary/20' }}
-      
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск залов...' : 'Search gyms...'}
-      
-      categories={GYM_CATEGORIES}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      
-      filterConfig={fitnessFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      filterActiveCount={activeFilterCount}
-      
-      isLoading={isLoading}
-      isEmpty={filteredGyms.length === 0}
-      emptyIcon={Dumbbell}
-      emptyText={language === 'ru' ? 'Залы не найдены' : 'No gyms found'}
-      
-      quickActions={
-        <MiniAppQuickGrid 
-          items={quickItems.map(item => ({
-            ...item,
-            label: language === 'ru' ? item.labelRu : item.label,
-            onClick: () => setSelectedCategory(item.label.toLowerCase().replace(' ', '-'))
-          }))} 
-          columns={4} 
-        />
-      }
-      
-      resultsCount={filteredGyms.length}
-      resultsLabel={language === 'ru' ? 'Залов' : 'Gyms'}
-    >
-      <ActiveFilters
-        config={fitnessFilterConfig}
-        values={filterValues}
-        onRemove={handleRemoveFilter}
-        onClearAll={() => setFilterValues({})}
-        className="mb-4"
-      />
+    <AppLayout showHeader={false} showBottomNav>
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold truncate">{isRu ? 'Фитнес и Спорт' : 'Fitness & Sports'}</h1>
+            <p className="text-xs text-muted-foreground">{filteredGyms.length} {isRu ? 'залов' : 'gyms'}</p>
+          </div>
+        </div>
 
-      <div className="grid gap-4">
-        {filteredGyms.map((gym) => {
-          const priceInfo = getPriceLabel(gym);
-          return (
-            <ItemCard
-              key={gym.id}
-              title={language === 'ru' ? gym.name_ru : gym.name_en}
-              image={gym.cover_image || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600'}
-              price={priceInfo.price}
-              priceLabel={priceInfo.label}
-              rating={gym.rating}
-              reviewCount={gym.review_count}
-              location={gym.district ?? undefined}
-              tags={gym.amenities?.slice(0, 3) || []}
-              isVerified={gym.is_verified}
-            onClick={() => navigate(`/fitness/gym/${gym.id}`)}
-            />
-          );
-        })}
+        {/* Category ribbon */}
+        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                selectedCategory === cat.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+              )}
+            >
+              {isRu ? cat.labelRu : cat.labelEn}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-[4/3] rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : filteredGyms.length === 0 ? (
+          <EmptyState
+            icon={Dumbbell}
+            title={isRu ? 'Залы не найдены' : 'No gyms found'}
+            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredGyms.map(gym => {
+              const name = isRu ? gym.name_ru : gym.name_en;
+              const price = getPriceLabel(gym);
+              return (
+                <div
+                  key={gym.id}
+                  className="cursor-pointer group"
+                  onClick={() => navigate(`/fitness/gym/${gym.id}`)}
+                >
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+                    <OptimizedImage
+                      src={gym.cover_image || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400'}
+                      alt={name}
+                      width={400}
+                      height={300}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      quality={80}
+                    />
+                    {gym.is_verified && (
+                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                        {isRu ? 'Проверено' : 'Verified'}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className="font-semibold text-sm truncate">{name}</h3>
+                      {gym.rating > 0 && (
+                        <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
+                          <Star className="w-3 h-3 fill-foreground" />
+                          {gym.rating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    {gym.amenities?.length > 0 && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {gym.amenities.slice(0, 3).join(' · ')}
+                      </p>
+                    )}
+                    {gym.district && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        {gym.district}
+                      </p>
+                    )}
+                    {price && <p className="text-sm font-semibold">{price}</p>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-      <VerticalCTA vertical="gyms" className="my-6" />
-
-      <CrossSellSection currentVertical="fitness" />
-    </MiniAppLayout>
+    </AppLayout>
   );
 }

@@ -1,297 +1,158 @@
 /**
- * FlowersIndex - Main catalog page for flower delivery
- * 
- * Uses dynamic taxonomy from DB via useFlowerFilterOptions
+ * FlowersIndex — Airbnb-style flower delivery catalog
  */
-
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower, ShoppingCart, Loader2 } from 'lucide-react';
+import { Flower2, Star, ShoppingCart, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MiniAppLayout, ItemCard, type MiniAppCategory, type QuickFilterSection } from '@/components/miniapp';
-import { ActiveFilters, FilterValues } from '@/components/filters';
-import { matchesSingleFilter } from '@/lib/filterUtils';
-import { useBouquets, Bouquet } from '@/hooks/useBouquets';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { useBouquets } from '@/hooks/useBouquets';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
-import { CrossSellSection } from '@/components/crosssell';
+import { cn } from '@/lib/utils';
 
-// No fallback - use production data only
-
-const FlowersIndex = () => {
+export default function FlowersIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { getItemsByType } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const isRu = language === 'ru';
 
-  // Dynamic filter options from DB
-  const { 
-    categoryRibbon, 
-    filterConfig: dynamicFilterConfig,
-    occasions,
-    colorPaletteOptions,
-    styleOptions,
-    isLoading: filtersLoading 
-  } = useFlowerFilterOptions();
+  const { categoryRibbon, isLoading: filtersLoading } = useFlowerFilterOptions();
+  const categories = useMemo(() => categoryRibbon.map(opt => ({
+    id: opt.id,
+    labelEn: opt.labelEn,
+    labelRu: opt.labelRu,
+  })), [categoryRibbon]);
 
-  // Price range options for quick filters
-  const priceRangeOptions = useMemo(() => [
-    { id: 'budget', labelEn: 'Up to ฿1,500', labelRu: 'До ฿1,500', icon: '💰' },
-    { id: 'mid', labelEn: '฿1,500–3,000', labelRu: '฿1,500–3,000', icon: '💎' },
-    { id: 'premium', labelEn: '฿3,000+', labelRu: '฿3,000+', icon: '👑' },
-  ], []);
-
-  // Special holiday occasion chips (priority display)
-  const holidayOccasions = useMemo(() => [
-    { id: 'valentines', labelEn: "Valentine's Day", labelRu: '14 февраля', icon: '❤️' },
-    { id: 'womens_day', labelEn: "Women's Day", labelRu: '8 марта', icon: '🌷' },
-  ], []);
-
-  // Build quick filter sections for inline chips
-  const quickFilters: QuickFilterSection[] = useMemo(() => [
-    {
-      id: 'occasion',
-      options: [
-        ...holidayOccasions,
-        ...occasions.slice(0, 4).map(o => ({
-          id: o.id,
-          labelEn: o.labelEn,
-          labelRu: o.labelRu,
-          icon: typeof o.icon === 'string' ? o.icon : undefined,
-        })),
-      ],
-    },
-    {
-      id: 'priceRange',
-      options: priceRangeOptions,
-    },
-    {
-      id: 'colorPalette',
-      options: colorPaletteOptions.map(o => ({
-        id: o.id,
-        labelEn: o.labelEn,
-        labelRu: o.labelRu,
-        icon: typeof o.icon === 'string' ? o.icon : undefined,
-      })),
-    },
-  ], [occasions, colorPaletteOptions, priceRangeOptions, holidayOccasions]);
-
-  // Convert to MiniAppCategory format
-  const categories: MiniAppCategory[] = useMemo(() => {
-    return categoryRibbon.map(opt => ({
-      id: opt.id,
-      labelEn: opt.labelEn,
-      labelRu: opt.labelRu,
-      icon: typeof opt.icon === 'string' ? opt.icon : undefined,
-    }));
-  }, [categoryRibbon]);
-
-  // Fetch bouquets from database
-  const { bouquets: dbBouquets, isLoading } = useBouquets({
+  const { bouquets, isLoading } = useBouquets({
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     onlyActive: true,
   });
 
-  // Use database data directly - no fallback needed with production seeded data
-  const bouquets = dbBouquets;
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([_, value]) => {
-      if (Array.isArray(value)) count += value.length;
-      else if (value) count += 1;
+  const filteredBouquets = useMemo(() => {
+    if (!searchQuery) return bouquets;
+    return bouquets.filter(b => {
+      const name = isRu ? b.name_ru : b.name_en;
+      return name.toLowerCase().includes(searchQuery.toLowerCase());
     });
-    return count;
-  }, [filterValues]);
-
-  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const sectionValue = prev[sectionId];
-      if (Array.isArray(sectionValue) && optionId) {
-        return { ...prev, [sectionId]: sectionValue.filter(v => v !== optionId) };
-      }
-      return { ...prev, [sectionId]: null };
-    });
-  };
+  }, [bouquets, searchQuery, isRu]);
 
   const flowersInCart = getItemsByType('flowers');
   const totalItems = flowersInCart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const filteredBouquets = useMemo(() => {
-    return bouquets.filter((bouquet) => {
-      // Category filter is already applied at API level, but keep for fallback data
-      if (selectedCategory !== 'all' && bouquet.category !== selectedCategory) return false;
-      
-      // Quick price range filter (new)
-      const priceRangeFilter = filterValues.priceRange as string[] | undefined;
-      if (priceRangeFilter?.length) {
-        const inRange = priceRangeFilter.some(range => {
-          switch (range) {
-            case 'budget': return bouquet.price <= 1500;
-            case 'mid': return bouquet.price > 1500 && bouquet.price <= 3000;
-            case 'premium': return bouquet.price > 3000;
-            default: return true;
-          }
-        });
-        if (!inRange) return false;
-      }
-      
-      // Price level filter (from drawer)
-      const priceLevel = filterValues.priceLevel as string | null;
-      if (priceLevel) {
-        const level = parseInt(priceLevel);
-        const priceRanges: Record<number, { min: number; max: number }> = {
-          1: { min: 0, max: 1000 },
-          2: { min: 1000, max: 2500 },
-          3: { min: 2500, max: 4000 },
-          4: { min: 4000, max: Infinity },
-        };
-        const range = priceRanges[level];
-        if (range && (bouquet.price < range.min || bouquet.price > range.max)) return false;
-      }
-      
-      // Search filter
-      if (searchQuery) {
-        const name = language === 'ru' ? bouquet.name_ru : bouquet.name_en;
-        if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      }
-      
-      // Color filter - match against colors array or name
-      const colorFilter = filterValues.color as string[] | undefined;
-      if (colorFilter?.length) {
-        const bouquetName = ((bouquet.name_en || '') + ' ' + (bouquet.name_ru || '')).toLowerCase();
-        const bouquetColors = bouquet.colors || [];
-        const hasColor = colorFilter.some(c => 
-          bouquetName.includes(c.toLowerCase()) || 
-          bouquetColors.some(bc => bc.toLowerCase().includes(c.toLowerCase()))
-        );
-        if (!hasColor) return false;
-      }
-      
-      // Flower type filter - match against category
-      const flowerTypeFilter = filterValues.flowerType as string[] | undefined;
-      if (flowerTypeFilter?.length) {
-        if (!matchesSingleFilter(bouquet.category || '', flowerTypeFilter)) return false;
-      }
-      
-      // Size filter
-      const sizeFilter = filterValues.size as string | undefined;
-      if (sizeFilter && bouquet.size !== sizeFilter) {
-        return false;
-      }
-      
-      // Occasion filter - match against occasion_tags array
-      const occasionFilter = filterValues.occasion as string[] | undefined;
-      if (occasionFilter?.length) {
-        const bouquetTags = bouquet.occasion_tags || [];
-        const hasOccasion = occasionFilter.some(o => 
-          bouquetTags.some(tag => tag.toLowerCase() === o.toLowerCase())
-        );
-        if (!hasOccasion) return false;
-      }
-      
-      // Color palette filter - match against color_palette field
-      const colorPaletteFilter = filterValues.colorPalette as string[] | undefined;
-      if (colorPaletteFilter?.length) {
-        const palette = (bouquet.color_palette || '').toLowerCase();
-        const hasColorPalette = colorPaletteFilter.some(c => palette.includes(c.toLowerCase()));
-        if (!hasColorPalette) return false;
-      }
-      
-      // Style filter - match against style field
-      const styleFilter = filterValues.style as string[] | undefined;
-      if (styleFilter?.length) {
-        const bouquetStyle = (bouquet.style || '').toLowerCase();
-        const hasStyle = styleFilter.some(s => bouquetStyle === s.toLowerCase());
-        if (!hasStyle) return false;
-      }
-      
-      return true;
-    });
-  }, [bouquets, selectedCategory, searchQuery, filterValues, language]);
-
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Букеты' : 'Bouquets'}
-      subtitle={language === 'ru' ? `${filteredBouquets.length} вариантов` : `${filteredBouquets.length} options`}
-      fallbackPath="/"
-      
-      heroIcon={Flower}
-      heroTitle={language === 'ru' ? 'Доставка цветов' : 'Flower Delivery'}
-      heroSubtitle={language === 'ru' ? 'Свежие букеты с доставкой за 2 часа' : 'Fresh bouquets delivered in 2 hours'}
-      heroGradientFrom="from-pink-500/20"
-      heroGradientVia="via-rose-500/20"
-      heroGradientTo="to-primary/20"
-      
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск букетов...' : 'Search bouquets...'}
-      
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      
-      quickFilters={quickFilters}
-      
-      showCartButton
-      cartItemCount={totalItems}
-      
-      filterConfig={dynamicFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      filterActiveCount={activeFilterCount}
-      
-      showBottomNav={false}
-      resultsCount={filteredBouquets.length}
-      resultsLabel={language === 'ru' ? 'Букеты' : 'Bouquets'}
-    >
-      {/* Active Filters */}
-      {activeFilterCount > 0 && (
-        <ActiveFilters
-          config={dynamicFilterConfig}
-          values={filterValues}
-          onRemove={handleRemoveFilter}
-          onClearAll={() => setFilterValues({})}
-          className="mb-4"
-        />
-      )}
-
-      {/* Bouquets Grid - Vertical cards for flowers */}
-      {isLoading || filtersLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    <AppLayout showHeader={false} showBottomNav={false}>
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold truncate">{isRu ? 'Доставка цветов' : 'Flower Delivery'}</h1>
+            <p className="text-xs text-muted-foreground">{filteredBouquets.length} {isRu ? 'букетов' : 'bouquets'}</p>
+          </div>
+          {totalItems > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 relative"
+              onClick={() => navigate('/cart')}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
+                {totalItems}
+              </span>
+            </Button>
+          )}
         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {filteredBouquets.map((bouquet) => {
-            // Show "from" price (Size S) when variants exist
-            const hasVariants = bouquet.size_variants?.length;
-            const displayPrice = hasVariants 
-              ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
-              : bouquet.price;
-            
-            return (
-              <ItemCard
-                key={bouquet.id}
-                title={language === 'ru' ? bouquet.name_ru : bouquet.name_en}
-                image={bouquet.image || undefined}
-                price={displayPrice}
-                pricePrefix={hasVariants ? (language === 'ru' ? 'от ' : 'from ') : undefined}
-                tags={bouquet.is_popular ? [language === 'ru' ? 'Хит' : 'Popular'] : undefined}
-                variant="vertical"
-                onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
-              />
-            );
-          })}
-        </div>
-      )}
 
-      <CrossSellSection currentVertical="flowers" className="mb-20" />
-    </MiniAppLayout>
+        {/* Category ribbon */}
+        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                selectedCategory === cat.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+              )}
+            >
+              {isRu ? cat.labelRu : cat.labelEn}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+        {isLoading || filtersLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-[3/4] rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : filteredBouquets.length === 0 ? (
+          <EmptyState
+            icon={Flower2}
+            title={isRu ? 'Букеты не найдены' : 'No bouquets found'}
+            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredBouquets.map(bouquet => {
+              const name = isRu ? bouquet.name_ru : bouquet.name_en;
+              const hasVariants = bouquet.size_variants?.length;
+              const displayPrice = hasVariants
+                ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
+                : bouquet.price;
+              return (
+                <div
+                  key={bouquet.id}
+                  className="cursor-pointer group"
+                  onClick={() => navigate(`/flowers/bouquet/${bouquet.id}`)}
+                >
+                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2">
+                    <OptimizedImage
+                      src={bouquet.image || 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400'}
+                      alt={name}
+                      width={400}
+                      height={533}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      quality={80}
+                    />
+                    {bouquet.is_popular && (
+                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                        {isRu ? 'Хит' : 'Popular'}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <h3 className="font-semibold text-sm truncate">{name}</h3>
+                    <p className="text-sm font-semibold">
+                      {hasVariants ? `${isRu ? 'от' : 'from'} ` : ''}{formatPrice(displayPrice)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </AppLayout>
   );
-};
-
-export default FlowersIndex;
+}
