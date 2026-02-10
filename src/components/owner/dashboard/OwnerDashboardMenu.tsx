@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
-  Calendar,
-  Receipt,
   Download,
   Sparkles,
   BarChart3,
@@ -22,8 +20,6 @@ interface MenuItem {
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { path: '/owner/calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: '/owner/financials', icon: Receipt, labelEn: 'Finances', labelRu: 'Финансы' },
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
   { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
