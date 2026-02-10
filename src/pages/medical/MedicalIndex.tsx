@@ -1,15 +1,22 @@
+/**
+ * MedicalIndex — Airbnb-style medical catalog
+ */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Phone, ShieldAlert, MessageCircle } from 'lucide-react';
+import { Stethoscope, Star, MapPin, Phone, ShieldAlert, MessageCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
-import { medicalFilterConfig, FilterValues } from '@/components/filters';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useClinics } from '@/hooks/useClinics';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { cn } from '@/lib/utils';
 
-const SPECIALTY_CATEGORIES: MiniAppCategory[] = [
+const SPECIALTIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
   { id: 'general', labelEn: 'General', labelRu: 'Терапевт' },
   { id: 'dental', labelEn: 'Dental', labelRu: 'Стоматолог' },
@@ -18,156 +25,166 @@ const SPECIALTY_CATEGORIES: MiniAppCategory[] = [
   { id: 'eye', labelEn: 'Eye', labelRu: 'Офтальмолог' },
 ];
 
+function isClinicOpen(workingHours: Record<string, string>, is24h: boolean): boolean {
+  if (is24h) return true;
+  const now = new Date();
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const today = days[now.getDay()];
+  const hours = workingHours[today];
+  if (!hours) return false;
+  const [open, close] = hours.split('-');
+  if (!open || !close) return false;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const [openH, openM] = open.split(':').map(Number);
+  const [closeH, closeM] = close.split(':').map(Number);
+  return currentMinutes >= openH * 60 + openM && currentMinutes <= closeH * 60 + closeM;
+}
+
 export default function MedicalIndex() {
   const { language } = useLanguage();
   const { currencyInfo } = useCurrency();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const isRu = language === 'ru';
 
   const { clinics, isLoading } = useClinics({
     specialty: selectedSpecialty,
-    clinicType: filterValues.clinicType as string | undefined,
-    is24h: filterValues.availability === 'open' ? true : undefined,
     searchQuery,
   });
 
-  const quickItems: QuickGridItem[] = [
-    { icon: '💊', label: language === 'ru' ? 'Аптеки' : 'Pharmacy', onClick: () => navigate('/pharmacy') },
-    { icon: '🏥', label: language === 'ru' ? 'Терапевт' : 'General', onClick: () => setSelectedSpecialty('general') },
-    { icon: '🦷', label: language === 'ru' ? 'Стоматолог' : 'Dental', onClick: () => setSelectedSpecialty('dental') },
-    { icon: '❤️', label: language === 'ru' ? 'Кардиолог' : 'Cardio', onClick: () => setSelectedSpecialty('cardio') },
-    { icon: '👶', label: language === 'ru' ? 'Педиатр' : 'Pediatric', onClick: () => setSelectedSpecialty('pediatric') },
-  ];
-
-  // Check if clinic is currently open based on working_hours
-  const isClinicOpen = (workingHours: Record<string, string>, is24h: boolean): boolean => {
-    if (is24h) return true;
-    
-    const now = new Date();
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = days[now.getDay()];
-    const hours = workingHours[today];
-    
-    if (!hours) return false;
-    
-    const [open, close] = hours.split('-');
-    if (!open || !close) return false;
-    
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const [openH, openM] = open.split(':').map(Number);
-    const [closeH, closeM] = close.split(':').map(Number);
-    const openMinutes = openH * 60 + openM;
-    const closeMinutes = closeH * 60 + closeM;
-    
-    return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
-  };
-
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Медицина' : 'Medical'}
-      subtitle={language === 'ru' ? 'Клиники, врачи, запись' : 'Clinics, doctors, appointments'}
-      heroIcon={Stethoscope}
-      heroTitle={language === 'ru' ? 'Медицинская помощь' : 'Medical Care'}
-      heroSubtitle={language === 'ru' ? 'Лучшие клиники и врачи на Пхукете' : 'Best clinics and doctors in Phuket'}
-      heroImage="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800"
-      heroGradient={{ from: 'from-teal-500/20', via: 'via-cyan-500/20', to: 'to-primary/20' }}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск клиник...' : 'Search clinics...'}
-      categories={SPECIALTY_CATEGORIES}
-      selectedCategory={selectedSpecialty}
-      onCategoryChange={setSelectedSpecialty}
-      filterConfig={medicalFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      isLoading={isLoading}
-      isEmpty={clinics.length === 0}
-      emptyIcon={Stethoscope}
-      emptyText={language === 'ru' ? 'Клиники не найдены' : 'No clinics found'}
-    >
-      {/* myUNO Alert Banner */}
-      <div className="p-4 rounded-2xl bg-muted/30 border border-border/60 mb-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-primary/10 shrink-0">
-            <ShieldAlert className="w-5 h-5 text-primary" />
-          </div>
+    <AppLayout showHeader={false} showBottomNav>
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">
-              myUNO Alert
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              {language === 'ru' 
-                ? 'Нужна помощь? myUNO возьмёт ситуацию на себя — найдём клинику, запишем к врачу, организуем переводчика и трансфер.'
-                : 'Need help? myUNO will handle everything — find a clinic, book a doctor, arrange an interpreter and transfer.'}
-            </p>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="mt-2.5 gap-1.5 h-8 text-xs"
-              asChild
+            <h1 className="text-lg font-bold truncate">{isRu ? 'Медицина' : 'Healthcare'}</h1>
+            <p className="text-xs text-muted-foreground">{clinics.length} {isRu ? 'клиник' : 'clinics'}</p>
+          </div>
+        </div>
+
+        {/* Specialty ribbon */}
+        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+          {SPECIALTIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedSpecialty(cat.id)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                selectedSpecialty === cat.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+              )}
             >
-              <a href="https://wa.me/66922407355?text=Medical%20help%20needed" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-3.5 h-3.5" />
-                {language === 'ru' ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}
+              {isRu ? cat.labelRu : cat.labelEn}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24 space-y-4">
+        {/* Emergency banner */}
+        <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-sm text-destructive">
+                {isRu ? 'Экстренная помощь' : 'Emergency'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isRu ? 'Скорая — 1669' : 'Ambulance — 1669'}
+              </p>
+            </div>
+            <Button variant="destructive" size="sm" className="gap-1" asChild>
+              <a href="tel:1669">
+                <Phone className="w-4 h-4" />
+                1669
               </a>
             </Button>
           </div>
         </div>
-      </div>
 
-      {/* Emergency Banner */}
-      <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-sm text-destructive">
-              {language === 'ru' ? 'Экстренная помощь' : 'Emergency'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Скорая — 1669' : 'Ambulance — 1669'}
-            </p>
+        {/* Clinics grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-[4/3] rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ))}
           </div>
-          <Button variant="destructive" size="sm" className="gap-1" asChild>
-            <a href="tel:1669">
-              <Phone className="w-4 h-4" />
-              1669
-            </a>
-          </Button>
-        </div>
+        ) : clinics.length === 0 ? (
+          <EmptyState
+            icon={Stethoscope}
+            title={isRu ? 'Клиники не найдены' : 'No clinics found'}
+            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {clinics.map(clinic => {
+              const name = isRu ? clinic.name_ru : clinic.name_en;
+              const isOpen = isClinicOpen(clinic.working_hours || {}, clinic.is_24h);
+              return (
+                <div
+                  key={clinic.id}
+                  className="cursor-pointer group"
+                  onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
+                >
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+                    <OptimizedImage
+                      src={clinic.cover_image || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400'}
+                      alt={name}
+                      width={400}
+                      height={300}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      quality={80}
+                    />
+                    <Badge className={cn(
+                      "absolute top-2 left-2 text-[10px]",
+                      isOpen
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {isOpen ? (isRu ? 'Открыто' : 'Open') : (isRu ? 'Закрыто' : 'Closed')}
+                    </Badge>
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className="font-semibold text-sm truncate">{name}</h3>
+                      {clinic.rating > 0 && (
+                        <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
+                          <Star className="w-3 h-3 fill-foreground" />
+                          {clinic.rating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    {clinic.languages?.length > 0 && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {clinic.languages.slice(0, 3).join(' · ')}
+                      </p>
+                    )}
+                    {clinic.district && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        {clinic.district}
+                      </p>
+                    )}
+                    {clinic.consultation_price > 0 && (
+                      <p className="text-sm font-semibold">
+                        {isRu ? 'от' : 'from'} {currencyInfo.symbol}{clinic.consultation_price}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      <MiniAppQuickGrid items={quickItems} columns={5} className="mb-6" />
-      
-      <div className="grid gap-4">
-        {clinics.map((clinic) => {
-          const isOpen = isClinicOpen(clinic.working_hours || {}, clinic.is_24h);
-          
-          return (
-            <ItemCard
-              key={clinic.id}
-              image={clinic.cover_image || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600'}
-              title={language === 'ru' ? clinic.name_ru : clinic.name_en}
-              rating={clinic.rating}
-              reviewCount={clinic.review_count}
-              price={clinic.consultation_price || 0}
-              pricePrefix={language === 'ru' ? 'от' : 'from'}
-              currency={currencyInfo.symbol}
-              location={clinic.district || clinic.address || ''}
-              isVerified={clinic.is_verified}
-              isFeatured={clinic.is_featured}
-               badge={isOpen 
-                 ? { text: language === 'ru' ? 'Открыто' : 'Open', className: 'bg-primary text-primary-foreground' }
-                : { text: language === 'ru' ? 'Закрыто' : 'Closed', className: 'bg-muted text-muted-foreground' }
-              }
-              tags={clinic.languages}
-              onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
-            />
-          );
-        })}
-      </div>
-
-      <VerticalCTA vertical="clinics" className="my-6" />
-    </MiniAppLayout>
+    </AppLayout>
   );
 }
