@@ -232,17 +232,17 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Куда вы едете?' : 'Where are you going?'}</h3>
                         
-                        <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-1.5">
                           {locations.map((loc) => (
                             <button
                               key={loc.id}
                               className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
+                                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
                                 loc.id === 'all' && selectedLocations.length === 0
-                                  ? "bg-primary/10 text-primary"
+                                  ? "bg-primary/10 border-primary/30 text-primary"
                                   : selectedLocations.includes(loc.id)
-                                    ? "bg-primary/10 text-primary" 
-                                    : "hover:bg-muted"
+                                    ? "bg-primary/10 border-primary/30 text-primary" 
+                                    : "border-border hover:bg-muted"
                               )}
                               onClick={() => toggleLocation(loc.id)}
                             >
@@ -250,11 +250,11 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                                 ? <Globe className="w-4 h-4 shrink-0" />
                                 : <MapPin className="w-4 h-4 shrink-0" />
                               }
-                              <span className="flex-1 text-sm font-medium">
+                              <span className="flex-1 text-xs font-medium truncate">
                                 {language === 'ru' ? loc.labelRu : loc.labelEn}
                               </span>
                               {(loc.id === 'all' && selectedLocations.length === 0) || selectedLocations.includes(loc.id) ? (
-                                <Check className="w-4 h-4 text-primary" />
+                                <Check className="w-3.5 h-3.5 text-primary shrink-0" />
                               ) : null}
                             </button>
                           ))}
