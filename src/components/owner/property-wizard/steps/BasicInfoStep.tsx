@@ -140,7 +140,35 @@ function BasicInfoStepInner({
         </Card>
       )}
 
-      {/* Project Selection */}
+      {/* Property Type — FIRST like Airbnb */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            {isRu ? 'Тип недвижимости' : 'Property Type'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select 
+            value={formData.property_type}
+            onValueChange={(value) => updateFormData({ property_type: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={isRu ? 'Выберите тип' : 'Select type'} />
+            </SelectTrigger>
+            <SelectContent>
+              {propertyTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {isRu ? type.labelRu : type.labelEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Project Selection — only for multi-unit types */}
+      {!['villa', 'house', 'townhouse'].includes(formData.property_type) && (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">
@@ -175,35 +203,34 @@ function BasicInfoStepInner({
           />
         </CardContent>
       </Card>
-
-      {/* Unit Fields */}
-      {(formData.project_id || ['villa', 'house', 'townhouse'].includes(formData.property_type)) && (
-        <UnitFields
-          propertyType={formData.property_type}
-          floor={formData.floor}
-          unitNumber={formData.unit_number}
-          onFloorChange={(floor) => updateFormData({ floor })}
-          onUnitNumberChange={(unit_number) => updateFormData({ unit_number })}
-          totalFloors={formData.total_floors}
-          plotSizeSqm={formData.plot_size_sqm}
-          hasElevator={formData.has_elevator}
-          parkingType={formData.parking_type}
-          poolType={formData.pool_type}
-          gardenType={formData.garden_type}
-          onTotalFloorsChange={(total_floors) => updateFormData({ total_floors })}
-          onPlotSizeChange={(plot_size_sqm) => updateFormData({ plot_size_sqm })}
-          onHasElevatorChange={(has_elevator) => updateFormData({ has_elevator })}
-          onParkingTypeChange={(parking_type) => updateFormData({ parking_type })}
-          onPoolTypeChange={(pool_type) => updateFormData({ pool_type })}
-          onGardenTypeChange={(garden_type) => updateFormData({ garden_type })}
-          viewType={formData.view_type}
-          furnishingLevel={formData.furnishing_level}
-          equipment={formData.equipment}
-          onViewTypeChange={(view_type) => updateFormData({ view_type })}
-          onFurnishingLevelChange={(furnishing_level) => updateFormData({ furnishing_level })}
-          onEquipmentChange={(equipment) => updateFormData({ equipment })}
-        />
       )}
+
+      {/* Unit Fields — always shown after type is selected */}
+      <UnitFields
+        propertyType={formData.property_type}
+        floor={formData.floor}
+        unitNumber={formData.unit_number}
+        onFloorChange={(floor) => updateFormData({ floor })}
+        onUnitNumberChange={(unit_number) => updateFormData({ unit_number })}
+        totalFloors={formData.total_floors}
+        plotSizeSqm={formData.plot_size_sqm}
+        hasElevator={formData.has_elevator}
+        parkingType={formData.parking_type}
+        poolType={formData.pool_type}
+        gardenType={formData.garden_type}
+        onTotalFloorsChange={(total_floors) => updateFormData({ total_floors })}
+        onPlotSizeChange={(plot_size_sqm) => updateFormData({ plot_size_sqm })}
+        onHasElevatorChange={(has_elevator) => updateFormData({ has_elevator })}
+        onParkingTypeChange={(parking_type) => updateFormData({ parking_type })}
+        onPoolTypeChange={(pool_type) => updateFormData({ pool_type })}
+        onGardenTypeChange={(garden_type) => updateFormData({ garden_type })}
+        viewType={formData.view_type}
+        furnishingLevel={formData.furnishing_level}
+        equipment={formData.equipment}
+        onViewTypeChange={(view_type) => updateFormData({ view_type })}
+        onFurnishingLevelChange={(furnishing_level) => updateFormData({ furnishing_level })}
+        onEquipmentChange={(equipment) => updateFormData({ equipment })}
+      />
 
       {/* Basic Info */}
       <Card>
@@ -231,25 +258,6 @@ function BasicInfoStepInner({
               onChange={(e) => updateFormData({ internal_name: e.target.value })}
               placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{isRu ? 'Тип недвижимости' : 'Property Type'} *</Label>
-            <Select 
-              value={formData.property_type}
-              onValueChange={(value) => updateFormData({ property_type: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {propertyTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {isRu ? type.labelRu : type.labelEn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
