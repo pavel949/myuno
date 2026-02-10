@@ -229,8 +229,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             )}>
               <Icon 
                 className={cn(isMore ? "text-muted-foreground" : "text-primary")}
-                style={{ width: 40, height: 40 }}
-                strokeWidth={1.2} 
+                style={{ width: 44, height: 44 }}
+                strokeWidth={1.1} 
               />
             </div>
             
