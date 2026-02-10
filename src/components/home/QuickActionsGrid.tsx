@@ -228,7 +228,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               "group-hover:scale-105 transition-transform duration-150"
             )}>
               <Icon className={cn(
-                "w-8 h-8",
+                "w-9 h-9",
                 isMore ? "text-muted-foreground" : "text-primary"
               )} strokeWidth={1.5} />
             </div>
