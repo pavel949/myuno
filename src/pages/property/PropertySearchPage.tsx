@@ -198,14 +198,13 @@ export default function PropertySearchPage() {
             </div>
           </div>
 
-          {/* Category ribbon */}
+          {/* Category ribbon — Airbnb style, no buy toggle */}
           <div className="px-4 pb-1">
             <PropertyCategoryRibbon
-              mode={propertyMode}
-              onModeChange={setPropertyMode}
               selectedType={selectedType}
               onTypeChange={setSelectedType}
               propertyTypes={propertyTypes}
+              showModeToggle={false}
             />
           </div>
         </header>
