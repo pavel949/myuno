@@ -200,6 +200,7 @@ export function getLifeOSAIContext(
     leisure: { intent: 'explore', time_horizon: '7d', risk_level: 'low' },
     business: { intent: 'work', time_horizon: '30d', risk_level: 'medium' },
     relocation: { intent: 'relocate', time_horizon: '90d', risk_level: 'medium' },
+    planning: { intent: 'plan_trip', time_horizon: '30d', risk_level: 'low' },
     visa_travel: { intent: 'travel', time_horizon: '14d', risk_level: 'medium' },
     sports: { intent: 'train', time_horizon: '7d', risk_level: 'low' },
     nightlife: { intent: 'socialize', time_horizon: '1d', risk_level: 'low' },
