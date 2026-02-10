@@ -11,7 +11,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Heart, Star, ArrowRight, SlidersHorizontal, MapPin, Loader2, Car, Plane, Flower2, Shield, Compass } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -21,6 +21,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
+import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
+import { CrossSellSection } from '@/components/crosssell';
 
 import { cn } from '@/lib/utils';
 
@@ -232,16 +234,18 @@ export default function PropertyIndex() {
             </div>
           </div>
 
-          {/* Search bar — Airbnb style */}
-          <button
-            onClick={() => navigate('/property/search')}
-            className="w-full flex items-center gap-3 px-5 py-3.5 rounded-full border border-border shadow-sm hover:shadow-md transition-shadow bg-card"
-          >
-            <Search className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              {isRu ? 'Начать поиск' : 'Start your search'}
-            </span>
-          </button>
+          {/* Search bar — Airbnb style (functional inline) */}
+          <AirbnbSearchBar
+            onSearch={(params: SearchParams) => {
+              const qp = new URLSearchParams();
+              if (params.locations.length > 0) qp.set('district', params.locations[0]);
+              if (params.checkIn) qp.set('checkIn', params.checkIn.toISOString());
+              if (params.checkOut) qp.set('checkOut', params.checkOut.toISOString());
+              if (params.guests) qp.set('guests', String(params.guests));
+              qp.set('mode', propertyMode);
+              navigate(`/property/search?${qp.toString()}`);
+            }}
+          />
         </div>
 
         {/* Category Icons Ribbon — Airbnb style */}
@@ -251,27 +255,6 @@ export default function PropertyIndex() {
           className="border-b border-border/40 py-2"
         />
 
-        {/* Quick services ribbon */}
-        <div className="flex gap-4 overflow-x-auto px-4 py-3 scrollbar-hide border-b border-border/40">
-          {[
-            { icon: Plane, label: isRu ? 'Трансфер' : 'Transfer', path: '/transfer' },
-            { icon: Car, label: isRu ? 'Авто' : 'Car Rental', path: '/transport' },
-            { icon: Flower2, label: isRu ? 'Цветы' : 'Flowers', path: '/flower-delivery' },
-            { icon: Shield, label: isRu ? 'Страховка' : 'Insurance', path: '/insurance' },
-            { icon: Compass, label: isRu ? 'Впечатления' : 'Experiences', path: '/experiences' },
-          ].map((s) => (
-            <button
-              key={s.path}
-              onClick={() => navigate(s.path)}
-              className="flex flex-col items-center gap-1 shrink-0 min-w-[56px]"
-            >
-              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
-                <s.icon className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <span className="text-[10px] text-muted-foreground font-medium">{s.label}</span>
-            </button>
-          ))}
-        </div>
 
         {/* Content */}
         <div className="space-y-6 pt-4">
@@ -348,16 +331,10 @@ export default function PropertyIndex() {
                 <h2 className="text-lg font-bold">
                   {isRu ? 'Все объекты' : 'All listings'}
                 </h2>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
-                    <MapPin className="w-4 h-4" />
-                    <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/search')}>
-                    <SlidersHorizontal className="w-4 h-4" />
-                    {isRu ? 'Фильтры' : 'Filters'}
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
+                  <MapPin className="w-4 h-4" />
+                  <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+                </Button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {allProperties.slice(0, 8).map((property) => (
@@ -384,6 +361,16 @@ export default function PropertyIndex() {
               )}
             </section>
           )}
+
+          {/* Cross-sell: May also need */}
+          <CrossSellSection
+            currentVertical="property"
+            className="px-4"
+            title={{
+              en: 'You may also need',
+              ru: 'Может пригодиться',
+            }}
+          />
         </div>
       </div>
     </AppLayout>

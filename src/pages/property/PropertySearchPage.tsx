@@ -43,11 +43,16 @@ export default function PropertySearchPage() {
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
   
-  const [searchParams, setSearchParams] = useState<SearchParams>({
-    locations: searchParamsUrl.get('district') ? [searchParamsUrl.get('district')!] : [],
-    checkIn: undefined,
-    checkOut: undefined,
-    guests: 2,
+  const [searchParams, setSearchParams] = useState<SearchParams>(() => {
+    const checkInStr = searchParamsUrl.get('checkIn');
+    const checkOutStr = searchParamsUrl.get('checkOut');
+    const guestsStr = searchParamsUrl.get('guests');
+    return {
+      locations: searchParamsUrl.get('district') ? [searchParamsUrl.get('district')!] : [],
+      checkIn: checkInStr ? new Date(checkInStr) : undefined,
+      checkOut: checkOutStr ? new Date(checkOutStr) : undefined,
+      guests: guestsStr ? parseInt(guestsStr, 10) : 2,
+    };
   });
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
