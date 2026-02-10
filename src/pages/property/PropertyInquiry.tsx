@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User } from 'lucide-react';
+import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,9 +18,20 @@ import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptions';
+import { useOrders } from '@/hooks/useOrders';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+
+// Russian pluralization helper for nights
+function pluralizeNights(n: number, isRu: boolean): string {
+  if (!isRu) return n === 1 ? 'night' : 'nights';
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'ночь';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'ночи';
+  return 'ночей';
+}
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -31,6 +42,7 @@ export default function PropertyInquiry() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const isRu = language === 'ru';
+  const { createOrder } = useOrders();
 
   // Get dates and guests from URL params (set on the property detail page)
   const checkInParam = searchParams.get('checkIn');
@@ -51,6 +63,7 @@ export default function PropertyInquiry() {
   });
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: property } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
@@ -202,7 +215,7 @@ export default function PropertyInquiry() {
                   {' → '}
                   {format(checkOut, 'd MMM', { locale: isRu ? ru : undefined })}
                   {' · '}
-                  {nights} {isRu ? (nights === 1 ? 'ночь' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
+                  {nights} {pluralizeNights(nights, isRu)}
                 </p>
                 {(rentalTerms?.check_in_time || rentalTerms?.check_out_time) && (
                   <p className="text-xs text-muted-foreground">
@@ -225,7 +238,7 @@ export default function PropertyInquiry() {
               <div>
                 <p className="text-sm font-medium">{isRu ? 'Гости' : 'Guests'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {guests} {isRu ? (guests === 1 ? 'гость' : 'гостей') : (guests === 1 ? 'guest' : 'guests')}
+                  {guests} {isRu ? (guests === 1 ? 'гость' : (guests >= 2 && guests <= 4 ? 'гостя' : 'гостей')) : (guests === 1 ? 'guest' : 'guests')}
                 </p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => navigate(editUrl)} className="text-primary shrink-0">
@@ -483,16 +496,70 @@ export default function PropertyInquiry() {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
               <span className="text-xs text-muted-foreground">
-                {nights} {isRu ? 'ночей' : 'nights'}
+                {nights} {pluralizeNights(nights, isRu)}
               </span>
             </div>
             <Button
               className="w-full h-12 text-base font-semibold"
               size="lg"
-              onClick={() => {
-                toast.success(isRu ? 'Запрос на бронирование отправлен!' : 'Booking request sent!');
+              disabled={isSubmitting}
+              onClick={async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+                try {
+                  const result = await createOrder({
+                    order_type: 'property',
+                    provider_org_id: (property as any)?.provider_id || undefined,
+                    start_at: checkIn!,
+                    end_at: checkOut!,
+                    total_amount: pricing.total,
+                    currency: 'THB',
+                    notes: formData.message || undefined,
+                    metadata: {
+                      property_id: id,
+                      property_title: propertyTitle,
+                      guests,
+                      nights,
+                      price_per_night: pricePerNight,
+                      deposit_amount: rentalTerms?.deposit_amount || 0,
+                      discount_percent: pricing.discountPercent,
+                      prepayment: Math.round(pricing.total * 0.1),
+                    },
+                    items: [{
+                      item_name: propertyTitle || 'Property booking',
+                      item_type: 'property_rental',
+                      qty: nights,
+                      unit_price: pricePerNight,
+                      amount: pricing.total,
+                      start_at: checkIn!,
+                      end_at: checkOut!,
+                      metadata: { source_id: id },
+                    }],
+                    participants: [{
+                      role: 'primary',
+                      name: formData.name,
+                      phone: formData.phone,
+                      email: formData.email || undefined,
+                    }],
+                    payment: {
+                      method: 'cash',
+                      amount: Math.round(pricing.total * 0.1),
+                    },
+                    serviceName: propertyTitle || 'Property',
+                  });
+                  if (result.success && result.order_id) {
+                    navigate(`/bookings/${result.order_id}`, { replace: true });
+                  }
+                } catch (err) {
+                  // Error toast is handled by useOrders
+                } finally {
+                  setIsSubmitting(false);
+                }
               }}
             >
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              ) : null}
               {isRu ? 'Подтвердить и оплатить' : 'Confirm and pay'}
             </Button>
           </div>
