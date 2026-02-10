@@ -129,7 +129,7 @@ export type AppRole =
       labelRu: 'Управляющий',
       icon: 'UserCog',
       color: 'from-teal-500 to-cyan-600',
-      defaultPath: '/manager',
+      defaultPath: '/owner',
       descriptionEn: 'Manage assigned properties and guests',
       descriptionRu: 'Управляйте назначенными объектами и гостями',
     },

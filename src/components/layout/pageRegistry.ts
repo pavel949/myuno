@@ -379,7 +379,4 @@ export const TeamSupportPage = lazy(() => import('@/pages/team/TeamSupportPage')
 export const TeamLeadsPage = lazy(() => import('@/pages/team/TeamLeadsPage'));
 export const TeamModerationPage = lazy(() => import('@/pages/team/TeamModerationPage'));
 
-// ── Manager ──
-export const ManagerDashboard = lazy(() => import('@/pages/manager/ManagerDashboard'));
-export const ManagerProperties = lazy(() => import('@/pages/manager/ManagerProperties'));
-export const ManagerCalendar = lazy(() => import('@/pages/manager/ManagerCalendar'));
+// ── Manager (removed — redirects to /owner) ──
