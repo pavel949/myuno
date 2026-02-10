@@ -4,8 +4,9 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
@@ -16,9 +17,14 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
-import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
-import { PropertyCategoryRibbon, PropertyMode } from '@/components/property/PropertyCategoryRibbon';
+import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
+import { FilterChip } from '@/components/uno/FilterChip';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { normalizeForFilter } from '@/lib/filterUtils';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
@@ -113,12 +119,8 @@ export default function PropertySearchPage() {
       
       if (bedroomsToCheck.length > 0) {
         const propBedrooms = prop.bedrooms ?? 0;
-        const matchesBedrooms = bedroomsToCheck.some(filter => {
-          if (filter === 'studio') return propBedrooms === 0;
-          if (filter === '5+' || filter === '4+') return propBedrooms >= parseInt(filter.replace('+', ''));
-          return propBedrooms === parseInt(filter);
-        });
-        if (!matchesBedrooms) return false;
+        const minBedrooms = Math.max(...bedroomsToCheck.map(f => parseInt(f) || 0));
+        if (propBedrooms < minBedrooms) return false;
       }
 
       const districtsToCheck = selectedDistricts.length > 0
@@ -183,51 +185,142 @@ export default function PropertySearchPage() {
           <div className="px-4 pt-3 pb-2">
             <div className="flex items-center gap-2">
               <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
-              <div className="flex-1" onClick={() => {}}>
+              <div className="flex-1">
                 <AirbnbSearchBar onSearch={setSearchParams} />
               </div>
+            </div>
+          </div>
+
+          {/* Unified filter chips row — Airbnb style */}
+          <div className="px-4 pb-2 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center gap-2 touch-pan-y">
+              {/* Property type chips: Villa, Condo */}
+              {(['villa', 'condo'] as const).map(typeId => {
+                const typeOpt = propertyTypes.find(t => t.id.toLowerCase() === typeId);
+                if (!typeOpt) return null;
+                const label = language === 'ru' ? typeOpt.labelRu : typeOpt.labelEn;
+                return (
+                  <FilterChip
+                    key={typeId}
+                    label={label}
+                    isActive={selectedTypes.includes(typeOpt.id)}
+                    onToggle={() => {
+                      setSelectedTypes(prev =>
+                        prev.includes(typeOpt.id)
+                          ? prev.filter(t => t !== typeOpt.id)
+                          : [...prev, typeOpt.id]
+                      );
+                    }}
+                    size="sm"
+                  />
+                );
+              })}
+
+              {/* More types dropdown */}
+              {(() => {
+                const otherTypes = propertyTypes.filter(
+                  t => !['villa', 'condo'].includes(t.id.toLowerCase())
+                );
+                if (!otherTypes.length) return null;
+                const activeOtherCount = otherTypes.filter(t => selectedTypes.includes(t.id)).length;
+                return (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className={cn(
+                        "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                        activeOtherCount > 0
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                      )}>
+                        <span>{language === 'ru' ? 'Тип' : 'Type'}</span>
+                        {activeOtherCount > 0 && <span>({activeOtherCount})</span>}
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-52 p-2" align="start" sideOffset={6}>
+                      <div className="space-y-1">
+                        {otherTypes.map(type => (
+                          <button
+                            key={type.id}
+                            onClick={() => {
+                              setSelectedTypes(prev =>
+                                prev.includes(type.id)
+                                  ? prev.filter(t => t !== type.id)
+                                  : [...prev, type.id]
+                              );
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+                              selectedTypes.includes(type.id)
+                                ? "bg-primary/10 text-primary"
+                                : "hover:bg-muted"
+                            )}
+                          >
+                            <span className="flex-1 text-left">
+                              {language === 'ru' ? type.labelRu : type.labelEn}
+                            </span>
+                            {selectedTypes.includes(type.id) && (
+                              <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                );
+              })()}
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border shrink-0" />
+
+              {/* Bedroom chips */}
+              {[
+                { id: '1', label: '1+' },
+                { id: '2', label: '2+' },
+                { id: '3', label: '3+' },
+                { id: '4', label: '4+' },
+              ].map(bed => (
+                <FilterChip
+                  key={bed.id}
+                  label={bed.label}
+                  isActive={selectedBedrooms.includes(bed.id)}
+                  onToggle={() => {
+                    setSelectedBedrooms(prev =>
+                      prev.includes(bed.id)
+                        ? prev.filter(b => b !== bed.id)
+                        : [bed.id] // single select for bedrooms (1+ means 1 or more)
+                    );
+                  }}
+                  size="sm"
+                />
+              ))}
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border shrink-0" />
+
+              {/* Full filters button */}
               <UniversalFilter
                 config={filterConfig}
                 values={filterValues}
                 onChange={setFilterValues}
                 activeCount={activeFilterCount}
               >
-                <button className="shrink-0 w-10 h-10 rounded-full border border-border flex items-center justify-center relative hover:shadow-sm transition-shadow">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  {activeFilterCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                      {activeFilterCount}
-                    </span>
+                <button className={cn(
+                  "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                  Object.keys(filterValues).length > 0
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                )}>
+                  <SlidersHorizontal className="w-3 h-3" />
+                  <span>{language === 'ru' ? 'Фильтры' : 'Filters'}</span>
+                  {Object.keys(filterValues).length > 0 && (
+                    <span>({Object.keys(filterValues).length})</span>
                   )}
                 </button>
               </UniversalFilter>
             </div>
           </div>
-
-          {/* Category ribbon — Airbnb style, no buy toggle */}
-          <div className="px-4 pb-1">
-            <PropertyCategoryRibbon
-              selectedTypes={selectedTypes}
-              onTypesChange={setSelectedTypes}
-              propertyTypes={propertyTypes}
-              showModeToggle={false}
-            />
-          </div>
         </header>
-
-        {/* Quick filters */}
-        <div className="px-4 py-1">
-          <QuickFiltersRibbon
-            selectedFilters={quickFilters}
-            selectedDistricts={selectedDistricts}
-            onFilterToggle={(id) => setQuickFilters(prev => 
-              prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-            )}
-            onDistrictToggle={(id) => setSelectedDistricts(prev =>
-              prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-            )}
-          />
-        </div>
 
         <div className="px-4 py-2">
           <div className="flex items-center justify-between">
