@@ -1,132 +1,142 @@
-import React, { useState, useMemo } from 'react';
+/**
+ * PetsIndex — Airbnb-style pet services catalog
+ */
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PawPrint } from 'lucide-react';
+import { PawPrint, Star, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
-import { FilterValues, petsFilterConfig } from '@/components/filters';
 import { usePetServices } from '@/hooks/usePetServices';
-import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { cn } from '@/lib/utils';
 
-const categories: MiniAppCategory[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🐾' },
-  { id: 'transport', labelEn: 'Transport', labelRu: 'Перевозка', icon: '✈️' },
-  { id: 'veterinary', labelEn: 'Veterinary', labelRu: 'Ветеринария', icon: '🏥' },
-  { id: 'hotel', labelEn: 'Hotels', labelRu: 'Гостиницы', icon: '🏨' },
-  { id: 'grooming', labelEn: 'Grooming', labelRu: 'Груминг', icon: '✂️' },
-  { id: 'training', labelEn: 'Training', labelRu: 'Дрессировка', icon: '🎓' },
+const CATEGORIES = [
+  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+  { id: 'transport', labelEn: 'Transport', labelRu: 'Перевозка' },
+  { id: 'veterinary', labelEn: 'Veterinary', labelRu: 'Ветеринария' },
+  { id: 'hotel', labelEn: 'Hotels', labelRu: 'Гостиницы' },
+  { id: 'grooming', labelEn: 'Grooming', labelRu: 'Груминг' },
+  { id: 'training', labelEn: 'Training', labelRu: 'Дрессировка' },
 ];
 
 export default function PetsIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { currencyInfo } = useCurrency();
+  const { formatPrice } = useCurrency();
   const { services: petServices, isLoading } = usePetServices();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([key, value]) => {
-      if (key === 'priceLevel' && value) count++;
-      else if (Array.isArray(value)) count += value.length;
-      else if (value) count++;
-    });
-    return count;
-  }, [filterValues]);
+  const isRu = language === 'ru';
 
   const filteredServices = useMemo(() => {
-    return petServices.filter(service => {
-      const name = language === 'ru' ? service.name_ru : service.name_en;
-      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || service.service_type === selectedCategory;
-      
-      if (!matchesSearch || !matchesCategory) return false;
-      
-      // Service type filter from modal - using normalized comparison
-      const serviceTypes = filterValues.serviceType as string[] | undefined;
-      if (serviceTypes?.length && !matchesFilter([service.service_type || ''], serviceTypes)) return false;
-      
-      // Pet type filter
-      const petTypes = filterValues.petType as string[] | undefined;
-      if (petTypes?.length && !matchesFilter(service.pet_types || [], petTypes)) return false;
-      
-      // Price level filter
-      const priceLevel = filterValues.priceLevel as string | undefined;
-      if (priceLevel && !matchesPriceLevel(service.price_from, priceLevel)) return false;
-      
-      // Features filter
-      const featuresFilter = filterValues.features as string[] | undefined;
-      if (featuresFilter?.length && !matchesFilter(service.features || [], featuresFilter)) return false;
-      
-      // Verified filter
-      const verifiedFeatures = filterValues.features as string[] | undefined;
-      if (verifiedFeatures?.includes('verified') && !service.is_verified) return false;
-      
-      // Rating filter
-      const ratingFilter = filterValues.rating as string | undefined;
-      if (ratingFilter) {
-        const minRating = parseFloat(ratingFilter);
-        if ((service.rating || 0) < minRating) return false;
-      }
-      
-      return true;
-    });
-  }, [petServices, searchQuery, selectedCategory, filterValues, language]);
-
-  const quickItems: QuickGridItem[] = [
-    { icon: '✈️', label: language === 'ru' ? 'Перевозка' : 'Transport', sublabel: language === 'ru' ? 'По миру' : 'Worldwide', onClick: () => navigate('/pets/transport') },
-    { icon: '💉', label: language === 'ru' ? 'Вакцинация' : 'Vaccination', sublabel: language === 'ru' ? 'Сертификаты' : 'Certificates', onClick: () => setSelectedCategory('veterinary') },
-    { icon: '🏨', label: language === 'ru' ? 'Отели' : 'Hotels', onClick: () => setSelectedCategory('hotel') },
-    { icon: '✂️', label: language === 'ru' ? 'Груминг' : 'Grooming', onClick: () => setSelectedCategory('grooming') },
-  ];
+    if (selectedCategory === 'all') return petServices;
+    return petServices.filter(s => s.service_type === selectedCategory);
+  }, [petServices, selectedCategory]);
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Питомцы' : 'Pets'}
-      subtitle={language === 'ru' ? `${filteredServices.length} услуг` : `${filteredServices.length} services`}
-      heroIcon={PawPrint}
-      heroTitle={language === 'ru' ? 'Забота о вашем друге' : 'Care for Your Friend'}
-      heroSubtitle={language === 'ru' ? 'Перевозка, ветеринария, гостиницы, груминг' : 'Transport, veterinary, hotels, grooming'}
-      heroImage="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800"
-      heroGradient={{ from: 'from-amber-500/20', via: 'via-orange-500/20', to: 'to-primary/20' }}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      filterConfig={petsFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      filterActiveCount={activeFilterCount}
-      isLoading={isLoading}
-      isEmpty={filteredServices.length === 0}
-      emptyIcon={PawPrint}
-      emptyText={language === 'ru' ? 'Услуги не найдены' : 'No services found'}
-    >
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+    <AppLayout showHeader={false} showBottomNav>
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold truncate">{isRu ? 'Питомцы' : 'Pets'}</h1>
+            <p className="text-xs text-muted-foreground">{filteredServices.length} {isRu ? 'услуг' : 'services'}</p>
+          </div>
+        </div>
 
-      <div className="grid gap-4">
-        {filteredServices.map((service) => (
-          <ItemCard
-            key={service.id}
-            image={service.cover_image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800'}
-            title={language === 'ru' ? service.name_ru : service.name_en}
-            subtitle={language === 'ru' ? service.description_ru : service.description_en}
-            rating={service.rating}
-            reviewCount={service.review_count}
-            location={service.address ?? undefined}
-            price={service.price_from ?? undefined}
-            pricePrefix={language === 'ru' ? 'от' : 'from'}
-            currency={currencyInfo.symbol}
-            isVerified={service.is_verified}
-            tags={service.features?.slice(0, 2) || []}
-            onClick={() => navigate(`/pets/${service.id}`)}
+        {/* Category ribbon */}
+        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                selectedCategory === cat.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+              )}
+            >
+              {isRu ? cat.labelRu : cat.labelEn}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-[4/3] rounded-xl" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : filteredServices.length === 0 ? (
+          <EmptyState
+            icon={PawPrint}
+            title={isRu ? 'Услуги не найдены' : 'No services found'}
+            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
           />
-        ))}
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredServices.map(service => {
+              const name = isRu ? service.name_ru : service.name_en;
+              return (
+                <div
+                  key={service.id}
+                  className="cursor-pointer group"
+                  onClick={() => navigate(`/pets/${service.id}`)}
+                >
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+                    <OptimizedImage
+                      src={service.cover_image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400'}
+                      alt={name}
+                      width={400}
+                      height={300}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      quality={80}
+                    />
+                    {service.is_verified && (
+                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                        {isRu ? 'Проверено' : 'Verified'}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className="font-semibold text-sm truncate">{name}</h3>
+                      {(service.rating ?? 0) > 0 && (
+                        <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
+                          <Star className="w-3 h-3 fill-foreground" />
+                          {service.rating?.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    {service.address && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5 truncate">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        {service.address}
+                      </p>
+                    )}
+                    <p className="text-sm font-semibold">
+                      {service.price_from ? `${isRu ? 'от' : 'from'} ${formatPrice(service.price_from)}` : ''}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </MiniAppLayout>
+    </AppLayout>
   );
 }
