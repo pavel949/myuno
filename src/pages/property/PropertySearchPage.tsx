@@ -229,135 +229,168 @@ export default function PropertySearchPage() {
             </div>
           </div>
 
-          {/* Unified filter chips row — Airbnb style */}
-          <div className="px-4 pb-2 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2 touch-pan-y">
-              {/* Property type chips: Villa, Condo, Hotel */}
-              {(['villa', 'condo', 'hotel'] as const).map(typeId => {
-                const typeOpt = propertyTypes.find(t => t.id.toLowerCase() === typeId);
-                // Fallback for hotel if not in DB yet
-                const label = typeOpt
-                  ? (language === 'ru' ? typeOpt.labelRu : typeOpt.labelEn)
-                  : (typeId === 'hotel' ? (language === 'ru' ? 'Отель' : 'Hotel') : typeId);
-                const id = typeOpt?.id || typeId;
-                return (
-                  <FilterChip
-                    key={typeId}
-                    label={label}
-                    isActive={selectedTypes.includes(id)}
-                    onToggle={() => {
-                      setSelectedTypes(prev =>
-                        prev.includes(id)
-                          ? prev.filter(t => t !== id)
-                          : [...prev, id]
-                      );
-                    }}
-                    size="sm"
-                  />
-                );
-              })}
+          {/* Airbnb-style compact filter buttons */}
+          <div className="px-4 pb-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Property Type Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                    selectedTypes.length > 0
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
+                  )}>
+                    <Home className="w-3.5 h-3.5" />
+                    <span>
+                      {selectedTypes.length > 0
+                        ? selectedTypes.slice(0, 2).map(t => {
+                            const opt = propertyTypes.find(p => p.id === t);
+                            return opt ? (language === 'ru' ? opt.labelRu : opt.labelEn) : t;
+                          }).join(', ') + (selectedTypes.length > 2 ? ` +${selectedTypes.length - 2}` : '')
+                        : (language === 'ru' ? 'Тип жилья' : 'Property type')
+                      }
+                    </span>
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 bg-popover z-50" align="start" sideOffset={6}>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {/* Hotel fallback if not in DB */}
+                    {(() => {
+                      const allTypes = propertyTypes.length > 0 ? propertyTypes : [];
+                      const hasHotel = allTypes.some(t => t.id.toLowerCase() === 'hotel');
+                      const displayTypes = hasHotel ? allTypes : [
+                        ...allTypes,
+                        { id: 'hotel', labelEn: 'Hotel', labelRu: 'Отель' },
+                      ];
+                      return displayTypes.map(type => (
+                        <button
+                          key={type.id}
+                          onClick={() => {
+                            setSelectedTypes(prev =>
+                              prev.includes(type.id)
+                                ? prev.filter(t => t !== type.id)
+                                : [...prev, type.id]
+                            );
+                          }}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left",
+                            selectedTypes.includes(type.id)
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          <span className="flex-1">{language === 'ru' ? type.labelRu : type.labelEn}</span>
+                          {selectedTypes.includes(type.id) && (
+                            <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center shrink-0">✓</span>
+                          )}
+                        </button>
+                      ));
+                    })()}
+                  </div>
+                  {selectedTypes.length > 0 && (
+                    <button
+                      onClick={() => setSelectedTypes([])}
+                      className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground text-center py-1"
+                    >
+                      {language === 'ru' ? 'Сбросить' : 'Clear'}
+                    </button>
+                  )}
+                </PopoverContent>
+              </Popover>
 
-              {/* More types dropdown */}
-              {(() => {
-                const otherTypes = propertyTypes.filter(
-                  t => !['villa', 'condo', 'hotel'].includes(t.id.toLowerCase())
-                );
-                if (!otherTypes.length) return null;
-                const activeOtherCount = otherTypes.filter(t => selectedTypes.includes(t.id)).length;
-                return (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className={cn(
-                        "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
-                        activeOtherCount > 0
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
-                      )}>
-                        <span>{language === 'ru' ? 'Ещё' : 'More'}</span>
-                        {activeOtherCount > 0 && <span>({activeOtherCount})</span>}
-                        <ChevronDown className="w-3 h-3" />
+              {/* Bedrooms Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                    selectedBedrooms.length > 0
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
+                  )}>
+                    <span>
+                      {selectedBedrooms.length > 0
+                        ? (selectedBedrooms.length === 1
+                            ? (selectedBedrooms[0] === 'studio'
+                                ? (language === 'ru' ? 'Студия' : 'Studio')
+                                : `${selectedBedrooms[0]}+ ${language === 'ru' ? 'спален' : 'beds'}`)
+                            : `${selectedBedrooms.length} ${language === 'ru' ? 'выбрано' : 'selected'}`)
+                        : (language === 'ru' ? 'Спальни' : 'Bedrooms')
+                      }
+                    </span>
+                    <ChevronDown className="w-3 h-3 opacity-60" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3 bg-popover z-50" align="start" sideOffset={6}>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { id: 'studio', label: language === 'ru' ? 'Студия' : 'Studio' },
+                      { id: '1', label: '1' },
+                      { id: '2', label: '2' },
+                      { id: '3', label: '3' },
+                      { id: '4', label: '4' },
+                      { id: '5', label: '5+' },
+                      { id: '6', label: '6+' },
+                      { id: '8', label: '8+' },
+                      { id: '10', label: '10+' },
+                      { id: '12', label: '12+' },
+                    ].map(bed => (
+                      <button
+                        key={bed.id}
+                        onClick={() => {
+                          setSelectedBedrooms(prev =>
+                            prev.includes(bed.id)
+                              ? prev.filter(b => b !== bed.id)
+                              : [...prev, bed.id]
+                          );
+                        }}
+                        className={cn(
+                          "py-2 px-1 rounded-lg text-sm font-medium transition-colors text-center",
+                          selectedBedrooms.includes(bed.id)
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/50 hover:bg-muted text-foreground"
+                        )}
+                      >
+                        {bed.label}
                       </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-52 p-2 bg-popover z-50" align="start" sideOffset={6}>
-                      <div className="space-y-1">
-                        {otherTypes.map(type => (
-                          <button
-                            key={type.id}
-                            onClick={() => {
-                              setSelectedTypes(prev =>
-                                prev.includes(type.id)
-                                  ? prev.filter(t => t !== type.id)
-                                  : [...prev, type.id]
-                              );
-                            }}
-                            className={cn(
-                              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                              selectedTypes.includes(type.id)
-                                ? "bg-primary/10 text-primary"
-                                : "hover:bg-muted"
-                            )}
-                          >
-                            <span className="flex-1 text-left">
-                              {language === 'ru' ? type.labelRu : type.labelEn}
-                            </span>
-                            {selectedTypes.includes(type.id) && (
-                              <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                );
-              })()}
+                    ))}
+                  </div>
+                  {selectedBedrooms.length > 0 && (
+                    <button
+                      onClick={() => setSelectedBedrooms([])}
+                      className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground text-center py-1"
+                    >
+                      {language === 'ru' ? 'Сбросить' : 'Clear'}
+                    </button>
+                  )}
+                </PopoverContent>
+              </Popover>
 
-              {/* Divider */}
-              <div className="w-px h-5 bg-border shrink-0" />
-
-              {/* Bedroom chips — multi-select */}
-              {[
-                { id: '1', label: '1+' },
-                { id: '2', label: '2+' },
-                { id: '3', label: '3+' },
-                { id: '4', label: '4+' },
-                { id: '5', label: '5+' },
-                { id: '6', label: '6+' },
-                { id: '8', label: '8+' },
-                { id: '10', label: '10+' },
-                { id: '12', label: '12+' },
-              ].map(bed => (
-                <FilterChip
-                  key={bed.id}
-                  label={bed.label}
-                  isActive={selectedBedrooms.includes(bed.id)}
-                  onToggle={() => {
-                    setSelectedBedrooms(prev =>
-                      prev.includes(bed.id)
-                        ? prev.filter(b => b !== bed.id)
-                        : [...prev, bed.id]
-                    );
-                  }}
-                  size="sm"
-                />
-              ))}
-
-              {/* Company filter dropdown */}
+              {/* Company Popover */}
               {companies.length > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
                     <button className={cn(
-                      "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                      "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
                       selectedCompanyId
                         ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                        : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                     )}>
-                      <Building2 className="w-3 h-3" />
-                      <span>{language === 'ru' ? 'УК' : 'Company'}</span>
-                      {selectedCompanyId && <span>✓</span>}
-                      <ChevronDown className="w-3 h-3" />
+                      <Building2 className="w-3.5 h-3.5" />
+                      <span>
+                        {selectedCompanyId
+                          ? (() => {
+                              const c = companies.find(c => c.id === selectedCompanyId);
+                              return c ? (language === 'ru' ? c.name_ru : c.name_en) : (language === 'ru' ? 'УК' : 'Company');
+                            })()
+                          : (language === 'ru' ? 'УК' : 'Company')
+                        }
+                      </span>
+                      <ChevronDown className="w-3 h-3 opacity-60" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-56 p-2" align="start" sideOffset={6}>
+                  <PopoverContent className="w-56 p-2 bg-popover z-50" align="start" sideOffset={6}>
                     <div className="space-y-1">
                       <button
                         onClick={() => setSelectedCompanyId(null)}
@@ -391,50 +424,21 @@ export default function PropertySearchPage() {
                 </Popover>
               )}
 
-              {/* Divider */}
-              <div className="w-px h-5 bg-border shrink-0" />
-
               {/* Instant Book toggle */}
               <button
                 onClick={() => setInstantBookOnly(prev => !prev)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
                   instantBookOnly
                     ? "bg-amber-500 text-white border-amber-500"
-                    : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                    : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                 )}
               >
-                <Zap className="w-3 h-3" />
+                <Zap className="w-3.5 h-3.5" />
                 <span>{language === 'ru' ? 'Мгновенное' : 'Instant'}</span>
               </button>
 
-              {/* Amenity quick chips */}
-              {[
-                { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
-                { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
-                { id: 'kitchen', icon: Utensils, labelEn: 'Kitchen', labelRu: 'Кухня' },
-                { id: 'parking', icon: CarIcon, labelEn: 'Parking', labelRu: 'Парковка' },
-                { id: 'gym', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Спортзал' },
-              ].map(amenity => (
-                <FilterChip
-                  key={amenity.id}
-                  label={language === 'ru' ? amenity.labelRu : amenity.labelEn}
-                  isActive={selectedAmenities.includes(amenity.id)}
-                  onToggle={() => {
-                    setSelectedAmenities(prev =>
-                      prev.includes(amenity.id)
-                        ? prev.filter(a => a !== amenity.id)
-                        : [...prev, amenity.id]
-                    );
-                  }}
-                  size="sm"
-                />
-              ))}
-
-              {/* Divider */}
-              <div className="w-px h-5 bg-border shrink-0" />
-
-              {/* Full filters button */}
+              {/* More filters */}
               <UniversalFilter
                 config={filterConfig}
                 values={filterValues}
@@ -442,15 +446,15 @@ export default function PropertySearchPage() {
                 activeCount={activeFilterCount}
               >
                 <button className={cn(
-                  "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                  "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
                   Object.keys(filterValues).length > 0
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                    : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                 )}>
-                  <SlidersHorizontal className="w-3 h-3" />
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
                   <span>{language === 'ru' ? 'Фильтры' : 'Filters'}</span>
                   {Object.keys(filterValues).length > 0 && (
-                    <span>({Object.keys(filterValues).length})</span>
+                    <span className="ml-0.5">({Object.keys(filterValues).length})</span>
                   )}
                 </button>
               </UniversalFilter>
