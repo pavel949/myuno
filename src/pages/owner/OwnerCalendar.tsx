@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDia
 import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromCalendarDialog';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { CalendarDays, CalendarPlus, Plus, RefreshCw } from 'lucide-react';
 
 export default function OwnerCalendar() {
@@ -23,13 +23,23 @@ export default function OwnerCalendar() {
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+
+  // Map to format expected by PropertyThumbnailSelector
+  const propertyRefs = useMemo(() =>
+    allProperties.map(p => ({
+      id: p.property_id,
+      title: p.title,
+      title_ru: p.title_ru,
+      cover_image: p.cover_image,
+    })), [allProperties]
+  );
 
   useEffect(() => {
-    if (properties?.length && !selectedPropertyId) {
-      setSelectedPropertyId(properties[0].id);
+    if (allProperties.length && !selectedPropertyId) {
+      setSelectedPropertyId(allProperties[0].property_id);
     }
-  }, [properties, selectedPropertyId]);
+  }, [allProperties, selectedPropertyId]);
 
   if (!user) {
     return (
@@ -56,7 +66,7 @@ export default function OwnerCalendar() {
           {isRu ? 'Выберите объект' : 'Select Property'}
         </p>
         <PropertyThumbnailSelector
-          properties={properties || []}
+          properties={propertyRefs}
           selectedId={selectedPropertyId}
           onSelect={setSelectedPropertyId}
           isLoading={propertiesLoading}
@@ -88,7 +98,7 @@ export default function OwnerCalendar() {
       {/* Airbnb-style Calendar Grid */}
       <AirbnbCalendarGrid
         propertyId={selectedPropertyId || undefined}
-        properties={properties || []}
+        properties={propertyRefs}
       />
 
       {/* Today's Tasks */}
@@ -115,7 +125,7 @@ export default function OwnerCalendar() {
       <CreateServiceTaskDialog
         open={showCreateTaskDialog}
         onOpenChange={setShowCreateTaskDialog}
-        properties={properties || []}
+        properties={propertyRefs}
         defaultPropertyId={selectedPropertyId}
         defaultDate={new Date()}
       />

@@ -10,13 +10,12 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard, ManagerGuard } from '@/components/auth';
+import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard } from '@/components/auth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
-import { ManagerLayout } from '@/components/manager/ManagerLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 
 // Core pages - eagerly loaded for fast initial navigation
@@ -70,11 +69,6 @@ const VendorRouteLayout = () => (
   </VendorGuard>
 );
 
-const ManagerRouteLayout = () => (
-  <ManagerGuard>
-    <ManagerLayout />
-  </ManagerGuard>
-);
 
 const GuestRouteLayout = () => (
   <AuthGuard>
@@ -440,13 +434,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/team/leads" element={<LazyPage><TeamGuard><Pages.TeamLeadsPage /></TeamGuard></LazyPage>} />
         <Route path="/team/moderation" element={<LazyPage><TeamGuard><Pages.TeamModerationPage /></TeamGuard></LazyPage>} />
         
-        {/* ── Manager ── */}
-        <Route element={<ManagerRouteLayout />}>
-          <Route path="/manager" element={<Pages.ManagerDashboard />} />
-          <Route path="/manager/properties" element={<Pages.ManagerProperties />} />
-          <Route path="/manager/properties/:id" element={<Pages.ManagerProperties />} />
-          <Route path="/manager/calendar" element={<Pages.ManagerCalendar />} />
-        </Route>
+        {/* ── Manager → Owner Redirects ── */}
+        <Route path="/manager" element={<Navigate to="/owner" replace />} />
+        <Route path="/manager/properties" element={<Navigate to="/owner/properties" replace />} />
+        <Route path="/manager/properties/:id" element={<Navigate to="/owner/properties" replace />} />
+        <Route path="/manager/calendar" element={<Navigate to="/owner/calendar" replace />} />
         
         {/* ── Guest ── */}
         <Route element={<GuestRouteLayout />}>

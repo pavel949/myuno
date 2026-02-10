@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Home } from 'lucide-react';
-import type { OwnerProperty } from '@/hooks/usePropertyCare';
+import type { PropertyReference } from '@/types/property';
 
 interface PropertyThumbnailSelectorProps {
-  properties: OwnerProperty[];
+  properties: PropertyReference[];
   selectedId: string;
   onSelect: (id: string) => void;
   isLoading?: boolean;
@@ -45,7 +45,7 @@ export function PropertyThumbnailSelector({
     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {properties.map(property => {
         const isSelected = selectedId === property.id;
-        const title = isRu && property.title_ru ? property.title_ru : property.title;
+        const title = isRu && property.title_ru ? property.title_ru : (property.title || '');
         
         return (
           <button

@@ -29,6 +29,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -37,6 +38,7 @@ interface NavItem {
   path: string;
   icon: React.ElementType;
   badge?: number;
+  ownerOnly?: boolean;
 }
 
 interface NavGroup {
@@ -46,9 +48,7 @@ interface NavGroup {
   defaultOpen?: boolean;
 }
 
-// Консолидированная навигация: 14 пунктов → 7 пунктов
 const navigationGroups: NavGroup[] = [
-  // MAIN - Core functionality (always open)
   {
     label: 'Main',
     labelRu: 'Главное',
@@ -59,24 +59,22 @@ const navigationGroups: NavGroup[] = [
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
     ],
   },
-  // MONEY - Financial management
   {
     label: 'Money',
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
-      { title: 'Documents', titleRu: 'Документы', path: '/owner/documents', icon: FileText },
+      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign, ownerOnly: true },
+      { title: 'Documents', titleRu: 'Документы', path: '/owner/documents', icon: FileText, ownerOnly: true },
     ],
   },
-  // TEAM - Collaboration
   {
     label: 'Team',
     labelRu: 'Команда',
     defaultOpen: false,
     items: [
       { title: 'My Team', titleRu: 'Моя команда', path: '/owner/team', icon: Users },
-      { title: 'Settings', titleRu: 'Настройки', path: '/owner/settings', icon: Settings },
+      { title: 'Settings', titleRu: 'Настройки', path: '/owner/settings', icon: Settings, ownerOnly: true },
     ],
   },
 ];
@@ -89,11 +87,12 @@ export function OwnerSidebar() {
   const { user, signOut } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const { accessRole } = useMyProperties();
+
+  const isManagerOnly = accessRole === 'manager';
 
   const isActive = (path: string) => {
-    if (path === '/owner') {
-      return location.pathname === '/owner';
-    }
+    if (path === '/owner') return location.pathname === '/owner';
     return location.pathname.startsWith(path);
   };
 
@@ -101,9 +100,16 @@ export function OwnerSidebar() {
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
   };
 
+  // Filter out owner-only items for pure managers
+  const filteredGroups = navigationGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => !isManagerOnly || !item.ownerOnly),
+    }))
+    .filter(group => group.items.length > 0);
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      {/* Header - clickable to go to main app */}
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
         <button
           onClick={() => navigate('/')}
@@ -126,9 +132,8 @@ export function OwnerSidebar() {
         </button>
       </SidebarHeader>
 
-      {/* Navigation */}
       <SidebarContent className="px-2 py-2">
-        {navigationGroups.map((group) => (
+        {filteredGroups.map((group) => (
           <Collapsible
             key={group.label}
             defaultOpen={getGroupDefaultOpen(group)}
@@ -175,7 +180,6 @@ export function OwnerSidebar() {
         ))}
       </SidebarContent>
 
-      {/* Footer */}
       <SidebarFooter className="border-t border-sidebar-border p-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
@@ -187,7 +191,7 @@ export function OwnerSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.user_metadata?.name || (isRussian ? 'Владелец' : 'Owner')}
+                {user?.user_metadata?.name || (isRussian ? (isManagerOnly ? 'Управляющий' : 'Владелец') : (isManagerOnly ? 'Manager' : 'Owner'))}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
                 {user?.email}
