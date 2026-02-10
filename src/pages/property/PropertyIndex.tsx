@@ -1,422 +1,345 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+/**
+ * PropertyIndex — Airbnb-style Discovery Page
+ * 
+ * Sections:
+ * 1. Search bar (rounded, prominent)
+ * 2. Category tabs (Rent / Buy)
+ * 3. Recently Viewed (horizontal scroll)
+ * 4. Featured / Guest Favorites (horizontal scroll)
+ * 5. By District sections (horizontal scroll)
+ * 6. All listings link → full catalog grid
+ */
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
+import { Search, Heart, Star, BedDouble, ArrowRight, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-import { Button } from '@/components/ui/button';
-
-import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
-import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
-import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
-import { cn } from '@/lib/utils';
-import { ConsultationCTA } from '@/components/property/ConsultationCTA';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
-import { QuickFiltersRibbon } from '@/components/property/QuickFiltersRibbon';
 import { PropertyCategoryRibbon, PropertyMode } from '@/components/property/PropertyCategoryRibbon';
-import { ProjectPromoSection } from '@/components/property/ProjectPromoSection';
-import { usePropertyProjectsWithStats } from '@/hooks/usePropertyProjectsWithStats';
-import { OffplanCTASection } from '@/components/property/OffplanCTASection';
-import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
-import { matchesFilter, matchesSingleFilter, normalizeForFilter } from '@/lib/filterUtils';
-import { CrossSellSection } from '@/components/crosssell';
-import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
+import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+
+// ── Recently Viewed Property Shape ──
+interface RecentProperty {
+  id: string;
+  title: string;
+  image: string;
+  district: string;
+  bedrooms: number;
+  rating: number | null;
+  price: number;
+  currency: string;
+  pricePeriod: string;
+}
+
+// ── Compact horizontal card ──
+function PropertyScrollCard({ property, mode, onClick }: { 
+  property: Property; 
+  mode: PropertyMode;
+  onClick: () => void;
+}) {
+  const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
+  const isRu = language === 'ru';
+  const title = isRu ? property.title_ru : property.title_en;
+  const image = property.cover_image || property.images?.[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400';
+
+  return (
+    <button 
+      onClick={onClick}
+      className="w-[260px] shrink-0 text-left group"
+    >
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+        />
+        <button
+          className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-background/70 hover:bg-background transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Heart className="w-4 h-4" />
+        </button>
+        {property.is_featured && (
+          <div className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg bg-background/90 text-[11px] font-semibold">
+            {isRu ? 'Выбор гостей' : 'Guest favorite'}
+          </div>
+        )}
+      </div>
+      <div className="space-y-0.5">
+        <h3 className="text-sm font-semibold line-clamp-1">
+          {property.district || 'Phuket'}
+        </h3>
+        <p className="text-xs text-muted-foreground line-clamp-1">
+          {property.bedrooms || 0} {isRu ? 'кроват' : 'bed'}{(property.bedrooms || 0) !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
+          {property.rating != null && property.rating > 0 && (
+            <> · <Star className="w-3 h-3 inline fill-current" /> {property.rating.toFixed(1)}</>
+          )}
+        </p>
+        <p className="text-sm font-semibold">
+          {formatPrice(property.price || 0)}
+          <span className="font-normal text-muted-foreground text-xs">
+            {mode === 'buy' ? '' : `/${isRu ? 'ночь' : 'night'}`}
+          </span>
+        </p>
+      </div>
+    </button>
+  );
+}
+
+// ── Recently Viewed Card (compact) ──
+function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => void }) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
+  return (
+    <button onClick={onClick} className="w-[150px] shrink-0 text-left group">
+      <div className="relative aspect-square rounded-xl overflow-hidden mb-1.5">
+        <img
+          src={item.image}
+          alt={item.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          loading="lazy"
+        />
+        <button
+          className="absolute top-2 right-2 p-1 rounded-full bg-background/70 hover:bg-background transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Heart className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
+      <p className="text-[11px] text-muted-foreground">
+        {item.bedrooms} {isRu ? 'кроват' : 'bed'}{item.bedrooms !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
+        {item.rating != null && item.rating > 0 && (
+          <> · <Star className="w-2.5 h-2.5 inline fill-current" /> {item.rating.toFixed(1)}</>
+        )}
+      </p>
+    </button>
+  );
+}
+
+// ── Section Header ──
+function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) {
+  return (
+    <div className="flex items-center justify-between px-4 mb-3">
+      <h2 className="text-lg font-bold">{title}</h2>
+      {onSeeAll && (
+        <button onClick={onSeeAll} className="p-2 rounded-full border border-border hover:bg-muted transition-colors">
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
+  const [searchParamsUrl] = useSearchParams();
+  const isRu = language === 'ru';
   
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
-  
-  const [searchParams, setSearchParams] = useState<SearchParams>({
-    locations: [],
-    checkIn: undefined,
-    checkOut: undefined,
-    guests: 2,
-  });
-  const [selectedType, setSelectedType] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-  const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
-  const [quickFilters, setQuickFilters] = useState<string[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
-  const [showStickyCTA, setShowStickyCTA] = useState(false);
-  const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
-  
 
-  // Infinite scroll sentinel
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const { propertyTypes } = usePropertyFilterOptions();
 
-  useEffect(() => {
-    if (propertyMode === 'buy') {
-      setSearchParamsUrl({ mode: 'buy' });
-    } else {
-      searchParamsUrl.delete('mode');
-      setSearchParamsUrl(searchParamsUrl);
-    }
-  }, [propertyMode, setSearchParamsUrl]);
+  const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowStickyCTA(window.scrollY > 800);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const { filterConfig, propertyTypes } = usePropertyFilterOptions();
-  const { data: projectsList } = usePropertyProjectsWithStats();
-
-  // Look up selected project name for filter chip
-  const selectedProjectName = useMemo(() => {
-    if (!selectedProjectId || !projectsList) return undefined;
-    const proj = projectsList.find(p => p.id === selectedProjectId);
-    return proj ? (language === 'ru' ? proj.nameRu : proj.nameEn) : undefined;
-  }, [selectedProjectId, projectsList, language]);
-  
-  const propertyTypePills = useMemo(() => [
-    { id: 'all', labelEn: 'All', labelRu: 'Все' },
-    ...propertyTypes
-  ], [propertyTypes]);
-
-  // Infinite query with server-side filters
-  const {
-    data: infiniteData,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = usePropertiesInfinite({
+  // Fetch properties
+  const { data: infiniteData, isLoading } = usePropertiesInfinite({
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
-    propertyType: selectedType !== 'all' ? selectedType : undefined,
   });
 
-  // Infinite scroll observer
-  useEffect(() => {
-    const sentinel = loadMoreRef.current;
-    if (!sentinel) return;
+  const allProperties = useMemo(() => 
+    infiniteData?.pages.flatMap(p => p.properties) || [],
+    [infiniteData]
+  );
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: '400px' }
-    );
+  // Featured
+  const featured = useMemo(() => 
+    allProperties.filter(p => p.is_featured).slice(0, 10),
+    [allProperties]
+  );
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // Flatten pages + apply client-side filters + sort
-  const properties = useMemo(() => {
-    const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
-    
-    // Client-side filters
-    const filtered = allItems.filter(prop => {
-      const matchesLocation = searchParams.locations.length === 0 || 
-        searchParams.locations.some(loc => 
-          prop.district?.toLowerCase().includes(loc.toLowerCase())
-        );
-      const matchesGuests = !searchParams.guests || (prop.max_guests || 0) >= searchParams.guests;
-      
-      // Bedroom filter
-      const bedroomsToCheck = selectedBedrooms.length > 0 
-        ? selectedBedrooms 
-        : (filterValues.bedrooms 
-            ? (Array.isArray(filterValues.bedrooms) ? filterValues.bedrooms as string[] : [filterValues.bedrooms as string])
-            : []);
-      
-      if (bedroomsToCheck.length > 0) {
-        const propBedrooms = prop.bedrooms ?? 0;
-        const matchesBedrooms = bedroomsToCheck.some(filter => {
-          if (filter === 'studio') return propBedrooms === 0;
-          if (filter === '5+' || filter === '4+') return propBedrooms >= parseInt(filter.replace('+', ''));
-          return propBedrooms === parseInt(filter);
-        });
-        if (!matchesBedrooms) return false;
-      }
-
-      // District filter
-      const districtsToCheck = selectedDistricts.length > 0
-        ? selectedDistricts
-        : (filterValues.district
-            ? (Array.isArray(filterValues.district) ? filterValues.district as string[] : [filterValues.district as string])
-            : []);
-      
-      if (districtsToCheck.length > 0) {
-        const normalizedDistricts = districtsToCheck.map(d => normalizeForFilter(d));
-        const propDistrict = normalizeForFilter(prop.district || '');
-        const matchesDistrict = normalizedDistricts.some(d => 
-          propDistrict.includes(d) || d.includes(propDistrict)
-        );
-        if (!matchesDistrict) return false;
-      }
-
-      // Amenities filter
-      if (filterValues.amenities) {
-        const amenityFilters = Array.isArray(filterValues.amenities)
-          ? filterValues.amenities as string[]
-          : [filterValues.amenities as string];
-        if (!matchesFilter(prop.amenities, amenityFilters)) return false;
-      }
-      
-      return matchesLocation && matchesGuests;
-    }) as unknown as Property[];
-
-    // Quick filters
-    const quickFiltered = applyQuickFilters(filtered, quickFilters, selectedProjectId);
-
-    // Sort
-    const sorted = [...quickFiltered];
-    switch (sortKey) {
-      case 'price_asc':
-        sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-        break;
-      case 'price_desc':
-        sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-        break;
-      case 'rating':
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'newest':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      default: // 'recommended' — featured first, already from server
-        break;
+  // Group by district
+  const byDistrict = useMemo(() => {
+    const grouped: Record<string, Property[]> = {};
+    for (const p of allProperties) {
+      const d = p.district || 'Phuket';
+      if (!grouped[d]) grouped[d] = [];
+      grouped[d].push(p);
     }
+    // Sort districts by count, take top 4
+    return Object.entries(grouped)
+      .sort(([, a], [, b]) => b.length - a.length)
+      .slice(0, 4)
+      .filter(([, items]) => items.length >= 2);
+  }, [allProperties]);
 
-    return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts, sortKey]);
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([key, value]) => {
-      if (key === 'priceLevel' && value) count++;
-      else if (Array.isArray(value)) count += value.length;
-      else if (value) count++;
-    });
-    count += selectedBedrooms.length;
-    count += selectedDistricts.length;
-    count += quickFilters.length;
-    if (selectedProjectId) count++;
-    return count;
-  }, [filterValues, quickFilters, selectedProjectId, selectedBedrooms, selectedDistricts]);
-
-  const handleRemoveFilter = (sectionId: string, optionId?: string) => {
-    setFilterValues(prev => {
-      const newValues = { ...prev };
-      if (optionId && Array.isArray(newValues[sectionId])) {
-        newValues[sectionId] = (newValues[sectionId] as string[]).filter(id => id !== optionId);
-        if ((newValues[sectionId] as string[]).length === 0) delete newValues[sectionId];
-      } else {
-        delete newValues[sectionId];
-      }
-      return newValues;
-    });
-  };
-
+  const handlePropertyClick = useCallback((id: string) => {
+    navigate(`/property/${id}`);
+  }, [navigate]);
 
   return (
-    <AppLayout showHeader={false} showBottomNav={true}>
-      <div className="min-h-screen bg-background">
-        {/* Compact Sticky Header */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          <div className="container max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <BackButton fallbackPath="/" variant="ghost" size="sm" />
-                <h1 className="text-lg font-bold truncate">
-                  {propertyMode === 'buy' 
-                    ? (language === 'ru' ? 'Купить недвижимость' : 'Buy Property')
-                    : (language === 'ru' ? 'Аренда жилья' : 'Vacation Rentals')
-                  }
-                </h1>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
-                  <MapPin className="w-4 h-4" />
-                  <span className="hidden sm:inline">{language === 'ru' ? 'Карта' : 'Map'}</span>
-                </Button>
-                
-                <UniversalFilter
-                  config={filterConfig}
-                  values={filterValues}
-                  onChange={setFilterValues}
-                  activeCount={activeFilterCount}
-                >
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <SlidersHorizontal className="w-4 h-4" />
-                    {activeFilterCount > 0 && (
-                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                        {activeFilterCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </UniversalFilter>
-              </div>
-            </div>
-          </div>
-            
-          <div className="container max-w-7xl mx-auto px-4">
-            <AirbnbSearchBar onSearch={setSearchParams} />
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="min-h-screen bg-background pb-24">
+        {/* Header */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <BackButton fallbackPath="/" variant="ghost" size="sm" />
+            <h1 className="text-lg font-bold">
+              {propertyMode === 'buy' 
+                ? (isRu ? 'Купить недвижимость' : 'Buy Property')
+                : (isRu ? 'Аренда жилья' : 'Vacation Rentals')
+              }
+            </h1>
           </div>
 
-          <div className="container max-w-7xl mx-auto px-4">
-            <PropertyCategoryRibbon
-              mode={propertyMode}
-              onModeChange={setPropertyMode}
-              selectedType={selectedType}
-              onTypeChange={setSelectedType}
-              propertyTypes={propertyTypes}
-            />
-          </div>
-        </header>
+          {/* Search bar — Airbnb style */}
+          <button
+            onClick={() => navigate('/property/search')}
+            className="w-full flex items-center gap-3 px-5 py-3.5 rounded-full border border-border shadow-sm hover:shadow-md transition-shadow bg-card"
+          >
+            <Search className="w-5 h-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {isRu ? 'Начать поиск' : 'Start your search'}
+            </span>
+          </button>
+        </div>
 
-        {/* Project Promo Section */}
-        <div className="container max-w-7xl mx-auto px-4 pt-3 pb-2">
-          <ProjectPromoSection
+        {/* Category tabs */}
+        <div className="px-4 py-2 border-b border-border/50">
+          <PropertyCategoryRibbon
             mode={propertyMode}
-            onProjectSelect={(id) => setSelectedProjectId(id || null)}
-            selectedProjectId={selectedProjectId}
+            onModeChange={setPropertyMode}
+            selectedType="all"
+            onTypeChange={() => {}}
+            propertyTypes={propertyTypes}
           />
         </div>
 
-        {/* Quick Filter Tags */}
-        <div className="container max-w-7xl mx-auto px-4 py-1">
-          <QuickFiltersRibbon
-            selectedFilters={quickFilters}
-            selectedDistricts={selectedDistricts}
-            onFilterToggle={(id) => setQuickFilters(prev => 
-              prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-            )}
-            onDistrictToggle={(id) => setSelectedDistricts(prev =>
-              prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-            )}
-            selectedProjectName={selectedProjectName}
-            onProjectClear={() => setSelectedProjectId(null)}
-          />
-        </div>
+        {/* Content */}
+        <div className="space-y-6 pt-4">
 
-        {/* Results Count + Sort */}
-        <div className="container max-w-7xl mx-auto px-4 py-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {properties.length} {language === 'ru' ? 'объектов найдено' : 'places found'}
-            </p>
-            <div className="flex items-center gap-2">
-              <PropertySortSelect value={sortKey} onChange={setSortKey} />
-              {activeFilterCount > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-xs h-7"
-                  onClick={() => {
-                    setFilterValues({});
-                    setQuickFilters([]);
-                    setSelectedDistricts([]);
-                    setSelectedBedrooms([]);
-                    setSelectedProjectId(null);
-                  }}
-                >
-                  {language === 'ru' ? 'Сбросить' : 'Clear'}
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+          {/* Recently Viewed */}
+          {recentItems.length > 0 && (
+            <section>
+              <SectionHeader
+                title={isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
+              />
+              <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
+                {recentItems.slice(0, 8).map((item) => (
+                  <RecentCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => handlePropertyClick(item.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
-        {/* Property Grid */}
-        <main className="container max-w-7xl mx-auto px-4 pb-24">
-          {/* Loading State */}
+          {/* Loading */}
           {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="space-y-3">
-                  <Skeleton className="aspect-square rounded-xl" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Property Cards */}
-          {!isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {properties.map((property) => (
-                <PropertyListingCard
-                  key={property.id}
-                  property={property}
-                  mode={propertyMode}
-                  isHovered={hoveredProperty === property.id}
-                  onHover={setHoveredProperty}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Infinite scroll sentinel */}
-          <div ref={loadMoreRef} className="py-8 flex justify-center">
-            {isFetchingNextPage && (
+            <div className="flex justify-center py-16">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            )}
-            {!isLoading && !hasNextPage && properties.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Все объекты загружены' : 'All properties loaded'}
-              </p>
-            )}
-          </div>
-
-          {/* Empty State */}
-          {!isLoading && properties.length === 0 && (
-            <div className="text-center py-16">
-              <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                {language === 'ru' ? 'Ничего не найдено' : 'No properties found'}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {language === 'ru' 
-                  ? 'Попробуйте изменить фильтры' 
-                  : 'Try adjusting your filters'}
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setFilterValues({});
-                  setQuickFilters([]);
-                  setSelectedDistricts([]);
-                  setSelectedBedrooms([]);
-                  setSelectedType('all');
-                }}
-              >
-                {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
-              </Button>
             </div>
           )}
 
-          <OffplanCTASection className="mt-8" />
-          <CrossSellSection currentVertical="property" className="mt-8 px-4" />
-
-          {showStickyCTA && (
-            <VerticalCTA
-              vertical="property"
-              variant="sticky"
-              context="list"
-            />
+          {/* Featured / Guest Favorites */}
+          {!isLoading && featured.length > 0 && (
+            <section>
+              <SectionHeader
+                title={isRu ? 'Популярное жильё' : 'Guest favorites'}
+                onSeeAll={() => navigate('/property/search')}
+              />
+              <div className="flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
+                {featured.map((property) => (
+                  <PropertyScrollCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                    onClick={() => handlePropertyClick(property.id)}
+                  />
+                ))}
+              </div>
+            </section>
           )}
-        </main>
+
+          {/* By District */}
+          {!isLoading && byDistrict.map(([district, items]) => (
+            <section key={district}>
+              <SectionHeader
+                title={isRu ? `${district}: доступное жильё` : `${district}: available stays`}
+                onSeeAll={() => navigate(`/property/search?district=${encodeURIComponent(district)}`)}
+              />
+              <div className="flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
+                {items.slice(0, 8).map((property) => (
+                  <PropertyScrollCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                    onClick={() => handlePropertyClick(property.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+
+          {/* All Properties — grid teaser */}
+          {!isLoading && allProperties.length > 0 && (
+            <section className="px-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold">
+                  {isRu ? 'Все объекты' : 'All listings'}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
+                    <MapPin className="w-4 h-4" />
+                    <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/search')}>
+                    <SlidersHorizontal className="w-4 h-4" />
+                    {isRu ? 'Фильтры' : 'Filters'}
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {allProperties.slice(0, 8).map((property) => (
+                  <PropertyListingCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                  />
+                ))}
+              </div>
+              {allProperties.length > 8 && (
+                <div className="mt-4 text-center">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => navigate('/property/search')}
+                  >
+                    {isRu 
+                      ? `Показать все ${allProperties.length} объектов` 
+                      : `Show all ${allProperties.length} listings`}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </section>
+          )}
+        </div>
       </div>
     </AppLayout>
   );
