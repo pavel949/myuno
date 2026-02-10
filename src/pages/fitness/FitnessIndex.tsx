@@ -3,17 +3,16 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, Star, MapPin, Loader2 } from 'lucide-react';
+import { Dumbbell, Star, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useGyms } from '@/hooks/useGyms';
-import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -30,19 +29,14 @@ export default function FitnessIndex() {
   const navigate = useNavigate();
   const { gyms, isLoading } = useGyms();
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const isRu = language === 'ru';
 
   const filteredGyms = useMemo(() => {
     return gyms.filter(gym => {
       if (selectedCategory !== 'all' && gym.gym_type !== selectedCategory) return false;
-      if (searchQuery) {
-        const name = isRu ? gym.name_ru : gym.name_en;
-        if (!name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      }
       return true;
     });
-  }, [gyms, selectedCategory, searchQuery, isRu]);
+  }, [gyms, selectedCategory]);
 
   const getPriceLabel = (gym: typeof gyms[0]) => {
     if (gym.price_day_pass) return `${formatPrice(gym.price_day_pass)}/${isRu ? 'день' : 'day'}`;
@@ -50,38 +44,19 @@ export default function FitnessIndex() {
     return '';
   };
 
+  const categories = CATEGORIES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }));
+
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Фитнес и Спорт' : 'Fitness & Sports'}</h1>
-            <p className="text-xs text-muted-foreground">{filteredGyms.length} {isRu ? 'залов' : 'gyms'}</p>
-          </div>
-        </div>
+      <CatalogHeader
+        title={isRu ? 'Фитнес и Спорт' : 'Fitness & Sports'}
+        subtitle={`${filteredGyms.length} ${isRu ? 'залов' : 'gyms'}`}
+        fallbackPath="/discover"
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
 
-        {/* Category ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedCategory === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
-
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -103,12 +78,11 @@ export default function FitnessIndex() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredGyms.map(gym => {
               const name = isRu ? gym.name_ru : gym.name_en;
-              const price = getPriceLabel(gym);
               return (
                 <div
                   key={gym.id}
                   className="cursor-pointer group"
-                  onClick={() => navigate(`/fitness/gym/${gym.id}`)}
+                  onClick={() => navigate(`/fitness/${gym.id}`)}
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
@@ -128,25 +102,20 @@ export default function FitnessIndex() {
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-between gap-1">
                       <h3 className="font-semibold text-sm truncate">{name}</h3>
-                      {gym.rating > 0 && (
+                      {(gym.rating ?? 0) > 0 && (
                         <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
                           <Star className="w-3 h-3 fill-foreground" />
-                          {gym.rating.toFixed(1)}
+                          {gym.rating?.toFixed(1)}
                         </span>
                       )}
                     </div>
-                    {gym.amenities?.length > 0 && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {gym.amenities.slice(0, 3).join(' · ')}
-                      </p>
-                    )}
-                    {gym.district && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    {gym.address && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5 truncate">
                         <MapPin className="w-3 h-3 shrink-0" />
-                        {gym.district}
+                        {gym.address}
                       </p>
                     )}
-                    {price && <p className="text-sm font-semibold">{price}</p>}
+                    <p className="text-sm font-semibold">{getPriceLabel(gym)}</p>
                   </div>
                 </div>
               );

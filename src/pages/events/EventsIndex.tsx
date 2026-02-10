@@ -1,19 +1,18 @@
 /**
  * EventsIndex — Airbnb-style events catalog
  */
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ticket, Star, Calendar, Clock, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useEvents } from '@/hooks/useEvents';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { cn } from '@/lib/utils';
 
 const EVENT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -42,36 +41,18 @@ export default function EventsIndex() {
     });
   };
 
+  const categories = EVENT_CATEGORIES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }));
+
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Афиша' : 'Events'}</h1>
-            <p className="text-xs text-muted-foreground">{events.length} {isRu ? 'событий' : 'events'}</p>
-          </div>
-        </div>
-
-        {/* Category ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {EVENT_CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedCategory === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
+      <CatalogHeader
+        title={isRu ? 'Афиша' : 'Events'}
+        subtitle={`${events.length} ${isRu ? 'событий' : 'events'}`}
+        fallbackPath="/discover"
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
@@ -88,15 +69,13 @@ export default function EventsIndex() {
         ) : events.length === 0 ? (
           <EmptyState
             icon={Ticket}
-            title={isRu ? 'Мероприятия не найдены' : 'No events found'}
+            title={isRu ? 'События не найдены' : 'No events found'}
             description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {events.map(event => {
-              const title = isRu ? event.title_ru : event.title_en;
-              const isFree = event.price === 0 || event.price === null;
-              const location = isRu ? event.location_ru : event.location_name;
+              const name = isRu ? event.title_ru : event.title_en;
               return (
                 <div
                   key={event.id}
@@ -106,38 +85,37 @@ export default function EventsIndex() {
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
                       src={event.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400'}
-                      alt={title}
+                      alt={name}
                       width={400}
                       height={300}
                       className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                       quality={80}
                     />
-                    {event.is_hot && (
-                      <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px]">
-                        Hot
+                    {event.is_featured && (
+                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                        <Star className="w-3 h-3 mr-0.5 fill-current" />
+                        {isRu ? 'Топ' : 'Featured'}
                       </Badge>
                     )}
-                    {!event.is_hot && isFree && (
-                      <Badge className="absolute top-2 left-2 bg-green-600 text-white text-[10px]">
-                        {isRu ? 'Бесплатно' : 'Free'}
-                      </Badge>
+                    {event.event_date && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2.5 pt-6">
+                        <span className="text-white text-xs font-medium flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(event.event_date)}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <div className="space-y-0.5">
-                    <h3 className="font-semibold text-sm truncate">{title}</h3>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="w-3 h-3 shrink-0" />
-                      {formatDate(event.event_date)}
-                      {event.event_time && ` · ${event.event_time}`}
-                    </p>
-                    {location && (
+                    <h3 className="font-semibold text-sm truncate">{name}</h3>
+                    {event.location_name && (
                       <p className="text-xs text-muted-foreground flex items-center gap-0.5 truncate">
                         <MapPin className="w-3 h-3 shrink-0" />
-                        {location}
+                        {event.location_name}
                       </p>
                     )}
                     <p className="text-sm font-semibold">
-                      {isFree ? (isRu ? 'Бесплатно' : 'Free') : formatPrice(event.price ?? 0)}
+                      {event.price ? `${isRu ? 'от' : 'from'} ${formatPrice(event.price)}` : (isRu ? 'Бесплатно' : 'Free')}
                     </p>
                   </div>
                 </div>

@@ -278,9 +278,9 @@ export default function SOS() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout showHeader={false}>
       <PageContainer>
-        <PageHeader title="SOS" showBack />
+        <PageHeader title="SOS" showBack fallbackPath="/" />
 
         {/* Offline indicator */}
         {isOffline && (
@@ -293,15 +293,14 @@ export default function SOS() {
         )}
 
         {/* UNO ALERT */}
-        <div className="mb-5 p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/15 to-red-500/20 border-2 border-amber-500/40">
+        <div className="mb-5 p-4 rounded-2xl bg-primary/5 border border-primary/20">
           <div className="flex items-center gap-2 mb-2">
-            <div className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500">
-              <Star className="w-4 h-4 text-white" fill="white" />
+            <div className="p-1.5 rounded-full bg-primary">
+              <Star className="w-4 h-4 text-primary-foreground" fill="currentColor" />
             </div>
-            <h2 className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h2 className="font-bold text-lg text-foreground">
               UNO ALERT
             </h2>
-            <Crown className="w-4 h-4 text-amber-500" />
           </div>
           
           <p className="text-sm text-foreground/80 mb-3">

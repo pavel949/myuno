@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -150,37 +150,13 @@ export default function YachtsIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          <div className="container max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center gap-3">
-              <BackButton fallbackPath="/" variant="ghost" size="sm" />
-              <h1 className="text-lg font-bold truncate">
-                {isRu ? 'Чартер яхт' : 'Boat Charters'}
-              </h1>
-            </div>
-          </div>
-
-          {/* Type pills */}
-          <div className="container max-w-7xl mx-auto px-4">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {YACHT_TYPES.map(type => (
-                <button
-                  key={type.id}
-                  onClick={() => setTypeFilter(type.id)}
-                  className={cn(
-                    "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap",
-                    typeFilter === type.id
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-background text-foreground border-border hover:border-foreground/50"
-                  )}
-                >
-                  {isRu ? type.labelRu : type.labelEn}
-                </button>
-              ))}
-            </div>
-          </div>
-        </header>
+        <CatalogHeader
+          title={isRu ? 'Чартер яхт' : 'Boat Charters'}
+          fallbackPath="/"
+          categories={YACHT_TYPES.map(t => ({ id: t.id, label: isRu ? t.labelRu : t.labelEn }))}
+          selectedCategory={typeFilter}
+          onCategoryChange={(id) => setTypeFilter(id as YachtTypeFilter)}
+        />
 
         {/* Count + sort */}
         <div className="container max-w-7xl mx-auto px-4 py-3">

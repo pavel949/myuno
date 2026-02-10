@@ -3,11 +3,11 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Stethoscope, Star, MapPin, Phone, ShieldAlert, MessageCircle, Loader2 } from 'lucide-react';
+import { Stethoscope, Star, MapPin, Phone, ShieldAlert, MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,63 +53,44 @@ export default function MedicalIndex() {
     searchQuery,
   });
 
+  const categories = SPECIALTIES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }));
+
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Медицина' : 'Healthcare'}</h1>
-            <p className="text-xs text-muted-foreground">{clinics.length} {isRu ? 'клиник' : 'clinics'}</p>
-          </div>
-        </div>
-
-        {/* Specialty ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {SPECIALTIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedSpecialty(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedSpecialty === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
+      <CatalogHeader
+        title={isRu ? 'Медицина' : 'Healthcare'}
+        subtitle={`${clinics.length} ${isRu ? 'клиник' : 'clinics'}`}
+        fallbackPath="/discover"
+        categories={categories}
+        selectedCategory={selectedSpecialty}
+        onCategoryChange={setSelectedSpecialty}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24 space-y-4">
         {/* Emergency banner */}
         <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-sm text-destructive">
-                {isRu ? 'Экстренная помощь' : 'Emergency'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {isRu ? 'Скорая — 1669' : 'Ambulance — 1669'}
-              </p>
-            </div>
-            <Button variant="destructive" size="sm" className="gap-1" asChild>
-              <a href="tel:1669">
-                <Phone className="w-4 h-4" />
-                1669
-              </a>
-            </Button>
+          <div className="flex items-center gap-2 mb-1">
+            <ShieldAlert className="w-4 h-4 text-destructive shrink-0" />
+            <span className="text-sm font-semibold text-destructive">{isRu ? 'Скорая помощь' : 'Emergency'}</span>
           </div>
+          <p className="text-xs text-muted-foreground mb-2">
+            {isRu ? 'Для экстренной медицинской помощи звоните 1669' : 'For medical emergencies call 1669'}
+          </p>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="text-xs"
+            onClick={() => window.location.href = 'tel:1669'}
+          >
+            <Phone className="w-3 h-3 mr-1" />
+            1669
+          </Button>
         </div>
 
-        {/* Clinics grid */}
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="aspect-[4/3] rounded-xl" />
                 <Skeleton className="h-4 w-3/4" />
@@ -127,12 +108,15 @@ export default function MedicalIndex() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {clinics.map(clinic => {
               const name = isRu ? clinic.name_ru : clinic.name_en;
-              const isOpen = isClinicOpen(clinic.working_hours || {}, clinic.is_24h);
+              const openNow = isClinicOpen(
+                (clinic.working_hours as Record<string, string>) || {},
+                clinic.is_24h ?? false
+              );
               return (
                 <div
                   key={clinic.id}
                   className="cursor-pointer group"
-                  onClick={() => navigate(`/medical/clinic/${clinic.id}`)}
+                  onClick={() => navigate(`/medical/${clinic.id}`)}
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
@@ -143,39 +127,35 @@ export default function MedicalIndex() {
                       className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                       quality={80}
                     />
-                    <Badge className={cn(
-                      "absolute top-2 left-2 text-[10px]",
-                      isOpen
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {isOpen ? (isRu ? 'Открыто' : 'Open') : (isRu ? 'Закрыто' : 'Closed')}
-                    </Badge>
+                    {clinic.is_24h && (
+                      <Badge className="absolute top-2 left-2 bg-green-600 text-white text-[10px]">24/7</Badge>
+                    )}
+                    {openNow && !clinic.is_24h && (
+                      <Badge className="absolute top-2 left-2 bg-green-600/90 text-white text-[10px]">
+                        {isRu ? 'Открыто' : 'Open'}
+                      </Badge>
+                    )}
                   </div>
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-between gap-1">
                       <h3 className="font-semibold text-sm truncate">{name}</h3>
-                      {clinic.rating > 0 && (
+                      {(clinic.rating ?? 0) > 0 && (
                         <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
                           <Star className="w-3 h-3 fill-foreground" />
-                          {clinic.rating.toFixed(1)}
+                          {clinic.rating?.toFixed(1)}
                         </span>
                       )}
                     </div>
-                    {clinic.languages?.length > 0 && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {clinic.languages.slice(0, 3).join(' · ')}
-                      </p>
-                    )}
-                    {clinic.district && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    {clinic.address && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5 truncate">
                         <MapPin className="w-3 h-3 shrink-0" />
-                        {clinic.district}
+                        {clinic.address}
                       </p>
                     )}
-                    {clinic.consultation_price > 0 && (
-                      <p className="text-sm font-semibold">
-                        {isRu ? 'от' : 'from'} {currencyInfo.symbol}{clinic.consultation_price}
+                    {clinic.languages?.includes('Russian') && (
+                      <p className="text-xs text-primary flex items-center gap-0.5">
+                        <MessageCircle className="w-3 h-3" />
+                        {isRu ? 'Русскоговорящий персонал' : 'Russian-speaking staff'}
                       </p>
                     )}
                   </div>

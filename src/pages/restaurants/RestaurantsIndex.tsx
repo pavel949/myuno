@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { UtensilsCrossed, SlidersHorizontal, Star, MapPin, Phone, CalendarDays } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -74,45 +74,21 @@ export default function RestaurantsIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          <div className="container max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <BackButton fallbackPath="/" variant="ghost" size="sm" />
-                <h1 className="text-lg font-bold truncate">
-                  {isRu ? 'Рестораны' : 'Restaurants'}
-                </h1>
-              </div>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/restaurants/map')}>
-                <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Cuisine pills */}
-          <div className="container max-w-7xl mx-auto px-4">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-              {CUISINES.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCuisine(c.id)}
-                  className={cn(
-                    "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap",
-                    selectedCuisine === c.id
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-background text-foreground border-border hover:border-foreground/50"
-                  )}
-                >
-                  {isRu ? c.labelRu : c.labelEn}
-                </button>
-              ))}
-            </div>
-          </div>
-
+        <CatalogHeader
+          title={isRu ? 'Рестораны' : 'Restaurants'}
+          fallbackPath="/"
+          categories={CUISINES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }))}
+          selectedCategory={selectedCuisine}
+          onCategoryChange={setSelectedCuisine}
+          actions={
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/restaurants/map')}>
+              <MapPin className="w-4 h-4" />
+              <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+            </Button>
+          }
+        >
           {/* Area filters */}
-          <div className="container max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4 pb-2.5">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {AREAS.map(a => (
                 <button
@@ -131,7 +107,7 @@ export default function RestaurantsIndex() {
               ))}
             </div>
           </div>
-        </header>
+        </CatalogHeader>
 
         {/* Results count */}
         <div className="container max-w-7xl mx-auto px-4 py-3">

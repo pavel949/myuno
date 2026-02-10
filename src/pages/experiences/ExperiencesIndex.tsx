@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -151,25 +151,18 @@ export default function ExperiencesIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          <div className="container max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <BackButton fallbackPath="/" variant="ghost" size="sm" />
-                <h1 className="text-lg font-bold truncate">
-                  {isRu ? 'Туры и активности' : 'Tours & Activities'}
-                </h1>
-              </div>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/map?vertical=experiences')}>
-                <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
-              </Button>
-            </div>
-          </div>
-
+        <CatalogHeader
+          title={isRu ? 'Туры и активности' : 'Tours & Activities'}
+          fallbackPath="/"
+          actions={
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/map?vertical=experiences')}>
+              <MapPin className="w-4 h-4" />
+              <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+            </Button>
+          }
+        >
           {/* Type toggle */}
-          <div className="container max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4 pb-2">
             <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
               {([
                 { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -195,7 +188,7 @@ export default function ExperiencesIndex() {
 
           {/* Category ribbon */}
           {dbCategories.length > 0 && (
-            <div className="container max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4 pb-2.5">
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                 <button
                   onClick={() => handleCategoryChange('all')}
@@ -203,7 +196,7 @@ export default function ExperiencesIndex() {
                     "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
                     selectedCategory === 'all'
                       ? "bg-foreground text-background border-foreground"
-                      : "bg-background text-foreground border-border hover:border-foreground/50"
+                      : "bg-secondary text-foreground border-border hover:border-foreground/30"
                   )}
                 >
                   {isRu ? 'Все' : 'All'}
@@ -216,7 +209,7 @@ export default function ExperiencesIndex() {
                       "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap",
                       selectedCategory === cat.slug
                         ? "bg-foreground text-background border-foreground"
-                        : "bg-background text-foreground border-border hover:border-foreground/50"
+                        : "bg-secondary text-foreground border-border hover:border-foreground/30"
                     )}
                   >
                     {isRu ? cat.name_ru : cat.name_en}
@@ -225,7 +218,7 @@ export default function ExperiencesIndex() {
               </div>
             </div>
           )}
-        </header>
+        </CatalogHeader>
 
         {/* Results count + sort */}
         <div className="container max-w-7xl mx-auto px-4 py-3">

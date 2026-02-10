@@ -3,18 +3,16 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Scissors, Star, MapPin, Loader2 } from 'lucide-react';
+import { Scissors, Star, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useSalons } from '@/hooks/useSalons';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { matchesPriceLevel, isOpenNow } from '@/lib/filterUtils';
-import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -30,52 +28,24 @@ export default function BeautySpaIndex() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const isRu = language === 'ru';
 
   const { salons, isLoading } = useSalons(selectedCategory === 'all' ? undefined : selectedCategory);
 
-  const filteredSalons = useMemo(() => {
-    if (!searchQuery) return salons;
-    return salons.filter(s => {
-      const name = isRu ? s.name_ru : s.name_en;
-      return name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-  }, [salons, searchQuery, isRu]);
+  const categories = CATEGORIES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }));
 
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Красота и СПА' : 'Beauty & Spa'}</h1>
-            <p className="text-xs text-muted-foreground">{filteredSalons.length} {isRu ? 'салонов' : 'salons'}</p>
-          </div>
-        </div>
+      <CatalogHeader
+        title={isRu ? 'Красота и СПА' : 'Beauty & Spa'}
+        subtitle={`${salons.length} ${isRu ? 'салонов' : 'salons'}`}
+        fallbackPath="/discover"
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
 
-        {/* Category ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedCategory === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
-
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -87,7 +57,7 @@ export default function BeautySpaIndex() {
               </div>
             ))}
           </div>
-        ) : filteredSalons.length === 0 ? (
+        ) : salons.length === 0 ? (
           <EmptyState
             icon={Scissors}
             title={isRu ? 'Салоны не найдены' : 'No salons found'}
@@ -95,14 +65,13 @@ export default function BeautySpaIndex() {
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredSalons.map(salon => {
+            {salons.map(salon => {
               const name = isRu ? salon.name_ru : salon.name_en;
-              const isOpen = isOpenNow(salon.working_hours);
               return (
                 <div
                   key={salon.id}
                   className="cursor-pointer group"
-                  onClick={() => navigate(`/beauty/salon/${salon.id}`)}
+                  onClick={() => navigate(`/beauty/${salon.id}`)}
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
@@ -113,31 +82,26 @@ export default function BeautySpaIndex() {
                       className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                       quality={80}
                     />
-                    {salon.is_featured && (
+                    {salon.is_verified && (
                       <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
-                        {isRu ? 'Топ' : 'Featured'}
+                        {isRu ? 'Проверено' : 'Verified'}
                       </Badge>
                     )}
                   </div>
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-between gap-1">
                       <h3 className="font-semibold text-sm truncate">{name}</h3>
-                      {salon.rating > 0 && (
+                      {(salon.rating ?? 0) > 0 && (
                         <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
                           <Star className="w-3 h-3 fill-foreground" />
-                          {salon.rating.toFixed(1)}
+                          {salon.rating?.toFixed(1)}
                         </span>
                       )}
                     </div>
-                    {(salon.services || []).length > 0 && (
-                      <p className="text-xs text-muted-foreground truncate">
-                        {salon.services!.slice(0, 3).join(' · ')}
-                      </p>
-                    )}
-                    {salon.district && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    {salon.address && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-0.5 truncate">
                         <MapPin className="w-3 h-3 shrink-0" />
-                        {salon.district}
+                        {salon.address}
                       </p>
                     )}
                     <p className="text-sm font-semibold">
