@@ -320,6 +320,11 @@ export default function PropertySearchPage() {
                 { id: '2', label: '2+' },
                 { id: '3', label: '3+' },
                 { id: '4', label: '4+' },
+                { id: '5', label: '5+' },
+                { id: '6', label: '6+' },
+                { id: '8', label: '8+' },
+                { id: '10', label: '10+' },
+                { id: '12', label: '12+' },
               ].map(bed => (
                 <FilterChip
                   key={bed.id}
