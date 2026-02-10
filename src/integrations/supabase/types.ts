@@ -6337,6 +6337,7 @@ export type Database = {
           name_ru: string
           phone: string | null
           properties_count: number | null
+          provider_id: string | null
           rating: number | null
           review_count: number | null
           services: string[] | null
@@ -6364,6 +6365,7 @@ export type Database = {
           name_ru: string
           phone?: string | null
           properties_count?: number | null
+          provider_id?: string | null
           rating?: number | null
           review_count?: number | null
           services?: string[] | null
@@ -6391,6 +6393,7 @@ export type Database = {
           name_ru?: string
           phone?: string | null
           properties_count?: number | null
+          provider_id?: string | null
           rating?: number | null
           review_count?: number | null
           services?: string[] | null
@@ -6399,7 +6402,15 @@ export type Database = {
           website?: string | null
           whatsapp?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "management_companies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       management_company_members: {
         Row: {
