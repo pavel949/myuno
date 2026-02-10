@@ -45,7 +45,7 @@ const MAIN_PERSONAS: PersonaCardData[] = [
     persona: 'property_owner',
     icon: <Building2 className="w-4 h-4 text-amber-600" />,
     iconBg: 'bg-gradient-to-br from-amber-500/25 to-orange-500/35',
-    title: { en: 'Owner', ru: 'Владелец' },
+    title: { en: 'Owner / MC', ru: 'Владелец / УК' },
     cardGradient: 'from-amber-500/10 via-orange-500/5 to-transparent',
     borderColor: 'border-amber-500/30 hover:border-amber-500/50',
     activeBorderColor: 'border-amber-500 ring-amber-500/30',
