@@ -11,7 +11,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Heart, Star, BedDouble, ArrowRight, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
+import { Search, Heart, Star, ArrowRight, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -19,10 +19,10 @@ import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
-import { PropertyCategoryRibbon, PropertyMode } from '@/components/property/PropertyCategoryRibbon';
-import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
+import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
+
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+
 import { Button } from '@/components/ui/button';
 
 // ── Recently Viewed Property Shape ──
@@ -53,9 +53,9 @@ function PropertyScrollCard({ property, mode, onClick }: {
   return (
     <button 
       onClick={onClick}
-      className="w-[260px] shrink-0 text-left group"
+      className="w-[300px] shrink-0 text-left group"
     >
-      <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
+      <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
         <img
           src={image}
           alt={title}
@@ -75,16 +75,19 @@ function PropertyScrollCard({ property, mode, onClick }: {
         )}
       </div>
       <div className="space-y-0.5">
-        <h3 className="text-sm font-semibold line-clamp-1">
-          {property.district || 'Phuket'}
-        </h3>
-        <p className="text-xs text-muted-foreground line-clamp-1">
-          {property.bedrooms || 0} {isRu ? 'кроват' : 'bed'}{(property.bedrooms || 0) !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold line-clamp-1">
+            {property.district || 'Phuket'}
+          </h3>
           {property.rating != null && property.rating > 0 && (
-            <> · <Star className="w-3 h-3 inline fill-current" /> {property.rating.toFixed(1)}</>
+            <span className="flex items-center gap-1 text-sm shrink-0">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              {property.rating.toFixed(1)}
+            </span>
           )}
-        </p>
-        <p className="text-sm font-semibold">
+        </div>
+        <p className="text-xs text-muted-foreground line-clamp-1">{title}</p>
+        <p className="text-sm font-semibold pt-0.5">
           {formatPrice(property.price || 0)}
           <span className="font-normal text-muted-foreground text-xs">
             {mode === 'buy' ? '' : `/${isRu ? 'ночь' : 'night'}`}
@@ -151,7 +154,7 @@ export default function PropertyIndex() {
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
 
-  const { propertyTypes } = usePropertyFilterOptions();
+  
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
@@ -197,12 +200,34 @@ export default function PropertyIndex() {
         <div className="px-4 pt-3 pb-2">
           <div className="flex items-center gap-3 mb-3">
             <BackButton fallbackPath="/" variant="ghost" size="sm" />
-            <h1 className="text-lg font-bold">
-              {propertyMode === 'buy' 
-                ? (isRu ? 'Купить недвижимость' : 'Buy Property')
-                : (isRu ? 'Аренда жилья' : 'Vacation Rentals')
-              }
+            <h1 className="text-lg font-bold flex-1">
+              {isRu ? 'Жильё' : 'Stays'}
             </h1>
+            {/* Compact Rent/Buy toggle */}
+            <div className="flex p-0.5 bg-muted/60 rounded-lg">
+              <button
+                onClick={() => setPropertyMode('rent')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                  propertyMode === 'rent'
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {isRu ? 'Аренда' : 'Rent'}
+              </button>
+              <button
+                onClick={() => setPropertyMode('buy')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                  propertyMode === 'buy'
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {isRu ? 'Покупка' : 'Buy'}
+              </button>
+            </div>
           </div>
 
           {/* Search bar — Airbnb style */}
@@ -215,17 +240,6 @@ export default function PropertyIndex() {
               {isRu ? 'Начать поиск' : 'Start your search'}
             </span>
           </button>
-        </div>
-
-        {/* Category tabs */}
-        <div className="px-4 py-2 border-b border-border/50">
-          <PropertyCategoryRibbon
-            mode={propertyMode}
-            onModeChange={setPropertyMode}
-            selectedType="all"
-            onTypeChange={() => {}}
-            propertyTypes={propertyTypes}
-          />
         </div>
 
         {/* Content */}
