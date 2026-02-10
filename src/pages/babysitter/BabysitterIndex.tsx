@@ -1,21 +1,25 @@
-import React, { useState, useMemo } from 'react';
+/**
+ * BabysitterIndex — Airbnb-style babysitter catalog
+ */
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Baby, Heart, Star, Shield, Languages, Calendar } from 'lucide-react';
+import { Baby, Star, Shield, Languages } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { MiniAppLayout, ItemCard, type MiniAppCategory } from '@/components/miniapp';
-import { FilterValues, babysitterFilterConfig } from '@/components/filters';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { BackButton } from '@/components/uno/BackButton';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
-import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { cn } from '@/lib/utils';
 
-const experienceFilters: MiniAppCategory[] = [
+const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'newborn', labelEn: 'Newborn', labelRu: '0-1 год', icon: '👶' },
-  { id: 'toddler', labelEn: 'Toddler', labelRu: '1-3 года', icon: '🧒' },
-  { id: 'preschool', labelEn: 'Preschool', labelRu: '3-6 лет', icon: '👧' },
-  { id: 'school', labelEn: 'School age', labelRu: 'Школьники', icon: '🎒' },
+  { id: 'newborn', labelEn: 'Newborn', labelRu: '0-1 год' },
+  { id: 'toddler', labelEn: 'Toddler', labelRu: '1-3 года' },
+  { id: 'preschool', labelEn: 'Preschool', labelRu: '3-6 лет' },
+  { id: 'school', labelEn: 'School age', labelRu: 'Школьники' },
 ];
 
 const babysitters = [
@@ -23,10 +27,10 @@ const babysitters = [
     id: 'bs-1',
     nameEn: 'Anna Petrova',
     nameRu: 'Анна Петрова',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
     rating: 4.9,
     reviewCount: 87,
-    experience: '5 years',
+    experienceEn: '5 years',
     experienceRu: '5 лет опыта',
     pricePerHour: 500,
     languages: ['Russian', 'English'],
@@ -44,10 +48,10 @@ const babysitters = [
     id: 'bs-2',
     nameEn: 'Maria Ivanova',
     nameRu: 'Мария Иванова',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
     rating: 4.8,
     reviewCount: 65,
-    experience: '8 years',
+    experienceEn: '8 years',
     experienceRu: '8 лет опыта',
     pricePerHour: 600,
     languages: ['Russian', 'English', 'Thai'],
@@ -64,10 +68,10 @@ const babysitters = [
     id: 'bs-3',
     nameEn: 'Olga Smirnova',
     nameRu: 'Ольга Смирнова',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
     rating: 4.7,
     reviewCount: 42,
-    experience: '3 years',
+    experienceEn: '3 years',
     experienceRu: '3 года опыта',
     pricePerHour: 400,
     languages: ['Russian'],
@@ -84,10 +88,10 @@ const babysitters = [
     id: 'bs-4',
     nameEn: 'Natalia Kozlova',
     nameRu: 'Наталья Козлова',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
     rating: 5.0,
     reviewCount: 28,
-    experience: '10 years',
+    experienceEn: '10 years',
     experienceRu: '10 лет опыта',
     pricePerHour: 800,
     languages: ['Russian', 'English', 'French'],
@@ -105,123 +109,111 @@ const babysitters = [
 
 export default function BabysitterIndex() {
   const { language } = useLanguage();
-  const { currencyInfo } = useCurrency();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgeGroup, setSelectedAgeGroup] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([key, value]) => {
-      if (key === 'priceLevel' && value) count++;
-      else if (Array.isArray(value)) count += value.length;
-      else if (value) count++;
-    });
-    return count;
-  }, [filterValues]);
+  const isRu = language === 'ru';
 
   const filteredBabysitters = useMemo(() => {
-    return babysitters.filter(bs => {
-      const name = language === 'ru' ? bs.nameRu : bs.nameEn;
-      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesAge = selectedAgeGroup === 'all' || bs.ageGroups.includes(selectedAgeGroup);
-      
-      if (!matchesSearch || !matchesAge) return false;
-      
-      // Age group filter - using normalized comparison
-      const ageGroups = filterValues.ageGroup as string[] | undefined;
-      if (ageGroups?.length && !matchesFilter(bs.ageGroups, ageGroups)) return false;
-      
-      // Languages filter - using normalized comparison
-      const langs = filterValues.languages as string[] | undefined;
-      if (langs?.length && !matchesFilter(bs.languages, langs)) return false;
-      
-      // Certifications filter
-      const certsFilter = filterValues.certifications as string[] | undefined;
-      if (certsFilter?.length && !matchesFilter(bs.certifications, certsFilter)) return false;
-      
-      // Price level filter
-      const priceLevel = filterValues.priceLevel as string | undefined;
-      if (priceLevel && !matchesPriceLevel(bs.pricePerHour, priceLevel)) return false;
-      
-      // Features filter
-      const features = filterValues.features as string[] | undefined;
-      if (features?.length) {
-        if (features.includes('verified') && !bs.isVerified) return false;
-        if (features.includes('available') && !bs.available) return false;
-        if (features.includes('featured') && !bs.isFeatured) return false;
-      }
-      
-      // Rating filter
-      const ratingFilter = filterValues.rating as string | undefined;
-      if (ratingFilter) {
-        const minRating = parseFloat(ratingFilter);
-        if ((bs.rating || 0) < minRating) return false;
-      }
-      
-      return true;
-    });
-  }, [searchQuery, selectedAgeGroup, filterValues, language]);
+    if (selectedAgeGroup === 'all') return babysitters;
+    return babysitters.filter(bs => bs.ageGroups.includes(selectedAgeGroup));
+  }, [selectedAgeGroup]);
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Няни' : 'Babysitters'}
-      subtitle={language === 'ru' ? `${filteredBabysitters.length} нянь` : `${filteredBabysitters.length} babysitters`}
-      heroIcon={Baby}
-      heroTitle={language === 'ru' ? 'Проверенные няни' : 'Trusted Babysitters'}
-      heroSubtitle={language === 'ru' ? 'Все няни прошли проверку и имеют сертификаты' : 'All babysitters are verified and certified'}
-      heroImage="https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=800"
-      heroGradient={{ from: 'from-pink-500/20', via: 'via-rose-500/20', to: 'to-primary/20' }}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск няни...' : 'Search babysitters...'}
-      categories={experienceFilters}
-      selectedCategory={selectedAgeGroup}
-      onCategoryChange={setSelectedAgeGroup}
-      filterConfig={babysitterFilterConfig}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      filterActiveCount={activeFilterCount}
-      isEmpty={filteredBabysitters.length === 0}
-      emptyIcon={Baby}
-      emptyText={language === 'ru' ? 'Няни не найдены' : 'No babysitters found'}
-      quickActions={
-        <Button 
-          className="w-full h-14 text-base gap-2"
-          onClick={() => navigate('/babysitter/book')}
-        >
-          <Calendar className="w-5 h-5" />
-          {language === 'ru' ? 'Найти няню на сегодня' : 'Find a babysitter today'}
-        </Button>
-      }
-    >
-      <div className="space-y-4">
-        {filteredBabysitters.map((bs) => (
-          <ItemCard
-            key={bs.id}
-            image={bs.image}
-            title={language === 'ru' ? bs.nameRu : bs.nameEn}
-            subtitle={language === 'ru' ? bs.descRu : bs.descEn}
-            rating={bs.rating}
-            reviewCount={bs.reviewCount}
-            price={bs.pricePerHour}
-            priceUnit={`/${language === 'ru' ? 'час' : 'hr'}`}
-            currency={currencyInfo.symbol}
-            isVerified={bs.isVerified}
-            badge={bs.isFeatured 
-              ? { text: language === 'ru' ? 'Топ' : 'Top', className: 'bg-amber-500 text-white' }
-              : !bs.available
-                ? { text: language === 'ru' ? 'Занята' : 'Busy', className: 'bg-muted text-muted-foreground' }
-                : undefined
-            }
-            tags={(language === 'ru' ? bs.certificationsRu : bs.certifications).slice(0, 2)}
-            onClick={() => navigate(`/babysitter/${bs.id}`)}
-          />
-        ))}
-      </div>
+    <AppLayout showHeader={false} showBottomNav>
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold truncate">{isRu ? 'Няни' : 'Babysitters'}</h1>
+            <p className="text-xs text-muted-foreground">{filteredBabysitters.length} {isRu ? 'нянь' : 'babysitters'}</p>
+          </div>
+        </div>
 
-      <VerticalCTA vertical="babysitters" className="my-6" />
-    </MiniAppLayout>
+        {/* Age group ribbon */}
+        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+          {AGE_GROUPS.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedAgeGroup(cat.id)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
+                selectedAgeGroup === cat.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+              )}
+            >
+              {isRu ? cat.labelRu : cat.labelEn}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+        {filteredBabysitters.length === 0 ? (
+          <EmptyState
+            icon={Baby}
+            title={isRu ? 'Няни не найдены' : 'No babysitters found'}
+            description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredBabysitters.map(bs => {
+              const name = isRu ? bs.nameRu : bs.nameEn;
+              const desc = isRu ? bs.descRu : bs.descEn;
+              return (
+                <div
+                  key={bs.id}
+                  className="cursor-pointer group"
+                  onClick={() => navigate(`/babysitter/${bs.id}`)}
+                >
+                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2">
+                    <OptimizedImage
+                      src={bs.image}
+                      alt={name}
+                      width={400}
+                      height={533}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      quality={80}
+                    />
+                    {bs.isFeatured && (
+                      <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
+                        {isRu ? 'Топ' : 'Top'}
+                      </Badge>
+                    )}
+                    {!bs.available && (
+                      <Badge className="absolute top-2 right-2 bg-muted text-muted-foreground text-[10px]">
+                        {isRu ? 'Занята' : 'Busy'}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className="font-semibold text-sm truncate">{name}</h3>
+                      {bs.rating > 0 && (
+                        <span className="flex items-center gap-0.5 text-xs font-medium shrink-0">
+                          <Star className="w-3 h-3 fill-foreground" />
+                          {bs.rating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{desc}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-0.5">
+                      <Shield className="w-3 h-3 shrink-0" />
+                      {isRu ? bs.experienceRu : bs.experienceEn}
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {formatPrice(bs.pricePerHour)}/{isRu ? 'час' : 'hr'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </AppLayout>
   );
 }
