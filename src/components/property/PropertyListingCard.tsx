@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Star, Zap, BedDouble, Bath, Users } from 'lucide-react';
+import { Heart, Star, Zap, BedDouble, Bath, Users, CalendarIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
@@ -126,19 +127,32 @@ export function PropertyListingCard({
           </span>
         </div>
 
-        {/* Price */}
-        <p className="text-sm font-semibold pt-1">
-          {mode === 'buy' ? (
-            formatPrice((property as any).sale_price || property.price || 0)
-          ) : (
-            <>
-              {formatPrice(property.price || 0)}
-              <span className="font-normal text-muted-foreground">
-                {formatPriceLabel(property.price_period || 'night', language)}
-              </span>
-            </>
-          )}
-        </p>
+        {/* Price + Book Button */}
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-sm font-semibold">
+            {mode === 'buy' ? (
+              formatPrice((property as any).sale_price || property.price || 0)
+            ) : (
+              <>
+                {formatPrice(property.price || 0)}
+                <span className="font-normal text-muted-foreground">
+                  {formatPriceLabel(property.price_period || 'night', language)}
+                </span>
+              </>
+            )}
+          </p>
+          <Button
+            size="sm"
+            className="h-8 text-xs px-3 gap-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/property/${property.id}/inquiry`);
+            }}
+          >
+            <CalendarIcon className="w-3.5 h-3.5" />
+            {isRu ? 'Забронировать' : 'Book'}
+          </Button>
+        </div>
       </div>
     </div>
   );
