@@ -79,6 +79,16 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
     ],
   },
   {
+    id: 'community',
+    labelEn: 'Community',
+    labelRu: 'Сообщество',
+    icon: '🏪',
+    items: [
+      { route: '/classifieds', icon: '🏪', labelEn: 'Flea Market', labelRu: 'Барахолка' },
+      { route: '/market', icon: '🛒', labelEn: 'Marketplace', labelRu: 'Маркетплейс' },
+    ],
+  },
+  {
     id: 'admin',
     labelEn: 'Life Admin',
     labelRu: 'Документы и финансы',
