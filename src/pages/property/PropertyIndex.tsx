@@ -11,7 +11,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Heart, Star, ArrowRight, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
+import { Search, Heart, Star, ArrowRight, SlidersHorizontal, MapPin, Loader2, Car, Plane, Flower2, Shield, Compass } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -240,6 +240,28 @@ export default function PropertyIndex() {
               {isRu ? 'Начать поиск' : 'Start your search'}
             </span>
           </button>
+        </div>
+
+        {/* Quick services ribbon */}
+        <div className="flex gap-4 overflow-x-auto px-4 py-3 scrollbar-hide border-b border-border/40">
+          {[
+            { icon: Plane, label: isRu ? 'Трансфер' : 'Transfer', path: '/transfer' },
+            { icon: Car, label: isRu ? 'Авто' : 'Car Rental', path: '/transport' },
+            { icon: Flower2, label: isRu ? 'Цветы' : 'Flowers', path: '/flower-delivery' },
+            { icon: Shield, label: isRu ? 'Страховка' : 'Insurance', path: '/insurance' },
+            { icon: Compass, label: isRu ? 'Впечатления' : 'Experiences', path: '/experiences' },
+          ].map((s) => (
+            <button
+              key={s.path}
+              onClick={() => navigate(s.path)}
+              className="flex flex-col items-center gap-1 shrink-0 min-w-[56px]"
+            >
+              <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
+                <s.icon className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <span className="text-[10px] text-muted-foreground font-medium">{s.label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Content */}
