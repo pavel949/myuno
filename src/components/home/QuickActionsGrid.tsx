@@ -188,7 +188,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
     }
     
     const moreAction = getMoreAction(contentMode);
-    const maxItems = 5;
+    const maxItems = 7;
     return [...userActions.slice(0, maxItems), moreAction];
   }, [activeRole, roleLoading, personas, profile?.user_type, contentMode]);
 
@@ -205,7 +205,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   }, [queryClient]);
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3">
+    <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-1 md:gap-2">
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
@@ -218,19 +218,19 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             onMouseEnter={() => handlePrefetch(action.path)}
             onTouchStart={() => handlePrefetch(action.path)}
             className={cn(
-              "relative flex flex-col items-center p-2 rounded-xl",
+              "relative flex flex-col items-center p-1.5 rounded-xl",
               "hover:bg-card/80 transition-all group active:scale-[0.97]",
             )}
           >
             <div className={cn(
-              "w-[60px] h-[60px] rounded-[16px] flex items-center justify-center mb-1.5 shadow-sm",
+              "w-[50px] h-[50px] rounded-[14px] flex items-center justify-center mb-1 shadow-sm",
               isMore ? "bg-muted" : "bg-primary/10",
               "group-hover:scale-105 transition-transform duration-150"
             )}>
               <Icon 
                 className={cn(isMore ? "text-muted-foreground" : "text-primary")}
-                style={{ width: 44, height: 44 }}
-                strokeWidth={1.1}
+                style={{ width: 28, height: 28 }}
+                strokeWidth={1.3}
               />
             </div>
             
