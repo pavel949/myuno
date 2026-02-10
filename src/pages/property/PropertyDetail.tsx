@@ -31,6 +31,9 @@ import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
+import { HostProfileSection } from '@/components/property/HostProfileSection';
+import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
+import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Calendar } from '@/components/ui/calendar';
@@ -409,6 +412,17 @@ export default function PropertyDetail() {
             </>
           )}
 
+          {/* Host Profile */}
+          {rentalTerms?.manager_name && (
+            <>
+              <Separator />
+              <HostProfileSection
+                rentalTerms={rentalTerms}
+                isVerified={property.is_verified}
+              />
+            </>
+          )}
+
           <Separator />
 
           {/* Description */}
@@ -587,17 +601,22 @@ export default function PropertyDetail() {
           )}
 
 
-          {/* Location */}
+          {/* Reviews */}
           <Separator />
-          <div>
-            <h2 className="text-xl font-semibold mb-3">
-              {isRu ? 'Где вы будете' : 'Where you\'ll be'}
-            </h2>
-            <div className="flex items-start gap-2 text-muted-foreground">
-              <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <p>{property.address || property.district}</p>
-            </div>
-          </div>
+          <ReviewsSection
+            itemType="property"
+            itemId={id || ''}
+            itemName={isRu ? property.title_ru : property.title_en}
+          />
+
+          {/* Location Map */}
+          <Separator />
+          <PropertyLocationMap
+            lat={property.lat}
+            lng={property.lng}
+            district={property.district}
+            address={property.address}
+          />
             </div>
 
             {/* Sidebar - Booking Card (Desktop Only) */}

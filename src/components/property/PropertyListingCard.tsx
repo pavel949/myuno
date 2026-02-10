@@ -6,9 +6,11 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2 } from 'lucide-react';
+import { Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FavoriteButton } from '@/components/uno/FavoriteButton';
+import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
@@ -52,7 +54,7 @@ export function PropertyListingCard({
   const isRu = language === 'ru';
 
   const title = isRu ? property.title_ru : property.title_en;
-  const image = property.cover_image || property.images?.[0] || FALLBACK_IMAGE;
+  const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
 
   return (
     <div
@@ -61,28 +63,34 @@ export function PropertyListingCard({
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
-      {/* Image */}
-      <div className="relative aspect-square rounded-2xl overflow-hidden mb-3">
-        <img
-          src={image}
+      {/* Image Carousel */}
+      <div className="relative mb-3">
+        <PropertyImageCarousel
+          images={images}
           alt={title}
-          className={cn(
-            "w-full h-full object-cover transition-transform duration-300",
-            isHovered && "scale-[1.03]"
-          )}
-          loading="lazy"
+          isHovered={isHovered}
         />
 
         {/* Favorite */}
-        <button
-          className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Heart className="w-5 h-5" />
-        </button>
+        <div className="absolute top-3 right-3 z-10">
+          <FavoriteButton
+            itemType="property"
+            itemId={property.id}
+            itemData={{
+              title_en: property.title_en,
+              title_ru: property.title_ru,
+              cover_image: property.cover_image || images[0],
+              price: property.price,
+              district: property.district,
+            }}
+            size="sm"
+            variant="ghost"
+            className="bg-background/80 backdrop-blur-sm hover:bg-background"
+          />
+        </div>
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1">
+        <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
           {property.is_featured && (
             <Badge className="bg-background text-foreground border-0 shadow-sm text-xs">
               {isRu ? 'Популярное' : 'Guest favorite'}
