@@ -5,6 +5,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, ChevronDown, Building2, Zap, Wifi, Droplets, Utensils, Car as CarIcon, Dumbbell } from 'lucide-react';
+import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -507,7 +508,16 @@ export default function PropertySearchPage() {
             </div>
           )}
 
-          {!isLoading && (
+          {!isLoading && properties.length > 0 && (
+            <>
+              {/* First-visit nudge */}
+              <NextStepNudge
+                message={language === 'ru' ? 'Нажмите на карточку для подробностей' : 'Tap a card for details'}
+                direction="down"
+                visible={true}
+                hintId="property-search-tap-card"
+                className="mb-4 w-fit mx-auto"
+              />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {properties.map(property => {
                 const mc = (property as any).management_company_id ? companyMap.get((property as any).management_company_id) : undefined;
@@ -524,6 +534,7 @@ export default function PropertySearchPage() {
                 );
               })}
             </div>
+            </>
           )}
 
           <div ref={loadMoreRef} className="py-8 flex justify-center">
