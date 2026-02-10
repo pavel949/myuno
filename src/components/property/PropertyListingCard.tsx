@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Star, Zap, BedDouble, Bath, Users, CalendarIcon } from 'lucide-react';
+import { Heart, Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,6 +19,8 @@ interface PropertyListingCardProps {
   mode?: 'rent' | 'buy';
   isHovered?: boolean;
   onHover?: (id: string | null) => void;
+  companyName?: string;
+  companySlug?: string;
   className?: string;
 }
 
@@ -40,6 +42,8 @@ export function PropertyListingCard({
   mode = 'rent',
   isHovered = false,
   onHover,
+  companyName,
+  companySlug,
   className,
 }: PropertyListingCardProps) {
   const navigate = useNavigate();
@@ -110,6 +114,20 @@ export function PropertyListingCard({
 
         {/* Title */}
         <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
+
+        {/* Management Company Badge */}
+        {companyName && (
+          <button
+            className="flex items-center gap-1 text-[11px] text-primary hover:underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (companySlug) navigate(`/company/${companySlug}`);
+            }}
+          >
+            <Building2 className="w-3 h-3" />
+            {companyName}
+          </button>
+        )}
 
         {/* Specs */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground">

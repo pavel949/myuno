@@ -69,6 +69,7 @@ export const APP_ROUTES = {
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/complexes',
+  MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
 
   // ── Offplan & Developers ──
   OFFPLAN: '/offplan',

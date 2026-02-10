@@ -4,13 +4,14 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, ChevronDown } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2, ChevronDown, Building2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
+import { useManagementCompanies, ManagementCompany } from '@/hooks/useManagementCompanies';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -56,6 +57,9 @@ export default function PropertySearchPage() {
   const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
+    searchParamsUrl.get('company') || null
+  );
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -68,6 +72,7 @@ export default function PropertySearchPage() {
   }, []);
 
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
+  const { data: companies = [] } = useManagementCompanies();
 
   const {
     data: infiniteData,
@@ -78,7 +83,17 @@ export default function PropertySearchPage() {
   } = usePropertiesInfinite({
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
     propertyType: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    managementCompanyId: selectedCompanyId || undefined,
   });
+
+  // Build company lookup map for card badges
+  const companyMap = useMemo(() => {
+    const map = new Map<string, { name: string; slug: string }>();
+    for (const c of companies) {
+      map.set(c.id, { name: language === 'ru' ? c.name_ru : c.name_en, slug: c.slug });
+    }
+    return map;
+  }, [companies, language]);
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
@@ -295,6 +310,56 @@ export default function PropertySearchPage() {
                 />
               ))}
 
+              {/* Company filter dropdown */}
+              {companies.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className={cn(
+                      "inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                      selectedCompanyId
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                    )}>
+                      <Building2 className="w-3 h-3" />
+                      <span>{language === 'ru' ? 'УК' : 'Company'}</span>
+                      {selectedCompanyId && <span>✓</span>}
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-2" align="start" sideOffset={6}>
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => setSelectedCompanyId(null)}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+                          !selectedCompanyId ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                        )}
+                      >
+                        <span className="flex-1 text-left">{language === 'ru' ? 'Все' : 'All'}</span>
+                      </button>
+                      {companies.map(c => {
+                        const label = language === 'ru' ? c.name_ru : c.name_en;
+                        return (
+                          <button
+                            key={c.id}
+                            onClick={() => setSelectedCompanyId(c.id === selectedCompanyId ? null : c.id)}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+                              selectedCompanyId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                            )}
+                          >
+                            <span className="flex-1 text-left">{label}</span>
+                            {selectedCompanyId === c.id && (
+                              <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+
               {/* Divider */}
               <div className="w-px h-5 bg-border shrink-0" />
 
@@ -335,6 +400,7 @@ export default function PropertySearchPage() {
                   setQuickFilters([]);
                   setSelectedDistricts([]);
                   setSelectedBedrooms([]);
+                  setSelectedCompanyId(null);
                 }}>
                   {language === 'ru' ? 'Сбросить' : 'Clear'}
                 </Button>
@@ -358,15 +424,20 @@ export default function PropertySearchPage() {
 
           {!isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {properties.map(property => (
-                <PropertyListingCard
-                  key={property.id}
-                  property={property}
-                  mode={propertyMode}
-                  isHovered={hoveredProperty === property.id}
-                  onHover={setHoveredProperty}
-                />
-              ))}
+              {properties.map(property => {
+                const mc = (property as any).management_company_id ? companyMap.get((property as any).management_company_id) : undefined;
+                return (
+                  <PropertyListingCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                    isHovered={hoveredProperty === property.id}
+                    onHover={setHoveredProperty}
+                    companyName={mc?.name}
+                    companySlug={mc?.slug}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -394,6 +465,7 @@ export default function PropertySearchPage() {
                 setSelectedDistricts([]);
                 setSelectedBedrooms([]);
                 setSelectedTypes([]);
+                setSelectedCompanyId(null);
               }}>
                 {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
               </Button>

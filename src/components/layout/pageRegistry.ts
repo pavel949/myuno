@@ -42,6 +42,7 @@ export const OffplanDetail = lazy(() => import('@/pages/property/OffplanDetail')
 export const DevelopersIndex = lazy(() => import('@/pages/property/DevelopersIndex'));
 export const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDetail'));
 export const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
+export const ManagementCompanyProfile = lazy(() => import('@/pages/property/ManagementCompanyProfile'));
 
 // ── Investment ──
 export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
