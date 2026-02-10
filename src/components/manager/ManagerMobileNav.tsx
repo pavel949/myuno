@@ -9,18 +9,11 @@ import {
   LayoutDashboard, 
   Building2, 
   Calendar, 
-  ClipboardList,
-  MoreHorizontal,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
-const mainNavItems = [
+const navItems = [
   { 
     id: 'dashboard', 
     icon: LayoutDashboard, 
@@ -43,19 +36,12 @@ const mainNavItems = [
     path: '/manager/calendar',
   },
   { 
-    id: 'bookings', 
-    icon: ClipboardList, 
-    labelEn: 'Bookings', 
-    labelRu: 'Брони',
-    path: '/manager/bookings',
+    id: 'profile', 
+    icon: User, 
+    labelEn: 'Profile', 
+    labelRu: 'Профиль',
+    path: '/account',
   },
-];
-
-const moreItems = [
-  { id: 'guests', labelEn: 'Guests', labelRu: 'Гости', path: '/manager/guests' },
-  { id: 'messages', labelEn: 'Messages', labelRu: 'Сообщения', path: '/manager/messages' },
-  { id: 'pricing', labelEn: 'Pricing', labelRu: 'Цены', path: '/manager/pricing' },
-  { id: 'settings', labelEn: 'Settings', labelRu: 'Настройки', path: '/manager/settings' },
 ];
 
 export function ManagerMobileNav() {
@@ -74,7 +60,7 @@ export function ManagerMobileNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t safe-area-inset-bottom">
       <div className="flex items-center justify-around h-16 px-2">
-        {mainNavItems.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
           
@@ -96,28 +82,6 @@ export function ManagerMobileNav() {
             </button>
           );
         })}
-        
-        {/* More menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex flex-col items-center justify-center gap-1 min-w-[60px] py-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors">
-              <MoreHorizontal className="h-5 w-5" />
-              <span className="text-[10px] font-medium">
-                {isRu ? 'Ещё' : 'More'}
-              </span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            {moreItems.map((item) => (
-              <DropdownMenuItem
-                key={item.id}
-                onClick={() => navigate(item.path)}
-              >
-                {isRu ? item.labelRu : item.labelEn}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </nav>
   );

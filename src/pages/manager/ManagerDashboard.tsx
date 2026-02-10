@@ -1,21 +1,20 @@
 /**
  * @module ManagerDashboard
- * @description Main dashboard for Property Managers
+ * @description Main dashboard for Property Managers — focused on "what to do today"
  */
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useAssignedProperties } from '@/hooks/useAssignedProperties';
+import { CalendarTodayTasks } from '@/components/owner/CalendarTodayTasks';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { 
   Building2, 
-  Calendar, 
   Users, 
-  Clock, 
   ArrowRight,
   CheckCircle2,
   AlertCircle,
@@ -24,42 +23,6 @@ import {
   LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Stats Card Component
-function StatsCard({ 
-  icon: Icon, 
-  label, 
-  value, 
-  trend,
-  className,
-}: { 
-  icon: React.ElementType; 
-  label: string; 
-  value: number | string;
-  trend?: string;
-  className?: string;
-}) {
-  return (
-    <Card className={cn("border-0 shadow-sm", className)}>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Icon className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-2xl font-bold">{value}</p>
-            <p className="text-xs text-muted-foreground truncate">{label}</p>
-          </div>
-          {trend && (
-            <Badge variant="secondary" className="text-xs">
-              {trend}
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 // Property Card Component
 function PropertyCard({ 
@@ -108,7 +71,6 @@ function PropertyCard({
     >
       <CardContent className="p-0">
         <div className="flex gap-3 p-3">
-          {/* Thumbnail */}
           <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
             {property.cover_image ? (
               <img 
@@ -122,8 +84,6 @@ function PropertyCard({
               </div>
             )}
           </div>
-
-          {/* Content */}
           <div className="flex-1 min-w-0">
             <h3 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
               {isRu ? property.title_ru : property.title}
@@ -131,14 +91,11 @@ function PropertyCard({
             <p className="text-xs text-muted-foreground truncate mt-0.5">
               {property.district || property.address || (isRu ? 'Адрес не указан' : 'No address')}
             </p>
-            
-            {/* Status Badge */}
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="secondary" className={cn("gap-1 text-xs", status.color)}>
                 <StatusIcon className="h-3 w-3" />
                 {isRu ? status.labelRu : status.labelEn}
               </Badge>
-              
               {property.upcoming_bookings_count > 0 && (
                 <span className="text-xs text-muted-foreground">
                   {property.upcoming_bookings_count} {isRu ? 'брон.' : 'bookings'}
@@ -146,8 +103,6 @@ function PropertyCard({
               )}
             </div>
           </div>
-
-          {/* Arrow */}
           <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors self-center" />
         </div>
       </CardContent>
@@ -155,10 +110,8 @@ function PropertyCard({
   );
 }
 
-// Empty State Component
 function EmptyState({ isRu }: { isRu: boolean }) {
   const navigate = useNavigate();
-  
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -170,8 +123,8 @@ function EmptyState({ isRu }: { isRu: boolean }) {
         </h3>
         <p className="text-muted-foreground text-sm max-w-sm mb-6">
           {isRu 
-            ? 'Вы являетесь управляющим, но пока вам не назначены объекты. Свяжитесь с владельцем или администратором.'
-            : 'You are a property manager, but no properties are assigned to you yet. Contact the owner or administrator.'}
+            ? 'Вам пока не назначены объекты. Свяжитесь с владельцем или администратором.'
+            : 'No properties are assigned to you yet. Contact the owner or administrator.'}
         </p>
         <Button variant="outline" onClick={() => navigate('/support')}>
           {isRu ? 'Связаться с поддержкой' : 'Contact Support'}
@@ -181,15 +134,11 @@ function EmptyState({ isRu }: { isRu: boolean }) {
   );
 }
 
-// Loading State
 function LoadingSkeleton() {
   return (
-    <div className="space-y-6 p-4">
-      <div className="grid grid-cols-2 gap-3">
-        {[1, 2, 3, 4].map(i => (
-          <Skeleton key={i} className="h-20 rounded-xl" />
-        ))}
-      </div>
+    <div className="space-y-4 p-4">
+      <Skeleton className="h-12 rounded-xl" />
+      <Skeleton className="h-32 rounded-xl" />
       <div className="space-y-3">
         {[1, 2, 3].map(i => (
           <Skeleton key={i} className="h-24 rounded-xl" />
@@ -207,7 +156,6 @@ export default function ManagerDashboard() {
 
   const { properties, stats, isLoading, hasProperties } = useAssignedProperties();
 
-  // Not authenticated
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -229,54 +177,47 @@ export default function ManagerDashboard() {
     );
   }
 
-  // Loading
-  if (isLoading) {
-    return <LoadingSkeleton />;
+  if (isLoading) return <LoadingSkeleton />;
+
+  // Summary line
+  const summaryParts: string[] = [];
+  if (stats.totalProperties > 0) {
+    summaryParts.push(`${stats.totalProperties} ${isRu ? 'объект' + (stats.totalProperties > 1 ? (stats.totalProperties < 5 ? 'а' : 'ов') : '') : 'propert' + (stats.totalProperties > 1 ? 'ies' : 'y')}`);
+  }
+  if (stats.upcomingCheckIns > 0) {
+    summaryParts.push(`${stats.upcomingCheckIns} ${isRu ? 'заезд сегодня' : 'check-in today'}`);
+  }
+  if (stats.currentGuests > 0) {
+    summaryParts.push(`${stats.currentGuests} ${isRu ? 'гостей сейчас' : 'guests now'}`);
   }
 
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return isRu ? 'Доброе утро' : 'Good morning';
+    if (hour < 18) return isRu ? 'Добрый день' : 'Good afternoon';
+    return isRu ? 'Добрый вечер' : 'Good evening';
+  })();
+
   return (
-    <div className="p-4 space-y-6 max-w-full overflow-x-hidden">
-      {/* Welcome Header */}
+    <div className="p-4 pb-24 space-y-5 max-w-full overflow-x-hidden">
+      {/* Greeting + summary */}
       <div>
-        <h1 className="text-xl font-bold">
-          {isRu ? 'Добро пожаловать!' : 'Welcome back!'}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {isRu 
-            ? 'Обзор ваших назначенных объектов' 
-            : 'Overview of your assigned properties'}
-        </p>
+        <h1 className="text-xl font-bold">{greeting}!</h1>
+        {summaryParts.length > 0 && (
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {summaryParts.join(' · ')}
+          </p>
+        )}
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <StatsCard
-          icon={Building2}
-          label={isRu ? 'Объектов' : 'Properties'}
-          value={stats.totalProperties}
-        />
-        <StatsCard
-          icon={Users}
-          label={isRu ? 'Гостей сейчас' : 'Current Guests'}
-          value={stats.currentGuests}
-        />
-        <StatsCard
-          icon={LogIn}
-          label={isRu ? 'Заезды сегодня' : 'Check-ins Today'}
-          value={stats.upcomingCheckIns}
-        />
-        <StatsCard
-          icon={Calendar}
-          label={isRu ? 'Активных' : 'Active'}
-          value={stats.activeProperties}
-        />
-      </div>
+      {/* Today's tasks — reused from Owner module */}
+      {hasProperties && <CalendarTodayTasks />}
 
       {/* Properties Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold">
-            {isRu ? 'Ваши объекты' : 'Your Properties'}
+            {isRu ? 'Мои объекты' : 'My Properties'}
           </h2>
           {hasProperties && (
             <Button 
@@ -306,35 +247,6 @@ export default function ManagerDashboard() {
           </div>
         )}
       </div>
-
-      {/* Quick Actions */}
-      {hasProperties && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">
-              {isRu ? 'Быстрые действия' : 'Quick Actions'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex-col gap-1"
-              onClick={() => navigate('/manager/calendar')}
-            >
-              <Calendar className="h-5 w-5" />
-              <span className="text-xs">{isRu ? 'Календарь' : 'Calendar'}</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-auto py-3 flex-col gap-1"
-              onClick={() => navigate('/manager/bookings')}
-            >
-              <Clock className="h-5 w-5" />
-              <span className="text-xs">{isRu ? 'Бронирования' : 'Bookings'}</span>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
