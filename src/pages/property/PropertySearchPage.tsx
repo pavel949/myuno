@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, ChevronDown, Building2 } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2, ChevronDown, Building2, Zap, Wifi, Droplets, Utensils, Car as CarIcon, Dumbbell } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
+import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { FilterChip } from '@/components/uno/FilterChip';
 import {
@@ -31,6 +32,7 @@ import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
+import { Switch } from '@/components/ui/switch';
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
@@ -60,6 +62,9 @@ export default function PropertySearchPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     searchParamsUrl.get('company') || null
   );
+  const [instantBookOnly, setInstantBookOnly] = useState(false);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +119,12 @@ export default function PropertySearchPage() {
     const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
     
     const filtered = allItems.filter(prop => {
+      // Category filter
+      if (selectedCategory && !matchesCategory(prop, selectedCategory)) return false;
+
+      // Instant book filter
+      if (instantBookOnly && !prop.instant_booking) return false;
+
       // Multi-type filter
       if (selectedTypes.length > 0) {
         const propType = (prop.property_type || '').toLowerCase();
@@ -153,12 +164,16 @@ export default function PropertySearchPage() {
         if (!matchesDistrict) return false;
       }
 
-      if (filterValues.amenities) {
-        const amenityFilters = Array.isArray(filterValues.amenities)
-          ? filterValues.amenities as string[]
-          : [filterValues.amenities as string];
-        const propAmenities = prop.amenities || [];
-        const match = amenityFilters.every(f => propAmenities.some(a => a.toLowerCase().includes(f.toLowerCase())));
+      // Amenities filter (from chips + universal filter)
+      const allAmenityFilters = [
+        ...selectedAmenities,
+        ...(filterValues.amenities
+          ? (Array.isArray(filterValues.amenities) ? filterValues.amenities as string[] : [filterValues.amenities as string])
+          : []),
+      ];
+      if (allAmenityFilters.length > 0) {
+        const propAmenities = (prop.amenities || []).map(a => a.toLowerCase());
+        const match = allAmenityFilters.every(f => propAmenities.some(a => a.includes(f.toLowerCase())));
         if (!match) return false;
       }
       
@@ -177,7 +192,7 @@ export default function PropertySearchPage() {
     }
 
     return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedTypes, sortKey]);
+  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedTypes, sortKey, instantBookOnly, selectedAmenities, selectedCategory]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -188,8 +203,11 @@ export default function PropertySearchPage() {
     count += selectedBedrooms.length;
     count += selectedDistricts.length;
     count += quickFilters.length;
+    count += selectedAmenities.length;
+    if (instantBookOnly) count++;
+    if (selectedCategory) count++;
     return count;
-  }, [filterValues, quickFilters, selectedBedrooms, selectedDistricts]);
+  }, [filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedAmenities, instantBookOnly, selectedCategory]);
 
   return (
     <AppLayout showHeader={false} showBottomNav>
@@ -363,6 +381,46 @@ export default function PropertySearchPage() {
               {/* Divider */}
               <div className="w-px h-5 bg-border shrink-0" />
 
+              {/* Instant Book toggle */}
+              <button
+                onClick={() => setInstantBookOnly(prev => !prev)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[11px] font-medium border transition-all shrink-0",
+                  instantBookOnly
+                    ? "bg-amber-500 text-white border-amber-500"
+                    : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                )}
+              >
+                <Zap className="w-3 h-3" />
+                <span>{language === 'ru' ? 'Мгновенное' : 'Instant'}</span>
+              </button>
+
+              {/* Amenity quick chips */}
+              {[
+                { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
+                { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
+                { id: 'kitchen', icon: Utensils, labelEn: 'Kitchen', labelRu: 'Кухня' },
+                { id: 'parking', icon: CarIcon, labelEn: 'Parking', labelRu: 'Парковка' },
+                { id: 'gym', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Спортзал' },
+              ].map(amenity => (
+                <FilterChip
+                  key={amenity.id}
+                  label={language === 'ru' ? amenity.labelRu : amenity.labelEn}
+                  isActive={selectedAmenities.includes(amenity.id)}
+                  onToggle={() => {
+                    setSelectedAmenities(prev =>
+                      prev.includes(amenity.id)
+                        ? prev.filter(a => a !== amenity.id)
+                        : [...prev, amenity.id]
+                    );
+                  }}
+                  size="sm"
+                />
+              ))}
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border shrink-0" />
+
               {/* Full filters button */}
               <UniversalFilter
                 config={filterConfig}
@@ -385,6 +443,13 @@ export default function PropertySearchPage() {
               </UniversalFilter>
             </div>
           </div>
+
+          {/* Category Icons Ribbon */}
+          <PropertyCategoryIcons
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+            className="py-2"
+          />
         </header>
 
         <div className="px-4 py-2">
@@ -401,6 +466,9 @@ export default function PropertySearchPage() {
                   setSelectedDistricts([]);
                   setSelectedBedrooms([]);
                   setSelectedCompanyId(null);
+                  setInstantBookOnly(false);
+                  setSelectedAmenities([]);
+                  setSelectedCategory(null);
                 }}>
                   {language === 'ru' ? 'Сбросить' : 'Clear'}
                 </Button>
@@ -466,6 +534,9 @@ export default function PropertySearchPage() {
                 setSelectedBedrooms([]);
                 setSelectedTypes([]);
                 setSelectedCompanyId(null);
+                setInstantBookOnly(false);
+                setSelectedAmenities([]);
+                setSelectedCategory(null);
               }}>
                 {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
               </Button>
