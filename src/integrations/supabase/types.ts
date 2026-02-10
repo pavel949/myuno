@@ -6317,6 +6317,125 @@ export type Database = {
           },
         ]
       }
+      management_companies: {
+        Row: {
+          address: string | null
+          cover_image: string | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          founded_year: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          logo: string | null
+          name_en: string
+          name_ru: string
+          phone: string | null
+          properties_count: number | null
+          rating: number | null
+          review_count: number | null
+          services: string[] | null
+          slug: string
+          updated_at: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          name_en: string
+          name_ru: string
+          phone?: string | null
+          properties_count?: number | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          slug: string
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          name_en?: string
+          name_ru?: string
+          phone?: string | null
+          properties_count?: number | null
+          rating?: number | null
+          review_count?: number | null
+          services?: string[] | null
+          slug?: string
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      management_company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "management_company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_categories: {
         Row: {
           category_group: string | null
@@ -10970,6 +11089,7 @@ export type Database = {
           lng: number | null
           location_id: string | null
           managed_by_org_id: string | null
+          management_company_id: string | null
           management_document_name: string | null
           management_document_url: string | null
           management_type: string | null
@@ -11149,6 +11269,7 @@ export type Database = {
           lng?: number | null
           location_id?: string | null
           managed_by_org_id?: string | null
+          management_company_id?: string | null
           management_document_name?: string | null
           management_document_url?: string | null
           management_type?: string | null
@@ -11328,6 +11449,7 @@ export type Database = {
           lng?: number | null
           location_id?: string | null
           managed_by_org_id?: string | null
+          management_company_id?: string | null
           management_document_name?: string | null
           management_document_url?: string | null
           management_type?: string | null
@@ -11430,6 +11552,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
           {
