@@ -223,14 +223,14 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             )}
           >
             <div className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center mb-1.5",
+              "w-16 h-16 rounded-2xl flex items-center justify-center mb-1.5",
               isMore ? "bg-muted" : "bg-primary/8",
               "group-hover:scale-105 transition-transform duration-150"
             )}>
               <Icon className={cn(
-                "w-8 h-8",
+                "w-9 h-9",
                 isMore ? "text-muted-foreground" : "text-primary"
-              )} />
+              )} strokeWidth={1.5} />
             </div>
             
             <span className="text-[11px] font-medium text-center leading-tight truncate w-full text-foreground">
