@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOwnerProperties, useCreateServiceRequest } from '@/hooks/usePropertyCare';
+import { useCreateServiceRequest } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
@@ -27,7 +28,7 @@ export default function ServiceRequest() {
   const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
 
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
   const createRequest = useCreateServiceRequest();
 
   const typeFromUrl = searchParams.get('type') || 'check_in';
@@ -100,7 +101,7 @@ export default function ServiceRequest() {
     );
   }
 
-  if (!properties?.length) {
+  if (!allProperties?.length) {
     return (
       <PageContainer>
         <BackButton />
@@ -181,9 +182,9 @@ export default function ServiceRequest() {
                 <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
               </SelectTrigger>
               <SelectContent>
-                {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {isRu && property.title_ru ? property.title_ru : property.title}
+                {allProperties.map((property) => (
+                  <SelectItem key={property.property_id} value={property.property_id}>
+                    {isRu ? property.title_ru : property.title}
                     {property.district && ` • ${property.district}`}
                   </SelectItem>
                 ))}

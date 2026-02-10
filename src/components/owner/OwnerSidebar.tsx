@@ -5,9 +5,7 @@ import {
   Building2,
   CalendarDays,
   DollarSign,
-  FileText,
   Users,
-  Settings,
   LogOut,
   Home,
   ChevronDown
@@ -29,7 +27,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMyProperties } from '@/hooks/useMyProperties';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -38,7 +35,6 @@ interface NavItem {
   path: string;
   icon: React.ElementType;
   badge?: number;
-  ownerOnly?: boolean;
 }
 
 interface NavGroup {
@@ -64,8 +60,7 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign, ownerOnly: true },
-      { title: 'Documents', titleRu: 'Документы', path: '/owner/documents', icon: FileText, ownerOnly: true },
+      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
     ],
   },
   {
@@ -74,7 +69,6 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'My Team', titleRu: 'Моя команда', path: '/owner/team', icon: Users },
-      { title: 'Settings', titleRu: 'Настройки', path: '/owner/settings', icon: Settings, ownerOnly: true },
     ],
   },
 ];
@@ -87,10 +81,6 @@ export function OwnerSidebar() {
   const { user, signOut } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
-  const { accessRole } = useMyProperties();
-
-  const isManagerOnly = accessRole === 'manager';
-
   const isActive = (path: string) => {
     if (path === '/owner') return location.pathname === '/owner';
     return location.pathname.startsWith(path);
@@ -99,14 +89,6 @@ export function OwnerSidebar() {
   const getGroupDefaultOpen = (group: NavGroup) => {
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
   };
-
-  // Filter out owner-only items for pure managers
-  const filteredGroups = navigationGroups
-    .map(group => ({
-      ...group,
-      items: group.items.filter(item => !isManagerOnly || !item.ownerOnly),
-    }))
-    .filter(group => group.items.length > 0);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -133,7 +115,7 @@ export function OwnerSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-2">
-        {filteredGroups.map((group) => (
+        {navigationGroups.map((group) => (
           <Collapsible
             key={group.label}
             defaultOpen={getGroupDefaultOpen(group)}
@@ -191,7 +173,7 @@ export function OwnerSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.user_metadata?.name || (isRussian ? (isManagerOnly ? 'Управляющий' : 'Владелец') : (isManagerOnly ? 'Manager' : 'Owner'))}
+                {user?.user_metadata?.name || (isRussian ? 'Владелец' : 'Owner')}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
                 {user?.email}

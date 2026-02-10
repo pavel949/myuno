@@ -49,10 +49,10 @@ export function OwnerHeader() {
   const { roles } = useUserRoles();
   
   const isPropertyManager = roles?.some(r => r.role === 'property_manager');
-  const isOwner = roles?.some(r => r.role === 'owner');
-  const roleLabelRu = isPropertyManager ? 'Управляющая компания' : 'Собственник';
-  const roleLabelEn = isPropertyManager ? 'Property Manager' : 'Owner';
-  const RoleIcon = isPropertyManager ? Users : Building2;
+  const isOwner = roles?.some(r => r.role === 'owner' || r.role === 'property_owner');
+  const roleLabelRu = isOwner ? 'Собственник' : (isPropertyManager ? 'Управляющая компания' : 'Собственник');
+  const roleLabelEn = isOwner ? 'Owner' : (isPropertyManager ? 'Property Manager' : 'Owner');
+  const RoleIcon = isOwner ? Building2 : (isPropertyManager ? Users : Building2);
   // Build breadcrumb from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs: { path: string; label: string; isLast: boolean }[] = [];
