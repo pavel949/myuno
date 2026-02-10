@@ -3,17 +3,16 @@
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, MapPin } from 'lucide-react';
+import { Sparkles, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCleaningServices } from '@/hooks/useCleaningServices';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { cn } from '@/lib/utils';
 
 const SERVICE_TYPES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -32,36 +31,18 @@ export default function CleaningIndex() {
 
   const { services, isLoading } = useCleaningServices(selectedType === 'all' ? undefined : selectedType);
 
+  const categories = SERVICE_TYPES.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }));
+
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Уборка и прачечная' : 'Cleaning & Laundry'}</h1>
-            <p className="text-xs text-muted-foreground">{services.length} {isRu ? 'услуг' : 'services'}</p>
-          </div>
-        </div>
-
-        {/* Category ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {SERVICE_TYPES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedType(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedType === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
+      <CatalogHeader
+        title={isRu ? 'Уборка и прачечная' : 'Cleaning & Laundry'}
+        subtitle={`${services.length} ${isRu ? 'услуг' : 'services'}`}
+        fallbackPath="/discover"
+        categories={categories}
+        selectedCategory={selectedType}
+        onCategoryChange={setSelectedType}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24">

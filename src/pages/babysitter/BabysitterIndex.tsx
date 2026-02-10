@@ -7,7 +7,7 @@ import { Baby, Star, Shield, Languages } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
@@ -121,34 +121,14 @@ export default function BabysitterIndex() {
 
   return (
     <AppLayout showHeader={false} showBottomNav>
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-          <BackButton fallbackPath="/discover" variant="ghost" size="sm" />
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{isRu ? 'Няни' : 'Babysitters'}</h1>
-            <p className="text-xs text-muted-foreground">{filteredBabysitters.length} {isRu ? 'нянь' : 'babysitters'}</p>
-          </div>
-        </div>
-
-        {/* Age group ribbon */}
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
-          {AGE_GROUPS.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedAgeGroup(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedAgeGroup === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
-              )}
-            >
-              {isRu ? cat.labelRu : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </header>
+      <CatalogHeader
+        title={isRu ? 'Няни' : 'Babysitters'}
+        subtitle={`${filteredBabysitters.length} ${isRu ? 'нянь' : 'babysitters'}`}
+        fallbackPath="/discover"
+        categories={AGE_GROUPS.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }))}
+        selectedCategory={selectedAgeGroup}
+        onCategoryChange={setSelectedAgeGroup}
+      />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 pb-24">

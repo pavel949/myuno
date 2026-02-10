@@ -50,28 +50,28 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
 
   return (
-    <div className={cn("bg-background border-b border-border/50", className)}>
-      <div className="px-4 py-3 max-w-7xl mx-auto">
+    <div className={cn("bg-background/95 backdrop-blur-md border-b border-border/50", className)}>
+      <div className="px-4 py-2.5 max-w-7xl mx-auto">
         {/* Top row: back, title, badge, right action */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-2">
           {showBack && (
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0 h-9 w-9 rounded-xl"
+              className="shrink-0 h-8 w-8 rounded-xl"
               onClick={handleBack}
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4.5 w-4.5" />
             </Button>
           )}
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold truncate">{title}</h1>
+              <h1 className="text-lg font-bold truncate">{title}</h1>
               {badge}
             </div>
             {subtitle && (
-              <p className="text-sm text-muted-foreground truncate">{subtitle}</p>
+              <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
             )}
           </div>
           
@@ -80,7 +80,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         
         {/* Search row */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
           <Input
             placeholder={searchPlaceholder}
             value={searchValue ?? ''}
@@ -88,7 +88,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
             onClick={isSearchClickable ? onSearchClick : undefined}
             readOnly={isSearchClickable}
             className={cn(
-              "pl-12 pr-4 h-12 rounded-full bg-muted/60 border-0 text-base",
+              "pl-10 pr-4 h-10 rounded-full bg-muted/60 border-0 text-sm",
               isSearchClickable && "cursor-pointer"
             )}
           />
