@@ -106,8 +106,8 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
                 "transition-all active:scale-[0.96]"
               )}
             >
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", scenario.bg)}>
-                <Icon className={cn("w-4 h-4", scenario.color)} />
+              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", scenario.bg)}>
+                <Icon className={cn("w-3.5 h-3.5", scenario.color)} />
               </div>
               <span className="text-[11px] font-medium text-foreground leading-tight text-center">
                 {isRu ? scenario.labelRu : scenario.labelEn}
