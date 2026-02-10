@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2, Maximize, Eye, CalendarDays, Tag } from 'lucide-react';
+import { Star, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -105,8 +104,8 @@ export function PropertyListingCard({
         </div>
       </div>
 
-      {/* Content */}
-      <div className="space-y-1">
+      {/* Content — Airbnb minimal: location, title, price */}
+      <div className="space-y-0.5">
         {/* District + Rating */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm line-clamp-1">
@@ -120,106 +119,22 @@ export function PropertyListingCard({
           )}
         </div>
 
-        {/* Title + Property Type */}
-        <p className="text-sm text-muted-foreground line-clamp-1">
-          {title}
-          {property.property_type && (
-            <span className="text-muted-foreground/70"> · {property.property_type}</span>
+        {/* Title */}
+        <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
+
+        {/* Price */}
+        <p className="text-sm font-semibold pt-1">
+          {mode === 'buy' ? (
+            formatPrice((property as any).sale_price || property.price || 0)
+          ) : (
+            <>
+              {formatPrice(property.price || 0)}
+              <span className="font-normal text-muted-foreground">
+                {formatPriceLabel(property.price_period || 'night', language)}
+              </span>
+            </>
           )}
         </p>
-
-        {/* Management Company Badge */}
-        {companyName && (
-          <button
-            className="flex items-center gap-1 text-[11px] text-primary hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (companySlug) navigate(`/company/${companySlug}`);
-            }}
-          >
-            <Building2 className="w-3 h-3" />
-            {companyName}
-          </button>
-        )}
-
-        {/* Specs row */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <BedDouble className="w-3.5 h-3.5" />
-            {property.bedrooms || 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <Bath className="w-3.5 h-3.5" />
-            {property.bathrooms || 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            {property.max_guests || 2}
-          </span>
-          {property.area_sqm && (
-            <span className="flex items-center gap-1">
-              <Maximize className="w-3.5 h-3.5" />
-              {property.area_sqm} m²
-            </span>
-          )}
-          {property.view_type && (
-            <span className="flex items-center gap-1">
-              <Eye className="w-3.5 h-3.5" />
-              {property.view_type}
-            </span>
-          )}
-        </div>
-
-        {/* Min stay + Discount badges */}
-        {(property.min_stay_nights && property.min_stay_nights > 1 || property.weekly_discount || property.monthly_discount) && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {property.min_stay_nights && property.min_stay_nights > 1 && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
-                <CalendarDays className="w-3 h-3" />
-                {isRu ? `от ${property.min_stay_nights} ночей` : `${property.min_stay_nights}+ nights`}
-              </span>
-            )}
-            {property.weekly_discount && property.weekly_discount > 0 ? (
-              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                <Tag className="w-3 h-3" />
-                -{property.weekly_discount}% {isRu ? 'нед' : 'week'}
-              </span>
-            ) : null}
-            {property.monthly_discount && property.monthly_discount > 0 ? (
-              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                <Tag className="w-3 h-3" />
-                -{property.monthly_discount}% {isRu ? 'мес' : 'mo'}
-              </span>
-            ) : null}
-          </div>
-        )}
-
-        {/* Price + Book Button */}
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-sm font-semibold">
-            {mode === 'buy' ? (
-              formatPrice((property as any).sale_price || property.price || 0)
-            ) : (
-              <>
-                {formatPrice(property.price || 0)}
-                <span className="font-normal text-muted-foreground">
-                  {formatPriceLabel(property.price_period || 'night', language)}
-                </span>
-              </>
-            )}
-          </p>
-          <Button
-            size="sm"
-            className="h-8 text-xs px-3 gap-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/property/${property.id}`);
-            }}
-          >
-            <CalendarIcon className="w-3.5 h-3.5" />
-            {isRu ? 'Забронировать' : 'Book'}
-          </Button>
-        </div>
       </div>
     </div>
   );
