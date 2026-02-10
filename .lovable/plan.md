@@ -1,93 +1,58 @@
 
 
-## Проблема
+## Airbnb Booking Flow Redesign
 
-Три разрыва в UX собственника недвижимости:
+### How Airbnb Actually Works
 
-1. **На главной странице** (QuickActionsGrid, роль Owner) — нет прямой кнопки "Мои объекты" ведущей в /owner dashboard. Текущие OWNER_ACTIONS ведут на сторонние сервисы, но не в собственный модуль управления.
+Airbnb uses a **2-page flow**, not a multi-step wizard:
 
-2. **Страница Life Situation "Недвижимость"** (/life/property) — внизу захардкожены "Забронировать трансфер" и "Trip Planner", что не имеет отношения к управлению недвижимостью. Вместо них нужны операционные действия собственника.
+1. **Property Detail Page** -- user selects dates and guests in a booking widget, sees price per night, clicks "Reserve"
+2. **"Confirm and Pay" Page** -- a single scrollable page with everything needed to finalize:
+   - Trip summary (dates, guests) with "Edit" links that go back to the detail page
+   - Price breakdown (already calculated)
+   - Contact info (auto-filled from profile)
+   - Payment method selection
+   - Cancellation policy and house rules (read-only)
+   - One big "Confirm and pay" button
 
-3. **Нет моста** между Life OS ситуацией "property" и реальными микро-задачами собственника: check-in/check-out, клининг, счётчики, налоги, депозиты — всё это существует в /owner/*, но не видно из Life OS.
+There is **no step-by-step wizard** on the booking page. Everything is visible at once on a single page.
 
----
+### What Changes
 
-## Решение (3 изменения)
+**1. Property Detail Page (PropertyDetail.tsx)** -- keep as-is, it already handles date/guest selection and navigates to the inquiry page with URL params.
 
-### 1. Добавить "Мои объекты" в OWNER_ACTIONS (QuickActionsGrid)
+**2. PropertyInquiry.tsx -- full redesign to match "Confirm and Pay" pattern:**
 
-Файл: `src/components/home/QuickActionsGrid.tsx`
+- Remove the `BookingStepProgress` wizard -- replace with a simple "Confirm and Pay" header
+- Assume dates and guests arrive via URL params (from the detail page). If missing, show an inline prompt to go back and select dates
+- Layout becomes a single scroll:
+  - **"Your trip" section** -- dates and guests displayed as summary rows with "Edit" links (navigate back to property detail)
+  - **Price breakdown** -- always visible, no toggle
+  - **Contact info** -- auto-filled from profile, collapsible if already filled
+  - **Payment method** -- inline selection (deposit options)
+  - **Cancellation policy** -- compact, read-only
+  - **Ground rules** -- collapsible section with house rules
+  - **"Confirm and pay" button** -- sticky at bottom
 
-Первый элемент в OWNER_ACTIONS станет прямой вход в Owner Dashboard:
+**3. PropertyListingCard.tsx** -- "Book" button behavior change:
 
-```text
-OWNER_ACTIONS (было):
-  Services -> /services
-  Management -> /services?category=property-management
-  Rental -> /property
-  Legal, Insurance, Cleaning
+- Instead of navigating directly to `/property/{id}/inquiry`, navigate to `/property/{id}` (the detail page) so the user can see the property, pick dates, then proceed. This matches Airbnb where you always go through the listing first.
 
-OWNER_ACTIONS (станет):
-  My Properties -> /owner           <-- НОВЫЙ, первый приоритет
-  Calendar -> /owner/calendar
-  Services -> /services
-  Rental -> /property
-  Legal -> /legal
-  Cleaning -> /cleaning
-```
+### Technical Details
 
-Это гарантирует: при переключении роли на Owner — первая кнопка на главной = вход в полный модуль управления.
+**PropertyInquiry.tsx rewrite:**
+- Remove `BookingStepProgress` import and `propertyBookingSteps` config
+- Remove `currentStep` logic entirely
+- If `checkIn`/`checkOut` URL params are missing, show a message with a "Select dates" button linking back to the detail page
+- Flatten all sections into a single scrollable layout
+- Keep existing hooks: `usePropertyWithRentalTerms`, `usePropertyBlockedDates`, `useProfile`, `useAuth`
+- Keep existing pricing logic
+- Make the "Confirm and pay" button sticky at the bottom of the screen
+- Auto-fill contact from profile silently; show editable fields only if profile data is incomplete
 
----
+**PropertyListingCard.tsx update:**
+- Change the "Book" button `onClick` from `/property/${id}/inquiry` to `/property/${id}` (detail page)
 
-### 2. Заменить хардкод на LifeFlowPage для ситуации "property"
-
-Файл: `src/pages/LifeFlowPage.tsx`
-
-Сейчас в конце страницы захардкожены 2 карточки (Transfer + Trip Planner) для ВСЕХ ситуаций. Нужна контекстная логика:
-
-- Если `code === 'property'` — показать операционные карточки собственника:
-  - "Управление объектами" -> /owner
-  - "Добавить объект" -> /owner/properties/new
-  - "Заказать уборку" -> /owner/service-request?type=cleaning
-  - "Календарь бронирований" -> /owner/calendar
-  - "Финансы и расходы" -> /owner/financials
-
-- Для всех остальных ситуаций — оставить текущие карточки (Transfer + Trip Planner)
-
-Это свяжет Life OS с реальным функционалом Owner-модуля.
-
----
-
-### 3. Обновить сценарий "property.management" в Life OS
-
-Текущие задачи в базе:
-- property.management.maintenance — "Обслуживание недвижимости"
-- property.management.rental_mgmt — "Управление арендой"
-
-Этого мало. Нужно добавить жизненные задачи, которые уже реализованы в приложении:
-
-| Задача | Маршрут в приложении |
-|--------|---------------------|
-| Check-in / Check-out гостей | /owner/operations |
-| Уборка и клининг | /owner/service-request?type=cleaning |
-| Показания счётчиков (вода, электричество) | /owner/properties/:id/manage |
-| Депозиты и залоги | /owner/financials |
-| Налоги на недвижимость | /owner/financials |
-| Инспекция объекта | /owner/inspection |
-| Канал-менеджер (OTA) | /owner/channels |
-| Отчёты о доходах | /owner/reports |
-
-Это добавление через SQL-миграцию в таблицу `life_tasks` со связкой к сценарию `property.management`.
-
----
-
-## Техническая сводка
-
-| Файл | Изменения |
-|------|-----------|
-| `src/components/home/QuickActionsGrid.tsx` | OWNER_ACTIONS: добавить "My Properties" -> /owner как первый элемент, заменить "Management" на "Calendar" |
-| `src/pages/LifeFlowPage.tsx` | Контекстная логика: для `code === 'property'` — показать операционные карточки собственника вместо Transfer/Trip Planner |
-| SQL миграция | Добавить ~6 life_tasks к сценарию property.management (check-in, cleaning, meters, deposits, taxes, inspection) |
-
-**Итого: 2 файла + 1 миграция. Собственник получает прямой доступ ко всем своим инструментам и с главной страницы, и через Life OS.**
+**Files to modify:**
+- `src/pages/property/PropertyInquiry.tsx` -- major rewrite
+- `src/components/property/PropertyListingCard.tsx` -- minor route change
