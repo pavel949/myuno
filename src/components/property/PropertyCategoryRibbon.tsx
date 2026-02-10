@@ -31,8 +31,8 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
  interface PropertyCategoryRibbonProps {
    mode?: PropertyMode;
    onModeChange?: (mode: PropertyMode) => void;
-   selectedType: string;
-   onTypeChange: (type: string) => void;
+   selectedTypes: string[];
+   onTypesChange: (types: string[]) => void;
    propertyTypes: PropertyTypeOption[];
    className?: string;
    showModeToggle?: boolean;
@@ -41,8 +41,8 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
  export const PropertyCategoryRibbon = memo(function PropertyCategoryRibbon({
    mode,
    onModeChange,
-   selectedType,
-   onTypeChange,
+   selectedTypes,
+   onTypesChange,
    propertyTypes,
    className,
    showModeToggle = true,
@@ -50,10 +50,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
    const { language } = useLanguage();
    const isRu = language === 'ru';
   const [moreOpen, setMoreOpen] = useState(false);
- 
-  // Split types: primary (visible) + secondary (in dropdown)
-  const allOption: PropertyTypeOption = { id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' };
-  
+
   const primaryTypes = propertyTypes.filter(t => 
     PRIMARY_TYPE_IDS.includes(t.id.toLowerCase())
   );
@@ -62,25 +59,31 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
     !PRIMARY_TYPE_IDS.includes(t.id.toLowerCase())
   );
   
-  // Check if selected type is in secondary (show it in "More" button)
-  const isSecondarySelected = secondaryTypes.some(t => t.id === selectedType);
-  const selectedSecondary = secondaryTypes.find(t => t.id === selectedType);
- 
+  const isSecondarySelected = secondaryTypes.some(t => selectedTypes.includes(t.id));
+  const noneSelected = selectedTypes.length === 0;
+
    const handleModeChange = (newMode: PropertyMode) => {
      if (newMode !== mode) {
        triggerHaptic('light');
-       onModeChange(newMode);
+       onModeChange?.(newMode);
      }
    };
- 
-   const handleTypeChange = (typeId: string) => {
-     triggerHaptic('light');
-     onTypeChange(typeId);
-   };
- 
+
+  const handleToggleType = (typeId: string) => {
+    triggerHaptic('light');
+    if (typeId === 'all') {
+      onTypesChange([]);
+      return;
+    }
+    const next = selectedTypes.includes(typeId)
+      ? selectedTypes.filter(t => t !== typeId)
+      : [...selectedTypes, typeId];
+    onTypesChange(next);
+  };
+
   const TypeButton = ({ type, isActive }: { type: PropertyTypeOption; isActive: boolean }) => (
     <button
-      onClick={() => handleTypeChange(type.id)}
+      onClick={() => handleToggleType(type.id)}
       className={cn(
         "flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all min-w-[56px]",
         "border-b-2",
@@ -134,11 +137,11 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
        )}
  
       {/* All Types */}
-      <TypeButton type={allOption} isActive={selectedType === 'all'} />
+      <TypeButton type={{ id: 'all', labelEn: 'All', labelRu: 'Все', icon: '🏠' }} isActive={noneSelected} />
 
-      {/* Primary Types - Condo, Villa, Apartment */}
+      {/* Primary Types */}
       {primaryTypes.map((type) => (
-        <TypeButton key={type.id} type={type} isActive={selectedType === type.id} />
+        <TypeButton key={type.id} type={type} isActive={selectedTypes.includes(type.id)} />
       ))}
 
       {/* More Types Dropdown */}
@@ -155,16 +158,11 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
               )}
             >
               <span className="text-lg leading-none">
-                {isSecondarySelected && selectedSecondary 
-                  ? (typeof selectedSecondary.icon === 'string' ? selectedSecondary.icon : '🏠')
-                  : <MoreHorizontal className="w-5 h-5" />
-                }
+                <MoreHorizontal className="w-5 h-5" />
               </span>
               <span className="text-[10px] font-medium whitespace-nowrap">
-                {isSecondarySelected && selectedSecondary
-                  ? (isRu ? selectedSecondary.labelRu : selectedSecondary.labelEn)
-                  : (isRu ? 'Ещё' : 'More')
-                }
+                {isRu ? 'Ещё' : 'More'}
+                {isSecondarySelected && ` (${secondaryTypes.filter(t => selectedTypes.includes(t.id)).length})`}
               </span>
             </button>
           </PopoverTrigger>
@@ -180,13 +178,10 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
               {secondaryTypes.map((type) => (
                 <button
                   key={type.id}
-                  onClick={() => {
-                    handleTypeChange(type.id);
-                    setMoreOpen(false);
-                  }}
+                  onClick={() => handleToggleType(type.id)}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                    selectedType === type.id
+                    selectedTypes.includes(type.id)
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted"
                   )}
@@ -197,7 +192,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
                   <span className="flex-1 text-left">
                     {isRu ? type.labelRu : type.labelEn}
                   </span>
-                  {selectedType === type.id && (
+                  {selectedTypes.includes(type.id) && (
                     <Check className="w-4 h-4 text-primary" />
                   )}
                 </button>

@@ -40,7 +40,7 @@ export default function PropertySearchPage() {
     checkOut: undefined,
     guests: 2,
   });
-  const [selectedType, setSelectedType] = useState('all');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
@@ -71,7 +71,7 @@ export default function PropertySearchPage() {
     fetchNextPage,
   } = usePropertiesInfinite({
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
-    propertyType: selectedType !== 'all' ? selectedType : undefined,
+    propertyType: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
   });
 
   useEffect(() => {
@@ -93,6 +93,12 @@ export default function PropertySearchPage() {
     const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
     
     const filtered = allItems.filter(prop => {
+      // Multi-type filter
+      if (selectedTypes.length > 0) {
+        const propType = (prop.property_type || '').toLowerCase();
+        if (!selectedTypes.some(t => propType.includes(t.toLowerCase()))) return false;
+      }
+
       const matchesLocation = searchParams.locations.length === 0 || 
         searchParams.locations.some(loc => 
           prop.district?.toLowerCase().includes(loc.toLowerCase())
@@ -154,7 +160,7 @@ export default function PropertySearchPage() {
     }
 
     return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, sortKey]);
+  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedTypes, sortKey]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -201,8 +207,8 @@ export default function PropertySearchPage() {
           {/* Category ribbon — Airbnb style, no buy toggle */}
           <div className="px-4 pb-1">
             <PropertyCategoryRibbon
-              selectedType={selectedType}
-              onTypeChange={setSelectedType}
+              selectedTypes={selectedTypes}
+              onTypesChange={setSelectedTypes}
               propertyTypes={propertyTypes}
               showModeToggle={false}
             />
@@ -294,7 +300,7 @@ export default function PropertySearchPage() {
                 setQuickFilters([]);
                 setSelectedDistricts([]);
                 setSelectedBedrooms([]);
-                setSelectedType('all');
+                setSelectedTypes([]);
               }}>
                 {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
               </Button>
