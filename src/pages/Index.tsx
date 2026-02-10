@@ -1,26 +1,27 @@
 /**
- * Index — Airbnb-style Guest Home Screen
+ * Index — LifeOS Dashboard
  * 
  * Structure:
- * 1. Search bar (Airbnb-style rounded)
- * 2. Quick category icons (horizontal)
- * 3. Featured properties grid (2-col, real data)
- * 4. Explore sections (contextual entry points)
- * 5. Life situation (contextual, not dominant)
- * 6. Support + Trust
+ * 1. HeroBlock (greeting, location, search, SOS)
+ * 2. Quick Actions (role-adaptive)
+ * 3. LifeOS Focus Bar (active situation)
+ * 4. LifeOS Status Block (contextual checklist)
+ * 5. Explore sections (vertical entry points)
+ * 6. Life situation selector (when no context)
+ * 7. Support + Trust
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { HomeSearchBar } from '@/components/home/HomeSearchBar';
+import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { HomeFeaturedProperties } from '@/components/home/HomeFeaturedProperties';
 import { HomeExploreSections } from '@/components/home/HomeExploreSections';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
+import { LifeOSFocusBar } from '@/components/home/LifeOSFocusBar';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -67,14 +68,14 @@ const Index = () => {
           {/* PWA Install — simplified */}
           <InstallBanner />
 
-          {/* Search — Airbnb style */}
-          <HomeSearchBar />
+          {/* Hero — greeting, location, search, SOS */}
+          <HeroBlock />
 
           {/* Quick Actions — role-adaptive icon row */}
           <QuickActionsGrid />
 
-          {/* Featured Properties — real data, 2-col grid */}
-          <HomeFeaturedProperties />
+          {/* LifeOS Focus Bar — top-priority active route */}
+          <LifeOSFocusBar />
 
           {/* When context is active → show status dashboard */}
           {hasContext && (
