@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { differenceInDays } from 'date-fns';
 import { createPortal } from 'react-dom';
 import { Search, MapPin, Globe, X, Minus, Plus, Check } from 'lucide-react';
 import { NextStepNudge } from '@/components/hints/NextStepNudge';
@@ -54,6 +55,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const [children, setChildren] = useState(0);
 
   const totalGuests = adults + children;
+  const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -168,7 +170,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               <span className="text-muted-foreground">·</span>
               <span className="text-muted-foreground truncate">
                 {checkIn && checkOut 
-                  ? `${formatDate(checkIn)} – ${formatDate(checkOut)}`
+                  ? `${formatDate(checkIn)} – ${formatDate(checkOut)} · ${nights} ${language === 'ru' ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : 'nights'}`
                   : (language === 'ru' ? 'Даты' : 'Any week')
                 }
               </span>
@@ -346,6 +348,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                           <div className="text-center p-3 bg-primary/5 rounded-xl">
                             <p className="text-sm font-medium text-primary">
                               {formatDate(checkIn)} – {formatDate(checkOut)}
+                              <span className="mx-1.5 text-primary/60">·</span>
+                              {nights} {language === 'ru' ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : 'nights'}
                             </p>
                           </div>
                         )}
@@ -556,7 +560,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               >
                 <p className="text-xs font-semibold">{language === 'ru' ? 'Выезд' : 'Check out'}</p>
                 <p className={cn("text-sm", !checkOut ? "text-muted-foreground" : "font-medium")}>
-                  {checkOut ? formatDate(checkOut) : (language === 'ru' ? 'Добавить' : 'Add dates')}
+                  {checkOut 
+                    ? `${formatDate(checkOut)}${nights > 0 ? ` · ${nights} ${language === 'ru' ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ноч.') : 'n.'}` : ''}`
+                    : (language === 'ru' ? 'Добавить' : 'Add dates')}
                 </p>
               </button>
             </PopoverTrigger>
