@@ -66,7 +66,7 @@ import {
   CardPreview,
   CardPreviewSection,
 } from '@/components/vendor';
-import { CancellationPolicySelector } from '@/components/yacht/CancellationPolicySelector';
+import { CancellationPolicySelector } from '@/components/yachts/CancellationPolicySelector';
 
 const yachtTypes = [
   { value: 'motor_yacht', label: 'Motor Yacht', labelRu: 'Моторная яхта' },

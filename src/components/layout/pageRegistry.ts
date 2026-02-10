@@ -237,7 +237,7 @@ export const InvestorPitchDeck = lazy(() => import('@/pages/admin/InvestorPitchD
 export const InvestorDemo = lazy(() => import('@/pages/admin/InvestorDemo'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
 export const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
-export const AdminTours = lazy(() => import('@/pages/admin/AdminTours'));
+
 export const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
 export const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'));
 export const AdminProjects = lazy(() => import('@/pages/admin/AdminProjects'));
@@ -309,7 +309,7 @@ export const VendorServices = lazy(() => import('@/pages/vendor/VendorServices')
 export const VendorAnalytics = lazy(() => import('@/pages/vendor/VendorAnalytics'));
 export const VendorPayouts = lazy(() => import('@/pages/vendor/VendorPayouts'));
 export const VendorProperties = lazy(() => import('@/pages/vendor/VendorProperties'));
-export const VendorTours = lazy(() => import('@/pages/vendor/VendorTours'));
+
 export const VendorActivities = lazy(() => import('@/pages/vendor/VendorActivities'));
 export const VendorExperiences = lazy(() => import('@/pages/vendor/VendorExperiences'));
 export const VendorYachts = lazy(() => import('@/pages/vendor/VendorYachts'));
