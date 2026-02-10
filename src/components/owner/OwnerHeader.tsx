@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, Home, HelpCircle } from 'lucide-react';
+import { Bell, ChevronRight, Home, HelpCircle, Building2, Users } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -45,7 +46,13 @@ export function OwnerHeader() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const { roles } = useUserRoles();
   
+  const isPropertyManager = roles?.some(r => r.role === 'property_manager');
+  const isOwner = roles?.some(r => r.role === 'owner');
+  const roleLabelRu = isPropertyManager ? 'Управляющая компания' : 'Собственник';
+  const roleLabelEn = isPropertyManager ? 'Property Manager' : 'Owner';
+  const RoleIcon = isPropertyManager ? Users : Building2;
   // Build breadcrumb from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs: { path: string; label: string; isLast: boolean }[] = [];
@@ -87,6 +94,12 @@ export function OwnerHeader() {
         <Home className="h-4 w-4" />
         <span className="text-sm">{isRussian ? 'На главную' : 'Home'}</span>
       </Button>
+      
+      {/* Role badge */}
+      <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/8 text-primary">
+        <RoleIcon className="h-3.5 w-3.5" />
+        <span className="text-xs font-medium">{isRussian ? roleLabelRu : roleLabelEn}</span>
+      </div>
       
       {/* Separator */}
       <div className="hidden md:block h-5 w-px bg-border" />

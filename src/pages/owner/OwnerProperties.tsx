@@ -1,19 +1,27 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
-import { Home, Plus, Download } from 'lucide-react';
+import { Home, Plus, Download, Building2, Users } from 'lucide-react';
 
 
 export default function OwnerProperties() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const { roles } = useUserRoles();
+  
+  const isPropertyManager = roles?.some(r => r.role === 'property_manager');
+  const RoleIcon = isPropertyManager ? Users : Building2;
+  const roleBadge = isPropertyManager 
+    ? (isRu ? 'Управляющая компания' : 'Property Manager')
+    : (isRu ? 'Собственник' : 'Owner');
   
   const { data: properties, isLoading } = useOwnerProperties();
 
@@ -37,6 +45,13 @@ export default function OwnerProperties() {
         subtitle={isRu ? 'Управление недвижимостью' : 'Property management'}
       />
 
+      {/* Role badge */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/8 text-primary">
+          <RoleIcon className="h-4 w-4" />
+          <span className="text-sm font-medium">{roleBadge}</span>
+        </div>
+      </div>
       {/* Action buttons */}
       <div className="flex gap-3 mb-6">
         <Button 
