@@ -25,9 +25,9 @@ export default function OwnerChatRoom() {
       if (type !== 'booking' || !id || !user) return null;
       const { data, error } = await supabase
         .from('property_bookings')
-        .select('*, owner_properties(title, title_ru)')
+        .select('*, properties(title, title_ru)')
         .eq('id', id)
-        .eq('owner_id', user.id) // Security: verify ownership
+        .eq('owner_id', user.id)
         .single();
       if (error) throw error;
       return data;
@@ -62,9 +62,9 @@ export default function OwnerChatRoom() {
     : property?.title || (isRu ? 'Чат по объекту' : 'Property Chat');
 
   const subtitle = type === 'booking'
-    ? (isRu && (booking?.owner_properties as any)?.title_ru 
-        ? (booking?.owner_properties as any)?.title_ru 
-        : (booking?.owner_properties as any)?.title)
+    ? (isRu && (booking?.properties as any)?.title_ru 
+        ? (booking?.properties as any)?.title_ru 
+        : (booking?.properties as any)?.title)
     : property?.address;
 
   return (

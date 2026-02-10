@@ -138,8 +138,8 @@ export function OwnerPropertiesList() {
         </div>
       )}
 
-      {/* Add new listing - only for owners */}
-      {accessRole !== 'manager' && (
+      {/* Add new listing */}
+      {(
         <button
           onClick={() => navigate('/owner/properties/new')}
           className="w-full flex items-center gap-4 py-3 hover:opacity-70 transition-opacity"
