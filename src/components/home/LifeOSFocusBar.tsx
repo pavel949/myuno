@@ -3,33 +3,59 @@
  * Shows the most relevant route as a calm, decisive banner
  * Philosophy: "Here's what you need right now" — not a menu
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
+import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeOSRoute } from '@/hooks/useLifeOSRoutes';
+import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
 import { cn } from '@/lib/utils';
 import * as LucideIcons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+// Map persona to preferred situation code
+const PERSONA_SITUATION_MAP: Record<UserPersona, string> = {
+  tourist: 'arrival',
+  resident: 'living',
+  property_owner: 'property',
+  investor: 'property',
+};
 
 interface LifeOSFocusBarProps {
   className?: string;
 }
 
-/**
- * For now, selects the highest-priority active situation.
- * Future: use geolocation, time-of-day, user history to auto-resolve.
- */
 export const LifeOSFocusBar = memo(function LifeOSFocusBar({ className }: LifeOSFocusBarProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { data: situations } = useLifeSituations();
+  const { activeCode } = useLifeSituationContext();
+  const { personas } = useUserPersonas();
 
-  // Pick top-priority situation (lowest priority number = highest priority)
-  const topSituation = situations?.[0];
+  // Resolve best situation: activeCode > persona-based > first by priority
+  const topSituation = useMemo(() => {
+    if (!situations || situations.length === 0) return null;
+    
+    // 1. If user has an active context, use it
+    if (activeCode) {
+      return situations.find(s => s.code === activeCode) || null;
+    }
+    
+    // 2. Match by persona
+    const primaryPersona = personas[0];
+    if (primaryPersona) {
+      const preferredCode = PERSONA_SITUATION_MAP[primaryPersona];
+      const match = situations.find(s => s.code === preferredCode);
+      if (match) return match;
+    }
+    
+    // 3. Default to first by priority
+    return situations[0];
+  }, [situations, activeCode, personas]);
 
   const { data: route } = useLifeOSRoute(topSituation?.id || null);
 

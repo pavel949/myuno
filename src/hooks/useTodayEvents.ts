@@ -35,7 +35,8 @@ export function useTodayEvents() {
   return useQuery({
     queryKey: ['today-events', today],
     queryFn: async (): Promise<TodayEvent[]> => {
-      const { data, error } = await supabase
+      // First try today's events
+      const { data: todayData, error: todayError } = await supabase
         .from('events')
         .select('id, title_en, title_ru, event_date, event_time, cover_image, location_name, price, category')
         .eq('is_active', true)
@@ -43,11 +44,34 @@ export function useTodayEvents() {
         .order('event_time', { ascending: true })
         .limit(5);
 
-      if (error) throw error;
-      return data || [];
+      if (todayError) throw todayError;
+      
+      if (todayData && todayData.length > 0) {
+        return todayData;
+      }
+
+      // Fallback: nearest upcoming events
+      const { data: upcomingData, error: upcomingError } = await supabase
+        .from('events')
+        .select('id, title_en, title_ru, event_date, event_time, cover_image, location_name, price, category')
+        .eq('is_active', true)
+        .gt('event_date', today)
+        .order('event_date', { ascending: true })
+        .order('event_time', { ascending: true })
+        .limit(3);
+
+      if (upcomingError) throw upcomingError;
+      return upcomingData || [];
     },
     ...CACHE_PROFILES.STATIC,
   });
+}
+
+/** Check if events are from today or upcoming */
+export function useEventTimeLabel(eventDate: string | null): 'today' | 'upcoming' | null {
+  if (!eventDate) return null;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  return eventDate === today ? 'today' : 'upcoming';
 }
 
 export function useSmartRecommendations() {
