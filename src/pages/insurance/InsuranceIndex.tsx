@@ -2,18 +2,21 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Heart, Plane, Home, Car, Users, AlertTriangle, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MiniAppLayout, ItemCard, MiniAppQuickGrid, type MiniAppCategory, type QuickGridItem } from '@/components/miniapp';
-import { FilterValues } from '@/components/filters';
-import { useInsuranceProviders, useInsurancePlans } from '@/hooks/useInsurance';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { CatalogHeader } from '@/components/shared/CatalogHeader';
+import { ItemCard } from '@/components/miniapp';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/uno/EmptyState';
 import { Badge } from '@/components/ui/badge';
+import { useInsuranceProviders, useInsurancePlans } from '@/hooks/useInsurance';
 
-const categories: MiniAppCategory[] = [
+const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'health', labelEn: 'Health', labelRu: 'Здоровье', icon: '🏥' },
-  { id: 'travel', labelEn: 'Travel', labelRu: 'Путешествия', icon: '✈️' },
-  { id: 'property', labelEn: 'Property', labelRu: 'Имущество', icon: '🏠' },
-  { id: 'vehicle', labelEn: 'Vehicle', labelRu: 'Авто', icon: '🚗' },
-  { id: 'life', labelEn: 'Life', labelRu: 'Жизнь', icon: '❤️' },
+  { id: 'health', labelEn: 'Health', labelRu: 'Здоровье' },
+  { id: 'travel', labelEn: 'Travel', labelRu: 'Путешествия' },
+  { id: 'property', labelEn: 'Property', labelRu: 'Имущество' },
+  { id: 'vehicle', labelEn: 'Vehicle', labelRu: 'Авто' },
+  { id: 'life', labelEn: 'Life', labelRu: 'Жизнь' },
 ];
 
 const insuranceTypeIcons: Record<string, React.ReactNode> = {
@@ -29,7 +32,7 @@ export default function InsuranceIndex() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const isRu = language === 'ru';
 
   const { providers, isLoading: providersLoading } = useInsuranceProviders({
     insuranceType: selectedCategory,
@@ -37,140 +40,139 @@ export default function InsuranceIndex() {
   });
 
   const { plans, isLoading: plansLoading } = useInsurancePlans(undefined, selectedCategory);
-
-const quickItems: QuickGridItem[] = [
-    { icon: '🏥', label: language === 'ru' ? 'Здоровье' : 'Health', onClick: () => setSelectedCategory('health') },
-    { icon: '✈️', label: language === 'ru' ? 'Туристам' : 'Tourists', onClick: () => navigate('/insurance/travel') },
-    { icon: '🏠', label: language === 'ru' ? 'Имущество' : 'Property', onClick: () => setSelectedCategory('property') },
-    { icon: '🚗', label: language === 'ru' ? 'Авто' : 'Vehicle', onClick: () => setSelectedCategory('vehicle') },
-  ];
-
   const popularPlans = useMemo(() => plans.filter((p) => p.is_popular).slice(0, 4), [plans]);
-
   const isLoading = providersLoading || plansLoading;
 
   return (
-    <MiniAppLayout
-      title={language === 'ru' ? 'Страхование' : 'Insurance'}
-      subtitle={language === 'ru' ? `${providers.length} компаний` : `${providers.length} providers`}
-      heroIcon={Shield}
-      heroTitle={language === 'ru' ? 'Страхование в Таиланде' : 'Insurance in Thailand'}
-      heroSubtitle={language === 'ru' ? 'Медицинское, туристическое и визовое страхование' : 'Health, travel, and visa insurance'}
-      heroImage="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800"
-      heroGradient={{ from: 'from-emerald-600/20', via: 'via-teal-600/20', to: 'to-cyan-700/20' }}
-      searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
-      searchPlaceholder={language === 'ru' ? 'Поиск страховки...' : 'Search insurance...'}
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={setSelectedCategory}
-      filterValues={filterValues}
-      onFilterChange={setFilterValues}
-      isLoading={isLoading}
-      isEmpty={providers.length === 0}
-      emptyIcon={Shield}
-      emptyText={language === 'ru' ? 'Страховые компании не найдены' : 'No insurance providers found'}
-    >
-      <MiniAppQuickGrid items={quickItems} columns={4} className="mb-6" />
+    <AppLayout showHeader={false} showBottomNav>
+      <div className="min-h-screen bg-background">
+        <CatalogHeader
+          title={isRu ? 'Страхование' : 'Insurance'}
+          subtitle={`${providers.length} ${isRu ? 'компаний' : 'providers'}`}
+          fallbackPath="/discover"
+          categories={categories.map(c => ({ id: c.id, label: isRu ? c.labelRu : c.labelEn }))}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
 
-      {/* Travel Insurance Promo Banner */}
-      <div
-        onClick={() => navigate('/insurance/travel')}
-        className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-destructive/10 via-orange-500/10 to-primary/10 border border-destructive/20 cursor-pointer hover:border-destructive/40 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-destructive" />
+        <main className="container max-w-7xl mx-auto px-4 py-4 pb-24">
+          {/* Travel Insurance Promo Banner */}
+          <div
+            onClick={() => navigate('/insurance/travel')}
+            className="mb-6 p-4 rounded-2xl bg-destructive/5 border border-destructive/20 cursor-pointer hover:border-destructive/40 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">
+                  {isRu ? 'Не летите без страховки!' : "Don't Fly Without Insurance!"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRu ? 'Быстрая туристическая страховка от 100 ₽/день' : 'Quick travel insurance from $1/day'}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">
-              {language === 'ru' ? '🚫 Не летите без страховки!' : "🚫 Don't Fly Without Insurance!"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {language === 'ru'
-                ? 'Быстрая туристическая страховка от 100 ₽/день'
-                : 'Quick travel insurance from $1/day'}
-            </p>
-          </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
-        </div>
-      </div>
 
-      {/* Popular Plans */}
-      {popularPlans.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span className="text-primary">⭐</span>
-            {language === 'ru' ? 'Популярные планы' : 'Popular Plans'}
-          </h2>
-          <div className="grid grid-cols-1 gap-3">
-            {popularPlans.map((plan) => (
-              <div
-                key={plan.id}
-                onClick={() => navigate(`/insurance/plan/${plan.id}`)}
-                className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-xs">
-                        {plan.plan_tier.toUpperCase()}
-                      </Badge>
-                      {insuranceTypeIcons[plan.insurance_type]}
-                    </div>
-                    <h3 className="font-semibold">
-                      {language === 'ru' ? plan.name_ru : plan.name_en}
-                    </h3>
-                  </div>
-                  <div className="text-right">
-                    {plan.price_yearly && (
-                      <p className="font-bold text-primary">
-                        ฿{plan.price_yearly.toLocaleString()}
-                        <span className="text-xs text-muted-foreground">
-                          /{language === 'ru' ? 'год' : 'yr'}
-                        </span>
-                      </p>
-                    )}
-                    {plan.price_monthly && (
-                      <p className="text-sm text-muted-foreground">
-                        ฿{plan.price_monthly.toLocaleString()}/{language === 'ru' ? 'мес' : 'mo'}
-                      </p>
-                    )}
+          {isLoading ? (
+            <div className="grid gap-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-24 h-24 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
-                {plan.coverage_amount && (
-                  <p className="text-sm text-muted-foreground">
-                    {language === 'ru' ? 'Покрытие до' : 'Coverage up to'}{' '}
-                    ฿{plan.coverage_amount.toLocaleString()}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Popular Plans */}
+              {popularPlans.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-3">
+                    {isRu ? 'Популярные планы' : 'Popular Plans'}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3">
+                    {popularPlans.map((plan) => (
+                      <div
+                        key={plan.id}
+                        onClick={() => navigate(`/insurance/plan/${plan.id}`)}
+                        className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">
+                                {plan.plan_tier.toUpperCase()}
+                              </Badge>
+                              {insuranceTypeIcons[plan.insurance_type]}
+                            </div>
+                            <h3 className="font-semibold">
+                              {isRu ? plan.name_ru : plan.name_en}
+                            </h3>
+                          </div>
+                          <div className="text-right">
+                            {plan.price_yearly && (
+                              <p className="font-bold text-primary">
+                                ฿{plan.price_yearly.toLocaleString()}
+                                <span className="text-xs text-muted-foreground">/{isRu ? 'год' : 'yr'}</span>
+                              </p>
+                            )}
+                            {plan.price_monthly && (
+                              <p className="text-sm text-muted-foreground">
+                                ฿{plan.price_monthly.toLocaleString()}/{isRu ? 'мес' : 'mo'}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {plan.coverage_amount && (
+                          <p className="text-sm text-muted-foreground">
+                            {isRu ? 'Покрытие до' : 'Coverage up to'} ฿{plan.coverage_amount.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-      {/* Insurance Providers */}
-      <h2 className="text-lg font-semibold mb-3">
-        {language === 'ru' ? 'Страховые компании' : 'Insurance Companies'}
-      </h2>
-      <div className="space-y-4">
-        {providers.map((provider) => (
-          <ItemCard
-            key={provider.id}
-            image={provider.cover_image || 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=200'}
-            title={language === 'ru' ? provider.name_ru : provider.name_en}
-            subtitle={language === 'ru' ? provider.description_ru : provider.description_en}
-            rating={provider.rating}
-            reviewCount={provider.review_count}
-            isVerified={provider.is_verified}
-            tags={provider.insurance_types.slice(0, 3).map((t) =>
-              t.charAt(0).toUpperCase() + t.slice(1)
-            )}
-            onClick={() => navigate(`/insurance/${provider.id}`)}
-          />
-        ))}
+              {/* Insurance Providers */}
+              {providers.length === 0 ? (
+                <EmptyState
+                  icon={Shield}
+                  title={isRu ? 'Страховые компании не найдены' : 'No insurance providers found'}
+                />
+              ) : (
+                <>
+                  <h2 className="text-lg font-semibold mb-3">
+                    {isRu ? 'Страховые компании' : 'Insurance Companies'}
+                  </h2>
+                  <div className="space-y-4">
+                    {providers.map((provider) => (
+                      <ItemCard
+                        key={provider.id}
+                        image={provider.cover_image || 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=200'}
+                        title={isRu ? provider.name_ru : provider.name_en}
+                        subtitle={isRu ? provider.description_ru : provider.description_en}
+                        rating={provider.rating}
+                        reviewCount={provider.review_count}
+                        isVerified={provider.is_verified}
+                        tags={provider.insurance_types.slice(0, 3).map((t) => t.charAt(0).toUpperCase() + t.slice(1))}
+                        onClick={() => navigate(`/insurance/${provider.id}`)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </main>
       </div>
-    </MiniAppLayout>
+    </AppLayout>
   );
 }

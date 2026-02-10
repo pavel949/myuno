@@ -2,7 +2,7 @@
  * ExperiencesIndex — Airbnb-style experiences catalog
  * Clean header, category ribbon, sort, responsive grid
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -115,6 +115,16 @@ export default function ExperiencesIndex() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [sortKey, setSortKey] = useState<SortKey>('recommended');
   const [showSort, setShowSort] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showSort) return;
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setShowSort(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showSort]);
 
   const { experiences, isLoading } = useExperiences({
     type: viewType === 'all' ? undefined : viewType as ExperienceType,
@@ -226,7 +236,7 @@ export default function ExperiencesIndex() {
             <p className="text-sm text-muted-foreground">
               {sorted.length} {isRu ? 'впечатлений' : 'experiences'}
             </p>
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 {isRu ? SORT_OPTIONS.find(s => s.id === sortKey)?.labelRu : SORT_OPTIONS.find(s => s.id === sortKey)?.labelEn}

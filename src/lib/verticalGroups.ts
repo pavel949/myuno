@@ -78,16 +78,8 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
       { verticalId: 'insurance' },
     ],
   },
-  {
-    id: 'community',
-    labelEn: 'Community',
-    labelRu: 'Сообщество',
-    icon: '🏪',
-    items: [
-      { route: '/classifieds', icon: '🏪', labelEn: 'Flea Market', labelRu: 'Барахолка' },
-      { route: '/market', icon: '🛒', labelEn: 'Marketplace', labelRu: 'Маркетплейс' },
-    ],
-  },
+  // Community group hidden until Phase 2
+  // { id: 'community', ... classifieds, market }
   {
     id: 'admin',
     labelEn: 'Life Admin',

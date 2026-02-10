@@ -58,18 +58,8 @@ export default function RestaurantsIndex() {
     searchQuery: searchQuery || undefined,
   });
 
-  const filtered = useMemo(() => {
-    return restaurants.filter(rest => {
-      if (selectedCuisine !== 'all') {
-        const tags = (rest as any).cuisine_tags as string[] | null;
-        const cuisineField = rest.cuisine?.toLowerCase() || '';
-        const matches = tags?.some(t => t.toLowerCase().includes(selectedCuisine.toLowerCase()))
-          || cuisineField.includes(selectedCuisine.toLowerCase());
-        if (!matches) return false;
-      }
-      return true;
-    });
-  }, [restaurants, selectedCuisine]);
+  // Server-side hook already filters by cuisine/district/search — no client-side duplicate needed
+  const filtered = restaurants;
 
   return (
     <AppLayout showHeader={false} showBottomNav>
