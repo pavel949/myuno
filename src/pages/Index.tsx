@@ -1,29 +1,30 @@
 /**
- * Index — LifeOS Dashboard
- * Calm, trust-first home screen.
- * NOT a marketplace landing. A personal companion dashboard.
+ * Index — Airbnb-style Guest Home Screen
  * 
  * Structure:
- * 1. Greeting + Search (HeroBlock)
- * 2. Active situation status (if context set)
- * 3. Life situation picker (if no context)
- * 4. Concierge support
- * 5. Trust signals
+ * 1. Search bar (Airbnb-style rounded)
+ * 2. Quick category icons (horizontal)
+ * 3. Featured properties grid (2-col, real data)
+ * 4. Explore sections (contextual entry points)
+ * 5. Life situation (contextual, not dominant)
+ * 6. Support + Trust
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { HeroBlock } from '@/components/home/HeroBlock';
+import { HomeSearchBar } from '@/components/home/HomeSearchBar';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { LifeSituationSelector } from '@/components/home/LifeSituationSelector';
+import { HomeFeaturedProperties } from '@/components/home/HomeFeaturedProperties';
+import { HomeExploreSections } from '@/components/home/HomeExploreSections';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
+const LifeSituationSelector = lazy(() => import('@/components/home/LifeSituationSelector'));
 const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
 const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -66,11 +67,14 @@ const Index = () => {
           {/* PWA Install — simplified */}
           <InstallBanner />
 
-          {/* Hero: Greeting + Search + SOS */}
-          <HeroBlock />
+          {/* Search — Airbnb style */}
+          <HomeSearchBar />
 
-          {/* Quick Actions — role-adaptive shortcuts */}
+          {/* Quick Actions — role-adaptive icon row */}
           <QuickActionsGrid />
+
+          {/* Featured Properties — real data, 2-col grid */}
+          <HomeFeaturedProperties />
 
           {/* When context is active → show status dashboard */}
           {hasContext && (
@@ -79,8 +83,17 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* When no context → show life situation picker */}
-          {!hasContext && <LifeSituationSelector />}
+          {/* Explore other verticals */}
+          <Suspense fallback={null}>
+            <HomeExploreSections />
+          </Suspense>
+
+          {/* Life situation — contextual, secondary */}
+          {!hasContext && (
+            <Suspense fallback={null}>
+              <LifeSituationSelector />
+            </Suspense>
+          )}
 
           {/* Support — always visible */}
           <Suspense fallback={null}>
