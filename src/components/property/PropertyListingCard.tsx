@@ -146,7 +146,7 @@ export function PropertyListingCard({
             className="h-8 text-xs px-3 gap-1"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/property/${property.id}/inquiry`);
+              navigate(`/property/${property.id}`);
             }}
           >
             <CalendarIcon className="w-3.5 h-3.5" />
