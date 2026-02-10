@@ -15,7 +15,7 @@ interface OwnerContext {
   pendingTasks?: number;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-owner-assistant`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-agent`;
 
 export function useOwnerAIChat(context?: OwnerContext) {
   const { user } = useAuth();
@@ -53,6 +53,7 @@ export function useOwnerAIChat(context?: OwnerContext) {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({ 
+          agentSlug: 'owner-assistant',
           messages: apiMessages,
           context,
         }),

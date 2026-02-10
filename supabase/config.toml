@@ -42,9 +42,6 @@ verify_jwt = false
 [functions.vendor-portal]
 verify_jwt = false
 
-[functions.calculate-metrics]
-verify_jwt = false
-
 [functions.ical-sync]
 verify_jwt = false
 
@@ -69,16 +66,7 @@ verify_jwt = false
 [functions.ai-smart-search]
 verify_jwt = false
 
-[functions.ai-owner-assistant]
-verify_jwt = false
-
-[functions.ai-property-assistant]
-verify_jwt = false
-
 [functions.ai-agent]
-verify_jwt = false
-
-[functions.firecrawl-scrape]
 verify_jwt = false
 
 [functions.intake-listing-agent]
@@ -109,10 +97,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.fazwaz-scrape-project]
-verify_jwt = false
-
-[functions.ignatev-scrape-rentals]
-verify_jwt = false
-
-[functions.cache-property-images]
 verify_jwt = false

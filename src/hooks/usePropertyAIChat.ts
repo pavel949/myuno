@@ -15,7 +15,7 @@ interface SearchContext {
   preferences?: string[];
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-property-assistant`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-agent`;
 
 export function usePropertyAIChat(context?: SearchContext) {
   const [messages, setMessages] = useState<AIMessage[]>([]);
@@ -50,6 +50,7 @@ export function usePropertyAIChat(context?: SearchContext) {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({ 
+          agentSlug: 'property-search',
           messages: apiMessages,
           context,
         }),

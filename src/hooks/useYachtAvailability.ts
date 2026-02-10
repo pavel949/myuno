@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { YachtAvailabilityEntry } from '@/components/yacht/YachtCalendar';
+import { YachtAvailabilityEntry } from '@/components/yachts/YachtCalendar';
 
 interface DbYachtAvailability {
   id: string;
