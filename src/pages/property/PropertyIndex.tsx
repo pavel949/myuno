@@ -20,6 +20,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
+import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 
 import { cn } from '@/lib/utils';
 
@@ -153,8 +154,8 @@ export default function PropertyIndex() {
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
@@ -163,10 +164,11 @@ export default function PropertyIndex() {
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
   });
 
-  const allProperties = useMemo(() => 
-    infiniteData?.pages.flatMap(p => p.properties) || [],
-    [infiniteData]
-  );
+  const allProperties = useMemo(() => {
+    const items = infiniteData?.pages.flatMap(p => p.properties) || [];
+    if (!selectedCategory) return items;
+    return items.filter(p => matchesCategory(p, selectedCategory));
+  }, [infiniteData, selectedCategory]);
 
   // Featured
   const featured = useMemo(() => 
@@ -241,6 +243,13 @@ export default function PropertyIndex() {
             </span>
           </button>
         </div>
+
+        {/* Category Icons Ribbon — Airbnb style */}
+        <PropertyCategoryIcons
+          selected={selectedCategory}
+          onSelect={setSelectedCategory}
+          className="border-b border-border/40 py-2"
+        />
 
         {/* Quick services ribbon */}
         <div className="flex gap-4 overflow-x-auto px-4 py-3 scrollbar-hide border-b border-border/40">
