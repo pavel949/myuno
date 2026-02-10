@@ -18,7 +18,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { HomeExploreSections } from '@/components/home/HomeExploreSections';
-import { ManagePropertyBanner } from '@/components/home/ManagePropertyBanner';
+import { PersonaChips } from '@/components/home/PersonaChips';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
@@ -72,6 +72,9 @@ const Index = () => {
           {/* Hero — greeting, location, search, SOS */}
           <HeroBlock />
 
+          {/* Persona chips — role selector */}
+          <PersonaChips />
+
           {/* Quick Actions — role-adaptive icon row */}
           <QuickActionsGrid />
 
@@ -85,8 +88,6 @@ const Index = () => {
             </Suspense>
           )}
 
-          {/* Manage Property banner */}
-          <ManagePropertyBanner />
 
           {/* Explore other verticals */}
           <Suspense fallback={null}>
