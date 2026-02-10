@@ -93,7 +93,7 @@ export const LifeOSFocusBar = memo(function LifeOSFocusBar({ className }: LifeOS
             {/* Content */}
             <div className="flex-1 min-w-0 space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                {isRu ? '🧭 Ваш маршрут' : '🧭 Your path'}
+                {isRu ? 'Следующий шаг' : 'Your next step'}
               </p>
               <p className="text-[13px] font-medium leading-snug line-clamp-2">
                 {shortRecognition}
