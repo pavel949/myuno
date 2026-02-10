@@ -59,22 +59,14 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return [];
 
-      // Find the owner property linked to this marketplace property
-      const { data: ownerProperty, error: opError } = await supabase
-        .from('owner_properties')
-        .select('id')
-        .eq('marketplace_property_id', marketplacePropertyId)
-        .maybeSingle();
-
-      if (opError || !ownerProperty) {
-        return [];
-      }
+      // In the unified model, the marketplace property ID IS the property ID
+      const propertyId = marketplacePropertyId;
 
       // Get all bookings for this property
       const { data: bookings, error: bookingsError } = await supabase
         .from('property_bookings')
         .select('id, check_in, check_out, status')
-        .eq('property_id', ownerProperty.id)
+        .eq('property_id', propertyId)
         .neq('status', 'cancelled')
         .neq('status', 'rejected');
 
@@ -114,8 +106,9 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return null;
 
+      // In unified model, the marketplace property ID IS the property ID
       const { data, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select(`
           price_per_night,
           min_stay_nights,
@@ -129,7 +122,7 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
           cancellation_policy,
           instant_booking
         `)
-        .eq('marketplace_property_id', marketplacePropertyId)
+        .eq('id', marketplacePropertyId)
         .maybeSingle();
 
       if (error) {

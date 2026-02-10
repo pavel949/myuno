@@ -69,7 +69,7 @@ export function useChannelHealth(propertyId?: string) {
         .from('property_external_calendars')
         .select(`
           *,
-          owner_properties!inner(id, title, title_ru)
+          properties!inner(id, title_en, title_ru)
         `)
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
@@ -112,14 +112,14 @@ export function useChannelHealth(propertyId?: string) {
 
       return (calendars || []).map((cal): ChannelHealth => {
         const latestLog = latestLogMap.get(cal.id);
-        const property = cal.owner_properties as any;
+        const property = cal.properties as any;
         
         return {
           id: cal.id,
           name: cal.name,
           channelType: cal.channel_type || 'other',
           propertyId: cal.property_id,
-          propertyName: property?.title,
+          propertyName: property?.title_en,
           status: getChannelStatus(cal),
           lastSyncAt: cal.last_synced_at,
           syncError: cal.sync_error,
@@ -230,9 +230,9 @@ export function useAllBookingConflicts() {
     queryFn: async () => {
       if (!user?.id) return { conflicts: [], count: 0 };
 
-      // Get all user properties
+      // Get all user properties from unified table
       const { data: properties } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('id')
         .eq('owner_id', user.id);
 

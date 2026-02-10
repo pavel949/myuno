@@ -50,10 +50,10 @@ export function useOwnerReviews() {
     queryFn: async () => {
       if (!user) return { reviews: [], stats: null };
 
-      // First get owner's property IDs
+      // First get owner's property IDs from unified table
       const { data: properties, error: propError } = await supabase
-        .from('owner_properties')
-        .select('id, title, title_ru, cover_image')
+        .from('properties')
+        .select('id, title_en, title_ru, cover_image')
         .eq('owner_id', user.id);
 
       if (propError) throw propError;
@@ -81,7 +81,7 @@ export function useOwnerReviews() {
         return {
           ...r,
           images: r.images || [],
-          property_title: property?.title,
+          property_title: property?.title_en,
           property_title_ru: property?.title_ru,
           property_cover: property?.cover_image,
           reviewer_name: (r.profiles as any)?.full_name,
@@ -127,7 +127,7 @@ export function useOwnerReviews() {
       
       // Verify ownership: check that this review belongs to owner's property
       const { data: properties } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('id')
         .eq('owner_id', user.id);
       
@@ -175,7 +175,7 @@ export function useOwnerReviews() {
       
       // Verify ownership before deleting response
       const { data: properties } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('id')
         .eq('owner_id', user.id);
       

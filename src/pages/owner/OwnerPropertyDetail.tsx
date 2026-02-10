@@ -225,7 +225,7 @@ export default function OwnerPropertyDetail() {
       {/* Marketplace integration - now automatic on approval */}
       <Card className="mb-6 border-primary/20 bg-primary/5">
         <CardContent className="p-4">
-          {property.marketplace_property_id ? (
+          {property.approval_status === 'approved' ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Globe className="h-5 w-5 text-primary" />
@@ -239,7 +239,7 @@ export default function OwnerPropertyDetail() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => navigate(`/property/${property.marketplace_property_id}`)}
+                onClick={() => navigate(`/property/${property.id}`)}
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
                 {isRu ? 'Открыть' : 'View'}
