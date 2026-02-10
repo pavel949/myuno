@@ -4,14 +4,14 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, MapPin, Loader2 } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
@@ -171,43 +171,35 @@ export default function PropertySearchPage() {
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b space-y-3 pb-3">
-          <div className="container max-w-7xl mx-auto px-4 pt-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <BackButton fallbackPath="/property" variant="ghost" size="sm" />
-                <h1 className="text-lg font-bold truncate">
-                  {propertyMode === 'buy' 
-                    ? (language === 'ru' ? 'Купить недвижимость' : 'Buy Property')
-                    : (language === 'ru' ? 'Аренда жилья' : 'Vacation Rentals')
-                  }
-                </h1>
+        {/* Sticky header — Airbnb style: search bar + categories */}
+        <header className="sticky top-0 z-40 bg-background border-b">
+          {/* Search bar row */}
+          <div className="px-4 pt-3 pb-2">
+            <div className="flex items-center gap-2">
+              <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
+              <div className="flex-1" onClick={() => {}}>
+                <AirbnbSearchBar onSearch={setSearchParams} />
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
-                  <MapPin className="w-4 h-4" />
-                  <span className="hidden sm:inline">{language === 'ru' ? 'Карта' : 'Map'}</span>
-                </Button>
-                <UniversalFilter
-                  config={filterConfig}
-                  values={filterValues}
-                  onChange={setFilterValues}
-                  activeCount={activeFilterCount}
-                >
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <SlidersHorizontal className="w-4 h-4" />
-                    {activeFilterCount > 0 && (
-                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{activeFilterCount}</Badge>
-                    )}
-                  </Button>
-                </UniversalFilter>
-              </div>
+              <UniversalFilter
+                config={filterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                activeCount={activeFilterCount}
+              >
+                <button className="shrink-0 w-10 h-10 rounded-full border border-border flex items-center justify-center relative hover:shadow-sm transition-shadow">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {activeFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </UniversalFilter>
             </div>
           </div>
-          <div className="container max-w-7xl mx-auto px-4">
-            <AirbnbSearchBar onSearch={setSearchParams} />
-          </div>
-          <div className="container max-w-7xl mx-auto px-4">
+
+          {/* Category ribbon */}
+          <div className="px-4 pb-1">
             <PropertyCategoryRibbon
               mode={propertyMode}
               onModeChange={setPropertyMode}
@@ -218,7 +210,8 @@ export default function PropertySearchPage() {
           </div>
         </header>
 
-        <div className="container max-w-7xl mx-auto px-4 py-1">
+        {/* Quick filters */}
+        <div className="px-4 py-1">
           <QuickFiltersRibbon
             selectedFilters={quickFilters}
             selectedDistricts={selectedDistricts}
@@ -231,7 +224,7 @@ export default function PropertySearchPage() {
           />
         </div>
 
-        <div className="container max-w-7xl mx-auto px-4 py-2">
+        <div className="px-4 py-2">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {properties.length} {language === 'ru' ? 'объектов найдено' : 'places found'}
@@ -252,7 +245,7 @@ export default function PropertySearchPage() {
           </div>
         </div>
 
-        <main className="container max-w-7xl mx-auto px-4 pb-24">
+        <main className="px-4 pb-24">
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1,2,3,4,5,6,7,8].map(i => (
