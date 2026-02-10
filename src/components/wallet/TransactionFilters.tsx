@@ -36,6 +36,25 @@ const typeOptions: { value: TransactionType | 'all'; labelRu: string; labelEn: s
   { value: 'cashback', labelRu: 'Кэшбэк', labelEn: 'Cashback' },
 ];
 
+function DatePickerField({ value, onChange, placeholder, isRu }: { 
+  value?: Date; onChange: (d: Date | undefined) => void; placeholder: string; isRu: boolean 
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className={cn('w-full justify-start text-left font-normal', !value && 'text-muted-foreground')}>
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, 'PPP', { locale: isRu ? ru : undefined }) : placeholder}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value} onSelect={(d) => { onChange(d); setOpen(false); }} initialFocus />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function TransactionFiltersComponent({
   filters,
   onFiltersChange,
@@ -107,61 +126,23 @@ export function TransactionFiltersComponent({
             {/* Date from */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{isRu ? 'С даты' : 'From date'}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !filters.dateFrom && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.dateFrom 
-                      ? format(filters.dateFrom, 'PPP', { locale: isRu ? ru : undefined })
-                      : isRu ? 'Выберите дату' : 'Pick a date'
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateFrom}
-                    onSelect={(date) => onFiltersChange({ ...filters, dateFrom: date })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePickerField
+                value={filters.dateFrom}
+                onChange={(date) => onFiltersChange({ ...filters, dateFrom: date })}
+                placeholder={isRu ? 'Выберите дату' : 'Pick a date'}
+                isRu={isRu}
+              />
             </div>
 
             {/* Date to */}
             <div className="space-y-2">
               <label className="text-sm font-medium">{isRu ? 'По дату' : 'To date'}</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !filters.dateTo && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.dateTo 
-                      ? format(filters.dateTo, 'PPP', { locale: isRu ? ru : undefined })
-                      : isRu ? 'Выберите дату' : 'Pick a date'
-                    }
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateTo}
-                    onSelect={(date) => onFiltersChange({ ...filters, dateTo: date })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePickerField
+                value={filters.dateTo}
+                onChange={(date) => onFiltersChange({ ...filters, dateTo: date })}
+                placeholder={isRu ? 'Выберите дату' : 'Pick a date'}
+                isRu={isRu}
+              />
             </div>
           </div>
         </PopoverContent>
