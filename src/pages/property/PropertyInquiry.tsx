@@ -44,6 +44,10 @@ export default function PropertyInquiry() {
   const isRu = language === 'ru';
   const { createOrder } = useOrders();
 
+  // Determine booking mode from property data
+  const { data: property } = usePropertyWithRentalTerms(id);
+  const rentalTerms = property?.rentalTerms;
+  const isInstantBooking = !!(property?.instant_booking || rentalTerms?.instant_booking);
   // Get dates and guests from URL params (set on the property detail page)
   const checkInParam = searchParams.get('checkIn');
   const checkOutParam = searchParams.get('checkOut');
@@ -65,9 +69,7 @@ export default function PropertyInquiry() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: property } = usePropertyWithRentalTerms(id);
-  const rentalTerms = property?.rentalTerms;
-
+  // rentalTerms already derived above from property
   // Autofill from profile
   useEffect(() => {
     if (profile) {
@@ -170,7 +172,9 @@ export default function PropertyInquiry() {
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath={editUrl} variant="ghost" />
             <h1 className="text-lg font-display font-bold">
-              {isRu ? 'Подтвердить и оплатить' : 'Confirm and pay'}
+              {isInstantBooking 
+                ? (isRu ? 'Подтвердить и оплатить' : 'Confirm and pay')
+                : (isRu ? 'Запросить бронирование' : 'Request to book')}
             </h1>
           </div>
         </div>
@@ -290,22 +294,35 @@ export default function PropertyInquiry() {
               <span>{formatPrice(pricing.total)}</span>
             </div>
 
-            {/* 10% deposit callout */}
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
-                  {isRu ? 'Предоплата 10% сейчас' : '10% deposit due now'}
-                </span>
-                <span className="font-semibold text-primary">
-                  {formatPrice(Math.round(pricing.total * 0.1))}
-                </span>
+            {/* 10% deposit callout — only for instant booking */}
+            {isInstantBooking && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {isRu ? 'Предоплата 10% сейчас' : '10% deposit due now'}
+                  </span>
+                  <span className="font-semibold text-primary">
+                    {formatPrice(Math.round(pricing.total * 0.1))}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {isRu
+                    ? 'Остаток оплачивается при заезде'
+                    : 'Remaining balance due at check-in'}
+                </p>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">
-                {isRu
-                  ? 'Остаток оплачивается при заезде'
-                  : 'Remaining balance due at check-in'}
-              </p>
-            </div>
+            )}
+
+            {/* Request info — only for non-instant */}
+            {!isInstantBooking && (
+              <div className="p-3 rounded-lg bg-muted/50 border">
+                <p className="text-sm text-muted-foreground">
+                  {isRu
+                    ? 'Оплата не списывается сейчас. Хозяин рассмотрит ваш запрос в течение 24 часов.'
+                    : "You won't be charged yet. The host will review your request within 24 hours."}
+                </p>
+              </div>
+            )}
           </section>
 
           {/* Validation Errors */}
@@ -456,8 +473,8 @@ export default function PropertyInquiry() {
             </div>
           )}
 
-          {/* ===== PAYMENT OPTIONS ===== */}
-          {user && isFormValid && (
+          {/* ===== PAYMENT OPTIONS (only for instant booking) ===== */}
+          {user && isFormValid && isInstantBooking && (
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="w-5 h-5 text-primary" />
@@ -490,7 +507,7 @@ export default function PropertyInquiry() {
           )}
         </div>
 
-        {/* ===== STICKY CONFIRM BUTTON ===== */}
+        {/* ===== STICKY CONFIRM / REQUEST BUTTON ===== */}
         {user && isFormValid && (
           <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t p-4 safe-area-bottom">
             <div className="flex items-center justify-between mb-2">
@@ -500,7 +517,10 @@ export default function PropertyInquiry() {
               </span>
             </div>
             <Button
-              className="w-full h-12 text-base font-semibold"
+              className={cn(
+                "w-full h-12 text-base font-semibold",
+                !isInstantBooking && "bg-foreground text-background hover:bg-foreground/90"
+              )}
               size="lg"
               disabled={isSubmitting}
               onClick={async () => {
@@ -523,7 +543,8 @@ export default function PropertyInquiry() {
                       price_per_night: pricePerNight,
                       deposit_amount: rentalTerms?.deposit_amount || 0,
                       discount_percent: pricing.discountPercent,
-                      prepayment: Math.round(pricing.total * 0.1),
+                      booking_mode: isInstantBooking ? 'instant' : 'request',
+                      ...(isInstantBooking ? { prepayment: Math.round(pricing.total * 0.1) } : {}),
                     },
                     items: [{
                       item_name: propertyTitle || 'Property booking',
@@ -541,13 +562,20 @@ export default function PropertyInquiry() {
                       phone: formData.phone,
                       email: formData.email || undefined,
                     }],
-                    payment: {
-                      method: 'cash',
-                      amount: Math.round(pricing.total * 0.1),
-                    },
+                    ...(isInstantBooking ? {
+                      payment: {
+                        method: 'cash',
+                        amount: Math.round(pricing.total * 0.1),
+                      },
+                    } : {}),
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
+                    if (!isInstantBooking) {
+                      toast.success(isRu 
+                        ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
+                        : 'Request sent! The host will respond within 24 hours.');
+                    }
                     navigate(`/bookings/${result.order_id}`, { replace: true });
                   }
                 } catch (err) {
@@ -559,9 +587,20 @@ export default function PropertyInquiry() {
             >
               {isSubmitting ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
+              ) : isInstantBooking ? (
+                <Zap className="w-5 h-5 mr-2" />
               ) : null}
-              {isRu ? 'Подтвердить и оплатить' : 'Confirm and pay'}
+              {isInstantBooking
+                ? (isRu ? 'Забронировать и оплатить' : 'Book and pay')
+                : (isRu ? 'Запросить бронирование' : 'Request to book')}
             </Button>
+            {!isInstantBooking && (
+              <p className="text-[10px] text-center text-muted-foreground mt-2">
+                {isRu 
+                  ? 'Оплата не списывается. Хозяин подтвердит бронирование.' 
+                  : "You won't be charged. The host will confirm your booking."}
+              </p>
+            )}
           </div>
         )}
       </div>
