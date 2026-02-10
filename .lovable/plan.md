@@ -1,58 +1,23 @@
 
 
-## Airbnb Booking Flow Redesign
+## Make Quick Action Icons Look Like App Buttons
 
-### How Airbnb Actually Works
-
-Airbnb uses a **2-page flow**, not a multi-step wizard:
-
-1. **Property Detail Page** -- user selects dates and guests in a booking widget, sees price per night, clicks "Reserve"
-2. **"Confirm and Pay" Page** -- a single scrollable page with everything needed to finalize:
-   - Trip summary (dates, guests) with "Edit" links that go back to the detail page
-   - Price breakdown (already calculated)
-   - Contact info (auto-filled from profile)
-   - Payment method selection
-   - Cancellation policy and house rules (read-only)
-   - One big "Confirm and pay" button
-
-There is **no step-by-step wizard** on the booking page. Everything is visible at once on a single page.
+Transform the current icon circles into app-style launcher buttons — large rounded squares with prominent icons inside, similar to iOS/Android home screen apps.
 
 ### What Changes
 
-**1. Property Detail Page (PropertyDetail.tsx)** -- keep as-is, it already handles date/guest selection and navigates to the inquiry page with URL params.
+**QuickActionsGrid.tsx** -- restyle the icon containers and SVGs:
 
-**2. PropertyInquiry.tsx -- full redesign to match "Confirm and Pay" pattern:**
+- **Container**: increase from `w-16 h-16` to `w-[60px] h-[60px]`, use `rounded-[16px]` (iOS-style squircle rounding), add a subtle `shadow-sm` for depth
+- **Background**: keep `bg-primary/8` but make it slightly stronger (`bg-primary/10`) so it reads more like a solid app tile
+- **Icon SVG**: increase from `w-9 h-9` to `w-8 h-8` (keep proportional within the larger container), keep `strokeWidth={1.5}` for clean lines
+- **Overall button padding**: tighten so the grid feels like an app launcher, not a list
 
-- Remove the `BookingStepProgress` wizard -- replace with a simple "Confirm and Pay" header
-- Assume dates and guests arrive via URL params (from the detail page). If missing, show an inline prompt to go back and select dates
-- Layout becomes a single scroll:
-  - **"Your trip" section** -- dates and guests displayed as summary rows with "Edit" links (navigate back to property detail)
-  - **Price breakdown** -- always visible, no toggle
-  - **Contact info** -- auto-filled from profile, collapsible if already filled
-  - **Payment method** -- inline selection (deposit options)
-  - **Cancellation policy** -- compact, read-only
-  - **Ground rules** -- collapsible section with house rules
-  - **"Confirm and pay" button** -- sticky at bottom
+### Visual Result
 
-**3. PropertyListingCard.tsx** -- "Book" button behavior change:
+Before: flat translucent circles with small icons
+After: rounded-square tiles with prominent icons, looking like tappable app buttons
 
-- Instead of navigating directly to `/property/{id}/inquiry`, navigate to `/property/{id}` (the detail page) so the user can see the property, pick dates, then proceed. This matches Airbnb where you always go through the listing first.
+### Files to modify
+- `src/components/home/QuickActionsGrid.tsx` -- container styling update only
 
-### Technical Details
-
-**PropertyInquiry.tsx rewrite:**
-- Remove `BookingStepProgress` import and `propertyBookingSteps` config
-- Remove `currentStep` logic entirely
-- If `checkIn`/`checkOut` URL params are missing, show a message with a "Select dates" button linking back to the detail page
-- Flatten all sections into a single scrollable layout
-- Keep existing hooks: `usePropertyWithRentalTerms`, `usePropertyBlockedDates`, `useProfile`, `useAuth`
-- Keep existing pricing logic
-- Make the "Confirm and pay" button sticky at the bottom of the screen
-- Auto-fill contact from profile silently; show editable fields only if profile data is incomplete
-
-**PropertyListingCard.tsx update:**
-- Change the "Book" button `onClick` from `/property/${id}/inquiry` to `/property/${id}` (detail page)
-
-**Files to modify:**
-- `src/pages/property/PropertyInquiry.tsx` -- major rewrite
-- `src/components/property/PropertyListingCard.tsx` -- minor route change
