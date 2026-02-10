@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2 } from 'lucide-react';
+import { Star, Zap, BedDouble, Bath, Users, CalendarIcon, Building2, Maximize, Eye, CalendarDays, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
@@ -120,8 +120,13 @@ export function PropertyListingCard({
           )}
         </div>
 
-        {/* Title */}
-        <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
+        {/* Title + Property Type */}
+        <p className="text-sm text-muted-foreground line-clamp-1">
+          {title}
+          {property.property_type && (
+            <span className="text-muted-foreground/70"> · {property.property_type}</span>
+          )}
+        </p>
 
         {/* Management Company Badge */}
         {companyName && (
@@ -137,7 +142,7 @@ export function PropertyListingCard({
           </button>
         )}
 
-        {/* Specs */}
+        {/* Specs row */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <BedDouble className="w-3.5 h-3.5" />
@@ -151,7 +156,43 @@ export function PropertyListingCard({
             <Users className="w-3.5 h-3.5" />
             {property.max_guests || 2}
           </span>
+          {property.area_sqm && (
+            <span className="flex items-center gap-1">
+              <Maximize className="w-3.5 h-3.5" />
+              {property.area_sqm} m²
+            </span>
+          )}
+          {property.view_type && (
+            <span className="flex items-center gap-1">
+              <Eye className="w-3.5 h-3.5" />
+              {property.view_type}
+            </span>
+          )}
         </div>
+
+        {/* Min stay + Discount badges */}
+        {(property.min_stay_nights && property.min_stay_nights > 1 || property.weekly_discount || property.monthly_discount) && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {property.min_stay_nights && property.min_stay_nights > 1 && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+                <CalendarDays className="w-3 h-3" />
+                {isRu ? `от ${property.min_stay_nights} ночей` : `${property.min_stay_nights}+ nights`}
+              </span>
+            )}
+            {property.weekly_discount && property.weekly_discount > 0 ? (
+              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                <Tag className="w-3 h-3" />
+                -{property.weekly_discount}% {isRu ? 'нед' : 'week'}
+              </span>
+            ) : null}
+            {property.monthly_discount && property.monthly_discount > 0 ? (
+              <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                <Tag className="w-3 h-3" />
+                -{property.monthly_discount}% {isRu ? 'мес' : 'mo'}
+              </span>
+            ) : null}
+          </div>
+        )}
 
         {/* Price + Book Button */}
         <div className="flex items-center justify-between pt-1">
