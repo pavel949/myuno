@@ -302,9 +302,10 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             rows={3}
           />
 
-          <div className="p-4 bg-muted rounded-lg">
+          <div className="p-4 bg-muted rounded-lg flex items-start gap-2">
+            <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
-              💡 {isRu 
+              {isRu 
                 ? 'После добавления объект будет проверен модератором UNO за 24 часа.' 
                 : "After adding, the property will be reviewed by UNO within 24 hours."}
             </p>

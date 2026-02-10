@@ -140,9 +140,10 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
         </div>
 
         {/* Recommendation */}
-        <div className="p-3 bg-muted/50 rounded-lg">
+        <div className="p-3 bg-muted/50 rounded-lg flex items-start gap-2">
+          <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground">
-            💡 {isRu 
+            {isRu 
               ? 'Рекомендуем: 5-10% на неделю, 15-25% на месяц. Объекты со скидками бронируют на 40% чаще.' 
               : 'Recommended: 5-10% weekly, 15-25% monthly. Properties with discounts get 40% more bookings.'}
           </p>

@@ -70,8 +70,9 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
         />
 
         {formData.lat && formData.lng && (
-          <p className="text-xs text-muted-foreground">
-            📍 {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
           </p>
         )}
       </CardContent>
