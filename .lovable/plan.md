@@ -1,77 +1,89 @@
 
 
-## Перестройка модуля Управляющего: от каркаса к рабочему инструменту
+## Объединение модулей Собственника и Управляющего
 
-### Проблема
+### Проблема сейчас
 
-Модуль управляющего сейчас — это каркас с 2 рабочими страницами и 8+ мёртвыми ссылками. Навигация обещает Calendar, Bookings, Guests, Messages, Pricing, Settings, Help — но ни одна из этих страниц не существует.
+Два отдельных модуля (`/owner` и `/manager`) делают одно и то же, но с разными источниками данных:
 
-При этом в Owner-модуле уже есть готовые компоненты: Airbnb-календарь, сервисные задачи, список объектов со статусами. Управляющему нужны **те же инструменты**, просто с фильтрацией по назначенным объектам.
+- **Owner**: 32 страницы, получает объекты через `owner_id` из таблицы `properties`
+- **Manager**: 3 страницы-дубликата, получает объекты через `property_manager_assignments`
+- Оба используют одинаковые компоненты: `AirbnbCalendarGrid`, `CalendarTodayTasks`, `PropertyThumbnailSelector`
+- Отдельный Layout, Sidebar, MobileNav, Header, Guard — всё продублировано
+
+### Концепция: один модуль `/owner` с адаптивным доступом
+
+Вместо двух модулей — один `/owner`, который автоматически показывает:
+- **Свои объекты** (если пользователь — собственник)
+- **Назначенные объекты** (если пользователь — управляющий)
+- **И те, и другие** (если пользователь и владеет, и управляет чужими)
+
+Бейдж в хедере и над списком объектов показывает контекст: "Мои объекты" / "Под управлением".
 
 ### Что изменится
 
-**1. Дашборд — фокус на «что делать сегодня»**
+**1. Новый хук `useMyProperties` — единый источник данных**
 
-Текущий дашборд показывает 4 абстрактных KPI и 2 мёртвых Quick Action. Новая структура:
+Объединяет `useOwnerProperties` и `useAssignedProperties` в один хук:
 
 ```text
-┌──────────────────────────────────┐
-│  Доброе утро, [имя]             │
-│  3 объекта · 1 заезд сегодня    │
-├──────────────────────────────────┤
-│  Сегодня                        │
-│  ┌─ Check-in: Villa Sunset 14:00│
-│  ┌─ Уборка: Pool Villa    ──✓── │
-│  ┌─ Check-out: Seaview    11:00 │
-├──────────────────────────────────┤
-│  Мои объекты (3)                │
-│  [Property cards with status]    │
-└──────────────────────────────────┘
+useMyProperties() -> {
+  ownedProperties: [...],      // где я owner_id
+  managedProperties: [...],    // где я в property_manager_assignments
+  allProperties: [...],        // объединённый список
+  role: 'owner' | 'manager' | 'both',
+}
 ```
 
-- Убрать KPI-карточки (4 штуки) — заменить одной строкой-сводкой в приветствии
-- Добавить блок «Сегодня» с задачами дня (check-in/out, уборки) — переиспользовать `CalendarTodayTasks`
-- Оставить список объектов со статусами
-- Убрать Quick Actions — действия теперь доступны через нижнюю навигацию
+Все компоненты Owner-модуля переключаются на `useMyProperties` вместо `useOwnerProperties`.
 
-**2. Календарь — переиспользовать Airbnb-компонент Owner**
+**2. Guard — расширить OwnerGuard**
 
-Вместо создания отдельного календаря — подключить уже готовый `AirbnbCalendarGrid` + `CalendarTodayTasks` к маршруту `/manager/calendar`.
+Текущий `OwnerGuard` пропускает только роль `owner`. Расширить: пропускать также `property_manager`. Один Guard вместо двух.
 
-Новая страница `ManagerCalendar.tsx`:
-- Горизонтальный выбор объекта (только назначенные)
-- Airbnb-календарь с бронированиями и задачами
-- Задачи дня с чекбоксами
-- Быстрые действия: + Бронирование, + Задача
+**3. Sidebar и навигация — адаптивная**
 
-**3. Навигация — убрать мёртвые ссылки**
+Sidebar остаётся от Owner, но:
+- Если пользователь — только управляющий (без роли `owner`), скрыть пункты: Financials, Documents, Settings
+- Если есть обе роли — показать всё
+- Пункт "Моя команда" доступен всем (собственник приглашает управляющего, управляющий видит кому он назначен)
 
-Сократить нижнюю навигацию до 4 работающих вкладок:
-- Home (дашборд)
-- Properties (объекты)
-- Calendar (новая страница)
-- Profile (вместо «More» с 4 мёртвыми пунктами)
+**4. Дашборд — объединённый**
 
-Sidebar: оставить те же 4 пункта + Help/Settings внизу. Убрать группы Guests, Messages, Pricing — это функции, которые будут доступны из контекста объекта, а не как отдельные страницы.
+Текущий `OwnerDashboard` показывает `OwnerPropertiesList` (свои объекты). Новый вариант:
+- Секция "Мои объекты" (owned) — если есть
+- Секция "Под управлением" (managed) — если есть  
+- Визуальное разделение с бейджами "Собственник" / "Управляющий"
 
-**4. Убрать дублирование навигации**
+**5. Удалить модуль Manager**
 
-Sidebar на десктопе и нижняя навигация на мобайле — одинаковый набор из 4 пунктов. Никаких Quick Actions на дашборде, никакого меню «Ещё».
+Все маршруты `/manager/*` перенаправить на `/owner/*`. Удалить:
+- `src/pages/manager/` (3 файла)
+- `src/components/manager/` (5 файлов)
+- `ManagerGuard` из auth
+- Маршруты `/manager/*` из `AnimatedRoutes.tsx`
+- Роль `property_manager` из навигации оставить, но defaultPath сменить на `/owner`
 
 ### Технические детали
 
 | Файл | Действие |
 |---|---|
-| `src/pages/manager/ManagerDashboard.tsx` | Переписать: убрать KPI-карточки, добавить строку-сводку, подключить `CalendarTodayTasks` для блока «Сегодня» |
-| `src/pages/manager/ManagerCalendar.tsx` | Новый файл: переиспользует `AirbnbCalendarGrid`, `CalendarTodayTasks`, `PropertyThumbnailSelector`, фильтруя по назначенным объектам через `useAssignedProperties` |
-| `src/components/manager/ManagerMobileNav.tsx` | Упростить: 4 вкладки (Home, Units, Calendar, Profile), убрать DropdownMenu «More» |
-| `src/components/manager/ManagerSidebar.tsx` | Упростить: убрать группы Operations и Support с мёртвыми ссылками, оставить Dashboard, Properties, Calendar + Settings/Help |
-| `src/components/manager/ManagerHeader.tsx` | Без изменений |
-| `src/components/layout/AnimatedRoutes.tsx` | Добавить маршрут `/manager/calendar` |
+| `src/hooks/useMyProperties.ts` | Новый хук: объединяет `useOwnerProperties` + `useAssignedProperties`, возвращает `ownedProperties`, `managedProperties`, `allProperties`, `accessRole` |
+| `src/components/auth/RoleGuard.tsx` | Расширить `OwnerGuard`: пропускать `owner` ИЛИ `property_manager` |
+| `src/components/owner/OwnerSidebar.tsx` | Адаптивное меню: скрывать Financials/Documents для чистых управляющих |
+| `src/components/owner/dashboard/OwnerPropertiesList.tsx` | Показывать две секции: "Мои" и "Под управлением" (если есть оба типа) |
+| `src/pages/owner/OwnerDashboard.tsx` | Использовать `useMyProperties` вместо только owned |
+| `src/pages/owner/OwnerCalendar.tsx` | PropertyThumbnailSelector показывает все доступные объекты (owned + managed) |
+| `src/types/auth.ts` | `property_manager.defaultPath` поменять на `/owner` |
+| `src/components/layout/AnimatedRoutes.tsx` | Удалить блок `/manager/*`, добавить редиректы `/manager` -> `/owner`, `/manager/calendar` -> `/owner/calendar`, `/manager/properties` -> `/owner/properties` |
+| `src/pages/manager/*` | Удалить 3 файла |
+| `src/components/manager/*` | Удалить 5 файлов |
+| `src/components/auth/ManagerGuard.tsx` | Удалить |
+| `src/components/layout/pageRegistry.ts` | Убрать Manager-импорты |
 
 ### Что НЕ меняется
-- Хук `useAssignedProperties` остаётся без изменений
-- Компоненты Owner-модуля (`AirbnbCalendarGrid`, `CalendarTodayTasks`, `PropertyThumbnailSelector`) используются как есть
-- Страница `ManagerProperties.tsx` остаётся без изменений
-- Хедер остаётся без изменений
 
+- Таблица `property_manager_assignments` и хук `useAssignedProperties` — остаются как есть (используются внутри нового `useMyProperties`)
+- Страница Team (`/owner/team`) — уже работает с приглашениями и ко-хостингом
+- Система permissions (view, edit, financial, bookings) — остаётся для управляющих
+- Компоненты календаря, задач — без изменений
