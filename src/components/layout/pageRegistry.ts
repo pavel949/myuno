@@ -30,6 +30,7 @@ export const BeautyMap = lazy(() => import('@/pages/beauty/BeautyMap'));
 
 // ── Property ──
 export const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
+export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySearchPage'));
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 export const PropertyMap = lazy(() => import('@/pages/property/PropertyMap'));
