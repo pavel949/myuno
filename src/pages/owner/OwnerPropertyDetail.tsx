@@ -7,19 +7,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Home, MapPin, Bed, Bath, SquareStack, Settings, 
-  Globe, ClipboardList, Wrench, Calendar, ExternalLink,
-  CheckCircle, Clock, AlertTriangle, DollarSign, BookOpen,
-  FileText, Building2, Sparkles, Shield
-} from 'lucide-react';
-import { differenceInHours } from 'date-fns';
+import { Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2, Sparkles, Shield, Settings } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { format, differenceInHours } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { PropertyDocumentsTab } from '@/components/owner/PropertyDocumentsTab';
 import { JuristicContactsCard } from '@/components/owner/JuristicContactsCard';
 import { usePropertyDocuments } from '@/hooks/usePropertyDocuments';
+import { PropertyDetailHeader } from '@/components/owner/property-detail/PropertyDetailHeader';
+import { PropertyQuickActions } from '@/components/owner/property-detail/PropertyQuickActions';
+import { MarketplaceStatusCard } from '@/components/owner/property-detail/MarketplaceStatusCard';
+import { Bed, Bath, SquareStack } from 'lucide-react';
 
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -32,52 +30,11 @@ export default function OwnerPropertyDetail() {
   const { data: inspections } = usePropertyInspections(id);
   const { documents } = usePropertyDocuments(id || '');
 
-  const getStatusBadge = (status: string, approvalStatus?: string) => {
-    if (approvalStatus === 'pending') {
-      return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 gap-1">
-          <Clock className="h-3 w-3" />
-          {isRu ? 'На рассмотрении' : 'Under Review'}
-        </Badge>
-      );
-    }
-    if (approvalStatus === 'rejected') {
-      return (
-        <Badge variant="destructive" className="gap-1">
-          {isRu ? 'Требует доработки' : 'Needs Revision'}
-        </Badge>
-      );
-    }
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500">{isRu ? 'Активен' : 'Active'}</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">{isRu ? 'На проверке' : 'Pending'}</Badge>;
-      default:
-        return <Badge variant="outline">{isRu ? 'Неактивен' : 'Inactive'}</Badge>;
-    }
-  };
-
-  // Calculate protection period
   const instantBookingEnabledAt = property?.instant_booking_enabled_at;
   const protectionEndTime = instantBookingEnabledAt ? new Date(instantBookingEnabledAt) : null;
   const isInProtectionPeriod = protectionEndTime && protectionEndTime > new Date();
   const hoursRemaining = protectionEndTime ? Math.max(0, differenceInHours(protectionEndTime, new Date())) : 0;
   const isRecentlyApproved = property?.approval_status === 'approved' && isInProtectionPeriod;
-
-  const getServiceStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in_progress':
-        return <Clock className="h-4 w-4 text-blue-500" />;
-      case 'pending':
-      case 'confirmed':
-        return <Clock className="h-4 w-4 text-amber-500" />;
-      default:
-        return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
 
   const getPropertyTypeLabel = (type: string) => {
     const types: Record<string, { en: string; ru: string }> = {
@@ -98,6 +55,15 @@ export default function OwnerPropertyDetail() {
     emergency: { en: 'Emergency', ru: 'Экстренная помощь' },
   };
 
+  const getServiceStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'in_progress': return <Clock className="h-4 w-4 text-blue-500" />;
+      case 'pending':
+      case 'confirmed': return <Clock className="h-4 w-4 text-amber-500" />;
+      default: return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -125,63 +91,26 @@ export default function OwnerPropertyDetail() {
     <PageContainer>
       <BackButton />
       
-      {/* Header with image */}
-      <div className="relative rounded-xl overflow-hidden mb-6">
-        {property.cover_image ? (
-          <img 
-            src={property.cover_image} 
-            alt={property.title}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <div className="w-full h-48 bg-muted flex items-center justify-center">
-            <Home className="h-16 w-16 text-muted-foreground" />
-          </div>
-        )}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-white">
-                {isRu && property.title_ru ? property.title_ru : property.title}
-              </h1>
-              <p className="text-white/80 text-sm flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {property.district || property.address}
-              </p>
-            </div>
-            {getStatusBadge(property.status, property.approval_status)}
-          </div>
-        </div>
-      </div>
+      <PropertyDetailHeader property={property} isRu={isRu} />
 
-      {/* Recently approved alert - prompt to setup */}
+      {/* Recently approved alert */}
       {isRecentlyApproved && (
         <Card className="mb-6 border-green-200 bg-green-50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium text-green-900">
-                  {isRu ? 'Объект одобрен! 🎉' : 'Property Approved! 🎉'}
-                </p>
+                <p className="font-medium text-green-900">{isRu ? 'Объект одобрен! 🎉' : 'Property Approved! 🎉'}</p>
                 <p className="text-sm text-green-700 mt-1">
-                  {isRu 
-                    ? 'Настройте календарь и цены, чтобы начать принимать бронирования' 
-                    : 'Set up calendar and pricing to start accepting bookings'}
+                  {isRu ? 'Настройте календарь и цены, чтобы начать принимать бронирования' : 'Set up calendar and pricing to start accepting bookings'}
                 </p>
                 <div className="flex items-center gap-2 mt-3">
-                  <Button 
-                    size="sm" 
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => navigate(`/owner/properties/${id}/setup`)}
-                  >
-                    <Sparkles className="h-4 w-4 mr-1" />
-                    {isRu ? 'Настроить' : 'Set Up Now'}
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => navigate(`/owner/properties/${id}/setup`)}>
+                    <Sparkles className="h-4 w-4 mr-1" />{isRu ? 'Настроить' : 'Set Up Now'}
                   </Button>
                   {isInProtectionPeriod && (
                     <Badge variant="secondary" className="text-xs gap-1">
-                      <Shield className="h-3 w-3" />
-                      {isRu ? `Защита: ${hoursRemaining}ч` : `Protection: ${hoursRemaining}h`}
+                      <Shield className="h-3 w-3" />{isRu ? `Защита: ${hoursRemaining}ч` : `Protection: ${hoursRemaining}h`}
                     </Badge>
                   )}
                 </div>
@@ -194,180 +123,39 @@ export default function OwnerPropertyDetail() {
       {/* Property specs */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-muted-foreground">
-                {getPropertyTypeLabel(property.property_type)}
-              </span>
-              {property.bedrooms && (
-                <span className="flex items-center gap-1">
-                  <Bed className="h-4 w-4" />
-                  {property.bedrooms}
-                </span>
-              )}
-              {property.bathrooms && (
-                <span className="flex items-center gap-1">
-                  <Bath className="h-4 w-4" />
-                  {property.bathrooms}
-                </span>
-              )}
-              {property.area_sqm && (
-                <span className="flex items-center gap-1">
-                  <SquareStack className="h-4 w-4" />
-                  {property.area_sqm}м²
-                </span>
-              )}
-            </div>
+          <div className="flex items-center gap-4">
+            <span className="text-muted-foreground">{getPropertyTypeLabel(property.property_type)}</span>
+            {property.bedrooms && <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms}</span>}
+            {property.bathrooms && <span className="flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms}</span>}
+            {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}м²</span>}
           </div>
         </CardContent>
       </Card>
 
-      {/* Marketplace integration - now automatic on approval */}
-      <Card className="mb-6 border-primary/20 bg-primary/5">
-        <CardContent className="p-4">
-          {property.approval_status === 'approved' ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Globe className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-medium">{isRu ? 'Опубликовано на маркетплейсе' : 'Published on Marketplace'}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isRu ? 'Доступно для бронирования' : 'Available for booking'}
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate(`/property/${property.id}`)}
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                {isRu ? 'Открыть' : 'View'}
-              </Button>
-            </div>
-          ) : property.approval_status === 'pending' ? (
-            <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-amber-500" />
-              <div>
-                <p className="font-medium">{isRu ? 'На модерации' : 'Under Review'}</p>
-                <p className="text-sm text-muted-foreground">
-                  {isRu ? 'После одобрения объект автоматически появится на маркетплейсе' : 'Property will be published automatically after approval'}
-                </p>
-              </div>
-            </div>
-          ) : property.approval_status === 'rejected' ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <div>
-                  <p className="font-medium">{isRu ? 'Требуется доработка' : 'Revision Required'}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {property.rejection_reason || (isRu ? 'Внесите изменения и отправьте на повторную проверку' : 'Make changes and resubmit for review')}
-                  </p>
-                </div>
-              </div>
-              <Button size="sm" onClick={() => navigate(`/owner/properties/${id}/edit`)}>
-                <Settings className="h-4 w-4 mr-1" />
-                {isRu ? 'Редактировать' : 'Edit'}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Globe className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{isRu ? 'Ожидает отправки на модерацию' : 'Awaiting Submission'}</p>
-                <p className="text-sm text-muted-foreground">
-                  {isRu ? 'Заполните все обязательные поля и отправьте на проверку' : 'Complete all required fields and submit for review'}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <MarketplaceStatusCard propertyId={property.id} approvalStatus={property.approval_status} rejectionReason={property.rejection_reason} isRu={isRu} />
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <Button 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/manage`)}
-        >
-          <Settings className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Редактировать' : 'Manage Listing'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/manage?section=calendar`)}
-        >
-          <Calendar className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Календарь' : 'Calendar'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/manage?section=pricing`)}
-        >
-          <DollarSign className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Цены' : 'Pricing'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/properties/${id}/guidebook`)}
-        >
-          <BookOpen className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Гайдбук' : 'Guidebook'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/service-request?property=${id}`)}
-        >
-          <Wrench className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Услуга' : 'Service'}</span>
-        </Button>
-        <Button 
-          variant="outline" 
-          className="h-auto py-4 flex-col gap-2"
-          onClick={() => navigate(`/owner/inspection?property=${id}`)}
-        >
-          <ClipboardList className="h-5 w-5" />
-          <span className="text-sm">{isRu ? 'Инспекция' : 'Inspection'}</span>
-        </Button>
-      </div>
+      <PropertyQuickActions propertyId={property.id} isRu={isRu} />
 
-      {/* Tabs for activity */}
+      {/* Activity Tabs */}
       <Tabs defaultValue="services" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="services" className="text-xs px-2">
             {isRu ? 'Услуги' : 'Services'}
-            {(serviceRequests?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{serviceRequests?.length}</Badge>
-            )}
+            {(serviceRequests?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1">{serviceRequests?.length}</Badge>}
           </TabsTrigger>
-          <TabsTrigger value="inspections" className="text-xs px-2">
-            {isRu ? 'Инспекции' : 'Inspections'}
-          </TabsTrigger>
+          <TabsTrigger value="inspections" className="text-xs px-2">{isRu ? 'Инспекции' : 'Inspections'}</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs px-2">
-            <FileText className="h-3 w-3 mr-1" />
-            {isRu ? 'Документы' : 'Docs'}
-            {(documents?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>
-            )}
+            <FileText className="h-3 w-3 mr-1" />{isRu ? 'Документы' : 'Docs'}
+            {(documents?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="juristic" className="text-xs px-2">
-            <Building2 className="h-3 w-3 mr-1" />
-            {isRu ? 'УК' : 'MC'}
+            <Building2 className="h-3 w-3 mr-1" />{isRu ? 'УК' : 'MC'}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="services" className="mt-4 space-y-3">
           {!serviceRequests?.length ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                {isRu ? 'Нет активных заявок' : 'No active requests'}
-              </CardContent>
-            </Card>
+            <Card><CardContent className="p-6 text-center text-muted-foreground">{isRu ? 'Нет активных заявок' : 'No active requests'}</CardContent></Card>
           ) : (
             serviceRequests.map((request) => (
               <Card key={request.id}>
@@ -376,23 +164,14 @@ export default function OwnerPropertyDetail() {
                     <div className="flex items-start gap-3">
                       {getServiceStatusIcon(request.status)}
                       <div>
-                        <p className="font-medium">
-                          {isRu 
-                            ? serviceTypeLabels[request.service_type]?.ru 
-                            : serviceTypeLabels[request.service_type]?.en
-                          }
-                        </p>
+                        <p className="font-medium">{isRu ? serviceTypeLabels[request.service_type]?.ru : serviceTypeLabels[request.service_type]?.en}</p>
                         {request.scheduled_at && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             {format(new Date(request.scheduled_at), 'PPP', { locale: isRu ? ru : undefined })}
                           </p>
                         )}
-                        {request.guest_name && (
-                          <p className="text-sm text-muted-foreground">
-                            {isRu ? 'Гость:' : 'Guest:'} {request.guest_name}
-                          </p>
-                        )}
+                        {request.guest_name && <p className="text-sm text-muted-foreground">{isRu ? 'Гость:' : 'Guest:'} {request.guest_name}</p>}
                       </div>
                     </div>
                     <Badge variant="outline">{request.status}</Badge>
@@ -405,11 +184,7 @@ export default function OwnerPropertyDetail() {
 
         <TabsContent value="inspections" className="mt-4 space-y-3">
           {!inspections?.length ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                {isRu ? 'Нет инспекций' : 'No inspections'}
-              </CardContent>
-            </Card>
+            <Card><CardContent className="p-6 text-center text-muted-foreground">{isRu ? 'Нет инспекций' : 'No inspections'}</CardContent></Card>
           ) : (
             inspections.map((inspection) => (
               <Card key={inspection.id}>
@@ -441,43 +216,25 @@ export default function OwnerPropertyDetail() {
           {property?.project_id ? (
             <>
               <JuristicContactsCard projectId={property.project_id} />
-              <Button 
-                className="w-full"
-                onClick={() => navigate(`/owner/properties/${id}/juristic-requests`)}
-              >
-                <Building2 className="h-4 w-4 mr-2" />
-                {isRu ? 'Запросы к УК' : 'MC Requests'}
+              <Button className="w-full" onClick={() => navigate(`/owner/properties/${id}/juristic-requests`)}>
+                <Building2 className="h-4 w-4 mr-2" />{isRu ? 'Запросы к УК' : 'MC Requests'}
               </Button>
             </>
           ) : (
             <Card>
               <CardContent className="p-6 text-center text-muted-foreground">
                 <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="font-medium mb-1">
-                  {isRu ? 'Комплекс не привязан' : 'No project linked'}
-                </p>
-                <p className="text-sm">
-                  {isRu 
-                    ? 'Привяжите объект к комплексу для взаимодействия с УК' 
-                    : 'Link property to a project to interact with management company'}
-                </p>
+                <p className="font-medium mb-1">{isRu ? 'Комплекс не привязан' : 'No project linked'}</p>
+                <p className="text-sm">{isRu ? 'Привяжите объект к комплексу для взаимодействия с УК' : 'Link property to a project to interact with management company'}</p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
       </Tabs>
 
-      {/* Settings button */}
-      <Button 
-        variant="ghost" 
-        className="w-full mt-6"
-        onClick={() => navigate(`/owner/properties/${id}/edit`)}
-      >
-        <Settings className="h-4 w-4 mr-2" />
-        {isRu ? 'Редактировать объект' : 'Edit Property'}
+      <Button variant="ghost" className="w-full mt-6" onClick={() => navigate(`/owner/properties/${id}/edit`)}>
+        <Settings className="h-4 w-4 mr-2" />{isRu ? 'Редактировать объект' : 'Edit Property'}
       </Button>
-
-      {/* Publish Dialog */}
     </PageContainer>
   );
 }
