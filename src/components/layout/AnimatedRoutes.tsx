@@ -445,6 +445,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/manager" element={<Pages.ManagerDashboard />} />
           <Route path="/manager/properties" element={<Pages.ManagerProperties />} />
           <Route path="/manager/properties/:id" element={<Pages.ManagerProperties />} />
+          <Route path="/manager/calendar" element={<Pages.ManagerCalendar />} />
         </Route>
         
         {/* ── Guest ── */}

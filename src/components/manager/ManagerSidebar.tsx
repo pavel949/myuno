@@ -21,12 +21,7 @@ import {
   LayoutDashboard, 
   Building2, 
   Calendar, 
-  Users, 
-  MessageCircle,
   Settings,
-  ClipboardList,
-  DollarSign,
-  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -58,41 +53,6 @@ const menuItems = [
         labelRu: 'Календарь',
         path: '/manager/calendar',
       },
-      { 
-        id: 'bookings', 
-        icon: ClipboardList, 
-        labelEn: 'Bookings', 
-        labelRu: 'Бронирования',
-        path: '/manager/bookings',
-      },
-    ],
-  },
-  {
-    group: 'operations',
-    groupLabelEn: 'Operations',
-    groupLabelRu: 'Операции',
-    items: [
-      { 
-        id: 'guests', 
-        icon: Users, 
-        labelEn: 'Guests', 
-        labelRu: 'Гости',
-        path: '/manager/guests',
-      },
-      { 
-        id: 'messages', 
-        icon: MessageCircle, 
-        labelEn: 'Messages', 
-        labelRu: 'Сообщения',
-        path: '/manager/messages',
-      },
-      { 
-        id: 'pricing', 
-        icon: DollarSign, 
-        labelEn: 'Pricing', 
-        labelRu: 'Цены',
-        path: '/manager/pricing',
-      },
     ],
   },
   {
@@ -100,13 +60,6 @@ const menuItems = [
     groupLabelEn: 'Support',
     groupLabelRu: 'Поддержка',
     items: [
-      { 
-        id: 'help', 
-        icon: HelpCircle, 
-        labelEn: 'Help', 
-        labelRu: 'Помощь',
-        path: '/manager/help',
-      },
       { 
         id: 'settings', 
         icon: Settings, 

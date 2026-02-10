@@ -382,3 +382,4 @@ export const TeamModerationPage = lazy(() => import('@/pages/team/TeamModeration
 // ── Manager ──
 export const ManagerDashboard = lazy(() => import('@/pages/manager/ManagerDashboard'));
 export const ManagerProperties = lazy(() => import('@/pages/manager/ManagerProperties'));
+export const ManagerCalendar = lazy(() => import('@/pages/manager/ManagerCalendar'));
