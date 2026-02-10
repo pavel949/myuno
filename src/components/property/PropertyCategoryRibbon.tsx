@@ -24,17 +24,18 @@ import { Button } from '@/components/ui/button';
    labelRu: string;
   icon?: string | React.ComponentType<{ className?: string }>;
  }
- 
+
 // Primary property types to show in ribbon (most searched)
 const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
 
  interface PropertyCategoryRibbonProps {
-   mode: PropertyMode;
-   onModeChange: (mode: PropertyMode) => void;
+   mode?: PropertyMode;
+   onModeChange?: (mode: PropertyMode) => void;
    selectedType: string;
    onTypeChange: (type: string) => void;
    propertyTypes: PropertyTypeOption[];
    className?: string;
+   showModeToggle?: boolean;
  }
  
  export const PropertyCategoryRibbon = memo(function PropertyCategoryRibbon({
@@ -44,6 +45,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
    onTypeChange,
    propertyTypes,
    className,
+   showModeToggle = true,
  }: PropertyCategoryRibbonProps) {
    const { language } = useLanguage();
    const isRu = language === 'ru';
@@ -98,36 +100,38 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
 
    return (
      <div className={cn("flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y pb-1", className)}>
-       {/* Mode Toggle - Rent/Buy */}
-       <div className="flex p-0.5 bg-muted/60 rounded-xl shrink-0">
-         <button
-           onClick={() => handleModeChange('rent')}
-           className={cn(
-             "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
-             mode === 'rent'
-               ? "bg-primary text-primary-foreground shadow-sm"
-               : "text-muted-foreground hover:text-foreground"
-           )}
-         >
-           <Home className="w-3.5 h-3.5" />
-           <span>{isRu ? 'Аренда' : 'Rent'}</span>
-         </button>
-         <button
-           onClick={() => handleModeChange('buy')}
-           className={cn(
-             "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
-             mode === 'buy'
-               ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
-               : "text-muted-foreground hover:text-foreground"
-           )}
-         >
-           <Building2 className="w-3.5 h-3.5" />
-           <span>{isRu ? 'Покупка' : 'Buy'}</span>
-         </button>
-       </div>
- 
-       {/* Divider */}
-       <div className="w-px h-6 bg-border shrink-0" />
+       {/* Mode Toggle - Rent/Buy (optional) */}
+       {showModeToggle && mode && onModeChange && (
+         <>
+           <div className="flex p-0.5 bg-muted/60 rounded-xl shrink-0">
+             <button
+               onClick={() => handleModeChange('rent')}
+               className={cn(
+                 "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                 mode === 'rent'
+                   ? "bg-primary text-primary-foreground shadow-sm"
+                   : "text-muted-foreground hover:text-foreground"
+               )}
+             >
+               <Home className="w-3.5 h-3.5" />
+               <span>{isRu ? 'Аренда' : 'Rent'}</span>
+             </button>
+             <button
+               onClick={() => handleModeChange('buy')}
+               className={cn(
+                 "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                 mode === 'buy'
+                   ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
+                   : "text-muted-foreground hover:text-foreground"
+               )}
+             >
+               <Building2 className="w-3.5 h-3.5" />
+               <span>{isRu ? 'Покупка' : 'Buy'}</span>
+             </button>
+           </div>
+           <div className="w-px h-6 bg-border shrink-0" />
+         </>
+       )}
  
       {/* All Types */}
       <TypeButton type={allOption} isActive={selectedType === 'all'} />
