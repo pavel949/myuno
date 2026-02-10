@@ -26,6 +26,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { PreBookingClarity } from '@/components/trust/PreBookingClarity';
 import { cn } from '@/lib/utils';
+import { NextStepNudge } from '@/components/hints/NextStepNudge';
 
 // ────────────────────────────────────
 // TYPES
@@ -289,6 +290,17 @@ export function BookingWizard({
         {/* Content */}
         <div className="p-4 pb-28 space-y-6">
           {renderStepContent()}
+
+          {/* Nudge on details step when no validation error */}
+          {currentStep === 0 && !validationError && (
+            <NextStepNudge
+              message={isRu ? 'Всё готово — нажмите Далее' : 'All set — tap Next'}
+              direction="down"
+              visible={true}
+              hintId={`booking-wizard-details-${config.vertical}`}
+              className="w-fit mx-auto"
+            />
+          )}
         </div>
 
         {!isConfirmStep && (

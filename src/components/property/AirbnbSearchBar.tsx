@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, MapPin, Globe, X, Minus, Plus, Check } from 'lucide-react';
+import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -274,7 +275,16 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                               ) : null;
                             })}
                           </div>
-                        )}
+                         )}
+
+                        {/* Nudge: selected locations → go to dates */}
+                        <NextStepNudge
+                          message={language === 'ru' ? 'Теперь выберите даты →' : 'Now select dates →'}
+                          direction="right"
+                          visible={selectedLocations.length > 0 && mobileTab === 'location'}
+                          hintId="search-locations-to-dates"
+                          className="mt-2 self-center w-fit mx-auto pointer-events-auto cursor-pointer"
+                        />
                       </div>
                     )}
 
@@ -339,6 +349,15 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                             </p>
                           </div>
                         )}
+
+                        {/* Nudge: dates selected → go to guests */}
+                        <NextStepNudge
+                          message={language === 'ru' ? 'Укажите гостей и нажмите Поиск' : 'Add guests and search'}
+                          direction="down"
+                          visible={!!checkIn && !!checkOut && mobileTab === 'dates'}
+                          hintId="search-dates-to-guests"
+                          className="self-center w-fit mx-auto"
+                        />
                       </div>
                     )}
 
