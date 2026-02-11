@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { OWNER_REVENUE } from '@/lib/config/ownerConstants';
 
 const locale = {
   ru: {
@@ -37,9 +38,9 @@ const locale = {
     ],
     plans: {
       basic: {
-        name: 'Базовый',
-        commission: '5%',
-        commissionLabel: 'от OTA-бронирований',
+        name: OWNER_REVENUE.CHANNEL_MANAGER.basic.nameRu,
+        commission: OWNER_REVENUE.CHANNEL_MANAGER.basic.labelRu,
+        commissionLabel: OWNER_REVENUE.CHANNEL_MANAGER.basic.descRu,
         features: [
           'Синхронизация iCal 24/7',
           'Уведомления о бронях',
@@ -48,9 +49,9 @@ const locale = {
         ],
       },
       premium: {
-        name: 'Премиум',
-        commission: '10%',
-        commissionLabel: 'от OTA-бронирований',
+        name: OWNER_REVENUE.CHANNEL_MANAGER.premium.nameRu,
+        commission: OWNER_REVENUE.CHANNEL_MANAGER.premium.labelRu,
+        commissionLabel: OWNER_REVENUE.CHANNEL_MANAGER.premium.descRu,
         badge: 'Популярный',
         features: [
           'Всё из базового тарифа',
@@ -61,7 +62,7 @@ const locale = {
         ],
       },
     },
-    fullManagement: 'Нужно полное управление? От 15%',
+    fullManagement: `Нужно полное управление? От ${OWNER_REVENUE.SERVICE_PARTNER.labelRu}`,
     cta: 'Оставить заявку',
     dialog: {
       title: 'Заявка на управление каналами',
@@ -91,9 +92,9 @@ const locale = {
     ],
     plans: {
       basic: {
-        name: 'Basic',
-        commission: '5%',
-        commissionLabel: 'of OTA bookings',
+        name: OWNER_REVENUE.CHANNEL_MANAGER.basic.nameEn,
+        commission: OWNER_REVENUE.CHANNEL_MANAGER.basic.labelEn,
+        commissionLabel: OWNER_REVENUE.CHANNEL_MANAGER.basic.descEn,
         features: [
           '24/7 iCal synchronization',
           'Booking notifications',
@@ -102,9 +103,9 @@ const locale = {
         ],
       },
       premium: {
-        name: 'Premium',
-        commission: '10%',
-        commissionLabel: 'of OTA bookings',
+        name: OWNER_REVENUE.CHANNEL_MANAGER.premium.nameEn,
+        commission: OWNER_REVENUE.CHANNEL_MANAGER.premium.labelEn,
+        commissionLabel: OWNER_REVENUE.CHANNEL_MANAGER.premium.descEn,
         badge: 'Popular',
         features: [
           'Everything in Basic',
@@ -115,7 +116,7 @@ const locale = {
         ],
       },
     },
-    fullManagement: 'Need full management? From 15%',
+    fullManagement: `Need full management? From ${OWNER_REVENUE.SERVICE_PARTNER.labelEn}`,
     cta: 'Request Service',
     dialog: {
       title: 'Channel Management Request',
