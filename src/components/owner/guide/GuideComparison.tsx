@@ -57,8 +57,8 @@ export function GuideComparison() {
 
         <p className="text-muted-foreground mb-6">
           {isRu 
-            ? 'Как UNO Property Care соотносится с ведущими PMS-системами:'
-            : 'How UNO Property Care compares to leading PMS systems:'
+            ? 'Как myUNO соотносится с ведущими PMS-системами:'
+            : 'How myUNO compares to leading PMS systems:'
           }
         </p>
 

@@ -9,46 +9,37 @@ const TOUR_STORAGE_KEY = 'uno_owner_tour_completed';
 const dashboardSteps: Record<string, DriveStep[]> = {
   en: [
     {
-      element: '[data-tour="quick-actions"]',
+      element: '[data-tour="active-stays"]',
       popover: {
-        title: '⚡ Quick Actions',
-        description: 'Fast access to common tasks: import bookings, add expenses, request cleaning, and more.',
+        title: 'Current Guests',
+        description: 'See who is currently staying at your properties and upcoming check-ins.',
         side: 'bottom',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="portfolio"]',
+      element: '[data-tour="properties"]',
       popover: {
-        title: '🏠 Your Portfolio',
-        description: 'All your properties at a glance. Tap to see details, bookings, and performance.',
+        title: 'Your Properties',
+        description: 'All your properties in one place. Tap to see details, bookings, and settings.',
         side: 'top',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="add-property"]',
+      element: '[data-tour="operations"]',
       popover: {
-        title: '➕ Add Property',
-        description: 'Register your first property. Our wizard guides you through each step.',
-        side: 'left',
-        align: 'center',
-      },
-    },
-    {
-      element: '[data-tour="finances"]',
-      popover: {
-        title: '💰 Financial Overview',
-        description: 'Track income, expenses, and net profit. Export reports anytime.',
+        title: "Today's Tasks",
+        description: 'Cleanings, maintenance, check-ins and check-outs for today.',
         side: 'top',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="team"]',
+      element: '[data-tour="menu"]',
       popover: {
-        title: '👥 Team Management',
-        description: 'Invite managers, agents, or management companies to help manage your properties.',
+        title: 'Menu',
+        description: 'Access channels, reports, support, and account settings.',
         side: 'top',
         align: 'center',
       },
@@ -56,46 +47,37 @@ const dashboardSteps: Record<string, DriveStep[]> = {
   ],
   ru: [
     {
-      element: '[data-tour="quick-actions"]',
+      element: '[data-tour="active-stays"]',
       popover: {
-        title: '⚡ Быстрые действия',
-        description: 'Быстрый доступ к частым задачам: импорт бронирований, добавление расходов, заказ уборки.',
+        title: 'Текущие гости',
+        description: 'Кто сейчас проживает в ваших объектах и ближайшие заезды.',
         side: 'bottom',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="portfolio"]',
+      element: '[data-tour="properties"]',
       popover: {
-        title: '🏠 Ваш портфель',
-        description: 'Все объекты на одном экране. Нажмите для просмотра деталей и статистики.',
+        title: 'Ваши объекты',
+        description: 'Все объекты в одном месте. Нажмите для просмотра деталей и настроек.',
         side: 'top',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="add-property"]',
+      element: '[data-tour="operations"]',
       popover: {
-        title: '➕ Добавить объект',
-        description: 'Зарегистрируйте первый объект. Мастер проведёт через все шаги.',
-        side: 'left',
-        align: 'center',
-      },
-    },
-    {
-      element: '[data-tour="finances"]',
-      popover: {
-        title: '💰 Финансовый обзор',
-        description: 'Отслеживайте доходы, расходы и чистую прибыль. Экспортируйте отчёты.',
+        title: 'Задачи на сегодня',
+        description: 'Уборки, обслуживание, заезды и выезды на сегодня.',
         side: 'top',
         align: 'center',
       },
     },
     {
-      element: '[data-tour="team"]',
+      element: '[data-tour="menu"]',
       popover: {
-        title: '👥 Управление командой',
-        description: 'Приглашайте менеджеров, агентов или управляющие компании для помощи.',
+        title: 'Меню',
+        description: 'Каналы, отчёты, поддержка и настройки аккаунта.',
         side: 'top',
         align: 'center',
       },
@@ -121,7 +103,6 @@ export function OwnerOnboardingTour({
   const startTour = useCallback(() => {
     const steps = dashboardSteps[language] || dashboardSteps.en;
     
-    // Filter steps to only include elements that exist on the page
     const availableSteps = steps.filter(step => {
       if (!step.element) return true;
       return document.querySelector(step.element as string);
@@ -149,15 +130,12 @@ export function OwnerOnboardingTour({
   }, [language, onComplete]);
 
   useEffect(() => {
-    // Only auto-start on dashboard
     if (!location.pathname.match(/^\/owner\/?$/)) return;
     
-    // Check if tour was already completed
     const tourCompleted = localStorage.getItem(TOUR_STORAGE_KEY);
     if (tourCompleted && !forceStart) return;
 
     if ((autoStart || forceStart) && !hasStarted) {
-      // Delay to ensure DOM elements are mounted
       const timer = setTimeout(startTour, 1500);
       return () => clearTimeout(timer);
     }

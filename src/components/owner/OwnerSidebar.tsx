@@ -104,7 +104,7 @@ export function OwnerSidebar() {
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="font-semibold text-sidebar-foreground">
-                UNO Property
+                myUNO
               </span>
               <span className="text-xs text-sidebar-foreground/60">
                 {isRussian ? '← На главную' : '← Back to Home'}

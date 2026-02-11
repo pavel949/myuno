@@ -34,7 +34,7 @@ export default function OwnerDashboard() {
         <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
           <Home className="h-10 w-10 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">UNO Property Care</h2>
+        <h2 className="text-2xl font-bold mb-2">myUNO</h2>
         <p className="text-muted-foreground mb-8 max-w-sm">
           {isRu ? 'Управляйте своей недвижимостью на Пхукете профессионально' : 'Manage your Phuket property professionally'}
         </p>
@@ -55,27 +55,35 @@ export default function OwnerDashboard() {
       {/* Invites */}
       <OwnershipInviteBanner />
 
-      {/* Active Stays — contextual, like Airbnb "Currently hosting" */}
-      <Suspense fallback={<SectionSkeleton />}>
-        <ActiveStaysWidget />
-      </Suspense>
+      {/* Active Stays */}
+      <div data-tour="active-stays">
+        <Suspense fallback={<SectionSkeleton />}>
+          <ActiveStaysWidget />
+        </Suspense>
+      </div>
 
-      {/* Properties — Airbnb "Your listings" style, grouped by status */}
-      <Suspense fallback={<SectionSkeleton />}>
-        <OwnerPropertiesList />
-      </Suspense>
-
-      <Separator />
-
-      {/* Today's Operations — flat list, status-dot style */}
-      <Suspense fallback={<SectionSkeleton />}>
-        <OwnerOperationsFlat />
-      </Suspense>
+      {/* Properties */}
+      <div data-tour="properties">
+        <Suspense fallback={<SectionSkeleton />}>
+          <OwnerPropertiesList />
+        </Suspense>
+      </div>
 
       <Separator />
 
-      {/* Menu — flat Airbnb style */}
-      <OwnerDashboardMenu />
+      {/* Today's Operations */}
+      <div data-tour="operations">
+        <Suspense fallback={<SectionSkeleton />}>
+          <OwnerOperationsFlat />
+        </Suspense>
+      </div>
+
+      <Separator />
+
+      {/* Menu */}
+      <div data-tour="menu">
+        <OwnerDashboardMenu />
+      </div>
     </div>
   );
 }

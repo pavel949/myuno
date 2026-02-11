@@ -54,7 +54,7 @@ export function GuidePropertyCare() {
       {/* Property Care Intro */}
       <section id="property-care" className="print-break-before">
         <h2 className="text-2xl font-bold mb-6 text-foreground">
-          {isRu ? 'UNO Property Care' : 'UNO Property Care'}
+          {isRu ? 'myUNO Property Care' : 'myUNO Property Care'}
         </h2>
         
         <p className="text-lg text-muted-foreground mb-6">

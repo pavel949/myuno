@@ -139,7 +139,7 @@ export function OwnerPropertiesList() {
       )}
 
       {/* Add new listing */}
-      {(
+      {
         <button
           onClick={() => navigate('/owner/properties/new')}
           className="w-full flex items-center gap-4 py-3 hover:opacity-70 transition-opacity"
@@ -149,7 +149,7 @@ export function OwnerPropertiesList() {
           </div>
           <span className="text-[15px] font-medium">{isRu ? 'Создайте новое объявление' : 'Create a new listing'}</span>
         </button>
-      )}
+      }
     </div>
   );
 }
