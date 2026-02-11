@@ -57,6 +57,17 @@
               window.location.reload();
             }
           });
+          
+          // Listen for SW_UPDATED message — hard reload to clear old JS from memory
+          navigator.serviceWorker.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SW_UPDATED') {
+              console.log('[myUNO] SW_UPDATED received — forcing hard reload');
+              if (!window.__swReloading) {
+                window.__swReloading = true;
+                window.location.href = window.location.href;
+              }
+            }
+          });
         }
         
         // Version check — clear caches AND reload on mismatch

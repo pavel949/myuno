@@ -32,16 +32,10 @@ export function PWAUpdatePrompt() {
     },
   });
 
-  // Auto-update: when new SW is ready, activate it immediately
-  React.useEffect(() => {
-    if (needRefresh) {
-      console.log('[PWA] New SW ready — activating immediately...');
-      updateServiceWorker(true);
-    }
-  }, [needRefresh, updateServiceWorker]);
-
   const handleUpdate = () => {
     updateServiceWorker(true);
+    // Force hard reload to clear old JS from memory
+    setTimeout(() => window.location.reload(), 300);
   };
 
   const handleDismiss = () => {
