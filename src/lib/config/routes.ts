@@ -234,7 +234,7 @@ export const APP_ROUTES = {
 
   // ── Owner Portal ──
   OWNER: '/owner',
-  OWNER_LANDING: '/owner/landing',
+  OWNER_LANDING: '/owner', // deprecated, redirects to /owner
   OWNER_GUIDE: '/owner/guide',
 
   // ── Provider Onboarding ──

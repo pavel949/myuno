@@ -13,7 +13,7 @@ export function QuickListingFAB() {
 
   // Listen for open-quick-listing event from CTA buttons
   useEffect(() => {
-    const handleOpenQuickListing = () => navigate('/owner/landing');
+    const handleOpenQuickListing = () => navigate('/owner');
     window.addEventListener('open-quick-listing', handleOpenQuickListing);
     return () => window.removeEventListener('open-quick-listing', handleOpenQuickListing);
   }, [navigate]);
@@ -27,7 +27,7 @@ export function QuickListingFAB() {
         whileTap={{ scale: 0.95 }}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        onClick={() => navigate('/owner/landing')}
+        onClick={() => navigate('/owner')}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
