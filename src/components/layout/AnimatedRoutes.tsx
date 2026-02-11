@@ -120,6 +120,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/profile" element={<LazyPage><Pages.Profile /></LazyPage>} />
         <Route path="/profile/edit" element={<LazyPage><Pages.EditProfile /></LazyPage>} />
         <Route path="/profile/settings" element={<LazyPage><Pages.ProfileSettings /></LazyPage>} />
+        <Route path="/profile/referral" element={<LazyPage><Pages.ReferralPage /></LazyPage>} />
         <Route path="/account" element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
         <Route path="/favorites" element={<LazyPage><Pages.Favorites /></LazyPage>} />
         <Route path="/search" element={<LazyPage><Pages.Search /></LazyPage>} />
