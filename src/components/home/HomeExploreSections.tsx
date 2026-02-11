@@ -36,7 +36,7 @@ const EXPLORE_ITEMS: ExploreItem[] = [
     id: 'transport', titleEn: 'Transport', titleRu: 'Транспорт',
     subtitleEn: 'Cars, bikes, transfers', subtitleRu: 'Авто, байки, трансферы',
     path: '/transport', icon: Car,
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=400&fit=crop',
     badgeEn: 'from ฿200/day', badgeRu: 'от ฿200/день',
   },
   {
