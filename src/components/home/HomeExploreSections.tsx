@@ -160,7 +160,7 @@ function ExploreCardDesktop({ item, language }: { item: ExploreItem; language: s
       className={cn(
         "hidden lg:block group relative overflow-hidden rounded-2xl",
         "aspect-[3/2] w-full",
-        "hover:shadow-lg transition-all duration-300",
+        "hover:shadow-lg hover:scale-[1.02] transition-all duration-300",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       )}
     >
@@ -208,7 +208,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
         </div>
         
         {/* Desktop: photo grid */}
-        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {EXPLORE_ITEMS.map((item) => (
             <ExploreCardDesktop key={item.id} item={item} language={language} />
           ))}
@@ -232,7 +232,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
         </div>
         
         {/* Desktop: photo grid */}
-        <div className="hidden lg:grid lg:grid-cols-3 gap-4">
+        <div className="hidden lg:grid lg:grid-cols-3 gap-5">
           {SERVICES_ITEMS.map((item) => (
             <ExploreCardDesktop key={item.id} item={item} language={language} />
           ))}

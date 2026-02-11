@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
+import { useIsDesktop } from '@/hooks/use-desktop';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -30,9 +31,14 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     },
     ref
   ) => {
+    const isDesktop = useIsDesktop();
+    // Desktop: always show header and footer for consistent navigation
+    const finalShowHeader = isDesktop ? true : showHeader;
+    const finalShowFooter = isDesktop ? true : showFooter;
+
     return (
       <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip", className)}>
-        {showHeader && <AppHeader title={title} />}
+        {finalShowHeader && <AppHeader title={title} />}
         {showSituationBanner && <ActiveSituationBanner />}
         
         <main
@@ -47,7 +53,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
           </div>
         </main>
         
-        {showFooter && <Footer />}
+        {finalShowFooter && <Footer />}
       </div>
     );
   }

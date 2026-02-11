@@ -51,7 +51,7 @@ export function CompactFooter() {
 
   return (
     <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4 lg:py-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between">
         {/* Install App Button - only show if not installed */}
         {!isInstalled && (
           <div className="flex justify-center">
@@ -70,7 +70,7 @@ export function CompactFooter() {
         )}
 
         {/* Social Links */}
-        <div className="flex justify-center gap-6">
+        <div className="flex justify-center gap-6 lg:gap-4 lg:order-2">
           {socialLinks.map((social) => (
             <a
               key={social.label}
@@ -87,7 +87,7 @@ export function CompactFooter() {
         </div>
 
         {/* Navigation Links */}
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 lg:order-1">
           {navLinks.map((link, index) => (
             <span key={link.to} className="flex items-center gap-4">
               <Link
@@ -104,7 +104,7 @@ export function CompactFooter() {
         </div>
 
         {/* Copyright */}
-        <p className="text-center text-[11px] text-muted-foreground">
+        <p className="text-center text-[11px] text-muted-foreground lg:order-3">
           © {new Date().getFullYear()} myUNO · Phuket Edition
         </p>
       </div>
