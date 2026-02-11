@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeItem } from '@/hooks/useIntakeAgent';
 import { useIntakeConfigs } from '@/hooks/useIntakeConfigs';
@@ -15,8 +15,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
-import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { Save, Loader2 } from 'lucide-react';
+
+// Canonical forms
+import { CanonicalPropertyForm } from '@/components/property/canonical-form';
+import type { CanonicalPropertyFormData } from '@/components/property/canonical-form';
+import {
+  getFormType,
+  mapIntakeToPropertyForm,
+  mapPropertyFormToIntake,
+} from './intakeToCanonicalMapper';
 
 interface IntakeItemEditorProps {
   item: IntakeItem | null;
@@ -29,36 +37,93 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: intakeConfigs, isLoading: configsLoading } = useIntakeConfigs();
-  
+
+  if (!item) return null;
+
+  const formType = getFormType(item.detectedVertical);
+
+  // Property vertical → CanonicalPropertyForm
+  if (formType === 'property') {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {isRu ? 'Редактировать объект' : 'Edit Property'}
+              <IntakeVerticalBadge verticalId={item.detectedVertical} size="sm" />
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto">
+            <CanonicalPropertyForm
+              initialData={mapIntakeToPropertyForm(item)}
+              onSubmit={async (data: CanonicalPropertyFormData) => {
+                const updates = mapPropertyFormToIntake(data, item);
+                onSave(item.id, updates);
+                onOpenChange(false);
+              }}
+              onCancel={() => onOpenChange(false)}
+              mode="admin"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // TODO: listing verticals → CanonicalListingWizard (requires categories/providerId context)
+  // For now, fall through to generic editor
+
+  // Generic editor (fallback + listing verticals until CanonicalListingWizard integration)
+  return (
+    <GenericIntakeEditor
+      item={item}
+      open={open}
+      onOpenChange={onOpenChange}
+      onSave={onSave}
+      intakeConfigs={intakeConfigs}
+      configsLoading={configsLoading}
+    />
+  );
+}
+
+// ==================== GENERIC EDITOR (existing logic) ====================
+
+interface GenericIntakeEditorProps {
+  item: IntakeItem;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (itemId: string, updates: Partial<IntakeItem>) => void;
+  intakeConfigs: any[] | undefined;
+  configsLoading: boolean;
+}
+
+function GenericIntakeEditor({ item, open, onOpenChange, onSave, intakeConfigs, configsLoading }: GenericIntakeEditorProps) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
   const [editedFields, setEditedFields] = useState<Record<string, any>>({});
   const [editedTitle, setEditedTitle] = useState({ en: '', ru: '' });
   const [editedDescription, setEditedDescription] = useState({ en: '', ru: '' });
 
-  // Find vertical from DB-driven configs
-  const vertical = useMemo(() => 
-    item ? intakeConfigs?.find(v => v.id === item.detectedVertical) : undefined,
+  const vertical = useMemo(() =>
+    intakeConfigs?.find(v => v.id === item.detectedVertical),
     [item, intakeConfigs]
   );
 
-  const allFields = useMemo(() => 
+  const allFields = useMemo(() =>
     vertical ? [...vertical.requiredFields, ...vertical.optionalFields] : [],
     [vertical]
   );
 
-  // Initialize when item changes
   React.useEffect(() => {
-    if (item) {
-      const fields: Record<string, any> = {};
-      for (const [key, field] of Object.entries(item.extractedFields)) {
-        fields[key] = field.value;
-      }
-      setEditedFields(fields);
-      setEditedTitle(item.suggestedTitle || { en: '', ru: '' });
-      setEditedDescription(item.suggestedDescription || { en: '', ru: '' });
+    const fields: Record<string, any> = {};
+    for (const [key, field] of Object.entries(item.extractedFields)) {
+      fields[key] = field.value;
     }
+    setEditedFields(fields);
+    setEditedTitle(item.suggestedTitle || { en: '', ru: '' });
+    setEditedDescription(item.suggestedDescription || { en: '', ru: '' });
   }, [item]);
-
-  if (!item) return null;
 
   if (configsLoading) {
     return (
@@ -77,19 +142,17 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
   };
 
   const handleSave = () => {
-    // Transform back to ExtractedField format
     const extractedFields: Record<string, any> = {};
     for (const [key, value] of Object.entries(editedFields)) {
       extractedFields[key] = {
         value,
-        confidence: 1, // User edited = 100% confidence
+        confidence: 1,
         source: 'text' as const
       };
     }
 
-    // Recalculate missing fields
     const requiredFields = vertical?.requiredFields || [];
-    const missingRequiredFields = requiredFields.filter(f => {
+    const missingRequiredFields = requiredFields.filter((f: string) => {
       const val = editedFields[f];
       return val === undefined || val === null || val === '';
     });
@@ -101,7 +164,7 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
       missingRequiredFields,
       overallConfidence: missingRequiredFields.length === 0 ? 0.95 : 0.6
     });
-    
+
     onOpenChange(false);
   };
 
@@ -176,15 +239,15 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 {allFields
-                  .filter(key => !['name_en', 'name_ru', 'description_en', 'description_ru'].includes(key))
-                  .map(key => {
+                  .filter((key: string) => !['name_en', 'name_ru', 'description_en', 'description_ru'].includes(key))
+                  .map((key: string) => {
                     const fieldConfig = vertical?.fieldLabels[key];
-                    const label = fieldConfig 
+                    const label = fieldConfig
                       ? (isRu ? fieldConfig.ru : fieldConfig.en)
                       : key;
                     const fieldType = fieldConfig?.type || 'string';
                     const isRequired = vertical?.requiredFields.includes(key);
-                    
+
                     return (
                       <div key={key} className="space-y-2">
                         <Label className="flex items-center gap-1">
@@ -215,9 +278,9 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
             {item.sourceUrl && (
               <div className="text-xs text-muted-foreground">
                 {isRu ? 'Источник: ' : 'Source: '}
-                <a 
-                  href={item.sourceUrl} 
-                  target="_blank" 
+                <a
+                  href={item.sourceUrl}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
