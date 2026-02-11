@@ -27,7 +27,7 @@ export const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(
         <div
           ref={ref}
           className={cn(
-            "animate-spin rounded-xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 flex items-center justify-center font-bold text-white shadow-lg",
+            "animate-spin rounded-xl bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--icon-dark))] flex items-center justify-center font-bold text-white shadow-lg",
             logoSizeClasses[size],
             className
           )}
