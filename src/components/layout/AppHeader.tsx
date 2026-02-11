@@ -41,7 +41,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     >
       <div className="flex items-center justify-between h-12 px-4 max-w-7xl mx-auto">
         {/* Logo — simple text, no gradients */}
-        <Link to="/" className="flex items-center gap-1">
+        <Link to="/" className="flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
           <span className="text-sm text-muted-foreground">my</span>
           <span className="text-base font-semibold text-foreground">UNO</span>
         </Link>
