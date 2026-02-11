@@ -1,9 +1,8 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Layers, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Package, Layers, MoreHorizontal, Bot, Inbox, FolderTree, Sparkles, Cog } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useSidebar } from '@/components/ui/sidebar';
 import {
   Drawer,
   DrawerContent,
@@ -26,11 +25,11 @@ const mainItems: NavItem[] = [
 ];
 
 const moreItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'AI Agents', labelRu: 'AI Агенты', path: '/admin/ai-agents' },
-  { icon: Package, label: 'Intake', labelRu: 'Приём', path: '/admin/intake' },
-  { icon: Layers, label: 'Taxonomy', labelRu: 'Таксономии', path: '/admin/taxonomy' },
-  { icon: LayoutDashboard, label: 'LifeOS', labelRu: 'LifeOS', path: '/admin/life-situations' },
-  { icon: Layers, label: 'Control', labelRu: 'Управление', path: '/admin/control' },
+  { icon: Bot, label: 'AI Agents', labelRu: 'AI Агенты', path: '/admin/ai-agents' },
+  { icon: Inbox, label: 'Intake', labelRu: 'Приём', path: '/admin/intake' },
+  { icon: FolderTree, label: 'Taxonomy', labelRu: 'Таксономии', path: '/admin/taxonomy' },
+  { icon: Sparkles, label: 'LifeOS', labelRu: 'LifeOS', path: '/admin/life-situations' },
+  { icon: Cog, label: 'Control', labelRu: 'Управление', path: '/admin/control' },
 ];
 
 export function AdminMobileBottomNav() {
