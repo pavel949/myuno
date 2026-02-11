@@ -1,8 +1,12 @@
 /**
  * Index — LifeOS Dashboard
  * 
- * Desktop: Full-width sections, secondary content in 3-col grid at bottom
- * Mobile: Single column, unchanged
+ * Clean, calm, confident layout:
+ * 1. Hero (greeting + weather + loyalty)
+ * 2. Quick Actions (8 shortcuts)
+ * 3. Smart tip (contextual, dismissable)
+ * 4. Explore (visual cards)
+ * 5. Secondary (concierge / emergency) — collapsed into a compact section
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -12,25 +16,16 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { HomeExploreSections } from '@/components/home/HomeExploreSections';
-import { PersonaChips } from '@/components/home/PersonaChips';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
-import { LifeOSFocusBar } from '@/components/home/LifeOSFocusBar';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
-import { DocumentExpiryWidget } from '@/components/home/DocumentExpiryWidget';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
-import { ReferralBanner } from '@/components/referral/ReferralBanner';
-import { MorningDigest } from '@/components/home/MorningDigest';
-import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
-import { ActivityPulse } from '@/components/home/ActivityPulse';
+import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 
 // Lazy load secondary components
-const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
-const LifeSituationSelector = lazy(() => import('@/components/home/LifeSituationSelector'));
 const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
 const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
@@ -53,7 +48,6 @@ const Index = () => {
   return (
     <AppLayout showFooter>
       <SEOHead jsonLd={createOrganizationSchema()} />
-      
       <PWAWelcomeScreen />
       <DocumentExpiryNotifier />
       
@@ -66,108 +60,43 @@ const Index = () => {
         </Suspense>
       )}
 
-      {/* Active situation banner — persists across navigation */}
       <ActiveSituationBanner />
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 w-full max-w-7xl mx-auto">
+        <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 w-full max-w-7xl mx-auto space-y-8 lg:space-y-12">
           
-          {/* PWA Install — simplified */}
-          <InstallBanner />
+          {/* ─── SECTION 1: Hero ─── */}
+          <HeroBlock />
 
-          {/* Hero — desktop: full-width photo banner; mobile: compact greeting */}
-          <div className="mb-6 lg:mb-8">
-            <HeroBlock />
-          </div>
+          {/* ─── SECTION 2: Quick Actions ─── */}
+          <QuickActionsGrid />
 
-          {/* Smart Widget — mobile only (desktop weather is in Hero) */}
-          <div className="mb-4 lg:hidden">
-            <Suspense fallback={null}>
-              <SmartWidget />
-            </Suspense>
-          </div>
+          {/* ─── SECTION 3: Smart Tip (contextual, dismissable) ─── */}
+          <LifecycleSmartTip />
 
-          {/* Persona chips — role selector */}
-          <div className="mb-4">
-            <PersonaChips />
-          </div>
+          {/* ─── SECTION 4: Explore — the visual heart ─── */}
+          <Suspense fallback={null}>
+            <HomeExploreSections />
+          </Suspense>
 
-          {/* Quick Actions — full-width ribbon on desktop */}
-          <div className="mb-6 lg:mb-8">
-            <QuickActionsGrid />
-          </div>
-
-          {/* Lifecycle-aware smart tip */}
-          <div className="mb-6">
-            <LifecycleSmartTip />
-          </div>
-
-          {/* Activity pulse — your stats at a glance */}
-          <div className="mb-6">
-            <ActivityPulse />
-          </div>
-
-          {/* Explore sections — full-width photo grid on desktop */}
-          <div className="mb-6 lg:mb-8">
-            <Suspense fallback={null}>
-              <HomeExploreSections />
-            </Suspense>
-          </div>
-
-          {/* Life situation — contextual, secondary */}
-          {!hasContext && (
-            <div className="mb-6">
-              <Suspense fallback={null}>
-                <LifeSituationSelector />
-              </Suspense>
-            </div>
-          )}
-
-          {/* LifeOS Focus Bar — full width on desktop */}
-          <div className="mb-6">
-            <LifeOSFocusBar />
-          </div>
-
-          {/* Morning Digest — enhanced daily value */}
-          <div className="mb-6">
-            <MorningDigest />
-          </div>
-
-          {/* Referral banner — logged-in users only */}
-          <div className="mb-6">
-            <ReferralBanner />
-          </div>
-
-          {/* Secondary content: stacked on mobile, 2-col grid on desktop */}
-          <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-            {/* When context is active → show status dashboard */}
+          {/* ─── SECTION 5: Support layer ─── */}
+          <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
             {hasContext ? (
-              <div>
-                <Suspense fallback={null}>
-                  <LifeOSStatusBlock />
-                </Suspense>
-              </div>
+              <Suspense fallback={null}>
+                <LifeOSStatusBlock />
+              </Suspense>
             ) : (
-              <div>
-                <Suspense fallback={null}>
-                  <ConciergeBanner />
-                </Suspense>
-              </div>
+              <Suspense fallback={null}>
+                <ConciergeBanner />
+              </Suspense>
             )}
-
-            {/* Emergency + Document Expiry */}
-            <div className="space-y-4">
-              <EmergencyQuickAccess />
-              <DocumentExpiryWidget />
-            </div>
+            <EmergencyQuickAccess />
           </div>
 
-          {/* Trust signals — bottom */}
-          <div className="mt-6">
-            <Suspense fallback={null}>
-              <TrustBanner />
-            </Suspense>
-          </div>
+          {/* ─── SECTION 6: Trust ─── */}
+          <Suspense fallback={null}>
+            <TrustBanner />
+          </Suspense>
 
         </div>
       </PullToRefresh>
