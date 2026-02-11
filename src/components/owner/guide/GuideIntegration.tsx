@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { OWNER_REVENUE } from '@/lib/config/ownerConstants';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowDown, Building2, CalendarCheck, Brush, Wrench, Car, 
@@ -154,9 +155,9 @@ export function GuideIntegration() {
             </CardHeader>
             <CardContent>
               <div className="mb-4 flex flex-col">
-                <span className="text-2xl font-bold text-primary">10%</span>
+                <span className="text-2xl font-bold text-primary">{OWNER_REVENUE.SELF_MANAGEMENT.labelEn}</span>
                 <span className="text-xs text-muted-foreground">
-                  {isRu ? 'с бронирований через myUNO' : 'on bookings via myUNO'}
+                  {isRu ? OWNER_REVENUE.SELF_MANAGEMENT.descRu : OWNER_REVENUE.SELF_MANAGEMENT.descEn}
                 </span>
               </div>
               <ul className="space-y-2 text-sm text-muted-foreground">
@@ -179,13 +180,13 @@ export function GuideIntegration() {
             <CardContent>
               <div className="mb-4 flex flex-col">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-primary">70%</span>
+                  <span className="text-2xl font-bold text-primary">{OWNER_REVENUE.FULL_MANAGEMENT.ownerSharePercent}%</span>
                   <span className="text-sm text-muted-foreground">
-                    {isRu ? 'вам после расходов' : 'to you after expenses'}
+                    {isRu ? OWNER_REVENUE.FULL_MANAGEMENT.ownerDescRu : OWNER_REVENUE.FULL_MANAGEMENT.ownerDescEn}
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground mt-1">
-                  {isRu ? '30% остаётся myUNO за управление' : '30% goes to myUNO for management'}
+                  {isRu ? OWNER_REVENUE.FULL_MANAGEMENT.platformDescRu : OWNER_REVENUE.FULL_MANAGEMENT.platformDescEn}
                 </span>
               </div>
               <ul className="space-y-2 text-sm text-muted-foreground">

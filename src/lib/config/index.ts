@@ -11,3 +11,4 @@ export * from './homeServicesTaxonomy';
 export * from './routes';
 export * from './currencies';
 export * from './entityTypes';
+export * from './ownerConstants';

@@ -154,6 +154,10 @@ export const CASHBACK = {
   MAX_PERCENTAGE: 20,
 } as const;
 
+/**
+ * @deprecated Use OWNER_REVENUE from src/lib/config/ownerConstants.ts instead.
+ * Kept for backward compatibility during migration.
+ */
 export const OWNER_COMMISSION = {
   SELF_MANAGEMENT: {
     rate: 10,

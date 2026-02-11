@@ -59,11 +59,9 @@ const ownershipOptions: OwnershipOption[] = [
   },
 ];
 
-const managementTypes = [
-  { value: 'full', labelEn: 'Full Management (70/30)', labelRu: 'Полное управление (70/30)', desc: 'UNO handles everything' },
-  { value: 'partial', labelEn: 'Service Partner (15%)', labelRu: 'Сервис-партнёр (15%)', desc: 'Check-in/out + services' },
-  { value: 'self', labelEn: 'Listing Only (10%)', labelRu: 'Только листинг (10%)', desc: 'Platform listing only' },
-];
+import { MANAGEMENT_TYPE_OPTIONS } from '@/lib/config/ownerConstants';
+
+const managementTypes = MANAGEMENT_TYPE_OPTIONS;
 
 function BasicInfoStepInner({ 
   formData, 

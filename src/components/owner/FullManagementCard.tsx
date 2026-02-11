@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { OWNER_BRAND, OWNER_REVENUE } from '@/lib/config/ownerConstants';
 
 export function FullManagementCard() {
   const { language } = useLanguage();
@@ -23,14 +24,14 @@ export function FullManagementCard() {
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-base">myUNO Full Management</h3>
+                <h3 className="font-bold text-base">{OWNER_BRAND.fullManagement}</h3>
                 <p className="text-xs text-muted-foreground">
                   {isRu ? 'Полное управление' : 'Complete property care'}
                 </p>
               </div>
             </div>
             <Badge variant="secondary" className="bg-primary/20 text-primary text-xs">
-              {isRu ? '70% вам' : '70% to you'}
+              {isRu ? `${OWNER_REVENUE.FULL_MANAGEMENT.ownerSharePercent}% вам` : `${OWNER_REVENUE.FULL_MANAGEMENT.ownerSharePercent}% to you`}
             </Badge>
           </div>
 
