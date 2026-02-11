@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Plane, Home, Palmtree, Heart, Users, Building, FileText, Briefcase,
-  ChevronRight,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -20,32 +20,35 @@ interface LifeSituation {
   bg: string;
   iconBg: string;
   iconColor: string;
+  accentBorder: string;
 }
 
 const SITUATIONS: LifeSituation[] = [
   {
     code: 'arrival',
     icon: Plane,
-    titleEn: 'Arrival & First Days',
+    titleEn: 'Arrival',
     titleRu: 'Прибытие',
     descEn: 'Airport, transport, essentials',
     descRu: 'Аэропорт, трансфер, первый день',
     route: '/life/arrival',
-    bg: 'bg-amber-50/60 dark:bg-amber-950/20',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/40',
-    iconColor: 'text-amber-600 dark:text-amber-400',
+    bg: 'bg-amber-50 dark:bg-amber-950/30',
+    iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500',
+    iconColor: 'text-white',
+    accentBorder: 'border-amber-200/60 dark:border-amber-800/30',
   },
   {
     code: 'living',
     icon: Home,
     titleEn: 'Daily Life',
     titleRu: 'Быт',
-    descEn: 'Home services, groceries',
+    descEn: 'Home, groceries, routines',
     descRu: 'Дом, быт, задачи',
     route: '/life/living',
-    bg: 'bg-violet-50/60 dark:bg-violet-950/20',
-    iconBg: 'bg-violet-100 dark:bg-violet-900/40',
-    iconColor: 'text-violet-600 dark:text-violet-400',
+    bg: 'bg-violet-50 dark:bg-violet-950/30',
+    iconBg: 'bg-gradient-to-br from-violet-400 to-purple-600',
+    iconColor: 'text-white',
+    accentBorder: 'border-violet-200/60 dark:border-violet-800/30',
   },
   {
     code: 'leisure',
@@ -55,9 +58,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Tours, yachts, activities',
     descRu: 'Туры, яхты, активности',
     route: '/life/leisure',
-    bg: 'bg-sky-50/60 dark:bg-sky-950/20',
-    iconBg: 'bg-sky-100 dark:bg-sky-900/40',
-    iconColor: 'text-sky-600 dark:text-sky-400',
+    bg: 'bg-sky-50 dark:bg-sky-950/30',
+    iconBg: 'bg-gradient-to-br from-sky-400 to-blue-600',
+    iconColor: 'text-white',
+    accentBorder: 'border-sky-200/60 dark:border-sky-800/30',
   },
   {
     code: 'health',
@@ -67,21 +71,23 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Clinics, insurance, pharmacy',
     descRu: 'Клиники, страховка, аптека',
     route: '/life/health',
-    bg: 'bg-rose-50/60 dark:bg-rose-950/20',
-    iconBg: 'bg-rose-100 dark:bg-rose-900/40',
-    iconColor: 'text-rose-600 dark:text-rose-400',
+    bg: 'bg-rose-50 dark:bg-rose-950/30',
+    iconBg: 'bg-gradient-to-br from-rose-400 to-red-500',
+    iconColor: 'text-white',
+    accentBorder: 'border-rose-200/60 dark:border-rose-800/30',
   },
   {
     code: 'family',
     icon: Users,
-    titleEn: 'Family & Kids',
+    titleEn: 'Family',
     titleRu: 'Семья',
     descEn: 'Childcare, schools, activities',
     descRu: 'Няни, школы, занятия',
     route: '/life/family',
-    bg: 'bg-teal-50/60 dark:bg-teal-950/20',
-    iconBg: 'bg-teal-100 dark:bg-teal-900/40',
-    iconColor: 'text-teal-600 dark:text-teal-400',
+    bg: 'bg-teal-50 dark:bg-teal-950/30',
+    iconBg: 'bg-gradient-to-br from-teal-400 to-emerald-600',
+    iconColor: 'text-white',
+    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
   },
   {
     code: 'property',
@@ -91,9 +97,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Rent, buy, manage',
     descRu: 'Аренда, покупка, управление',
     route: '/life/property',
-    bg: 'bg-indigo-50/60 dark:bg-indigo-950/20',
-    iconBg: 'bg-indigo-100 dark:bg-indigo-900/40',
-    iconColor: 'text-indigo-600 dark:text-indigo-400',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+    iconBg: 'bg-gradient-to-br from-indigo-400 to-blue-700',
+    iconColor: 'text-white',
+    accentBorder: 'border-indigo-200/60 dark:border-indigo-800/30',
   },
   {
     code: 'relocation',
@@ -103,9 +110,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Visa, banking, legal help',
     descRu: 'Виза, банки, юрист',
     route: '/life/relocation',
-    bg: 'bg-cyan-50/60 dark:bg-cyan-950/20',
-    iconBg: 'bg-cyan-100 dark:bg-cyan-900/40',
-    iconColor: 'text-cyan-600 dark:text-cyan-400',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/30',
+    iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-500',
+    iconColor: 'text-white',
+    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
   },
   {
     code: 'business',
@@ -115,20 +123,21 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Coworking, company setup',
     descRu: 'Коворкинг, компания',
     route: '/life/business',
-    bg: 'bg-slate-50/60 dark:bg-slate-950/20',
-    iconBg: 'bg-slate-100 dark:bg-slate-900/40',
-    iconColor: 'text-slate-600 dark:text-slate-400',
+    bg: 'bg-slate-100/80 dark:bg-slate-950/30',
+    iconBg: 'bg-gradient-to-br from-slate-500 to-slate-700',
+    iconColor: 'text-white',
+    accentBorder: 'border-slate-200/60 dark:border-slate-800/30',
   },
 ];
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.04 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
-const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0 },
+const itemVariant = {
+  hidden: { opacity: 0, y: 16, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { ease: [0.22, 1, 0.36, 1] as [number, number, number, number], duration: 0.4 } },
 };
 
 export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
@@ -137,7 +146,7 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
   const isRu = language === 'ru';
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <h2 className="text-lg font-bold text-foreground">
         {isRu ? 'Жизненные ситуации' : 'Life Situations'}
       </h2>
@@ -152,29 +161,41 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
           return (
             <motion.button
               key={s.code}
-              variants={item}
-              whileTap={{ scale: 0.97 }}
+              variants={itemVariant}
+              whileTap={{ scale: 0.96 }}
               onClick={() => { triggerHaptic('light'); navigate(s.route); }}
               className={cn(
-                "flex flex-col items-start gap-2.5 p-4 rounded-2xl text-left group cursor-pointer",
-                "border border-border/30 shadow-sm",
-                "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
-                s.bg
+                "relative flex flex-col items-start gap-3 p-4 rounded-2xl text-left group cursor-pointer",
+                "border shadow-sm min-h-[130px]",
+                "hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
+                s.bg,
+                s.accentBorder,
               )}
               style={{ touchAction: 'manipulation' }}
             >
-              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", s.iconBg)}>
+              {/* Gradient icon */}
+              <div className={cn(
+                "w-11 h-11 rounded-xl flex items-center justify-center shadow-md",
+                "group-hover:scale-110 group-hover:shadow-lg transition-all duration-300",
+                s.iconBg,
+              )}>
                 <Icon className={cn("w-5 h-5", s.iconColor)} />
               </div>
-              <div className="space-y-0.5">
-                <h3 className="text-sm font-semibold text-foreground leading-tight">
+
+              {/* Text */}
+              <div className="space-y-0.5 flex-1">
+                <h3 className="text-[14px] font-bold text-foreground leading-tight">
                   {isRu ? s.titleRu : s.titleEn}
                 </h3>
-                <p className="text-[11px] text-muted-foreground line-clamp-1">
+                <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2">
                   {isRu ? s.descRu : s.descEn}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground/30 self-end mt-auto group-hover:text-muted-foreground transition-colors" />
+
+              {/* Arrow indicator */}
+              <div className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-foreground/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowUpRight className="w-3.5 h-3.5 text-foreground/40" />
+              </div>
             </motion.button>
           );
         })}
