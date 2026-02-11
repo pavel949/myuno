@@ -360,7 +360,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
           <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
           <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
-          <Route path="/admin/analytics" element={<Pages.AdminAnalytics />} />
+          <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/providers" element={<Pages.AdminProviders />} />
           <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
           <Route path="/admin/services" element={<Pages.AdminServices />} />
@@ -402,15 +402,16 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/quick-listings" element={<Pages.AdminQuickListings />} />
           <Route path="/admin/water-activities" element={<Pages.AdminWaterActivities />} />
           <Route path="/admin/experiences" element={<Pages.AdminExperiences />} />
-          <Route path="/admin/moderation" element={<Pages.AdminContentModeration />} />
+          <Route path="/admin/moderation" element={<Navigate to="/admin/operations" replace />} />
           <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
           <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
-          <Route path="/admin/leads" element={<Pages.AdminLeadsDashboard />} />
-          <Route path="/admin/finance" element={<Pages.AdminFinance />} />
+          <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
+          <Route path="/admin/finance" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/cities" element={<Pages.AdminCities />} />
           <Route path="/admin/translations" element={<Pages.AdminTranslations />} />
           <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
-          <Route path="/admin/user-analytics" element={<Pages.UserAnalyticsDashboard />} />
+          <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
+          <Route path="/admin/user-analytics" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/marketplace/products" element={<Pages.AdminMarketplaceProducts />} />
           <Route path="/admin/marketplace/categories" element={<Pages.AdminMarketplaceCategories />} />
           <Route path="/admin/marketplace/subcategories" element={<Pages.AdminMarketplaceSubcategories />} />
@@ -425,7 +426,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketing" element={<Pages.MarketingDashboard />} />
           <Route path="/admin/experience-categories" element={<Pages.ExperienceCategoriesPage />} />
           <Route path="/admin/life-situations" element={<Pages.AdminLifeOS />} />
-          <Route path="/admin/lifeos" element={<Pages.AdminLifeOS />} />
+          <Route path="/admin/lifeos" element={<Navigate to="/admin/life-situations" replace />} />
         </Route>
         
         {/* ── Staff ── */}
