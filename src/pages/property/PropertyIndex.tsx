@@ -19,6 +19,10 @@ import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcon
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
+import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
+import { matchesFilter, matchesSingleFilter, matchesPriceLevel } from '@/lib/filterUtils';
 
 // ── Recently Viewed Property Shape ──
 interface RecentProperty {
@@ -57,6 +61,19 @@ export default function PropertyIndex() {
   const [searchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
 
+  // UniversalFilter state
+  const { filterConfig } = usePropertyFilterOptions();
+  const [filterValues, setFilterValues] = useState<FilterValues>({});
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    Object.values(filterValues).forEach(v => {
+      if (Array.isArray(v)) count += v.length;
+      else if (v) count += 1;
+    });
+    return count;
+  }, [filterValues]);
+
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
@@ -73,13 +90,53 @@ export default function PropertyIndex() {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
 
-  // Filter by selected categories (AND logic — must match ALL selected)
+  // Filter by selected categories + UniversalFilter values
   const filteredProperties = useMemo(() => {
-    if (selectedCategories.length === 0) return allProperties;
-    return allProperties.filter(p =>
-      selectedCategories.every(cat => matchesCategory(p, cat))
-    );
-  }, [allProperties, selectedCategories]);
+    let result = allProperties;
+    
+    // Category ribbon filter
+    if (selectedCategories.length > 0) {
+      result = result.filter(p =>
+        selectedCategories.every(cat => matchesCategory(p, cat))
+      );
+    }
+
+    // UniversalFilter values
+    const districts = (filterValues.district as string[]) || [];
+    const amenities = (filterValues.amenities as string[]) || [];
+    const bedrooms = (filterValues.bedrooms as string[]) || [];
+    const propertyTypes = (filterValues.propertyType as string[]) || [];
+    const listingType = filterValues.listingType as string | null;
+    const priceLevel = filterValues.priceLevel as string | null;
+
+    if (districts.length > 0) {
+      result = result.filter(p => matchesSingleFilter(p.district, districts));
+    }
+    if (amenities.length > 0) {
+      result = result.filter(p => matchesFilter(p.amenities, amenities));
+    }
+    if (bedrooms.length > 0) {
+      result = result.filter(p => {
+        const beds = p.bedrooms ?? 0;
+        return bedrooms.some(b => {
+          if (b === 'studio') return beds === 0;
+          const num = parseInt(b);
+          return beds >= num;
+        });
+      });
+    }
+    if (propertyTypes.length > 0) {
+      result = result.filter(p => matchesSingleFilter(p.property_type, propertyTypes));
+    }
+    if (listingType) {
+      result = result.filter(p => matchesSingleFilter(p.listing_type, [listingType]));
+    }
+    if (priceLevel) {
+      result = result.filter(p => matchesPriceLevel(p.price, priceLevel));
+    }
+
+    return result;
+  }, [allProperties, selectedCategories, filterValues]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(`/property/${id}`);
@@ -163,26 +220,40 @@ export default function PropertyIndex() {
                 onChange={setSelectedCategories}
                 className="flex-1" 
               />
-              {/* Filters button */}
-              <button
-                onClick={() => navigate('/property/search')}
-                className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium text-foreground hover:shadow-sm transition-all"
+              {/* Filters button — opens UniversalFilter sheet */}
+              <UniversalFilter
+                config={filterConfig}
+                values={filterValues}
+                onChange={setFilterValues}
+                activeCount={activeFilterCount}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                {isRu ? 'Фильтры' : 'Filters'}
-              </button>
+                <button
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium text-foreground hover:shadow-sm transition-all"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  {isRu ? 'Фильтры' : 'Filters'}
+                  {activeFilterCount > 0 && (
+                    <Badge className="ml-0.5 h-4 min-w-[16px] px-1 flex items-center justify-center text-[10px]">
+                      {activeFilterCount}
+                    </Badge>
+                  )}
+                </button>
+              </UniversalFilter>
             </div>
           </div>
         </div>
 
-        {/* Active category badges */}
-        {selectedCategories.length > 0 && (
+        {/* Active filter badges */}
+        {(selectedCategories.length > 0 || activeFilterCount > 0) && (
           <div className="px-4 pt-2 flex items-center gap-2">
             <p className="text-xs text-muted-foreground">
               {filteredProperties.length} {isRu ? 'объектов' : 'places'}
             </p>
             <button
-              onClick={() => setSelectedCategories([])}
+              onClick={() => {
+                setSelectedCategories([]);
+                setFilterValues({});
+              }}
               className="text-xs text-primary font-medium hover:underline"
             >
               {isRu ? 'Сбросить' : 'Clear'}
