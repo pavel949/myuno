@@ -44,19 +44,19 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     <header
       className={cn(
         "sticky top-0 z-50 w-full",
-        "bg-background/90 backdrop-blur-lg border-b border-border/40",
+        "bg-background/90 backdrop-blur-lg border-b border-border/60",
         className
       )}
     >
-      <div className="flex items-center justify-between h-12 lg:h-16 px-4 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between h-12 lg:h-[72px] px-4 lg:px-8 max-w-7xl mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-          <span className="text-sm lg:text-base text-muted-foreground">my</span>
-          <span className="text-base lg:text-lg font-semibold text-foreground">UNO</span>
+          <span className="text-sm lg:text-base text-muted-foreground font-light">my</span>
+          <span className="text-base lg:text-xl font-semibold text-foreground font-display">UNO</span>
         </Link>
 
         {/* Desktop navigation — hidden on mobile */}
-        <nav className="hidden lg:flex items-center gap-1 ml-6">
+        <nav className="hidden lg:flex items-center gap-0.5 ml-6">
           {desktopNavItems.map(({ path, icon: Icon, labelEn, labelRu, exact }) => (
             <NavLink
               key={path}
@@ -64,7 +64,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               end={exact}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 px-4 py-2 rounded-lg text-[15px] font-medium transition-colors",
                   isActive
                     ? "text-primary bg-primary/8"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -81,13 +81,14 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
         <button
           onClick={() => navigate('/search')}
           className={cn(
-            "hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-lg",
-            "px-4 py-2 rounded-full border border-border shadow-sm",
-            "bg-card hover:shadow-md transition-shadow cursor-pointer"
+            "hidden lg:flex items-center gap-3 mx-6 flex-1 max-w-xl",
+            "px-5 py-2.5 rounded-full border border-border",
+            "bg-card hover:shadow-md transition-shadow cursor-pointer",
+            "shadow-[0_1px_6px_rgba(0,0,0,0.08)]"
           )}
         >
           <Search className="w-4 h-4 text-primary shrink-0" />
-          <div className="flex items-center gap-2 text-sm flex-1">
+          <div className="flex items-center gap-2 text-[15px] flex-1">
             <span className="font-medium text-foreground">
               {isRu ? 'Поиск' : 'Search'}
             </span>
@@ -96,7 +97,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               {isRu ? 'Услуги · Жильё · Впечатления' : 'Services · Stay · Experiences'}
             </span>
           </div>
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground">
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground">
             <Search className="w-3.5 h-3.5" />
           </div>
         </button>
@@ -106,7 +107,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
         )}
 
         {/* Right — compact utilities */}
-        <div className="flex items-center gap-0.5 ml-auto">
+        <div className="flex items-center gap-0.5 lg:gap-1 ml-auto">
           <LanguageSwitcher size="sm" />
           <div className="hidden sm:block">
             <ThemeSwitcher size="sm" />
@@ -137,7 +138,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               </button>
               
               <Link to="/account" aria-label={t('nav.profile')}>
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center ml-0.5">
+                <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-muted flex items-center justify-center ml-0.5">
                   <span className="text-xs font-medium text-muted-foreground">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>

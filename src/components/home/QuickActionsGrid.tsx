@@ -203,7 +203,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
     <div className={cn(
       "grid grid-cols-4 gap-1",
       // Desktop: full-width horizontal ribbon
-      "lg:flex lg:items-start lg:justify-between lg:gap-0 lg:border-b lg:border-border/50 lg:pb-4"
+      "lg:flex lg:items-start lg:justify-evenly lg:gap-2 lg:pb-4"
     )}>
       {quickActions.map((action) => {
         const Icon = action.icon;
@@ -219,8 +219,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             className={cn(
               "relative flex flex-col items-center p-1.5 rounded-xl",
               "hover:bg-card/80 transition-all group active:scale-[0.97]",
-              // Desktop: wider touch target, border-bottom indicator on hover
-              "lg:px-4 lg:py-2 lg:rounded-none lg:hover:bg-transparent",
+              // Desktop: wider touch target, soft bg on hover
+              "lg:px-5 lg:py-3 lg:rounded-xl lg:hover:bg-muted/60",
             )}
           >
             <div className={cn(
@@ -228,10 +228,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               isMore ? "bg-muted" : "bg-primary/10",
               "group-hover:scale-105 transition-transform duration-150",
               // Desktop: larger icons
-              "lg:w-14 lg:h-14 lg:rounded-2xl lg:mb-2"
+              "lg:w-16 lg:h-16 lg:rounded-2xl lg:mb-2"
             )}>
               <Icon 
-                className={cn(isMore ? "text-muted-foreground" : "text-primary")}
+                className={cn(isMore ? "text-muted-foreground" : "text-primary", "lg:!w-8 lg:!h-8")}
                 style={{ width: 28, height: 28 }}
                 strokeWidth={1.3}
               />
@@ -239,13 +239,10 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             
             <span className={cn(
               "text-[11px] font-medium text-center leading-tight truncate w-full text-foreground",
-              "lg:text-xs"
+              "lg:text-sm"
             )}>
               {label}
             </span>
-
-            {/* Desktop hover underline */}
-            <div className="hidden lg:block absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-foreground rounded-full group-hover:w-8 transition-all duration-200" />
           </button>
         );
       })}

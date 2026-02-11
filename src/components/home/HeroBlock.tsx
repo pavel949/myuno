@@ -1,11 +1,10 @@
 import React, { memo, useMemo } from 'react';
-import { MapPin, AlertTriangle, Sun, Cloud, CloudRain } from 'lucide-react';
+import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InlineSearch } from '@/components/search/InlineSearch';
 import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
-import heroBg from '@/assets/hero-phuket-desktop.jpg';
 
 /**
  * HeroBlock — "Welcome Home" hero
@@ -58,47 +57,46 @@ export const HeroBlock = memo(function HeroBlock() {
     );
   }
 
-  // Desktop: cinematic hero banner
+  // Desktop: clean dashboard greeting — no background photo
+  const now = new Date();
+  const dayName = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'long' });
+  const dateStr = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'long' });
+
   return (
-    <div className="relative overflow-hidden rounded-2xl -mx-2">
-      {/* Background image */}
-      <img 
-        src={heroBg} 
-        alt="Phuket coastline" 
-        className="w-full h-[280px] object-cover"
-      />
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-      
-      {/* Content overlay */}
-      <div className="absolute inset-0 flex items-end p-8">
-        <div className="flex-1">
-          <p className="text-white/70 text-sm font-medium mb-1 tracking-wide">
+    <div className="rounded-2xl bg-muted/30 border border-border/50 p-8 xl:p-10">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <p className="text-[15px] text-muted-foreground font-medium">
             {isRu ? 'Ваш дом на острове' : 'Your home away from home'}
           </p>
-          <h1 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-2">
+          <h1 className="text-4xl xl:text-5xl font-bold text-foreground leading-tight font-display">
             {greeting}
           </h1>
-          <div className="flex items-center gap-4 text-white/80 text-sm">
+          <div className="flex items-center gap-5 text-muted-foreground text-[15px] pt-1">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>{isRu ? 'Пхукет' : 'Phuket'}</span>
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
             </div>
-            <span className="text-white/40">·</span>
+            <span className="text-border">·</span>
             <div className="flex items-center gap-1.5">
               <WeatherIcon className="w-4 h-4" />
               <span>{weather?.temp || 31}°C</span>
             </div>
+            <span className="text-border">·</span>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
+              <span className="capitalize">{dayName}, {dateStr}</span>
+            </div>
           </div>
         </div>
 
-        {/* SOS button */}
+        {/* SOS pill */}
         <Link 
           to="/sos" 
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 transition-all text-white"
+          className="flex items-center gap-2 px-4 py-2 rounded-full border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all"
         >
-          <AlertTriangle className="w-4 h-4" />
-          <span className="text-sm font-medium">SOS</span>
+          <AlertTriangle className="w-4 h-4 text-destructive" />
+          <span className="text-sm font-semibold text-destructive">SOS</span>
         </Link>
       </div>
     </div>

@@ -60,10 +60,10 @@ export const PersonaChips = memo(function PersonaChips() {
 
   return (
     <div className="space-y-1.5">
-      <span className="text-xs font-medium text-muted-foreground">
+      <span className="text-xs lg:text-sm font-medium text-muted-foreground">
         {isRu ? 'Я здесь как:' : "I'm here as:"}
       </span>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 lg:gap-3 flex-wrap">
         {CHIPS.map((chip) => {
           const isActive = personas.includes(chip.persona);
           return (
@@ -71,13 +71,13 @@ export const PersonaChips = memo(function PersonaChips() {
               key={chip.persona}
               onClick={() => handleClick(chip)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
+                "flex items-center gap-1.5 px-3 py-1.5 lg:px-4 lg:py-2 rounded-full border text-xs lg:text-sm font-medium transition-all",
                 isActive
                   ? chip.activeColor
                   : "bg-card border-border text-muted-foreground hover:border-primary/30"
               )}
             >
-              {chip.icon}
+              <span className="lg:w-4 lg:h-4">{chip.icon}</span>
               {isRu ? chip.label.ru : chip.label.en}
               {isActive && <Check className="w-3 h-3" />}
             </button>
