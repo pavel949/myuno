@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminYachts } from '@/hooks/useAdminContent';
 import { Yacht } from '@/hooks/useYachts';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -107,21 +107,21 @@ export default function AdminYachts() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader title={isRussian ? 'Управление яхтами' : 'Yacht Management'} showBack />
 
@@ -188,6 +188,6 @@ export default function AdminYachts() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

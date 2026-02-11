@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminProperties } from '@/hooks/useAdminContent';
 import { VendorProperty } from '@/hooks/useVendorProperties';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
@@ -245,7 +245,7 @@ export default function AdminProperties() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
@@ -254,14 +254,14 @@ export default function AdminProperties() {
             ))}
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title={isRussian ? 'Управление недвижимостью' : 'Property Management'}
@@ -366,6 +366,6 @@ export default function AdminProperties() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -129,21 +129,21 @@ export default function AdminTicketDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <LoadingSpinner />
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!ticket) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <PageHeader title="Тикет не найден" showBack />
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
@@ -154,7 +154,7 @@ export default function AdminTicketDetail() {
   const canResolve = !['resolved', 'closed'].includes(ticket.status);
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title={ticket.ticket_number}
@@ -389,6 +389,6 @@ export default function AdminTicketDetail() {
           </div>
         </div>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

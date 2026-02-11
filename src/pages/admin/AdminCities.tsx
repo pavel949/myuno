@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCities, City } from '@/hooks/useCities';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -231,7 +231,7 @@ export default function AdminCities() {
   };
 
   return (
-    <AppLayout showFooter={false}>
+    <>
       <div className="container max-w-4xl mx-auto px-4 py-6 pb-24">
         <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -583,6 +583,6 @@ export default function AdminCities() {
         </AlertDialogContent>
       </AlertDialog>
       </div>
-    </AppLayout>
+    </>
   );
 }

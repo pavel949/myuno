@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminVehicles } from '@/hooks/useAdminContent';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
@@ -147,11 +147,11 @@ export default function AdminVehicles() {
     } catch { toast.error(isRussian ? 'Ошибка' : 'Error'); }
   };
 
-  if (authLoading || adminLoading) return <AppLayout><PageContainer><Skeleton className="h-48" /></PageContainer></AppLayout>;
+  if (authLoading || adminLoading) return <><PageContainer><Skeleton className="h-48" /></PageContainer></>;
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader title={isRussian ? 'Управление транспортом' : 'Vehicle Management'} showBack />
         <Button className="w-full mb-4" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
@@ -270,6 +270,6 @@ export default function AdminVehicles() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

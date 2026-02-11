@@ -10,7 +10,7 @@ import {
   ProjectStatus
 } from '@/hooks/usePropertyProjects';
 import { useAdminDevelopers } from '@/hooks/useAdminDevelopers';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -286,19 +286,19 @@ export default function AdminProjects() {
 
   if (adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="text-center py-12">
             <p className="text-muted-foreground">
@@ -306,12 +306,12 @@ export default function AdminProjects() {
             </p>
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader
           title={isRu ? 'Проекты / ЖК' : 'Projects / Complexes'}
@@ -881,6 +881,6 @@ export default function AdminProjects() {
           onComplete={handleAIIntakeComplete}
         />
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

@@ -6,7 +6,7 @@ import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminExperiences, AdminExperience } from '@/hooks/useAdminExperiences';
 import { ExperienceType, EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
 import { experienceDifficultyOptions } from '@/components/filters/ExperiencesFilters';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
@@ -221,7 +221,7 @@ export default function AdminExperiences() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-12 w-48" />
@@ -230,19 +230,19 @@ export default function AdminExperiences() {
             </div>
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="text-center py-12">
             <p className="text-muted-foreground">{isRu ? 'Доступ запрещён' : 'Access denied'}</p>
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
@@ -259,7 +259,7 @@ export default function AdminExperiences() {
   const selectedExp = selectedExperienceId ? experiences.find(e => e.id === selectedExperienceId) : null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader
           title={isRu ? 'Туры и Активности' : 'Tours & Experiences'}
@@ -533,6 +533,6 @@ export default function AdminExperiences() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }
