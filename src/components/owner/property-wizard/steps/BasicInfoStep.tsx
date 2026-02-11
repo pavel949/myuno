@@ -10,6 +10,7 @@ import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyFormData, OwnershipData, OwnershipType } from '@/hooks/usePropertyWizard';
+import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
@@ -226,6 +227,12 @@ function BasicInfoStepInner({
         onViewTypeChange={(view_type) => updateFormData({ view_type })}
         onFurnishingLevelChange={(furnishing_level) => updateFormData({ furnishing_level })}
         onEquipmentChange={(equipment) => updateFormData({ equipment })}
+      />
+
+      {/* Property Features / Highlights */}
+      <PropertyFeaturesSelector
+        highlights={formData.highlights}
+        onChange={(highlights) => updateFormData({ highlights })}
       />
 
       {/* Basic Info */}
