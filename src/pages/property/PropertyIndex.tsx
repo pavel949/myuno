@@ -1,9 +1,10 @@
 /**
  * PropertyIndex — Airbnb-style Discovery Page
+ * Clean search pill + category icons ribbon + card grid
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, Loader2 } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, Loader2, SlidersHorizontal, Map } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -14,6 +15,7 @@ import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
+import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,53 +33,6 @@ interface RecentProperty {
   pricePeriod: string;
 }
 
-// ── Compact horizontal card ──
-function PropertyScrollCard({ property, mode, onClick }: { 
-  property: Property; 
-  mode: PropertyMode;
-  onClick: () => void;
-}) {
-  const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
-  const isRu = language === 'ru';
-  const title = isRu ? property.title_ru : property.title_en;
-  const image = property.cover_image || property.images?.[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400';
-
-  return (
-    <button 
-      onClick={onClick}
-      className="w-[300px] shrink-0 text-left group"
-    >
-      <div className="relative aspect-square rounded-xl overflow-hidden mb-2">
-        <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-        <button className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-background/70 hover:bg-background transition-colors" onClick={(e) => e.stopPropagation()}>
-          <Heart className="w-4 h-4" />
-        </button>
-        {property.is_featured && (
-          <div className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg bg-background/90 text-[11px] font-semibold">
-            {isRu ? 'Выбор гостей' : 'Guest favorite'}
-          </div>
-        )}
-      </div>
-      <div className="space-y-0.5">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-semibold line-clamp-1">{property.district || 'Phuket'}</h3>
-          {property.rating != null && property.rating > 0 && (
-            <span className="flex items-center gap-1 text-sm shrink-0">
-              <Star className="w-3.5 h-3.5 fill-current" /> {property.rating.toFixed(1)}
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground line-clamp-1">{title}</p>
-        <p className="text-sm font-semibold pt-0.5">
-          {formatPrice(property.price || 0)}
-          <span className="font-normal text-muted-foreground text-xs">{mode === 'buy' ? '' : `/${isRu ? 'ночь' : 'night'}`}</span>
-        </p>
-      </div>
-    </button>
-  );
-}
-
 // ── Recently Viewed Card ──
 function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => void }) {
   const { language } = useLanguage();
@@ -86,9 +41,6 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
     <button onClick={onClick} className="w-[150px] shrink-0 text-left group">
       <div className="relative aspect-square rounded-xl overflow-hidden mb-1.5">
         <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" />
-        <button className="absolute top-2 right-2 p-1 rounded-full bg-background/70 hover:bg-background transition-colors" onClick={(e) => e.stopPropagation()}>
-          <Heart className="w-3.5 h-3.5" />
-        </button>
       </div>
       <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
       <p className="text-[11px] text-muted-foreground">
@@ -96,20 +48,6 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
         {item.rating != null && item.rating > 0 && (<> · <Star className="w-2.5 h-2.5 inline fill-current" /> {item.rating.toFixed(1)}</>)}
       </p>
     </button>
-  );
-}
-
-// ── Section Header ──
-function SectionHeader({ title, onSeeAll }: { title: string; onSeeAll?: () => void }) {
-  return (
-    <div className="flex items-center justify-between px-4 mb-3">
-      <h2 className="text-lg font-bold">{title}</h2>
-      {onSeeAll && (
-        <button onClick={onSeeAll} className="p-2 rounded-full border border-border hover:bg-muted transition-colors">
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      )}
-    </div>
   );
 }
 
@@ -123,6 +61,8 @@ export default function PropertyIndex() {
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
 
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
   const { data: infiniteData, isLoading } = usePropertiesInfinite({
@@ -133,20 +73,13 @@ export default function PropertyIndex() {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
 
-  const featured = useMemo(() => allProperties.filter(p => p.is_featured).slice(0, 10), [allProperties]);
-
-  const byDistrict = useMemo(() => {
-    const grouped: Record<string, Property[]> = {};
-    for (const p of allProperties) {
-      const d = p.district || 'Phuket';
-      if (!grouped[d]) grouped[d] = [];
-      grouped[d].push(p);
-    }
-    return Object.entries(grouped)
-      .sort(([, a], [, b]) => b.length - a.length)
-      .slice(0, 4)
-      .filter(([, items]) => items.length >= 2);
-  }, [allProperties]);
+  // Filter by selected categories (AND logic — must match ALL selected)
+  const filteredProperties = useMemo(() => {
+    if (selectedCategories.length === 0) return allProperties;
+    return allProperties.filter(p =>
+      selectedCategories.every(cat => matchesCategory(p, cat))
+    );
+  }, [allProperties, selectedCategories]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(`/property/${id}`);
@@ -169,37 +102,102 @@ export default function PropertyIndex() {
   return (
     <AppLayout showHeader={false} showBottomNav showFooter>
       <div className="min-h-screen bg-background pb-24">
-        {/* Header */}
-        <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center gap-3 mb-3">
-            <BackButton fallbackPath="/" variant="ghost" size="sm" />
-            <h1 className="text-lg font-bold flex-1">{isRu ? 'Жильё' : 'Stays'}</h1>
-            <div className="flex p-0.5 bg-muted/60 rounded-lg">
+        {/* Sticky header: search + categories */}
+        <div className="sticky top-0 z-40 bg-background">
+          {/* Search pill + mode toggle */}
+          <div className="px-4 pt-3 pb-2">
+            <div className="flex items-center gap-2">
+              <BackButton fallbackPath="/" variant="ghost" size="sm" className="shrink-0 -ml-1" />
+              <div className="flex-1">
+                <AirbnbSearchBar onSearch={handleSearch} />
+              </div>
+              {/* Rent/Buy toggle — compact, desktop-like */}
+              <div className="hidden sm:flex p-0.5 bg-muted/60 rounded-lg shrink-0">
+                <button
+                  onClick={() => setPropertyMode('rent')}
+                  className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'rent' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {isRu ? 'Аренда' : 'Rent'}
+                </button>
+                <button
+                  onClick={() => setPropertyMode('buy')}
+                  className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'buy' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {isRu ? 'Покупка' : 'Buy'}
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile: Rent/Buy as subtle text tabs */}
+            <div className="sm:hidden flex items-center gap-4 mt-2">
               <button
                 onClick={() => setPropertyMode('rent')}
-                className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'rent' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                className={cn(
+                  "text-sm font-medium pb-1 border-b-2 transition-all",
+                  propertyMode === 'rent'
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground"
+                )}
               >
-                {isRu ? 'Аренда' : 'Rent'}
+                {isRu ? 'Аренда' : 'Stays'}
               </button>
               <button
                 onClick={() => setPropertyMode('buy')}
-                className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'buy' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+                className={cn(
+                  "text-sm font-medium pb-1 border-b-2 transition-all",
+                  propertyMode === 'buy'
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground"
+                )}
               >
                 {isRu ? 'Покупка' : 'Buy'}
               </button>
             </div>
           </div>
 
-          {/* Unified Search Bar — all filters inside */}
-          <AirbnbSearchBar onSearch={handleSearch} />
+          {/* Category icons ribbon — Airbnb-style with underline */}
+          <div className="border-b">
+            <div className="px-4 flex items-center gap-2">
+              <AirbnbCategoryRibbon 
+                selected={selectedCategories} 
+                onChange={setSelectedCategories}
+                className="flex-1" 
+              />
+              {/* Filters button */}
+              <button
+                onClick={() => navigate('/property/search')}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium text-foreground hover:shadow-sm transition-all"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                {isRu ? 'Фильтры' : 'Filters'}
+              </button>
+            </div>
+          </div>
         </div>
 
+        {/* Active category badges */}
+        {selectedCategories.length > 0 && (
+          <div className="px-4 pt-2 flex items-center gap-2">
+            <p className="text-xs text-muted-foreground">
+              {filteredProperties.length} {isRu ? 'объектов' : 'places'}
+            </p>
+            <button
+              onClick={() => setSelectedCategories([])}
+              className="text-xs text-primary font-medium hover:underline"
+            >
+              {isRu ? 'Сбросить' : 'Clear'}
+            </button>
+          </div>
+        )}
+
         {/* Content */}
-        <div className="space-y-6 pt-4">
-          {/* Recently Viewed */}
-          {recentItems.length > 0 && (
-            <section>
-              <SectionHeader title={isRu ? 'Вы недавно смотрели' : 'Recently viewed'} />
+        <div className="pt-4">
+          {/* Recently Viewed — only when no category filters */}
+          {recentItems.length > 0 && selectedCategories.length === 0 && (
+            <section className="mb-6">
+              <h2 className="text-base font-bold px-4 mb-3">
+                {isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
+              </h2>
               <div className="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-hide">
                 {recentItems.slice(0, 8).map((item) => (
                   <RecentCard key={item.id} item={item} onClick={() => handlePropertyClick(item.id)} />
@@ -214,46 +212,29 @@ export default function PropertyIndex() {
             </div>
           )}
 
-          {!isLoading && featured.length > 0 && (
-            <section>
-              <SectionHeader title={isRu ? 'Популярное жильё' : 'Guest favorites'} onSeeAll={() => navigate('/property/search')} />
-              <div className="flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
-                {featured.map((property) => (
-                  <PropertyScrollCard key={property.id} property={property} mode={propertyMode} onClick={() => handlePropertyClick(property.id)} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {!isLoading && byDistrict.map(([district, items]) => (
-            <section key={district}>
-              <SectionHeader title={isRu ? `${district}: доступное жильё` : `${district}: available stays`} onSeeAll={() => navigate(`/property/search?district=${encodeURIComponent(district)}`)} />
-              <div className="flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
-                {items.slice(0, 8).map((property) => (
-                  <PropertyScrollCard key={property.id} property={property} mode={propertyMode} onClick={() => handlePropertyClick(property.id)} />
-                ))}
-              </div>
-            </section>
-          ))}
-
-          {!isLoading && allProperties.length > 0 && (
+          {/* Main grid — Airbnb-style 2-col cards */}
+          {!isLoading && filteredProperties.length > 0 && (
             <section className="px-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold">{isRu ? 'Все объекты' : 'All listings'}</h2>
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/property/map')}>
-                  <MapPin className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isRu ? 'Карта' : 'Map'}</span>
+                {selectedCategories.length === 0 && (
+                  <h2 className="text-base font-bold">
+                    {isRu ? 'Все объекты' : 'All listings'}
+                  </h2>
+                )}
+                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate('/property/map')}>
+                  <Map className="w-4 h-4" />
+                  {isRu ? 'Карта' : 'Map'}
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {allProperties.slice(0, 8).map((property) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+                {filteredProperties.slice(0, 20).map((property) => (
                   <PropertyListingCard key={property.id} property={property} mode={propertyMode} />
                 ))}
               </div>
-              {allProperties.length > 8 && (
-                <div className="mt-4 text-center">
+              {filteredProperties.length > 20 && (
+                <div className="mt-6 text-center">
                   <Button variant="outline" className="gap-2" onClick={() => navigate('/property/search')}>
-                    {isRu ? `Показать все ${allProperties.length} объектов` : `Show all ${allProperties.length} listings`}
+                    {isRu ? `Показать все ${filteredProperties.length}` : `Show all ${filteredProperties.length}`}
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
@@ -261,7 +242,18 @@ export default function PropertyIndex() {
             </section>
           )}
 
-          <CrossSellSection currentVertical="property" className="px-4" title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
+          {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
+            <div className="text-center py-16 px-4">
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => setSelectedCategories([])}>
+                {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            </div>
+          )}
+
+          <CrossSellSection currentVertical="property" className="px-4 mt-8" title={{ en: 'You may also need', ru: 'Может пригодиться' }} />
         </div>
       </div>
     </AppLayout>

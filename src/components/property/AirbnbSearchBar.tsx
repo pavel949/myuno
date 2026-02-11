@@ -332,32 +332,32 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
   return (
     <div className={cn("w-full", className)}>
-      {/* ═══ Mobile Search Bar ═══ */}
+      {/* ═══ Mobile Search Bar — Airbnb-style minimal pill ═══ */}
       <div className="md:hidden">
         <motion.div
-          className="flex items-center gap-2 px-4 py-2.5 bg-card rounded-full border shadow-sm cursor-pointer"
+          className="flex items-center gap-3 px-4 py-3 bg-card rounded-full border shadow-sm cursor-pointer"
           onClick={() => setIsOpen(true)}
           whileTap={{ scale: 0.98 }}
         >
-          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+          <Search className="w-5 h-5 text-foreground shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1 text-sm">
-              <span className="font-medium truncate">{summaryParts[0]}</span>
-              {summaryParts.length > 1 && (
-                <>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="text-muted-foreground truncate">
-                    {summaryParts.slice(1).join(' · ')}
-                  </span>
-                </>
-              )}
-            </div>
+            <p className="text-sm font-semibold leading-tight">
+              {selectedLocations.length > 0
+                ? locationLabel
+                : (isRu ? 'Куда угодно' : 'Where to?')
+              }
+            </p>
+            <p className="text-xs text-muted-foreground leading-tight">
+              {[
+                checkIn && checkOut
+                  ? `${formatDateShort(checkIn)} – ${formatDateShort(checkOut)}`
+                  : (isRu ? 'Любая неделя' : 'Any week'),
+                totalGuests !== 2
+                  ? `${totalGuests} ${isRu ? 'гост.' : 'guests'}`
+                  : (isRu ? 'Сколько угодно' : 'Add guests'),
+              ].join(' · ')}
+            </p>
           </div>
-          {propertyFilterCount > 0 && (
-            <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-              {propertyFilterCount}
-            </span>
-          )}
         </motion.div>
 
         {/* ═══ Mobile Full Screen Modal ═══ */}
