@@ -1,83 +1,71 @@
 
+# Мульти-выбор категорий (чипов) на странице жилья
 
-# Фильтры на первом экране жилья (/property)
+## Проблема
+Сейчас `PropertyCategoryIcons` поддерживает только **одиночный** выбор (`selected: string | null`). Пользователь не может одновременно выбрать "Бассейн" + "С питомцами" + "У пляжа".
 
-## Текущая проблема
-
-1. **Спальни в AirbnbSearchBar** имеют только 6 вариантов (Studio, 1, 2, 3, 4, 5+), а нужны 1+, 2+, ... 12+
-2. **На первом экране** (`/property`) фильтры скрыты в модалке поиска — пользователь не видит их сразу
-3. **Атрибуты** (животные, пешком до пляжа, бассейн) доступны только через PropertyCategoryIcons, но нет быстрого доступа к спальням и типу жилья
+## Данные в базе
+40 из 42 объектов уже имеют заполненные `amenities` (массив строк). Логика сопоставления `matchesCategory` работает корректно — она проверяет `amenities`, `highlights` и `view_type`. Проблема только в интерфейсе (single-select).
 
 ## Решение
 
-Перенести ключевые фильтры **прямо на первый экран** под поисковую строку, перед карточками. Вместо того чтобы прятать всё в модалку, показать inline-фильтры как на PropertySearchPage.
-
-### Что появится на первом экране (под AirbnbSearchBar)
-
-```text
-[Поиск: район, даты, гости]                    ← уже есть
-[Beachfront | Pool | Sea View | ... ]           ← уже есть (PropertyCategoryIcons)
-[Тип жилья ▼] [Спальни ▼] [⚡Мгновенное] [Фильтры ▼]  ← НОВОЕ: inline compact поповеры
-[Карточки...]
-```
-
-### Спальни: формат "N+" до 12+
-
-Заменить текущие 6 вариантов (Studio, 1-5+) на полный набор из PropertySearchPage:
-
-```text
-Studio | 1+ | 2+ | 3+ | 4+ | 5+ | 6+ | 8+ | 10+ | 12+
-```
-
-Это изменение применяется и в AirbnbSearchBar (мобильный модал), и в inline-поповерах.
-
-## Изменения по файлам
-
-### 1. `src/components/property/AirbnbSearchBar.tsx`
-- Заменить `BEDROOM_OPTIONS` (6 вариантов) на расширенный набор с форматом N+:
-  - Studio, 1+, 2+, 3+, 4+, 5+, 6+, 8+, 10+, 12+
-- Обновить сетку в мобильном табе "Спальни" с `grid-cols-3` на `grid-cols-4` для 10 кнопок
-- Обновить desktop попover аналогично
-- Поменять лейбл с просто числа на "N+" формат
+### 1. `src/components/property/PropertyCategoryIcons.tsx`
+- Изменить интерфейс с `selected: string | null` на `selected: string[]` и `onSelect: (ids: string[]) => void`
+- При клике — добавлять/убирать из массива (toggle), а не заменять
+- Визуально: активные чипы подсвечиваются (как сейчас для одного)
+- Сохранить обратную совместимость: добавить overloaded props или новый пропс `multi?: boolean`
 
 ### 2. `src/pages/property/PropertyIndex.tsx`
-- Добавить inline compact filter bar (поповеры) между PropertyCategoryIcons и карточками
-- Скопировать паттерн из PropertySearchPage: "Тип жилья", "Спальни", "Мгновенное бронирование" как компактные кнопки-попопверы
-- Подключить `usePropertyFilterOptions` для типов жилья
-- Фильтровать `allProperties` по выбранным спальням, типу, instant booking
-- При переходе на `/property/search` передавать все выбранные фильтры в URL
+- Заменить `selectedCategory: string | null` на `selectedCategories: string[]`
+- В фильтрации: объект проходит если соответствует **всем** выбранным категориям (AND-логика — "бассейн И парковка")
+- Передать массив в `PropertyCategoryIcons`
 
 ### 3. `src/pages/property/PropertySearchPage.tsx`
-- Синхронизировать `BEDROOM_OPTIONS` с новым форматом (уже частично есть Studio-12+, но нужно выровнять лейблы на "N+")
+- Аналогичная замена `selectedCategory: string | null` на `selectedCategories: string[]`
+- Обновить фильтрацию с AND-логикой
+
+### Логика фильтрации
+Если выбраны `['pool', 'pet_friendly']`, объект отображается только если `matchesCategory(property, 'pool') === true` **И** `matchesCategory(property, 'pet_friendly') === true`.
 
 ## Технические детали
 
-### Новые состояния в PropertyIndex
+### Изменение интерфейса PropertyCategoryIcons
 ```typescript
-const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
-const [instantBookOnly, setInstantBookOnly] = useState(false);
+// Было:
+interface PropertyCategoryIconsProps {
+  selected: string | null;
+  onSelect: (id: string | null) => void;
+}
+
+// Станет:
+interface PropertyCategoryIconsProps {
+  selected: string[];
+  onSelect: (ids: string[]) => void;
+}
 ```
 
-### Единый массив BEDROOM_OPTIONS (shared)
+### Изменение состояния в PropertyIndex и PropertySearchPage
 ```typescript
-const BEDROOM_OPTIONS = [
-  { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
-  { id: '1', labelEn: '1+', labelRu: '1+' },
-  { id: '2', labelEn: '2+', labelRu: '2+' },
-  { id: '3', labelEn: '3+', labelRu: '3+' },
-  { id: '4', labelEn: '4+', labelRu: '4+' },
-  { id: '5', labelEn: '5+', labelRu: '5+' },
-  { id: '6', labelEn: '6+', labelRu: '6+' },
-  { id: '8', labelEn: '8+', labelRu: '8+' },
-  { id: '10', labelEn: '10+', labelRu: '10+' },
-  { id: '12', labelEn: '12+', labelRu: '12+' },
-];
+// Было:
+const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+// Станет:
+const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 ```
 
-### Фильтрация по спальням (логика "N+")
-Выбор "3+" означает >= 3 спален. При множественном выборе берётся минимальное значение из выбранных.
+### Фильтрация (AND-логика)
+```typescript
+// Объект проходит только если соответствует КАЖДОЙ выбранной категории
+if (selectedCategories.length > 0) {
+  const passesAll = selectedCategories.every(cat => matchesCategory(p, cat));
+  if (!passesAll) return false;
+}
+```
 
-### Inline filter bar на PropertyIndex
-Компактные pill-кнопки с Popover (как на PropertySearchPage), расположенные горизонтально с overflow-x-auto. Это позволяет пользователю сразу видеть и использовать фильтры без открытия модалки.
+## Файлы для изменения
 
+| Файл | Изменение |
+|------|-----------|
+| `src/components/property/PropertyCategoryIcons.tsx` | Пропсы: `string \| null` -> `string[]`. Toggle при клике |
+| `src/pages/property/PropertyIndex.tsx` | Состояние -> массив, AND-фильтрация |
+| `src/pages/property/PropertySearchPage.tsx` | Состояние -> массив, AND-фильтрация |
