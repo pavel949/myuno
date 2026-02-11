@@ -1,36 +1,45 @@
 
 
-# Исправление "перескакивания" на старый билд
+# Исправление кнопки бронирования транспорта + улучшение поиска жилья
 
-## Что уже сделано
-Версия синхронизирована: `index.html`, `version.json`, `appVersion.ts` — все `3.26.0`.
+## 1. Кнопка бронирования перекрыта навигацией (транспорт)
 
-## Что осталось (2 проблемы)
+### Причина
+Глобальная нижняя навигация (`AdaptiveBottomNav`) рендерится **вне** `AppLayout` в `AnimatedRoutes.tsx`. Параметр `showBottomNav={false}` убирает только padding, но сама панель навигации продолжает отображаться поверх кнопки.
 
-### Проблема 1: Молчаливое обновление SW без перезагрузки
-В `PWAUpdatePrompt.tsx` строки 36-41 вызывают `updateServiceWorker(true)` автоматически. Это активирует новый SW, но **старый JavaScript продолжает работать в памяти**. Пользователь видит старый UI, хотя SW уже новый.
+В списке `routesWithOwnBottomBar` есть `/transfer/` (трансфер), но **нет `/transport/`** (аренда авто). Поэтому на страницах `/transport/vehicle/*` и `/transport/fast-track` навигация не прячется и перекрывает CTA.
 
-**Решение**: Убрать авто-обновление. Вместо этого показывать prompt и при нажатии "Обновить" делать `updateServiceWorker(true)` + принудительный `window.location.reload()`.
+### Решение
+Добавить `/transport/` в массив `routesWithOwnBottomBar` в файле `src/components/layout/AdaptiveBottomNav.tsx`.
 
-### Проблема 2: SW не сообщает клиентам об обновлении
-Когда новый SW активируется, он чистит кеши, но не говорит странице "перезагрузись". Если `controllerchange` не сработал (race condition), страница продолжает работать на старом коде.
+---
 
-**Решение**: В `sw.ts` при активации отправлять `postMessage({ type: 'SW_UPDATED' })` всем клиентам. В `index.html` слушать это сообщение и делать hard reload.
+## 2. Спальни недоступны с первого экрана жилья
 
-## Изменения по файлам
+### Текущее поведение
+- Страница `/property` (PropertyIndex) показывает: поиск (район, даты, гости) + иконки категорий + карточки
+- Селектор спален доступен только на `/property/search` через попапы фильтров
+- Пользователь не может указать количество спален пока не перейдёт на вторую страницу
 
-### 1. `src/components/pwa/PWAUpdatePrompt.tsx`
-- Удалить `useEffect` с авто-обновлением (строки 35-41)
-- В `handleUpdate` добавить `window.location.reload()` после `updateServiceWorker(true)`
+### Решение
+Добавить в `AirbnbSearchBar` четвёртый таб "Спальни" (Bedrooms) в мобильном модале поиска. На десктопе — добавить дополнительный попап-секцию между датами и гостями.
 
-### 2. `src/sw.ts`
-- В обработчике `activate` добавить рассылку `SW_UPDATED` всем клиентам через `self.clients.matchAll()` + `client.postMessage()`
-- Добавить обработчик `message` для команды `SKIP_WAITING`
+### Что будет в табе "Спальни"
+- Сетка кнопок: Студия, 1, 2, 3, 4, 5+ (аналогично `PropertySearchPage`)
+- Множественный выбор
+- Передача выбранных значений в `SearchParams` → URL-параметр `bedrooms`
 
-### 3. `index.html`
-- Добавить слушатель `navigator.serviceWorker.addEventListener('message')` для сообщения `SW_UPDATED` — при получении делать `window.location.href = window.location.href` (hard navigation, не просто reload)
+### Изменения по файлам
 
-## Ожидаемый результат
-- При обновлении SW страница **гарантированно** перезагружается с новыми ассетами
-- Старый JS-бандл никогда не останется в памяти после обновления SW
-- "Перескакивание" на старый билд исчезнет полностью
+| Файл | Изменение |
+|------|-----------|
+| `src/components/layout/AdaptiveBottomNav.tsx` | Добавить `/transport/` в `routesWithOwnBottomBar` |
+| `src/components/property/AirbnbSearchBar.tsx` | Добавить таб "Спальни" в мобильный модал и попап на десктопе; расширить `SearchParams` полем `bedrooms: string[]` |
+| `src/pages/property/PropertyIndex.tsx` | Передавать `bedrooms` из `SearchParams` в URL при переходе на `/property/search` |
+| `src/pages/property/PropertySearchPage.tsx` | Считывать `bedrooms` из URL и применять как начальный фильтр |
+
+### Порядок табов в поиске (мобайл)
+```text
+Куда | Когда | Спальни | Кто
+```
+
