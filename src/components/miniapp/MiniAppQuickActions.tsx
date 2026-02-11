@@ -19,7 +19,7 @@ interface MiniAppQuickActionsProps {
 
 const renderActionIcon = (icon: string | LucideIcon) => {
   const Resolved = resolveIcon(icon);
-  return <Resolved className="w-6 h-6 text-primary" />;
+  return <Resolved className="w-6 h-6 text-icon-dark" />;
 };
 
 export function MiniAppQuickActions({

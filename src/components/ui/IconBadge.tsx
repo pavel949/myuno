@@ -23,8 +23,8 @@ const containerSizes: Record<IconSize, string> = {
 };
 
 const containerStyles = {
-  default: 'bg-muted text-foreground',
-  primary: 'bg-primary/10 text-primary',
+  default: 'bg-muted text-icon-dark',
+  primary: 'bg-primary/10 text-icon-dark',
   muted: 'bg-muted/50 text-muted-foreground',
   gradient: '', // Dynamic - set via gradient prop
   ghost: 'bg-transparent text-foreground',

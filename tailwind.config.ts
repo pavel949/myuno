@@ -95,6 +95,9 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(0 0% 100%)",
         },
+        "icon-dark": {
+          DEFAULT: "hsl(var(--icon-dark))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

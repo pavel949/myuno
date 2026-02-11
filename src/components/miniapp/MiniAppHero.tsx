@@ -38,8 +38,8 @@ export function MiniAppHero({
       )}
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-2">
-          <Icon className="w-6 h-6 text-primary" />
-          <span className="text-sm font-medium text-primary">{title}</span>
+          <Icon className="w-6 h-6 text-icon-dark" />
+          <span className="text-sm font-medium text-icon-dark">{title}</span>
         </div>
         {subtitle && (
           <p className="text-muted-foreground text-sm">{subtitle}</p>
