@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
 import { useRestaurants } from '@/hooks/useRestaurants';
-import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
+import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 
 type VerticalFilter = 'all' | 'property' | 'beauty' | 'restaurant';
