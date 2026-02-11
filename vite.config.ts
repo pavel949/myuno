@@ -88,7 +88,6 @@ export default defineConfig(({ mode }) => ({
           'vendor-map': ['mapbox-gl'],
           'feature-admin': [
             './src/pages/admin/AdminDashboard.tsx',
-            './src/pages/admin/AdminAnalytics.tsx',
             './src/pages/admin/AcquisitionMetrics.tsx',
           ],
           'feature-vendor': [
