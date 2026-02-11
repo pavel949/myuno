@@ -1,103 +1,56 @@
 
+# Исправление модуля собственников
 
-# Единая панель поиска в стиле Airbnb
+## 1. Единое название бренда "myUNO" везде
 
-## Проблема сейчас
+Заменить все варианты ("UNO Property Care", "UNO Property") на единое "myUNO":
 
-Фильтры разбросаны по 3 отдельным местам:
-1. **Поисковый модал** (AirbnbSearchBar) — район, даты, гости, спальни
-2. **Inline pill-кнопки** — тип жилья, спальни (дублируется!), мгновенное бронирование
-3. **Горизонтальная лента иконок** — бассейн, WiFi, парковка и др.
+| Файл | Было | Станет |
+|------|------|--------|
+| `src/pages/owner/OwnerDashboard.tsx` (строка 37) | "UNO Property Care" | "myUNO" |
+| `src/components/owner/OwnerSidebar.tsx` (строка 107) | "UNO Property" | "myUNO" |
+| `src/pages/owner/OwnerGuidePage.tsx` (строка 47) | "UNO Property Care v2.0" | "myUNO v2.0" |
+| `src/components/owner/guide/GuideCover.tsx` (строка 29-30) | "...в экосистеме UNO Property Care" | "...в экосистеме myUNO" |
+| `src/components/owner/guide/GuideComparison.tsx` (строка 60-61) | "UNO Property Care" | "myUNO" |
+| `src/components/owner/guide/GuidePropertyCare.tsx` (строка 57) | "UNO Property Care" | "myUNO Property Care" |
+| `src/components/owner/guide/GuideTableOfContents.tsx` (строка 15-16) | "Преимущества UNO" | "Преимущества myUNO" |
 
-Пользователь должен кликать в 3 разных места, чтобы настроить поиск. Спальни дублируются.
+## 2. Убрать выдуманные маркетинговые цифры
 
-## Решение
+**`src/components/owner/guide/GuideIntegration.tsx`** (строки 199-204): Заменить "Средняя заполняемость: 85%" на value-driven текст: "Прозрачная отчётность каждый месяц" / "Transparent monthly reporting".
 
-Объединить **все** параметры в один полноэкранный модал поиска (мобайл) и в один расширяемый бар (десктоп). При нажатии на компактную строку поиска открывается панель со **всеми** секциями:
+## 3. Добавить data-tour атрибуты в OwnerDashboard
 
-```text
-Мобайл (полноэкранный модал):
-┌─────────────────────────────────┐
-│ [X]       Поиск        [Сброс] │
-│ ─────────────────────────────── │
-│  Куда | Когда | Жильё | Кто    │  <- табы
-│ ─────────────────────────────── │
-│                                 │
-│  Таб "Жильё":                  │
-│  ┌─ Тип жилья ────────────────┐│
-│  │ [Кондо] [Вилла] [Дом] ...  ││
-│  ├─ Спальни ──────────────────┤│
-│  │ [Studio][1+][2+]...[12+]   ││
-│  ├─ Удобства ─────────────────┤│
-│  │ [Бассейн][WiFi][Парковка]  ││
-│  │ [Питомцы][Спортзал]...     ││
-│  ├─ Особенности ──────────────┤│
-│  │ [У пляжа][Вид на море]    ││
-│  │ [Люкс][Новострой]         ││
-│  ├─────────────────────────────┤│
-│  │ [Мгновенное бронирование]  ││
-│  └─────────────────────────────┘│
-│                                 │
-│  [══════ Найти жильё ═════════] │
-└─────────────────────────────────┘
-```
+Тур ссылается на 5 элементов: `quick-actions`, `portfolio`, `add-property`, `finances`, `team`. Эти атрибуты есть в старых компонентах (`QuickActionsBar`, `PortfolioSection`, `FinancesSummary`, `CommunicationsSection`), но текущий дашборд их не использует.
 
-## Ключевые изменения
+Решение -- обновить шаги тура под текущие компоненты дашборда и добавить `data-tour` атрибуты к ним:
 
-### 1. Объединение таба "Спальни" в таб "Жильё" (Property)
+| Компонент | data-tour атрибут | Шаг тура |
+|-----------|-------------------|----------|
+| `ActiveStaysWidget` (обёртка в OwnerDashboard) | `active-stays` | "Текущие гости -- кто сейчас проживает" |
+| `OwnerPropertiesList` (обёртка в OwnerDashboard) | `properties` | "Ваши объекты -- все объекты в одном месте" |
+| `OwnerOperationsFlat` (обёртка в OwnerDashboard) | `operations` | "Задачи на сегодня -- уборки, обслуживание" |
+| `OwnerDashboardMenu` (обёртка в OwnerDashboard) | `menu` | "Меню -- каналы, отчёты, поддержка" |
 
-Вместо 4 табов (Куда / Когда / Спальни / Кто) будет:
-- **Куда** — районы (как сейчас)
-- **Когда** — даты и гибкие варианты (как сейчас)
-- **Жильё** — НОВЫЙ объединённый таб: тип жилья + спальни + удобства + особенности + мгновенное бронирование
-- **Кто** — гости (как сейчас)
+Обновить `OwnerOnboardingTour.tsx`: заменить 5 старых шагов на 4 новых, привязанных к реальным секциям. Убрать эмодзи из заголовков шагов (согласно бренд-буку -- только Lucide-иконки).
 
-### 2. Расширение SearchParams
+## 4. Убрать лишние скобки в OwnerPropertiesList
 
-```typescript
-export interface SearchParams {
-  locations: string[];
-  checkIn: Date | undefined;
-  checkOut: Date | undefined;
-  guests: number;
-  bedrooms: string[];
-  propertyTypes: string[];    // NEW
-  amenities: string[];        // NEW (категории из PropertyCategoryIcons)
-  instantBooking: boolean;    // NEW
-}
-```
+**`src/components/owner/dashboard/OwnerPropertiesList.tsx`** (строка 142): `{(` -> `{` и соответствующее закрытие `)}` -> `}`.
 
-### 3. Удаление дублирующих inline-фильтров с PropertyIndex
+---
 
-Убрать отдельные Popover-кнопки для типа жилья, спален и мгновенного бронирования из PropertyIndex — всё это переезжает внутрь модала AirbnbSearchBar. Останется только компактная строка поиска, которая показывает сводку выбранных фильтров.
+## Технические детали: файлы и изменения
 
-### 4. Компактная сводка фильтров на строке поиска
+**Изменяемые файлы (9 штук):**
 
-Компактная строка будет показывать все активные фильтры:
-```text
-[Банг Тао · 5-12 мар · 2 гостя · Вилла · 3+ сп. · Бассейн]
-```
-
-### 5. Десктоп-версия
-
-На десктопе секция "Жильё" добавляется как ещё один сегмент в горизонтальном баре с Popover, объединяющим тип, спальни, удобства и мгновенное бронирование в одной выпадающей панели.
-
-## Файлы для изменения
-
-| Файл | Что меняется |
-|------|-------------|
-| `src/components/property/AirbnbSearchBar.tsx` | Объединить таб "Спальни" в "Жильё" с добавлением секций: тип жилья, удобства, особенности, instant booking. Расширить SearchParams. Добавить десктоп Popover "Жильё". |
-| `src/pages/property/PropertyIndex.tsx` | Убрать inline Popover-фильтры (тип/спальни/instant), убрать PropertyCategoryIcons. Передавать все параметры из SearchParams. Обновить компактную строку сводки. |
-| `src/pages/property/PropertySearchPage.tsx` | Считывать новые параметры (propertyTypes, amenities, instantBooking) из URL и SearchParams. Убрать дублирующиеся inline-фильтры (оставить только compact кнопки "редактировать фильтры" для быстрого доступа). |
-
-## Визуальная структура таба "Жильё" (мобайл)
-
-Содержимое таба делится на секции с заголовками и сеткой кнопок:
-
-- **Тип жилья** — grid 2 колонки с иконками (из propertyTypes hook)
-- **Спальни** — grid 4 колонки (Studio, 1+...12+) — перенос из текущего таба
-- **Удобства и особенности** — grid 3 колонки с иконками из CATEGORIES (бассейн, WiFi, парковка, питомцы, спортзал, кухня, вид на море, у пляжа, люкс и др.)
-- **Мгновенное бронирование** — toggle-переключатель
-
-Каждая секция визуально отделена заголовком и тонкой линией.
-
+1. `src/pages/owner/OwnerDashboard.tsx` -- бренд "myUNO" + обёртки `data-tour` на секциях
+2. `src/components/owner/OwnerSidebar.tsx` -- бренд "myUNO"
+3. `src/pages/owner/OwnerGuidePage.tsx` -- бренд "myUNO"
+4. `src/components/owner/guide/GuideCover.tsx` -- бренд "myUNO"
+5. `src/components/owner/guide/GuideComparison.tsx` -- бренд "myUNO"
+6. `src/components/owner/guide/GuidePropertyCare.tsx` -- бренд "myUNO"
+7. `src/components/owner/guide/GuideTableOfContents.tsx` -- бренд "myUNO"
+8. `src/components/owner/guide/GuideIntegration.tsx` -- убрать "85%"
+9. `src/components/owner/onboarding/OwnerOnboardingTour.tsx` -- обновить шаги тура
+10. `src/components/owner/dashboard/OwnerPropertiesList.tsx` -- убрать лишние скобки
