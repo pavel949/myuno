@@ -96,9 +96,9 @@ export const HeroBlock = memo(function HeroBlock() {
       <div className="-mx-4 -mt-5">
         {/* Navy gradient header */}
         <div className="relative bg-hero-navy overflow-hidden">
-          {/* Gradient overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0f223a] via-[#152d45] to-[#1a3a54] opacity-90" />
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/[0.03] rounded-full -translate-y-1/2 translate-x-1/4" />
+          {/* Solid navy — same as icon backgrounds */}
+          <div className="absolute inset-0 bg-hero-navy" />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/[0.04] rounded-full -translate-y-1/2 translate-x-1/4" />
           
           <div className="relative z-10 px-5 pt-12 pb-16">
             {/* Top row: Location + actions */}
