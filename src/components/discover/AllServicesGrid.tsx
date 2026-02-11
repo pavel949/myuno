@@ -1,7 +1,7 @@
 import React, { memo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Grid3X3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { VERTICAL_GROUPS, type VerticalGroupItem } from '@/lib/verticalGroups';
 import { VERTICALS } from '@/lib/verticals';
@@ -45,21 +45,35 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-bold text-foreground">
-        {isRu ? 'Все сервисы' : 'All Services'}
-      </h2>
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+          <Grid3X3 className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <h2 className="text-lg font-bold text-foreground">
+          {isRu ? 'Все сервисы' : 'All Services'}
+        </h2>
+      </div>
 
-      <div className="space-y-5">
-        {visibleGroups.map((group) => {
+      <div className="rounded-2xl bg-muted/20 border border-border/40 p-4 space-y-5">
+        {visibleGroups.map((group, gi) => {
           const items = group.items
             .map(item => resolveItem(item, language))
             .filter(Boolean) as NonNullable<ReturnType<typeof resolveItem>>[];
 
           return (
-            <div key={group.id} className="space-y-2">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
-                {isRu ? group.labelRu : group.labelEn}
-              </p>
+            <motion.div
+              key={group.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: gi * 0.05 }}
+              className="space-y-2.5"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm">{group.icon}</span>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+                  {isRu ? group.labelRu : group.labelEn}
+                </p>
+              </div>
               <div className="grid grid-cols-4 gap-2">
                 {items.map((item) => {
                   const Icon = resolveIcon(item.icon);
@@ -69,36 +83,40 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
                       onClick={() => handleNav(item.route)}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-2.5 rounded-xl",
-                        "bg-muted/30 hover:bg-muted/60",
-                        "active:scale-[0.96] transition-all duration-150",
-                        "text-center cursor-pointer"
+                        "bg-card hover:bg-card/80 border border-border/30",
+                        "hover:shadow-md hover:-translate-y-0.5",
+                        "active:scale-[0.95] transition-all duration-200",
+                        "text-center cursor-pointer group"
                       )}
                       style={{ touchAction: 'manipulation' }}
                     >
-                      <div className="w-8 h-8 rounded-lg bg-card border border-border/40 flex items-center justify-center shadow-sm">
-                        <Icon className="w-4 h-4 text-foreground/70" />
+                      <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <Icon className="w-4.5 h-4.5 text-foreground/70 group-hover:text-primary transition-colors" />
                       </div>
-                      <span className="text-[10px] font-medium text-foreground/80 leading-tight line-clamp-2">
+                      <span className="text-[10px] font-medium text-foreground/70 leading-tight line-clamp-2 group-hover:text-foreground transition-colors">
                         {item.label}
                       </span>
                     </button>
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
 
-      {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
-        <button
-          onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
-          className="flex items-center gap-1.5 mx-auto text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <span>{isRu ? (expanded ? 'Свернуть' : 'Показать все') : (expanded ? 'Show less' : 'Show all')}</span>
-          <ChevronDown className={cn("w-4 h-4 transition-transform", expanded && "rotate-180")} />
-        </button>
-      )}
+        <AnimatePresence>
+          {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
+            <motion.button
+              layout
+              onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
+              className="flex items-center gap-1.5 mx-auto py-2 px-4 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            >
+              <span>{isRu ? (expanded ? 'Свернуть' : 'Показать все') : (expanded ? 'Show less' : 'Show all')}</span>
+              <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", expanded && "rotate-180")} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
     </section>
   );
 });
