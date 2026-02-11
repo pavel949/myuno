@@ -11,8 +11,7 @@ interface CatalogPropertiesTabProps {
 }
 
 const propertyCategories = [
-  { key: 'properties', label: 'Rentals', labelRu: 'Аренда', icon: Home, path: '/admin/properties', description: 'Short-term & long-term rentals', descriptionRu: 'Краткосрочная и долгосрочная аренда' },
-  { key: 'owner-properties', label: 'Owner Properties', labelRu: 'Объекты владельцев', icon: Building2, path: '/admin/properties', description: 'Managed by property owners', descriptionRu: 'Управляемые владельцами' },
+  { key: 'properties', label: 'Properties', labelRu: 'Недвижимость', icon: Building2, path: '/admin/properties', description: 'Rentals, long-term & sales', descriptionRu: 'Аренда, долгосрок и продажа' },
 ];
 
 export function CatalogPropertiesTab({ searchQuery, statusFilter }: CatalogPropertiesTabProps) {
