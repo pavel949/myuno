@@ -490,7 +490,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
         
         {/* ── Owner ── */}
-        <Route path="/owner/landing" element={<LazyPage><Pages.OwnerLanding /></LazyPage>} />
+        <Route path="/owner/landing" element={<Navigate to="/owner" replace />} />
         <Route path="/owner/guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
         
         <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>

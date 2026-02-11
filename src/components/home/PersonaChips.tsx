@@ -32,7 +32,7 @@ const CHIPS: ChipData[] = [
     icon: <Building2 className="w-3.5 h-3.5" />,
     label: { en: 'Owner / MC', ru: 'Владелец / УК' },
     activeColor: 'bg-amber-500/15 border-amber-500/50 text-amber-700 dark:text-amber-300',
-    navigateOnFirstActivation: '/owner/landing',
+    navigateOnFirstActivation: '/owner',
   },
   {
     persona: 'investor',

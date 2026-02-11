@@ -39,7 +39,7 @@ const chips: ChipData[] = [
     icon: Building2,
     label: 'For Owners',
     labelRu: 'Владельцам',
-    path: '/owner/landing',
+    path: '/owner',
     gradient: 'from-teal-500 to-emerald-600',
   },
   {

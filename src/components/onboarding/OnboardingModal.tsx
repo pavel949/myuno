@@ -98,7 +98,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
 
     // Redirect based on persona
     if (selectedPersonas.includes('property_owner')) {
-      navigate('/owner/landing');
+      navigate('/owner');
     } else if (selectedPersonas.includes('investor')) {
       navigate('/invest');
     }

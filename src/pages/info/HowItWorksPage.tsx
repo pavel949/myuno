@@ -396,7 +396,7 @@ export default function HowItWorksPage() {
                 {isRu ? 'Исследовать сервисы' : isTh ? 'สำรวจบริการ' : 'Explore Services'}
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button variant="outline" onClick={() => navigate('/owner/landing')}>
+              <Button variant="outline" onClick={() => navigate('/owner')}>
                 {isRu ? 'Разместить объект' : isTh ? 'ลงประกาศทรัพย์สิน' : 'List Property'}
               </Button>
             </div>

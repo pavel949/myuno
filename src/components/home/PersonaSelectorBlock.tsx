@@ -49,7 +49,7 @@ const MAIN_PERSONAS: PersonaCardData[] = [
     cardGradient: 'from-amber-500/10 via-orange-500/5 to-transparent',
     borderColor: 'border-amber-500/30 hover:border-amber-500/50',
     activeBorderColor: 'border-amber-500 ring-amber-500/30',
-    navigateOnFirstActivation: '/owner/landing',
+    navigateOnFirstActivation: '/owner',
   },
 ];
 
