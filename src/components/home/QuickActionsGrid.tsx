@@ -199,18 +199,18 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               "lg:px-5 lg:py-3 lg:hover:bg-muted/40",
             )}
           >
-            {/* Icon container — navy bg, white icon */}
+            {/* Icon container — clean, no shadow, warm bg */}
             <div className={cn(
               "w-14 h-14 rounded-2xl flex items-center justify-center",
               "transition-transform duration-200 group-hover:scale-110",
               isMore 
                 ? "bg-muted/60" 
-                : "bg-hero-navy",
+                : "bg-primary/[0.07]",
               "lg:w-16 lg:h-16"
             )}>
               <Icon 
                 className={cn(
-                  isMore ? "text-muted-foreground" : "text-white",
+                  isMore ? "text-muted-foreground" : "text-primary",
                   "lg:!w-7 lg:!h-7"
                 )}
                 style={{ width: 26, height: 26 }}
