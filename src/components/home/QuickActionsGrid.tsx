@@ -85,10 +85,7 @@ const ADMIN_ACTIONS: QuickAction[] = [
 ];
 
 const getMoreAction = (contentMode: 'services' | 'products'): QuickAction => ({
-  id: 'more',
-  icon: MoreHorizontal,
-  label: 'More',
-  labelRu: 'Ещё',
+  id: 'more', icon: MoreHorizontal, label: 'More', labelRu: 'Ещё',
   path: contentMode === 'products' ? '/market' : '/discover',
 });
 
@@ -105,32 +102,21 @@ const DEFAULT_ACTIONS: QuickAction[] = [
 
 function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
   if (personas.length === 0) return DEFAULT_ACTIONS;
-
   const actionScores: Record<string, { action: QuickAction; score: number }> = {};
   const personaToActions: Record<UserPersona, QuickAction[]> = {
-    tourist: TOURIST_ACTIONS,
-    resident: RESIDENT_ACTIONS,
-    property_owner: OWNER_ACTIONS,
-    investor: INVESTOR_ACTIONS,
+    tourist: TOURIST_ACTIONS, resident: RESIDENT_ACTIONS,
+    property_owner: OWNER_ACTIONS, investor: INVESTOR_ACTIONS,
   };
-
   for (const persona of personas) {
     const actions = personaToActions[persona] || [];
     actions.forEach((action, index) => {
       const positionScore = actions.length - index;
       const existing = actionScores[action.id];
-      if (existing) {
-        existing.score += positionScore + 5;
-      } else {
-        actionScores[action.id] = { action, score: positionScore };
-      }
+      if (existing) { existing.score += positionScore + 5; }
+      else { actionScores[action.id] = { action, score: positionScore }; }
     });
   }
-
-  return Object.values(actionScores)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 8)
-    .map(item => item.action);
+  return Object.values(actionScores).sort((a, b) => b.score - a.score).slice(0, 8).map(item => item.action);
 }
 
 function getActionsForUserType(userType: UserType | null | undefined): QuickAction[] {
@@ -138,9 +124,7 @@ function getActionsForUserType(userType: UserType | null | undefined): QuickActi
     case 'tourist': return TOURIST_ACTIONS;
     case 'resident': return RESIDENT_ACTIONS;
     case 'owner': return OWNER_ACTIONS;
-    case 'vendor':
-    case 'admin':
-    case 'uno_team': return RESIDENT_ACTIONS;
+    case 'vendor': case 'admin': case 'uno_team': return RESIDENT_ACTIONS;
     default: return DEFAULT_ACTIONS;
   }
 }
@@ -149,10 +133,7 @@ function getActionsForRole(role: AppRole): QuickAction[] {
   switch (role) {
     case 'owner': return OWNER_ACTIONS;
     case 'vendor': return VENDOR_ACTIONS;
-    case 'admin':
-    case 'staff':
-    case 'uno_team': return ADMIN_ACTIONS;
-    case 'user':
+    case 'admin': case 'staff': case 'uno_team': return ADMIN_ACTIONS;
     default: return DEFAULT_ACTIONS;
   }
 }
@@ -173,7 +154,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
-    
     if (!roleLoading && activeRole && activeRole !== 'user') {
       userActions = getActionsForRole(activeRole);
     } else if (personas.length > 0) {
@@ -181,10 +161,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
     } else {
       userActions = getActionsForUserType(profile?.user_type);
     }
-    
     const moreAction = getMoreAction(contentMode);
-    const maxItems = 7;
-    return [...userActions.slice(0, maxItems), moreAction];
+    return [...userActions.slice(0, 7), moreAction];
   }, [activeRole, roleLoading, personas, profile?.user_type, contentMode]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -201,9 +179,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   return (
     <div className={cn(
-      "grid grid-cols-4 gap-1",
-      // Desktop: full-width horizontal ribbon
-      "lg:flex lg:items-start lg:justify-evenly lg:gap-2 lg:pb-4"
+      "grid grid-cols-4 gap-y-4 gap-x-2",
+      "lg:flex lg:items-start lg:justify-evenly lg:gap-3"
     )}>
       {quickActions.map((action) => {
         const Icon = action.icon;
@@ -217,29 +194,33 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             onMouseEnter={() => handlePrefetch(action.path)}
             onTouchStart={() => handlePrefetch(action.path)}
             className={cn(
-              "relative flex flex-col items-center p-1.5 rounded-xl",
-              "hover:bg-card/80 transition-all group active:scale-[0.97]",
-              // Desktop: wider touch target, soft bg on hover
-              "lg:px-5 lg:py-3 lg:rounded-xl lg:hover:bg-muted/60",
+              "relative flex flex-col items-center gap-2 p-1 rounded-2xl",
+              "transition-all group active:scale-[0.95]",
+              "lg:px-5 lg:py-3 lg:hover:bg-muted/40",
             )}
           >
+            {/* Icon container — clean, no shadow, warm bg */}
             <div className={cn(
-              "w-[50px] h-[50px] rounded-[14px] flex items-center justify-center mb-1 shadow-sm",
-              isMore ? "bg-muted" : "bg-primary/10",
-              "group-hover:scale-105 transition-transform duration-150",
-              // Desktop: larger icons
-              "lg:w-16 lg:h-16 lg:rounded-2xl lg:mb-2"
+              "w-14 h-14 rounded-2xl flex items-center justify-center",
+              "transition-transform duration-200 group-hover:scale-110",
+              isMore 
+                ? "bg-muted/60" 
+                : "bg-primary/[0.07]",
+              "lg:w-16 lg:h-16"
             )}>
               <Icon 
-                className={cn(isMore ? "text-muted-foreground" : "text-primary", "lg:!w-8 lg:!h-8")}
-                style={{ width: 28, height: 28 }}
-                strokeWidth={1.3}
+                className={cn(
+                  isMore ? "text-muted-foreground" : "text-primary",
+                  "lg:!w-7 lg:!h-7"
+                )}
+                style={{ width: 26, height: 26 }}
+                strokeWidth={1.5}
               />
             </div>
             
             <span className={cn(
-              "text-[11px] font-medium text-center leading-tight truncate w-full text-foreground",
-              "lg:text-sm"
+              "text-[11px] font-medium text-center leading-tight text-foreground/80",
+              "lg:text-[13px]"
             )}>
               {label}
             </span>
