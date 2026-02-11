@@ -1,109 +1,77 @@
 
-# Редизайн Discover — из списка в визуальный хаб
+# Единая форма редактирования в Intake
 
 ## Проблема
+Сейчас в AI Intake (`/admin/intake`) при редактировании объекта открывается **простой диалог с текстовыми полями**, автоматически генерируемый из конфига вертикали. Это значит, что форма для недвижимости в Intake отличается от формы для собственника, а форма для услуг - от формы вендора. Данные вводятся через простые `Input`, без специфичных селекторов (тип недвижимости, карта, загрузка фото, ценовые модели и т.д.).
 
-Текущий Discover — это плоский список кнопок с иконками. Нет фото, нет визуальной иерархии, нет "wow-эффекта". Страница не вызывает желания исследовать платформу.
-
-## Концепция: "Visual Life Hub"
-
-Вдохновление: Airbnb Experiences + Klook + Apple TV. Фото-первый подход с чистой типографикой и мягкими анимациями.
-
-## Структура новой страницы
+## Решение
+Заменить generic-редактор `IntakeItemEditor` на **маршрутизатор канонических форм** по вертикали:
 
 ```text
-+--------------------------------------------------+
-|  Header: "Life in Phuket" + Search               |
-+--------------------------------------------------+
-|                                                    |
-|  [Hero Banner — full-width photo card]            |
-|  "Your life, simplified"                           |
-|  Large atmospheric photo with soft gradient        |
-|                                                    |
-+--------------------------------------------------+
-|                                                    |
-|  FEATURED STRIP (horizontal scroll)               |
-|  [Photo]  [Photo]  [Photo]  [Photo]               |
-|  Yachts   Beauty   Dining   Experiences           |
-|  4 top-tier services with large photo cards        |
-|                                                    |
-+--------------------------------------------------+
-|                                                    |
-|  LIFE SITUATIONS (2-col cards with subtle color)  |
-|  [Arrival]      [Daily Life]                      |
-|  [Leisure]      [Health]                          |
-|  [Family]       [Property]                        |
-|  [Relocation]   [Business]                        |
-|  Each card: icon + title + description + arrow    |
-|  Subtle unique bg color per card (no gradients)   |
-|                                                    |
-+--------------------------------------------------+
-|                                                    |
-|  ALL SERVICES (compact 4-col icon grid)           |
-|  30+ mini-apps as small icon+label tiles          |
-|  Grouped by category with section headers         |
-|  Minimizes scrolling for power users              |
-|                                                    |
-+--------------------------------------------------+
-|                                                    |
-|  SUPPORT BLOCK (unchanged)                        |
-|  WhatsApp + Call CTA                              |
-|                                                    |
-+--------------------------------------------------+
+IntakeItemEditor (маршрутизатор)
+  |
+  |-- vertical = "properties"  --> CanonicalPropertyForm
+  |-- vertical = "products"    --> UnifiedVendorWizard (product mode)
+  |-- vertical = "services"    --> CanonicalListingWizard (service schema)
+  |-- vertical = "experiences" --> CanonicalListingWizard (experience schema)
+  |-- vertical = "yachts"      --> CanonicalListingWizard (yacht schema)
+  |-- ... другие вертикали     --> CanonicalListingWizard / UnifiedVendorWizard
+  |-- fallback (неизвестная)   --> текущий generic редактор (как сейчас)
 ```
 
-## Детали реализации
+## Изменения
 
-### 1. Hero Banner (новый блок)
-- Полноширинный фото-блок с атмосферной картинкой Пхукета
-- Мягкий градиент overlay (from-black/60 to-transparent)
-- Заголовок "Your life, simplified" и подзаголовок
-- Высота: ~200px мобайл, ~280px десктоп
-- Без кнопок — чисто эмоциональный якорь
+### 1. Рефакторинг `IntakeItemEditor` (маршрутизатор форм)
+**Файл:** `src/components/admin/intake/IntakeItemEditor.tsx`
 
-### 2. Featured Strip (новый блок)
-- Горизонтальный скролл с 4-6 фото-карточками топ-сервисов
-- Каждая карточка: 160x200px, фото + название + badge с ценой
-- Сервисы: Experiences, Yachts, Beauty, Transport, Restaurants, Flowers
-- Snap scrolling на мобайле
+- Определить маппинг `detectedVertical` -> компонент формы
+- Для `properties`: открывать `CanonicalPropertyForm` в режиме `admin`, передавая `extractedFields` как `initialData`
+- Для остальных вертикалей: открывать `CanonicalListingWizard` с соответствующей `categorySchema`, передавая extracted данные как начальные значения
+- Оставить текущий generic-редактор как fallback для неизвестных вертикалей
 
-### 3. Life Situations (редизайн)
-- Из плоского списка в 2-колоночную сетку с цветными карточками
-- Каждая карточка получает уникальный мягкий bg (amber-50 для Arrival, sky-50 для Leisure, etc.)
-- Иконка в цветном кружке + заголовок + описание + стрелка
-- Без фото (отличие от Featured Strip — здесь фокус на навигации)
-- Hover: мягкий shadow и приподнятие
+### 2. Маппинг данных Intake -> Canonical форма
+**Новый файл:** `src/components/admin/intake/intakeToCanonicalMapper.ts`
 
-### 4. All Services Grid (новый блок)
-- Компактная сетка 4 колонки всех мини-аппов
-- Маленькие тайлы: иконка 32px + название
-- Группировка по категориям из VERTICAL_GROUPS (Home, Transport, Leisure, etc.)
-- Заголовки секций — мелкий uppercase текст
-- Сворачиваемый блок (по умолчанию показываются первые 2 группы)
+- `mapIntakeToPropertyForm(item: IntakeItem)` -> `CanonicalPropertyFormData`
+- `mapIntakeToListingData(item: IntakeItem)` -> данные для `CanonicalListingWizard`
+- `mapCanonicalToIntakeItem(formData, originalItem)` -> обратный маппинг для сохранения в IntakeItem
 
-### 5. Поиск
-- Остается в хедере через MiniAppLayout (без изменений)
+### 3. Обновление IntakeQueue
+**Файл:** `src/components/admin/intake/IntakeQueue.tsx`
 
-## Технический план
+- Передать в editor необходимые колбэки для сохранения через canonical формы
+- При сохранении из canonical формы - конвертировать обратно в `IntakeItem.extractedFields`
 
-### Файлы:
+## Техническая реализация
 
-1. **`src/pages/Discover.tsx`** — полная переработка:
-   - Убираем плоский список ситуаций
-   - Добавляем 4 секции: Hero, Featured, Situations Grid, All Services
-   - Используем существующие данные из LIFE_CONTEXTS и VERTICAL_GROUPS
-   
-2. **`src/components/discover/DiscoverHero.tsx`** (новый) — атмосферный фото-баннер
+Ключевая логика маршрутизатора:
+```typescript
+// IntakeItemEditor.tsx
+const PROPERTY_VERTICALS = ['properties', 'property', 'real_estate'];
+const LISTING_VERTICALS = ['yachts', 'experiences', 'services', 'restaurants', ...];
 
-3. **`src/components/discover/FeaturedStrip.tsx`** (новый) — горизонтальный скролл фото-карточек
+if (PROPERTY_VERTICALS.includes(item.detectedVertical)) {
+  return <CanonicalPropertyForm 
+    initialData={mapIntakeToPropertyForm(item)} 
+    onSubmit={handlePropertySave}
+    mode="admin" 
+  />;
+}
 
-4. **`src/components/discover/LifeSituationsGrid.tsx`** (новый) — 2-колоночная сетка ситуаций с цветами
+if (LISTING_VERTICALS.includes(item.detectedVertical)) {
+  return <CanonicalListingWizard
+    initialData={mapIntakeToListingData(item)}
+    vertical={item.detectedVertical}
+    onSubmit={handleListingSave}
+  />;
+}
 
-5. **`src/components/discover/AllServicesGrid.tsx`** (новый) — компактная иконочная сетка всех сервисов
+// Fallback: текущий generic editor
+return <GenericIntakeFields ... />;
+```
 
-### Визуальные стандарты:
-- Никаких градиентов на карточках (кроме фото-overlay)
-- rounded-2xl везде
-- Мягкие тени вместо бордеров
-- framer-motion для появления секций (stagger)
-- Семантические токены цветов (bg-amber-50/50, bg-sky-50/50, etc.)
+## Что это даёт
+- Одна и та же форма для объекта при создании собственником, вендором, админом и через AI Intake
+- Все специфичные селекторы (тип недвижимости, карта, фото-загрузчик, ценовые модели) доступны сразу
+- AI заполняет поля, а пользователь дорабатывает в привычном интерфейсе
+- Fallback гарантирует, что новые вертикали не ломают систему
