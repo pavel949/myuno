@@ -23,6 +23,8 @@ interface LifeSituation {
   accentBorder: string;
 }
 
+const ICON_GRADIENT = 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600';
+
 const SITUATIONS: LifeSituation[] = [
   {
     code: 'arrival',
@@ -32,10 +34,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Airport, transport, essentials',
     descRu: 'Аэропорт, трансфер, первый день',
     route: '/life/arrival',
-    bg: 'bg-amber-50 dark:bg-amber-950/30',
-    iconBg: 'bg-gradient-to-br from-amber-400 to-orange-500',
+    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-amber-200/60 dark:border-amber-800/30',
+    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
   },
   {
     code: 'living',
@@ -45,10 +47,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Home, groceries, routines',
     descRu: 'Дом, быт, задачи',
     route: '/life/living',
-    bg: 'bg-violet-50 dark:bg-violet-950/30',
-    iconBg: 'bg-gradient-to-br from-violet-400 to-purple-600',
+    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-violet-200/60 dark:border-violet-800/30',
+    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
   },
   {
     code: 'leisure',
@@ -58,10 +60,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Tours, yachts, activities',
     descRu: 'Туры, яхты, активности',
     route: '/life/leisure',
-    bg: 'bg-sky-50 dark:bg-sky-950/30',
-    iconBg: 'bg-gradient-to-br from-sky-400 to-blue-600',
+    bg: 'bg-cyan-50/50 dark:bg-cyan-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-sky-200/60 dark:border-sky-800/30',
+    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
   },
   {
     code: 'health',
@@ -71,10 +73,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Clinics, insurance, pharmacy',
     descRu: 'Клиники, страховка, аптека',
     route: '/life/health',
-    bg: 'bg-rose-50 dark:bg-rose-950/30',
-    iconBg: 'bg-gradient-to-br from-rose-400 to-red-500',
+    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-rose-200/60 dark:border-rose-800/30',
+    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
   },
   {
     code: 'family',
@@ -84,8 +86,8 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Childcare, schools, activities',
     descRu: 'Няни, школы, занятия',
     route: '/life/family',
-    bg: 'bg-teal-50 dark:bg-teal-950/30',
-    iconBg: 'bg-gradient-to-br from-teal-400 to-emerald-600',
+    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
     accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
   },
@@ -97,10 +99,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Rent, buy, manage',
     descRu: 'Аренда, покупка, управление',
     route: '/life/property',
-    bg: 'bg-indigo-50 dark:bg-indigo-950/30',
-    iconBg: 'bg-gradient-to-br from-indigo-400 to-blue-700',
+    bg: 'bg-cyan-50/50 dark:bg-cyan-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-indigo-200/60 dark:border-indigo-800/30',
+    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
   },
   {
     code: 'relocation',
@@ -110,10 +112,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Visa, banking, legal help',
     descRu: 'Виза, банки, юрист',
     route: '/life/relocation',
-    bg: 'bg-cyan-50 dark:bg-cyan-950/30',
-    iconBg: 'bg-gradient-to-br from-cyan-400 to-blue-500',
+    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
+    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
   },
   {
     code: 'business',
@@ -123,10 +125,10 @@ const SITUATIONS: LifeSituation[] = [
     descEn: 'Coworking, company setup',
     descRu: 'Коворкинг, компания',
     route: '/life/business',
-    bg: 'bg-slate-100/80 dark:bg-slate-950/30',
-    iconBg: 'bg-gradient-to-br from-slate-500 to-slate-700',
+    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-slate-200/60 dark:border-slate-800/30',
+    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
   },
 ];
 

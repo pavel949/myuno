@@ -48,7 +48,7 @@ export const CatalogHeader = memo(function CatalogHeader({
   return (
     <header className={cn(
       // Mobile: sticky top header; Desktop: static sub-header (AppHeader is already sticky above)
-      "z-40 bg-background/95 backdrop-blur-md border-b border-border/50",
+      "z-40 bg-gradient-to-r from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] border-b border-border/50",
       !isDesktop && "sticky top-0",
       className
     )}>
@@ -56,9 +56,9 @@ export const CatalogHeader = memo(function CatalogHeader({
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-3">
         {!isDesktop && <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />}
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold truncate">{title}</h1>
+          <h1 className="text-lg font-bold truncate text-white">{title}</h1>
           {subtitle && (
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
+            <p className="text-xs text-white/70">{subtitle}</p>
           )}
         </div>
         {actions && (
@@ -76,8 +76,8 @@ export const CatalogHeader = memo(function CatalogHeader({
               className={cn(
                 "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
                 selectedCategory === cat.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-secondary text-foreground border-border hover:border-foreground/30"
+                  ? "bg-white text-[hsl(var(--icon-dark))] border-white"
+                  : "bg-white/15 text-white border-white/20 hover:bg-white/25"
               )}
             >
               {cat.label}
