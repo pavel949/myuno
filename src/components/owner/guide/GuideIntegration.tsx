@@ -199,7 +199,7 @@ export function GuideIntegration() {
               <div className="mt-4 p-3 bg-primary/10 rounded-lg">
                 <p className="text-xs text-primary flex items-center gap-1">
                   <Percent className="w-3 h-3" />
-                  {isRu ? 'Средняя заполняемость: 85%' : 'Average occupancy: 85%'}
+                  {isRu ? 'Прозрачная отчётность каждый месяц' : 'Transparent monthly reporting'}
                 </p>
               </div>
             </CardContent>

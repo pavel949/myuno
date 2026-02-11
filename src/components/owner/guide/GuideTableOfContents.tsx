@@ -12,7 +12,7 @@ interface TOCItem {
 const tocItems: TOCItem[] = [
   { id: 'ecosystem', titleRu: 'Что такое myUNO', titleEn: 'What is myUNO', page: 3 },
   { id: 'services', titleRu: 'Все сервисы платформы', titleEn: 'All Platform Services', page: 4 },
-  { id: 'advantages', titleRu: 'Преимущества UNO', titleEn: 'UNO Advantages', page: 5 },
+  { id: 'advantages', titleRu: 'Преимущества myUNO', titleEn: 'myUNO Advantages', page: 5 },
   { id: 'property-care', titleRu: 'UNO Property Care', titleEn: 'UNO Property Care', page: 6 },
   { id: 'dashboard', titleRu: 'Личный кабинет', titleEn: 'Dashboard', page: 7 },
   { id: 'add-property', titleRu: 'Добавление объекта', titleEn: 'Adding a Property', page: 8 },

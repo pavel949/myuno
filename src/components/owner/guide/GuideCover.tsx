@@ -26,8 +26,8 @@ export function GuideCover() {
 
       <p className="text-lg text-muted-foreground max-w-xl mb-12">
         {isRu 
-          ? 'Полное руководство по управлению недвижимостью в экосистеме UNO Property Care'
-          : 'Complete guide to property management in the UNO Property Care ecosystem'
+          ? 'Полное руководство по управлению недвижимостью в экосистеме myUNO'
+          : 'Complete guide to property management in the myUNO ecosystem'
         }
       </p>
 

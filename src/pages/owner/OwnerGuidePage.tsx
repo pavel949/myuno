@@ -44,7 +44,7 @@ export default function OwnerGuidePage() {
                 {isRu ? 'Руководство для владельцев' : 'Owner Guide'}
               </h1>
               <p className="text-xs text-muted-foreground">
-                UNO Property Care v2.0
+                myUNO v2.0
               </p>
             </div>
           </div>
