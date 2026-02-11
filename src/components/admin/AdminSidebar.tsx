@@ -10,7 +10,6 @@ import {
   ChevronDown,
   Bot,
   Inbox,
-  UserPlus,
   Megaphone,
   Building2,
   Target,
@@ -20,6 +19,12 @@ import {
   TrendingUp,
   HardHat,
   Sparkles,
+  Home,
+  Anchor,
+  Car,
+  Flower2,
+  Scissors,
+  Stethoscope,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -61,18 +66,31 @@ const SIDEBAR_GROUPS_KEY = 'myuno_admin_sidebar_groups';
 // Grouped navigation items
 const navigationGroups: NavGroup[] = [
   {
-    id: 'content',
-    title: 'Content',
-    titleRu: 'Контент',
+    id: 'main',
+    title: 'Main',
+    titleRu: 'Главное',
     items: [
       { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
-      { title: 'Create Content', titleRu: 'Создать контент', path: '/admin/vendor-content', icon: UserPlus },
       { title: 'Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
+      { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
+      { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
+    ],
+  },
+  {
+    id: 'verticals',
+    title: 'Verticals',
+    titleRu: 'Вертикали',
+    items: [
+      { title: 'Properties', titleRu: 'Недвижимость', path: '/admin/properties', icon: Home },
+      { title: 'Yachts', titleRu: 'Яхты', path: '/admin/yachts', icon: Anchor },
+      { title: 'Transport', titleRu: 'Транспорт', path: '/admin/transport', icon: Car },
+      { title: 'Flowers', titleRu: 'Цветы', path: '/admin/flowers', icon: Flower2 },
+      { title: 'Beauty', titleRu: 'Красота', path: '/admin/beauty', icon: Scissors },
+      { title: 'Medical', titleRu: 'Медицина', path: '/admin/medical', icon: Stethoscope },
       { title: 'Projects', titleRu: 'Проекты / ЖК', path: '/admin/projects', icon: Building2 },
       { title: 'Investments', titleRu: 'Инвестиции', path: '/admin/investments', icon: TrendingUp },
       { title: 'Developers', titleRu: 'Застройщики', path: '/admin/developers', icon: HardHat },
       { title: 'PM Companies', titleRu: 'УК', path: '/admin/pm-companies', icon: Building },
-      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
     ],
   },
   {
@@ -80,11 +98,10 @@ const navigationGroups: NavGroup[] = [
     title: 'Operations',
     titleRu: 'Операции',
     items: [
-      { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
-      { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
       { title: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot },
       { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
       { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
+      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
     ],
   },
   {
@@ -114,7 +131,7 @@ export function AdminSidebar() {
       if (stored) return JSON.parse(stored);
     } catch {}
     // Default: all groups open
-    return { content: true, operations: true, system: true };
+    return { main: true, verticals: false, operations: true, system: true };
   });
 
   // Save group states to localStorage

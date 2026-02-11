@@ -4,8 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   Plus, UserPlus, FileText, 
-  BarChart3, Users, DollarSign, Ticket,
-  MessageSquare, Package
+  Users, Ticket, Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,19 +13,19 @@ import { cn } from '@/lib/utils';
 // All content creation now flows through: Catalog → Select Provider → ContentCreatorMenu
 const QUICK_ACTIONS = [
   { 
-    id: 'moderation', 
+    id: 'operations', 
     icon: FileText, 
-    label: 'Moderation', 
-    labelRu: 'Модерация', 
-    href: '/admin/moderation',
+    label: 'Operations', 
+    labelRu: 'Операции', 
+    href: '/admin/operations',
     variant: 'primary' as const,
   },
   { 
-    id: 'leads', 
-    icon: MessageSquare, 
-    label: 'Leads', 
-    labelRu: 'Лиды', 
-    href: '/admin/leads',
+    id: 'intake', 
+    icon: Package, 
+    label: 'Intake', 
+    labelRu: 'Приём', 
+    href: '/admin/intake',
     variant: 'primary' as const,
   },
   { 
@@ -35,27 +34,6 @@ const QUICK_ACTIONS = [
     label: 'Add Provider', 
     labelRu: '+ Провайдер', 
     href: '/admin/providers?action=new',
-  },
-  { 
-    id: 'catalog', 
-    icon: Package, 
-    label: 'Catalog', 
-    labelRu: 'Каталог', 
-    href: '/admin/catalog',
-  },
-  { 
-    id: 'analytics', 
-    icon: BarChart3, 
-    label: 'Analytics', 
-    labelRu: 'Аналитика', 
-    href: '/admin/analytics',
-  },
-  { 
-    id: 'finance', 
-    icon: DollarSign, 
-    label: 'Finance', 
-    labelRu: 'Финансы', 
-    href: '/admin/finance',
   },
   { 
     id: 'tickets', 
@@ -86,7 +64,7 @@ export function AdminQuickActionsGrid() {
           {isRu ? 'Быстрые действия' : 'Quick Actions'}
         </h3>
       </div>
-      <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-8 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
           const isPrimary = action.variant === 'primary';

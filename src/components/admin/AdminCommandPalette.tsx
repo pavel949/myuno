@@ -101,13 +101,11 @@ const navigationItems: CommandItem[] = [
   { id: 'operations', titleEn: 'Operations Hub', titleRu: 'Центр операций', path: '/admin/operations', icon: Building2, group: 'navigation', keywords: ['hub', 'center'] },
   
   // Analytics
-  { id: 'analytics', titleEn: 'Analytics Overview', titleRu: 'Обзор аналитики', path: '/admin/analytics', icon: BarChart3, group: 'navigation', keywords: ['stats', 'metrics', 'data'] },
-  { id: 'user-analytics', titleEn: 'User Analytics', titleRu: 'Аналитика пользователей', path: '/admin/user-analytics', icon: Users, group: 'navigation', keywords: ['users', 'behavior'] },
+  { id: 'analytics', titleEn: 'Analytics Overview', titleRu: 'Обзор аналитики', path: '/admin/control', icon: BarChart3, group: 'navigation', keywords: ['stats', 'metrics', 'data'] },
   { id: 'acquisition', titleEn: 'Acquisition Metrics', titleRu: 'Метрики привлечения', path: '/admin/acquisition-metrics', icon: Flag, group: 'navigation', keywords: ['marketing', 'growth'] },
-  { id: 'pitch-deck', titleEn: 'Investor Pitch Deck', titleRu: 'Презентация для инвесторов', path: '/admin/pitch-deck', icon: Presentation, group: 'navigation', keywords: ['investor', 'presentation'] },
   
   // Finance
-  { id: 'finance', titleEn: 'Finance Dashboard', titleRu: 'Финансовая панель', path: '/admin/finance', icon: DollarSign, group: 'navigation', keywords: ['money', 'revenue', 'payments'] },
+  { id: 'finance', titleEn: 'Finance Dashboard', titleRu: 'Финансовая панель', path: '/admin/control', icon: DollarSign, group: 'navigation', keywords: ['money', 'revenue', 'payments'] },
   
   // System
   { id: 'providers', titleEn: 'Providers', titleRu: 'Провайдеры', path: '/admin/providers', icon: Users, group: 'navigation', keywords: ['vendor', 'partner', 'business'] },
