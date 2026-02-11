@@ -314,7 +314,7 @@ export default function AdminProperties() {
 
         {/* Canonical Property Form Sheet */}
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto max-h-screen flex flex-col">
             <SheetHeader>
               <SheetTitle>
                 {editingProperty 
@@ -323,7 +323,7 @@ export default function AdminProperties() {
               </SheetTitle>
             </SheetHeader>
             
-            <div className="mt-6">
+            <div className="mt-6 flex-1 overflow-y-auto min-h-0">
               <CanonicalPropertyForm
                 key={editingProperty?.id || 'new'}
                 initialData={getInitialFormData()}
