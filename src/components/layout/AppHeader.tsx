@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Bell, Home, Compass, ShoppingBag, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,16 +20,25 @@ interface AppHeaderProps {
   className?: string;
 }
 
+const desktopNavItems = [
+  { path: '/', icon: Home, labelEn: 'Home', labelRu: 'Главная', exact: true },
+  { path: '/discover', icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
+  { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
+  { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Мой' },
+];
+
 /**
  * AppHeader — Minimal, calm header
- * No gradient branding, no visual noise
+ * Desktop: includes horizontal nav links
+ * Mobile: logo + utilities only (bottom nav handles navigation)
  */
 export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const { availableRoles } = useUserContext();
+  const isRu = language === 'ru';
 
   return (
     <header
@@ -40,18 +49,40 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
       )}
     >
       <div className="flex items-center justify-between h-12 px-4 max-w-7xl mx-auto">
-        {/* Logo — simple text, no gradients */}
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
           <span className="text-sm text-muted-foreground">my</span>
           <span className="text-base font-semibold text-foreground">UNO</span>
         </Link>
+
+        {/* Desktop navigation — hidden on mobile */}
+        <nav className="hidden md:flex items-center gap-1 ml-8">
+          {desktopNavItems.map(({ path, icon: Icon, labelEn, labelRu, exact }) => (
+            <NavLink
+              key={path}
+              to={path}
+              end={exact}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )
+              }
+            >
+              <Icon className="w-4 h-4" />
+              <span>{isRu ? labelRu : labelEn}</span>
+            </NavLink>
+          ))}
+        </nav>
         
         {title && (
-          <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground">{title}</h1>
+          <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground md:hidden">{title}</h1>
         )}
 
         {/* Right — compact utilities */}
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 ml-auto">
           <LanguageSwitcher size="sm" />
           <div className="hidden sm:block">
             <ThemeSwitcher size="sm" />

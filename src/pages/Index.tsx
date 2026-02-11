@@ -66,60 +66,69 @@ const Index = () => {
       <ActiveSituationBanner />
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 py-5 pb-24 md:pb-8 space-y-6 max-w-lg mx-auto w-full">
+        <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 w-full max-w-7xl mx-auto">
           
-          {/* PWA Install — simplified */}
-          <InstallBanner />
+          {/* Desktop: 2-column grid layout / Mobile: single column */}
+          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+            
+            {/* Left column — primary content (8 cols on desktop) */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* PWA Install — simplified */}
+              <InstallBanner />
 
-          {/* Hero — greeting, location, search, SOS */}
-          <HeroBlock />
+              {/* Hero — greeting, location, search, SOS */}
+              <HeroBlock />
 
-          {/* Persona chips — role selector */}
-          <PersonaChips />
+              {/* Persona chips — role selector */}
+              <PersonaChips />
 
-          {/* Quick Actions — role-adaptive icon row */}
-          <QuickActionsGrid />
+              {/* Quick Actions — role-adaptive icon row */}
+              <QuickActionsGrid />
 
-          {/* Smart Widget — weather, events, recommendations */}
-          <Suspense fallback={null}>
-            <SmartWidget />
-          </Suspense>
+              {/* Explore other verticals */}
+              <Suspense fallback={null}>
+                <HomeExploreSections />
+              </Suspense>
 
-          {/* LifeOS Focus Bar — top-priority active route */}
-          <LifeOSFocusBar />
+              {/* Life situation — contextual, secondary */}
+              {!hasContext && (
+                <Suspense fallback={null}>
+                  <LifeSituationSelector />
+                </Suspense>
+              )}
+            </div>
 
-          {/* When context is active → show status dashboard */}
-          {hasContext && (
-            <Suspense fallback={null}>
-              <LifeOSStatusBlock />
-            </Suspense>
-          )}
+            {/* Right column — widgets & support (4 cols on desktop, stacked below on mobile) */}
+            <div className="lg:col-span-4 space-y-6 mt-6 lg:mt-0">
+              {/* Smart Widget — weather, events, recommendations */}
+              <Suspense fallback={null}>
+                <SmartWidget />
+              </Suspense>
 
+              {/* LifeOS Focus Bar — top-priority active route */}
+              <LifeOSFocusBar />
 
-          {/* Explore other verticals */}
-          <Suspense fallback={null}>
-            <HomeExploreSections />
-          </Suspense>
+              {/* When context is active → show status dashboard */}
+              {hasContext && (
+                <Suspense fallback={null}>
+                  <LifeOSStatusBlock />
+                </Suspense>
+              )}
 
-          {/* Life situation — contextual, secondary */}
-          {!hasContext && (
-            <Suspense fallback={null}>
-              <LifeSituationSelector />
-            </Suspense>
-          )}
+              {/* Emergency Quick Access — always visible */}
+              <EmergencyQuickAccess />
 
-          {/* Emergency Quick Access — always visible */}
-          <EmergencyQuickAccess />
+              {/* Support — always visible */}
+              <Suspense fallback={null}>
+                <ConciergeBanner />
+              </Suspense>
 
-          {/* Support — always visible */}
-          <Suspense fallback={null}>
-            <ConciergeBanner />
-          </Suspense>
-
-          {/* Trust signals — subtle, bottom */}
-          <Suspense fallback={null}>
-            <TrustBanner />
-          </Suspense>
+              {/* Trust signals — subtle, bottom */}
+              <Suspense fallback={null}>
+                <TrustBanner />
+              </Suspense>
+            </div>
+          </div>
 
         </div>
       </PullToRefresh>
