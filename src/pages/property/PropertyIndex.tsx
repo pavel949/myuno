@@ -167,7 +167,7 @@ export default function PropertyIndex() {
   }, [navigate, propertyMode]);
 
   return (
-    <AppLayout showHeader={false} showBottomNav>
+    <AppLayout showHeader={false} showBottomNav showFooter>
       <div className="min-h-screen bg-background pb-24">
         {/* Header */}
         <div className="px-4 pt-3 pb-2">
