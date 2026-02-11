@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote } from 'lucide-react';
+import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote, ArrowLeft } from 'lucide-react';
 import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -16,17 +16,31 @@ import { useProfile } from '@/hooks/useProfile';
 import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { AddressAutocomplete } from '@/components/transport/AddressAutocomplete';
+import { AnimatePresence, motion } from 'framer-motion';
+import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
+import { PriceDisplay } from '@/components/uno/PriceDisplay';
 
 const terminals = [
   { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал' },
   { id: 'international', nameEn: 'International Terminal', nameRu: 'Международный терминал' },
 ];
 
+const transferSteps: BookingStep[] = [
+  { id: 'route', labelEn: 'Route', labelRu: 'Маршрут' },
+  { id: 'vehicle', labelEn: 'Vehicle', labelRu: 'Авто' },
+  { id: 'details', labelEn: 'Details', labelRu: 'Детали' },
+];
+
 type TransferDirection = 'from-airport' | 'to-airport';
 type TransferPaymentMethod = 'stripe' | 'cash' | 'concierge_advance';
+
+const stepVariants = {
+  enter: { opacity: 0, x: 40 },
+  center: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -40 },
+};
 
 export default function AirportTransferBooking() {
   const navigate = useNavigate();
@@ -41,19 +55,20 @@ export default function AirportTransferBooking() {
   const { profile } = useProfile();
   const { latitude, longitude, loading: geoLoading, getPosition, hasLocation, supported: geoSupported } = useGeolocation();
 
-  // Track if user manually edited the meeting sign name
   const meetingSignManuallyEdited = useRef(false);
 
+  const [step, setStep] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
+  const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   
   const [formData, setFormData] = useState({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
     terminal: '',
     destinationAddress: '',
-    selectedDestinationId: '', // ID from transport_destinations
+    selectedDestinationId: '',
     flightNumber: '',
     arrivalDate: '',
     arrivalTime: '',
@@ -68,9 +83,6 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
-  // State for reverse geocoding
-  const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
-
   // Reverse geocode when location is obtained
   useEffect(() => {
     if (hasLocation && latitude && longitude && isReverseGeocoding) {
@@ -84,7 +96,7 @@ export default function AirportTransferBooking() {
           setIsReverseGeocoding(false);
         })
         .catch(() => {
-          setFormData(prev => ({ ...prev, destinationAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+          setFormData(prev => ({ ...prev, destinationAddress: `${latitude!.toFixed(6)}, ${longitude!.toFixed(6)}` }));
           setIsReverseGeocoding(false);
         });
     }
@@ -95,14 +107,12 @@ export default function AirportTransferBooking() {
     getPosition();
   };
 
-  // Set default vehicle type when loaded
   useEffect(() => {
     if (vehicleTypes.length > 0 && !formData.vehicleType) {
       setFormData(prev => ({ ...prev, vehicleType: vehicleTypes[0].id }));
     }
   }, [vehicleTypes, formData.vehicleType]);
 
-  // Prefill contact info from profile
   useEffect(() => {
     if (profile && !formData.name && !formData.phone && !formData.email) {
       const fullName = profile.full_name || '';
@@ -126,17 +136,12 @@ export default function AirportTransferBooking() {
     [destinations, formData.selectedDestinationId]
   );
 
-  // Auto-transliterate name for meeting sign (only if not manually edited)
   useEffect(() => {
     if (!meetingSignManuallyEdited.current && formData.name) {
-      setFormData(prev => ({
-        ...prev,
-        meetingSignName: transliterate(formData.name),
-      }));
+      setFormData(prev => ({ ...prev, meetingSignName: transliterate(formData.name) }));
     }
   }, [formData.name]);
 
-  // Dynamic pricing: destination base_price * vehicle price_multiplier
   const routeBasePrice = selectedDestination?.base_price || 0;
   const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
   const totalPrice = routeBasePrice > 0 
@@ -144,7 +149,21 @@ export default function AirportTransferBooking() {
     : (selectedVehicle?.base_price || 800);
 
   const handleDirectionChange = (dir: TransferDirection) => {
-    setFormData({ ...formData, direction: dir });
+    setFormData(prev => ({ ...prev, direction: dir }));
+  };
+
+  // Step validation
+  const canProceedStep0 = !!(formData.direction && formData.terminal && formData.destinationAddress);
+  const canProceedStep1 = !!formData.vehicleType;
+  const canSubmit = canProceedStep0 && canProceedStep1 &&
+    formData.flightNumber && formData.arrivalDate && formData.arrivalTime && 
+    formData.name && formData.phone;
+
+  const handleNext = () => {
+    if (step < 2) setStep(step + 1);
+  };
+  const handleBack = () => {
+    if (step > 0) setStep(step - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
@@ -218,7 +237,6 @@ export default function AirportTransferBooking() {
       setCreatedOrderId(result.order_id);
       setCreatedOrderNumber(result.order_number || null);
 
-      // Send notifications (non-blocking)
       const pickupAddr = formData.direction === 'from-airport'
         ? `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`
         : formData.destinationAddress;
@@ -250,7 +268,6 @@ export default function AirportTransferBooking() {
         },
       }).catch(err => console.error('[Notify] Transfer notification error:', err));
 
-      // Handle payment based on method
       if (formData.paymentMethod === 'stripe') {
         setIsProcessingPayment(true);
         try {
@@ -282,15 +299,10 @@ export default function AirportTransferBooking() {
           return;
         }
       } else {
-        // Cash or Concierge advance - show success directly
         setIsSuccess(true);
       }
     }
   };
-
-  const canSubmit = formData.direction && formData.terminal && formData.destinationAddress &&
-    formData.flightNumber && formData.arrivalDate && formData.arrivalTime && 
-    formData.passengers && formData.vehicleType;
 
   if (isSuccess) {
     return (
@@ -331,7 +343,6 @@ export default function AirportTransferBooking() {
             </p>
           )}
           
-          {/* Meeting sign name and destination */}
           {formData.direction === 'from-airport' && (
             <div className="w-full max-w-sm p-4 rounded-xl bg-card border border-border/50 mb-4">
               <div className="flex items-center gap-3 mb-3">
@@ -389,170 +400,139 @@ export default function AirportTransferBooking() {
 
   return (
     <AppLayout showBottomNav={false}>
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-background pb-4">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
-        </div>
-        
-        <div className="relative px-4 pt-4">
-          <div className="flex items-center gap-4 mb-4">
-            <button 
-              onClick={() => navigate('/transport')} 
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-background transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="flex-1">
-              <h1 className="text-xl font-display font-bold">
-                {language === 'ru' ? 'Трансфер в/из аэропорта' : 'Airport Transfer'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Phuket International (HKT)
-              </p>
-            </div>
-            <div className="flex items-center gap-1 px-3 py-1.5 bg-gold/10 rounded-full">
-              <Star className="w-4 h-4 text-gold fill-gold" />
-              <span className="text-sm font-semibold text-gold">4.9</span>
-            </div>
+      <div className="px-4 pt-4 pb-2 bg-background border-b border-border/50">
+        <div className="flex items-center gap-3 mb-3">
+          <button 
+            onClick={() => step > 0 ? handleBack() : navigate('/transport')} 
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-lg font-display font-bold">
+              {language === 'ru' ? 'Трансфер' : 'Airport Transfer'}
+            </h1>
+            <p className="text-xs text-muted-foreground">Phuket (HKT)</p>
+          </div>
+          <div className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 rounded-full">
+            <Star className="w-3.5 h-3.5 text-primary fill-primary" />
+            <span className="text-xs font-semibold text-primary">4.9</span>
           </div>
         </div>
+
+        <BookingStepProgress steps={transferSteps} currentStep={step} className="py-2" />
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="px-4 py-4 pb-40">
-          {/* Fast Track Upsell Banner */}
-          <button
-            type="button"
-            onClick={() => navigate('/transport/fast-track')}
-            className="w-full mb-4 p-3.5 rounded-2xl border border-primary/20 bg-primary/5 flex items-center gap-3 text-left hover:bg-primary/10 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Shield className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">
-                {language === 'ru' ? 'Fast Track — без очередей' : 'Fast Track — skip the queues'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {language === 'ru' ? 'Приоритетное прохождение от ฿2,500' : 'Priority processing from ฿2,500'}
-              </p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-primary shrink-0" />
-          </button>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Direction Toggle */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">
-                {language === 'ru' ? 'Направление' : 'Direction'}
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDirectionChange('from-airport')}
-                  className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-left relative",
-                    formData.direction === 'from-airport'
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-card hover:border-primary/50"
-                  )}
-                >
-                  {formData.direction === 'from-airport' && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Plane className="w-4 h-4 text-primary" />
-                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <p className="font-medium text-sm">
-                    {language === 'ru' ? 'Из аэропорта' : 'From Airport'}
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDirectionChange('to-airport')}
-                  className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-left relative",
-                    formData.direction === 'to-airport'
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-card hover:border-primary/50"
-                  )}
-                >
-                  {formData.direction === 'to-airport' && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                    <Plane className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="font-medium text-sm">
-                    {language === 'ru' ? 'В аэропорт' : 'To Airport'}
-                  </p>
-                </button>
-              </div>
-            </div>
-
-            {/* Terminal Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">
-                {language === 'ru' ? 'Терминал' : 'Terminal'}
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                {terminals.map((terminal) => (
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-44">
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div
+              key="step-route"
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.25 }}
+              className="space-y-5"
+            >
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {language === 'ru' ? 'Направление' : 'Direction'}
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
-                    key={terminal.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, terminal: terminal.id })}
+                    onClick={() => handleDirectionChange('from-airport')}
                     className={cn(
-                      "p-3 rounded-xl border-2 transition-all text-center relative",
-                      formData.terminal === terminal.id
+                      "p-3.5 rounded-xl border-2 transition-all text-left relative",
+                      formData.direction === 'from-airport'
                         ? "border-primary bg-primary/10"
                         : "border-border/50 bg-card hover:border-primary/50"
                     )}
                   >
-                    {formData.terminal === terminal.id && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="w-3 h-3 text-primary" />
-                      </div>
+                    {formData.direction === 'from-airport' && (
+                      <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-primary" /></div>
                     )}
-                    <Plane className="w-5 h-5 mb-1 text-primary" />
-                    <p className="font-medium text-xs">
-                      {language === 'ru' ? terminal.nameRu : terminal.nameEn}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Plane className="w-4 h-4 text-primary" />
+                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <p className="font-medium text-sm">
+                      {language === 'ru' ? 'Из аэропорта' : 'From Airport'}
                     </p>
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => handleDirectionChange('to-airport')}
+                    className={cn(
+                      "p-3.5 rounded-xl border-2 transition-all text-left relative",
+                      formData.direction === 'to-airport'
+                        ? "border-primary bg-primary/10"
+                        : "border-border/50 bg-card hover:border-primary/50"
+                    )}
+                  >
+                    {formData.direction === 'to-airport' && (
+                      <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-primary" /></div>
+                    )}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                      <Plane className="w-4 h-4 text-primary" />
+                    </div>
+                    <p className="font-medium text-sm">
+                      {language === 'ru' ? 'В аэропорт' : 'To Airport'}
+                    </p>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Destination Address */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                {formData.direction === 'from-airport'
-                  ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
-                  : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
-              </Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {language === 'ru' ? 'Терминал' : 'Terminal'}
+                </Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {terminals.map((terminal) => (
+                    <button
+                      key={terminal.id}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, terminal: terminal.id }))}
+                      className={cn(
+                        "p-3.5 rounded-xl border-2 transition-all text-center relative",
+                        formData.terminal === terminal.id
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 bg-card hover:border-primary/50"
+                      )}
+                    >
+                      {formData.terminal === terminal.id && (
+                        <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-primary" /></div>
+                      )}
+                      <Plane className="w-5 h-5 mb-1 text-primary mx-auto" />
+                      <p className="font-medium text-xs">
+                        {language === 'ru' ? terminal.nameRu : terminal.nameEn}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              {/* Popular destinations */}
-              {destinations.length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground">
-                    {language === 'ru' ? 'Популярные направления' : 'Popular destinations'}
-                  </p>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 touch-pan-y snap-x scrollbar-hide">
-                    {destinations
-                      .sort((a, b) => (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0))
-                      .map((dest) => {
-                        const destPrice = Math.round(dest.base_price * vehicleMultiplier);
-                        return (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  {formData.direction === 'from-airport'
+                    ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
+                    : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
+                </Label>
+
+                {destinations.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-muted-foreground">
+                      {language === 'ru' ? 'Популярные направления' : 'Popular destinations'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {destinations
+                        .sort((a, b) => (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0))
+                        .map((dest) => (
                           <button
                             key={dest.id}
                             type="button"
@@ -562,185 +542,245 @@ export default function AirportTransferBooking() {
                               destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
                             }))}
                             className={cn(
-                              "flex-shrink-0 px-3 py-2 rounded-xl border-2 transition-all text-left",
+                              "p-3 rounded-xl border-2 transition-all text-left relative",
                               formData.selectedDestinationId === dest.id
                                 ? "border-primary bg-primary/10"
                                 : "border-border/50 bg-card hover:border-primary/30"
                             )}
                           >
-                            <p className="font-medium text-xs whitespace-nowrap">
+                            {formData.selectedDestinationId === dest.id && (
+                              <div className="absolute top-2 right-2"><Check className="w-3 h-3 text-primary" /></div>
+                            )}
+                            <p className="font-medium text-sm mb-1">
                               {language === 'ru' ? dest.name_ru : dest.name_en}
                             </p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] font-semibold text-primary">฿{destPrice.toLocaleString()}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-primary">฿{dest.base_price.toLocaleString()}</span>
                               {dest.duration_minutes && (
                                 <span className="text-[10px] text-muted-foreground">~{dest.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
                               )}
                             </div>
                           </button>
-                        );
-                      })}
+                        ))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <AddressAutocomplete
-                  value={formData.destinationAddress}
-                  onChange={(val) => setFormData({ ...formData, destinationAddress: val, selectedDestinationId: '' })}
-                  placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
-                  className="flex-1"
-                />
-                {geoSupported && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-11 w-11 shrink-0"
-                    onClick={handleUseCurrentLocation}
-                    disabled={geoLoading || isReverseGeocoding}
-                  >
-                    {(geoLoading || isReverseGeocoding) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <LocateFixed className="h-4 w-4" />
-                    )}
-                  </Button>
                 )}
-              </div>
-              {geoSupported && (
-                <button
-                  type="button"
-                  onClick={handleUseCurrentLocation}
-                  disabled={geoLoading || isReverseGeocoding}
-                  className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
-                >
-                  <LocateFixed className="h-3 w-3" />
-                  {language === 'ru' ? 'Использовать моё местоположение' : 'Use my current location'}
-                </button>
-              )}
-            </div>
 
-            {/* Flight Number */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Plane className="w-4 h-4" />
-                {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
-              </Label>
-              <Input
-                value={formData.flightNumber}
-                onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
-                placeholder="TG 925"
-                className="h-11"
-              />
-            </div>
+                <div className="flex gap-2">
+                  <AddressAutocomplete
+                    value={formData.destinationAddress}
+                    onChange={(val) => setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }))}
+                    placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
+                    className="flex-1"
+                  />
+                  {geoSupported && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-11 w-11 shrink-0"
+                      onClick={handleUseCurrentLocation}
+                      disabled={geoLoading || isReverseGeocoding}
+                    >
+                      {(geoLoading || isReverseGeocoding) ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <LocateFixed className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-            {/* Date & Time */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {language === 'ru' ? 'Дата' : 'Date'}
-                </Label>
-                <Input
-                  type="date"
-                  value={formData.arrivalDate}
-                  onChange={(e) => setFormData({ ...formData, arrivalDate: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  {language === 'ru' ? 'Время' : 'Time'}
-                </Label>
-                <Input
-                  type="time"
-                  value={formData.arrivalTime}
-                  onChange={(e) => setFormData({ ...formData, arrivalTime: e.target.value })}
-                  className="h-11"
-                />
-              </div>
-            </div>
+          {step === 1 && (
+            <motion.div
+              key="step-vehicle"
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.25 }}
+              className="space-y-3"
+            >
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru' ? 'Выберите автомобиль' : 'Choose your vehicle'}
+              </p>
 
-            {/* Passengers & Luggage */}
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  {language === 'ru' ? 'Пассажиры' : 'Passengers'}
-                </Label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="8"
-                  value={formData.passengers}
-                  onChange={(e) => setFormData({ ...formData, passengers: e.target.value })}
-                  className="h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" />
-                  {language === 'ru' ? 'Багаж' : 'Luggage'}
-                </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={formData.luggage}
-                  onChange={(e) => setFormData({ ...formData, luggage: e.target.value })}
-                  className="h-11"
-                />
-              </div>
-            </div>
+                {vehicleTypes.map((vehicle) => {
+                  const price = routeBasePrice > 0
+                    ? Math.round(routeBasePrice * vehicle.price_multiplier)
+                    : vehicle.base_price;
+                  const Icon = resolveIcon(vehicle.icon || '🚗');
+                  const isSelected = formData.vehicleType === vehicle.id;
 
-            {/* Vehicle Type - Compact */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">
-                {language === 'ru' ? 'Тип автомобиля' : 'Vehicle Type'}
-              </Label>
-              <div className="flex gap-2 overflow-x-auto pb-1 touch-pan-y snap-x scrollbar-hide">
-                {vehicleTypes
-                  .filter(v => v.max_passengers >= parseInt(formData.passengers))
-                  .map((vehicle) => (
+                  return (
                     <button
                       key={vehicle.id}
                       type="button"
-                      onClick={() => setFormData({ ...formData, vehicleType: vehicle.id })}
+                      onClick={() => setFormData(prev => ({ ...prev, vehicleType: vehicle.id }))}
                       className={cn(
-                        "flex-shrink-0 flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all min-w-[80px]",
-                        formData.vehicleType === vehicle.id
+                        "w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left",
+                        isSelected
                           ? "border-primary bg-primary/10"
-                          : "border-border/50 bg-card"
+                          : "border-border/50 bg-card hover:border-primary/30"
                       )}
                     >
-                      {(() => { const Icon = resolveIcon(vehicle.icon || '🚗'); return <Icon className="w-6 h-6 text-primary" />; })()}
-                      <p className="font-medium text-xs text-center">
-                        {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {language === 'ru' ? `до ${vehicle.max_passengers}` : `up to ${vehicle.max_passengers}`}
-                      </p>
-                      <p className="text-[10px] font-semibold text-primary">
-                        ฿{Math.round((routeBasePrice > 0 ? routeBasePrice : vehicle.base_price) * vehicle.price_multiplier).toLocaleString()}
-                      </p>
+                      <div className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                        isSelected ? "bg-primary/20" : "bg-muted"
+                      )}>
+                        <Icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">
+                          {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'ru' ? `до ${vehicle.max_passengers} пасс.` : `up to ${vehicle.max_passengers} pax`}
+                          {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : 'min'}` : ''}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-bold text-base text-foreground">฿{price.toLocaleString()}</p>
+                      </div>
+                      {isSelected && (
+                        <Check className="w-5 h-5 text-primary shrink-0" />
+                      )}
                     </button>
-                  ))}
+                  );
+                })}
               </div>
-            </div>
+            </motion.div>
+          )}
 
-            {/* Contact Info - Compact */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {language === 'ru' ? 'Контактные данные' : 'Contact Info'}
-              </Label>
+          {step === 2 && (
+            <motion.div
+              key="step-details"
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.25 }}
+              className="space-y-5"
+            >
+              <div className="p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
+                    {formData.direction === 'from-airport' ? (
+                      <><Plane className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><MapPin className="w-3 h-3" /></>
+                    ) : (
+                      <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
+                    )}
+                  </div>
+                  <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedVehicle && (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)}
+                    {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
+                  </p>
+                </div>
+                <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/transport/fast-track')}
+                className="w-full p-3 rounded-xl border border-primary/20 bg-primary/5 flex items-center gap-3 text-left hover:bg-primary/10 transition-colors"
+              >
+                <Shield className="w-5 h-5 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">
+                    {language === 'ru' ? 'Fast Track — без очередей' : 'Fast Track — skip queues'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' ? 'от ฿2,500' : 'from ฿2,500'}
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-primary shrink-0" />
+              </button>
+
               <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Plane className="w-4 h-4" />
+                  {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
+                </Label>
+                <Input
+                  value={formData.flightNumber}
+                  onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
+                  placeholder="TG 925"
+                  className="h-11"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {language === 'ru' ? 'Дата' : 'Date'}
+                  </Label>
+                  <Input
+                    type="date"
+                    value={formData.arrivalDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    {language === 'ru' ? 'Время' : 'Time'}
+                  </Label>
+                  <Input
+                    type="time"
+                    value={formData.arrivalTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, arrivalTime: e.target.value }))}
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    {language === 'ru' ? 'Пассажиры' : 'Passengers'}
+                  </Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="8"
+                    value={formData.passengers}
+                    onChange={(e) => setFormData(prev => ({ ...prev, passengers: e.target.value }))}
+                    className="h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    {language === 'ru' ? 'Багаж' : 'Luggage'}
+                  </Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={formData.luggage}
+                    onChange={(e) => setFormData(prev => ({ ...prev, luggage: e.target.value }))}
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {language === 'ru' ? 'Контакты' : 'Contact Info'}
+                </Label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
                   className="h-11"
                 />
@@ -748,218 +788,152 @@ export default function AirportTransferBooking() {
                   <Input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder={language === 'ru' ? 'Телефон' : 'Phone'}
                     className="h-11"
                   />
                   <Input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder="Email"
                     className="h-11"
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Meeting Sign Name - only for 'from-airport' direction */}
-            {formData.direction === 'from-airport' && (
+              {formData.direction === 'from-airport' && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                  </Label>
+                  <Input
+                    value={formData.meetingSignName}
+                    onChange={(e) => {
+                      meetingSignManuallyEdited.current = true;
+                      setFormData(prev => ({ ...prev, meetingSignName: e.target.value }));
+                    }}
+                    placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : 'In Latin letters'}
+                    className="h-11"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">
-                  {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                  {language === 'ru' ? 'Примечания' : 'Notes'}
                 </Label>
-                <Input
-                  value={formData.meetingSignName}
-                  onChange={(e) => {
-                    meetingSignManuallyEdited.current = true;
-                    setFormData({ ...formData, meetingSignName: e.target.value });
-                  }}
-                  placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : 'In Latin letters'}
-                  className="h-11"
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
+                  className="resize-none"
+                  rows={2}
                 />
               </div>
-            )}
 
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">
-                {language === 'ru' ? 'Примечания' : 'Notes'}
-              </Label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
-                className="resize-none"
-                rows={2}
-              />
-            </div>
-
-            {/* Payment Method Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">
-                {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, paymentMethod: 'stripe' })}
-                  className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-left relative",
-                    formData.paymentMethod === 'stripe'
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-card hover:border-primary/50"
-                  )}
-                >
-                  {formData.paymentMethod === 'stripe' && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-1">
-                    <CreditCard className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="font-medium text-xs">
-                    {language === 'ru' ? 'Картой' : 'Card'}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { key: 'stripe' as const, icon: CreditCard, iconClass: 'text-primary', label: language === 'ru' ? 'Картой' : 'Card', sub: 'Visa, MC' },
+                    { key: 'cash' as const, icon: Banknote, iconClass: 'text-green-600', label: language === 'ru' ? 'Наличные' : 'Cash', sub: language === 'ru' ? 'Водителю' : 'To driver' },
+                    { key: 'concierge_advance' as const, icon: Handshake, iconClass: 'text-amber-500', label: 'myUNO', sub: language === 'ru' ? '0% ком.' : '0% fee' },
+                  ]).map(pm => (
+                    <button
+                      key={pm.key}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, paymentMethod: pm.key }))}
+                      className={cn(
+                        "p-3 rounded-xl border-2 transition-all text-left relative",
+                        formData.paymentMethod === pm.key
+                          ? "border-primary bg-primary/10"
+                          : "border-border/50 bg-card hover:border-primary/50"
+                      )}
+                    >
+                      {formData.paymentMethod === pm.key && (
+                        <div className="absolute top-2 right-2"><Check className="w-3 h-3 text-primary" /></div>
+                      )}
+                      <pm.icon className={cn("w-4 h-4 mb-1", pm.iconClass)} />
+                      <p className="font-medium text-xs">{pm.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{pm.sub}</p>
+                    </button>
+                  ))}
+                </div>
+                {formData.paymentMethod === 'cash' && (
+                  <p className="text-xs text-muted-foreground p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                    {language === 'ru' 
+                      ? 'Оплата наличными водителю при встрече. THB или USD.'
+                      : 'Pay cash to the driver upon meeting. THB or USD.'}
                   </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Visa, MC
+                )}
+                {formData.paymentMethod === 'concierge_advance' && (
+                  <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+                    {language === 'ru' 
+                      ? 'myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
+                      : 'myUNO will pay for your transfer. Return the amount after your trip.'}
                   </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, paymentMethod: 'cash' })}
-                  className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-left relative",
-                    formData.paymentMethod === 'cash'
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-card hover:border-primary/50"
-                  )}
-                >
-                  {formData.paymentMethod === 'cash' && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-1">
-                    <Banknote className="w-4 h-4 text-green-600" />
-                  </div>
-                  <p className="font-medium text-xs">
-                    {language === 'ru' ? 'Наличные' : 'Cash'}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {language === 'ru' ? 'Водителю' : 'To driver'}
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, paymentMethod: 'concierge_advance' })}
-                  className={cn(
-                    "p-3 rounded-xl border-2 transition-all relative",
-                    formData.paymentMethod === 'concierge_advance'
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-card hover:border-primary/50"
-                  )}
-                >
-                  {formData.paymentMethod === 'concierge_advance' && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-1">
-                    <Handshake className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <p className="font-medium text-xs">
-                    myUNO
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {language === 'ru' ? '0% ком.' : '0% fee'}
-                  </p>
-                </button>
+                )}
               </div>
-              {formData.paymentMethod === 'cash' && (
-                <p className="text-xs text-muted-foreground p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                  {language === 'ru' 
-                    ? 'Оплата наличными водителю при встрече. THB или USD.'
-                    : 'Pay cash to the driver upon meeting. THB or USD.'}
-                </p>
-              )}
-              {formData.paymentMethod === 'concierge_advance' && (
-                <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
-                  {language === 'ru' 
-                    ? 'myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
-                    : 'myUNO will pay for your transfer. Return the amount after your trip.'}
-                </p>
-              )}
-            </div>
-          </form>
-        </div>
-      </ScrollArea>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      {/* Fixed Bottom CTA - always visible */}
       <div 
         className="sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/50 z-50"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
       >
         <div className="px-4 pt-3 pb-2">
-          {/* Price summary always visible */}
           <div className="flex items-center justify-between mb-2">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {selectedDestination 
-                  ? (language === 'ru' ? selectedDestination.name_ru : selectedDestination.name_en)
-                  : (language === 'ru' ? 'Стоимость трансфера' : 'Transfer price')}
-                {selectedDestination?.duration_minutes && (
-                  <span className="ml-1">· ~{selectedDestination.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
-                )}
-              </p>
+            <div className="flex-1 min-w-0">
+              {formData.destinationAddress ? (
+                <p className="text-xs text-muted-foreground truncate">
+                  {formData.destinationAddress}
+                  {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
+                </p>
+              )}
               <p className="text-lg font-bold">฿{totalPrice.toLocaleString()}</p>
             </div>
             {selectedVehicle && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs shrink-0 ml-2">
                 {language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en}
               </Badge>
             )}
           </div>
 
-          {!canSubmit && (formData.destinationAddress || formData.flightNumber || formData.terminal) && (
-            <p className="text-[11px] text-destructive text-center mb-1.5">
-              {language === 'ru' 
-                ? `Заполните: ${[
-                    !formData.terminal && 'терминал',
-                    !formData.destinationAddress && 'адрес',
-                    !formData.flightNumber && 'рейс',
-                    !formData.arrivalDate && 'дата',
-                    !formData.arrivalTime && 'время',
-                    !formData.vehicleType && 'авто',
-                  ].filter(Boolean).join(', ')}`
-                : `Missing: ${[
-                    !formData.terminal && 'terminal',
-                    !formData.destinationAddress && 'address',
-                    !formData.flightNumber && 'flight',
-                    !formData.arrivalDate && 'date',
-                    !formData.arrivalTime && 'time',
-                    !formData.vehicleType && 'vehicle',
-                  ].filter(Boolean).join(', ')}`}
-            </p>
+          {step < 2 ? (
+            <Button
+              type="button"
+              className="w-full h-12 text-base font-semibold"
+              disabled={step === 0 ? !canProceedStep0 : !canProceedStep1}
+              onClick={handleNext}
+            >
+              {language === 'ru' ? 'Далее' : 'Continue'}
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="w-full h-12 text-base font-semibold"
+              disabled={isCreating || isProcessingPayment || !canSubmit}
+              onClick={handleSubmit}
+            >
+              {isCreating || isProcessingPayment
+                ? (language === 'ru' ? 'Обработка...' : 'Processing...') 
+                : formData.paymentMethod === 'stripe'
+                  ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
+                  : formData.paymentMethod === 'cash'
+                    ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
+                    : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`)}
+            </Button>
           )}
-
-          <Button
-            type="button"
-            className="w-full h-12 text-base font-semibold"
-            disabled={isCreating || isProcessingPayment || !canSubmit || !formData.name || !formData.phone}
-            onClick={handleSubmit}
-          >
-            {isCreating || isProcessingPayment
-              ? (language === 'ru' ? 'Обработка...' : 'Processing...') 
-              : canSubmit
-                ? (formData.paymentMethod === 'stripe'
-                    ? (language === 'ru' ? `Оплатить ฿${totalPrice.toLocaleString()}` : `Pay ฿${totalPrice.toLocaleString()}`)
-                    : formData.paymentMethod === 'cash'
-                      ? (language === 'ru' ? `Забронировать • наличные ฿${totalPrice.toLocaleString()}` : `Book • Cash ฿${totalPrice.toLocaleString()}`)
-                      : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`))
-                : (language === 'ru' ? 'Заполните форму' : 'Complete the form')}
-          </Button>
         </div>
       </div>
     </AppLayout>
