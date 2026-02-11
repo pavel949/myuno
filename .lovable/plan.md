@@ -1,125 +1,98 @@
 
-# Desktop UX Overhaul — Airbnb-Level Professional Design
 
-## Текущая проблема
+# Desktop UX/UI Normalization — Full Audit & Fix Plan
 
-Сейчас десктопная версия выглядит как увеличенная мобильная: мелкие карточки, много пустого пространства, визуально бедно. Нет ощущения "настоящего" веб-приложения.
+## Выявленные проблемы
 
-## Референс: Airbnb Desktop
+### 1. Header отсутствует на 20+ страницах
+Большинство mini-app страниц (Experiences, Transport, Yachts, Beauty, Medical, Insurance, Cleaning, Events, Education, Flowers, Pets, Legal, Fitness, Pharmacy, Market, Property Search и др.) используют `showHeader={false}`, заменяя глобальный AppHeader на локальный CatalogHeader. На мобильном это работает, но на десктопе пользователь теряет глобальную навигацию, поиск и утилиты (язык, валюта, корзина, профиль).
 
-Ключевые принципы, которые делают Airbnb профессиональным:
+### 2. Footer отсутствует почти везде
+Только Index и PropertyIndex передают `showFooter`. Остальные 20+ страниц не имеют футера вообще — на десктопе это создает ощущение незавершенности.
 
-1. **Полноширинный контент** — карточки занимают всю ширину, контент дышит
-2. **Крупная поисковая строка** в центре header — главный элемент
-3. **Горизонтальные карусели** с большими фото-карточками
-4. **Четкая визуальная иерархия** — крупные заголовки секций, много воздуха
-5. **Минимализм навигации** — header + контент, никаких sidebar-ов
-6. **Карточки с фотографиями** вместо текстовых списков
+### 3. Контрастность текста
+- `--muted-foreground` в light mode: `220 10% 46%` — это серый ~46% lightness на почти белом фоне (~98% lightness). Разница всего ~52%, что ниже рекомендуемого WCAG AA для мелкого текста.
+- Много текста использует `text-muted-foreground` для важной информации (subtitles, labels, descriptions).
+- В dark mode: `220 6% 56%` — тоже слабый контраст на фоне `220 12% 6%`.
 
-## План изменений
+### 4. Элементы домашней страницы на десктопе
+- Emergency cards слишком мелкие (w-7 h-7 icons, text-[11px])
+- SmartWidget нагружен деталями, но визуально тесный
+- Секции выглядят разрозненно без визуальной иерархии
 
-### 1. Header — центрированный поиск (как Airbnb)
+## План исправлений
 
-На десктопе поиск переедет в центр header, станет крупнее и заметнее с сегментами "Where / When / Who":
+### Фаза 1: Header и Footer на всех страницах (глобально)
 
-```text
-[myUNO]  [Home  Discover  Market  Me]  [Where | When | Who 🔍]  [🌐 🛒 👤]
-```
+**Файл: `src/components/layout/AppLayout.tsx`**
 
-**Файл**: `src/components/layout/AppHeader.tsx`
-- Расширить поиск из HeroBlock в header на десктопе
-- Убрать дублирование поиска на главной (на desktop он будет только в header)
+Изменить дефолт `showFooter` с `false` на `true` для десктопа. На десктопе (lg+) footer всегда рендерится. Также на десктопе всегда показывать AppHeader, даже когда `showHeader={false}` — mini-app CatalogHeader будет рендериться ПОД ним.
 
-### 2. Hero Block — десктопная адаптация
+Логика:
+- Добавить `useIsDesktop()` хук
+- На десктопе: AppHeader рендерится ВСЕГДА, Footer рендерится ВСЕГДА
+- На мобильном: поведение не меняется (showHeader/showFooter работают как раньше)
+- CatalogHeader на десктопе теряет BackButton (навигация уже в AppHeader), но сохраняет заголовок и фильтры
 
-На десктопе HeroBlock трансформируется: приветствие становится крупным (text-3xl), поисковая строка скрывается (она уже в header), добавляется визуальный акцент.
+**Файл: `src/components/shared/CatalogHeader.tsx`**
 
-**Файл**: `src/components/home/HeroBlock.tsx`
-- Desktop: крупный greeting без поиска (поиск в header)
-- Mobile: без изменений
+На десктопе (lg+): скрыть BackButton, убрать `sticky top-0` (т.к. AppHeader уже sticky), добавить отступ сверху. Заголовок и категории остаются.
 
-### 3. Quick Actions — горизонтальная полоса на всю ширину
+### Фаза 2: Контрастность текста
 
-Вместо 4-колоночной сетки на десктопе — одна полноширинная строка из 8 иконок в формате Airbnb categories (горизонтальный скролл-ribbon):
+**Файл: `src/index.css`**
 
-**Файл**: `src/components/home/QuickActionsGrid.tsx`
-- Desktop: `flex` в одну строку, увеличенные иконки (64x64), подписи text-xs
-- Mobile: без изменений (4-col grid)
+Light mode:
+- `--muted-foreground`: с `220 10% 46%` на `220 12% 38%` — темнее на 8 пунктов, проходит WCAG AA
+- `--border`: с `40 10% 88%` на `40 10% 82%` — чуть заметнее для разделителей
 
-### 4. Explore Sections — карточки с фотографиями в grid
+Dark mode:
+- `--muted-foreground`: с `220 6% 56%` на `220 8% 64%` — светлее, лучше читается на темном фоне
+- `--border`: с `220 8% 18%` на `220 8% 22%` — чуть заметнее
 
-Главное визуальное изменение: вместо текстовых списков (icon + text) — карточки в 3-4 колонки с фоновыми изображениями, как у Airbnb:
+### Фаза 3: Нормализация десктопных элементов Home
 
-```text
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│  [photo bg]  │ │  [photo bg]  │ │  [photo bg]  │ │  [photo bg]  │
-│              │ │              │ │              │ │              │
-│  Things to do│ │  Transport   │ │  Yachts      │ │  Beauty      │
-│  Tours, ...  │ │  Cars, ...   │ │  Day trips   │ │  Salons, ... │
-└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
-```
+**Файл: `src/components/home/EmergencyQuickAccess.tsx`**
+- На десктопе: увеличить иконки (lg:w-10 lg:h-10), текст (lg:text-sm), padding (lg:p-4)
+- Добавить hover-эффекты для десктопа
 
-**Файл**: `src/components/home/HomeExploreSections.tsx`
-- Desktop (lg+): 3- или 4-колоночная grid с aspect-ratio карточками, фоновые gradient overlays
-- Mobile: текущий компактный формат без изменений
+**Файл: `src/components/home/SmartWidget.tsx`**
+- На десктопе: увеличить padding (lg:p-4), размер шрифтов (lg:text-base для temp, lg:text-sm для labels)
 
-### 5. Index Layout — убрать тесноту
+**Файл: `src/components/home/QuickActionsGrid.tsx`**
+- Убрать обрезанный вид на 8 элементах — на десктопе все элементы равномерно распределены
+- Увеличить label до lg:text-sm
 
-Правая колонка (4/12) слишком узкая. Контент перераспределится:
+**Файл: `src/components/home/HomeExploreSections.tsx`**
+- Увеличить gap между фото-карточками (lg:gap-5)
+- Добавить hover-scale для карточек
 
-```text
-Desktop layout:
-┌───────────────────────────────────────────────────────────┐
-│  Header: [myUNO] [Nav] [Search bar] [Utils]               │
-├───────────────────────────────────────────────────────────┤
-│  Greeting (large)        │  Weather widget (compact)      │
-│  Persona chips           │                                │
-│  Quick Actions (full-width ribbon)                        │
-├───────────────────────────────────────────────────────────┤
-│  Explore (4-col photo grid)                               │
-├───────────────────────────────────────────────────────────┤
-│  Services (3-col)   │  LifeOS Focus  │  Emergency         │
-├───────────────────────────────────────────────────────────┤
-│  Footer                                                   │
-└───────────────────────────────────────────────────────────┘
-```
+**Файл: `src/components/layout/CompactFooter.tsx`**
+- На десктопе: горизонтальная раскладка (соц.ссылки | навигация | копирайт в одну строку)
+- Убрать `pb-20` (bottom nav padding) на десктопе — уже есть `md:pb-0`
 
-**Файл**: `src/pages/Index.tsx`
-- Quick Actions и Explore — полноширинные (12 cols) на десктопе
-- Вторичный контент (Emergency, LifeOS, Support) — 3-колоночная grid внизу
-- Погода интегрируется рядом с greeting вместо отдельной колонки
+### Фаза 4: Типографика десктопа
 
-### 6. Typography — масштаб для десктопа
-
-Заголовки секций увеличатся на десктопе:
-- Greeting: `text-xl` -> `lg:text-3xl`
-- Section headers: `text-xs uppercase` -> `lg:text-lg font-semibold`  (нормальный регистр)
-- Body: останется `text-sm`
-
-Затронутые файлы: `HeroBlock.tsx`, `HomeExploreSections.tsx`, `EmergencyQuickAccess.tsx`
-
-### 7. SmartWidget — горизонтальный на десктопе
-
-Вместо вертикальной карточки в узкой колонке — компактная горизонтальная полоса рядом с greeting:
-
-**Файл**: `src/components/home/SmartWidget.tsx`
-- Desktop: inline рядом с hero, горизонтальный формат
-- Mobile: без изменений
+**Файл: `src/index.css`**
+- h1 на десктопе: `lg:text-3xl` (уже есть в md:text-3xl)
+- Body text: убедиться, что `text-sm` масштабируется до `lg:text-base` в основных блоках
 
 ## Затрагиваемые файлы
 
-| Файл | Тип изменения |
-|------|--------------|
-| `src/components/layout/AppHeader.tsx` | Центрированный поиск на desktop |
-| `src/components/home/HeroBlock.tsx` | Крупный greeting, скрыть search на lg |
-| `src/components/home/QuickActionsGrid.tsx` | Полноширинная полоса на desktop |
-| `src/components/home/HomeExploreSections.tsx` | Фото-карточки в 3-4 col grid |
-| `src/pages/Index.tsx` | Новый layout: full-width секции |
-| `src/components/home/SmartWidget.tsx` | Горизонтальный формат на desktop |
-| `src/components/home/EmergencyQuickAccess.tsx` | Desktop typography |
+| Файл | Изменение |
+|------|-----------|
+| `src/components/layout/AppLayout.tsx` | Desktop: всегда рендерить header + footer |
+| `src/components/shared/CatalogHeader.tsx` | Desktop: убрать sticky/BackButton, стать sub-header |
+| `src/index.css` | Контрастность: muted-foreground, border |
+| `src/components/home/EmergencyQuickAccess.tsx` | Desktop: увеличить элементы |
+| `src/components/home/SmartWidget.tsx` | Desktop: увеличить spacing |
+| `src/components/home/QuickActionsGrid.tsx` | Desktop: нормализовать ribbon |
+| `src/components/home/HomeExploreSections.tsx` | Desktop: увеличить gap, hover |
+| `src/components/layout/CompactFooter.tsx` | Desktop: горизонтальный layout |
 
 ## Не затрагивается
 
-- Мобильная версия — все изменения через responsive breakpoints (lg:)
-- Бренд-бук и дизайн-токены — соблюдаются
+- Мобильная версия — все через `lg:` breakpoints
 - Backend / данные — только UI
+- Дизайн-токены бренда — соблюдаются (цвета primary остаются)
+
