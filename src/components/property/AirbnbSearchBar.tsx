@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { differenceInDays } from 'date-fns';
 import { createPortal } from 'react-dom';
-import { Search, MapPin, Globe, X, Minus, Plus, Check } from 'lucide-react';
+import { Search, MapPin, Globe, X, Minus, Plus, Check, Bed } from 'lucide-react';
 import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ export interface SearchParams {
   checkIn: Date | undefined;
   checkOut: Date | undefined;
   guests: number;
+  bedrooms: string[];
 }
 
 // Locations are now loaded dynamically from the database via usePropertyQuickFilters
@@ -34,7 +35,16 @@ const flexibleDates = [
   { id: 'month', labelEn: 'Month', labelRu: 'Месяц', getDates: () => ({ from: new Date(), to: addMonths(new Date(), 1) }) },
 ];
 
-type MobileTab = 'location' | 'dates' | 'guests';
+type MobileTab = 'location' | 'dates' | 'bedrooms' | 'guests';
+
+const BEDROOM_OPTIONS = [
+  { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+  { id: '1', labelEn: '1', labelRu: '1' },
+  { id: '2', labelEn: '2', labelRu: '2' },
+  { id: '3', labelEn: '3', labelRu: '3' },
+  { id: '4', labelEn: '4', labelRu: '4' },
+  { id: '5+', labelEn: '5+', labelRu: '5+' },
+];
 
 export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const { language } = useLanguage();
@@ -53,6 +63,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const [checkOut, setCheckOut] = useState<Date | undefined>();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
 
   const totalGuests = adults + children;
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
@@ -70,7 +81,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   }, [isOpen]);
 
   const handleSearch = () => {
-    onSearch({ locations: selectedLocations, checkIn, checkOut, guests: totalGuests });
+    onSearch({ locations: selectedLocations, checkIn, checkOut, guests: totalGuests, bedrooms: selectedBedrooms });
     setActiveField(null);
     setIsOpen(false);
   };
@@ -81,6 +92,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
     setCheckOut(undefined);
     setAdults(2);
     setChildren(0);
+    setSelectedBedrooms([]);
   };
 
   const toggleLocation = (locId: string) => {
@@ -114,8 +126,23 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
   const goToNextTab = () => {
     if (mobileTab === 'location') setMobileTab('dates');
-    else if (mobileTab === 'dates') setMobileTab('guests');
+    else if (mobileTab === 'dates') setMobileTab('bedrooms');
+    else if (mobileTab === 'bedrooms') setMobileTab('guests');
   };
+
+  const toggleBedroom = (id: string) => {
+    setSelectedBedrooms(prev =>
+      prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
+    );
+  };
+
+  const bedroomLabel = selectedBedrooms.length === 0
+    ? (language === 'ru' ? 'Спальни' : 'Bedrooms')
+    : selectedBedrooms.length === 1
+      ? (selectedBedrooms[0] === 'studio' 
+          ? (language === 'ru' ? 'Студия' : 'Studio')
+          : `${selectedBedrooms[0]} ${language === 'ru' ? 'сп.' : 'bed'}`)
+      : `${selectedBedrooms.length} ${language === 'ru' ? 'выбрано' : 'selected'}`;
 
   const GuestCounter = ({ label, sublabel, value, onChange, min = 0, max = 16 }: {
     label: string;
@@ -209,11 +236,11 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                   
                   {/* Tab Navigation */}
                   <div className="flex px-4 gap-1">
-                    {(['location', 'dates', 'guests'] as MobileTab[]).map((tab) => (
+                    {(['location', 'dates', 'bedrooms', 'guests'] as MobileTab[]).map((tab) => (
                       <button
                         key={tab}
                         className={cn(
-                          "flex-1 py-3 text-sm font-medium text-center border-b-2 transition-colors",
+                          "flex-1 py-3 text-xs font-medium text-center border-b-2 transition-colors",
                           mobileTab === tab 
                             ? "border-primary text-primary" 
                             : "border-transparent text-muted-foreground"
@@ -222,6 +249,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       >
                         {tab === 'location' && (language === 'ru' ? 'Куда' : 'Where')}
                         {tab === 'dates' && (language === 'ru' ? 'Когда' : 'When')}
+                        {tab === 'bedrooms' && (language === 'ru' ? 'Спальни' : 'Beds')}
                         {tab === 'guests' && (language === 'ru' ? 'Кто' : 'Who')}
                       </button>
                     ))}
@@ -362,6 +390,39 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                           hintId="search-dates-to-guests"
                           className="self-center w-fit mx-auto"
                         />
+                      </div>
+                    )}
+
+                    {/* Bedrooms Tab */}
+                    {mobileTab === 'bedrooms' && (
+                      <div className="p-4 space-y-4">
+                        <h3 className="text-xl font-bold">{language === 'ru' ? 'Сколько спален?' : 'How many bedrooms?'}</h3>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          {BEDROOM_OPTIONS.map((option) => (
+                            <button
+                              key={option.id}
+                              onClick={() => toggleBedroom(option.id)}
+                              className={cn(
+                                "py-3 px-2 rounded-xl text-sm font-medium transition-all border text-center",
+                                selectedBedrooms.includes(option.id)
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "border-border hover:border-primary/40 bg-card"
+                              )}
+                            >
+                              {language === 'ru' ? option.labelRu : option.labelEn}
+                            </button>
+                          ))}
+                        </div>
+
+                        {selectedBedrooms.length > 0 && (
+                          <button
+                            onClick={() => setSelectedBedrooms([])}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            {language === 'ru' ? 'Сбросить' : 'Clear'}
+                          </button>
+                        )}
                       </div>
                     )}
 
@@ -585,6 +646,53 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           </Popover>
 
           <div className="w-px h-8 bg-border" />
+
+          {/* Bedrooms (Desktop) */}
+          <Popover open={activeField === 'bedrooms'} onOpenChange={(open) => setActiveField(open ? 'bedrooms' : null)}>
+            <PopoverTrigger asChild>
+              <button 
+                className={cn(
+                  "px-5 py-4 text-left transition-all",
+                  activeField === 'bedrooms' 
+                    ? "bg-card shadow-lg rounded-full" 
+                    : activeField 
+                      ? "bg-muted/30 hover:bg-muted/50" 
+                      : "hover:bg-muted/50"
+                )}
+              >
+                <p className="text-xs font-semibold">{language === 'ru' ? 'Спальни' : 'Beds'}</p>
+                <p className={cn("text-sm", selectedBedrooms.length === 0 ? "text-muted-foreground" : "font-medium")}>
+                  {bedroomLabel}
+                </p>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-3" align="center" sideOffset={8}>
+              <div className="grid grid-cols-3 gap-1.5">
+                {BEDROOM_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => toggleBedroom(option.id)}
+                    className={cn(
+                      "py-2 px-2 rounded-lg text-sm font-medium transition-colors text-center",
+                      selectedBedrooms.includes(option.id)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/50 hover:bg-muted text-foreground"
+                    )}
+                  >
+                    {language === 'ru' ? option.labelRu : option.labelEn}
+                  </button>
+                ))}
+              </div>
+              {selectedBedrooms.length > 0 && (
+                <button
+                  onClick={() => setSelectedBedrooms([])}
+                  className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground text-center py-1"
+                >
+                  {language === 'ru' ? 'Сбросить' : 'Clear'}
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
 
           {/* Guests */}
           <Popover open={activeField === 'guests'} onOpenChange={(open) => setActiveField(open ? 'guests' : null)}>
