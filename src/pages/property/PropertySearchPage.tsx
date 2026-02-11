@@ -48,11 +48,13 @@ export default function PropertySearchPage() {
     const checkInStr = searchParamsUrl.get('checkIn');
     const checkOutStr = searchParamsUrl.get('checkOut');
     const guestsStr = searchParamsUrl.get('guests');
+    const bedroomsStr = searchParamsUrl.get('bedrooms');
     return {
       locations: searchParamsUrl.get('district') ? [searchParamsUrl.get('district')!] : [],
       checkIn: checkInStr ? new Date(checkInStr) : undefined,
       checkOut: checkOutStr ? new Date(checkOutStr) : undefined,
       guests: guestsStr ? parseInt(guestsStr, 10) : 2,
+      bedrooms: bedroomsStr ? bedroomsStr.split(',') : [],
     };
   });
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -62,7 +64,9 @@ export default function PropertySearchPage() {
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>(
     searchParamsUrl.get('district') ? [searchParamsUrl.get('district')!] : []
   );
-  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>(
+    searchParamsUrl.get('bedrooms') ? searchParamsUrl.get('bedrooms')!.split(',') : []
+  );
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(

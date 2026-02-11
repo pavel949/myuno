@@ -242,6 +242,7 @@ export default function PropertyIndex() {
               if (params.checkIn) qp.set('checkIn', params.checkIn.toISOString());
               if (params.checkOut) qp.set('checkOut', params.checkOut.toISOString());
               if (params.guests) qp.set('guests', String(params.guests));
+              if (params.bedrooms.length > 0) qp.set('bedrooms', params.bedrooms.join(','));
               qp.set('mode', propertyMode);
               navigate(`/property/search?${qp.toString()}`);
             }}

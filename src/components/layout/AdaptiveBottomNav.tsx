@@ -97,6 +97,7 @@ const routesWithOwnBottomBar = [
   '/experience/',
   '/babysitter/',
   '/transfer/',
+  '/transport/',
   '/service/',
 ];
 
