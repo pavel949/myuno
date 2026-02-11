@@ -1,42 +1,41 @@
 
-# Add Property Specs to Property Profile (Source)
 
-## Problem
-The search ribbon has 11 category filters (beachfront, walk to beach, sea view, private pool, pool, washer, pets, kids, parking, wifi, luxury), but properties have empty `highlights` arrays. Owners have no way to tag these specs when adding a property.
+## Проблема
 
-## Solution
-Add a "Property Features" card to the Add Property wizard that lets owners toggle the same categories used in the search ribbon. This ensures the filter data comes from the source.
+На странице `/property` кнопка **«Фильтры»** вместо открытия панели фильтров перенаправляет на `/property/search`, где есть свои собственные фильтры. Это создает:
+- Неожиданную навигацию (пользователь теряет контекст)
+- Дублирование фильтров на двух страницах
 
-## Changes
+## Решение
 
-### 1. Add `highlights` field to `PropertyFormData`
-**File**: `src/hooks/usePropertyWizard.ts`
-- Add `highlights: string[]` to `PropertyFormData` interface
-- Add default `highlights: []` to initial form state
-- Include `highlights` in the submit payload sent to the database
+Заменить навигацию на встроенную панель фильтров прямо на странице `/property`, используя тот же компонент `UniversalFilter`, что уже работает на `/property/search`.
 
-### 2. Create a reusable `PropertyFeaturesSelector` component
-**File**: `src/components/owner/property-wizard/PropertyFeaturesSelector.tsx` (new)
-- Import `PROPERTY_CATEGORIES` from the ribbon file so the IDs are always in sync
-- Render a grid of tappable chips/badges with icons matching the ribbon
-- Toggle on/off, store selected IDs in `highlights` array
-- Limit to 6 max (same as existing HighlightsSection)
+## Изменения
 
-### 3. Add the selector to BasicInfoStep
-**File**: `src/components/owner/property-wizard/steps/BasicInfoStep.tsx`
-- Add a new Card section titled "Property Features" / "Особенности" after the Basic Information card (before Management Type)
-- Use `PropertyFeaturesSelector` passing `formData.highlights` and `updateFormData`
+### Файл: `src/pages/property/PropertyIndex.tsx`
 
-### 4. Reuse in property-manage HighlightsSection
-**File**: `src/components/owner/property-manage/HighlightsSection.tsx`
-- Replace the current `usePropertyQuickFilters` dependency with `PROPERTY_CATEGORIES` from the ribbon
-- This ensures the manage page and wizard use the exact same list
+1. **Импортировать** `UniversalFilter`, `FilterValues`, `usePropertyFilterOptions` и утилиту нормализации фильтров
+2. **Добавить состояние** `filterValues` для хранения выбранных фильтров
+3. **Заменить кнопку «Фильтры»** (строки 166-173): вместо `navigate('/property/search')` обернуть кнопку в `UniversalFilter` как триггер (аналогично PropertySearchPage, строки 301-317)
+4. **Применить фильтры к списку** — добавить фильтрацию `filteredProperties` по значениям из `filterValues` (район, удобства, спальни, тип)
+5. **Показать счетчик активных фильтров** на кнопке и добавить кнопку сброса
 
-## Technical Details
+### Визуальный результат
 
-### Data flow
-- Owner toggles "Walk to Beach" in wizard -> stored as `["walk_to_beach"]` in `highlights` column
-- Search ribbon filter for "Walk" -> `matchesCategory()` checks `highlights` array for `walk_to_beach` -> match
+```text
+┌─────────────────────────────────┐
+│ ← [  Поиск жилья...  ] Аренда  │
+│─────────────────────────────────│
+│ 🏠 Villa  🏢 Condo  ... [⚙ Фильтры (2)] │  <-- кнопка открывает
+│─────────────────────────────────│         панель, а не уходит
+│  Карточки недвижимости          │         на другую страницу
+└─────────────────────────────────┘
+```
 
-### No database changes needed
-The `highlights` column already exists as a text array on the `properties` table.
+### Технические детали
+
+- Компонент `UniversalFilter` уже поддерживает работу как popover/sheet — принимает `children` как триггер
+- `usePropertyFilterOptions()` уже возвращает `filterConfig` с секциями: тип, спальни, район, удобства
+- Фильтрация будет применяться локально к уже загруженным данным (как на SearchPage)
+- Никаких новых зависимостей не требуется
+
