@@ -311,12 +311,12 @@ export default function AdminYachts() {
             <div className="flex items-center gap-4">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Select value={filterProviderId} onValueChange={setFilterProviderId}>
+                <Select value={filterProviderId || 'all'} onValueChange={(v) => setFilterProviderId(v === 'all' ? '' : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder={isRussian ? 'Все провайдеры' : 'All providers'} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{isRussian ? 'Все провайдеры' : 'All providers'}</SelectItem>
+                    <SelectItem value="all">{isRussian ? 'Все провайдеры' : 'All providers'}</SelectItem>
                     {/* Provider list will be populated from the selector */}
                   </SelectContent>
                 </Select>
