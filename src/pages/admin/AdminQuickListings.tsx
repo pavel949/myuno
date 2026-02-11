@@ -9,7 +9,7 @@ import { getCurrencySymbol } from '@/lib/config/currencies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -190,7 +190,7 @@ export default function AdminQuickListings() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <div className="p-4 space-y-4">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-10 w-full" />
@@ -200,14 +200,14 @@ export default function AdminQuickListings() {
             ))}
           </div>
         </div>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <AppLayout showHeader={false} showBottomNav={false}>
+    <>
       <PageHeader 
         title={language === 'ru' ? 'Быстрые заявки' : 'Quick Listings'}
         showBack
@@ -453,6 +453,6 @@ export default function AdminQuickListings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </>
   );
 }

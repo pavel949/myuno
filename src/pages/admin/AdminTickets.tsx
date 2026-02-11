@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,16 +39,16 @@ export default function AdminTickets() {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <LoadingSpinner />
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title="Тикеты поддержки"
@@ -248,6 +248,6 @@ export default function AdminTickets() {
           </CardContent>
         </Card>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

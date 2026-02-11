@@ -6,7 +6,7 @@ import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminRestaurants } from '@/hooks/useAdminContent';
 import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
@@ -270,21 +270,21 @@ export default function AdminRestaurants() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title={isRussian ? 'Управление ресторанами' : 'Restaurant Management'}
@@ -459,6 +459,6 @@ export default function AdminRestaurants() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

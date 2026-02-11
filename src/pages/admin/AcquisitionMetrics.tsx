@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useAcquisitionMetrics, useAirbnbMetrics } from "@/hooks/useAcquisitionMetrics";
-import { AppLayout } from "@/components/layout/AppLayout";
+
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,11 +43,11 @@ export default function AcquisitionMetrics() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <Skeleton className="h-96" />
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
@@ -87,7 +87,7 @@ export default function AcquisitionMetrics() {
   }));
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader title="M&A Acquisition Metrics" />
         
@@ -556,6 +556,6 @@ export default function AcquisitionMetrics() {
           </TabsContent>
         </Tabs>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminGyms } from '@/hooks/useAdminContent';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
@@ -145,11 +145,11 @@ export default function AdminGyms() {
     } catch { toast.error(isRussian ? 'Ошибка' : 'Error'); }
   };
 
-  if (authLoading || adminLoading) return <AppLayout><PageContainer><Skeleton className="h-48" /></PageContainer></AppLayout>;
+  if (authLoading || adminLoading) return <><PageContainer><Skeleton className="h-48" /></PageContainer></>;
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader title={isRussian ? 'Управление залами' : 'Gym Management'} showBack />
         <Button className="w-full mb-4" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
@@ -250,6 +250,6 @@ export default function AdminGyms() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

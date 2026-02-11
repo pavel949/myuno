@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -84,11 +84,11 @@ export default function AdminRestaurantDataQuality() {
   const missingImages = restaurants.filter(r => !r.hero_image_url && !r.cover_image).length;
   const missingCoords = restaurants.filter(r => !r.lat || !r.lng).length;
 
-  if (adminLoading) return <AppLayout><Skeleton className="h-96" /></AppLayout>;
-  if (!isAdmin) return <AppLayout><PageContainer><p>Access denied</p></PageContainer></AppLayout>;
+  if (adminLoading) return <><Skeleton className="h-96" /></>;
+  if (!isAdmin) return <><PageContainer><p>Access denied</p></PageContainer></>;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader
           title="Restaurant Data Quality"
@@ -194,6 +194,6 @@ export default function AdminRestaurantDataQuality() {
           </div>
         )}
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

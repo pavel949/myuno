@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnoTeamMembers, VERTICALS, VERTICAL_LABELS, type Vertical, type UnoTeamMember } from '@/hooks/useUnoTeamPermissions';
 import { supabase } from '@/integrations/supabase/client';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -167,19 +167,19 @@ export default function AdminUnoTeam() {
 
   if (isLoading) {
     return (
-      <AppLayout title={isRu ? 'Управление UNO Team' : 'UNO Team Management'}>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-64 w-full" />
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout title={isRu ? 'Управление UNO Team' : 'UNO Team Management'}>
+    <>
       <PageContainer>
         <PageHeader 
           title={isRu ? 'UNO Team' : 'UNO Team'}
@@ -363,7 +363,7 @@ export default function AdminUnoTeam() {
           </div>
         )}
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }
 

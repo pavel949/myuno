@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminProviders } from '@/hooks/useAdmin';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -409,7 +409,7 @@ export default function AdminVendorContentCreator() {
   );
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         {/* Page Header */}
         <div className="mb-8">
@@ -497,6 +497,6 @@ export default function AdminVendorContentCreator() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

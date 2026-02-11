@@ -6,7 +6,7 @@ import { useAdminCheck, useAdminProviders, useAdminServices, useAdminCategories,
 import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { useOnBehalfContext } from '@/hooks/useAdminContentCreation';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
@@ -278,7 +278,7 @@ export default function AdminServices() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
@@ -287,7 +287,7 @@ export default function AdminServices() {
             ))}
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
@@ -296,7 +296,7 @@ export default function AdminServices() {
   const selectedProviderName = providerId ? getProviderName(providerId) : null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title={selectedProviderName 
@@ -639,6 +639,6 @@ export default function AdminServices() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }

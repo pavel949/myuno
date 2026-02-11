@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, Provider } from '@/hooks/useAdmin';
-import { AppLayout } from '@/components/layout/AppLayout';
+
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -248,7 +248,7 @@ export default function AdminProviders() {
 
   if (authLoading || adminLoading) {
     return (
-      <AppLayout>
+      <>
         <PageContainer>
           <div className="space-y-4">
             <Skeleton className="h-8 w-48" />
@@ -257,14 +257,14 @@ export default function AdminProviders() {
             ))}
           </div>
         </PageContainer>
-      </AppLayout>
+      </>
     );
   }
 
   if (!isAdmin) return null;
 
   return (
-    <AppLayout>
+    <>
       <PageContainer>
         <PageHeader 
           title={isRussian ? 'Провайдеры' : 'Providers'}
@@ -629,6 +629,6 @@ export default function AdminProviders() {
           </DialogContent>
         </Dialog>
       </PageContainer>
-    </AppLayout>
+    </>
   );
 }
