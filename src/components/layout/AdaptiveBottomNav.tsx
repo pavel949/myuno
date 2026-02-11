@@ -153,10 +153,10 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     return (
       <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 md:hidden" {...props}>
         {/* Clean backdrop */}
-        <div className="absolute inset-0 bg-background/95 backdrop-blur-md border-t border-border/30" />
+        <div className="absolute inset-0 bg-card/95 backdrop-blur-xl border-t border-border/40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" />
         
-        {/* Nav items — calm, minimal */}
-        <div className="relative flex items-center justify-around h-14 px-2 max-w-lg mx-auto">
+        {/* Nav items — Figma style with gradient active */}
+        <div className="relative grid grid-cols-4 gap-1 h-16 px-2 py-2.5 max-w-[390px] mx-auto">
           {navItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
             const active = isActive(path);
             
@@ -168,14 +168,16 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 onMouseEnter={() => handlePrefetch(path)}
                 onTouchStart={() => handlePrefetch(path)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground"
+                  "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
+                  active
+                    ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(210,35%,55%)] shadow-md scale-105"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
                 )}
               >
-                <Icon className={cn("w-5 h-5", active && "text-primary")} />
+                <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
                 <span className={cn(
                   "text-[10px]",
-                  active ? "font-semibold text-primary" : "font-medium"
+                  active ? "font-bold" : "font-medium"
                 )}>
                   {language === 'ru' ? labelRu : labelEn}
                 </span>
@@ -185,7 +187,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
         </div>
         
         {/* Safe area */}
-        <div className="h-safe-area-inset-bottom bg-background/95" />
+        <div className="h-safe-area-inset-bottom bg-card/95" />
       </nav>
     );
   }

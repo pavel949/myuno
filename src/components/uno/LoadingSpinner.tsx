@@ -64,9 +64,12 @@ export const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
     return (
       <div 
         ref={ref} 
-        className="flex flex-col items-center justify-center min-h-[50vh] h-full flex-1 gap-4"
+        className="min-h-screen bg-background flex flex-col items-center justify-center gap-4"
       >
         <LoadingSpinner size="lg" variant={branded ? 'logo' : 'default'} />
+        {branded && (
+          <h2 className="text-xl font-semibold text-foreground">myUNO</h2>
+        )}
         {message && (
           <p className="text-muted-foreground text-sm animate-pulse">{message}</p>
         )}
