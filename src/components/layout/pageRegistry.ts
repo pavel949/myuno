@@ -239,9 +239,6 @@ export const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 export const PartnerApplicationsAdmin = lazy(() => import('@/pages/admin/PartnerApplicationsAdmin'));
 export const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'));
 export const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
-export const AdminAnalytics = lazy(() => import('@/pages/admin/AdminAnalytics'));
-export const InvestorPitchDeck = lazy(() => import('@/pages/admin/InvestorPitchDeck'));
-export const InvestorDemo = lazy(() => import('@/pages/admin/InvestorDemo'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
 export const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
 
@@ -263,7 +260,7 @@ export const AdminPets = lazy(() => import('@/pages/admin/AdminPets'));
 export const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
 export const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
 export const AdminFlowers = lazy(() => import('@/pages/admin/AdminFlowers'));
-export const AdminBouquets = lazy(() => import('@/pages/admin/AdminBouquets'));
+
 export const AdminLookups = lazy(() => import('@/pages/admin/AdminLookups'));
 export const AdminTaxonomyManager = lazy(() => import('@/pages/admin/AdminTaxonomyManager'));
 export const AcquisitionMetrics = lazy(() => import('@/pages/admin/AcquisitionMetrics'));
@@ -275,22 +272,16 @@ export const AdminInsurance = lazy(() => import('@/pages/admin/AdminInsurance'))
 export const AdminQuickListings = lazy(() => import('@/pages/admin/AdminQuickListings'));
 export const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
 export const AdminExperiences = lazy(() => import('@/pages/admin/AdminExperiences'));
-export const AdminContentModeration = lazy(() => import('@/pages/admin/AdminContentModeration'));
+
 export const AdminConsultations = lazy(() => import('@/pages/admin/AdminConsultations'));
 export const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
-export const AdminLeadsDashboard = lazy(() => import('@/pages/admin/AdminLeadsDashboard'));
-export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 export const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
 export const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslations'));
-export const UserAnalyticsDashboard = lazy(() => import('@/pages/admin/UserAnalyticsDashboard'));
+
 export const AdminLocationKnowledge = lazy(() => import('@/pages/admin/AdminLocationKnowledge'));
 export const AdminPMCompanies = lazy(() => import('@/pages/admin/AdminPMCompanies'));
 export const AdminContracts = lazy(() => import('@/pages/admin/AdminContracts'));
 export const AdminProviderDetail = lazy(() => import('@/pages/admin/AdminProviderDetail'));
-export const AdminMarketplaceProducts = lazy(() => import('@/pages/admin/AdminMarketplaceProducts'));
-export const AdminMarketplaceCategories = lazy(() => import('@/pages/admin/AdminMarketplaceCategories'));
-export const AdminMarketplaceSubcategories = lazy(() => import('@/pages/admin/AdminMarketplaceSubcategories'));
-export const AdminMarketplaceVendors = lazy(() => import('@/pages/admin/AdminMarketplaceVendors'));
 export const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
 export const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnifiedCatalog'));
 export const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
