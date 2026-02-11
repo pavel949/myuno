@@ -1,6 +1,6 @@
 /**
  * HighlightsSection - Property highlights editor for owners
- * Allows selecting up to 6 property highlights from lookup_values
+ * Uses PROPERTY_CATEGORIES from search ribbon as single source of truth
  */
 
 import React from 'react';
@@ -8,8 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { usePropertyQuickFilters, QuickFilter } from '@/hooks/usePropertyQuickFilters';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PROPERTY_CATEGORIES } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { Sparkles } from 'lucide-react';
 
 interface HighlightsSectionProps {
@@ -27,12 +26,6 @@ export function HighlightsSection({
 }: HighlightsSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { quickFilters, isLoading } = usePropertyQuickFilters();
-
-  // Filter to only show highlight-type filters (not boolean or computed)
-  const selectableHighlights = quickFilters.filter(
-    f => f.type === 'highlight' || f.type === 'amenity'
-  );
 
   const toggleHighlight = (id: string) => {
     if (highlights.includes(id)) {
@@ -41,26 +34,6 @@ export function HighlightsSection({
       onChange([...highlights, id]);
     }
   };
-
-  if (isLoading) {
-    return (
-      <Card className={className}>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            {isRu ? 'Особенности объекта' : 'Property Highlights'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <Skeleton key={i} className="h-8 w-24 rounded-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className={cn("", className)}>
@@ -82,23 +55,24 @@ export function HighlightsSection({
       <CardContent className="space-y-4">
         {/* Available Highlights */}
         <div className="flex flex-wrap gap-2">
-          {selectableHighlights.map((highlight) => {
-            const isSelected = highlights.includes(highlight.id);
+          {PROPERTY_CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = highlights.includes(cat.id);
             const isDisabled = !isSelected && highlights.length >= maxHighlights;
             
             return (
               <Badge
-                key={highlight.id}
+                key={cat.id}
                 variant={isSelected ? 'default' : 'outline'}
                 className={cn(
                   "cursor-pointer gap-1.5 py-1.5 px-3 transition-all text-sm",
                   isDisabled && "opacity-50 cursor-not-allowed",
                   isSelected && "ring-2 ring-primary/20"
                 )}
-                onClick={() => !isDisabled && toggleHighlight(highlight.id)}
+                onClick={() => !isDisabled && toggleHighlight(cat.id)}
               >
-                <span>{highlight.icon}</span>
-                {isRu ? highlight.labelRu : highlight.labelEn}
+                <Icon className="w-3.5 h-3.5" />
+                {isRu ? cat.labelRu : cat.labelEn}
               </Badge>
             );
           })}
@@ -112,8 +86,9 @@ export function HighlightsSection({
             </h4>
             <div className="flex flex-wrap gap-2">
               {highlights.map(id => {
-                const highlight = quickFilters.find(h => h.id === id);
-                if (!highlight) return null;
+                const cat = PROPERTY_CATEGORIES.find(c => c.id === id);
+                if (!cat) return null;
+                const Icon = cat.icon;
                 
                 return (
                   <Badge 
@@ -122,8 +97,8 @@ export function HighlightsSection({
                     className="gap-1.5 cursor-pointer hover:bg-destructive/10"
                     onClick={() => toggleHighlight(id)}
                   >
-                    <span>{highlight.icon}</span>
-                    {isRu ? highlight.labelRu : highlight.labelEn}
+                    <Icon className="w-3.5 h-3.5" />
+                    {isRu ? cat.labelRu : cat.labelEn}
                     <span className="ml-1 text-muted-foreground">×</span>
                   </Badge>
                 );

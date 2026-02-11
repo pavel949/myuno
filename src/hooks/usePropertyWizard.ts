@@ -87,6 +87,7 @@ export interface PropertyFormData {
   cancellation_policy?: string;
   weekly_discount?: number;
   monthly_discount?: number;
+  highlights: string[];
 }
 
 const initialFormData: PropertyFormData = {
@@ -140,6 +141,7 @@ const initialFormData: PropertyFormData = {
   quiet_hours_end: '08:00',
   // Cancellation & Discounts defaults
   cancellation_policy: 'flexible',
+  highlights: [],
 };
 
 const initialOwnershipData: OwnershipData = {
@@ -236,6 +238,7 @@ export function usePropertyWizard() {
         ownership_form: undefined,
         is_for_sale: false,
         sale_price: '',
+        highlights: sourceProperty.highlights || [],
       });
       setIsCloneDataApplied(true);
       toast.success(isRu ? 'Данные объекта загружены' : 'Property data loaded');

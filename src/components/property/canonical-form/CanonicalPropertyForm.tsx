@@ -111,6 +111,7 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     cancellation_policy: data.cancellation_policy,
     weekly_discount: data.weekly_discount,
     monthly_discount: data.monthly_discount,
+    highlights: data.highlights || [],
   };
 }
 
