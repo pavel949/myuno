@@ -23,7 +23,7 @@ interface AppHeaderProps {
 
 /**
  * AppHeader — Architectural Navigation
- * Desktop: animated pill tabs + elegant search + grouped utilities
+ * Desktop: segmented pill tabs + elegant search + grouped utilities
  * Mobile: logo + utilities only (bottom nav handles navigation)
  */
 export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
@@ -38,41 +38,42 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     <header
       className={cn(
         "sticky top-0 z-50 w-full",
-        "bg-background/90 backdrop-blur-lg border-b border-border/60",
+        "bg-background/95 backdrop-blur-xl border-b border-border/40",
         className
       )}
     >
-      <div className="flex items-center justify-between h-12 lg:h-16 px-4 lg:px-8 max-w-7xl mx-auto">
-        {/* Logo with hover letter-spacing */}
+      <div className="flex items-center justify-between h-12 lg:h-[68px] px-4 lg:px-8 max-w-7xl mx-auto">
+        {/* Logo with hover animation */}
         <Link
           to="/"
-          className="flex items-center gap-1 flex-shrink-0 whitespace-nowrap group"
+          className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group"
         >
-          <span className="text-sm lg:text-base text-muted-foreground font-light transition-all duration-300 group-hover:tracking-wider">
+          <span className="text-sm lg:text-[15px] text-muted-foreground font-light transition-all duration-300 group-hover:tracking-wider">
             my
           </span>
-          <span className="text-base lg:text-xl font-semibold text-foreground font-display">
+          <span className="text-base lg:text-xl font-bold text-foreground font-display tracking-tight">
             UNO
           </span>
         </Link>
 
-        {/* Desktop animated pill navigation */}
+        {/* Desktop segmented pill navigation */}
         <DesktopNavTabs />
 
-        {/* Desktop Search — clean pill with Ctrl+K */}
+        {/* Desktop Search — refined pill */}
         <button
           onClick={() => navigate('/search')}
           className={cn(
-            "hidden lg:flex items-center gap-3 mx-6 flex-1 max-w-md",
-            "px-4 py-2 rounded-full border border-border/80",
-            "bg-muted/30 hover:bg-muted/50 hover:shadow-sm transition-all duration-200 cursor-pointer"
+            "hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm",
+            "px-4 py-2 rounded-xl border border-border/60",
+            "bg-muted/30 hover:bg-muted/50 hover:border-border",
+            "transition-all duration-200 cursor-pointer group/search"
           )}
         >
-          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-          <span className="text-[14px] text-muted-foreground flex-1 text-left">
+          <Search className="w-4 h-4 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
+          <span className="text-[13px] text-muted-foreground flex-1 text-left truncate">
             {isRu ? 'Поиск услуг и товаров...' : 'Search services & products...'}
           </span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-muted text-[11px] font-mono text-muted-foreground border border-border/60">
+          <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-md bg-background text-[10px] font-mono text-muted-foreground border border-border/60 shadow-sm">
             ⌘K
           </kbd>
         </button>
@@ -81,10 +82,10 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground lg:hidden">{title}</h1>
         )}
 
-        {/* Right — grouped utilities with separator */}
+        {/* Right — grouped utilities */}
         <div className="flex items-center gap-0.5 lg:gap-1 ml-auto">
           {/* Utility group */}
-          <div className="hidden lg:flex items-center gap-0.5">
+          <div className="hidden lg:flex items-center gap-0.5 bg-muted/40 rounded-lg p-0.5">
             <LanguageSwitcher size="sm" />
             <ThemeSwitcher size="sm" />
             <CurrencySwitcher size="sm" />
@@ -97,7 +98,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           </div>
 
           {/* Vertical separator — desktop only */}
-          <div className="hidden lg:block w-px h-5 bg-border/60 mx-2" />
+          <div className="hidden lg:block w-px h-5 bg-border/50 mx-1.5" />
 
           <MiniCart className="rounded-lg hover:bg-muted transition-colors" />
 
@@ -107,7 +108,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
 
           {user ? (
             <>
-              {/* Notification bell with dot indicator */}
+              {/* Notification bell with dot */}
               <button
                 onClick={() => navigate('/notifications')}
                 aria-label={t('nav.notifications')}
@@ -115,14 +116,14 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
               >
                 <Bell className="w-[18px] h-[18px] text-muted-foreground" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
                 )}
               </button>
 
               {/* Avatar with hover ring */}
               <Link to="/account" aria-label={t('nav.profile')}>
-                <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-muted flex items-center justify-center ml-0.5 transition-all duration-200 hover:ring-2 hover:ring-primary/30">
-                  <span className="text-xs font-medium text-muted-foreground">
+                <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-primary/10 flex items-center justify-center ml-0.5 transition-all duration-200 hover:ring-2 hover:ring-primary/20 hover:bg-primary/15">
+                  <span className="text-xs font-semibold text-primary">
                     {user.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -130,7 +131,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             </>
           ) : (
             <Link to="/auth">
-              <Button size="sm" variant="outline" className="h-8 text-xs px-3 ml-1">
+              <Button size="sm" className="h-8 text-xs px-4 ml-1 rounded-lg font-medium">
                 {t('auth.login')}
               </Button>
             </Link>

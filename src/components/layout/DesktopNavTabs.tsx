@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,36 +13,31 @@ const navItems = [
 
 export const DesktopNavTabs = React.memo(function DesktopNavTabs() {
   const { language } = useLanguage();
-  const location = useLocation();
   const isRu = language === 'ru';
 
-  const activeIndex = navItems.findIndex(item =>
-    item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path)
-  );
-
   return (
-    <nav className="hidden lg:flex items-center gap-1 ml-8 relative">
-      {navItems.map((item, index) => (
+    <nav className="hidden lg:flex items-center gap-0.5 ml-8 relative bg-muted/40 rounded-xl p-1">
+      {navItems.map((item) => (
         <NavLink
           key={item.path}
           to={item.path}
           end={item.exact}
-          className="relative px-4 py-1.5 text-[15px] font-medium transition-colors duration-200 rounded-lg"
+          className="relative px-5 py-2 text-[14px] font-medium transition-colors duration-200 rounded-lg"
         >
           {({ isActive }) => (
             <>
               {isActive && (
                 <motion.div
                   layoutId="activeNavPill"
-                  className="absolute inset-0 bg-primary/[0.08] rounded-lg"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  className="absolute inset-0 bg-background rounded-lg shadow-sm border border-border/50"
+                  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                 />
               )}
               <span
                 className={cn(
-                  "relative z-10",
+                  "relative z-10 whitespace-nowrap",
                   isActive
-                    ? "text-primary"
+                    ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
