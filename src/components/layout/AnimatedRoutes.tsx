@@ -112,6 +112,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── User ── */}
         <Route path="/discover" element={<LazyPage><Pages.Discover /></LazyPage>} />
+        <Route path="/catalog" element={<LazyPage><Pages.PlatformCatalog /></LazyPage>} />
         <Route path="/categories" element={<Navigate to="/discover" replace />} />
         <Route path="/map" element={<LazyPage><Pages.MapView /></LazyPage>} />
         <Route path="/bookings" element={<LazyPage><Pages.Bookings /></LazyPage>} />
