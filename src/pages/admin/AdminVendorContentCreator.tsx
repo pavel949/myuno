@@ -90,7 +90,7 @@ const CONTENT_TYPES: ContentType[] = [
     labelRu: 'Товар',
     descEn: 'Marketplace products',
     descRu: 'Товары маркетплейса',
-    route: '/admin/marketplace/products',
+    route: '/admin/catalog',
     color: 'bg-green-500/10 text-green-600 border-green-500/30',
   },
   {
@@ -100,7 +100,7 @@ const CONTENT_TYPES: ContentType[] = [
     labelRu: 'Букет',
     descEn: 'Flower arrangements',
     descRu: 'Цветочные композиции',
-    route: '/admin/bouquets',
+    route: '/admin/flowers',
     color: 'bg-rose-500/10 text-rose-600 border-rose-500/30',
   },
   {

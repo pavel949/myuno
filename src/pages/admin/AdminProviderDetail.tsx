@@ -425,7 +425,7 @@ export default function AdminProviderDetail() {
               </div>
               <Button 
                 size="sm" 
-                onClick={() => navigate(`/admin/marketplace/products?provider=${provider.id}&action=new`)}
+                onClick={() => navigate(`/admin/catalog?provider=${provider.id}&action=new`)}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 {isRussian ? 'Добавить' : 'Add'}

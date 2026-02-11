@@ -180,7 +180,7 @@ export function UnifiedCatalogTable() {
       case 'service':
         return `/admin/services?edit=${item.id}`;
       case 'product':
-        return `/admin/marketplace/products?edit=${item.id}`;
+        return `/admin/catalog?edit=${item.id}`;
       case 'property':
         return `/admin/properties?edit=${item.id}`;
     }

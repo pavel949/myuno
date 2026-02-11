@@ -152,7 +152,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     labelRu: 'Товар',
     descriptionEn: 'General marketplace product',
     descriptionRu: 'Товар маркетплейса',
-    route: '/admin/marketplace/products',
+    route: '/admin/catalog',
     color: 'text-green-500 bg-green-100 dark:bg-green-900/30',
   },
   {
@@ -163,7 +163,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     labelRu: 'Букет',
     descriptionEn: 'Flower arrangement',
     descriptionRu: 'Цветочная композиция',
-    route: '/admin/bouquets',
+    route: '/admin/flowers',
     color: 'text-rose-500 bg-rose-100 dark:bg-rose-900/30',
   },
   {
@@ -174,7 +174,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     labelRu: 'Еда и напитки',
     descriptionEn: 'Restaurant, cafe, delivery',
     descriptionRu: 'Ресторан, кафе, доставка',
-    route: '/admin/marketplace/products',
+    route: '/admin/catalog',
     color: 'text-amber-500 bg-amber-100 dark:bg-amber-900/30',
   },
   // Properties
