@@ -20,11 +20,17 @@ import { Save, Loader2 } from 'lucide-react';
 // Canonical forms
 import { CanonicalPropertyForm } from '@/components/property/canonical-form';
 import type { CanonicalPropertyFormData } from '@/components/property/canonical-form';
+import { CanonicalListingWizard } from '@/components/vendor/wizard';
+import type { CanonicalListingData } from '@/components/vendor/wizard';
 import {
   getFormType,
   mapIntakeToPropertyForm,
   mapPropertyFormToIntake,
+  mapIntakeToListingData,
+  mapListingDataToIntake,
 } from './intakeToCanonicalMapper';
+import { getCategoriesForVertical } from '@/lib/config/verticalCategorySchemas';
+import { normalizeVerticalId } from '@/lib/verticals';
 
 interface IntakeItemEditorProps {
   item: IntakeItem | null;
@@ -70,10 +76,29 @@ export function IntakeItemEditor({ item, open, onOpenChange, onSave }: IntakeIte
     );
   }
 
-  // TODO: listing verticals → CanonicalListingWizard (requires categories/providerId context)
-  // For now, fall through to generic editor
+  // Listing verticals → CanonicalListingWizard
+  if (formType === 'listing') {
+    const normalizedVertical = normalizeVerticalId(item.detectedVertical);
+    const categories = getCategoriesForVertical(normalizedVertical) || getCategoriesForVertical(item.detectedVertical);
 
-  // Generic editor (fallback + listing verticals until CanonicalListingWizard integration)
+    if (categories.length > 0) {
+      return (
+        <CanonicalListingWizard
+          open={open}
+          onOpenChange={onOpenChange}
+          categories={categories}
+          providerId="intake-admin"
+          tableName={normalizedVertical}
+          initialData={mapIntakeToListingData(item)}
+          onSuccess={() => {
+            onOpenChange(false);
+          }}
+        />
+      );
+    }
+  }
+
+  // Generic editor (fallback for unsupported verticals)
   return (
     <GenericIntakeEditor
       item={item}

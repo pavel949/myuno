@@ -1,8 +1,11 @@
 /**
  * Provider Taxonomy Categories - Sample category tree for canonical listing wizard
- * This should eventually come from the database via useTaxonomyDefinitions
+ * 
+ * NOTE: For vertical-specific schemas, use verticalCategorySchemas.ts instead.
+ * This file retains the legacy "services + products" tree for backward compatibility.
  */
 import { CategoryNode } from '@/components/vendor/wizard';
+export { VERTICAL_CATEGORY_MAP, getCategoriesForVertical, getSupportedVerticals } from './verticalCategorySchemas';
 
 export const PROVIDER_CATEGORY_TREE: CategoryNode[] = [
   {

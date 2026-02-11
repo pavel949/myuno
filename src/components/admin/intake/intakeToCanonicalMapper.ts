@@ -170,11 +170,17 @@ export const PROPERTY_VERTICALS = ['properties', 'property', 'real_estate'];
 
 /** All verticals that should use CanonicalListingWizard */
 export const LISTING_VERTICALS = [
+  // Plural forms (URL slugs, legacy)
   'yachts', 'experiences', 'restaurants', 'salons', 'clinics',
   'gyms', 'babysitters', 'cleaning_services', 'pet_services',
   'legal_services', 'education_providers', 'events',
   'water_activities', 'flower_shops', 'insurance_providers',
   'vehicles', 'transfers',
+  // Singular forms (canonical vertical IDs)
+  'yacht', 'experience', 'restaurant', 'beauty', 'medical',
+  'fitness', 'babysitter', 'cleaning', 'pet_service',
+  'legal', 'education', 'event', 'water_activity',
+  'flower', 'insurance', 'vehicle', 'transfer',
 ];
 
 export function getFormType(detectedVertical: string): 'property' | 'listing' | 'generic' {
