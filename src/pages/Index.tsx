@@ -63,7 +63,7 @@ const Index = () => {
       <ActiveSituationBanner />
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 w-full max-w-7xl mx-auto space-y-8 lg:space-y-12">
+        <div className="px-4 md:px-6 lg:px-8 py-5 pb-20 md:pb-8 w-full max-w-7xl mx-auto space-y-6 lg:space-y-12">
           
           {/* ─── SECTION 1: Hero ─── */}
           <HeroBlock />
