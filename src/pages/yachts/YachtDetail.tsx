@@ -44,7 +44,10 @@ export default function YachtDetail() {
     );
   }
 
-  const images = yacht.images?.length ? yacht.images : [yacht.cover_image || 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800'];
+  const fallbackImage = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800';
+  const coverImage = yacht.cover_image || fallbackImage;
+  const galleryImages = yacht.images?.filter(img => img && img !== yacht.cover_image) || [];
+  const images = [coverImage, ...galleryImages];
   const name = language === 'ru' ? yacht.name_ru : yacht.name_en;
   const description = language === 'ru' ? yacht.description_ru : yacht.description_en;
   const location = language === 'ru' ? yacht.location_ru : yacht.location_name;
