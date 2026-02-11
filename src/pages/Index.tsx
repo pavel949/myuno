@@ -24,6 +24,8 @@ import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 import { ReferralBanner } from '@/components/referral/ReferralBanner';
 import { MorningDigest } from '@/components/home/MorningDigest';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
+import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
+import { ActivityPulse } from '@/components/home/ActivityPulse';
 
 // Lazy load secondary components
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
@@ -93,6 +95,16 @@ const Index = () => {
           {/* Quick Actions — full-width ribbon on desktop */}
           <div className="mb-6 lg:mb-8">
             <QuickActionsGrid />
+          </div>
+
+          {/* Lifecycle-aware smart tip */}
+          <div className="mb-6">
+            <LifecycleSmartTip />
+          </div>
+
+          {/* Activity pulse — your stats at a glance */}
+          <div className="mb-6">
+            <ActivityPulse />
           </div>
 
           {/* Explore sections — full-width photo grid on desktop */}

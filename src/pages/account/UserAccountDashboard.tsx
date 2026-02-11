@@ -10,6 +10,8 @@ import { AccountActivitySection } from '@/components/account/AccountActivitySect
 import { AccountFlatMenu } from '@/components/account/AccountFlatMenu';
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { AchievementShowcase } from '@/components/gamification/AchievementShowcase';
+import { ActivityPulse } from '@/components/home/ActivityPulse';
 
 export default function UserAccountDashboard() {
   const navigate = useNavigate();
@@ -27,6 +29,12 @@ export default function UserAccountDashboard() {
       <div className="px-4 pt-6 pb-24 space-y-8 max-w-lg mx-auto">
         {/* Profile */}
         <AccountProfileCard />
+
+        {/* Activity Stats */}
+        <ActivityPulse />
+
+        {/* Achievements & Loyalty */}
+        <AchievementShowcase />
 
         {/* Active Stay */}
         <AccountActiveStay />
