@@ -109,11 +109,14 @@ body {
     --card-padding-compact: 0.75rem;
     --card-gap: 0.75rem;
     
-    /* Shadows — subtle */
-    --shadow-card: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
-    --shadow-card-hover: 0 2px 8px -2px hsl(0 0% 0% / 0.08);
-    --shadow-elevated: 0 8px 20px -6px hsl(0 0% 0% / 0.1);
-    --shadow-float: 0 16px 32px -8px hsl(0 0% 0% / 0.12);
+    /* Shadows — neumorphic navy */
+    --shadow-card: 0 2px 8px -2px hsl(220 40% 20% / 0.08), 0 1px 2px 0 hsl(220 40% 20% / 0.04);
+    --shadow-card-hover: 0 8px 24px -4px hsl(230 45% 46% / 0.15), 0 2px 6px -1px hsl(220 40% 20% / 0.08);
+    --shadow-elevated: 0 12px 32px -8px hsl(230 45% 46% / 0.18), 0 4px 12px -4px hsl(220 40% 20% / 0.1);
+    --shadow-float: 0 20px 48px -12px hsl(230 45% 46% / 0.22), 0 8px 16px -4px hsl(220 40% 20% / 0.08);
+    --shadow-neu-inset: inset 0 1px 2px hsl(220 20% 50% / 0.08);
+    --shadow-btn: 0 2px 8px -2px hsl(230 45% 46% / 0.25), 0 1px 2px hsl(220 40% 20% / 0.1);
+    --shadow-btn-hover: 0 6px 20px -4px hsl(230 45% 46% / 0.35), 0 2px 4px hsl(220 40% 20% / 0.1);
 
     --sidebar-background: 40 15% 97%;
     --sidebar-foreground: 220 15% 25%;
@@ -169,10 +172,13 @@ body {
     --card-elevated: 220 12% 10%;
     --card-hover: 220 12% 12%;
     
-    --shadow-card: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
-    --shadow-card-hover: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 8px 20px -6px hsl(0 0% 0% / 0.4);
-    --shadow-float: 0 16px 32px -8px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 2px 8px -2px hsl(220 40% 4% / 0.4), 0 1px 2px hsl(220 40% 4% / 0.2);
+    --shadow-card-hover: 0 8px 24px -4px hsl(230 40% 58% / 0.2), 0 2px 6px hsl(220 40% 4% / 0.3);
+    --shadow-elevated: 0 12px 32px -8px hsl(230 40% 58% / 0.25), 0 4px 12px hsl(220 40% 4% / 0.3);
+    --shadow-float: 0 20px 48px -12px hsl(230 40% 58% / 0.3), 0 8px 16px hsl(220 40% 4% / 0.25);
+    --shadow-neu-inset: inset 0 1px 3px hsl(220 12% 2% / 0.3);
+    --shadow-btn: 0 2px 8px -2px hsl(230 40% 58% / 0.3), 0 1px 2px hsl(220 40% 4% / 0.2);
+    --shadow-btn-hover: 0 6px 20px -4px hsl(230 40% 58% / 0.45), 0 2px 4px hsl(220 40% 4% / 0.2);
 
     --sidebar-background: 220 12% 7%;
     --sidebar-foreground: 40 10% 88%;
@@ -386,21 +392,27 @@ body {
     @apply bg-muted/30 rounded-2xl;
   }
   
-  /* Level 2: Content - default cards with border */
+  /* Level 2: Content - neumorphic navy cards */
   .card-content {
-    @apply bg-card border border-border rounded-2xl shadow-sm;
+    @apply bg-card border border-border/40 rounded-2xl;
+    box-shadow: var(--shadow-card);
   }
   
-  /* Level 3: Interactive - hover lift effect */
+  /* Level 3: Interactive - hover lift with navy glow */
   .card-interactive {
-    @apply bg-card border border-border rounded-2xl shadow-sm 
-           hover:shadow-md hover:-translate-y-0.5 
-           transition-all duration-200 cursor-pointer;
+    @apply bg-card border border-border/40 rounded-2xl 
+           hover:-translate-y-1 
+           transition-all duration-250 cursor-pointer;
+    box-shadow: var(--shadow-card);
+  }
+  .card-interactive:hover {
+    box-shadow: var(--shadow-card-hover);
   }
   
-  /* Level 4: Elevated - prominent shadow */
+  /* Level 4: Elevated - prominent navy shadow */
   .card-elevated {
-    @apply bg-card border border-border rounded-2xl shadow-lg;
+    @apply bg-card border border-border/40 rounded-2xl;
+    box-shadow: var(--shadow-elevated);
   }
   
   /* Dark mode: remove borders, rely on shadows */
