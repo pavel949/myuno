@@ -1,21 +1,14 @@
 /**
  * PropertyIndex — Airbnb-style Discovery Page
- * 
- * Sections:
- * 1. Search bar (rounded, prominent)
- * 2. Category tabs (Rent / Buy)
- * 3. Recently Viewed (horizontal scroll)
- * 4. Featured / Guest Favorites (horizontal scroll)
- * 5. By District sections (horizontal scroll)
- * 6. All listings link → full catalog grid
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, Loader2 } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, Loader2, Home, ChevronDown, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
+import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
@@ -23,6 +16,7 @@ import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { CrossSellSection } from '@/components/crosssell';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { cn } from '@/lib/utils';
 
@@ -158,6 +152,25 @@ export default function PropertyIndex() {
   );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Inline filter states
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
+  const [instantBookOnly, setInstantBookOnly] = useState(false);
+
+  const { propertyTypes } = usePropertyFilterOptions();
+
+  const BEDROOM_OPTIONS = [
+    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+    { id: '1', labelEn: '1+', labelRu: '1+' },
+    { id: '2', labelEn: '2+', labelRu: '2+' },
+    { id: '3', labelEn: '3+', labelRu: '3+' },
+    { id: '4', labelEn: '4+', labelRu: '4+' },
+    { id: '5', labelEn: '5+', labelRu: '5+' },
+    { id: '6', labelEn: '6+', labelRu: '6+' },
+    { id: '8', labelEn: '8+', labelRu: '8+' },
+    { id: '10', labelEn: '10+', labelRu: '10+' },
+    { id: '12', labelEn: '12+', labelRu: '12+' },
+  ];
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
@@ -168,9 +181,33 @@ export default function PropertyIndex() {
 
   const allProperties = useMemo(() => {
     const items = infiniteData?.pages.flatMap(p => p.properties) || [];
-    if (!selectedCategory) return items;
-    return items.filter(p => matchesCategory(p, selectedCategory));
-  }, [infiniteData, selectedCategory]);
+    return items.filter(p => {
+      // Category filter
+      if (selectedCategory && !matchesCategory(p, selectedCategory)) return false;
+      // Type filter
+      if (selectedTypes.length > 0) {
+        const propType = (p.property_type || '').toLowerCase();
+        if (!selectedTypes.some(t => propType.includes(t.toLowerCase()))) return false;
+      }
+      // Bedroom filter (N+ logic)
+      if (selectedBedrooms.length > 0) {
+        const propBedrooms = p.bedrooms ?? 0;
+        const hasStudio = selectedBedrooms.includes('studio');
+        const numericBedrooms = selectedBedrooms.filter(b => b !== 'studio').map(b => parseInt(b) || 0);
+        if (hasStudio && propBedrooms === 0) return true;
+        if (numericBedrooms.length > 0) {
+          const minBed = Math.min(...numericBedrooms);
+          if (propBedrooms >= minBed) return true;
+          if (hasStudio && propBedrooms === 0) return true;
+          return false;
+        }
+        if (hasStudio && propBedrooms !== 0) return false;
+      }
+      // Instant booking filter
+      if (instantBookOnly && !p.instant_booking) return false;
+      return true;
+    });
+  }, [infiniteData, selectedCategory, selectedTypes, selectedBedrooms, instantBookOnly]);
 
   // Featured
   const featured = useMemo(() => 
@@ -243,6 +280,8 @@ export default function PropertyIndex() {
               if (params.checkOut) qp.set('checkOut', params.checkOut.toISOString());
               if (params.guests) qp.set('guests', String(params.guests));
               if (params.bedrooms.length > 0) qp.set('bedrooms', params.bedrooms.join(','));
+              if (selectedTypes.length > 0) qp.set('types', selectedTypes.join(','));
+              if (instantBookOnly) qp.set('instant', '1');
               qp.set('mode', propertyMode);
               navigate(`/property/search?${qp.toString()}`);
             }}
@@ -256,6 +295,128 @@ export default function PropertyIndex() {
           className="border-b border-border/40 py-2"
         />
 
+        {/* Inline Filter Bar */}
+        <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto scrollbar-hide">
+          {/* Property Type Popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                selectedTypes.length > 0
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border hover:border-primary/40"
+              )}>
+                <Home className="w-3.5 h-3.5" />
+                <span>
+                  {selectedTypes.length > 0
+                    ? selectedTypes.slice(0, 2).map(t => {
+                        const opt = propertyTypes.find(p => p.id === t);
+                        return opt ? (isRu ? opt.labelRu : opt.labelEn) : t;
+                      }).join(', ')
+                    : (isRu ? 'Тип жилья' : 'Type')
+                  }
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-3" align="start" sideOffset={6}>
+              <div className="grid grid-cols-2 gap-1.5">
+                {propertyTypes.map(type => (
+                  <button
+                    key={type.id}
+                    onClick={() => setSelectedTypes(prev =>
+                      prev.includes(type.id) ? prev.filter(t => t !== type.id) : [...prev, type.id]
+                    )}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left",
+                      selectedTypes.includes(type.id)
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    {isRu ? type.labelRu : type.labelEn}
+                  </button>
+                ))}
+              </div>
+              {selectedTypes.length > 0 && (
+                <button onClick={() => setSelectedTypes([])} className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground text-center py-1">
+                  {isRu ? 'Сбросить' : 'Clear'}
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {/* Bedrooms Popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className={cn(
+                "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                selectedBedrooms.length > 0
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border hover:border-primary/40"
+              )}>
+                <span>
+                  {selectedBedrooms.length > 0
+                    ? (selectedBedrooms.length === 1
+                        ? (selectedBedrooms[0] === 'studio' ? (isRu ? 'Студия' : 'Studio') : `${selectedBedrooms[0]}+ ${isRu ? 'сп.' : 'beds'}`)
+                        : `${selectedBedrooms.length} ${isRu ? 'выбр.' : 'sel.'}`)
+                    : (isRu ? 'Спальни' : 'Beds')
+                  }
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-3" align="start" sideOffset={6}>
+              <div className="grid grid-cols-4 gap-1.5">
+                {BEDROOM_OPTIONS.map(bed => (
+                  <button
+                    key={bed.id}
+                    onClick={() => setSelectedBedrooms(prev =>
+                      prev.includes(bed.id) ? prev.filter(b => b !== bed.id) : [...prev, bed.id]
+                    )}
+                    className={cn(
+                      "py-2 px-1 rounded-lg text-sm font-medium transition-colors text-center",
+                      selectedBedrooms.includes(bed.id)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/50 hover:bg-muted text-foreground"
+                    )}
+                  >
+                    {isRu ? bed.labelRu : bed.labelEn}
+                  </button>
+                ))}
+              </div>
+              {selectedBedrooms.length > 0 && (
+                <button onClick={() => setSelectedBedrooms([])} className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground text-center py-1">
+                  {isRu ? 'Сбросить' : 'Clear'}
+                </button>
+              )}
+            </PopoverContent>
+          </Popover>
+
+          {/* Instant Book Toggle */}
+          <button
+            onClick={() => setInstantBookOnly(prev => !prev)}
+            className={cn(
+              "inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+              instantBookOnly
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-foreground border-border hover:border-primary/40"
+            )}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>{isRu ? 'Мгновенное' : 'Instant'}</span>
+          </button>
+
+          {/* Clear all filters */}
+          {(selectedTypes.length > 0 || selectedBedrooms.length > 0 || instantBookOnly) && (
+            <button
+              onClick={() => { setSelectedTypes([]); setSelectedBedrooms([]); setInstantBookOnly(false); }}
+              className="text-xs text-primary hover:underline shrink-0 ml-1"
+            >
+              {isRu ? 'Сброс' : 'Clear'}
+            </button>
+          )}
+        </div>
 
         {/* Content */}
         <div className="space-y-6 pt-4">
