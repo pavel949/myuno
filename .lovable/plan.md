@@ -1,56 +1,92 @@
 
-# Исправление модуля собственников
 
-## 1. Единое название бренда "myUNO" везде
+# Restructuring Property Search for Real Phuket Use Cases
 
-Заменить все варианты ("UNO Property Care", "UNO Property") на единое "myUNO":
+## Problem
 
-| Файл | Было | Станет |
-|------|------|--------|
-| `src/pages/owner/OwnerDashboard.tsx` (строка 37) | "UNO Property Care" | "myUNO" |
-| `src/components/owner/OwnerSidebar.tsx` (строка 107) | "UNO Property" | "myUNO" |
-| `src/pages/owner/OwnerGuidePage.tsx` (строка 47) | "UNO Property Care v2.0" | "myUNO v2.0" |
-| `src/components/owner/guide/GuideCover.tsx` (строка 29-30) | "...в экосистеме UNO Property Care" | "...в экосистеме myUNO" |
-| `src/components/owner/guide/GuideComparison.tsx` (строка 60-61) | "UNO Property Care" | "myUNO" |
-| `src/components/owner/guide/GuidePropertyCare.tsx` (строка 57) | "UNO Property Care" | "myUNO Property Care" |
-| `src/components/owner/guide/GuideTableOfContents.tsx` (строка 15-16) | "Преимущества UNO" | "Преимущества myUNO" |
+The current search UI uses generic Airbnb-style categories (Tropical, Rooftop, Garden, Mountain) that don't match how people actually search for property in Phuket. Based on your input, the real search mental model is:
 
-## 2. Убрать выдуманные маркетинговые цифры
+**Type** (Villa/Condo/Hotel) -> **Specs** (bedrooms, guests) -> **Beach/Area** -> **Project** -> **Unit**
 
-**`src/components/owner/guide/GuideIntegration.tsx`** (строки 199-204): Заменить "Средняя заполняемость: 85%" на value-driven текст: "Прозрачная отчётность каждый месяц" / "Transparent monthly reporting".
+Key differentiators that matter but are missing or buried:
+- Walk to beach (vs. drive)
+- Private pool (villa) vs. shared pool (condo)
+- Washing machine in unit
+- Kid-friendly infrastructure
+- Pet-friendly
+- Sea view
 
-## 3. Добавить data-tour атрибуты в OwnerDashboard
+## Changes
 
-Тур ссылается на 5 элементов: `quick-actions`, `portfolio`, `add-property`, `finances`, `team`. Эти атрибуты есть в старых компонентах (`QuickActionsBar`, `PortfolioSection`, `FinancesSummary`, `CommunicationsSection`), но текущий дашборд их не использует.
+### 1. Replace Category Ribbon with Real Differentiators
 
-Решение -- обновить шаги тура под текущие компоненты дашборда и добавить `data-tour` атрибуты к ним:
+Remove irrelevant categories (Tropical, Mountain, Rooftop, Garden, Gym, Kitchen, WiFi, New Build) and replace with what actually drives decisions:
 
-| Компонент | data-tour атрибут | Шаг тура |
-|-----------|-------------------|----------|
-| `ActiveStaysWidget` (обёртка в OwnerDashboard) | `active-stays` | "Текущие гости -- кто сейчас проживает" |
-| `OwnerPropertiesList` (обёртка в OwnerDashboard) | `properties` | "Ваши объекты -- все объекты в одном месте" |
-| `OwnerOperationsFlat` (обёртка в OwnerDashboard) | `operations` | "Задачи на сегодня -- уборки, обслуживание" |
-| `OwnerDashboardMenu` (обёртка в OwnerDashboard) | `menu` | "Меню -- каналы, отчёты, поддержка" |
+| Current (remove)     | New (add)              |
+|----------------------|------------------------|
+| Tropical             | Walk to Beach          |
+| Mountain             | Private Pool           |
+| Rooftop              | Washer                 |
+| Garden               | Condo w/ Pool          |
+| New Build            | Family-friendly        |
+| Kitchen              | --                     |
+| Gym                  | --                     |
 
-Обновить `OwnerOnboardingTour.tsx`: заменить 5 старых шагов на 4 новых, привязанных к реальным секциям. Убрать эмодзи из заголовков шагов (согласно бренд-буку -- только Lucide-иконки).
+New ribbon order (priority-based):
+1. Beachfront (keep)
+2. Walk to Beach (new)
+3. Sea View (keep)
+4. Private Pool (new)
+5. Pool (keep - shared/condo pool)
+6. Washer (new)
+7. Pet Friendly (keep)
+8. Kids (keep)
+9. Parking (keep)
+10. WiFi (keep)
+11. Luxury (keep)
 
-## 4. Убрать лишние скобки в OwnerPropertiesList
+### 2. Restructure Mobile Search Flow Tabs
 
-**`src/components/owner/dashboard/OwnerPropertiesList.tsx`** (строка 142): `{(` -> `{` и соответствующее закрытие `)}` -> `}`.
+Current: **Where | When | Property | Who**
 
----
+New: **Type | Beach | Dates | Details**
 
-## Технические детали: файлы и изменения
+- **Type** tab: Villa / Condo / Apartment / House / Penthouse / Bungalow (large tappable cards, single-select primary + multi for "show all")
+- **Beach** tab: Replace "district" label with "Beach / Area". Group popular beaches at top (Bangtao, Surin, Kamala, Kata, Karon, Patong, Nai Harn, Layan). Less popular below a divider. Multi-select.
+- **Dates** tab: Keep as-is (calendar + flexible options)
+- **Details** tab: Merge bedrooms + guests + key amenities. Bedrooms selector at top, guest counter below, then toggle chips for key differentiators (private pool, walk to beach, washer, pets, kids, instant booking)
 
-**Изменяемые файлы (9 штук):**
+### 3. Update matchesCategory Logic
 
-1. `src/pages/owner/OwnerDashboard.tsx` -- бренд "myUNO" + обёртки `data-tour` на секциях
-2. `src/components/owner/OwnerSidebar.tsx` -- бренд "myUNO"
-3. `src/pages/owner/OwnerGuidePage.tsx` -- бренд "myUNO"
-4. `src/components/owner/guide/GuideCover.tsx` -- бренд "myUNO"
-5. `src/components/owner/guide/GuideComparison.tsx` -- бренд "myUNO"
-6. `src/components/owner/guide/GuidePropertyCare.tsx` -- бренд "myUNO"
-7. `src/components/owner/guide/GuideTableOfContents.tsx` -- бренд "myUNO"
-8. `src/components/owner/guide/GuideIntegration.tsx` -- убрать "85%"
-9. `src/components/owner/onboarding/OwnerOnboardingTour.tsx` -- обновить шаги тура
-10. `src/components/owner/dashboard/OwnerPropertiesList.tsx` -- убрать лишние скобки
+Update `PropertyCategoryIcons.tsx` `matchesCategory()` to handle new categories:
+- `walk_to_beach`: check highlights for "walking_to_beach" or "beach_close"
+- `private_pool`: check highlights for "private_pool" or amenities containing "private pool"
+- `washer`: check amenities for "washer" or equipment array
+- `condo_pool`: property_type === "condo" AND amenities includes "pool"
+
+### 4. Sync Ribbon Categories with Database
+
+Add missing `property_highlight` values to `lookup_values` if not already present:
+- `walk_to_beach` (already exists as "walking_to_beach")
+- `private_pool` (already exists)
+- `washer` (exists in amenities as "washer")
+
+No new DB records needed -- just map the ribbon to existing data.
+
+### 5. Search Bar Summary Text
+
+Update the collapsed pill to show the most relevant info:
+- "Villa in Bangtao" instead of generic "Anywhere in Phuket"
+- "2 BR, pool, beachfront" as subtitle when filters selected
+
+## Technical Details
+
+### Files to modify:
+- `src/components/property/PropertyCategoryIcons.ribbon.tsx` -- new category list + icons
+- `src/components/property/PropertyCategoryIcons.tsx` -- update `matchesCategory()` function
+- `src/components/property/AirbnbSearchBar.tsx` -- restructure mobile tabs, rename "Location" to "Beach / Area", reorder property tab, update summary text
+- `src/pages/property/PropertyIndex.tsx` -- minor label updates
+
+### No database changes required
+All filtering data already exists in the `properties` table (amenities, highlights, property_type, district) and `lookup_values` table.
+
