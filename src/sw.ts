@@ -100,7 +100,7 @@ registerRoute(
 
 // ─── ACTIVATE: Delete ALL old caches (any that aren't current -v2) ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.25] Activated — cleaning ALL old caches');
+  console.log('[SW v3.26] Activated — cleaning ALL old caches');
   const CURRENT_CACHES = ['navigation-v2', 'images-v2', 'fonts-v2', 'supabase-v2', 'google-fonts-v2'];
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -117,5 +117,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.25] Installing new service worker...');
+  console.log('[SW v3.26] Installing new service worker...');
 });
