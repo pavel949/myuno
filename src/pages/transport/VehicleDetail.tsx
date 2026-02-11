@@ -52,7 +52,7 @@ export default function VehicleDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout>
+      <AppLayout showBottomNav={false}>
         <DetailPageSkeleton />
       </AppLayout>
     );
@@ -60,7 +60,7 @@ export default function VehicleDetail() {
 
   if (!vehicle) {
     return (
-      <AppLayout>
+      <AppLayout showBottomNav={false}>
         <div className="flex flex-col items-center justify-center py-20 text-center px-6">
           <Settings2 className="w-16 h-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
@@ -90,7 +90,7 @@ export default function VehicleDetail() {
   const fuelType = vehicle.fuel_type || 'petrol';
 
   return (
-    <AppLayout>
+    <AppLayout showBottomNav={false}>
       <div className="pb-24">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
@@ -315,7 +315,7 @@ export default function VehicleDetail() {
         </div>
 
         {/* Fixed Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border/50">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border/50 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <div className="flex-1">
               <span className="text-sm text-muted-foreground">

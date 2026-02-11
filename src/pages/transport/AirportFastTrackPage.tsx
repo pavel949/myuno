@@ -291,7 +291,7 @@ export default function AirportFastTrackPage() {
 
   if (isLoading) {
     return (
-      <AppLayout title="Fast Track">
+      <AppLayout title="Fast Track" showBottomNav={false}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -300,7 +300,7 @@ export default function AirportFastTrackPage() {
   }
 
   return (
-    <AppLayout title="Fast Track">
+    <AppLayout title="Fast Track" showBottomNav={false}>
       <div className="pb-32">
         {/* Back button */}
         <div className="px-4 pt-3">
@@ -776,7 +776,7 @@ export default function AirportFastTrackPage() {
       </div>
 
       {/* Bottom bar — always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 pb-safe z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
