@@ -390,7 +390,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/cleaning" element={<Pages.AdminCleaning />} />
           <Route path="/admin/babysitters" element={<Pages.AdminBabysitters />} />
           <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
-          <Route path="/admin/bouquets" element={<Pages.AdminBouquets />} />
+          <Route path="/admin/bouquets" element={<Navigate to="/admin/flowers" replace />} />
           <Route path="/admin/lookups" element={<Pages.AdminLookups />} />
           <Route path="/admin/taxonomy" element={<Pages.AdminTaxonomyManager />} />
           <Route path="/admin/acquisition-metrics" element={<Pages.AcquisitionMetrics />} />
@@ -412,10 +412,10 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
           <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/user-analytics" element={<Navigate to="/admin/control" replace />} />
-          <Route path="/admin/marketplace/products" element={<Pages.AdminMarketplaceProducts />} />
-          <Route path="/admin/marketplace/categories" element={<Pages.AdminMarketplaceCategories />} />
-          <Route path="/admin/marketplace/subcategories" element={<Pages.AdminMarketplaceSubcategories />} />
-          <Route path="/admin/marketplace/vendors" element={<Pages.AdminMarketplaceVendors />} />
+          <Route path="/admin/marketplace/products" element={<Navigate to="/admin/catalog" replace />} />
+          <Route path="/admin/marketplace/categories" element={<Navigate to="/admin/catalog" replace />} />
+          <Route path="/admin/marketplace/subcategories" element={<Navigate to="/admin/catalog" replace />} />
+          <Route path="/admin/marketplace/vendors" element={<Navigate to="/admin/catalog" replace />} />
           <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
           <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
           <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />

@@ -11,10 +11,10 @@ interface CatalogProductsTabProps {
 }
 
 const marketplaceCategories = [
-  { key: 'products', label: 'Products', labelRu: 'Товары', icon: ShoppingCart, path: '/admin/marketplace/products', description: 'All marketplace products', descriptionRu: 'Все товары маркетплейса' },
-  { key: 'categories', label: 'Categories', labelRu: 'Категории', icon: Grid3X3, path: '/admin/marketplace/categories', description: 'Product categories', descriptionRu: 'Категории товаров' },
-  { key: 'subcategories', label: 'Subcategories', labelRu: 'Подкатегории', icon: List, path: '/admin/marketplace/subcategories', description: 'Product subcategories', descriptionRu: 'Подкатегории товаров' },
-  { key: 'vendors', label: 'Vendors', labelRu: 'Продавцы', icon: BadgeCheck, path: '/admin/marketplace/vendors', description: 'Verified sellers', descriptionRu: 'Верифицированные продавцы' },
+  { key: 'products', label: 'Products', labelRu: 'Товары', icon: ShoppingCart, path: '/admin/catalog', description: 'All marketplace products', descriptionRu: 'Все товары маркетплейса' },
+  { key: 'categories', label: 'Categories', labelRu: 'Категории', icon: Grid3X3, path: '/admin/catalog', description: 'Product categories', descriptionRu: 'Категории товаров' },
+  { key: 'subcategories', label: 'Subcategories', labelRu: 'Подкатегории', icon: List, path: '/admin/catalog', description: 'Product subcategories', descriptionRu: 'Подкатегории товаров' },
+  { key: 'vendors', label: 'Vendors', labelRu: 'Продавцы', icon: BadgeCheck, path: '/admin/catalog', description: 'Verified sellers', descriptionRu: 'Верифицированные продавцы' },
 ];
 
 export function CatalogProductsTab({ searchQuery, statusFilter }: CatalogProductsTabProps) {
