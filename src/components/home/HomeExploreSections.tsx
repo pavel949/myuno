@@ -89,7 +89,7 @@ const SERVICES_ITEMS: ExploreItem[] = [
   },
 ];
 
-function ExploreCard({ item, language, tall }: { item: ExploreItem; language: string; tall?: boolean }) {
+function ExploreCard({ item, language }: { item: ExploreItem; language: string }) {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const badge = isRu ? item.badgeRu : item.badgeEn;
@@ -98,8 +98,7 @@ function ExploreCard({ item, language, tall }: { item: ExploreItem; language: st
     <button
       onClick={() => navigate(item.path)}
       className={cn(
-        "group relative overflow-hidden rounded-2xl w-full",
-        tall ? "aspect-[3/4]" : "aspect-[4/3]",
+        "group relative overflow-hidden rounded-2xl w-full aspect-[4/3]",
         "hover:shadow-xl transition-shadow duration-300",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       )}
@@ -150,7 +149,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
         {/* Mobile: 2-col grid with alternating tall/short */}
         <div className="grid grid-cols-2 gap-3 lg:hidden">
           {EXPLORE_ITEMS.map((item, i) => (
-            <ExploreCard key={item.id} item={item} language={language} tall={i % 3 === 0} />
+            <ExploreCard key={item.id} item={item} language={language} />
           ))}
         </div>
         
