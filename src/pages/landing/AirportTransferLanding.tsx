@@ -6,6 +6,7 @@ import { ShieldCheck, Globe, CreditCard, Plane, Clock, MapPin, CheckCircle, User
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { SocialProofCounter } from '@/components/landing/SocialProofCounter';
 import type { Variants, Easing } from 'framer-motion';
 
 const fadeUp: Variants = {
@@ -122,6 +123,9 @@ export default function AirportTransferLanding() {
               <p className="text-center text-xs text-muted-foreground mt-2.5">
                 {isRu ? '฿800–1 500 · Без предоплаты' : '฿800–1,500 · No prepayment required'}
               </p>
+              <div className="mt-4">
+                <SocialProofCounter vertical="transfer" variant="banner" />
+              </div>
             </motion.div>
           </div>
         </section>

@@ -10976,6 +10976,9 @@ export type Database = {
           id: string
           phone: string | null
           preferred_language: string | null
+          referral_balance: number
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"] | null
         }
@@ -10990,6 +10993,9 @@ export type Database = {
           id: string
           phone?: string | null
           preferred_language?: string | null
+          referral_balance?: number
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
@@ -11004,6 +11010,9 @@ export type Database = {
           id?: string
           phone?: string | null
           preferred_language?: string | null
+          referral_balance?: number
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
@@ -14777,6 +14786,8 @@ export type Database = {
           cons: string | null
           content: string | null
           created_at: string
+          entity_id: string | null
+          entity_type: string | null
           helpful_count: number | null
           id: string
           images: string[] | null
@@ -14785,6 +14796,10 @@ export type Database = {
           is_verified_purchase: boolean | null
           item_id: string
           item_type: string
+          language: string | null
+          moderation_status: string | null
+          order_id: string | null
+          photos: string[] | null
           pros: string | null
           rating: number
           response: string | null
@@ -14798,6 +14813,8 @@ export type Database = {
           cons?: string | null
           content?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           helpful_count?: number | null
           id?: string
           images?: string[] | null
@@ -14806,6 +14823,10 @@ export type Database = {
           is_verified_purchase?: boolean | null
           item_id: string
           item_type: string
+          language?: string | null
+          moderation_status?: string | null
+          order_id?: string | null
+          photos?: string[] | null
           pros?: string | null
           rating: number
           response?: string | null
@@ -14819,6 +14840,8 @@ export type Database = {
           cons?: string | null
           content?: string | null
           created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
           helpful_count?: number | null
           id?: string
           images?: string[] | null
@@ -14827,6 +14850,10 @@ export type Database = {
           is_verified_purchase?: boolean | null
           item_id?: string
           item_type?: string
+          language?: string | null
+          moderation_status?: string | null
+          order_id?: string | null
+          photos?: string[] | null
           pros?: string | null
           rating?: number
           response?: string | null
@@ -14836,7 +14863,15 @@ export type Database = {
           user_id?: string
           visit_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       salon_services: {
         Row: {
@@ -17436,7 +17471,9 @@ export type Database = {
           id: string
           is_verified: boolean | null
           issue_date: string | null
+          last_reminded_at: string | null
           notes: string | null
+          reminder_days: number[] | null
           updated_at: string
           user_id: string
           verified_at: string | null
@@ -17452,7 +17489,9 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           issue_date?: string | null
+          last_reminded_at?: string | null
           notes?: string | null
+          reminder_days?: number[] | null
           updated_at?: string
           user_id: string
           verified_at?: string | null
@@ -17468,7 +17507,9 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           issue_date?: string | null
+          last_reminded_at?: string | null
           notes?: string | null
+          reminder_days?: number[] | null
           updated_at?: string
           user_id?: string
           verified_at?: string | null
@@ -17757,6 +17798,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          qualified_at: string | null
+          qualifying_order_id: string | null
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          reward_amount: number
+          reward_currency: string
+          rewarded_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          qualified_at?: string | null
+          qualifying_order_id?: string | null
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          reward_amount?: number
+          reward_currency?: string
+          rewarded_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          qualified_at?: string | null
+          qualifying_order_id?: string | null
+          referral_code?: string
+          referred_id?: string
+          referrer_id?: string
+          reward_amount?: number
+          reward_currency?: string
+          rewarded_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_referrals_qualifying_order_id_fkey"
+            columns: ["qualifying_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
