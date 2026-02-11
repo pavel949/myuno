@@ -1,11 +1,11 @@
 /**
  * AirbnbCategoryRibbon — Horizontal scrollable category icons
- * Replicates Airbnb's primary discovery mechanism with underline-active style
+ * Phuket-specific differentiators that match real search patterns
  */
 import { memo } from 'react';
 import { 
-  Waves, Droplets, Eye, Mountain, TreePalm, Sparkles, Building, 
-  Fence, Dumbbell, PawPrint, Baby, Utensils, Car, Sun, Home, Wifi
+  Waves, Footprints, Eye, Droplets, Lock, 
+  WashingMachine, PawPrint, Baby, Car, Wifi, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,20 +19,16 @@ export interface CategoryItem {
 
 export const PROPERTY_CATEGORIES: CategoryItem[] = [
   { id: 'beachfront', icon: Waves, labelEn: 'Beachfront', labelRu: 'У пляжа' },
-  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
+  { id: 'walk_to_beach', icon: Footprints, labelEn: 'Walk to beach', labelRu: 'Пешком до пляжа' },
   { id: 'sea_view', icon: Eye, labelEn: 'Sea view', labelRu: 'Вид на море' },
-  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс' },
-  { id: 'tropical', icon: TreePalm, labelEn: 'Tropical', labelRu: 'Тропики' },
-  { id: 'mountain_view', icon: Mountain, labelEn: 'Mountain', labelRu: 'Горы' },
-  { id: 'new_build', icon: Building, labelEn: 'New build', labelRu: 'Новострой' },
-  { id: 'garden', icon: Fence, labelEn: 'Garden', labelRu: 'Сад' },
-  { id: 'gym', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Спортзал' },
+  { id: 'private_pool', icon: Lock, labelEn: 'Private pool', labelRu: 'Свой бассейн' },
+  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
+  { id: 'washer', icon: WashingMachine, labelEn: 'Washer', labelRu: 'Стиралка' },
   { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pets OK', labelRu: 'С питомцами' },
   { id: 'kid_friendly', icon: Baby, labelEn: 'Kids', labelRu: 'Для детей' },
-  { id: 'kitchen', icon: Utensils, labelEn: 'Kitchen', labelRu: 'Кухня' },
   { id: 'parking', icon: Car, labelEn: 'Parking', labelRu: 'Парковка' },
   { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
-  { id: 'rooftop', icon: Sun, labelEn: 'Rooftop', labelRu: 'Крыша' },
+  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс' },
 ];
 
 interface AirbnbCategoryRibbonProps {

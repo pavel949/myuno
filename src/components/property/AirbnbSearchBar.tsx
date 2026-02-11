@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { differenceInDays } from 'date-fns';
 import { createPortal } from 'react-dom';
-import { Search, MapPin, Globe, X, Minus, Plus, Check, Bed, Home, Zap, Waves, Droplets, Eye, Mountain, TreePalm, Sparkles, Building, Fence, Dumbbell, PawPrint, Baby, Utensils, Wifi, Car, Sun } from 'lucide-react';
+import { Search, MapPin, Globe, X, Minus, Plus, Check, Bed, Home, Zap,
+  Waves, Footprints, Eye, Droplets, Lock, WashingMachine, PawPrint, Baby, Car, Wifi, Sparkles
+} from 'lucide-react';
 import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { usePropertyQuickFilters, DistrictOption } from '@/hooks/usePropertyQuickFilters';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
@@ -38,7 +40,7 @@ const flexibleDates = [
   { id: 'month', labelEn: 'Month', labelRu: 'Месяц', getDates: () => ({ from: new Date(), to: addMonths(new Date(), 1) }) },
 ];
 
-type MobileTab = 'location' | 'dates' | 'property' | 'guests';
+type MobileTab = 'type' | 'beach' | 'dates' | 'details';
 
 const BEDROOM_OPTIONS = [
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
@@ -53,23 +55,23 @@ const BEDROOM_OPTIONS = [
   { id: '12', labelEn: '12+', labelRu: '12+' },
 ];
 
-// Amenity/category options with icons
-const AMENITY_CATEGORIES = [
-  { id: 'beachfront', icon: Waves, labelEn: 'Beachfront', labelRu: 'У пляжа' },
-  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
-  { id: 'sea_view', icon: Eye, labelEn: 'Sea View', labelRu: 'Вид на море' },
-  { id: 'mountain_view', icon: Mountain, labelEn: 'Mountain', labelRu: 'Горы' },
-  { id: 'tropical', icon: TreePalm, labelEn: 'Tropical', labelRu: 'Тропики' },
-  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс' },
-  { id: 'new_build', icon: Building, labelEn: 'New Build', labelRu: 'Новострой' },
-  { id: 'garden', icon: Fence, labelEn: 'Garden', labelRu: 'Сад' },
-  { id: 'gym', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Спортзал' },
-  { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pet Friendly', labelRu: 'С питомцами' },
+// Key differentiators for the Details tab — Phuket-specific
+const DETAIL_AMENITIES = [
+  { id: 'private_pool', icon: Lock, labelEn: 'Private pool', labelRu: 'Свой бассейн' },
+  { id: 'walk_to_beach', icon: Footprints, labelEn: 'Walk to beach', labelRu: 'Пешком до пляжа' },
+  { id: 'washer', icon: WashingMachine, labelEn: 'Washer', labelRu: 'Стиралка' },
+  { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pets OK', labelRu: 'С питомцами' },
   { id: 'kid_friendly', icon: Baby, labelEn: 'Kids', labelRu: 'Для детей' },
-  { id: 'kitchen', icon: Utensils, labelEn: 'Kitchen', labelRu: 'Кухня' },
+  { id: 'sea_view', icon: Eye, labelEn: 'Sea view', labelRu: 'Вид на море' },
+  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
   { id: 'parking', icon: Car, labelEn: 'Parking', labelRu: 'Парковка' },
   { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
-  { id: 'rooftop', icon: Sun, labelEn: 'Rooftop', labelRu: 'Крыша' },
+];
+
+// Popular beaches first, then others
+const POPULAR_BEACHES = [
+  'bangtao', 'surin', 'kamala', 'kata', 'karon', 'patong', 'nai-harn', 'layan',
+  'nai-yang', 'mai-khao', 'rawai', 'chalong'
 ];
 
 export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
@@ -78,14 +80,25 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const { propertyTypes } = usePropertyFilterOptions();
   const isRu = language === 'ru';
 
-  const locations = useMemo(() => [
-    { id: 'all', labelEn: 'All Phuket', labelRu: 'Весь Пхукет' },
-    ...dbDistricts.map(d => ({ id: d.valueKey, labelEn: d.labelEn, labelRu: d.labelRu })),
-  ], [dbDistricts]);
+  // Sort districts: popular beaches first
+  const locations = useMemo(() => {
+    const sorted = [...dbDistricts].sort((a, b) => {
+      const aIdx = POPULAR_BEACHES.indexOf(a.valueKey);
+      const bIdx = POPULAR_BEACHES.indexOf(b.valueKey);
+      if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
+      if (aIdx >= 0) return -1;
+      if (bIdx >= 0) return 1;
+      return 0;
+    });
+    return sorted.map(d => ({ id: d.valueKey, labelEn: d.labelEn, labelRu: d.labelRu }));
+  }, [dbDistricts]);
+
+  const popularBeaches = useMemo(() => locations.filter(l => POPULAR_BEACHES.includes(l.id)), [locations]);
+  const otherAreas = useMemo(() => locations.filter(l => !POPULAR_BEACHES.includes(l.id)), [locations]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
-  const [mobileTab, setMobileTab] = useState<MobileTab>('location');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('type');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState<Date | undefined>();
   const [checkOut, setCheckOut] = useState<Date | undefined>();
@@ -99,8 +112,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const totalGuests = adults + children;
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
 
-  // Count of property tab filters
-  const propertyFilterCount = selectedPropertyTypes.length + selectedBedrooms.length + selectedAmenities.length + (instantBooking ? 1 : 0);
+  const detailsFilterCount = selectedBedrooms.length + selectedAmenities.length + (instantBooking ? 1 : 0) + (totalGuests !== 2 ? 1 : 0);
 
   useEffect(() => {
     if (isOpen) {
@@ -139,13 +151,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   };
 
   const toggleLocation = (locId: string) => {
-    if (locId === 'all') {
-      setSelectedLocations([]);
-    } else {
-      setSelectedLocations(prev =>
-        prev.includes(locId) ? prev.filter(id => id !== locId) : [...prev, locId]
-      );
-    }
+    setSelectedLocations(prev =>
+      prev.includes(locId) ? prev.filter(id => id !== locId) : [...prev, locId]
+    );
   };
 
   const toggleBedroom = (id: string) => {
@@ -164,7 +172,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
     ? (isRu ? 'Весь Пхукет' : 'Anywhere in Phuket')
     : selectedLocations.length === 1
       ? locations.find(l => l.id === selectedLocations[0])?.[isRu ? 'labelRu' : 'labelEn'] || ''
-      : `${selectedLocations.length} ${isRu ? 'районов' : 'areas'}`;
+      : `${selectedLocations.length} ${isRu ? 'пляжей' : 'beaches'}`;
 
   const formatDateShort = (date: Date | undefined) => {
     if (!date) return null;
@@ -178,44 +186,45 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   };
 
   const goToNextTab = () => {
-    if (mobileTab === 'location') setMobileTab('dates');
-    else if (mobileTab === 'dates') setMobileTab('property');
-    else if (mobileTab === 'property') setMobileTab('guests');
+    if (mobileTab === 'type') setMobileTab('beach');
+    else if (mobileTab === 'beach') setMobileTab('dates');
+    else if (mobileTab === 'dates') setMobileTab('details');
   };
 
-  // Build compact summary for mobile bar
-  const summaryParts: string[] = [];
-  summaryParts.push(locationLabel);
-  if (checkIn && checkOut) {
-    summaryParts.push(`${formatDateShort(checkIn)} – ${formatDateShort(checkOut)}`);
-  }
-  if (totalGuests !== 2) {
-    summaryParts.push(`${totalGuests} ${isRu ? 'гост.' : 'guests'}`);
-  }
-  if (selectedPropertyTypes.length > 0) {
-    const firstType = propertyTypes.find(t => t.id === selectedPropertyTypes[0]);
-    summaryParts.push(firstType ? (isRu ? firstType.labelRu : firstType.labelEn) : '');
-  }
-  if (selectedBedrooms.length > 0) {
-    summaryParts.push(selectedBedrooms[0] === 'studio' ? (isRu ? 'Студия' : 'Studio') : `${selectedBedrooms[0]}+ ${isRu ? 'сп.' : 'BR'}`);
-  }
-  if (selectedAmenities.length > 0) {
-    const firstAm = AMENITY_CATEGORIES.find(a => a.id === selectedAmenities[0]);
-    summaryParts.push(firstAm ? (isRu ? firstAm.labelRu : firstAm.labelEn) : '');
-  }
-  if (instantBooking) {
-    summaryParts.push(isRu ? 'Мгнов.' : 'Instant');
-  }
+  // Build smart summary for the collapsed pill
+  const pillTitle = useMemo(() => {
+    const parts: string[] = [];
+    if (selectedPropertyTypes.length === 1) {
+      const pt = propertyTypes.find(t => t.id === selectedPropertyTypes[0]);
+      if (pt) parts.push(isRu ? pt.labelRu : pt.labelEn);
+    }
+    if (selectedLocations.length === 1) {
+      const loc = locations.find(l => l.id === selectedLocations[0]);
+      if (loc) parts.push(isRu ? loc.labelRu : loc.labelEn);
+    } else if (selectedLocations.length > 1) {
+      parts.push(`${selectedLocations.length} ${isRu ? 'пляжей' : 'beaches'}`);
+    }
+    if (parts.length === 0) return isRu ? 'Куда угодно' : 'Where to?';
+    return parts.join(' · ');
+  }, [selectedPropertyTypes, selectedLocations, propertyTypes, locations, isRu]);
 
-  const bedroomLabel = selectedBedrooms.length === 0
-    ? (isRu ? 'Спальни' : 'Bedrooms')
-    : selectedBedrooms.length === 1
-      ? (selectedBedrooms[0] === 'studio' ? (isRu ? 'Студия' : 'Studio') : `${selectedBedrooms[0]} ${isRu ? 'сп.' : 'bed'}`)
-      : `${selectedBedrooms.length} ${isRu ? 'выбрано' : 'selected'}`;
-
-  const propertyTabLabel = propertyFilterCount === 0
-    ? (isRu ? 'Жильё' : 'Property')
-    : `${isRu ? 'Жильё' : 'Property'} (${propertyFilterCount})`;
+  const pillSubtitle = useMemo(() => {
+    const parts: string[] = [];
+    if (checkIn && checkOut) {
+      parts.push(`${formatDateShort(checkIn)} – ${formatDateShort(checkOut)}`);
+    } else {
+      parts.push(isRu ? 'Любые даты' : 'Any dates');
+    }
+    if (selectedBedrooms.length === 1) {
+      parts.push(selectedBedrooms[0] === 'studio' ? (isRu ? 'Студия' : 'Studio') : `${selectedBedrooms[0]} ${isRu ? 'сп.' : 'BR'}`);
+    }
+    if (selectedAmenities.length > 0) {
+      const first = DETAIL_AMENITIES.find(a => a.id === selectedAmenities[0]);
+      if (first) parts.push(isRu ? first.labelRu : first.labelEn);
+    }
+    if (totalGuests !== 2) parts.push(`${totalGuests} ${isRu ? 'гост.' : 'guests'}`);
+    return parts.join(' · ');
+  }, [checkIn, checkOut, selectedBedrooms, selectedAmenities, totalGuests, isRu]);
 
   const GuestCounter = ({ label, sublabel, value, onChange, min = 0, max = 16 }: {
     label: string; sublabel: string; value: number; onChange: (v: number) => void; min?: number; max?: number;
@@ -237,34 +246,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
     </div>
   );
 
-  // ── Property Tab Content (shared between mobile & desktop) ──
-  const PropertyTabContent = () => (
+  // ── Details Tab Content (bedrooms + guests + amenity toggles + instant) ──
+  const DetailsTabContent = () => (
     <div className="space-y-5">
-      {/* Property Type */}
-      <div>
-        <h4 className="text-sm font-semibold mb-2">{isRu ? 'Тип жилья' : 'Property type'}</h4>
-        <div className="grid grid-cols-2 gap-1.5">
-          {propertyTypes.map(type => (
-            <button
-              key={type.id}
-              onClick={() => togglePropertyType(type.id)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border text-sm",
-                selectedPropertyTypes.includes(type.id)
-                  ? "bg-primary/10 border-primary/30 text-primary font-medium"
-                  : "border-border hover:bg-muted"
-              )}
-            >
-              <Home className="w-4 h-4 shrink-0" />
-              <span className="flex-1 truncate">{isRu ? type.labelRu : type.labelEn}</span>
-              {selectedPropertyTypes.includes(type.id) && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t" />
-
       {/* Bedrooms */}
       <div>
         <h4 className="text-sm font-semibold mb-2">{isRu ? 'Спальни' : 'Bedrooms'}</h4>
@@ -288,11 +272,20 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
       <div className="border-t" />
 
-      {/* Amenities & Features */}
+      {/* Guests */}
       <div>
-        <h4 className="text-sm font-semibold mb-2">{isRu ? 'Удобства и особенности' : 'Amenities & features'}</h4>
+        <h4 className="text-sm font-semibold mb-2">{isRu ? 'Гости' : 'Guests'}</h4>
+        <GuestCounter label={isRu ? 'Взрослые' : 'Adults'} sublabel={isRu ? 'От 13 лет' : 'Ages 13+'} value={adults} onChange={setAdults} min={1} />
+        <GuestCounter label={isRu ? 'Дети' : 'Children'} sublabel={isRu ? 'От 2 до 12 лет' : 'Ages 2-12'} value={children} onChange={setChildren} />
+      </div>
+
+      <div className="border-t" />
+
+      {/* Key Differentiators */}
+      <div>
+        <h4 className="text-sm font-semibold mb-2">{isRu ? 'Важные удобства' : 'Key features'}</h4>
         <div className="grid grid-cols-3 gap-1.5">
-          {AMENITY_CATEGORIES.map(cat => {
+          {DETAIL_AMENITIES.map(cat => {
             const Icon = cat.icon;
             const isActive = selectedAmenities.includes(cat.id);
             return (
@@ -341,22 +334,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
         >
           <Search className="w-5 h-5 text-foreground shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold leading-tight">
-              {selectedLocations.length > 0
-                ? locationLabel
-                : (isRu ? 'Куда угодно' : 'Where to?')
-              }
-            </p>
-            <p className="text-xs text-muted-foreground leading-tight">
-              {[
-                checkIn && checkOut
-                  ? `${formatDateShort(checkIn)} – ${formatDateShort(checkOut)}`
-                  : (isRu ? 'Любая неделя' : 'Any week'),
-                totalGuests !== 2
-                  ? `${totalGuests} ${isRu ? 'гост.' : 'guests'}`
-                  : (isRu ? 'Сколько угодно' : 'Add guests'),
-              ].join(' · ')}
-            </p>
+            <p className="text-sm font-semibold leading-tight truncate">{pillTitle}</p>
+            <p className="text-xs text-muted-foreground leading-tight truncate">{pillSubtitle}</p>
           </div>
         </motion.div>
 
@@ -385,9 +364,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       </Button>
                     </div>
 
-                    {/* Tab Navigation — 4 tabs: Куда | Когда | Жильё | Кто */}
+                    {/* Tab Navigation — Type | Beach | Dates | Details */}
                     <div className="flex px-4 gap-1">
-                      {(['location', 'dates', 'property', 'guests'] as MobileTab[]).map((tab) => (
+                      {(['type', 'beach', 'dates', 'details'] as MobileTab[]).map((tab) => (
                         <button
                           key={tab}
                           className={cn(
@@ -398,19 +377,37 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                           )}
                           onClick={() => setMobileTab(tab)}
                         >
-                          {tab === 'location' && (isRu ? 'Куда' : 'Where')}
-                          {tab === 'dates' && (isRu ? 'Когда' : 'When')}
-                          {tab === 'property' && (
+                          {tab === 'type' && (
                             <span className="inline-flex items-center gap-1">
-                              {isRu ? 'Жильё' : 'Property'}
-                              {propertyFilterCount > 0 && (
+                              {isRu ? 'Тип' : 'Type'}
+                              {selectedPropertyTypes.length > 0 && (
                                 <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
-                                  {propertyFilterCount}
+                                  {selectedPropertyTypes.length}
                                 </span>
                               )}
                             </span>
                           )}
-                          {tab === 'guests' && (isRu ? 'Кто' : 'Who')}
+                          {tab === 'beach' && (
+                            <span className="inline-flex items-center gap-1">
+                              {isRu ? 'Пляж' : 'Beach'}
+                              {selectedLocations.length > 0 && (
+                                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
+                                  {selectedLocations.length}
+                                </span>
+                              )}
+                            </span>
+                          )}
+                          {tab === 'dates' && (isRu ? 'Даты' : 'Dates')}
+                          {tab === 'details' && (
+                            <span className="inline-flex items-center gap-1">
+                              {isRu ? 'Детали' : 'Details'}
+                              {detailsFilterCount > 0 && (
+                                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] inline-flex items-center justify-center">
+                                  {detailsFilterCount}
+                                </span>
+                              )}
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -418,39 +415,103 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
                   {/* Tab Content */}
                   <div className="flex-1 overflow-y-auto">
-                    {/* Location Tab */}
-                    {mobileTab === 'location' && (
+                    {/* Type Tab */}
+                    {mobileTab === 'type' && (
                       <div className="p-4 space-y-4">
-                        <h3 className="text-xl font-bold">{isRu ? 'Куда вы едете?' : 'Where are you going?'}</h3>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {locations.map((loc) => (
+                        <h3 className="text-xl font-bold">{isRu ? 'Какой тип жилья?' : 'What type of place?'}</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {propertyTypes.map(type => (
                             <button
-                              key={loc.id}
+                              key={type.id}
+                              onClick={() => togglePropertyType(type.id)}
                               className={cn(
-                                "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
-                                loc.id === 'all' && selectedLocations.length === 0
-                                  ? "bg-primary/10 border-primary/30 text-primary"
-                                  : selectedLocations.includes(loc.id)
-                                    ? "bg-primary/10 border-primary/30 text-primary"
-                                    : "border-border hover:bg-muted"
+                                "flex items-center gap-3 px-4 py-4 rounded-2xl text-left transition-all border-2",
+                                selectedPropertyTypes.includes(type.id)
+                                  ? "bg-primary/10 border-primary text-primary font-semibold"
+                                  : "border-border hover:bg-muted"
                               )}
-                              onClick={() => toggleLocation(loc.id)}
                             >
-                              {loc.id === 'all' ? <Globe className="w-4 h-4 shrink-0" /> : <MapPin className="w-4 h-4 shrink-0" />}
-                              <span className="flex-1 text-xs font-medium truncate">{isRu ? loc.labelRu : loc.labelEn}</span>
-                              {(loc.id === 'all' && selectedLocations.length === 0) || selectedLocations.includes(loc.id) ? (
-                                <Check className="w-3.5 h-3.5 text-primary shrink-0" />
-                              ) : null}
+                              <Home className="w-5 h-5 shrink-0" />
+                              <span className="flex-1 text-sm truncate">{isRu ? type.labelRu : type.labelEn}</span>
+                              {selectedPropertyTypes.includes(type.id) && <Check className="w-4 h-4 text-primary shrink-0" />}
                             </button>
                           ))}
                         </div>
+                        <NextStepNudge
+                          message={isRu ? 'Выберите пляж →' : 'Pick a beach →'}
+                          direction="right"
+                          visible={selectedPropertyTypes.length > 0 && mobileTab === 'type'}
+                          hintId="search-type-to-beach"
+                          className="mt-2 self-center w-fit mx-auto pointer-events-auto cursor-pointer"
+                        />
+                      </div>
+                    )}
+
+                    {/* Beach / Area Tab */}
+                    {mobileTab === 'beach' && (
+                      <div className="p-4 space-y-4">
+                        <h3 className="text-xl font-bold">{isRu ? 'Какой пляж / район?' : 'Which beach / area?'}</h3>
+                        
+                        {/* Popular beaches */}
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                            {isRu ? 'Популярные пляжи' : 'Popular beaches'}
+                          </p>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {popularBeaches.map((loc) => (
+                              <button
+                                key={loc.id}
+                                className={cn(
+                                  "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
+                                  selectedLocations.includes(loc.id)
+                                    ? "bg-primary/10 border-primary/30 text-primary"
+                                    : "border-border hover:bg-muted"
+                                )}
+                                onClick={() => toggleLocation(loc.id)}
+                              >
+                                <Waves className="w-4 h-4 shrink-0" />
+                                <span className="flex-1 text-xs font-medium truncate">{isRu ? loc.labelRu : loc.labelEn}</span>
+                                {selectedLocations.includes(loc.id) && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Other areas */}
+                        {otherAreas.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                              {isRu ? 'Другие районы' : 'Other areas'}
+                            </p>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {otherAreas.map((loc) => (
+                                <button
+                                  key={loc.id}
+                                  className={cn(
+                                    "flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors border",
+                                    selectedLocations.includes(loc.id)
+                                      ? "bg-primary/10 border-primary/30 text-primary"
+                                      : "border-border hover:bg-muted"
+                                  )}
+                                  onClick={() => toggleLocation(loc.id)}
+                                >
+                                  <MapPin className="w-4 h-4 shrink-0" />
+                                  <span className="flex-1 text-xs font-medium truncate">{isRu ? loc.labelRu : loc.labelEn}</span>
+                                  {selectedLocations.includes(loc.id) && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Selected summary chips */}
                         {selectedLocations.length > 0 && (
                           <div className="flex flex-wrap gap-2 pt-2 border-t">
                             {selectedLocations.map(locId => {
                               const loc = locations.find(l => l.id === locId);
                               return loc ? (
                                 <span key={locId} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                                  <MapPin className="w-3 h-3" /> {isRu ? loc.labelRu : loc.labelEn}
+                                  <Waves className="w-3 h-3" /> {isRu ? loc.labelRu : loc.labelEn}
                                   <button onClick={(e) => { e.stopPropagation(); toggleLocation(locId); }} className="ml-1 hover:text-primary/70">
                                     <X className="w-3 h-3" />
                                   </button>
@@ -462,8 +523,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                         <NextStepNudge
                           message={isRu ? 'Теперь выберите даты →' : 'Now select dates →'}
                           direction="right"
-                          visible={selectedLocations.length > 0 && mobileTab === 'location'}
-                          hintId="search-locations-to-dates"
+                          visible={selectedLocations.length > 0 && mobileTab === 'beach'}
+                          hintId="search-beach-to-dates"
                           className="mt-2 self-center w-fit mx-auto pointer-events-auto cursor-pointer"
                         />
                       </div>
@@ -514,31 +575,20 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                           </div>
                         )}
                         <NextStepNudge
-                          message={isRu ? 'Настройте жильё →' : 'Set property preferences →'}
+                          message={isRu ? 'Уточните детали →' : 'Add details →'}
                           direction="down"
                           visible={!!checkIn && !!checkOut && mobileTab === 'dates'}
-                          hintId="search-dates-to-property"
+                          hintId="search-dates-to-details"
                           className="self-center w-fit mx-auto"
                         />
                       </div>
                     )}
 
-                    {/* Property Tab (NEW — unified type + bedrooms + amenities + instant) */}
-                    {mobileTab === 'property' && (
+                    {/* Details Tab (bedrooms + guests + key amenities + instant) */}
+                    {mobileTab === 'details' && (
                       <div className="p-4">
-                        <h3 className="text-xl font-bold mb-4">{isRu ? 'Какое жильё ищете?' : 'What are you looking for?'}</h3>
-                        <PropertyTabContent />
-                      </div>
-                    )}
-
-                    {/* Guests Tab */}
-                    {mobileTab === 'guests' && (
-                      <div className="p-4 space-y-4">
-                        <h3 className="text-xl font-bold">{isRu ? 'Кто едет?' : "Who's coming?"}</h3>
-                        <div className="space-y-2">
-                          <GuestCounter label={isRu ? 'Взрослые' : 'Adults'} sublabel={isRu ? 'От 13 лет' : 'Ages 13+'} value={adults} onChange={setAdults} min={1} />
-                          <GuestCounter label={isRu ? 'Дети' : 'Children'} sublabel={isRu ? 'От 2 до 12 лет' : 'Ages 2-12'} value={children} onChange={setChildren} />
-                        </div>
+                        <h3 className="text-xl font-bold mb-4">{isRu ? 'Детали поиска' : 'Search details'}</h3>
+                        <DetailsTabContent />
                       </div>
                     )}
                   </div>
@@ -577,23 +627,53 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           animate={{ scale: activeField ? 1.02 : 1 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Location */}
-          <Popover open={activeField === 'location'} onOpenChange={(open) => setActiveField(open ? 'location' : null)}>
+          {/* Type */}
+          <Popover open={activeField === 'type'} onOpenChange={(open) => setActiveField(open ? 'type' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("flex-1 px-6 py-4 text-left rounded-l-full transition-all", activeField === 'location' ? "bg-card shadow-lg" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
-                <p className="text-xs font-semibold">{isRu ? 'Куда' : 'Where'}</p>
+              <button className={cn("flex-1 px-6 py-4 text-left rounded-l-full transition-all", activeField === 'type' ? "bg-card shadow-lg" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+                <p className="text-xs font-semibold">{isRu ? 'Тип' : 'Type'}</p>
+                <p className={cn("text-sm", selectedPropertyTypes.length === 0 ? "text-muted-foreground" : "font-medium")}>
+                  {selectedPropertyTypes.length === 0
+                    ? (isRu ? 'Любой' : 'Any')
+                    : selectedPropertyTypes.length === 1
+                      ? (propertyTypes.find(t => t.id === selectedPropertyTypes[0])?.[isRu ? 'labelRu' : 'labelEn'] || '')
+                      : `${selectedPropertyTypes.length} ${isRu ? 'типов' : 'types'}`
+                  }
+                </p>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="start" sideOffset={8}>
+              <h4 className="font-semibold mb-3">{isRu ? 'Тип жилья' : 'Property type'}</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {propertyTypes.map(type => (
+                  <button key={type.id} className={cn("flex items-center gap-2 p-3 rounded-xl text-left text-sm transition-all border-2", selectedPropertyTypes.includes(type.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => togglePropertyType(type.id)}>
+                    <Home className="w-4 h-4 shrink-0" />
+                    {isRu ? type.labelRu : type.labelEn}
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <div className="w-px h-8 bg-border" />
+
+          {/* Beach / Area */}
+          <Popover open={activeField === 'beach'} onOpenChange={(open) => setActiveField(open ? 'beach' : null)}>
+            <PopoverTrigger asChild>
+              <button className={cn("flex-1 px-6 py-4 text-left transition-all", activeField === 'beach' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+                <p className="text-xs font-semibold">{isRu ? 'Пляж' : 'Beach'}</p>
                 <p className={cn("text-sm", selectedLocations.length === 0 ? "text-muted-foreground" : "font-medium")}>{locationLabel}</p>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-96 p-4" align="start" sideOffset={8}>
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold">{isRu ? 'Выберите районы' : 'Choose areas'}</h4>
+                <h4 className="font-semibold">{isRu ? 'Пляж / район' : 'Beach / area'}</h4>
                 {selectedLocations.length > 0 && <Button variant="ghost" size="sm" onClick={() => setSelectedLocations([])}>{isRu ? 'Сбросить' : 'Clear'}</Button>}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {locations.filter(l => l.id !== 'all').map((loc) => (
+                {locations.map((loc) => (
                   <button key={loc.id} className={cn("flex items-center gap-3 p-3 rounded-xl text-left text-sm transition-all border", selectedLocations.includes(loc.id) ? "bg-primary/10 border-primary text-primary font-medium" : "border-transparent hover:bg-muted")} onClick={() => toggleLocation(loc.id)}>
-                    <MapPin className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    <Waves className="w-4 h-4 shrink-0 text-muted-foreground" />
                     {isRu ? loc.labelRu : loc.labelEn}
                   </button>
                 ))}
@@ -615,7 +695,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
             <PopoverContent className="w-auto p-4" align="center" sideOffset={8}>
               <div className="flex gap-2 mb-4">
                 {flexibleDates.map((option) => (
-                  <Button key={option.id} variant="outline" size="sm" className="rounded-full" onClick={() => { handleFlexibleDate(option); setActiveField('property'); }}>
+                  <Button key={option.id} variant="outline" size="sm" className="rounded-full" onClick={() => { handleFlexibleDate(option); setActiveField('details'); }}>
                     {isRu ? option.labelRu : option.labelEn}
                   </Button>
                 ))}
@@ -623,7 +703,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               <CalendarComponent
                 mode="range"
                 selected={{ from: checkIn, to: checkOut } as DateRange}
-                onSelect={(range: DateRange | undefined) => { setCheckIn(range?.from); setCheckOut(range?.to); if (range?.to) setActiveField('property'); }}
+                onSelect={(range: DateRange | undefined) => { setCheckIn(range?.from); setCheckOut(range?.to); if (range?.to) setActiveField('details'); }}
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
@@ -647,7 +727,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               <CalendarComponent
                 mode="range"
                 selected={{ from: checkIn, to: checkOut } as DateRange}
-                onSelect={(range: DateRange | undefined) => { setCheckIn(range?.from); setCheckOut(range?.to); if (range?.to) setActiveField('property'); }}
+                onSelect={(range: DateRange | undefined) => { setCheckIn(range?.from); setCheckOut(range?.to); if (range?.to) setActiveField('details'); }}
                 numberOfMonths={2}
                 disabled={(date) => date < new Date()}
                 locale={isRu ? ru : undefined}
@@ -657,39 +737,21 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
 
           <div className="w-px h-8 bg-border" />
 
-          {/* Property (Desktop — replaces old Bedrooms segment) */}
-          <Popover open={activeField === 'property'} onOpenChange={(open) => setActiveField(open ? 'property' : null)}>
+          {/* Details (Desktop) */}
+          <Popover open={activeField === 'details'} onOpenChange={(open) => setActiveField(open ? 'details' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("px-5 py-4 text-left transition-all", activeField === 'property' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
-                <p className="text-xs font-semibold">{isRu ? 'Жильё' : 'Property'}</p>
-                <p className={cn("text-sm", propertyFilterCount === 0 ? "text-muted-foreground" : "font-medium")}>
-                  {propertyFilterCount === 0
-                    ? (isRu ? 'Тип, удобства' : 'Type, amenities')
-                    : `${propertyFilterCount} ${isRu ? 'фильтр.' : 'filters'}`
+              <button className={cn("px-5 py-4 text-left transition-all", activeField === 'details' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+                <p className="text-xs font-semibold">{isRu ? 'Детали' : 'Details'}</p>
+                <p className={cn("text-sm", detailsFilterCount === 0 ? "text-muted-foreground" : "font-medium")}>
+                  {detailsFilterCount === 0
+                    ? (isRu ? 'Спальни, удобства' : 'Beds, features')
+                    : `${detailsFilterCount} ${isRu ? 'фильтр.' : 'filters'}`
                   }
                 </p>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-[380px] p-4 max-h-[70vh] overflow-y-auto" align="center" sideOffset={8}>
-              <PropertyTabContent />
-            </PopoverContent>
-          </Popover>
-
-          <div className="w-px h-8 bg-border" />
-
-          {/* Guests */}
-          <Popover open={activeField === 'guests'} onOpenChange={(open) => setActiveField(open ? 'guests' : null)}>
-            <PopoverTrigger asChild>
-              <button className={cn("px-6 py-4 text-left transition-all", activeField === 'guests' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
-                <p className="text-xs font-semibold">{isRu ? 'Гости' : 'Who'}</p>
-                <p className={cn("text-sm", totalGuests === 2 ? "text-muted-foreground" : "font-medium")}>
-                  {totalGuests} {isRu ? (totalGuests === 1 ? 'гость' : 'гостей') : (totalGuests === 1 ? 'guest' : 'guests')}
-                </p>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="end" sideOffset={8}>
-              <GuestCounter label={isRu ? 'Взрослые' : 'Adults'} sublabel={isRu ? 'От 13 лет' : 'Ages 13+'} value={adults} onChange={setAdults} min={1} />
-              <GuestCounter label={isRu ? 'Дети' : 'Children'} sublabel={isRu ? 'От 2 до 12 лет' : 'Ages 2-12'} value={children} onChange={setChildren} />
+              <DetailsTabContent />
             </PopoverContent>
           </Popover>
 
