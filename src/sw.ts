@@ -98,7 +98,14 @@ registerRoute(
   })
 );
 
-// ─── ACTIVATE: Delete ALL old caches (any that aren't current -v2) ───
+// ─── MESSAGE: Handle SKIP_WAITING command ───
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
   console.log('[SW v3.26] Activated — cleaning ALL old caches');
   const CURRENT_CACHES = ['navigation-v2', 'images-v2', 'fonts-v2', 'supabase-v2', 'google-fonts-v2'];
@@ -112,6 +119,14 @@ self.addEventListener('activate', (event) => {
             return caches.delete(key);
           })
       );
+    }).then(() => {
+      // Notify ALL clients to hard-reload with fresh assets
+      return self.clients.matchAll({ type: 'window' }).then((clients) => {
+        clients.forEach((client) => {
+          console.log('[SW] Sending SW_UPDATED to client:', client.id);
+          client.postMessage({ type: 'SW_UPDATED' });
+        });
+      });
     })
   );
 });
