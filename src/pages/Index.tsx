@@ -65,17 +65,16 @@ const Index = () => {
           {/* PWA Install — simplified */}
           <InstallBanner />
 
-          {/* Hero row: greeting + smart widget side by side on desktop */}
-          <div className="lg:flex lg:items-start lg:justify-between lg:gap-8 mb-6">
-            <div className="flex-1">
-              <HeroBlock />
-            </div>
-            {/* Smart Widget — inline on desktop */}
-            <div className="mt-4 lg:mt-0 lg:w-[380px] lg:shrink-0">
-              <Suspense fallback={null}>
-                <SmartWidget />
-              </Suspense>
-            </div>
+          {/* Hero — desktop: full-width photo banner; mobile: compact greeting */}
+          <div className="mb-6 lg:mb-8">
+            <HeroBlock />
+          </div>
+
+          {/* Smart Widget — mobile only (desktop weather is in Hero) */}
+          <div className="mb-4 lg:hidden">
+            <Suspense fallback={null}>
+              <SmartWidget />
+            </Suspense>
           </div>
 
           {/* Persona chips — role selector */}
