@@ -150,7 +150,7 @@ export default function PropertyIndex() {
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Inline filter states
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -182,8 +182,11 @@ export default function PropertyIndex() {
   const allProperties = useMemo(() => {
     const items = infiniteData?.pages.flatMap(p => p.properties) || [];
     return items.filter(p => {
-      // Category filter
-      if (selectedCategory && !matchesCategory(p, selectedCategory)) return false;
+      // Category filter (AND-logic: must match ALL selected categories)
+      if (selectedCategories.length > 0) {
+        const passesAll = selectedCategories.every(cat => matchesCategory(p, cat));
+        if (!passesAll) return false;
+      }
       // Type filter
       if (selectedTypes.length > 0) {
         const propType = (p.property_type || '').toLowerCase();
@@ -207,7 +210,7 @@ export default function PropertyIndex() {
       if (instantBookOnly && !p.instant_booking) return false;
       return true;
     });
-  }, [infiniteData, selectedCategory, selectedTypes, selectedBedrooms, instantBookOnly]);
+  }, [infiniteData, selectedCategories, selectedTypes, selectedBedrooms, instantBookOnly]);
 
   // Featured
   const featured = useMemo(() => 
@@ -290,8 +293,8 @@ export default function PropertyIndex() {
 
         {/* Category Icons Ribbon — Airbnb style */}
         <PropertyCategoryIcons
-          selected={selectedCategory}
-          onSelect={setSelectedCategory}
+          selected={selectedCategories}
+          onSelect={setSelectedCategories}
           className="border-b border-border/40 py-2"
         />
 
