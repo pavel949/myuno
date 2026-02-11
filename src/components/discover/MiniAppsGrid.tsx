@@ -142,8 +142,7 @@ const MiniAppCard = memo(function MiniAppCard({
       {/* Icon */}
       <div className={cn(
         "w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3",
-        "bg-gradient-to-br shadow-md",
-        color || "from-primary/80 to-primary",
+        "bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] shadow-md",
         "group-hover:scale-110 group-hover:shadow-lg transition-all duration-200"
       )}>
         <div className="absolute inset-0 rounded-xl md:rounded-2xl bg-gradient-to-tr from-white/15 to-transparent" />
