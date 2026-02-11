@@ -80,7 +80,7 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
   return (
     <section className="space-y-2.5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground lg:text-base lg:font-semibold lg:normal-case lg:tracking-normal lg:text-foreground">
           {isRu ? 'Экстренные ситуации' : 'Emergency'}
         </p>
         <button

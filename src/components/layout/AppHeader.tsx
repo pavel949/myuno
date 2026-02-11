@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Bell, Home, Compass, ShoppingBag, User } from 'lucide-react';
+import { Bell, Home, Compass, ShoppingBag, User, Search, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -29,7 +29,7 @@ const desktopNavItems = [
 
 /**
  * AppHeader — Minimal, calm header
- * Desktop: includes horizontal nav links
+ * Desktop: includes horizontal nav + centered search bar (Airbnb-style)
  * Mobile: logo + utilities only (bottom nav handles navigation)
  */
 export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
@@ -48,15 +48,15 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
         className
       )}
     >
-      <div className="flex items-center justify-between h-12 px-4 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between h-12 lg:h-16 px-4 max-w-7xl mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-          <span className="text-sm text-muted-foreground">my</span>
-          <span className="text-base font-semibold text-foreground">UNO</span>
+          <span className="text-sm lg:text-base text-muted-foreground">my</span>
+          <span className="text-base lg:text-lg font-semibold text-foreground">UNO</span>
         </Link>
 
         {/* Desktop navigation — hidden on mobile */}
-        <nav className="hidden md:flex items-center gap-1 ml-8">
+        <nav className="hidden lg:flex items-center gap-1 ml-6">
           {desktopNavItems.map(({ path, icon: Icon, labelEn, labelRu, exact }) => (
             <NavLink
               key={path}
@@ -76,9 +76,33 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             </NavLink>
           ))}
         </nav>
+
+        {/* Desktop Search Bar — Airbnb-style centered pill */}
+        <button
+          onClick={() => navigate('/search')}
+          className={cn(
+            "hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-lg",
+            "px-4 py-2 rounded-full border border-border shadow-sm",
+            "bg-card hover:shadow-md transition-shadow cursor-pointer"
+          )}
+        >
+          <Search className="w-4 h-4 text-primary shrink-0" />
+          <div className="flex items-center gap-2 text-sm flex-1">
+            <span className="font-medium text-foreground">
+              {isRu ? 'Поиск' : 'Search'}
+            </span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground">
+              {isRu ? 'Услуги · Жильё · Впечатления' : 'Services · Stay · Experiences'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground">
+            <Search className="w-3.5 h-3.5" />
+          </div>
+        </button>
         
         {title && (
-          <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground md:hidden">{title}</h1>
+          <h1 className="text-sm font-medium truncate flex-1 text-center mx-4 text-foreground lg:hidden">{title}</h1>
         )}
 
         {/* Right — compact utilities */}

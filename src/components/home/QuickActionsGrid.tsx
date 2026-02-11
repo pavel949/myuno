@@ -27,10 +27,6 @@ interface QuickAction {
   isUrgent?: boolean;
 }
 
-// ============================================
-// ACTIONS BY USER TYPE — semantic tokens only
-// ============================================
-
 const TOURIST_ACTIONS: QuickAction[] = [
   { id: 'property', icon: Home, label: 'Rent', labelRu: 'Аренда', path: '/property' },
   { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer' },
@@ -76,7 +72,7 @@ const VENDOR_ACTIONS: QuickAction[] = [
   { id: 'vendor-services', icon: Wrench, label: 'Services', labelRu: 'Услуги', path: '/vendor/services' },
   { id: 'vendor-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/vendor/calendar' },
   { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market' },
-  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банкинг', path: '/banking' },
 ];
 
 const ADMIN_ACTIONS: QuickAction[] = [
@@ -107,7 +103,6 @@ const DEFAULT_ACTIONS: QuickAction[] = [
   { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical' },
 ];
 
-// Map personas to actions
 function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
   if (personas.length === 0) return DEFAULT_ACTIONS;
 
@@ -205,7 +200,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   }, [queryClient]);
 
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-1 md:gap-2">
+    <div className={cn(
+      "grid grid-cols-4 gap-1",
+      // Desktop: full-width horizontal ribbon
+      "lg:flex lg:items-start lg:justify-between lg:gap-0 lg:border-b lg:border-border/50 lg:pb-4"
+    )}>
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
@@ -220,12 +219,16 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             className={cn(
               "relative flex flex-col items-center p-1.5 rounded-xl",
               "hover:bg-card/80 transition-all group active:scale-[0.97]",
+              // Desktop: wider touch target, border-bottom indicator on hover
+              "lg:px-4 lg:py-2 lg:rounded-none lg:hover:bg-transparent",
             )}
           >
             <div className={cn(
               "w-[50px] h-[50px] rounded-[14px] flex items-center justify-center mb-1 shadow-sm",
               isMore ? "bg-muted" : "bg-primary/10",
-              "group-hover:scale-105 transition-transform duration-150"
+              "group-hover:scale-105 transition-transform duration-150",
+              // Desktop: larger icons
+              "lg:w-14 lg:h-14 lg:rounded-2xl lg:mb-2"
             )}>
               <Icon 
                 className={cn(isMore ? "text-muted-foreground" : "text-primary")}
@@ -234,9 +237,15 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               />
             </div>
             
-            <span className="text-[11px] font-medium text-center leading-tight truncate w-full text-foreground">
+            <span className={cn(
+              "text-[11px] font-medium text-center leading-tight truncate w-full text-foreground",
+              "lg:text-xs"
+            )}>
               {label}
             </span>
+
+            {/* Desktop hover underline */}
+            <div className="hidden lg:block absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-foreground rounded-full group-hover:w-8 transition-all duration-200" />
           </button>
         );
       })}
