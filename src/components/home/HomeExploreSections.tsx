@@ -173,7 +173,7 @@ function ExploreCardDesktop({ item, language }: { item: ExploreItem; language: s
     <button
       onClick={() => navigate(item.path)}
       className={cn(
-        "hidden lg:block group relative overflow-hidden rounded-2xl",
+        "hidden lg:block group relative overflow-hidden rounded-xl",
         "aspect-[3/2] w-full",
         "hover:shadow-lg hover:scale-[1.02] transition-all duration-300",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -185,7 +185,7 @@ function ExploreCardDesktop({ item, language }: { item: ExploreItem; language: s
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
       
       {/* Top badges */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
@@ -203,10 +203,10 @@ function ExploreCardDesktop({ item, language }: { item: ExploreItem; language: s
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="text-lg font-semibold text-white leading-tight">
+        <h3 className="text-xl font-semibold text-white leading-tight">
           {isRu ? item.titleRu : item.titleEn}
         </h3>
-        <p className="text-sm text-white/80 mt-0.5">
+        <p className="text-[15px] text-white/80 mt-0.5">
           {isRu ? item.subtitleRu : item.subtitleEn}
         </p>
       </div>
@@ -224,7 +224,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
       <section className="space-y-3 lg:space-y-4">
         <p className={cn(
           "text-xs font-medium text-muted-foreground uppercase tracking-wide",
-          "lg:text-lg lg:font-semibold lg:text-foreground lg:normal-case lg:tracking-normal"
+          "lg:text-xl lg:font-semibold lg:text-foreground lg:normal-case lg:tracking-normal"
         )}>
           {isRu ? 'Отдых и досуг' : 'Leisure & lifestyle'}
         </p>
@@ -235,7 +235,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
           ))}
         </div>
         
-        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {EXPLORE_ITEMS.map((item) => (
             <ExploreCardDesktop key={item.id} item={item} language={language} />
           ))}
@@ -246,7 +246,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
       <section className="space-y-3 lg:space-y-4">
         <p className={cn(
           "text-xs font-medium text-muted-foreground uppercase tracking-wide",
-          "lg:text-lg lg:font-semibold lg:text-foreground lg:normal-case lg:tracking-normal"
+          "lg:text-xl lg:font-semibold lg:text-foreground lg:normal-case lg:tracking-normal"
         )}>
           {isRu ? 'Услуги' : 'Services'}
         </p>
@@ -257,7 +257,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
           ))}
         </div>
         
-        <div className="hidden lg:grid lg:grid-cols-3 gap-5">
+        <div className="hidden lg:grid lg:grid-cols-3 gap-6">
           {SERVICES_ITEMS.map((item) => (
             <ExploreCardDesktop key={item.id} item={item} language={language} />
           ))}

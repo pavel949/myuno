@@ -67,28 +67,28 @@ body {
   :root {
     /* Calm Light — warm off-white, trust-first palette */
     --background: 40 20% 98%;
-    --foreground: 220 15% 18%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 18%;
+    --foreground: 220 20% 12%;
+    --card: 40 15% 99%;
+    --card-foreground: 220 20% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 18%;
+    --popover-foreground: 220 20% 12%;
     /* Primary — warm indigo, single accent */
     --primary: 230 45% 46%;
     --primary-foreground: 0 0% 100%;
     --primary-light: 230 40% 60%;
-    --secondary: 40 15% 95%;
-    --secondary-foreground: 220 15% 18%;
+    --secondary: 40 18% 96%;
+    --secondary-foreground: 220 20% 12%;
     --muted: 40 10% 94%;
-    --muted-foreground: 220 12% 38%;
+    --muted-foreground: 220 14% 32%;
     /* Accent = primary (single accent rule) */
     --accent: 40 15% 95%;
-    --accent-foreground: 220 15% 18%;
+    --accent-foreground: 220 20% 12%;
     /* Semantic accents */
     --accent-coral: 12 60% 58%;
     --accent-teal: 180 50% 42%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 10% 82%;
+    --border: 40 12% 86%;
     --input: 40 10% 84%;
     --ring: 230 45% 46%;
     --radius: 0.75rem;
@@ -127,7 +127,7 @@ body {
   .dark {
     /* Calm Dark — muted, not flashy */
     --background: 220 12% 6%;
-    --foreground: 40 10% 92%;
+    --foreground: 40 12% 94%;
     
     --card: 220 12% 8%;
     --card-foreground: 40 10% 92%;
@@ -194,6 +194,15 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: 15px;
+    }
+    p {
+      @apply text-base;
+    }
   }
 
   /* Typography Scale - optimized for Russian text (longer words) */

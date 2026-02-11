@@ -103,13 +103,13 @@ const Index = () => {
             </div>
           )}
 
-          {/* Secondary content: stacked on mobile, 3-col grid on desktop */}
-          <div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
-            {/* LifeOS Focus Bar */}
-            <div>
-              <LifeOSFocusBar />
-            </div>
+          {/* LifeOS Focus Bar — full width on desktop */}
+          <div className="mb-6">
+            <LifeOSFocusBar />
+          </div>
 
+          {/* Secondary content: stacked on mobile, 2-col grid on desktop */}
+          <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
             {/* When context is active → show status dashboard */}
             {hasContext ? (
               <div>

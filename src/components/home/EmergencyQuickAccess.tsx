@@ -92,7 +92,7 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 lg:gap-3">
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-3">
         {EMERGENCY_SCENARIOS.map((scenario) => {
           const Icon = scenario.icon;
           return (
@@ -106,8 +106,8 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
                 "transition-all active:scale-[0.96]"
               )}
             >
-              <div className={cn("w-7 h-7 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center", scenario.bg)}>
-                <Icon className={cn("w-3.5 h-3.5 lg:w-5 lg:h-5", scenario.color)} />
+              <div className={cn("w-7 h-7 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center", scenario.bg)}>
+                <Icon className={cn("w-3.5 h-3.5 lg:w-6 lg:h-6", scenario.color)} />
               </div>
               <span className="text-[11px] lg:text-sm font-medium text-foreground leading-tight text-center">
                 {isRu ? scenario.labelRu : scenario.labelEn}
@@ -122,7 +122,7 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
         href={`https://wa.me/${COMPANY_CONTACTS.whatsapp.number}?text=${encodeURIComponent(isRu ? 'Мне нужна срочная помощь' : 'I need urgent help')}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium hover:bg-emerald-500/15 transition-colors"
+        className="flex items-center justify-center gap-2 py-2 lg:py-3 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs lg:text-sm font-medium hover:bg-emerald-500/15 transition-colors"
       >
         💬 {isRu ? 'WhatsApp myUNO — помощь 24/7' : 'WhatsApp myUNO — help 24/7'}
       </a>

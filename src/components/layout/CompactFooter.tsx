@@ -51,17 +51,17 @@ export function CompactFooter() {
   // Desktop: professional multi-column footer
   if (isDesktop) {
     return (
-      <footer className="border-t border-border bg-muted/20 mt-auto">
-        <div className="max-w-7xl mx-auto px-8 py-10">
+      <footer className="border-t-2 border-border bg-muted/20 mt-auto">
+        <div className="max-w-7xl mx-auto px-8 py-12">
           {/* Main grid */}
           <div className="grid grid-cols-4 gap-8 mb-8">
             {/* Brand column */}
             <div className="space-y-3">
               <div className="flex items-center gap-1">
-                <span className="text-sm text-muted-foreground">my</span>
-                <span className="text-base font-semibold text-foreground">UNO</span>
+                <span className="text-base text-muted-foreground font-light">my</span>
+                <span className="text-lg font-semibold text-foreground font-display">UNO</span>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-[15px] text-muted-foreground leading-7">
                 {isRu 
                   ? 'Ваш дом на Пхукете. Сервисы, недвижимость и жизнь на острове — в одном приложении.' 
                   : 'Your home in Phuket. Services, real estate, and island life — all in one app.'}
@@ -74,7 +74,7 @@ export function CompactFooter() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center justify-center w-8 h-8 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors ${social.hoverColor}`}
+                    className={`flex items-center justify-center w-9 h-9 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors ${social.hoverColor}`}
                     aria-label={social.label}
                   >
                     <social.icon className="w-4 h-4" />
@@ -85,12 +85,12 @@ export function CompactFooter() {
 
             {/* Services column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 className="text-base font-semibold text-foreground">
                 {isRu ? 'Сервисы' : 'Services'}
               </h4>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-2.5">
                 {serviceLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link key={link.to} to={link.to} className="text-[15px] text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -99,12 +99,12 @@ export function CompactFooter() {
 
             {/* Company column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 className="text-base font-semibold text-foreground">
                 {isRu ? 'Компания' : 'Company'}
               </h4>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-2.5">
                 {companyLinks.map((link) => (
-                  <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link key={link.to} to={link.to} className="text-[15px] text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -113,14 +113,14 @@ export function CompactFooter() {
 
             {/* Trust column */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 className="text-base font-semibold text-foreground">
                 {isRu ? 'Гарантии' : 'Trust & Safety'}
               </h4>
               <div className="flex flex-col gap-3">
                 {trustBadges.map((badge) => (
                   <div key={badge.labelEn} className="flex items-center gap-2">
                     <badge.icon className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-[15px] text-muted-foreground">
                       {isRu ? badge.labelRu : badge.labelEn}
                     </span>
                   </div>
@@ -131,10 +131,10 @@ export function CompactFooter() {
 
           {/* Bottom bar */}
           <div className="border-t border-border/50 pt-4 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} myUNO · Phuket Edition
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {isRu ? 'Сделано с заботой на Пхукете' : 'Made with care in Phuket'}
             </p>
           </div>

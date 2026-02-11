@@ -105,10 +105,10 @@ export const LifeOSFocusBar = memo(function LifeOSFocusBar({ className }: LifeOS
             }}
           />
 
-          <div className="p-3.5 flex items-start gap-3">
+          <div className="p-3.5 lg:p-5 flex items-start gap-3">
             {/* Icon */}
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center shrink-0"
               style={{
                 background: `linear-gradient(135deg, ${topSituation.color}25, ${topSituation.color}10)`,
               }}
@@ -121,11 +121,11 @@ export const LifeOSFocusBar = memo(function LifeOSFocusBar({ className }: LifeOS
               <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 {isRu ? 'Следующий шаг' : 'Your next step'}
               </p>
-              <p className="text-[13px] font-medium leading-snug line-clamp-2">
+              <p className="text-[13px] lg:text-[15px] font-medium leading-snug line-clamp-2">
                 {shortRecognition}
               </p>
               <span
-                className="inline-flex items-center gap-1 text-xs font-semibold mt-1"
+                className="inline-flex items-center gap-1 text-xs lg:text-sm font-semibold mt-1"
                 style={{ color: topSituation.color }}
               >
                 {ctaText}
