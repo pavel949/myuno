@@ -1,14 +1,8 @@
 /**
  * Index — LifeOS Dashboard
  * 
- * Structure:
- * 1. HeroBlock (greeting, location, search, SOS)
- * 2. Quick Actions (role-adaptive)
- * 3. LifeOS Focus Bar (active situation)
- * 4. LifeOS Status Block (contextual checklist)
- * 5. Explore sections (vertical entry points)
- * 6. Life situation selector (when no context)
- * 7. Support + Trust
+ * Desktop: Full-width sections, secondary content in 3-col grid at bottom
+ * Mobile: Single column, unchanged
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -68,66 +62,81 @@ const Index = () => {
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 py-5 pb-24 md:pb-8 w-full max-w-7xl mx-auto">
           
-          {/* Desktop: 2-column grid layout / Mobile: single column */}
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            
-            {/* Left column — primary content (8 cols on desktop) */}
-            <div className="lg:col-span-8 space-y-6">
-              {/* PWA Install — simplified */}
-              <InstallBanner />
+          {/* PWA Install — simplified */}
+          <InstallBanner />
 
-              {/* Hero — greeting, location, search, SOS */}
+          {/* Hero row: greeting + smart widget side by side on desktop */}
+          <div className="lg:flex lg:items-start lg:justify-between lg:gap-8 mb-6">
+            <div className="flex-1">
               <HeroBlock />
-
-              {/* Persona chips — role selector */}
-              <PersonaChips />
-
-              {/* Quick Actions — role-adaptive icon row */}
-              <QuickActionsGrid />
-
-              {/* Explore other verticals */}
-              <Suspense fallback={null}>
-                <HomeExploreSections />
-              </Suspense>
-
-              {/* Life situation — contextual, secondary */}
-              {!hasContext && (
-                <Suspense fallback={null}>
-                  <LifeSituationSelector />
-                </Suspense>
-              )}
             </div>
-
-            {/* Right column — widgets & support (4 cols on desktop, stacked below on mobile) */}
-            <div className="lg:col-span-4 space-y-6 mt-6 lg:mt-0">
-              {/* Smart Widget — weather, events, recommendations */}
+            {/* Smart Widget — inline on desktop */}
+            <div className="mt-4 lg:mt-0 lg:w-[380px] lg:shrink-0">
               <Suspense fallback={null}>
                 <SmartWidget />
               </Suspense>
+            </div>
+          </div>
 
-              {/* LifeOS Focus Bar — top-priority active route */}
+          {/* Persona chips — role selector */}
+          <div className="mb-4">
+            <PersonaChips />
+          </div>
+
+          {/* Quick Actions — full-width ribbon on desktop */}
+          <div className="mb-6 lg:mb-8">
+            <QuickActionsGrid />
+          </div>
+
+          {/* Explore sections — full-width photo grid on desktop */}
+          <div className="mb-6 lg:mb-8">
+            <Suspense fallback={null}>
+              <HomeExploreSections />
+            </Suspense>
+          </div>
+
+          {/* Life situation — contextual, secondary */}
+          {!hasContext && (
+            <div className="mb-6">
+              <Suspense fallback={null}>
+                <LifeSituationSelector />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Secondary content: stacked on mobile, 3-col grid on desktop */}
+          <div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
+            {/* LifeOS Focus Bar */}
+            <div>
               <LifeOSFocusBar />
+            </div>
 
-              {/* When context is active → show status dashboard */}
-              {hasContext && (
+            {/* When context is active → show status dashboard */}
+            {hasContext ? (
+              <div>
                 <Suspense fallback={null}>
                   <LifeOSStatusBlock />
                 </Suspense>
-              )}
+              </div>
+            ) : (
+              <div>
+                <Suspense fallback={null}>
+                  <ConciergeBanner />
+                </Suspense>
+              </div>
+            )}
 
-              {/* Emergency Quick Access — always visible */}
+            {/* Emergency Quick Access */}
+            <div>
               <EmergencyQuickAccess />
-
-              {/* Support — always visible */}
-              <Suspense fallback={null}>
-                <ConciergeBanner />
-              </Suspense>
-
-              {/* Trust signals — subtle, bottom */}
-              <Suspense fallback={null}>
-                <TrustBanner />
-              </Suspense>
             </div>
+          </div>
+
+          {/* Trust signals — bottom */}
+          <div className="mt-6">
+            <Suspense fallback={null}>
+              <TrustBanner />
+            </Suspense>
           </div>
 
         </div>

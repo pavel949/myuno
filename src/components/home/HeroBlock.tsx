@@ -1,13 +1,13 @@
 import React, { memo } from 'react';
-import { MapPin, AlertTriangle, Search } from 'lucide-react';
+import { MapPin, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { InlineSearch } from '@/components/search/InlineSearch';
 
 /**
  * HeroBlock — Calm LifeOS header
- * Location + Greeting + Search + SOS
- * No branding noise, no marketing copy
+ * Mobile: Location + Greeting + Search + SOS
+ * Desktop: Large greeting only (search is in header)
  */
 export const HeroBlock = memo(function HeroBlock() {
   const { language } = useLanguage();
@@ -38,18 +38,18 @@ export const HeroBlock = memo(function HeroBlock() {
         </Link>
       </div>
 
-      {/* Greeting */}
+      {/* Greeting — scales up on desktop */}
       <div>
-        <h1 className="text-xl font-semibold text-foreground leading-tight">
+        <h1 className="text-xl lg:text-3xl font-semibold text-foreground leading-tight">
           {getGreeting()}
         </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="text-sm lg:text-base text-muted-foreground mt-0.5 lg:mt-1">
           {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}
         </p>
       </div>
 
-      {/* Search */}
-      <div>
+      {/* Search — hidden on desktop (it's in the header) */}
+      <div className="lg:hidden">
         <InlineSearch />
       </div>
     </div>
