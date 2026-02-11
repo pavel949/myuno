@@ -92,7 +92,7 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 lg:gap-3">
         {EMERGENCY_SCENARIOS.map((scenario) => {
           const Icon = scenario.icon;
           return (
@@ -100,16 +100,16 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
               key={scenario.id}
               onClick={() => navigate(`/sos${scenario.anchor}`)}
               className={cn(
-                "flex flex-col items-center gap-1.5 p-3 rounded-xl",
+                "flex flex-col items-center gap-1.5 p-3 lg:p-4 rounded-xl",
                 "border border-border/50 bg-card",
                 "hover:border-destructive/30 hover:bg-destructive/5",
                 "transition-all active:scale-[0.96]"
               )}
             >
-              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", scenario.bg)}>
-                <Icon className={cn("w-3.5 h-3.5", scenario.color)} />
+              <div className={cn("w-7 h-7 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center", scenario.bg)}>
+                <Icon className={cn("w-3.5 h-3.5 lg:w-5 lg:h-5", scenario.color)} />
               </div>
-              <span className="text-[11px] font-medium text-foreground leading-tight text-center">
+              <span className="text-[11px] lg:text-sm font-medium text-foreground leading-tight text-center">
                 {isRu ? scenario.labelRu : scenario.labelEn}
               </span>
             </button>

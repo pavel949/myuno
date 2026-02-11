@@ -1,6 +1,7 @@
 import React, { memo, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { BackButton } from '@/components/uno/BackButton';
+import { useIsDesktop } from '@/hooks/use-desktop';
 
 interface CategoryItem {
   id: string;
@@ -42,14 +43,18 @@ export const CatalogHeader = memo(function CatalogHeader({
   children,
   className,
 }: CatalogHeaderProps) {
+  const isDesktop = useIsDesktop();
+
   return (
     <header className={cn(
-      "sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/50",
+      // Mobile: sticky top header; Desktop: static sub-header (AppHeader is already sticky above)
+      "z-40 bg-background/95 backdrop-blur-md border-b border-border/50",
+      !isDesktop && "sticky top-0",
       className
     )}>
       {/* Title row */}
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-3">
-        <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />
+        {!isDesktop && <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold truncate">{title}</h1>
           {subtitle && (

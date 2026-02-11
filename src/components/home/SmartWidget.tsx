@@ -76,7 +76,7 @@ export const SmartWidget = memo(function SmartWidget() {
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-card border border-border">
-      <div className="p-3 space-y-3">
+      <div className="p-3 lg:p-4 space-y-3">
         {/* Compact Header: Greeting + Weather in one row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export const SmartWidget = memo(function SmartWidget() {
             {isWeatherLoading ? (
               <Skeleton className="h-5 w-12" />
             ) : (
-              <span className="text-base font-bold text-foreground">
+              <span className="text-base lg:text-lg font-bold text-foreground">
                 {weather?.temp || 31}°C
               </span>
             )}
