@@ -52,7 +52,17 @@ export function PropertyCategoryIcons({ selected, onSelect, className }: Propert
 
   return (
     <div className={cn("overflow-x-auto scrollbar-hide", className)}>
-      <div className="flex items-end gap-6 px-4 min-w-max">
+      <div className="flex items-end gap-4 px-4 min-w-max">
+        {selected.length > 1 && (
+          <button
+            onClick={() => onSelect([])}
+            className="flex flex-col items-center gap-1.5 pb-2 border-b-2 border-transparent text-primary hover:text-primary/80 min-w-[56px] transition-all"
+          >
+            <span className="text-[10px] font-medium whitespace-nowrap">
+              {isRu ? 'Сброс' : 'Clear'}
+            </span>
+          </button>
+        )}
         {CATEGORIES.map((cat) => {
           const isActive = selected.includes(cat.id);
           const Icon = cat.icon;
