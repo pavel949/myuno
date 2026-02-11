@@ -18,6 +18,9 @@ import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { LifeOSFocusBar } from '@/components/home/LifeOSFocusBar';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
+import { DocumentExpiryWidget } from '@/components/home/DocumentExpiryWidget';
+import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
+import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 
 // Lazy load secondary components
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
@@ -33,6 +36,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete');
   });
+  const { pendingReview, isOpen: reviewOpen, setIsOpen: setReviewOpen, dismiss: dismissReview } = usePostOrderReview();
 
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -125,9 +129,10 @@ const Index = () => {
               </div>
             )}
 
-            {/* Emergency Quick Access */}
-            <div>
+            {/* Emergency + Document Expiry */}
+            <div className="space-y-4">
               <EmergencyQuickAccess />
+              <DocumentExpiryWidget />
             </div>
           </div>
 
@@ -140,6 +145,18 @@ const Index = () => {
 
         </div>
       </PullToRefresh>
+
+      {/* Post-order review prompt */}
+      {pendingReview && (
+        <PostOrderReviewPrompt
+          open={reviewOpen}
+          onClose={dismissReview}
+          orderId={pendingReview.orderId}
+          entityType={pendingReview.entityType}
+          entityId={pendingReview.entityId}
+          entityName={pendingReview.entityName}
+        />
+      )}
     </AppLayout>
   );
 };
