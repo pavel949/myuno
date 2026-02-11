@@ -34,7 +34,18 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
         <div className="flex h-full">
           {images.map((img, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0 h-full">
-              <img src={img} alt={`${name} ${idx + 1}`} className="w-full h-full object-cover select-none" />
+              <img
+                src={img}
+                alt={`${name} ${idx + 1}`}
+                className="w-full h-full object-cover select-none"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.fallback) {
+                    target.dataset.fallback = '1';
+                    target.src = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800';
+                  }
+                }}
+              />
             </div>
           ))}
         </div>
