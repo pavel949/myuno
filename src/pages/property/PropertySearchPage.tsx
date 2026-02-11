@@ -74,7 +74,7 @@ export default function PropertySearchPage() {
   );
   const [instantBookOnly, setInstantBookOnly] = useState(false);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -129,8 +129,10 @@ export default function PropertySearchPage() {
     const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
     
     const filtered = allItems.filter(prop => {
-      // Category filter
-      if (selectedCategory && !matchesCategory(prop, selectedCategory)) return false;
+      // Category filter (AND-logic)
+      if (selectedCategories.length > 0) {
+        if (!selectedCategories.every(cat => matchesCategory(prop, cat))) return false;
+      }
 
       // Instant book filter
       if (instantBookOnly && !prop.instant_booking) return false;
@@ -202,7 +204,7 @@ export default function PropertySearchPage() {
     }
 
     return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedTypes, sortKey, instantBookOnly, selectedAmenities, selectedCategory]);
+  }, [infiniteData, searchParams, filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedTypes, sortKey, instantBookOnly, selectedAmenities, selectedCategories]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -215,9 +217,9 @@ export default function PropertySearchPage() {
     count += quickFilters.length;
     count += selectedAmenities.length;
     if (instantBookOnly) count++;
-    if (selectedCategory) count++;
+    if (selectedCategories.length > 0) count += selectedCategories.length;
     return count;
-  }, [filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedAmenities, instantBookOnly, selectedCategory]);
+  }, [filterValues, quickFilters, selectedBedrooms, selectedDistricts, selectedAmenities, instantBookOnly, selectedCategories]);
 
   return (
     <AppLayout showHeader={false} showBottomNav>
@@ -468,8 +470,8 @@ export default function PropertySearchPage() {
 
           {/* Category Icons Ribbon */}
           <PropertyCategoryIcons
-            selected={selectedCategory}
-            onSelect={setSelectedCategory}
+            selected={selectedCategories}
+            onSelect={setSelectedCategories}
             className="py-2"
           />
         </header>
@@ -490,7 +492,7 @@ export default function PropertySearchPage() {
                   setSelectedCompanyId(null);
                   setInstantBookOnly(false);
                   setSelectedAmenities([]);
-                  setSelectedCategory(null);
+                  setSelectedCategories([]);
                 }}>
                   {language === 'ru' ? 'Сбросить' : 'Clear'}
                 </Button>
@@ -568,7 +570,7 @@ export default function PropertySearchPage() {
                 setSelectedCompanyId(null);
                 setInstantBookOnly(false);
                 setSelectedAmenities([]);
-                setSelectedCategory(null);
+                setSelectedCategories([]);
               }}>
                 {language === 'ru' ? 'Сбросить фильтры' : 'Reset filters'}
               </Button>

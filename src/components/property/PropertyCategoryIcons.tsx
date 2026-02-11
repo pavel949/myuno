@@ -33,8 +33,8 @@ const CATEGORIES: PropertyCategory[] = [
 ];
 
 interface PropertyCategoryIconsProps {
-  selected: string | null;
-  onSelect: (id: string | null) => void;
+  selected: string[];
+  onSelect: (ids: string[]) => void;
   className?: string;
 }
 
@@ -42,16 +42,24 @@ export function PropertyCategoryIcons({ selected, onSelect, className }: Propert
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
+  const handleToggle = (id: string) => {
+    onSelect(
+      selected.includes(id)
+        ? selected.filter(s => s !== id)
+        : [...selected, id]
+    );
+  };
+
   return (
     <div className={cn("overflow-x-auto scrollbar-hide", className)}>
       <div className="flex items-end gap-6 px-4 min-w-max">
         {CATEGORIES.map((cat) => {
-          const isActive = selected === cat.id;
+          const isActive = selected.includes(cat.id);
           const Icon = cat.icon;
           return (
             <button
               key={cat.id}
-              onClick={() => onSelect(isActive ? null : cat.id)}
+              onClick={() => handleToggle(cat.id)}
               className={cn(
                 "flex flex-col items-center gap-1.5 pb-2 border-b-2 transition-all min-w-[56px]",
                 isActive
