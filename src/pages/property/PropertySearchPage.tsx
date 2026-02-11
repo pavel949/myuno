@@ -329,12 +329,12 @@ export default function PropertySearchPage() {
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-3 bg-popover z-50" align="start" sideOffset={6}>
                   <div className="grid grid-cols-4 gap-1.5">
-                    {[
+                     {[
                       { id: 'studio', label: language === 'ru' ? 'Студия' : 'Studio' },
-                      { id: '1', label: '1' },
-                      { id: '2', label: '2' },
-                      { id: '3', label: '3' },
-                      { id: '4', label: '4' },
+                      { id: '1', label: '1+' },
+                      { id: '2', label: '2+' },
+                      { id: '3', label: '3+' },
+                      { id: '4', label: '4+' },
                       { id: '5', label: '5+' },
                       { id: '6', label: '6+' },
                       { id: '8', label: '8+' },

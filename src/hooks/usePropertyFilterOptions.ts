@@ -84,10 +84,15 @@ export function usePropertyFilterOptions() {
   // Bedroom options - static as they're numeric
   const bedroomOptions: FilterOption[] = useMemo(() => [
     { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
-    { id: '1', labelEn: '1 Bedroom', labelRu: '1 спальня' },
-    { id: '2', labelEn: '2 Bedrooms', labelRu: '2 спальни' },
-    { id: '3', labelEn: '3 Bedrooms', labelRu: '3 спальни' },
-    { id: '4+', labelEn: '4+ Bedrooms', labelRu: '4+ спальни' },
+    { id: '1', labelEn: '1+', labelRu: '1+' },
+    { id: '2', labelEn: '2+', labelRu: '2+' },
+    { id: '3', labelEn: '3+', labelRu: '3+' },
+    { id: '4', labelEn: '4+', labelRu: '4+' },
+    { id: '5', labelEn: '5+', labelRu: '5+' },
+    { id: '6', labelEn: '6+', labelRu: '6+' },
+    { id: '8', labelEn: '8+', labelRu: '8+' },
+    { id: '10', labelEn: '10+', labelRu: '10+' },
+    { id: '12', labelEn: '12+', labelRu: '12+' },
   ], []);
 
   // Listing type options - static

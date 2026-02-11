@@ -39,11 +39,15 @@ type MobileTab = 'location' | 'dates' | 'bedrooms' | 'guests';
 
 const BEDROOM_OPTIONS = [
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
-  { id: '1', labelEn: '1', labelRu: '1' },
-  { id: '2', labelEn: '2', labelRu: '2' },
-  { id: '3', labelEn: '3', labelRu: '3' },
-  { id: '4', labelEn: '4', labelRu: '4' },
-  { id: '5+', labelEn: '5+', labelRu: '5+' },
+  { id: '1', labelEn: '1+', labelRu: '1+' },
+  { id: '2', labelEn: '2+', labelRu: '2+' },
+  { id: '3', labelEn: '3+', labelRu: '3+' },
+  { id: '4', labelEn: '4+', labelRu: '4+' },
+  { id: '5', labelEn: '5+', labelRu: '5+' },
+  { id: '6', labelEn: '6+', labelRu: '6+' },
+  { id: '8', labelEn: '8+', labelRu: '8+' },
+  { id: '10', labelEn: '10+', labelRu: '10+' },
+  { id: '12', labelEn: '12+', labelRu: '12+' },
 ];
 
 export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
@@ -398,7 +402,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{language === 'ru' ? 'Сколько спален?' : 'How many bedrooms?'}</h3>
                         
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                           {BEDROOM_OPTIONS.map((option) => (
                             <button
                               key={option.id}
@@ -667,7 +671,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-3" align="center" sideOffset={8}>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {BEDROOM_OPTIONS.map((option) => (
                   <button
                     key={option.id}
