@@ -21,6 +21,9 @@ import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
 import { DocumentExpiryWidget } from '@/components/home/DocumentExpiryWidget';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
+import { ReferralBanner } from '@/components/referral/ReferralBanner';
+import { MorningDigest } from '@/components/home/MorningDigest';
+import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 
 // Lazy load secondary components
 const SmartWidget = lazy(() => import('@/components/home/SmartWidget').then(m => ({ default: m.SmartWidget })));
@@ -50,6 +53,7 @@ const Index = () => {
       <SEOHead jsonLd={createOrganizationSchema()} />
       
       <PWAWelcomeScreen />
+      <DocumentExpiryNotifier />
       
       {showOnboarding && (
         <Suspense fallback={null}>
@@ -110,6 +114,16 @@ const Index = () => {
           {/* LifeOS Focus Bar — full width on desktop */}
           <div className="mb-6">
             <LifeOSFocusBar />
+          </div>
+
+          {/* Morning Digest — enhanced daily value */}
+          <div className="mb-6">
+            <MorningDigest />
+          </div>
+
+          {/* Referral banner — logged-in users only */}
+          <div className="mb-6">
+            <ReferralBanner />
           </div>
 
           {/* Secondary content: stacked on mobile, 2-col grid on desktop */}

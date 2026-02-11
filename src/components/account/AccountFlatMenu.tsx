@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Home,
   Plus,
+  Gift,
   ChevronRight,
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const MENU_ITEMS: MenuItem[] = [
   { path: '/bookings', icon: ShoppingBag, labelEn: 'Bookings & Orders', labelRu: 'Заказы и брони' },
   { path: '/favorites', icon: Heart, labelEn: 'Favorites', labelRu: 'Избранное' },
   { path: '/wallet', icon: CreditCard, labelEn: 'Wallet & Payments', labelRu: 'Кошелёк и оплата' },
+  { path: '/profile/referral', icon: Gift, labelEn: 'Invite & Earn', labelRu: 'Пригласить и заработать' },
   { path: '/notifications', icon: Bell, labelEn: 'Notifications', labelRu: 'Уведомления' },
   { path: '/profile/documents', icon: FileText, labelEn: 'Documents', labelRu: 'Документы' },
   { path: '/profile/settings', icon: Settings, labelEn: 'Account Settings', labelRu: 'Настройки аккаунта' },
