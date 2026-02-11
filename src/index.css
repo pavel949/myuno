@@ -101,7 +101,6 @@ body {
     --warning: 38 80% 50%;
     --info: 210 70% 50%;
     --icon-dark: 210 100% 10%;
-    --hero-navy: 210 62% 14%;
 
     /* Card tokens */
     --card-radius: 1rem;
@@ -166,7 +165,6 @@ body {
     --warning: 38 80% 50%;
     --info: 210 65% 50%;
     --icon-dark: 210 60% 70%;
-    --hero-navy: 210 55% 18%;
 
     --card-elevated: 220 12% 10%;
     --card-hover: 220 12% 12%;

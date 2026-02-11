@@ -98,9 +98,6 @@ export default {
         "icon-dark": {
           DEFAULT: "hsl(var(--icon-dark))",
         },
-        "hero-navy": {
-          DEFAULT: "hsl(var(--hero-navy))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
