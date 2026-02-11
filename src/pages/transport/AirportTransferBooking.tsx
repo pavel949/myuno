@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useOrders, PaymentMethod } from '@/hooks/useOrders';
-import { useVehicleTypes } from '@/hooks/useTransportConfig';
+import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportConfig';
 import { useProfile } from '@/hooks/useProfile';
 import { cn, transliterate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +36,7 @@ export default function AirportTransferBooking() {
   const { toast } = useToast();
   
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('airport_transfer');
+  const { destinations } = useTransportDestinations('airport_transfer');
   const { createOrder, isCreating } = useOrders();
   const { profile } = useProfile();
   const { latitude, longitude, loading: geoLoading, getPosition, hasLocation, supported: geoSupported } = useGeolocation();
@@ -52,6 +53,7 @@ export default function AirportTransferBooking() {
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
     terminal: '',
     destinationAddress: '',
+    selectedDestinationId: '', // ID from transport_destinations
     flightNumber: '',
     arrivalDate: '',
     arrivalTime: '',
@@ -62,7 +64,7 @@ export default function AirportTransferBooking() {
     phone: '',
     email: '',
     notes: '',
-    meetingSignName: '', // Name for meeting sign (transliterated)
+    meetingSignName: '',
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
@@ -119,6 +121,11 @@ export default function AirportTransferBooking() {
     [vehicleTypes, formData.vehicleType]
   );
 
+  const selectedDestination = useMemo(() =>
+    destinations.find(d => d.id === formData.selectedDestinationId),
+    [destinations, formData.selectedDestinationId]
+  );
+
   // Auto-transliterate name for meeting sign (only if not manually edited)
   useEffect(() => {
     if (!meetingSignManuallyEdited.current && formData.name) {
@@ -129,9 +136,12 @@ export default function AirportTransferBooking() {
     }
   }, [formData.name]);
 
-  // Base price for transfers (flat rate, can be fetched from config later)
-  const basePrice = selectedVehicle?.base_price || 800;
-  const totalPrice = basePrice;
+  // Dynamic pricing: destination base_price * vehicle price_multiplier
+  const routeBasePrice = selectedDestination?.base_price || 0;
+  const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
+  const totalPrice = routeBasePrice > 0 
+    ? Math.round(routeBasePrice * vehicleMultiplier) 
+    : (selectedVehicle?.base_price || 800);
 
   const handleDirectionChange = (dir: TransferDirection) => {
     setFormData({ ...formData, direction: dir });
@@ -530,11 +540,55 @@ export default function AirportTransferBooking() {
                   ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
                   : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
               </Label>
+
+              {/* Popular destinations */}
+              {destinations.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' ? 'Популярные направления' : 'Popular destinations'}
+                  </p>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 touch-pan-y snap-x scrollbar-hide">
+                    {destinations
+                      .sort((a, b) => (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0))
+                      .map((dest) => {
+                        const destPrice = Math.round(dest.base_price * vehicleMultiplier);
+                        return (
+                          <button
+                            key={dest.id}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ 
+                              ...prev, 
+                              selectedDestinationId: dest.id,
+                              destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
+                            }))}
+                            className={cn(
+                              "flex-shrink-0 px-3 py-2 rounded-xl border-2 transition-all text-left",
+                              formData.selectedDestinationId === dest.id
+                                ? "border-primary bg-primary/10"
+                                : "border-border/50 bg-card hover:border-primary/30"
+                            )}
+                          >
+                            <p className="font-medium text-xs whitespace-nowrap">
+                              {language === 'ru' ? dest.name_ru : dest.name_en}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-semibold text-primary">฿{destPrice.toLocaleString()}</span>
+                              {dest.duration_minutes && (
+                                <span className="text-[10px] text-muted-foreground">~{dest.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 <AddressAutocomplete
                   value={formData.destinationAddress}
-                  onChange={(val) => setFormData({ ...formData, destinationAddress: val })}
-                  placeholder={language === 'ru' ? 'Отель, кондо или адрес' : 'Hotel, condo or address'}
+                  onChange={(val) => setFormData({ ...formData, destinationAddress: val, selectedDestinationId: '' })}
+                  placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
                   className="flex-1"
                 />
                 {geoSupported && (
@@ -668,6 +722,9 @@ export default function AirportTransferBooking() {
                       </p>
                       <p className="text-[10px] text-muted-foreground">
                         {language === 'ru' ? `до ${vehicle.max_passengers}` : `up to ${vehicle.max_passengers}`}
+                      </p>
+                      <p className="text-[10px] font-semibold text-primary">
+                        ฿{Math.round((routeBasePrice > 0 ? routeBasePrice : vehicle.base_price) * vehicle.price_multiplier).toLocaleString()}
                       </p>
                     </button>
                   ))}
@@ -849,7 +906,12 @@ export default function AirportTransferBooking() {
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-xs text-muted-foreground">
-                {language === 'ru' ? 'Стоимость трансфера' : 'Transfer price'}
+                {selectedDestination 
+                  ? (language === 'ru' ? selectedDestination.name_ru : selectedDestination.name_en)
+                  : (language === 'ru' ? 'Стоимость трансфера' : 'Transfer price')}
+                {selectedDestination?.duration_minutes && (
+                  <span className="ml-1">· ~{selectedDestination.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
+                )}
               </p>
               <p className="text-lg font-bold">฿{totalPrice.toLocaleString()}</p>
             </div>
