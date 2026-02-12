@@ -147,9 +147,9 @@ export const HeroBlock = memo(function HeroBlock() {
   if (!isDesktop) {
     return (
     <div className="relative rounded-2xl overflow-hidden">
-        {/* Navy-to-indigo gradient background (spinner style) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(230,50%,42%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(230,60%,65%,0.4),transparent_70%)]" />
+        {/* Deep navy gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,40%,8%)] via-[hsl(225,45%,14%)] to-[hsl(230,40%,20%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(230,50%,30%,0.4),transparent_70%)]" />
         
         <div className="relative px-5 py-5 space-y-4">
           {/* Location + SOS */}
