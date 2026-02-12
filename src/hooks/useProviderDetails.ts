@@ -119,12 +119,12 @@ export function useProviderDetails(providerId: string | null) {
       // Fetch services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, name_en, name_ru, price, currency, is_active, rating, review_count, category_id, created_at')
+        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });
 
       if (!servicesError) {
-        setServices((servicesData || []).map((s: any) => ({ ...s, is_featured: false })));
+        setServices((servicesData || []).map((s: any) => ({ ...s, is_featured: false, rating: null, review_count: null })));
       }
 
       // Fetch products (if provider is linked to marketplace vendor)
