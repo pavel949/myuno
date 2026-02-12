@@ -44,8 +44,10 @@ import {
   Clock,
   Languages,
   Eye,
-  Sparkles
+  Sparkles,
+  Star
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { BusinessCardScanButton, ScannedProviderData } from '@/components/admin/BusinessCardScanButton';
 import { 
   ALL_SERVICE_CATEGORIES, 
@@ -312,75 +314,108 @@ export default function AdminProviders() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {filteredProviders.map((provider) => (
-              <Card key={provider.id} className={!provider.is_active ? 'opacity-60' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div 
-                      className="flex-1 cursor-pointer"
-                      onClick={() => navigate(`/admin/providers/${provider.id}`)}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium hover:text-primary">
-                          {provider.name}
-                        </h3>
-                        {provider.is_verified && (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
+            {filteredProviders.map((provider) => {
+              const categoryLabel = ALL_BUSINESS_CATEGORIES.find(c => c.value === provider.business_category)?.[isRussian ? 'labelRu' : 'labelEn'] || provider.business_category;
+              return (
+                <Card key={provider.id} className={cn(!provider.is_active && 'opacity-60')}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      {/* Avatar/Logo */}
+                      <div 
+                        className="shrink-0 cursor-pointer"
+                        onClick={() => navigate(`/admin/providers/${provider.id}`)}
+                      >
+                        {provider.logo_url ? (
+                          <img 
+                            src={provider.logo_url} 
+                            alt={provider.name} 
+                            className="h-12 w-12 rounded-xl object-cover border"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Building2 className="h-6 w-6 text-primary" />
+                          </div>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <Badge variant="outline" className="text-xs">
-                          {ALL_BUSINESS_CATEGORIES.find(c => c.value === provider.business_category)?.[isRussian ? 'labelRu' : 'labelEn'] || provider.business_category}
-                        </Badge>
-                        {(provider as any).provider_type === 'individual' && (
-                          <Badge variant="secondary" className="text-xs">
-                            <User className="h-3 w-3 mr-1" />
-                            {isRussian ? 'Мастер' : 'Master'}
-                          </Badge>
-                        )}
-                        {!provider.is_active && (
-                          <Badge variant="secondary" className="text-xs">
-                            {isRussian ? 'Неактивен' : 'Inactive'}
-                          </Badge>
-                        )}
-                      </div>
-                      {provider.address && (
-                        <p className="text-sm text-muted-foreground">{provider.address}</p>
-                      )}
-                    </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/admin/providers/${provider.id}`)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Подробнее' : 'View Details'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(`/admin/services?provider=${provider.id}`)}>
-                          <Package className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Услуги' : 'Services'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openEditDialog(provider)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Редактировать' : 'Edit'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-red-500"
-                          onClick={() => setDeleteConfirmId(provider.id)}
+                      {/* Info */}
+                      <div 
+                        className="flex-1 min-w-0 cursor-pointer"
+                        onClick={() => navigate(`/admin/providers/${provider.id}`)}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium hover:text-primary truncate">
+                            {provider.name}
+                          </h3>
+                          {provider.is_verified && (
+                            <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                          )}
+                          {!provider.is_active && (
+                            <Badge variant="secondary" className="text-xs shrink-0">
+                              {isRussian ? 'Неактивен' : 'Inactive'}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {categoryLabel}
+                          </Badge>
+                          {(provider as any).provider_type === 'individual' && (
+                            <Badge variant="secondary" className="text-xs">
+                              <User className="h-3 w-3 mr-1" />
+                              {isRussian ? 'Мастер' : 'Master'}
+                            </Badge>
+                          )}
+                          {provider.rating != null && provider.rating > 0 && (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              {provider.rating.toFixed(1)}
+                              {provider.review_count ? ` (${provider.review_count})` : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(provider)}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Удалить' : 'Delete'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => navigate(`/admin/providers/${provider.id}`)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Подробнее' : 'View Details'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/admin/services?provider=${provider.id}`)}>
+                              <Package className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Услуги' : 'Services'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-500"
+                              onClick={() => setDeleteConfirmId(provider.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              {isRussian ? 'Удалить' : 'Delete'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
