@@ -107,7 +107,7 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.29] Activated — cleaning ALL old caches');
+  console.log('[SW v3.30] Activated — cleaning ALL old caches');
   const CURRENT_CACHES = ['navigation-v2', 'images-v2', 'fonts-v2', 'supabase-v2', 'google-fonts-v2'];
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -132,5 +132,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.29] Installing new service worker...');
+  console.log('[SW v3.30] Installing new service worker...');
 });
