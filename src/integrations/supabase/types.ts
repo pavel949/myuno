@@ -1612,16 +1612,21 @@ export type Database = {
         Row: {
           approval_status: string | null
           availability_note: string | null
+          bestseller_rank: number | null
+          box_type: string | null
           category: string | null
+          collection_slug: string | null
           color_palette: string | null
           colors: string[] | null
           composition_en: string | null
           composition_ru: string | null
+          cost_thb: number | null
           created_at: string
           created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
+          emotional_trigger_tag: string | null
           flowers: string[] | null
           id: string
           image: string | null
@@ -1630,32 +1635,44 @@ export type Database = {
           is_popular: boolean | null
           is_verified: boolean | null
           lifeos_tags: string[] | null
+          margin_percent: number | null
           name_en: string
           name_ru: string
           occasion_tags: string[] | null
           preparation_time_minutes: number | null
           price: number
+          scarcity_level: string | null
+          seo_slug: string | null
           shop_id: string
+          short_description_en: string | null
+          short_description_ru: string | null
           size: string | null
           size_variants: Json | null
           sku: string | null
+          social_proof_badge: string | null
           stock_quantity: number | null
           style: string | null
           uno_team_creator_id: string | null
+          urgency_badge: string | null
         }
         Insert: {
           approval_status?: string | null
           availability_note?: string | null
+          bestseller_rank?: number | null
+          box_type?: string | null
           category?: string | null
+          collection_slug?: string | null
           color_palette?: string | null
           colors?: string[] | null
           composition_en?: string | null
           composition_ru?: string | null
+          cost_thb?: number | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          emotional_trigger_tag?: string | null
           flowers?: string[] | null
           id?: string
           image?: string | null
@@ -1664,32 +1681,44 @@ export type Database = {
           is_popular?: boolean | null
           is_verified?: boolean | null
           lifeos_tags?: string[] | null
+          margin_percent?: number | null
           name_en: string
           name_ru: string
           occasion_tags?: string[] | null
           preparation_time_minutes?: number | null
           price: number
+          scarcity_level?: string | null
+          seo_slug?: string | null
           shop_id: string
+          short_description_en?: string | null
+          short_description_ru?: string | null
           size?: string | null
           size_variants?: Json | null
           sku?: string | null
+          social_proof_badge?: string | null
           stock_quantity?: number | null
           style?: string | null
           uno_team_creator_id?: string | null
+          urgency_badge?: string | null
         }
         Update: {
           approval_status?: string | null
           availability_note?: string | null
+          bestseller_rank?: number | null
+          box_type?: string | null
           category?: string | null
+          collection_slug?: string | null
           color_palette?: string | null
           colors?: string[] | null
           composition_en?: string | null
           composition_ru?: string | null
+          cost_thb?: number | null
           created_at?: string
           created_by_uno_team?: boolean | null
           currency?: string | null
           description_en?: string | null
           description_ru?: string | null
+          emotional_trigger_tag?: string | null
           flowers?: string[] | null
           id?: string
           image?: string | null
@@ -1698,18 +1727,25 @@ export type Database = {
           is_popular?: boolean | null
           is_verified?: boolean | null
           lifeos_tags?: string[] | null
+          margin_percent?: number | null
           name_en?: string
           name_ru?: string
           occasion_tags?: string[] | null
           preparation_time_minutes?: number | null
           price?: number
+          scarcity_level?: string | null
+          seo_slug?: string | null
           shop_id?: string
+          short_description_en?: string | null
+          short_description_ru?: string | null
           size?: string | null
           size_variants?: Json | null
           sku?: string | null
+          social_proof_badge?: string | null
           stock_quantity?: number | null
           style?: string | null
           uno_team_creator_id?: string | null
+          urgency_badge?: string | null
         }
         Relationships: [
           {
@@ -4261,6 +4297,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      flower_addons: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name_en: string
+          name_ru: string
+          price_thb: number
+          sort_order: number | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en: string
+          name_ru: string
+          price_thb?: number
+          sort_order?: number | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name_en?: string
+          name_ru?: string
+          price_thb?: number
+          sort_order?: number | null
+          type?: string
+        }
+        Relationships: []
       }
       flower_shops: {
         Row: {
