@@ -192,14 +192,14 @@ const VendorServices = () => {
     try {
       const serviceData = {
         name: formData.name_en,
-        name_ru: formData.name_ru || undefined,
-        description: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
+        name_ru: formData.name_ru || null,
+        description: formData.description_en || null,
+        description_ru: formData.description_ru || null,
         price: parseFloat(formData.price),
         currency: 'THB',
-        duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
+        duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : null,
         max_capacity: parseInt(formData.max_capacity) || 1,
-        image: formData.image || undefined,
+        image: formData.image || null,
         is_active: formData.is_active,
       };
 

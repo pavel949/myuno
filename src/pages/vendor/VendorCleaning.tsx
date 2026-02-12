@@ -93,16 +93,16 @@ const VendorCleaning = () => {
     try {
       const data: any = {
         name_en: formData.name_en, name_ru: formData.name_ru || formData.name_en,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
+        description_en: formData.description_en || null,
+        description_ru: formData.description_ru || null,
         service_type: formData.service_type,
         features: formData.features ? formData.features.split(',').map(s => s.trim()).filter(Boolean) : [],
         areas_served: formData.areas_served ? formData.areas_served.split(',').map(s => s.trim()).filter(Boolean) : [],
-        price_per_hour: formData.price_per_hour ? parseFloat(formData.price_per_hour) : undefined,
-        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : undefined,
-        duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : undefined,
+        price_per_hour: formData.price_per_hour ? parseFloat(formData.price_per_hour) : null,
+        price_fixed: formData.price_fixed ? parseFloat(formData.price_fixed) : null,
+        duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : null,
         currency: 'THB',
-        cover_image: formData.cover_image || undefined,
+        cover_image: formData.cover_image || null,
         is_active: formData.is_active,
       };
 

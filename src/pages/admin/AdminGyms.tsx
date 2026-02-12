@@ -110,13 +110,25 @@ export default function AdminGyms() {
     setIsSubmitting(true);
     try {
       const data: any = {
-        ...formData,
+        provider_id: formData.provider_id,
+        name_en: formData.name_en,
         name_ru: formData.name_ru || formData.name_en,
+        description_en: formData.description_en || null,
+        description_ru: formData.description_ru || null,
+        gym_type: formData.gym_type || null,
+        address: formData.address || null,
+        district: formData.district || null,
+        phone: formData.phone || null,
+        email: formData.email || null,
+        cover_image: formData.cover_image || null,
+        images: formData.images || [],
         price_day_pass: formData.price_day_pass ? parseFloat(formData.price_day_pass) : null,
         price_week_pass: formData.price_week_pass ? parseFloat(formData.price_week_pass) : null,
         price_month_pass: formData.price_month_pass ? parseFloat(formData.price_month_pass) : null,
         amenities: formData.amenities ? formData.amenities.split(',').map(s => s.trim()).filter(Boolean) : [],
         classes: formData.classes ? formData.classes.split(',').map(s => s.trim()).filter(Boolean) : [],
+        is_featured: formData.is_featured,
+        currency: 'THB',
       };
       if (editingItem) {
         const { error } = await updateGym(editingItem.id, data);
