@@ -326,25 +326,27 @@ export function useFlowerFilterOptions() {
     { id: 'L', labelEn: 'Large', labelRu: 'Большой' },
   ];
 
-  // Style options
+  // Style options — synced with actual bouquet.style values in DB
   const styleOptions: FilterOption[] = [
-    { id: 'Classic', labelEn: 'Classic', labelRu: 'Классика' },
-    { id: 'Romantic', labelEn: 'Romantic', labelRu: 'Романтика' },
-    { id: 'Minimal', labelEn: 'Minimal', labelRu: 'Минимализм' },
-    { id: 'Bright', labelEn: 'Bright', labelRu: 'Яркий' },
-    { id: 'Luxury', labelEn: 'Luxury', labelRu: 'Люкс' },
-    { id: 'Elegant', labelEn: 'Elegant', labelRu: 'Элегант' },
-    { id: 'Soft', labelEn: 'Soft', labelRu: 'Нежный' },
+    { id: 'classic', labelEn: 'Classic', labelRu: 'Классика' },
+    { id: 'modern', labelEn: 'Modern', labelRu: 'Современный' },
+    { id: 'minimalist', labelEn: 'Minimalist', labelRu: 'Минимализм' },
+    { id: 'luxe', labelEn: 'Luxury', labelRu: 'Люкс' },
+    { id: 'tropical', labelEn: 'Tropical', labelRu: 'Тропический' },
   ];
 
-  // Color palette options
+  // Color options — synced with actual bouquet.colors[] values in DB
   const colorPaletteOptions: FilterOption[] = [
-    { id: 'Red', labelEn: 'Red', labelRu: 'Красный' },
-    { id: 'Pink', labelEn: 'Pink', labelRu: 'Розовый' },
-    { id: 'White', labelEn: 'White', labelRu: 'Белый' },
-    { id: 'Yellow', labelEn: 'Yellow', labelRu: 'Жёлтый' },
-    { id: 'Pastel', labelEn: 'Pastel', labelRu: 'Пастель' },
-    { id: 'Mix', labelEn: 'Mix', labelRu: 'Микс' },
+    { id: 'red', labelEn: 'Red', labelRu: 'Красный' },
+    { id: 'pink', labelEn: 'Pink', labelRu: 'Розовый' },
+    { id: 'white', labelEn: 'White', labelRu: 'Белый' },
+    { id: 'yellow', labelEn: 'Yellow', labelRu: 'Жёлтый' },
+    { id: 'orange', labelEn: 'Orange', labelRu: 'Оранжевый' },
+    { id: 'purple', labelEn: 'Purple', labelRu: 'Фиолетовый' },
+    { id: 'peach', labelEn: 'Peach', labelRu: 'Персиковый' },
+    { id: 'cream', labelEn: 'Cream', labelRu: 'Кремовый' },
+    { id: 'lavender', labelEn: 'Lavender', labelRu: 'Лавандовый' },
+    { id: 'green', labelEn: 'Green', labelRu: 'Зелёный' },
   ];
 
   // Delivery options (static)
@@ -396,7 +398,17 @@ export function useFlowerFilterOptions() {
         titleEn: 'Flower Type',
         titleRu: 'Тип цветов',
         type: 'multi',
-        options: toFilterOptions(categories),
+        options: [
+          { id: 'roses', labelEn: 'Roses', labelRu: 'Розы' },
+          { id: 'orchids', labelEn: 'Orchids', labelRu: 'Орхидеи' },
+          { id: 'peonies', labelEn: 'Peonies', labelRu: 'Пионы' },
+          { id: 'sunflowers', labelEn: 'Sunflowers', labelRu: 'Подсолнухи' },
+          { id: 'lilies', labelEn: 'Lilies', labelRu: 'Лилии' },
+          { id: 'carnations', labelEn: 'Carnations', labelRu: 'Гвоздики' },
+          { id: 'eustoma', labelEn: 'Eustoma', labelRu: 'Эустома' },
+          { id: 'eucalyptus', labelEn: 'Eucalyptus', labelRu: 'Эвкалипт' },
+          { id: 'daisies', labelEn: 'Daisies', labelRu: 'Ромашки' },
+        ],
       },
     ],
   }), [categories, occasions, colors]);
