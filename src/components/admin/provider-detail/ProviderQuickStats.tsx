@@ -12,10 +12,10 @@ interface Props {
 }
 
 const statCards = [
-  { key: 'services', icon: Package, colorClass: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' },
-  { key: 'products', icon: ShoppingCart, colorClass: 'bg-green-100 dark:bg-green-900/30 text-green-600' },
-  { key: 'contracts', icon: FileText, colorClass: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' },
-  { key: 'rating', icon: Star, colorClass: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' },
+  { key: 'services', icon: Package, colorClass: 'bg-primary/10 text-primary' },
+  { key: 'products', icon: ShoppingCart, colorClass: 'bg-accent/15 text-accent-foreground' },
+  { key: 'contracts', icon: FileText, colorClass: 'bg-secondary text-secondary-foreground' },
+  { key: 'rating', icon: Star, colorClass: 'bg-muted text-muted-foreground' },
 ] as const;
 
 export function ProviderQuickStats({ provider, services, products, contracts }: Props) {

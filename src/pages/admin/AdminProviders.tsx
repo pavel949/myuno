@@ -95,6 +95,7 @@ export default function AdminProviders() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<'all' | 'active' | 'verified' | 'inactive'>('all');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -242,11 +243,16 @@ export default function AdminProviders() {
     }
   };
 
-  const filteredProviders = providers.filter(p => 
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.business_category?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProviders = providers.filter(p => {
+    const matchesSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.business_category?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filter === 'active') return p.is_active;
+    if (filter === 'verified') return p.is_verified;
+    if (filter === 'inactive') return !p.is_active;
+    return true;
+  });
 
   if (authLoading || adminLoading) {
     return (
@@ -274,7 +280,7 @@ export default function AdminProviders() {
         />
 
         {/* Search & Add */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -287,6 +293,32 @@ export default function AdminProviders() {
           <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
             <Plus className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Filter Chips */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {([
+            { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
+            { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
+            { key: 'verified' as const, labelEn: 'Verified', labelRu: 'Верифицированные' },
+            { key: 'inactive' as const, labelEn: 'Inactive', labelRu: 'Неактивные' },
+          ]).map(f => (
+            <Button
+              key={f.key}
+              variant={filter === f.key ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter(f.key)}
+            >
+              {isRussian ? f.labelRu : f.labelEn}
+              {f.key !== 'all' && (
+                <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
+                  {f.key === 'active' ? providers.filter(p => p.is_active).length :
+                   f.key === 'verified' ? providers.filter(p => p.is_verified).length :
+                   providers.filter(p => !p.is_active).length}
+                </Badge>
+              )}
+            </Button>
+          ))}
         </div>
 
         {/* Providers List */}
