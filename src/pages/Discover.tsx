@@ -30,6 +30,15 @@ const LIFE_CONTEXTS_SEARCH = [
   { code: 'property', titleEn: 'Property & Investment', titleRu: 'Недвижимость', route: '/life/property' },
   { code: 'relocation', titleEn: 'Relocation & Legals', titleRu: 'Переезд и документы', route: '/life/relocation' },
   { code: 'business', titleEn: 'Business & Work', titleRu: 'Бизнес и работа', route: '/life/business' },
+  { code: 'sports', titleEn: 'Sports & Fitness', titleRu: 'Спорт и фитнес', route: '/life/sports' },
+  { code: 'nightlife', titleEn: 'Nightlife & Social', titleRu: 'Ночная жизнь', route: '/life/nightlife' },
+  { code: 'shopping', titleEn: 'Shopping', titleRu: 'Шопинг', route: '/life/shopping' },
+  { code: 'education', titleEn: 'Education', titleRu: 'Образование', route: '/life/education' },
+  { code: 'pets', titleEn: 'Pet Care', titleRu: 'Питомцы', route: '/life/pets' },
+  { code: 'visa_travel', titleEn: 'Visa & Travel', titleRu: 'Виза и поездки', route: '/life/visa_travel' },
+  { code: 'planning', titleEn: 'Trip Planning', titleRu: 'Планирование поездки', route: '/life/planning' },
+  { code: 'wedding_event', titleEn: 'Wedding & Events', titleRu: 'Свадьба и праздники', route: '/life/wedding_event' },
+  { code: 'retirement_living', titleEn: 'Retirement Living', titleRu: 'Пенсия на Пхукете', route: '/life/retirement_living' },
 ];
 
 function resolveItem(item: VerticalGroupItem, language: string) {

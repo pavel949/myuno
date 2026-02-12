@@ -1,9 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plane, Home, Palmtree, Heart, Users, Building, FileText, Briefcase,
-  ArrowUpRight,
+  ArrowUpRight, Dumbbell, Music, ShoppingBag, GraduationCap, PawPrint,
+  MapPin, PartyPopper, Armchair, ChevronDown,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -25,7 +26,8 @@ interface LifeSituation {
 
 const ICON_GRADIENT = 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600';
 
-const SITUATIONS: LifeSituation[] = [
+/** Primary 8 — large cards */
+const PRIMARY_SITUATIONS: LifeSituation[] = [
   {
     code: 'arrival',
     icon: Plane,
@@ -132,6 +134,27 @@ const SITUATIONS: LifeSituation[] = [
   },
 ];
 
+/** Secondary — compact row items */
+const SECONDARY_SITUATIONS: Array<{
+  code: string;
+  icon: React.ElementType;
+  titleEn: string;
+  titleRu: string;
+  descEn: string;
+  descRu: string;
+  route: string;
+}> = [
+  { code: 'sports', icon: Dumbbell, titleEn: 'Sports & Fitness', titleRu: 'Спорт и фитнес', descEn: 'Gyms, yoga, water sports', descRu: 'Залы, йога, водный спорт', route: '/life/sports' },
+  { code: 'nightlife', icon: Music, titleEn: 'Nightlife', titleRu: 'Ночная жизнь', descEn: 'Clubs, bars, events', descRu: 'Клубы, бары, события', route: '/life/nightlife' },
+  { code: 'shopping', icon: ShoppingBag, titleEn: 'Shopping', titleRu: 'Шопинг', descEn: 'Markets, delivery, flowers', descRu: 'Маркеты, доставка, цветы', route: '/life/shopping' },
+  { code: 'education', icon: GraduationCap, titleEn: 'Education', titleRu: 'Образование', descEn: 'Schools, courses, tutors', descRu: 'Школы, курсы, репетиторы', route: '/life/education' },
+  { code: 'pets', icon: PawPrint, titleEn: 'Pet Care', titleRu: 'Питомцы', descEn: 'Vets, shops, pet sitting', descRu: 'Ветклиники, зоомагазины', route: '/life/pets' },
+  { code: 'visa_travel', icon: MapPin, titleEn: 'Visa & Travel', titleRu: 'Виза и поездки', descEn: 'Visa runs, insurance, transfers', descRu: 'Виза-раны, страховка, трансферы', route: '/life/visa_travel' },
+  { code: 'planning', icon: Plane, titleEn: 'Trip Planning', titleRu: 'Планирование', descEn: 'Prepare before you arrive', descRu: 'Подготовка к поездке', route: '/life/planning' },
+  { code: 'wedding_event', icon: PartyPopper, titleEn: 'Wedding & Events', titleRu: 'Свадьба и праздники', descEn: 'Venues, flowers, catering', descRu: 'Площадки, цветы, кейтеринг', route: '/life/wedding_event' },
+  { code: 'retirement_living', icon: Armchair, titleEn: 'Retirement', titleRu: 'Пенсия на Пхукете', descEn: 'Healthcare, housing, insurance', descRu: 'Медицина, жильё, страховка', route: '/life/retirement_living' },
+];
+
 const container = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
@@ -146,19 +169,22 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [showMore, setShowMore] = useState(false);
 
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-bold text-foreground">
         {isRu ? 'Жизненные ситуации' : 'Life Situations'}
       </h2>
+
+      {/* Primary 2×4 grid */}
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="grid grid-cols-2 gap-3"
       >
-        {SITUATIONS.map((s) => {
+        {PRIMARY_SITUATIONS.map((s) => {
           const Icon = s.icon;
           return (
             <motion.button
@@ -175,7 +201,6 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
               )}
               style={{ touchAction: 'manipulation' }}
             >
-              {/* Gradient icon */}
               <div className={cn(
                 "w-11 h-11 rounded-xl flex items-center justify-center shadow-md",
                 "group-hover:scale-110 group-hover:shadow-lg transition-all duration-300",
@@ -183,8 +208,6 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
               )}>
                 <Icon className={cn("w-5 h-5", s.iconColor)} />
               </div>
-
-              {/* Text */}
               <div className="space-y-0.5 flex-1">
                 <h3 className="text-[14px] font-bold text-foreground leading-tight">
                   {isRu ? s.titleRu : s.titleEn}
@@ -193,8 +216,6 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
                   {isRu ? s.descRu : s.descEn}
                 </p>
               </div>
-
-              {/* Arrow indicator */}
               <div className="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-foreground/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <ArrowUpRight className="w-3.5 h-3.5 text-foreground/40" />
               </div>
@@ -202,6 +223,57 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
           );
         })}
       </motion.div>
+
+      {/* "Show more" toggle */}
+      <button
+        onClick={() => { setShowMore(!showMore); triggerHaptic('light'); }}
+        className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/5 active:scale-[0.98] transition-all touch-manipulation"
+      >
+        <span>{isRu ? (showMore ? 'Свернуть' : 'Ещё 9 ситуаций') : (showMore ? 'Show less' : '9 more situations')}</span>
+        <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", showMore && "rotate-180")} />
+      </button>
+
+      {/* Secondary compact list */}
+      <AnimatePresence>
+        {showMore && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-1.5">
+              {SECONDARY_SITUATIONS.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <button
+                    key={s.code}
+                    onClick={() => { triggerHaptic('light'); navigate(s.route); }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 active:scale-[0.99] transition-all touch-manipulation text-left group"
+                  >
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+                      ICON_GRADIENT,
+                    )}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-foreground leading-tight">
+                        {isRu ? s.titleRu : s.titleEn}
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground leading-snug truncate">
+                        {isRu ? s.descRu : s.descEn}
+                      </p>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/60 transition-colors flex-shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 });
