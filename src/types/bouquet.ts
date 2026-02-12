@@ -20,6 +20,8 @@ export interface BouquetBase {
   name_ru: string;
   description_en: string | null;
   description_ru: string | null;
+  short_description_en: string | null;
+  short_description_ru: string | null;
   composition_en: string | null;
   composition_ru: string | null;
   category: string | null;
@@ -41,6 +43,17 @@ export interface BouquetBase {
   is_active: boolean | null;
   is_verified: boolean | null;
   stock_quantity: number | null;
+  // Psychology & margin fields
+  cost_thb: number | null;
+  margin_percent: number | null;
+  box_type: string | null;
+  urgency_badge: string | null;
+  social_proof_badge: string | null;
+  scarcity_level: string | null;
+  emotional_trigger_tag: string | null;
+  bestseller_rank: number | null;
+  seo_slug: string | null;
+  collection_slug: string | null;
   created_at: string;
 }
 

@@ -28,6 +28,7 @@ async function fetchBouquets(options: UseBouquetsOptions): Promise<Bouquet[]> {
         provider_id
       )
     `)
+    .order('bestseller_rank', { ascending: true, nullsFirst: false })
     .order('is_popular', { ascending: false })
     .order('created_at', { ascending: false });
 
