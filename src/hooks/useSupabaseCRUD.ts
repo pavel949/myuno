@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { toast } from 'sonner';
+import { sanitizePayload } from '@/lib/sanitizePayload';
 
 interface AdditionalFilter {
   column: string;
@@ -155,7 +156,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
     }
 
     try {
-      const insertData = { ...data } as Record<string, unknown>;
+      const insertData = sanitizePayload({ ...data } as Record<string, unknown>);
       if (providerId) {
         insertData[providerIdField] = providerId;
       }
@@ -195,10 +196,10 @@ export function useSupabaseCRUD<T extends { id: string }>({
   const update = useCallback(async (id: string, data: Partial<T>) => {
     try {
       // Auto-set updated_at timestamp
-      const updateData = {
+      const updateData = sanitizePayload({
         ...data,
         updated_at: new Date().toISOString(),
-      };
+      } as Record<string, unknown>);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: result, error: updateError } = await supabase
         .from(table as any)

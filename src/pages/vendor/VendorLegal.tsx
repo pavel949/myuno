@@ -92,15 +92,15 @@ const VendorLegal = () => {
     try {
       const data: any = {
         name_en: formData.name_en, name_ru: formData.name_ru || formData.name_en,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
+        description_en: formData.description_en || null,
+        description_ru: formData.description_ru || null,
         service_type: formData.service_type,
         specializations: formData.specializations ? formData.specializations.split(',').map(s => s.trim()).filter(Boolean) : [],
         languages: formData.languages ? formData.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
-        price_consultation: formData.price_consultation ? parseFloat(formData.price_consultation) : undefined,
+        price_consultation: formData.price_consultation ? parseFloat(formData.price_consultation) : null,
         currency: 'THB',
-        address: formData.address || undefined, phone: formData.phone || undefined, email: formData.email || undefined,
-        cover_image: formData.cover_image || undefined,
+        address: formData.address || null, phone: formData.phone || null, email: formData.email || null,
+        cover_image: formData.cover_image || null,
         is_active: formData.is_active,
       };
 
