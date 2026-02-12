@@ -16,8 +16,8 @@ interface StripItem {
 }
 
 const items: StripItem[] = [
-  { id: 'transfers', icon: Plane, labelEn: 'Transfers', labelRu: 'Трансферы', path: '/transfers' },
-  { id: 'property', icon: Home, labelEn: 'Real Estate', labelRu: 'Недвижимость', path: '/properties' },
+  { id: 'transfers', icon: Plane, labelEn: 'Transfers', labelRu: 'Трансферы', path: '/transfer' },
+  { id: 'property', icon: Home, labelEn: 'Real Estate', labelRu: 'Недвижимость', path: '/property' },
   { id: 'medical', icon: Stethoscope, labelEn: 'Healthcare', labelRu: 'Медицина', path: '/medical' },
   { id: 'experiences', icon: Compass, labelEn: 'Things To Do', labelRu: 'Чем заняться', path: '/experiences' },
   { id: 'vehicles', icon: Car, labelEn: 'Car Rental', labelRu: 'Аренда авто', path: '/transport' },

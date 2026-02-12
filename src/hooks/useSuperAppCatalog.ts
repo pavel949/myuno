@@ -38,7 +38,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
   hierarchyChild?: string;
   path: string;
   queryParam?: string;
-  customHub?: boolean;  // For verticals with custom hub structure (e.g., property)
+  customHub?: boolean;
 }> = {
   yachts: { 
     primaryTaxonomy: 'yacht_type', 
@@ -47,7 +47,7 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
   },
   tours: { 
     primaryTaxonomy: 'tour_type', 
-    path: '/tours',
+    path: '/experiences',
     queryParam: 'type',
   },
   restaurants: { 
@@ -67,10 +67,9 @@ const VERTICAL_CATALOG_CONFIG: Record<TaxonomyVertical, {
     queryParam: 'category',
   },
   property: { 
-    // Property uses custom hub structure instead of simple taxonomy
     path: '/property',
     queryParam: 'type',
-    customHub: true, // Flag for special rendering
+    customHub: true,
   },
   medical: { 
     primaryTaxonomy: 'clinic_specialty', 

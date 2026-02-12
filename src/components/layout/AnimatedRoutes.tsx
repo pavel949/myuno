@@ -157,6 +157,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/beauty/map" element={<LazyPage><Pages.BeautyMap /></LazyPage>} />
         <Route path="/salons" element={<Navigate to="/beauty" replace />} />
         <Route path="/spa" element={<Navigate to="/beauty" replace />} />
+        <Route path="/gyms" element={<Navigate to="/fitness" replace />} />
+        <Route path="/clinics" element={<Navigate to="/medical" replace />} />
+        <Route path="/water_activities" element={<Navigate to="/experiences?type=activity" replace />} />
         
         {/* ── Property ── */}
         <Route path="/properties" element={<Navigate to="/property" replace />} />
