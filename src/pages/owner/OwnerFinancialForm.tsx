@@ -101,10 +101,24 @@ export default function OwnerFinancialForm() {
       return;
     }
 
-    const payload = {
-      ...formData,
+    // Clean empty strings to null for optional fields
+    const payload: Record<string, any> = {
+      property_id: formData.property_id,
       transaction_type: transactionType,
       amount: parseFloat(formData.amount),
+      currency: formData.currency || 'THB',
+      transaction_date: formData.transaction_date,
+      category: formData.category || null,
+      description: formData.description || null,
+      description_ru: formData.description_ru || null,
+      payment_method: formData.payment_method || null,
+      tax_deductible: formData.tax_deductible,
+      recurring: formData.recurring,
+      recurring_interval: formData.recurring_interval || null,
+      status: formData.status || 'completed',
+      vendor_name: formData.vendor_name || null,
+      invoice_number: formData.invoice_number || null,
+      notes: formData.notes || null,
     };
 
     try {
