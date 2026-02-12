@@ -1,15 +1,16 @@
 /**
  * HomeExploreSections — Visual entry points to platform verticals
  * 
- * Mobile: 2-column photo cards with soft rounded corners
+ * Mobile: 2-column photo cards with overlaid text
  * Desktop: 3-4 column photo grid
- * Design: warm, calm, no borders — uses shadows and soft overlays
+ * Design: warm, calm, rounded corners with gradient overlays
  */
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, Scale, GraduationCap, Flower2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ChevronRight } from 'lucide-react';
 
 interface ExploreItem {
   id: string;
@@ -89,17 +90,19 @@ const SERVICES_ITEMS: ExploreItem[] = [
   },
 ];
 
-function ExploreCard({ item, language }: { item: ExploreItem; language: string }) {
+function ExploreCard({ item, language, featured }: { item: ExploreItem; language: string; featured?: boolean }) {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const badge = isRu ? item.badgeRu : item.badgeEn;
+  const Icon = item.icon;
 
   return (
     <button
       onClick={() => navigate(item.path)}
       className={cn(
-        "group relative overflow-hidden rounded-2xl w-full aspect-[4/3]",
-        "hover:shadow-xl transition-shadow duration-300",
+        "group relative overflow-hidden rounded-2xl w-full",
+        featured ? "aspect-[4/5]" : "aspect-[4/3]",
+        "hover:shadow-lg transition-shadow duration-300",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       )}
     >
@@ -109,8 +112,8 @@ function ExploreCard({ item, language }: { item: ExploreItem; language: string }
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         loading="lazy"
       />
-      {/* Soft gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
       
       {/* Price badge */}
       {badge && (
@@ -122,33 +125,59 @@ function ExploreCard({ item, language }: { item: ExploreItem; language: string }
       )}
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="text-base lg:text-xl font-semibold text-white leading-tight">
-          {isRu ? item.titleRu : item.titleEn}
-        </h3>
-        <p className="text-[13px] text-white/70 mt-0.5 hidden lg:block">
-          {isRu ? item.subtitleRu : item.subtitleEn}
-        </p>
+      <div className="absolute bottom-0 left-0 right-0 p-3.5">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <Icon className="w-3.5 h-3.5 text-white" />
+          </div>
+          <div className="text-left">
+            <h3 className="text-sm lg:text-base font-semibold text-white leading-tight">
+              {isRu ? item.titleRu : item.titleEn}
+            </h3>
+            <p className="text-[11px] text-white/70 mt-0.5 line-clamp-1">
+              {isRu ? item.subtitleRu : item.subtitleEn}
+            </p>
+          </div>
+        </div>
       </div>
     </button>
   );
 }
 
+function SectionHeader({ title, actionLabel, onAction }: { title: string; actionLabel?: string; onAction?: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest lg:text-lg lg:text-foreground lg:normal-case lg:tracking-normal lg:font-bold">
+        {title}
+      </h2>
+      {actionLabel && onAction && (
+        <button onClick={onAction} className="text-xs text-primary font-medium flex items-center gap-0.5 hover:underline">
+          {actionLabel}
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export const HomeExploreSections = memo(function HomeExploreSections() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
 
   return (
     <div className="space-y-8 lg:space-y-12">
-      {/* Leisure — 2-col mosaic on mobile, 3-col on desktop */}
+      {/* Leisure */}
       <section>
-        <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest mb-4 lg:text-lg lg:text-foreground lg:normal-case lg:tracking-normal lg:font-bold">
-          {isRu ? 'Отдых и досуг' : 'Leisure & lifestyle'}
-        </h2>
+        <SectionHeader 
+          title={isRu ? 'Отдых и досуг' : 'Leisure & lifestyle'} 
+          actionLabel={isRu ? 'Все' : 'All'}
+          onAction={() => navigate('/discover')}
+        />
         
-        {/* Mobile: 2-col grid with alternating tall/short */}
+        {/* Mobile: 2-col grid */}
         <div className="grid grid-cols-2 gap-3 lg:hidden">
-          {EXPLORE_ITEMS.map((item, i) => (
+          {EXPLORE_ITEMS.map((item) => (
             <ExploreCard key={item.id} item={item} language={language} />
           ))}
         </div>
@@ -163,9 +192,11 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
 
       {/* Services */}
       <section>
-        <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest mb-4 lg:text-lg lg:text-foreground lg:normal-case lg:tracking-normal lg:font-bold">
-          {isRu ? 'Услуги' : 'Services'}
-        </h2>
+        <SectionHeader 
+          title={isRu ? 'Услуги' : 'Services'}
+          actionLabel={isRu ? 'Все' : 'All'}
+          onAction={() => navigate('/discover')}
+        />
         
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-5">
           {SERVICES_ITEMS.map((item) => (

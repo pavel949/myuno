@@ -1,12 +1,11 @@
 /**
- * EmergencyQuickAccess — Quick access to emergency scenarios from home
- * 6 most common emergency situations with 1-tap access
+ * EmergencyQuickAccess — Compact emergency strip with 1-tap access
  */
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Heart, Bug, Car, FileX, Wallet, Shield,
-  ChevronRight
+  ChevronRight, MessageCircle
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -14,61 +13,40 @@ import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 
 const EMERGENCY_SCENARIOS = [
   {
-    id: 'health',
-    icon: Heart,
-    labelEn: 'Health',
-    labelRu: 'Здоровье',
-    phone: '1669',
+    id: 'health', icon: Heart,
+    labelEn: 'Health', labelRu: 'Здоровье',
     anchor: '#medical',
-    color: 'text-rose-500',
-    bg: 'bg-rose-500/10',
+    color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20',
   },
   {
-    id: 'bite',
-    icon: Bug,
-    labelEn: 'Bite / Sting',
-    labelRu: 'Укус',
+    id: 'bite', icon: Bug,
+    labelEn: 'Bite', labelRu: 'Укус',
     anchor: '#wildlife',
-    color: 'text-orange-500',
-    bg: 'bg-orange-500/10',
+    color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20',
   },
   {
-    id: 'accident',
-    icon: Car,
-    labelEn: 'Accident',
-    labelRu: 'Авария',
-    phone: '1193',
+    id: 'accident', icon: Car,
+    labelEn: 'Accident', labelRu: 'Авария',
     anchor: '#traffic',
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10',
+    color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20',
   },
   {
-    id: 'passport',
-    icon: FileX,
-    labelEn: 'Lost passport',
-    labelRu: 'Паспорт',
+    id: 'passport', icon: FileX,
+    labelEn: 'Passport', labelRu: 'Паспорт',
     anchor: '#documents',
-    color: 'text-purple-500',
-    bg: 'bg-purple-500/10',
+    color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20',
   },
   {
-    id: 'money',
-    icon: Wallet,
-    labelEn: 'No money',
-    labelRu: 'Без денег',
+    id: 'money', icon: Wallet,
+    labelEn: 'No money', labelRu: 'Без денег',
     anchor: '#documents',
-    color: 'text-slate-500',
-    bg: 'bg-slate-500/10',
+    color: 'text-slate-500', bg: 'bg-slate-500/10', border: 'border-slate-500/20',
   },
   {
-    id: 'police',
-    icon: Shield,
-    labelEn: 'Police',
-    labelRu: 'Полиция',
-    phone: '1155',
+    id: 'police', icon: Shield,
+    labelEn: 'Police', labelRu: 'Полиция',
     anchor: '#police',
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
+    color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20',
   },
 ] as const;
 
@@ -78,9 +56,9 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
   const isRu = language === 'ru';
 
   return (
-    <section className="space-y-2.5">
+    <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground lg:text-base lg:font-semibold lg:normal-case lg:tracking-normal lg:text-foreground">
+        <p className="text-[13px] font-semibold uppercase tracking-widest text-muted-foreground lg:text-base lg:font-semibold lg:normal-case lg:tracking-normal lg:text-foreground">
           {isRu ? 'Экстренные ситуации' : 'Emergency'}
         </p>
         <button
@@ -92,7 +70,8 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-3">
+      {/* Horizontal scrollable on mobile, grid on desktop */}
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar lg:grid lg:grid-cols-6 lg:gap-3 lg:overflow-visible">
         {EMERGENCY_SCENARIOS.map((scenario) => {
           const Icon = scenario.icon;
           return (
@@ -100,16 +79,18 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
               key={scenario.id}
               onClick={() => navigate(`/sos${scenario.anchor}`)}
               className={cn(
-                "flex flex-col items-center gap-1.5 p-3 lg:p-4 rounded-xl",
-                "border border-border/50 bg-card",
-                "hover:border-destructive/30 hover:bg-destructive/5",
-                "transition-all active:scale-[0.96]"
+                "flex-shrink-0 flex flex-col items-center gap-1.5 py-3 px-4 lg:px-2 rounded-xl",
+                "border bg-card",
+                scenario.border,
+                "hover:shadow-sm",
+                "transition-all active:scale-[0.96]",
+                "min-w-[72px] lg:min-w-0"
               )}
             >
-              <div className={cn("w-7 h-7 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center", scenario.bg)}>
-                <Icon className={cn("w-3.5 h-3.5 lg:w-6 lg:h-6", scenario.color)} />
+              <div className={cn("w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center", scenario.bg)}>
+                <Icon className={cn("w-4 h-4 lg:w-5 lg:h-5", scenario.color)} />
               </div>
-              <span className="text-[11px] lg:text-sm font-medium text-foreground leading-tight text-center">
+              <span className="text-[10px] lg:text-xs font-medium text-foreground leading-tight text-center whitespace-nowrap">
                 {isRu ? scenario.labelRu : scenario.labelEn}
               </span>
             </button>
@@ -117,14 +98,15 @@ export const EmergencyQuickAccess = memo(function EmergencyQuickAccess() {
         })}
       </div>
 
-      {/* Quick WhatsApp line */}
+      {/* WhatsApp help */}
       <a
         href={`https://wa.me/${COMPANY_CONTACTS.whatsapp.number}?text=${encodeURIComponent(isRu ? 'Мне нужна срочная помощь' : 'I need urgent help')}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 py-2 lg:py-3 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs lg:text-sm font-medium hover:bg-emerald-500/15 transition-colors"
+        className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-emerald-500/8 border border-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-medium hover:bg-emerald-500/12 transition-colors"
       >
-        💬 {isRu ? 'WhatsApp myUNO — помощь 24/7' : 'WhatsApp myUNO — help 24/7'}
+        <MessageCircle className="w-3.5 h-3.5" />
+        {isRu ? 'WhatsApp myUNO — помощь 24/7' : 'WhatsApp myUNO — help 24/7'}
       </a>
     </section>
   );
