@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,6 +8,9 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { ProfessionalProductCard } from './ProfessionalProductCard';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+import { useState, useEffect } from 'react';
 
 interface ProductSectionProps {
   title: string;
@@ -18,6 +21,32 @@ interface ProductSectionProps {
   variant?: 'scroll' | 'grid';
   isLoading?: boolean;
   icon?: 'sparkles' | 'trending';
+}
+
+function useDotButton(emblaApi: ReturnType<typeof useEmblaCarousel>[1]) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    setScrollSnaps(emblaApi.scrollSnapList());
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', () => {
+      setScrollSnaps(emblaApi.scrollSnapList());
+      onSelect();
+    });
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return { selectedIndex, scrollSnaps };
 }
 
 export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(function ProductSection({
@@ -34,6 +63,13 @@ export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(funct
   const { language } = useLanguage();
   const { addItem, removeItem, getItemsByType } = useCart();
   const { showAddedToast } = useCartToast();
+
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: 'start', skipSnaps: false, slidesToScroll: 1 },
+    [Autoplay({ delay: 3500, stopOnInteraction: true, stopOnMouseEnter: true })]
+  );
+
+  const { selectedIndex, scrollSnaps } = useDotButton(emblaApi);
 
   const displayProducts = products.slice(0, maxItems);
   const cartItems = getItemsByType('product');
@@ -113,25 +149,45 @@ export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(funct
 
       {/* Products */}
       {variant === 'scroll' ? (
-        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-proximity touch-pan-y">
-          {displayProducts.map((product, index) => (
-            <div 
-              key={product.id} 
-              className={cn(
-                "shrink-0 snap-start",
-                index === 0 ? "w-[200px]" : "w-[170px]"
-              )}
-            >
-              <ProfessionalProductCard
-                product={product}
-                quantity={getQuantity(product.id)}
-                onAdd={() => handleAdd(product)}
-                onRemove={() => handleRemove(product.id)}
-                onClick={() => navigate(`/market/product/${product.id}`)}
-                variant={index === 0 ? 'grid' : 'grid'}
-              />
+        <div className="space-y-3">
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-3">
+              {displayProducts.map((product) => (
+                <div 
+                  key={product.id} 
+                  className="shrink-0 min-w-0 basis-[170px] lg:basis-[200px]"
+                >
+                  <ProfessionalProductCard
+                    product={product}
+                    quantity={getQuantity(product.id)}
+                    onAdd={() => handleAdd(product)}
+                    onRemove={() => handleRemove(product.id)}
+                    onClick={() => navigate(`/market/product/${product.id}`)}
+                    variant="grid"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          
+          {/* Dot indicators */}
+          {scrollSnaps.length > 1 && (
+            <div className="flex justify-center gap-1.5">
+              {scrollSnaps.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => emblaApi?.scrollTo(index)}
+                  className={cn(
+                    "rounded-full transition-all duration-300",
+                    index === selectedIndex
+                      ? "w-5 h-2 bg-primary"
+                      : "w-2 h-2 bg-muted-foreground/25 hover:bg-muted-foreground/40"
+                  )}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
