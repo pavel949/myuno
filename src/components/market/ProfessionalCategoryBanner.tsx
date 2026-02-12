@@ -7,6 +7,19 @@ import { ChevronRight, ArrowRight } from 'lucide-react';
 import { MarketplaceCategory, MarketplaceProduct } from '@/types/marketplace';
 import { Badge } from '@/components/ui/badge';
 
+// Editorial-style category images
+import groceriesImg from '@/assets/categories/groceries.jpg';
+import thaiFashionImg from '@/assets/categories/thai-fashion.jpg';
+import cosmeticsImg from '@/assets/categories/cosmetics.jpg';
+import souvenirsImg from '@/assets/categories/souvenirs.jpg';
+import homeDecorImg from '@/assets/categories/home-decor.jpg';
+import babyKidsImg from '@/assets/categories/baby-kids.jpg';
+import healthPharmacyImg from '@/assets/categories/health-pharmacy.jpg';
+import seafoodImg from '@/assets/categories/seafood.jpg';
+import organicImg from '@/assets/categories/organic.jpg';
+import meatImg from '@/assets/categories/meat.jpg';
+import defaultMarketImg from '@/assets/categories/default-market.jpg';
+
 interface ProfessionalCategoryBannerProps {
   categories: MarketplaceCategory[];
   products?: MarketplaceProduct[];
@@ -34,21 +47,21 @@ export const ProfessionalCategoryBanner: React.FC<ProfessionalCategoryBannerProp
     }
   };
 
-  // Default placeholder images by category type
+  // Editorial-style category images
   const getCategoryImage = (slug: string) => {
     const images: Record<string, string> = {
-      'groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
-      'thai-fashion': 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80',
-      'cosmetics': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80',
-      'souvenirs': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&q=80',
-      'home-decor': 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80',
-      'baby-kids': 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&q=80',
-      'health-pharmacy': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80',
-      'seafood': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800&q=80',
-      'organic': 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80',
-      'meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=80',
+      'groceries': groceriesImg,
+      'thai-fashion': thaiFashionImg,
+      'cosmetics': cosmeticsImg,
+      'souvenirs': souvenirsImg,
+      'home-decor': homeDecorImg,
+      'baby-kids': babyKidsImg,
+      'health-pharmacy': healthPharmacyImg,
+      'seafood': seafoodImg,
+      'organic': organicImg,
+      'meat': meatImg,
     };
-    return images[slug] || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80';
+    return images[slug] || defaultMarketImg;
   };
 
   if (categories.length === 0) return null;

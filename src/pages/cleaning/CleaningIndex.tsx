@@ -2,6 +2,7 @@
  * CleaningIndex — Airbnb-style cleaning & laundry catalog
  */
 import { useState, useMemo } from 'react';
+import cleaningFallback from '@/assets/services/cleaning.jpg';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -75,7 +76,7 @@ export default function CleaningIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={service.cover_image || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400'}
+                      src={service.cover_image || cleaningFallback}
                       alt={name}
                       width={400}
                       height={300}

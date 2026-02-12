@@ -16,7 +16,8 @@ interface RecommendedItem {
 }
 
 // Default fallback image for items without cover_image
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400';
+import defaultFallback from '@/assets/categories/default-market.jpg';
+const DEFAULT_IMAGE = defaultFallback;
 
 // Fetch function for recommendations
 const fetchRecommendations = async (userId?: string): Promise<RecommendedItem[]> => {
