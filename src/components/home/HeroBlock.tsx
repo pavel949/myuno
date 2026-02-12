@@ -147,9 +147,8 @@ export const HeroBlock = memo(function HeroBlock() {
   if (!isDesktop) {
     return (
     <div className="relative rounded-2xl overflow-hidden">
-        {/* Navy gradient — matches bottom nav active tone */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(210,35%,55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(210,40%,60%,0.3),transparent_70%)]" />
+        {/* Deep navy solid with subtle gradient — high contrast for white text */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(225,40%,18%)] to-[hsl(230,45%,22%)]" />
         
         <div className="relative px-5 py-5 space-y-4">
           {/* Location + SOS */}
@@ -216,9 +215,8 @@ export const HeroBlock = memo(function HeroBlock() {
   // Desktop
   return (
     <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10">
-      {/* Navy gradient — matches bottom nav active tone */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(210,35%,55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(210,40%,60%,0.3),transparent_70%)]" />
+      {/* Deep navy solid with subtle gradient — high contrast for white text */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(225,40%,18%)] to-[hsl(230,45%,22%)]" />
       
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
