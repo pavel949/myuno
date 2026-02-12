@@ -1,12 +1,18 @@
 /**
- * HomeExploreSections — Services-only visual entry points
- * Leisure verticals are already covered by QuickActionsGrid
+ * HomeExploreSections — Persona-adaptive visual entry points
+ * Tourist → leisure cards (Experiences, Yachts, Beauty, Restaurants)
+ * Resident → services cards (Medical, Legal, Education, Childcare)
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Stethoscope, Scale, GraduationCap, Baby, Sparkles, ChevronRight } from 'lucide-react';
+import { 
+  Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, 
+  Scale, GraduationCap, Flower2, Baby, ChevronRight 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useProfile } from '@/hooks/useProfile';
 
 interface ExploreItem {
   id: string;
@@ -18,6 +24,33 @@ interface ExploreItem {
   icon: React.ElementType;
   image: string;
 }
+
+const LEISURE_ITEMS: ExploreItem[] = [
+  {
+    id: 'experiences', titleEn: 'Things to do', titleRu: 'Чем заняться',
+    subtitleEn: 'Tours & activities', subtitleRu: 'Туры и активности',
+    path: '/experiences', icon: Compass,
+    image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=600&h=400&fit=crop',
+  },
+  {
+    id: 'yachts', titleEn: 'Yachts', titleRu: 'Яхты',
+    subtitleEn: 'Day trips & sunset cruises', subtitleRu: 'Дневные и закатные прогулки',
+    path: '/yachts', icon: Anchor,
+    image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600&h=400&fit=crop',
+  },
+  {
+    id: 'beauty', titleEn: 'Beauty & SPA', titleRu: 'Красота и SPA',
+    subtitleEn: 'Salons, massage, wellness', subtitleRu: 'Салоны, массаж, велнес',
+    path: '/beauty', icon: Sparkles,
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop',
+  },
+  {
+    id: 'restaurants', titleEn: 'Restaurants', titleRu: 'Рестораны',
+    subtitleEn: 'Best dining in Phuket', subtitleRu: 'Лучшие рестораны',
+    path: '/restaurants', icon: Utensils,
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop',
+  },
+];
 
 const SERVICES_ITEMS: ExploreItem[] = [
   {
@@ -92,14 +125,41 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const { personas } = useUserPersonas();
+  const { profile } = useProfile();
+
+  // Determine which cards to show based on persona
+  const { items, sectionTitle, sectionTitleRu, sectionIcon } = useMemo(() => {
+    const isTourist = personas.includes('tourist') || 
+                      profile?.user_type === 'tourist' || 
+                      personas.length === 0; // Default to tourist
+
+    if (isTourist) {
+      return {
+        items: LEISURE_ITEMS,
+        sectionTitle: 'Leisure & lifestyle',
+        sectionTitleRu: 'Отдых и досуг',
+        sectionIcon: Compass,
+      };
+    }
+
+    return {
+      items: SERVICES_ITEMS,
+      sectionTitle: 'Services',
+      sectionTitleRu: 'Услуги',
+      sectionIcon: Sparkles,
+    };
+  }, [personas, profile?.user_type]);
+
+  const Icon = sectionIcon;
 
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
+          <Icon className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-bold text-foreground">
-            {isRu ? 'Услуги' : 'Services'}
+            {isRu ? sectionTitleRu : sectionTitle}
           </h2>
         </div>
         <button onClick={() => navigate('/discover')} className="text-xs text-primary font-medium flex items-center gap-0.5 hover:underline">
@@ -109,7 +169,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
       </div>
       
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
-        {SERVICES_ITEMS.map((item) => (
+        {items.map((item) => (
           <ExploreCard key={item.id} item={item} language={language} />
         ))}
       </div>

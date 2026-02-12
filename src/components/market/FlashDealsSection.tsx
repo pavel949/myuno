@@ -89,9 +89,10 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
     return end;
   }, [flashDealProducts]);
 
-  const { hours, minutes, seconds } = useCountdown(endTime);
+  const { total, hours, minutes, seconds } = useCountdown(endTime);
 
-  if (flashDealProducts.length === 0) return null;
+  // Hide section if no flash deals or timer expired
+  if (flashDealProducts.length === 0 || total <= 0) return null;
 
   const getQuantity = (productId: string) => {
     return cartItems.find(i => i.id === productId)?.quantity || 0;
