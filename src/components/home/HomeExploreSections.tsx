@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, Scale, GraduationCap, Flower2, ChevronRight } from 'lucide-react';
+import { Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, Scale, GraduationCap, Flower2, Baby, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ExploreItem {
@@ -89,6 +89,12 @@ const SERVICES_ITEMS: ExploreItem[] = [
     subtitleEn: 'Schools & courses', subtitleRu: 'Школы и курсы',
     path: '/education', icon: GraduationCap,
     image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop',
+  },
+  {
+    id: 'childcare', titleEn: 'Childcare', titleRu: 'Няни и дети',
+    subtitleEn: 'Babysitters & nannies', subtitleRu: 'Бебиситтеры и няни',
+    path: '/babysitters', icon: Baby,
+    image: 'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=600&h=400&fit=crop',
   },
 ];
 
