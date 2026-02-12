@@ -95,59 +95,65 @@ export const HeroBlock = memo(function HeroBlock() {
   // Mobile
   if (!isDesktop) {
     return (
-      <div className="space-y-4">
-        {/* Location + SOS */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <MapPin className="w-3.5 h-3.5 text-primary" />
-            <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
-            <span className="text-border">·</span>
-            <WeatherIcon className="w-3.5 h-3.5" />
-            <span>{weather?.temp || 31}°</span>
-            <span className="text-border">·</span>
-            <span className="capitalize">{dayName}, {dateStr}</span>
-          </div>
-          <Link 
-            to="/sos" 
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/8 border border-destructive/20 hover:bg-destructive/12 active:scale-[0.97] transition-all"
-          >
-            <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
-            <span className="text-[11px] font-semibold text-destructive">SOS</span>
-          </Link>
-        </div>
+      <div className="relative rounded-2xl overflow-hidden">
+        {/* Warm gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary)/0.12)] via-[hsl(var(--icon-dark)/0.06)] to-[hsl(35,60%,60%,0.08)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.1),transparent_70%)]" />
         
-        {/* Greeting */}
-        <div>
-          <h1 className="text-2xl font-bold text-foreground leading-tight">{greeting}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}
-          </p>
-          
-          {/* Loyalty + streak chips */}
-          {user && (loyaltyTier || (activityStreak && activityStreak > 0)) && (
-            <div className="flex items-center gap-2 mt-3">
-              {loyaltyTier && (
-                <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/8 border border-primary/15 text-xs">
-                  <Trophy className="w-3 h-3 text-primary" />
-                  <span className="font-medium text-primary">{loyaltyTier.name}</span>
-                  <span className="text-muted-foreground">{loyaltyTier.cashback}%</span>
-                </Link>
-              )}
-              {activityStreak && activityStreak > 0 ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/8 border border-orange-500/15 text-xs">
-                  <Flame className="w-3 h-3 text-orange-500" />
-                  <span className="font-medium text-orange-600 dark:text-orange-400">
-                    {activityStreak} {isRu ? 'заказов' : 'orders'}
-                  </span>
-                </div>
-              ) : null}
+        <div className="relative px-5 py-5 space-y-4">
+          {/* Location + SOS */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
+              <span className="text-border">·</span>
+              <WeatherIcon className="w-3.5 h-3.5" />
+              <span>{weather?.temp || 31}°</span>
+              <span className="text-border">·</span>
+              <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
-          )}
-        </div>
-        
-        {/* Search */}
-        <div className="lg:hidden">
-          <InlineSearch />
+            <Link 
+              to="/sos" 
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/8 border border-destructive/20 hover:bg-destructive/12 active:scale-[0.97] transition-all"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
+              <span className="text-[11px] font-semibold text-destructive">SOS</span>
+            </Link>
+          </div>
+          
+          {/* Greeting */}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground leading-tight">{greeting}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}
+            </p>
+            
+            {/* Loyalty + streak chips */}
+            {user && (loyaltyTier || (activityStreak && activityStreak > 0)) && (
+              <div className="flex items-center gap-2 mt-3">
+                {loyaltyTier && (
+                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/8 border border-primary/15 text-xs">
+                    <Trophy className="w-3 h-3 text-primary" />
+                    <span className="font-medium text-primary">{loyaltyTier.name}</span>
+                    <span className="text-muted-foreground">{loyaltyTier.cashback}%</span>
+                  </Link>
+                )}
+                {activityStreak && activityStreak > 0 ? (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/8 border border-orange-500/15 text-xs">
+                    <Flame className="w-3 h-3 text-orange-500" />
+                    <span className="font-medium text-orange-600 dark:text-orange-400">
+                      {activityStreak} {isRu ? 'заказов' : 'orders'}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+          
+          {/* Search */}
+          <div className="lg:hidden">
+            <InlineSearch />
+          </div>
         </div>
       </div>
     );
