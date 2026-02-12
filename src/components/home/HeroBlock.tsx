@@ -28,7 +28,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   }, [setPersonas]);
 
   return (
-    <div className="flex gap-1 p-1 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
+    <div className="grid grid-cols-4 gap-1.5 p-1.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
       {PERSONA_OPTIONS.map((p) => {
         const info = PERSONA_INFO[p];
         const isActive = activePersona === p;
@@ -37,8 +37,8 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
             key={p}
             onClick={() => handleSelect(p)}
             className={cn(
-              "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-              "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1",
+              "relative flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap",
+              "focus-visible:ring-2 focus-visible:ring-white/50",
               !isActive && "text-white/50 hover:text-white/80"
             )}
           >
@@ -202,9 +202,7 @@ export const HeroBlock = memo(function HeroBlock() {
           </div>
           
           {/* Persona switcher */}
-          <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
-            <PersonaSwitcher isRu={isRu} />
-          </div>
+          <PersonaSwitcher isRu={isRu} />
           
           {/* Search */}
           <div className="lg:hidden">
