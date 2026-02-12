@@ -6,6 +6,21 @@ import {
 import type { ServiceDomain, ProviderType } from '@/lib/config/homeServicesTaxonomy';
 import { HOME_SERVICE_CATEGORY_IDS } from '@/lib/config/homeServicesTaxonomy';
 
+// Editorial-style service images
+import handymanImg from '@/assets/services/handyman.jpg';
+import plumbingImg from '@/assets/services/plumbing.jpg';
+import electricalImg from '@/assets/services/electrical.jpg';
+import acImg from '@/assets/services/ac.jpg';
+import securityImg from '@/assets/services/security.jpg';
+import cleaningImg from '@/assets/services/cleaning.jpg';
+import laundryImg from '@/assets/services/laundry.jpg';
+import pestImg from '@/assets/services/pest.jpg';
+import gardenImg from '@/assets/services/garden.jpg';
+import poolImg from '@/assets/services/pool.jpg';
+import movingImg from '@/assets/services/moving.jpg';
+import waterDeliveryImg from '@/assets/services/water-delivery.jpg';
+import roadAssistanceImg from '@/assets/services/road-assistance.jpg';
+
 export interface HomeServiceProvider {
   id: string;
   name: string;
@@ -28,23 +43,23 @@ export interface HomeServiceProvider {
 }
 
 const defaultImages: Record<string, string> = {
-  'handyman': 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200',
-  'plumbing': 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200',
-  'electrical': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-  'ac': 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200',
-  'repair': 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200',
-  'security': 'https://images.unsplash.com/photo-1558002038-1055907df827?w=200',
-  'home-cleaning': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200',
-  'deep-cleaning': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200',
-  'cleaning': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200',
-  'laundry': 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=200',
-  'pest': 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=200',
-  'garden': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200',
-  'pool': 'https://images.unsplash.com/photo-1575429198097-0414ec08e8cd?w=200',
-  'exterior': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200',
-  'moving': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200',
-  'water-delivery': 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200',
-  'road-assistance': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200',
+  'handyman': handymanImg,
+  'plumbing': plumbingImg,
+  'electrical': electricalImg,
+  'ac': acImg,
+  'repair': handymanImg,
+  'security': securityImg,
+  'home-cleaning': cleaningImg,
+  'deep-cleaning': cleaningImg,
+  'cleaning': cleaningImg,
+  'laundry': laundryImg,
+  'pest': pestImg,
+  'garden': gardenImg,
+  'pool': poolImg,
+  'exterior': movingImg,
+  'moving': movingImg,
+  'water-delivery': waterDeliveryImg,
+  'road-assistance': roadAssistanceImg,
 };
 
 interface UseHomeServicesOptions {
