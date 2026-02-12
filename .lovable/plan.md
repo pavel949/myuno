@@ -1,77 +1,72 @@
 
-# Единая форма редактирования в Intake
+# Улучшение секции «Отдых и досуг»
 
-## Проблема
-Сейчас в AI Intake (`/admin/intake`) при редактировании объекта открывается **простой диалог с текстовыми полями**, автоматически генерируемый из конфига вертикали. Это значит, что форма для недвижимости в Intake отличается от формы для собственника, а форма для услуг - от формы вендора. Данные вводятся через простые `Input`, без специфичных селекторов (тип недвижимости, карта, загрузка фото, ценовые модели и т.д.).
+## Что не так сейчас
 
-## Решение
-Заменить generic-редактор `IntakeItemEditor` на **маршрутизатор канонических форм** по вертикали:
+- Все 6 карточек одинаковые — нет визуальной иерархии, глаз «скользит» мимо
+- Иконки маленькие (28px) и теряются на фото
+- Карточки статичные, не вызывают желания нажать
+- Заголовок секции бледный и незаметный
+- Ценовые бейджи мелкие и не продающие
+
+## Что сделаем
+
+### 1. Визуальная иерархия — «Hero + Grid» layout
+Первые 2 карточки (Experiences и Yachts) станут крупными — каждая на полную ширину, aspect-ratio 16/9. Остальные 4 — в сетке 2x2 как сейчас. Это создаст ритм и привлечёт внимание к ключевым вертикалям.
 
 ```text
-IntakeItemEditor (маршрутизатор)
-  |
-  |-- vertical = "properties"  --> CanonicalPropertyForm
-  |-- vertical = "products"    --> UnifiedVendorWizard (product mode)
-  |-- vertical = "services"    --> CanonicalListingWizard (service schema)
-  |-- vertical = "experiences" --> CanonicalListingWizard (experience schema)
-  |-- vertical = "yachts"      --> CanonicalListingWizard (yacht schema)
-  |-- ... другие вертикали     --> CanonicalListingWizard / UnifiedVendorWizard
-  |-- fallback (неизвестная)   --> текущий generic редактор (как сейчас)
++---------------------------+
+|   Чем заняться (большая)  |
++---------------------------+
+|   Яхты (большая)          |
++---------------------------+
+| Транспорт  | Красота      |
++------------+------------+
+| Рестораны  | Цветы        |
++------------+------------+
 ```
 
-## Изменения
+### 2. Насыщенные карточки
+- Увеличить градиентный оверлей для лучшей читаемости
+- Иконки увеличить до 36px в контейнере 40x40px с более плотным backdrop-blur
+- Заголовки увеличить до `text-base font-bold` для крупных карточек
+- Добавить стрелку-шеврон справа — визуальный сигнал «нажми»
 
-### 1. Рефакторинг `IntakeItemEditor` (маршрутизатор форм)
-**Файл:** `src/components/admin/intake/IntakeItemEditor.tsx`
+### 3. Продающие ценовые бейджи
+- Сделать бейджи крупнее с primary-фоном и белым текстом вместо белого с чёрным
+- Добавить мягкую тень для выделения на фото
 
-- Определить маппинг `detectedVertical` -> компонент формы
-- Для `properties`: открывать `CanonicalPropertyForm` в режиме `admin`, передавая `extractedFields` как `initialData`
-- Для остальных вертикалей: открывать `CanonicalListingWizard` с соответствующей `categorySchema`, передавая extracted данные как начальные значения
-- Оставить текущий generic-редактор как fallback для неизвестных вертикалей
+### 4. Заголовок секции с иконкой
+- Добавить иконку (Compass или Sparkles) слева от заголовка
+- Увеличить шрифт, убрать uppercase — сделать тёплым и заметным
+- Стиль: `text-lg font-bold text-foreground` вместо muted uppercase
 
-### 2. Маппинг данных Intake -> Canonical форма
-**Новый файл:** `src/components/admin/intake/intakeToCanonicalMapper.ts`
+### 5. Микро-анимации
+- Добавить `group-hover:translate-x-1` на шеврон
+- Плавное появление бейджа при hover
+- Уже есть zoom фото — оставляем
 
-- `mapIntakeToPropertyForm(item: IntakeItem)` -> `CanonicalPropertyFormData`
-- `mapIntakeToListingData(item: IntakeItem)` -> данные для `CanonicalListingWizard`
-- `mapCanonicalToIntakeItem(formData, originalItem)` -> обратный маппинг для сохранения в IntakeItem
+---
 
-### 3. Обновление IntakeQueue
-**Файл:** `src/components/admin/intake/IntakeQueue.tsx`
+## Технические детали
 
-- Передать в editor необходимые колбэки для сохранения через canonical формы
-- При сохранении из canonical формы - конвертировать обратно в `IntakeItem.extractedFields`
+### Файлы для изменения
+- `src/components/home/HomeExploreSections.tsx` — единственный файл
 
-## Техническая реализация
+### Изменения в коде
 
-Ключевая логика маршрутизатора:
-```typescript
-// IntakeItemEditor.tsx
-const PROPERTY_VERTICALS = ['properties', 'property', 'real_estate'];
-const LISTING_VERTICALS = ['yachts', 'experiences', 'services', 'restaurants', ...];
+**EXPLORE_ITEMS** — добавить флаг `featured: true` для первых двух элементов (Experiences, Yachts), чтобы они рендерились крупными.
 
-if (PROPERTY_VERTICALS.includes(item.detectedVertical)) {
-  return <CanonicalPropertyForm 
-    initialData={mapIntakeToPropertyForm(item)} 
-    onSubmit={handlePropertySave}
-    mode="admin" 
-  />;
-}
+**ExploreCard** — условная логика для `featured`:
+- `featured`: aspect-ratio 16/9, крупный текст, шеврон
+- Обычные: aspect-ratio 4/3 (как сейчас), но с улучшенными иконками
 
-if (LISTING_VERTICALS.includes(item.detectedVertical)) {
-  return <CanonicalListingWizard
-    initialData={mapIntakeToListingData(item)}
-    vertical={item.detectedVertical}
-    onSubmit={handleListingSave}
-  />;
-}
+**SectionHeader** — заменить мелкий uppercase на `text-lg font-bold` с иконкой Compass.
 
-// Fallback: текущий generic editor
-return <GenericIntakeFields ... />;
-```
+**Price badge** — класс `bg-primary text-white` вместо `bg-white/90 text-foreground`.
 
-## Что это даёт
-- Одна и та же форма для объекта при создании собственником, вендором, админом и через AI Intake
-- Все специфичные селекторы (тип недвижимости, карта, фото-загрузчик, ценовые модели) доступны сразу
-- AI заполняет поля, а пользователь дорабатывает в привычном интерфейсе
-- Fallback гарантирует, что новые вертикали не ломают систему
+**Сетка** — вместо единой `grid-cols-2` сделать:
+1. Первые 2 элемента (`featured`) рендерятся отдельно, каждый на полную ширину
+2. Остальные 4 — в `grid-cols-2 gap-3`
+
+Никаких новых зависимостей или файлов не потребуется.
