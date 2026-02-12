@@ -217,45 +217,49 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="rounded-2xl bg-muted/30 border border-border/50 p-8 xl:p-10">
-      <div className="flex items-start justify-between">
+    <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10">
+      {/* Deep navy gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(220,40%,8%)] via-[hsl(225,45%,14%)] to-[hsl(230,40%,20%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(230,50%,30%,0.4),transparent_70%)]" />
+      
+      <div className="relative flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-[15px] text-muted-foreground font-medium">
+          <p className="text-[15px] text-white/60 font-medium">
             {isRu ? 'Ваш дом на острове' : 'Your home away from home'}
           </p>
-          <h1 className="text-4xl xl:text-5xl font-bold text-foreground leading-tight font-display">
+          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight font-display">
             {greeting}
           </h1>
-          <div className="flex items-center gap-5 text-muted-foreground text-[15px] pt-1">
+          <div className="flex items-center gap-5 text-white/60 text-[15px] pt-1">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-primary" />
-              <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
+              <MapPin className="w-4 h-4 text-white/80" />
+              <span className="font-medium text-white/90">{isRu ? 'Пхукет' : 'Phuket'}</span>
             </div>
-            <span className="text-border">·</span>
+            <span className="text-white/20">·</span>
             <div className="flex items-center gap-1.5">
-              <WeatherIcon className="w-4 h-4" />
+              <WeatherIcon className="w-4 h-4 text-white/70" />
               <span>{weather?.temp || 31}°C</span>
             </div>
-            <span className="text-border">·</span>
+            <span className="text-white/20">·</span>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-4 h-4 text-white/70" />
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             {loyaltyTier && (
               <>
-                <span className="text-border">·</span>
-                <Link to="/wallet" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                  <Trophy className="w-4 h-4 text-primary" />
-                  <span className="font-medium">{loyaltyTier.name}</span>
-                  <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">{loyaltyTier.cashback}% cashback</span>
+                <span className="text-white/20">·</span>
+                <Link to="/wallet" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                  <Trophy className="w-4 h-4 text-white/80" />
+                  <span className="font-medium text-white/90">{loyaltyTier.name}</span>
+                  <span className="text-xs bg-white/15 text-white px-1.5 py-0.5 rounded-full">{loyaltyTier.cashback}% cashback</span>
                 </Link>
               </>
             )}
             {activityStreak && activityStreak > 0 ? (
               <>
-                <span className="text-border">·</span>
+                <span className="text-white/20">·</span>
                 <div className="flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-orange-500" />
+                  <Flame className="w-4 h-4 text-orange-300" />
                   <span>{activityStreak} {isRu ? 'заказов за 30д' : 'orders in 30d'}</span>
                 </div>
               </>
@@ -268,10 +272,10 @@ export const HeroBlock = memo(function HeroBlock() {
 
         <Link 
           to="/sos" 
-          className="flex items-center gap-2 px-4 py-2 rounded-full border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 transition-all"
         >
-          <AlertTriangle className="w-4 h-4 text-destructive" />
-          <span className="text-sm font-semibold text-destructive">SOS</span>
+          <AlertTriangle className="w-4 h-4 text-white" />
+          <span className="text-sm font-semibold text-white">SOS</span>
         </Link>
       </div>
     </div>
