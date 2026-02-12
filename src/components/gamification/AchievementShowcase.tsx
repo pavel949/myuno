@@ -63,25 +63,34 @@ export function AchievementShowcase() {
           <div className="grid grid-cols-4 gap-3">
             {allAchievements.slice(0, 8).map(def => {
               const earned = earnedCodes.has(def.code);
+              const description = isRu ? def.description_ru : def.description_en;
               return (
                 <div
                   key={def.id}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
                     earned 
                       ? 'bg-primary/5 border border-primary/20' 
-                      : 'bg-muted/30 border border-transparent opacity-50'
+                      : 'bg-muted/30 border border-transparent'
                   }`}
+                  title={!earned && description ? description : undefined}
                 >
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
                     earned ? 'bg-primary/10' : 'bg-muted'
                   }`}>
-                    {earned ? (def.icon || '🏆') : <Lock className="w-4 h-4 text-muted-foreground" />}
+                    {earned ? (def.icon || '🏆') : (def.icon || <Lock className="w-4 h-4 text-muted-foreground" />)}
                   </div>
-                  <p className="text-[10px] text-center text-foreground font-medium leading-tight">
+                  <p className={`text-[10px] text-center font-medium leading-tight ${
+                    earned ? 'text-foreground' : 'text-muted-foreground'
+                  }`}>
                     {isRu ? def.name_ru : def.name_en}
                   </p>
                   {earned && def.bonus_amount > 0 && (
                     <span className="text-[9px] text-primary font-semibold">+฿{def.bonus_amount}</span>
+                  )}
+                  {!earned && description && (
+                    <p className="text-[9px] text-muted-foreground text-center line-clamp-2 leading-tight">
+                      {description}
+                    </p>
                   )}
                 </div>
               );

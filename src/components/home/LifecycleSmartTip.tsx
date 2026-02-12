@@ -1,21 +1,15 @@
 /**
- * LifecycleSmartTip — shows contextual, lifecycle-aware tips based on user's
- * life situation, time since registration, and activity patterns.
- * 
- * Examples:
- * - New user (< 7 days): "Set up your documents for quick visa tracking"
- * - Active tourist: "Don't miss the Sunday Walking Street market"
- * - Resident: "Your 90-day report is due soon"
- * - Owner: "3 new booking requests this week"
+ * LifecycleSmartTip — contextual, lifecycle-aware tips.
+ * No marketing/referral content — only genuinely useful advice.
  */
-import React, { useMemo } from 'react';
-import { Lightbulb, ArrowRight, X } from 'lucide-react';
+import React, { useMemo, useState, useCallback } from 'react';
+import { ArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useUserContext } from '@/hooks/useUserContext';
-import { useState, useCallback } from 'react';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
 
 interface Tip {
   id: string;
@@ -36,15 +30,29 @@ const TIPS_BY_SITUATION: Record<string, Tip[]> = {
   living: [
     { id: 'living-90day', titleRu: '90-дневный отчёт', titleEn: '90-day report', descRu: 'Отслеживайте сроки иммиграционных отчётов', descEn: 'Track your immigration report deadlines', path: '/profile/documents', icon: '📄' },
     { id: 'living-gym', titleRu: 'Абонемент в зал', titleEn: 'Gym membership', descRu: 'Сравните лучшие залы рядом', descEn: 'Compare the best gyms nearby', path: '/gyms', icon: '💪' },
-    { id: 'living-market', titleRu: 'Рынки и доставка', titleEn: 'Markets & delivery', descRu: 'Фрукты и продукты с доставкой', descEn: 'Fresh fruits & groceries delivered', path: '/discover', icon: '🛒' },
+    { id: 'living-market', titleRu: 'Рынки и доставка', titleEn: 'Markets & delivery', descRu: 'Фрукты и продукты с доставкой', descEn: 'Fresh fruits & groceries delivered', path: '/market', icon: '🛒' },
   ],
   property: [
     { id: 'prop-listings', titleRu: 'Ваши объекты', titleEn: 'Your properties', descRu: 'Проверьте статус бронирований', descEn: 'Check your booking status', path: '/owner', icon: '🏠' },
     { id: 'prop-income', titleRu: 'Доход за месяц', titleEn: 'Monthly income', descRu: 'Отслеживайте доходность', descEn: 'Track your rental yield', path: '/owner', icon: '📊' },
   ],
+  leisure: [
+    { id: 'leisure-sunset', titleRu: 'Закат на яхте', titleEn: 'Sunset cruise', descRu: 'Лучшие закатные прогулки по Андаманскому морю', descEn: 'Best sunset tours on the Andaman Sea', path: '/yachts', icon: '🌅' },
+    { id: 'leisure-food', titleRu: 'Лучшие рестораны', titleEn: 'Top restaurants', descRu: 'Подборка проверенных мест для ужина', descEn: 'Curated dining spots', path: '/restaurants', icon: '🍽️' },
+  ],
+  default_tourist: [
+    { id: 'tourist-explore', titleRu: 'Чем заняться сегодня?', titleEn: 'What to do today?', descRu: 'Экскурсии, яхты и активности рядом', descEn: 'Tours, yachts & activities nearby', path: '/experiences', icon: '🧭' },
+    { id: 'tourist-transport', titleRu: 'Аренда транспорта', titleEn: 'Rent transport', descRu: 'Байки и авто — сравните цены', descEn: 'Bikes & cars — compare prices', path: '/transport', icon: '🛵' },
+    { id: 'tourist-beauty', titleRu: 'SPA и массаж', titleEn: 'SPA & massage', descRu: 'Расслабьтесь — лучшие салоны острова', descEn: 'Relax — best island salons', path: '/beauty', icon: '💆' },
+  ],
+  default_resident: [
+    { id: 'res-visa', titleRu: 'Визовые вопросы', titleEn: 'Visa matters', descRu: 'Проверенные юристы для продления визы', descEn: 'Verified lawyers for visa extension', path: '/legal', icon: '📑' },
+    { id: 'res-school', titleRu: 'Школы и курсы', titleEn: 'Schools & courses', descRu: 'Образование для детей и взрослых', descEn: 'Education for kids & adults', path: '/education', icon: '📚' },
+    { id: 'res-clinic', titleRu: 'Клиники рядом', titleEn: 'Clinics nearby', descRu: 'Проверенные врачи с отзывами', descEn: 'Verified doctors with reviews', path: '/medical', icon: '🏥' },
+  ],
   default: [
-    { id: 'def-explore', titleRu: 'Исследуйте остров', titleEn: 'Explore the island', descRu: '100+ проверенных мест и сервисов', descEn: '100+ verified places & services', path: '/explore', icon: '🌴' },
-    { id: 'def-referral', titleRu: 'Пригласите друга', titleEn: 'Invite a friend', descRu: 'Получите бонус за каждое приглашение', descEn: 'Earn a bonus for each invite', path: '/profile/referral', icon: '🎁' },
+    { id: 'def-explore', titleRu: 'Исследуйте остров', titleEn: 'Explore the island', descRu: '100+ проверенных мест и сервисов', descEn: '100+ verified places & services', path: '/discover', icon: '🌴' },
+    { id: 'def-flowers', titleRu: 'Доставка цветов', titleEn: 'Flower delivery', descRu: 'Свежие букеты с доставкой в тот же день', descEn: 'Fresh bouquets, same-day delivery', path: '/flowers', icon: '💐' },
   ],
 };
 
@@ -53,6 +61,7 @@ export function LifecycleSmartTip() {
   const { user } = useAuth();
   const { activeCode } = useLifeSituationContext();
   const { activeRole } = useUserContext();
+  const { personas } = useUserPersonas();
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
@@ -75,14 +84,16 @@ export function LifecycleSmartTip() {
   const situationKey = useMemo(() => {
     if (activeCode) return activeCode;
     if (activeRole === 'owner') return 'property';
+    // Use persona-specific defaults instead of generic
+    if (personas.includes('tourist')) return 'default_tourist';
+    if (personas.includes('resident')) return 'default_resident';
     return 'default';
-  }, [activeCode, activeRole]);
+  }, [activeCode, activeRole, personas]);
 
   const tip = useMemo(() => {
     const tips = TIPS_BY_SITUATION[situationKey] || TIPS_BY_SITUATION.default;
     const available = tips.filter(t => !dismissedTips.has(t.id));
     if (available.length === 0) return null;
-    // Rotate by day of month
     return available[new Date().getDate() % available.length];
   }, [situationKey, dismissedTips]);
 
