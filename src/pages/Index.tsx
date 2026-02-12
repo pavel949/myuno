@@ -19,6 +19,7 @@ import { HomeExploreSections } from '@/components/home/HomeExploreSections';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
+import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
@@ -79,7 +80,10 @@ const Index = () => {
             <HomeExploreSections />
           </Suspense>
 
-          {/* ─── SECTION 5: Support layer ─── */}
+          {/* ─── SECTION 5: Products ─── */}
+          <HomeProductsSection />
+
+          {/* ─── SECTION 6: Support layer ─── */}
           <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
             {hasContext ? (
               <Suspense fallback={null}>
