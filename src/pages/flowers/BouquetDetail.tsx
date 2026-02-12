@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Star, Heart, Share2, ShoppingCart, Plus, Minus, Flower2, Truck, Clock, Shield, Zap, Package, Sparkles, Gift } from 'lucide-react';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -160,6 +161,10 @@ const BouquetDetail = () => {
 
   return (
     <AppLayout showBottomNav={false}>
+      <Helmet>
+        <title>{`${isRu ? bouquet.name_ru : bouquet.name_en} — ${isRu ? 'Доставка цветов' : 'Flower Delivery'} | myUNO`}</title>
+        <meta name="description" content={(isRu ? bouquet.description_ru : bouquet.description_en) || (isRu ? bouquet.name_ru : bouquet.name_en)} />
+      </Helmet>
       <div className="min-h-screen bg-background pb-28">
         {/* Header Image */}
         <div className="relative aspect-square max-h-[500px]">
