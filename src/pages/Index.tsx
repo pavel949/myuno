@@ -3,10 +3,12 @@
  * 
  * Clean, calm, confident layout:
  * 1. Hero (greeting + weather + loyalty)
- * 2. Quick Actions (8 shortcuts)
+ * 2. Quick Actions (8 role-adaptive shortcuts)
  * 3. Smart tip (contextual, dismissable)
- * 4. Explore (visual cards)
- * 5. Secondary (concierge / emergency) — collapsed into a compact section
+ * 4. Products (marketplace carousel)
+ * 5. Services (photo cards — non-duplicate categories)
+ * 6. Support (concierge + compact emergency)
+ * 7. Trust
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -75,13 +77,13 @@ const Index = () => {
           {/* ─── SECTION 3: Smart Tip (contextual, dismissable) ─── */}
           <LifecycleSmartTip />
 
-          {/* ─── SECTION 4: Explore — the visual heart ─── */}
+          {/* ─── SECTION 4: Products (marketplace carousel) ─── */}
+          <HomeProductsSection />
+
+          {/* ─── SECTION 5: Services (non-duplicate photo cards) ─── */}
           <Suspense fallback={null}>
             <HomeExploreSections />
           </Suspense>
-
-          {/* ─── SECTION 5: Products ─── */}
-          <HomeProductsSection />
 
           {/* ─── SECTION 6: Support layer ─── */}
           <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
