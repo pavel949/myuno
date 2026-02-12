@@ -26,7 +26,7 @@ export default function AdminProviderDetail() {
   const isRussian = language === 'ru';
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { provider, services, products, contracts, bookings, isLoading, error } = useProviderDetails(id || null);
+  const { provider, services, products, contracts, bookings, isLoading, error, refetch } = useProviderDetails(id || null);
 
   if (isLoading) {
     return (
@@ -61,7 +61,7 @@ export default function AdminProviderDetail() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      <ProviderDetailHeader provider={provider} />
+      <ProviderDetailHeader provider={provider} onUpdate={refetch} />
       <ProviderQuickStats provider={provider} services={services} products={products} contracts={contracts} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -74,33 +74,26 @@ export default function AdminProviderDetail() {
             <Handshake className="h-4 w-4" />
             <span className="hidden sm:inline">{isRussian ? 'Условия' : 'Terms'}</span>
           </TabsTrigger>
-          {services.length > 0 && (
-            <TabsTrigger value="services" className="gap-1">
-              <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRussian ? 'Услуги' : 'Services'}</span>
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5">{services.length}</Badge>
-            </TabsTrigger>
-          )}
-          {products.length > 0 && (
-            <TabsTrigger value="products" className="gap-1">
-              <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRussian ? 'Товары' : 'Products'}</span>
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5">{products.length}</Badge>
-            </TabsTrigger>
-          )}
-          {contracts.length > 0 && (
-            <TabsTrigger value="contracts" className="gap-1">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRussian ? 'Контракты' : 'Contracts'}</span>
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5">{contracts.length}</Badge>
-            </TabsTrigger>
-          )}
-          {bookings.length > 0 && (
-            <TabsTrigger value="bookings" className="gap-1">
-              <CalendarCheck className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRussian ? 'Заказы' : 'Bookings'}</span>
-            </TabsTrigger>
-          )}
+          <TabsTrigger value="services" className="gap-1">
+            <Package className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'Услуги' : 'Services'}</span>
+            {services.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{services.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="products" className="gap-1">
+            <ShoppingCart className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'Товары' : 'Products'}</span>
+            {products.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{products.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="contracts" className="gap-1">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'Контракты' : 'Contracts'}</span>
+            {contracts.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{contracts.length}</Badge>}
+          </TabsTrigger>
+          <TabsTrigger value="bookings" className="gap-1">
+            <CalendarCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'Заказы' : 'Bookings'}</span>
+            {bookings.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5">{bookings.length}</Badge>}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4 space-y-4">
