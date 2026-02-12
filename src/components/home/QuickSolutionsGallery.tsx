@@ -103,17 +103,17 @@ export function QuickSolutionsGallery() {
               <button
                 key={s.id}
                 onClick={() => navigate(s.path)}
-                className="shrink-0 min-w-0 basis-[170px] lg:basis-[200px] group text-left"
+                className="shrink-0 min-w-0 basis-[140px] lg:basis-[160px] group text-left"
               >
-                {/* Icon area — same aspect ratio as product image */}
+                {/* Icon area — 4:3 ratio like product cards */}
                 <div className={cn(
-                  "aspect-square rounded-2xl flex items-center justify-center mb-3 transition-transform duration-200 group-active:scale-[0.97]",
+                  "aspect-[4/3] rounded-2xl flex items-center justify-center mb-2.5 transition-transform duration-200 group-active:scale-[0.97]",
                   s.iconBg
                 )}>
-                  <Icon className={cn("w-12 h-12", s.iconColor)} strokeWidth={1.5} />
+                  <Icon className={cn("w-10 h-10", s.iconColor)} strokeWidth={1.5} />
                 </div>
                 {/* Label */}
-                <p className="text-sm font-medium text-foreground leading-tight line-clamp-2 mb-1">
+                <p className="text-[13px] font-medium text-foreground leading-tight line-clamp-2 mb-0.5">
                   {isRu ? s.labelRu : s.labelEn}
                 </p>
                 <div className="flex items-center gap-1 text-muted-foreground">
