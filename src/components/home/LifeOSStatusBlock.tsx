@@ -24,11 +24,11 @@ const CONTEXT_ACTIONS: Record<string, Array<{
 }>> = {
   arrival: [
     { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'ListChecks' },
-    { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfers', icon: 'Plane' },
+    { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfer', icon: 'Plane' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],
   living: [
-    { labelEn: 'Find housing', labelRu: 'Найти жильё', path: '/properties', icon: 'Home' },
+    { labelEn: 'Find housing', labelRu: 'Найти жильё', path: '/property', icon: 'Home' },
     { labelEn: 'Healthcare', labelRu: 'Медицина', path: '/medical', icon: 'Stethoscope' },
     { labelEn: 'Visa & docs', labelRu: 'Виза', path: '/visa', icon: 'FileText' },
   ],
@@ -38,7 +38,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Pharmacy', labelRu: 'Аптека', path: '/pharmacy', icon: 'Pill' },
   ],
   family: [
-    { labelEn: 'Childcare', labelRu: 'Няни', path: '/babysitters', icon: 'Baby' },
+    { labelEn: 'Childcare', labelRu: 'Няни', path: '/babysitter', icon: 'Baby' },
     { labelEn: 'Education', labelRu: 'Образование', path: '/education', icon: 'GraduationCap' },
     { labelEn: 'Healthcare', labelRu: 'Медицина', path: '/medical', icon: 'Stethoscope' },
   ],
@@ -48,7 +48,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Yacht charter', labelRu: 'Яхты', path: '/yachts', icon: 'Anchor' },
   ],
   property: [
-    { labelEn: 'Real estate', labelRu: 'Недвижимость', path: '/properties', icon: 'Building2' },
+    { labelEn: 'Real estate', labelRu: 'Недвижимость', path: '/property', icon: 'Building2' },
     { labelEn: 'Legal help', labelRu: 'Юридическая помощь', path: '/legal', icon: 'Scale' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],
@@ -59,13 +59,13 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   ],
   relocation: [
     { labelEn: 'Visa & docs', labelRu: 'Виза', path: '/visa', icon: 'FileText' },
-    { labelEn: 'Find housing', labelRu: 'Жильё', path: '/properties', icon: 'Home' },
+    { labelEn: 'Find housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],
   pets: [
-    { labelEn: 'Vet clinic', labelRu: 'Ветклиника', path: '/services?category=vet', icon: 'Stethoscope' },
-    { labelEn: 'Pet shops', labelRu: 'Зоомагазин', path: '/services?category=pet-shop', icon: 'ShoppingBag' },
-    { labelEn: 'Pet sitting', labelRu: 'Передержка', path: '/services?category=pet-sitting', icon: 'Heart' },
+    { labelEn: 'Vet clinic', labelRu: 'Ветклиника', path: '/pets', icon: 'Stethoscope' },
+    { labelEn: 'Pet shops', labelRu: 'Зоомагазин', path: '/pets', icon: 'ShoppingBag' },
+    { labelEn: 'Pet sitting', labelRu: 'Передержка', path: '/pets', icon: 'Heart' },
   ],
   education: [
     { labelEn: 'Schools', labelRu: 'Школы', path: '/education', icon: 'School' },
@@ -80,17 +80,17 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   nightlife: [
     { labelEn: 'Clubs & bars', labelRu: 'Клубы и бары', path: '/nightlife', icon: 'Music' },
     { labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants', icon: 'UtensilsCrossed' },
-    { labelEn: 'Taxi', labelRu: 'Такси', path: '/transfers', icon: 'Car' },
+    { labelEn: 'Taxi', labelRu: 'Такси', path: '/transport/taxi', icon: 'Car' },
   ],
   sports: [
-    { labelEn: 'Gyms', labelRu: 'Залы', path: '/services?category=gym', icon: 'Dumbbell' },
-    { labelEn: 'Pools', labelRu: 'Бассейны', path: '/services?category=pool', icon: 'Waves' },
-    { labelEn: 'Yoga', labelRu: 'Йога', path: '/services?category=yoga', icon: 'Leaf' },
+    { labelEn: 'Gyms', labelRu: 'Залы', path: '/fitness', icon: 'Dumbbell' },
+    { labelEn: 'Water sports', labelRu: 'Водный спорт', path: '/experiences?type=activity', icon: 'Waves' },
+    { labelEn: 'Yoga', labelRu: 'Йога', path: '/fitness', icon: 'Leaf' },
   ],
   visa_travel: [
     { labelEn: 'Visa services', labelRu: 'Визовые услуги', path: '/visa', icon: 'FileText' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
-    { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfers', icon: 'Plane' },
+    { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfer', icon: 'Plane' },
   ],
   planning: [
     { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'ListChecks' },
