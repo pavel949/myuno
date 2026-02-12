@@ -30,23 +30,14 @@ function isSupabaseStorageUrl(url: string): boolean {
   return url.includes(SUPABASE_PROJECT_ID) && url.includes('/storage/v1/object/public/');
 }
 
-function generateSupabaseSrcSet(url: string, quality: number = 80): string {
-  if (!isSupabaseStorageUrl(url)) return '';
-  
-  return WIDTHS.map(w => {
-    const transformedUrl = url
-      .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
-      + `?width=${w}&quality=${quality}&format=webp`;
-    return `${transformedUrl} ${w}w`;
-  }).join(', ');
+function generateSupabaseSrcSet(_url: string, _quality: number = 80): string {
+  // Disabled: render/image endpoint requires Pro plan
+  return '';
 }
 
-function getOptimizedUrl(url: string, width: number, quality: number = 80): string {
-  if (!isSupabaseStorageUrl(url)) return url;
-  
-  return url
-    .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
-    + `?width=${width}&quality=${quality}&format=webp`;
+function getOptimizedUrl(url: string, _width: number, _quality: number = 80): string {
+  // Disabled: render/image endpoint requires Pro plan
+  return url;
 }
 
 const aspectRatioClasses = {
