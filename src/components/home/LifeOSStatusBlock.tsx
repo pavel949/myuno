@@ -94,7 +94,17 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   ],
   planning: [
     { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'ListChecks' },
-    { labelEn: 'Housing', labelRu: 'Жильё', path: '/properties', icon: 'Home' },
+    { labelEn: 'Housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
+    { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
+  ],
+  wedding_event: [
+    { labelEn: 'Venues', labelRu: 'Площадки', path: '/restaurants', icon: 'MapPin' },
+    { labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers', icon: 'Flower2' },
+    { labelEn: 'Events', labelRu: 'Организация', path: '/events', icon: 'PartyPopper' },
+  ],
+  retirement_living: [
+    { labelEn: 'Healthcare', labelRu: 'Медицина', path: '/medical', icon: 'Stethoscope' },
+    { labelEn: 'Housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],
 };
