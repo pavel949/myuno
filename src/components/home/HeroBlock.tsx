@@ -28,7 +28,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   }, [setPersonas]);
 
   return (
-    <div className="flex gap-1 p-1 rounded-xl bg-muted/60 backdrop-blur-sm border border-border/30">
+    <div className="flex gap-1 p-1 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
       {PERSONA_OPTIONS.map((p) => {
         const info = PERSONA_INFO[p];
         const isActive = activePersona === p;
@@ -38,19 +38,19 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
             onClick={() => handleSelect(p)}
             className={cn(
               "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-              "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
-              !isActive && "text-muted-foreground hover:text-foreground"
+              "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1",
+              !isActive && "text-white/50 hover:text-white/80"
             )}
           >
             {isActive && (
               <motion.div
                 layoutId="persona-pill"
-                className="absolute inset-0 rounded-lg bg-background shadow-sm border border-border/50"
+                className="absolute inset-0 rounded-lg bg-white/20 shadow-sm border border-white/25"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
             <span className="relative z-10">{info.icon}</span>
-            <span className={cn("relative z-10", isActive && "text-foreground")}>
+            <span className={cn("relative z-10", isActive ? "text-white" : "")}>
               {isRu ? info.labelRu : info.labelEn}
             </span>
           </button>
@@ -146,36 +146,36 @@ export const HeroBlock = memo(function HeroBlock() {
   // Mobile
   if (!isDesktop) {
     return (
-      <div className="relative rounded-2xl overflow-hidden">
-        {/* Warm gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary)/0.12)] via-[hsl(var(--icon-dark)/0.06)] to-[hsl(35,60%,60%,0.08)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.1),transparent_70%)]" />
+    <div className="relative rounded-2xl overflow-hidden">
+        {/* Navy-to-indigo gradient background (spinner style) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(230,50%,42%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(230,60%,65%,0.4),transparent_70%)]" />
         
         <div className="relative px-5 py-5 space-y-4">
           {/* Location + SOS */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5 text-primary" />
-              <span className="font-medium">{isRu ? 'Пхукет' : 'Phuket'}</span>
-              <span className="text-border">·</span>
-              <WeatherIcon className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 text-xs text-white/70">
+              <MapPin className="w-3.5 h-3.5 text-white/80" />
+              <span className="font-medium text-white/90">{isRu ? 'Пхукет' : 'Phuket'}</span>
+              <span className="text-white/30">·</span>
+              <WeatherIcon className="w-3.5 h-3.5 text-white/80" />
               <span>{weather?.temp || 31}°</span>
-              <span className="text-border">·</span>
+              <span className="text-white/30">·</span>
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             <Link 
               to="/sos" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/8 border border-destructive/20 hover:bg-destructive/12 active:scale-[0.97] transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 border border-white/20 hover:bg-white/25 active:scale-[0.97] transition-all"
             >
-              <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
-              <span className="text-[11px] font-semibold text-destructive">SOS</span>
+              <AlertTriangle className="w-3.5 h-3.5 text-white" />
+              <span className="text-[11px] font-semibold text-white">SOS</span>
             </Link>
           </div>
           
           {/* Greeting */}
           <div>
-            <h1 className="text-2xl font-bold text-foreground leading-tight">{greeting}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-2xl font-bold text-white leading-tight">{greeting}</h1>
+            <p className="text-sm text-white/60 mt-1">
               {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}
             </p>
             
@@ -183,16 +183,16 @@ export const HeroBlock = memo(function HeroBlock() {
             {user && (loyaltyTier || (activityStreak && activityStreak > 0)) && (
               <div className="flex items-center gap-2 mt-3">
                 {loyaltyTier && (
-                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/8 border border-primary/15 text-xs">
-                    <Trophy className="w-3 h-3 text-primary" />
-                    <span className="font-medium text-primary">{loyaltyTier.name}</span>
-                    <span className="text-muted-foreground">{loyaltyTier.cashback}%</span>
+                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-xs">
+                    <Trophy className="w-3 h-3 text-white" />
+                    <span className="font-medium text-white">{loyaltyTier.name}</span>
+                    <span className="text-white/60">{loyaltyTier.cashback}%</span>
                   </Link>
                 )}
                 {activityStreak && activityStreak > 0 ? (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/8 border border-orange-500/15 text-xs">
-                    <Flame className="w-3 h-3 text-orange-500" />
-                    <span className="font-medium text-orange-600 dark:text-orange-400">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-xs">
+                    <Flame className="w-3 h-3 text-orange-300" />
+                    <span className="font-medium text-white">
                       {activityStreak} {isRu ? 'заказов' : 'orders'}
                     </span>
                   </div>
