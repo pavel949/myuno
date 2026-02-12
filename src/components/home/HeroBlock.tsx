@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar, Trophy, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,6 +8,57 @@ import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+
+const PERSONA_OPTIONS: UserPersona[] = ['tourist', 'resident', 'property_owner', 'investor'];
+
+/** Compact segmented persona switcher */
+function PersonaSwitcher({ isRu }: { isRu: boolean }) {
+  const { personas, setPersonas } = useUserPersonas();
+
+  const activePersona = useMemo(() => {
+    if (personas.length === 0) return 'tourist';
+    return personas[0];
+  }, [personas]);
+
+  const handleSelect = useCallback((p: UserPersona) => {
+    setPersonas([p]);
+  }, [setPersonas]);
+
+  return (
+    <div className="flex gap-1 p-1 rounded-xl bg-muted/60 backdrop-blur-sm border border-border/30">
+      {PERSONA_OPTIONS.map((p) => {
+        const info = PERSONA_INFO[p];
+        const isActive = activePersona === p;
+        return (
+          <button
+            key={p}
+            onClick={() => handleSelect(p)}
+            className={cn(
+              "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
+              !isActive && "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {isActive && (
+              <motion.div
+                layoutId="persona-pill"
+                className="absolute inset-0 rounded-lg bg-background shadow-sm border border-border/50"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">{info.icon}</span>
+            <span className={cn("relative z-10", isActive && "text-foreground")}>
+              {isRu ? info.labelRu : info.labelEn}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 /**
  * HeroBlock — personalized "Welcome Home" hero
@@ -150,6 +201,11 @@ export const HeroBlock = memo(function HeroBlock() {
             )}
           </div>
           
+          {/* Persona switcher */}
+          <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+            <PersonaSwitcher isRu={isRu} />
+          </div>
+          
           {/* Search */}
           <div className="lg:hidden">
             <InlineSearch />
@@ -204,6 +260,9 @@ export const HeroBlock = memo(function HeroBlock() {
                 </div>
               </>
             ) : null}
+          </div>
+          <div className="pt-3">
+            <PersonaSwitcher isRu={isRu} />
           </div>
         </div>
 
