@@ -1,16 +1,15 @@
 /**
  * HomeExploreSections — Visual entry points to platform verticals
  * 
- * Mobile: 2-column photo cards with overlaid text
+ * Mobile: Hero+Grid layout for leisure, 2-col for services
  * Desktop: 3-4 column photo grid
  * Design: warm, calm, rounded corners with gradient overlays
  */
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, Scale, GraduationCap, Flower2 } from 'lucide-react';
+import { Compass, Car, Anchor, Sparkles, Utensils, Stethoscope, Scale, GraduationCap, Flower2, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ChevronRight } from 'lucide-react';
 
 interface ExploreItem {
   id: string;
@@ -23,6 +22,7 @@ interface ExploreItem {
   image: string;
   badgeEn?: string;
   badgeRu?: string;
+  featured?: boolean;
 }
 
 const EXPLORE_ITEMS: ExploreItem[] = [
@@ -30,8 +30,17 @@ const EXPLORE_ITEMS: ExploreItem[] = [
     id: 'experiences', titleEn: 'Things to do', titleRu: 'Чем заняться',
     subtitleEn: 'Tours & activities', subtitleRu: 'Туры и активности',
     path: '/experiences', icon: Compass,
-    image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=600&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=800&h=450&fit=crop',
     badgeEn: 'from ฿1,200', badgeRu: 'от ฿1 200',
+    featured: true,
+  },
+  {
+    id: 'yachts', titleEn: 'Yachts', titleRu: 'Яхты',
+    subtitleEn: 'Day trips & sunset cruises', subtitleRu: 'Дневные и закатные прогулки',
+    path: '/yachts', icon: Anchor,
+    image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800&h=450&fit=crop',
+    badgeEn: 'from ฿15,000', badgeRu: 'от ฿15 000',
+    featured: true,
   },
   {
     id: 'transport', titleEn: 'Transport', titleRu: 'Транспорт',
@@ -39,13 +48,6 @@ const EXPLORE_ITEMS: ExploreItem[] = [
     path: '/transport', icon: Car,
     image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=400&fit=crop',
     badgeEn: 'from ฿200/day', badgeRu: 'от ฿200/день',
-  },
-  {
-    id: 'yachts', titleEn: 'Yachts', titleRu: 'Яхты',
-    subtitleEn: 'Day trips & sunset cruises', subtitleRu: 'Дневные и закатные прогулки',
-    path: '/yachts', icon: Anchor,
-    image: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600&h=400&fit=crop',
-    badgeEn: 'from ฿15,000', badgeRu: 'от ฿15 000',
   },
   {
     id: 'beauty', titleEn: 'Beauty & SPA', titleRu: 'Красота и SPA',
@@ -100,8 +102,8 @@ function ExploreCard({ item, language, featured }: { item: ExploreItem; language
     <button
       onClick={() => navigate(item.path)}
       className={cn(
-        "group relative overflow-hidden rounded-2xl w-full",
-        featured ? "aspect-[4/5]" : "aspect-[4/3]",
+        "group relative overflow-hidden rounded-2xl w-full text-left",
+        featured ? "aspect-[16/9]" : "aspect-[4/3]",
         "hover:shadow-lg transition-shadow duration-300",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       )}
@@ -112,42 +114,75 @@ function ExploreCard({ item, language, featured }: { item: ExploreItem; language
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
         loading="lazy"
       />
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+      {/* Gradient overlay — deeper for readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5" />
       
-      {/* Price badge */}
+      {/* Price badge — high contrast */}
       {badge && (
         <div className="absolute top-3 right-3">
-          <span className="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-foreground shadow-sm">
+          <span className={cn(
+            "px-3 py-1.5 rounded-full backdrop-blur-sm font-semibold shadow-md",
+            "bg-primary text-primary-foreground",
+            featured ? "text-xs" : "text-[11px]"
+          )}>
             {badge}
           </span>
         </div>
       )}
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-3.5">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-            <Icon className="w-3.5 h-3.5 text-white" />
+      <div className={cn(
+        "absolute bottom-0 left-0 right-0",
+        featured ? "p-4" : "p-3.5"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            {/* Icon container — larger */}
+            <div className={cn(
+              "rounded-xl bg-white/25 backdrop-blur-md flex items-center justify-center flex-shrink-0",
+              featured ? "w-10 h-10" : "w-8 h-8"
+            )}>
+              <Icon className={cn(
+                "text-white",
+                featured ? "w-5 h-5" : "w-4 h-4"
+              )} />
+            </div>
+            <div>
+              <h3 className={cn(
+                "font-bold text-white leading-tight",
+                featured ? "text-base" : "text-sm"
+              )}>
+                {isRu ? item.titleRu : item.titleEn}
+              </h3>
+              <p className={cn(
+                "text-white/70 mt-0.5 line-clamp-1",
+                featured ? "text-xs" : "text-[11px]"
+              )}>
+                {isRu ? item.subtitleRu : item.subtitleEn}
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="text-sm lg:text-base font-semibold text-white leading-tight">
-              {isRu ? item.titleRu : item.titleEn}
-            </h3>
-            <p className="text-[11px] text-white/70 mt-0.5 line-clamp-1">
-              {isRu ? item.subtitleRu : item.subtitleEn}
-            </p>
-          </div>
+          {/* Chevron — tap affordance */}
+          <ChevronRight className={cn(
+            "text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all duration-300 flex-shrink-0",
+            featured ? "w-5 h-5" : "w-4 h-4"
+          )} />
         </div>
       </div>
     </button>
   );
 }
 
-function SectionHeader({ title, actionLabel, onAction }: { title: string; actionLabel?: string; onAction?: () => void }) {
+function SectionHeader({ title, icon: SectionIcon, actionLabel, onAction }: { 
+  title: string; 
+  icon?: React.ElementType;
+  actionLabel?: string; 
+  onAction?: () => void;
+}) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest lg:text-lg lg:text-foreground lg:normal-case lg:tracking-normal lg:font-bold">
+      <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+        {SectionIcon && <SectionIcon className="w-5 h-5 text-primary" />}
         {title}
       </h2>
       {actionLabel && onAction && (
@@ -165,28 +200,46 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
+  const featuredItems = EXPLORE_ITEMS.filter(i => i.featured);
+  const gridItems = EXPLORE_ITEMS.filter(i => !i.featured);
+
   return (
     <div className="space-y-8 lg:space-y-12">
       {/* Leisure */}
       <section>
         <SectionHeader 
           title={isRu ? 'Отдых и досуг' : 'Leisure & lifestyle'} 
+          icon={Compass}
           actionLabel={isRu ? 'Все' : 'All'}
           onAction={() => navigate('/discover')}
         />
         
-        {/* Mobile: 2-col grid */}
-        <div className="grid grid-cols-2 gap-3 lg:hidden">
-          {EXPLORE_ITEMS.map((item) => (
-            <ExploreCard key={item.id} item={item} language={language} />
+        {/* Mobile: Hero + Grid */}
+        <div className="space-y-3 lg:hidden">
+          {/* Featured cards — full width */}
+          {featuredItems.map((item) => (
+            <ExploreCard key={item.id} item={item} language={language} featured />
           ))}
+          {/* Regular cards — 2-col grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {gridItems.map((item) => (
+              <ExploreCard key={item.id} item={item} language={language} />
+            ))}
+          </div>
         </div>
         
-        {/* Desktop: 3-col uniform grid */}
-        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {EXPLORE_ITEMS.map((item) => (
-            <ExploreCard key={item.id} item={item} language={language} />
-          ))}
+        {/* Desktop: first 2 large, rest in grid */}
+        <div className="hidden lg:block space-y-5">
+          <div className="grid lg:grid-cols-2 gap-5">
+            {featuredItems.map((item) => (
+              <ExploreCard key={item.id} item={item} language={language} featured />
+            ))}
+          </div>
+          <div className="grid lg:grid-cols-4 gap-5">
+            {gridItems.map((item) => (
+              <ExploreCard key={item.id} item={item} language={language} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -194,6 +247,7 @@ export const HomeExploreSections = memo(function HomeExploreSections() {
       <section>
         <SectionHeader 
           title={isRu ? 'Услуги' : 'Services'}
+          icon={Sparkles}
           actionLabel={isRu ? 'Все' : 'All'}
           onAction={() => navigate('/discover')}
         />
