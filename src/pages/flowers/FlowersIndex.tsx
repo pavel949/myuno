@@ -1,9 +1,9 @@
 /**
- * FlowersIndex — Airbnb-style flower delivery catalog
+ * FlowersIndex — Premium flower delivery catalog with conversion mechanics
  */
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower2, ShoppingCart } from 'lucide-react';
+import { Flower2, ShoppingCart, Shield, Clock, Flame, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
@@ -53,6 +53,9 @@ export default function FlowersIndex() {
     </Button>
   ) : undefined;
 
+  // Check if before 2 PM for same-day delivery badge
+  const isBefore2PM = new Date().getHours() < 14;
+
   return (
     <AppLayout showHeader={false} showBottomNav={false}>
       <div className="min-h-screen bg-background">
@@ -65,6 +68,22 @@ export default function FlowersIndex() {
           onCategoryChange={setSelectedCategory}
           actions={cartButton}
         />
+
+        {/* Trust bar */}
+        <div className="bg-muted/50 border-b px-4 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Shield className="w-3 h-3 text-primary" />
+              {isRu ? 'Гарантия свежести 5 дней' : '5-day freshness guarantee'}
+            </span>
+            {isBefore2PM && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3 text-primary" />
+                {isRu ? 'До 14:00 — доставим сегодня' : 'Order by 2 PM — same-day delivery'}
+              </span>
+            )}
+          </div>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
           {isLoading || filtersLoading ? (
@@ -87,10 +106,18 @@ export default function FlowersIndex() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {bouquets.map(bouquet => {
                 const name = isRu ? bouquet.name_ru : bouquet.name_en;
+                const shortDesc = isRu 
+                  ? (bouquet as any).short_description_ru 
+                  : (bouquet as any).short_description_en;
                 const hasVariants = bouquet.size_variants?.length;
                 const displayPrice = hasVariants
                   ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
                   : bouquet.price;
+                const socialProof = (bouquet as any).social_proof_badge;
+                const urgencyBadge = (bouquet as any).urgency_badge;
+                const scarcityLevel = (bouquet as any).scarcity_level;
+                const boxType = (bouquet as any).box_type;
+
                 return (
                   <div
                     key={bouquet.id}
@@ -106,17 +133,50 @@ export default function FlowersIndex() {
                         className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                         quality={80}
                       />
-                      {bouquet.is_popular && (
-                        <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px]">
-                          {isRu ? 'Хит' : 'Popular'}
-                        </Badge>
+                      {/* Badges stack */}
+                      <div className="absolute top-2 left-2 flex flex-col gap-1">
+                        {bouquet.is_popular && (
+                          <Badge className="bg-primary text-primary-foreground text-[10px]">
+                            <Flame className="w-2.5 h-2.5 mr-0.5" />
+                            {isRu ? 'Хит' : 'Popular'}
+                          </Badge>
+                        )}
+                        {boxType && boxType !== 'wrap' && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            {boxType === 'velvet_box' ? '🎁 Velvet Box' : boxType === 'luxury_box' ? '👑 Luxury Box' : boxType}
+                          </Badge>
+                        )}
+                        {scarcityLevel === 'high' && (
+                          <Badge variant="destructive" className="text-[10px]">
+                            {isRu ? 'Осталось мало' : 'Limited'}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Social proof badge bottom */}
+                      {socialProof && (
+                        <div className="absolute bottom-2 left-2 right-2">
+                          <Badge className="bg-background/90 text-foreground text-[9px] backdrop-blur-sm border-0 w-full justify-center">
+                            <Star className="w-2.5 h-2.5 mr-0.5 text-amber-500" />
+                            {socialProof}
+                          </Badge>
+                        </div>
                       )}
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="font-semibold text-sm truncate">{name}</h3>
-                      <p className="text-sm font-semibold">
-                        {hasVariants ? `${isRu ? 'от' : 'from'} ` : ''}{formatPrice(displayPrice)}
-                      </p>
+                      {shortDesc && (
+                        <p className="text-[11px] text-muted-foreground line-clamp-1">{shortDesc}</p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold">
+                          {hasVariants ? `${isRu ? 'от' : 'from'} ` : ''}฿{displayPrice.toLocaleString()}
+                        </p>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                          <Shield className="w-2.5 h-2.5" />
+                          {isRu ? '5д' : '5d'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
