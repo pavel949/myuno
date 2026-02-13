@@ -1,57 +1,121 @@
 
 
-## Импорт новостроек Этажи Пхукет
+# Подготовка кода для работы разработчика
 
-### Что будет сделано
+## Проблема
 
-Создание Edge Function `etagi-scrape-projects`, которая:
-1. Парсит раздел новостроек `phuket.etagi.com/zastr/` через Firecrawl
-2. Извлекает данные по каждому ЖК (название, адрес, цены, сроки сдачи, планировки)
-3. Скачивает фото с `cdn.esoft.digital` в Supabase Storage (`property-images/etagi/`)
-4. Сохраняет проекты в таблицу `property_projects` с внутренними ссылками на изображения
-5. Удаляет все внешние ссылки на etagi -- в БД остаются только локальные URL
+Проект myUNO — это масштабное приложение (40+ вертикалей, 200+ хуков, 60+ edge-функций, 9 контекстов), но документация для разработчика практически отсутствует:
 
-### Пошаговый план
+- `README.md` — шаблонный, без описания проекта
+- Нет инструкций по локальному запуску с переменными окружения
+- Нет карты архитектуры проекта
+- Нет описания соглашений (naming, patterns, где что лежит)
+- Существующие docs (`MCC_ARCHITECTURE.md`, `UX_CONTRACT.md`) описывают бизнес-логику, но не помогают быстро войти в код
 
-**Шаг 1 -- Edge Function `etagi-scrape-projects/index.ts`**
+## План действий
 
-Логика:
-- `GET` -- запуск парсинга
-- Firecrawl scrape `phuket.etagi.com/zastr/` в формате `markdown + links`
-- Извлечь список проектов: название, цена от, срок сдачи, cover image URL
-- Для каждого проекта -- скачать cover image через `fetch`, загрузить в Supabase Storage bucket `property-images` по пути `etagi/{project-slug}.webp`
-- Upsert в `property_projects`:
-  - `name_en` / `name_ru` (из парсинга)
-  - `address`, `district` = 'Phuket'
-  - `price_from` (THB)
-  - `completion_date` (из "срок сдачи")
-  - `project_status` = 'offplan' или 'under_construction'
-  - `cover_image` = внутренний Supabase Storage URL
-  - `images` = массив внутренних URL
-  - `developer_name` (если есть)
-  - `is_active` = true
-- Дедупликация по `name_en` -- если проект уже есть, обновить цены и прогресс
+### 1. Обновить README.md — главная точка входа
 
-**Шаг 2 -- Скачивание изображений**
+Переписать README с реальной информацией о проекте:
 
-- Используем прямой `fetch` к `cdn.esoft.digital` внутри Edge Function (CDN не блокирует серверные запросы)
-- Загрузка в Storage bucket `property-images` через `supabase.storage.from('property-images').upload()`
-- Итоговые URL: `{SUPABASE_URL}/storage/v1/object/public/property-images/etagi/{slug}.webp`
-- Никаких внешних ссылок на etagi в финальных данных
+- Что такое myUNO (SuperApp для сервисов в Пхукете)
+- Стек: React 18 + Vite + TypeScript + Tailwind + shadcn/ui + Lovable Cloud
+- Быстрый старт: `npm i && npm run dev`
+- Переменные окружения (какие нужны, откуда взять)
+- Ссылки на внутреннюю документацию
 
-**Шаг 3 -- Конфигурация**
+### 2. Создать docs/ARCHITECTURE.md — карта проекта
 
-- Добавить `[functions.etagi-scrape-projects]` с `verify_jwt = false` в `config.toml`
-- Firecrawl API key уже настроен
+Документ с описанием структуры:
 
-**Шаг 4 -- Админ-кнопка запуска (опционально)**
+```text
+src/
+  components/    -- UI-компоненты по доменам (admin/, vendor/, owner/, booking/, ...)
+  pages/         -- Страницы маршрутов (40+ вертикалей)
+  hooks/         -- Бизнес-логика (200+ хуков)
+  contexts/      -- Глобальные провайдеры (Auth, Cart, Language, Currency, ...)
+  lib/           -- Утилиты, конфиги, таксономии, адаптеры
+  types/         -- Типы TypeScript
+  integrations/  -- Авто-генерируемые файлы Lovable Cloud (НЕ РЕДАКТИРОВАТЬ)
 
-- Добавить кнопку в админ-панель управления проектами для запуска импорта через вызов Edge Function
+supabase/
+  functions/     -- Edge-функции (60+)
+  migrations/    -- SQL-миграции
+```
 
-### Технические детали
+Плюс описание ключевых паттернов:
+- Canonical Listing Wizard (schema-driven формы)
+- MiniAppLayout (обязательный layout для вертикалей)
+- UnifiedFiltersKlook (стандартная система фильтров)
+- Content Adapters (маппинг данных в карточки)
+- Taxonomy system (статические + динамические таксономии)
 
-- Firecrawl scrape для главной страницы каталога + отдельные scrape для страниц проектов (до 20 за раз, чтобы не превысить лимит)
-- Все изображения проксируются и сохраняются локально -- в БД не будет ни одной ссылки на `etagi.com` или `cdn.esoft.digital`
-- Batch upsert через `ON CONFLICT` по имени проекта для идемпотентности
-- Лимит 50 проектов за один запуск для контроля расхода Firecrawl кредитов
+### 3. Создать docs/CONVENTIONS.md — соглашения о коде
+
+- Именование файлов: `useXxx.ts` для хуков, `XxxPage.tsx` для страниц
+- Паттерн barrel exports (каждая папка имеет `index.ts`)
+- Локализация: `isRu ? 'Русский' : 'English'` через `useLanguage()`
+- Компоненты UI: только shadcn/ui + Radix, стили через Tailwind semantic tokens
+- Запрещено: raw CSS цвета, прямой импорт из `@radix-ui`, редактирование `integrations/supabase/*`
+
+### 4. Создать docs/EDGE_FUNCTIONS.md — справочник Edge-функций
+
+Таблица всех 60+ функций с кратким описанием:
+- Назначение каждой функции
+- Входные/выходные параметры
+- Какие секреты нужны
+- Группировка: AI, Payments, Notifications, Sync, Import
+
+### 5. Создать docs/DATABASE.md — схема базы данных
+
+- Ключевые таблицы и их назначение
+- Связи между таблицами
+- RLS-политики (кто к чему имеет доступ)
+- Какие файлы авто-генерируемые и их нельзя менять
+
+### 6. Добавить JSDoc-комментарии в ключевые файлы
+
+Добавить краткие описания в:
+- `src/App.tsx` — дерево провайдеров
+- `src/lib/verticals.ts` — список вертикалей
+- `src/lib/config/routes.ts` — маршруты
+- Ключевые контексты (`AuthContext`, `CartContext`)
+
+### 7. Создать .env.example
+
+Файл-шаблон с перечнем нужных переменных окружения (без значений):
+
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_PROJECT_ID=
+```
+
+---
+
+## Технические детали
+
+**Файлы, которые будут созданы:**
+- `docs/ARCHITECTURE.md` — структура и паттерны
+- `docs/CONVENTIONS.md` — coding standards
+- `docs/EDGE_FUNCTIONS.md` — справочник backend-функций
+- `docs/DATABASE.md` — схема данных
+- `.env.example` — шаблон переменных окружения
+
+**Файлы, которые будут обновлены:**
+- `README.md` — полное переписывание
+- Ключевые `index.ts` файлы — добавление JSDoc
+
+**Не будут затронуты:**
+- Бизнес-логика и функциональность
+- Авто-генерируемые файлы (`integrations/supabase/*`)
+- Конфигурация сборки
+
+## Результат
+
+Новый разработчик сможет за 30 минут:
+1. Понять что это за проект и его архитектуру
+2. Запустить локально
+3. Найти нужный компонент/хук/функцию
+4. Следовать установленным паттернам при написании нового кода
 
