@@ -16,7 +16,7 @@ import { resolveIcon } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { DiscoverHero } from '@/components/discover/DiscoverHero';
-import { FeaturedStrip } from '@/components/discover/FeaturedStrip';
+
 import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
 
@@ -161,9 +161,6 @@ export default function Discover() {
         <div className="space-y-8">
           {/* Hero Banner */}
           <DiscoverHero />
-
-          {/* Featured Services Strip */}
-          <FeaturedStrip />
 
           {/* Life Situations 2x Grid */}
           <LifeSituationsGrid />
