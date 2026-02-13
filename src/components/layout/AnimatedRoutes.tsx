@@ -328,6 +328,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/market/wishlist" element={<LazyPage><Pages.WishlistPage /></LazyPage>} />
         <Route path="/market/store/:id" element={<LazyPage><Pages.StoreDetail /></LazyPage>} />
         <Route path="/market/checkout" element={<LazyPage><Pages.MarketCheckout /></LazyPage>} />
+        <Route path="/market/success" element={<LazyPage><Pages.MarketSuccess /></LazyPage>} />
         <Route path="/sell" element={<AuthGuard><LazyPage><Pages.SellItemPage /></LazyPage></AuthGuard>} />
         
         {/* ── Classifieds (Барахолка) ── */}

@@ -179,6 +179,7 @@ export const VendorPage = lazy(() => import('@/pages/market/VendorPage'));
 export const WishlistPage = lazy(() => import('@/pages/market/WishlistPage'));
 export const StoreDetail = lazy(() => import('@/pages/market/StoreDetail'));
 export const MarketCheckout = lazy(() => import('@/pages/market/MarketCheckout'));
+export const MarketSuccess = lazy(() => import('@/pages/market/MarketSuccess'));
 export const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
 
 // ── Classifieds (Барахолка) ──
