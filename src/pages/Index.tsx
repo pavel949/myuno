@@ -17,7 +17,7 @@ import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { HomeExploreSections } from '@/components/home/HomeExploreSections';
+import { DiscoverCTABanner } from '@/components/home/DiscoverCTABanner';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
@@ -80,10 +80,8 @@ const Index = () => {
           {/* ─── SECTION 4: Products (marketplace carousel) ─── */}
           <HomeProductsSection />
 
-          {/* ─── SECTION 5: Services (non-duplicate photo cards) ─── */}
-          <Suspense fallback={null}>
-            <HomeExploreSections />
-          </Suspense>
+          {/* ─── SECTION 5: Discover CTA ─── */}
+          <DiscoverCTABanner />
 
           {/* ─── SECTION 6: Support layer ─── */}
           <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
