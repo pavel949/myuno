@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.fazwaz-scrape-project]
 verify_jwt = false
+
+[functions.etagi-scrape-projects]
+verify_jwt = false
