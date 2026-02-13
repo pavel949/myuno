@@ -1,3 +1,15 @@
+/**
+ * @module CartContext
+ * @description Shopping cart with dual storage strategy.
+ *
+ * - Guest users: cart stored in localStorage (`myuno-cart` key)
+ * - Authenticated users: cart synced to `cart_items` table in DB
+ * - On login: local cart merges into DB, then localStorage is cleared
+ *
+ * Supports multiple item types: food, flowers, service, product, tour, activity, yacht.
+ *
+ * Usage: `const { items, addItem, getTotal } = useCart();`
+ */
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';

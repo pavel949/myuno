@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# myUNO — SuperApp for Phuket
 
-## Project info
+myUNO is a comprehensive SuperApp platform providing 18+ service verticals for residents and tourists in Phuket, Thailand. It covers real estate, transport, restaurants, beauty, healthcare, education, events, yachts, and many more — all in one unified application.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- **Frontend:** React 18 + TypeScript + Vite
+- **UI:** shadcn/ui + Radix UI + Tailwind CSS (semantic tokens)
+- **State:** React Context (9 providers) + TanStack React Query
+- **Backend:** Lovable Cloud (Supabase) — 60+ Edge Functions, PostgreSQL with RLS
+- **Payments:** Stripe (checkout sessions, webhooks, vendor subscriptions)
+- **Maps:** Mapbox GL
+- **Notifications:** Resend (email), WhatsApp integrations
+- **AI:** Lovable AI (descriptions, search, translations, moderation)
+- **PWA:** vite-plugin-pwa with offline support
 
-There are several ways of editing your application.
+## Quick Start
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# 1. Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 2. Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Copy environment variables
+cp .env.example .env
+# Fill in your values (see .env.example for details)
+
+# 4. Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Environment Variables
 
-**Use GitHub Codespaces**
+See [`.env.example`](.env.example) for the complete list. Key variables:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+| Variable | Description |
+|----------|-------------|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
+| `VITE_SUPABASE_PROJECT_ID` | Supabase project ID |
 
-## What technologies are used for this project?
+Edge functions also require secrets configured in the backend: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `MAPBOX_PUBLIC_TOKEN`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`.
 
-This project is built with:
+## Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+  components/    — UI components organized by domain (60+ folders)
+  pages/         — Route pages (40+ verticals)
+  hooks/         — Business logic hooks (230+)
+  contexts/      — Global providers (Auth, Cart, Language, Currency, Theme, etc.)
+  lib/           — Utilities, configs, taxonomies, adapters
+  types/         — TypeScript type definitions
+  integrations/  — Auto-generated files (DO NOT EDIT)
 
-## How can I deploy this project?
+supabase/
+  functions/     — Edge Functions (60+)
+  migrations/    — SQL migrations (DO NOT EDIT)
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+docs/            — Developer documentation
+```
 
-## Can I connect a custom domain to my Lovable project?
+## Documentation
 
-Yes, you can!
+| Document | Description |
+|----------|-------------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Project structure, patterns, and key abstractions |
+| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Coding standards and naming conventions |
+| [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Reference for all 60+ backend functions |
+| [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, and RLS policies |
+| [`docs/MCC_ARCHITECTURE.md`](docs/MCC_ARCHITECTURE.md) | Management company business logic |
+| [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns and contracts |
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Key Concepts
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Verticals** — Each service category (property, yachts, restaurants, etc.) is a self-contained vertical with its own pages, hooks, filters, and components. See `src/lib/verticals.ts` for the canonical registry.
+- **MiniAppLayout** — Every vertical uses this standardized layout wrapper.
+- **Canonical Listing Wizard** — Schema-driven forms for creating/editing listings across all verticals.
+- **Taxonomy System** — Static (`src/lib/taxonomies/`) + dynamic (`lookup_values` table) classification system.
+- **Bilingual** — All content supports English and Russian via `useLanguage()` context.
+
+## User Modes
+
+1. **Life** (`/`) — LifeOS dashboard with situational shortcuts
+2. **Services** (`/discover`) — Service discovery hub organized by life contexts
+3. **Marketplace** (`/market`) — Product marketplace
+4. **Me** (`/account`) — Profile, bookings, wallet, settings
+
+## Portals
+
+- **Admin** (`/admin`) — Platform management (content, orders, analytics, AI)
+- **Vendor** (`/vendor`) — Service provider dashboard
+- **Owner** (`/owner`) — Property owner management
+- **Team** (`/team`) — Internal team tools
+- **Manager** (`/manager`) — Property manager tools
+
+## Deployment
+
+The app is deployed via Lovable. Frontend changes require clicking "Update" in the publish dialog. Backend changes (Edge Functions, migrations) deploy automatically.
