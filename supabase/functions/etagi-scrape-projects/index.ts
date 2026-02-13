@@ -212,41 +212,66 @@ serve(async (req) => {
       throw new Error("FIRECRAWL_API_KEY not configured");
     }
 
+    // Parse page range from request body or query
+    let startPage = 1;
+    let endPage = 1;
+    try {
+      if (req.method === "POST") {
+        const body = await req.json();
+        startPage = body.startPage || 1;
+        endPage = body.endPage || startPage;
+      } else {
+        const url = new URL(req.url);
+        startPage = parseInt(url.searchParams.get("startPage") || "1");
+        endPage = parseInt(url.searchParams.get("endPage") || String(startPage));
+      }
+    } catch { /* defaults */ }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    let allParsedProjects: ParsedProject[] = [];
 
-    console.log("Step 1: Scraping Etagi catalog...");
+    for (let page = startPage; page <= endPage; page++) {
+      const pageUrl = page === 1 ? ETAGI_CATALOG_URL : `${ETAGI_CATALOG_URL}?page=${page}`;
+      console.log(`Scraping page ${page}: ${pageUrl}`);
 
-    const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: ETAGI_CATALOG_URL,
-        formats: ["markdown"],
-        onlyMainContent: true,
-        waitFor: 3000,
-      }),
-    });
+      const scrapeResponse = await fetch("https://api.firecrawl.dev/v1/scrape", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: pageUrl,
+          formats: ["markdown"],
+          onlyMainContent: true,
+          waitFor: 3000,
+        }),
+      });
 
-    const scrapeData = await scrapeResponse.json();
-    if (!scrapeResponse.ok || !scrapeData.success) {
-      throw new Error(`Firecrawl failed: ${JSON.stringify(scrapeData)}`);
+      const scrapeData = await scrapeResponse.json();
+      if (!scrapeResponse.ok || !scrapeData.success) {
+        console.error(`Page ${page} failed:`, JSON.stringify(scrapeData));
+        continue;
+      }
+
+      const markdown = scrapeData.data?.markdown || scrapeData.markdown || "";
+      console.log(`Page ${page}: ${markdown.length} chars`);
+
+      const pageProjects = parseProjectsFromMarkdown(markdown);
+      console.log(`Page ${page}: parsed ${pageProjects.length} projects`);
+      allParsedProjects = allParsedProjects.concat(pageProjects);
     }
 
-    const markdown = scrapeData.data?.markdown || scrapeData.markdown || "";
-    console.log(`Scraped ${markdown.length} chars`);
+    console.log(`Total parsed across all pages: ${allParsedProjects.length} projects`);
 
-    const parsedProjects = parseProjectsFromMarkdown(markdown);
-    console.log(`Parsed ${parsedProjects.length} projects`);
-
-    if (parsedProjects.length === 0) {
+    if (allParsedProjects.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, message: "No projects parsed. Page structure may have changed.", raw_length: markdown.length }),
+        JSON.stringify({ success: true, message: "No projects parsed. Page structure may have changed." }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const parsedProjects = allParsedProjects;
 
     const results = { processed: 0, upserted: 0, images_uploaded: 0, errors: [] as string[] };
 
