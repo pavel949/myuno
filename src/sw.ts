@@ -22,7 +22,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 // ─── NAVIGATION: ALWAYS NetworkFirst (NEVER cache HTML) ───
 // This ensures index.html is ALWAYS fetched from network first
 const navigationStrategy = new NetworkFirst({
-  cacheName: 'navigation-v2', // Changed cache name to invalidate old cache
+  cacheName: 'navigation-v3', // Changed cache name to invalidate old cache
   networkTimeoutSeconds: 5, // Increased timeout
   plugins: [
     new CacheableResponsePlugin({ statuses: [200] }), // Only cache 200, not 0
@@ -41,7 +41,7 @@ registerRoute(new NavigationRoute(navigationStrategy, {
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
-    cacheName: 'images-v2',
+    cacheName: 'images-v3',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -56,7 +56,7 @@ registerRoute(
 registerRoute(
   ({ request }) => request.destination === 'font',
   new CacheFirst({
-    cacheName: 'fonts-v2',
+    cacheName: 'fonts-v3',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -71,7 +71,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.hostname.endsWith('.supabase.co'),
   new NetworkFirst({
-    cacheName: 'supabase-v2',
+    cacheName: 'supabase-v3',
     networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -87,7 +87,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
   new CacheFirst({
-    cacheName: 'google-fonts-v2',
+    cacheName: 'google-fonts-v3',
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -107,8 +107,8 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.31] Activated — cleaning ALL old caches');
-  const CURRENT_CACHES = ['navigation-v2', 'images-v2', 'fonts-v2', 'supabase-v2', 'google-fonts-v2'];
+  console.log('[SW v3.32] Activated — cleaning ALL old caches');
+  const CURRENT_CACHES = ['navigation-v3', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3'];
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -132,5 +132,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.31] Installing new service worker...');
+  console.log('[SW v3.32] Installing new service worker...');
 });
