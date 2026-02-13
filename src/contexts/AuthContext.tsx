@@ -1,3 +1,12 @@
+/**
+ * @module AuthContext
+ * @description Authentication provider wrapping Supabase Auth.
+ *
+ * Provides: user, session, isLoading, signUp, signIn, signOut, resetPassword, updatePassword.
+ * Listens to auth state changes and persists session in localStorage.
+ *
+ * Usage: `const { user, signIn } = useAuth();`
+ */
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';

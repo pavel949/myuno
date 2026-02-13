@@ -1,3 +1,15 @@
+/**
+ * @module App
+ * @description Root application component for myUNO SuperApp.
+ *
+ * Provider tree (order matters — each provider can use contexts above it):
+ * ErrorBoundary → HelmetProvider → QueryClientProvider → ThemeProvider →
+ * MaintenanceProvider → LanguageProvider → LocationProvider → CurrencyProvider →
+ * AuthProvider → CartProvider → PWAInstallProvider → LifeSituationProvider →
+ * TooltipProvider → HintProvider → PrefetchProvider → AppContent
+ *
+ * @see docs/ARCHITECTURE.md for full architecture overview
+ */
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
