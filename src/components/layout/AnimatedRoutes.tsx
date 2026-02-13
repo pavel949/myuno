@@ -209,7 +209,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transfer" element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
         <Route path="/flower-delivery" element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
         <Route path="/rent-phuket" element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
-        <Route path="/new-developments" element={<LazyPage><Pages.NewDevelopmentsLanding /></LazyPage>} />
+        <Route path="/new-developments" element={<Navigate to="/offplan" replace />} />
         <Route path="/transport/taxi" element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         <Route path="/transfers" element={<Navigate to="/transfer" replace />} />
