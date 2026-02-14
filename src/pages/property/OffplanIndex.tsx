@@ -182,12 +182,12 @@ export default function OffplanIndex() {
                   <label className="text-sm font-medium mb-2 block">
                     {isRu ? 'Район' : 'District'}
                   </label>
-                  <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                  <Select value={selectedDistrict || '_all'} onValueChange={(v) => setSelectedDistrict(v === '_all' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder={isRu ? 'Все районы' : 'All districts'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{isRu ? 'Все районы' : 'All districts'}</SelectItem>
+                      <SelectItem value="_all">{isRu ? 'Все районы' : 'All districts'}</SelectItem>
                       {districts?.map(d => (
                         <SelectItem key={d} value={d}>{d}</SelectItem>
                       ))}
@@ -200,12 +200,12 @@ export default function OffplanIndex() {
                   <label className="text-sm font-medium mb-2 block">
                     {isRu ? 'Застройщик' : 'Developer'}
                   </label>
-                  <Select value={selectedDeveloper} onValueChange={setSelectedDeveloper}>
+                  <Select value={selectedDeveloper || '_all'} onValueChange={(v) => setSelectedDeveloper(v === '_all' ? '' : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder={isRu ? 'Все застройщики' : 'All developers'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{isRu ? 'Все застройщики' : 'All developers'}</SelectItem>
+                      <SelectItem value="_all">{isRu ? 'Все застройщики' : 'All developers'}</SelectItem>
                       {developers?.map(d => (
                         <SelectItem key={d.id} value={d.id}>
                           {isRu ? d.nameRu : d.nameEn}
