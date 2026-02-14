@@ -26,6 +26,7 @@ import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPromp
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
+import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -77,7 +78,10 @@ const Index = () => {
           {/* ─── SECTION 3: Smart Tip (contextual, dismissable) ─── */}
           <LifecycleSmartTip />
 
-          {/* ─── SECTION 4: Products (marketplace carousel) ─── */}
+          {/* ─── SECTION 4: Property Tour Banner ─── */}
+          <PropertyTourBanner />
+
+          {/* ─── SECTION 5: Products (marketplace carousel) ─── */}
           <HomeProductsSection />
 
           {/* ─── SECTION 5: Discover CTA ─── */}

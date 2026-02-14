@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
+import { PropertyTourPromo } from '@/components/experiences/PropertyTourPromo';
 import { useExperiences, formatDuration, ExperienceType, Experience } from '@/hooks/useExperiences';
 import { useExperienceCategories } from '@/hooks/useExperienceCategories';
 import { cn } from '@/lib/utils';
@@ -286,6 +287,11 @@ export default function ExperiencesIndex() {
               ))}
             </div>
           )}
+
+          {/* Property Tour promo */}
+          <div className="mt-6">
+            <PropertyTourPromo />
+          </div>
 
           <CrossSellSection currentVertical="experiences" className="mt-8" />
         </main>

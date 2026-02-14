@@ -27,6 +27,7 @@ import pmImg from '@/assets/solutions/pm.jpg';
 import renovationImg from '@/assets/solutions/renovation.jpg';
 import legalImg from '@/assets/solutions/legal.jpg';
 import rentalMgmtImg from '@/assets/solutions/rental-mgmt.jpg';
+import propertyTourImg from '@/assets/solutions/property-tour.jpg';
 
 interface QuickSolution {
   id: string;
@@ -63,6 +64,7 @@ const SOLUTIONS: QuickSolution[] = [
   { id: 'renovation', image: renovationImg, labelRu: 'Ремонт и отделка', labelEn: 'Renovation', path: '/services', personas: ['property_owner'] },
 
   // Universal
+  { id: 'property-tour', image: propertyTourImg, labelRu: 'Бесплатный тур', labelEn: 'Free property tour', path: '/property/consultation?type=property_tour', personas: ['all'] },
   { id: 'flowers', image: flowersImg, labelRu: 'Заказать цветы', labelEn: 'Order flowers', path: '/flowers', personas: ['all'] },
   { id: 'bike', image: bikeImg, labelRu: 'Арендовать байк', labelEn: 'Rent a scooter', path: '/transport', personas: ['all'] },
   { id: 'housing', image: housingImg, labelRu: 'Найти жильё на месяц', labelEn: 'Find monthly rental', path: '/property', personas: ['all'] },
