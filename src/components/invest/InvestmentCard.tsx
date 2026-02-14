@@ -108,9 +108,9 @@ export function InvestmentCard({
             {/* Score */}
             <MuunoScoreWidget
               score={project.muuno_score}
-              riskLevel={project.risk_level}
               size="sm"
               showLabel={false}
+              showRisk={false}
             />
           </div>
 
@@ -207,8 +207,8 @@ export function InvestmentCard({
           <div className="bg-background/90 backdrop-blur-sm rounded-lg p-2">
             <MuunoScoreWidget
               score={project.muuno_score}
-              riskLevel={project.risk_level}
               size="sm"
+              showRisk={false}
             />
           </div>
         </div>
