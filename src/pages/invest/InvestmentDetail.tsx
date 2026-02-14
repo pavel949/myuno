@@ -159,8 +159,8 @@ export default function InvestmentDetail() {
             <div className="pt-2 border-t border-border/50">
               <MuunoScoreWidget
                 score={project.muuno_score}
-                riskLevel={project.risk_level}
                 size="md"
+                showRisk={false}
               />
             </div>
           </div>
