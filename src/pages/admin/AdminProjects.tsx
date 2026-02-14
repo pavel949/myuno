@@ -10,6 +10,8 @@ import {
   ProjectStatus
 } from '@/hooks/usePropertyProjects';
 import { useAdminDevelopers } from '@/hooks/useAdminDevelopers';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -100,6 +102,29 @@ export default function AdminProjects() {
   const { data: developers } = useAdminDevelopers();
   const createProject = useCreatePropertyProject();
   const updateProject = useUpdatePropertyProject();
+  const queryClient = useQueryClient();
+
+  const handleEnrichAll = async () => {
+    setIsEnriching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('enrich-projects', {
+        body: { mode: 'batch' },
+      });
+      if (error) throw error;
+      toast.success(
+        isRu 
+          ? `AI обогатил ${data.enriched} из ${data.total} проектов` 
+          : `AI enriched ${data.enriched} of ${data.total} projects`
+      );
+      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
+    } catch (err: any) {
+      console.error('Enrich error:', err);
+      toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
+    } finally {
+      setIsEnriching(false);
+    }
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -107,6 +132,7 @@ export default function AdminProjects() {
   const [editingProject, setEditingProject] = useState<PropertyProject | null>(null);
   const [formData, setFormData] = useState<Partial<CreatePropertyProjectData>>(getEmptyProject());
   const [isAIIntakeOpen, setIsAIIntakeOpen] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
   
   // Filter projects by status and search
   const filteredProjects = useMemo(() => {
@@ -317,7 +343,11 @@ export default function AdminProjects() {
           title={isRu ? 'Проекты / ЖК' : 'Projects / Complexes'}
           subtitle={isRu ? 'Управление жилыми комплексами и проектами' : 'Manage residential complexes and projects'}
           actions={
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" onClick={handleEnrichAll} disabled={isEnriching}>
+                {isEnriching ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                {isRu ? 'AI Обогащение' : 'AI Enrich'}
+              </Button>
               <Button variant="outline" onClick={() => setIsAIIntakeOpen(true)}>
                 <Sparkles className="h-4 w-4 mr-2" />
                 AI Intake

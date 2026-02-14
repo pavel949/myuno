@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.etagi-scrape-projects]
 verify_jwt = false
+
+[functions.enrich-projects]
+verify_jwt = false
