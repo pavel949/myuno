@@ -12,7 +12,9 @@ import {
   Calendar, 
   Sparkles,
   HardHat,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck,
+  ShieldAlert
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -178,6 +180,26 @@ export function OffplanProjectCard({
             </span>
           </p>
         )}
+
+        {/* Due Diligence status */}
+        <div className={cn(
+          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium",
+          project.riskLevel 
+            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" 
+            : "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+        )}>
+          {project.riskLevel ? (
+            <>
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {isRu ? 'Due Diligence пройден' : 'Due Diligence Complete'}
+            </>
+          ) : (
+            <>
+              <ShieldAlert className="w-3.5 h-3.5" />
+              {isRu ? 'Запросить оценку рисков' : 'Request Risk Assessment'}
+            </>
+          )}
+        </div>
 
         {/* Metrics row */}
         <div className="flex items-center gap-2 pt-2 border-t border-border/50">

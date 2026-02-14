@@ -20,7 +20,10 @@ import {
   MessageCircle,
   ExternalLink,
   Shield,
-  AlertTriangle
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  FileSearch
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -28,6 +31,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useOffplanProjects, type ProjectStatus } from '@/hooks/useOffplanProjects';
@@ -35,6 +44,7 @@ import { useDeveloper } from '@/hooks/useDevelopers';
 import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
+import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
 
 const STATUS_CONFIG: Record<ProjectStatus, { 
@@ -65,7 +75,7 @@ export default function OffplanDetail() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
-
+  const [showLeadForm, setShowLeadForm] = useState(false);
   const { data: projects, isLoading } = useOffplanProjects();
   const project = projects?.find(p => p.id === id);
   const { data: developer } = useDeveloper(project?.developerId || '');
@@ -275,45 +285,83 @@ export default function OffplanDetail() {
               </div>
             )}
 
-            {/* Risk warning */}
-            {project.riskLevel && project.riskLevel !== 'low' && (
-              <div className={cn(
-                "rounded-xl p-4 flex items-start gap-3",
-                project.riskLevel === 'high' ? "bg-red-500/10 border border-red-500/30" : "bg-amber-500/10 border border-amber-500/30"
-              )}>
-                <AlertTriangle className={cn(
-                  "w-5 h-5 flex-shrink-0 mt-0.5",
-                  project.riskLevel === 'high' ? "text-red-500" : "text-amber-500"
-                )} />
-                <div>
-                  <p className="font-medium">
-                    {isRu ? 'Уровень риска:' : 'Risk Level:'}{' '}
-                    {project.riskLevel === 'high' ? (isRu ? 'Высокий' : 'High') : (isRu ? 'Средний' : 'Medium')}
+            {/* Due Diligence Status Block */}
+            <div className={cn(
+              "rounded-xl p-4 space-y-3 border",
+              project.riskLevel 
+                ? "bg-emerald-500/5 border-emerald-500/20" 
+                : "bg-amber-500/5 border-amber-500/20"
+            )}>
+              <div className="flex items-start gap-3">
+                {project.riskLevel ? (
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    {project.riskLevel 
+                      ? (isRu ? 'Due Diligence пройден' : 'Due Diligence Complete')
+                      : (isRu ? 'Due Diligence не проведён' : 'Due Diligence Pending')
+                    }
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {isRu 
-                      ? 'Рекомендуем проконсультироваться с экспертом перед инвестированием'
-                      : 'We recommend consulting with an expert before investing'}
+                    {project.riskLevel 
+                      ? (isRu 
+                          ? 'Проект прошёл независимую экспертизу muUNO. Получите персональный отчёт с детальной оценкой рисков.' 
+                          : 'Project has passed independent muUNO assessment. Get a personalized report with detailed risk analysis.')
+                      : (isRu 
+                          ? 'Этот проект ещё не прошёл независимую экспертизу. Запросите оценку рисков, чтобы принять взвешенное решение.'
+                          : 'This project has not yet been independently assessed. Request a risk evaluation to make an informed decision.')
+                    }
                   </p>
                 </div>
               </div>
-            )}
+              <Button 
+                className="w-full gap-2" 
+                variant={project.riskLevel ? "outline" : "default"}
+                onClick={() => setShowLeadForm(true)}
+              >
+                <FileSearch className="w-4 h-4" />
+                {project.riskLevel
+                  ? (isRu ? 'Получить полный отчёт' : 'Get Full Report')
+                  : (isRu ? 'Запросить оценку рисков' : 'Request Risk Assessment')
+                }
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="scoring" className="pt-4">
             {project.muunoScore ? (
-              <ScoreBreakdown
-                scoreBreakdown={{
-                  location: 80,
-                  developer: 85,
-                  financial: 75,
-                  market: 78,
-                }}
-                projectType="real_estate_offplan"
-              />
+              <div className="space-y-4">
+                <ScoreBreakdown
+                  scoreBreakdown={{
+                    location: 80,
+                    developer: 85,
+                    financial: 75,
+                    market: 78,
+                  }}
+                  projectType="real_estate_offplan"
+                />
+                <Button 
+                  className="w-full gap-2" 
+                  variant="outline"
+                  onClick={() => setShowLeadForm(true)}
+                >
+                  <FileSearch className="w-4 h-4" />
+                  {isRu ? 'Получить детальный анализ' : 'Get Detailed Analysis'}
+                </Button>
+              </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {isRu ? 'Скоринг недоступен' : 'Scoring not available'}
+              <div className="text-center py-8 space-y-3">
+                <ShieldAlert className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+                <p className="text-muted-foreground">
+                  {isRu ? 'Скоринг ещё не проведён' : 'Scoring not yet available'}
+                </p>
+                <Button onClick={() => setShowLeadForm(true)} className="gap-2">
+                  <FileSearch className="w-4 h-4" />
+                  {isRu ? 'Запросить оценку' : 'Request Assessment'}
+                </Button>
               </div>
             )}
           </TabsContent>
@@ -374,16 +422,33 @@ export default function OffplanDetail() {
       {/* Fixed CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t safe-area-bottom">
         <div className="flex gap-3">
-          <Button variant="outline" size="lg" className="flex-1 gap-2">
-            <Phone className="w-5 h-5" />
-            {isRu ? 'Позвонить' : 'Call'}
+          <Button variant="outline" size="lg" className="flex-1 gap-2" onClick={() => setShowLeadForm(true)}>
+            <FileSearch className="w-5 h-5" />
+            {isRu ? 'Оценка рисков' : 'Risk Report'}
           </Button>
-          <Button size="lg" className="flex-1 gap-2">
+          <Button size="lg" className="flex-1 gap-2" onClick={() => setShowLeadForm(true)}>
             <MessageCircle className="w-5 h-5" />
-            {isRu ? 'Запрос' : 'Inquire'}
+            {isRu ? 'Консультация' : 'Consultation'}
           </Button>
         </div>
       </div>
+
+      {/* Lead Form Dialog */}
+      <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {isRu ? 'Оценка рисков и консультация' : 'Risk Assessment & Consultation'}
+            </DialogTitle>
+          </DialogHeader>
+          <UniversalLeadForm
+            verticalId="property"
+            entryPoint={`offplan_risk_assessment_${project.id}`}
+            leadSource="risk_assessment"
+            onSuccess={() => setShowLeadForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
