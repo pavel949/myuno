@@ -23,7 +23,7 @@ const chips: ChipData[] = [
     icon: Building2,
     label: 'Complexes',
     labelRu: 'Комплексы',
-    path: '/complexes',
+    path: '/property/projects',
     gradient: 'from-sky-500 to-blue-600',
   },
   {
@@ -31,7 +31,7 @@ const chips: ChipData[] = [
     icon: TrendingUp,
     label: 'Invest',
     labelRu: 'Инвестиции',
-    path: '/invest',
+    path: '/property/invest',
     gradient: 'from-emerald-500 to-green-600',
   },
   {

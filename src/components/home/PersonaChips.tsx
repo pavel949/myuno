@@ -39,7 +39,7 @@ const CHIPS: ChipData[] = [
     icon: <TrendingUp className="w-3.5 h-3.5" />,
     label: { en: 'Investor', ru: 'Инвестор' },
     activeColor: 'bg-purple-500/15 border-purple-500/50 text-purple-700 dark:text-purple-300',
-    navigateOnFirstActivation: '/invest',
+    navigateOnFirstActivation: '/property/invest',
   },
 ];
 

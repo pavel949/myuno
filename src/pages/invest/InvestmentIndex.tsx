@@ -143,7 +143,7 @@ export default function InvestmentIndex() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate('/invest/dashboard')}
+              onClick={() => navigate('/property/invest/dashboard')}
               className="gap-1.5"
             >
               <User className="h-4 w-4" />
@@ -276,7 +276,7 @@ export default function InvestmentIndex() {
               </div>
             </div>
             <Button 
-              onClick={() => navigate('/invest/raise')}
+              onClick={() => navigate('/property/invest/raise')}
               className="w-full gap-2"
             >
               {isRu ? 'Подать заявку' : 'Submit Application'}

@@ -322,7 +322,7 @@ export default function OffplanIndex() {
               ? 'Разместите свой проект на платформе muUNO' 
               : 'List your project on the muUNO platform'}
           </p>
-          <Button onClick={() => navigate('/invest/raise')} className="w-full">
+          <Button onClick={() => navigate('/property/invest/raise')} className="w-full">
             {isRu ? 'Подать заявку' : 'Submit Application'}
           </Button>
         </div>

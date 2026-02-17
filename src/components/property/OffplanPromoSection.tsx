@@ -63,7 +63,7 @@ export function OffplanPromoSection({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/offplan')}
+          onClick={() => navigate('/property/offplan')}
           className="gap-1 text-primary hover:text-primary"
         >
           {isRu ? 'Все' : 'All'}
@@ -121,7 +121,7 @@ export function OffplanPromoSection({
           {/* View All card */}
           {projects && projects.length > maxItems && (
             <div
-              onClick={() => navigate('/offplan')}
+              onClick={() => navigate('/property/offplan')}
               className={cn(
                 "flex-shrink-0 w-[200px] rounded-2xl",
                 "bg-gradient-to-br from-primary/10 to-primary/5",

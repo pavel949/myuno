@@ -24,7 +24,7 @@ export default function InvestorDashboard() {
 
   // Redirect to auth if not logged in
   if (!user) {
-    return <Navigate to="/auth?redirect=/invest/dashboard" replace />;
+    return <Navigate to="/auth?redirect=/property/invest/dashboard" replace />;
   }
 
   return (

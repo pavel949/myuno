@@ -101,7 +101,7 @@ export default function OffplanDetail() {
           <p className="text-muted-foreground">
             {isRu ? 'Проект не найден' : 'Project not found'}
           </p>
-          <Button variant="link" onClick={() => navigate('/offplan')}>
+          <Button variant="link" onClick={() => navigate('/property/offplan')}>
             {isRu ? 'Вернуться к списку' : 'Back to list'}
           </Button>
         </div>

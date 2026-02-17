@@ -14,7 +14,7 @@ export const InvestorPromoCard = memo(function InvestorPromoCard() {
 
   const handleClick = () => {
     triggerHaptic('medium');
-    navigate('/invest');
+    navigate('/property/invest');
   };
 
   const categories = [

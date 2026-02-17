@@ -10,7 +10,7 @@ export function InvestorQuickActions() {
 
   return (
     <div className="flex gap-3">
-      <Button variant="outline" onClick={() => navigate('/invest')}>
+      <Button variant="outline" onClick={() => navigate('/property/invest')}>
         <Search className="h-4 w-4 mr-2" />
         {isRu ? 'Смотреть проекты' : 'Browse Projects'}
       </Button>

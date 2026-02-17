@@ -32,13 +32,13 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
       icon: TrendingUp,
       title: isRu ? 'Узнать реальную доходность' : 'Check Real ROI',
       description: isRu ? 'Независимая аналитика muUNO' : 'Independent muUNO analytics',
-      action: () => navigate('/invest'),
+      action: () => navigate('/property/invest'),
     },
     {
       icon: ShieldCheck,
       title: isRu ? 'Проверить риски застройщика' : 'Verify Developer Risks',
       description: isRu ? 'Скоринг надёжности проектов' : 'Project reliability scoring',
-      action: () => navigate('/offplan'),
+      action: () => navigate('/property/offplan'),
     },
     {
       icon: MessageCircle,
@@ -97,7 +97,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
         {/* CTA Buttons */}
         <div className="flex gap-3">
           <Button
-            onClick={() => navigate('/offplan')}
+            onClick={() => navigate('/property/offplan')}
             className="flex-1 gap-2"
           >
             <Building2 className="w-4 h-4" />
