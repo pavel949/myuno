@@ -55,7 +55,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   business: [
     { labelEn: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', icon: 'Building' },
     { labelEn: 'Legal help', labelRu: 'Юрист', path: '/legal', icon: 'Scale' },
-    { labelEn: 'Banks', labelRu: 'Банки', path: '/banks', icon: 'Landmark' },
+    { labelEn: 'Banks', labelRu: 'Банки', path: '/banking', icon: 'Landmark' },
   ],
   relocation: [
     { labelEn: 'Visa & docs', labelRu: 'Виза', path: '/visa', icon: 'FileText' },
@@ -78,7 +78,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Flowers', labelRu: 'Цветы', path: '/flowers', icon: 'Flower2' },
   ],
   nightlife: [
-    { labelEn: 'Clubs & bars', labelRu: 'Клубы и бары', path: '/nightlife', icon: 'Music' },
+    { labelEn: 'Clubs & bars', labelRu: 'Клубы и бары', path: '/events', icon: 'Music' },
     { labelEn: 'Restaurants', labelRu: 'Рестораны', path: '/restaurants', icon: 'UtensilsCrossed' },
     { labelEn: 'Taxi', labelRu: 'Такси', path: '/transport/taxi', icon: 'Car' },
   ],
