@@ -80,7 +80,7 @@ const TRIP_SERVICES: TripService[] = [
   {
     id: 'bank',
     icon: CreditCard,
-    path: '/banks',
+    path: '/banking',
     labelEn: 'Open Account',
     labelRu: 'Открыть счёт',
     descEn: 'Thai bank account',
