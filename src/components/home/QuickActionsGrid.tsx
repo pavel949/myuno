@@ -5,7 +5,7 @@ import {
   Anchor, Plane, Flower2, Home, Utensils, Compass,
   Stethoscope, ShoppingBag, MoreHorizontal, Scale, Shield,
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
-  Calendar, Wrench, Building2, Key, Droplets
+  Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -30,7 +30,7 @@ interface QuickAction {
 }
 
 const TOURIST_ACTIONS: QuickAction[] = [
-  { id: 'property', icon: Home, label: 'Rent', labelRu: 'Аренда', path: '/property', tint: 'bg-emerald-500/15' },
+  { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-emerald-500/15' },
   { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-sky-500/15' },
   { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-pink-500/15' },
   { id: 'delivery', icon: Droplets, label: 'Delivery', labelRu: 'Доставка', path: '/market?category=groceries', tint: 'bg-cyan-500/15' },
@@ -51,18 +51,18 @@ const RESIDENT_ACTIONS: QuickAction[] = [
 ];
 
 const OWNER_ACTIONS: QuickAction[] = [
-  { id: 'my-properties', icon: Home, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-emerald-500/15' },
+  { id: 'my-properties', icon: Key, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-emerald-500/15' },
   { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar', tint: 'bg-blue-500/15' },
   { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', tint: 'bg-amber-500/15' },
-  { id: 'rental', icon: Key, label: 'Rental', labelRu: 'Аренда', path: '/property', tint: 'bg-violet-500/15' },
+  { id: 'rental', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-violet-500/15' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-slate-500/15' },
   { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-cyan-500/15' },
 ];
 
 const INVESTOR_ACTIONS: QuickAction[] = [
-  { id: 'invest', icon: Banknote, label: 'Invest', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-green-500/15' },
+  { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-green-500/15' },
   { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', tint: 'bg-sky-500/15' },
-  { id: 'property-buy', icon: Home, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', tint: 'bg-emerald-500/15' },
+  { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', tint: 'bg-emerald-500/15' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-slate-500/15' },
   { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-indigo-500/15' },
   { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-blue-500/15' },

@@ -48,9 +48,9 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Yacht charter', labelRu: 'Яхты', path: '/yachts', icon: 'Anchor' },
   ],
   property: [
-    { labelEn: 'Real estate', labelRu: 'Недвижимость', path: '/property', icon: 'Building2' },
-    { labelEn: 'Legal help', labelRu: 'Юридическая помощь', path: '/legal', icon: 'Scale' },
-    { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
+    { labelEn: 'Housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
+    { labelEn: 'Investment', labelRu: 'Инвестиции', path: '/invest', icon: 'TrendingUp' },
+    { labelEn: 'Legal help', labelRu: 'Юрист', path: '/legal', icon: 'Scale' },
   ],
   business: [
     { labelEn: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', icon: 'Building' },
@@ -93,7 +93,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
     { labelEn: 'Airport transfer', labelRu: 'Трансфер', path: '/transfer', icon: 'Plane' },
   ],
   planning: [
-    { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'ListChecks' },
+    { labelEn: 'Trip planner', labelRu: 'Планировщик', path: '/trip-planner', icon: 'CalendarCheck' },
     { labelEn: 'Housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
     { labelEn: 'Insurance', labelRu: 'Страховка', path: '/insurance', icon: 'Shield' },
   ],

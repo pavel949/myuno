@@ -23,8 +23,8 @@ const TOP_APPS: TopApp[] = [
   {
     id: 'property',
     icon: <Home className="w-7 h-7" />,
-    titleEn: 'Property',
-    titleRu: 'Аренда',
+    titleEn: 'Housing',
+    titleRu: 'Жильё',
     descEn: 'Villas & Condos',
     descRu: 'Виллы и кондо',
     countLabel: 'Top',
