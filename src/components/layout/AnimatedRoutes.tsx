@@ -192,6 +192,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="invest/raise" element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
           <Route path="invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
           
+          {/* My Property */}
+          <Route path="my" element={<LazyPage><Pages.PropertyMySection /></LazyPage>} />
+          
           {/* Property Detail (must be last — catches :id) */}
           <Route path=":id" element={<LazyPage><Pages.PropertyDetail /></LazyPage>} />
           <Route path=":id/inquiry" element={<LazyPage><Pages.PropertyInquiry /></LazyPage>} />
