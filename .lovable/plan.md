@@ -1,121 +1,39 @@
 
 
-# Подготовка кода для работы разработчика
+## Audit: Navigation Links and Mini-App Context Consistency
 
-## Проблема
+### Issues Found
 
-Проект myUNO — это масштабное приложение (40+ вертикалей, 200+ хуков, 60+ edge-функций, 9 контекстов), но документация для разработчика практически отсутствует:
+**1. Broken Route: `/banks` (2 places)**
+- `LifeOSStatusBlock.tsx` — business context links to `/banks`
+- `TripServicesGrid.tsx` — "Open Account" links to `/banks`
+- Route `/banks` does NOT exist. The correct route is `/banking`.
 
-- `README.md` — шаблонный, без описания проекта
-- Нет инструкций по локальному запуску с переменными окружения
-- Нет карты архитектуры проекта
-- Нет описания соглашений (naming, patterns, где что лежит)
-- Существующие docs (`MCC_ARCHITECTURE.md`, `UX_CONTRACT.md`) описывают бизнес-логику, но не помогают быстро войти в код
+**2. Broken Route: `/nightlife` (1 place)**
+- `LifeOSStatusBlock.tsx` — nightlife context links to `/nightlife`
+- Route `/nightlife` does NOT exist in `AnimatedRoutes.tsx` and has no legacy redirect.
+- Fix: change to `/events` (the closest existing vertical for clubs/bars/events).
 
-## План действий
+**3. Inconsistent Transfer Links**
+- `LifeOSStatusBlock.tsx` (arrival, visa_travel contexts): links to `/transfer` — this is a **landing page** (SEO), not the booking flow.
+- `QuickActionsGrid.tsx` (tourist): links to `/transport/airport-transfer` — this is the **actual booking flow**.
+- For context actions (LifeOS), linking to the landing page is acceptable since it acts as an entry funnel. **No change needed**, but worth noting.
 
-### 1. Обновить README.md — главная точка входа
+**4. Inconsistent Label: QuickAccessStrip**
+- Uses "Real Estate" / "Недвижимость" for `/property`
+- All other components use "Housing" / "Жильё" per the standardized naming convention.
+- Fix: align to "Housing" / "Жильё".
 
-Переписать README с реальной информацией о проекте:
+### Changes Plan
 
-- Что такое myUNO (SuperApp для сервисов в Пхукете)
-- Стек: React 18 + Vite + TypeScript + Tailwind + shadcn/ui + Lovable Cloud
-- Быстрый старт: `npm i && npm run dev`
-- Переменные окружения (какие нужны, откуда взять)
-- Ссылки на внутреннюю документацию
+| File | Change |
+|------|--------|
+| `src/components/home/LifeOSStatusBlock.tsx` | `business.banks`: `/banks` -> `/banking` |
+| `src/components/home/LifeOSStatusBlock.tsx` | `nightlife.clubs`: `/nightlife` -> `/events` |
+| `src/components/property/TripServicesGrid.tsx` | bank path: `/banks` -> `/banking` |
+| `src/components/home/QuickAccessStrip.tsx` | Label: "Real Estate"/"Недвижимость" -> "Housing"/"Жильё" |
 
-### 2. Создать docs/ARCHITECTURE.md — карта проекта
+### Technical Details
 
-Документ с описанием структуры:
-
-```text
-src/
-  components/    -- UI-компоненты по доменам (admin/, vendor/, owner/, booking/, ...)
-  pages/         -- Страницы маршрутов (40+ вертикалей)
-  hooks/         -- Бизнес-логика (200+ хуков)
-  contexts/      -- Глобальные провайдеры (Auth, Cart, Language, Currency, ...)
-  lib/           -- Утилиты, конфиги, таксономии, адаптеры
-  types/         -- Типы TypeScript
-  integrations/  -- Авто-генерируемые файлы Lovable Cloud (НЕ РЕДАКТИРОВАТЬ)
-
-supabase/
-  functions/     -- Edge-функции (60+)
-  migrations/    -- SQL-миграции
-```
-
-Плюс описание ключевых паттернов:
-- Canonical Listing Wizard (schema-driven формы)
-- MiniAppLayout (обязательный layout для вертикалей)
-- UnifiedFiltersKlook (стандартная система фильтров)
-- Content Adapters (маппинг данных в карточки)
-- Taxonomy system (статические + динамические таксономии)
-
-### 3. Создать docs/CONVENTIONS.md — соглашения о коде
-
-- Именование файлов: `useXxx.ts` для хуков, `XxxPage.tsx` для страниц
-- Паттерн barrel exports (каждая папка имеет `index.ts`)
-- Локализация: `isRu ? 'Русский' : 'English'` через `useLanguage()`
-- Компоненты UI: только shadcn/ui + Radix, стили через Tailwind semantic tokens
-- Запрещено: raw CSS цвета, прямой импорт из `@radix-ui`, редактирование `integrations/supabase/*`
-
-### 4. Создать docs/EDGE_FUNCTIONS.md — справочник Edge-функций
-
-Таблица всех 60+ функций с кратким описанием:
-- Назначение каждой функции
-- Входные/выходные параметры
-- Какие секреты нужны
-- Группировка: AI, Payments, Notifications, Sync, Import
-
-### 5. Создать docs/DATABASE.md — схема базы данных
-
-- Ключевые таблицы и их назначение
-- Связи между таблицами
-- RLS-политики (кто к чему имеет доступ)
-- Какие файлы авто-генерируемые и их нельзя менять
-
-### 6. Добавить JSDoc-комментарии в ключевые файлы
-
-Добавить краткие описания в:
-- `src/App.tsx` — дерево провайдеров
-- `src/lib/verticals.ts` — список вертикалей
-- `src/lib/config/routes.ts` — маршруты
-- Ключевые контексты (`AuthContext`, `CartContext`)
-
-### 7. Создать .env.example
-
-Файл-шаблон с перечнем нужных переменных окружения (без значений):
-
-```
-VITE_SUPABASE_URL=
-VITE_SUPABASE_PUBLISHABLE_KEY=
-VITE_SUPABASE_PROJECT_ID=
-```
-
----
-
-## Технические детали
-
-**Файлы, которые будут созданы:**
-- `docs/ARCHITECTURE.md` — структура и паттерны
-- `docs/CONVENTIONS.md` — coding standards
-- `docs/EDGE_FUNCTIONS.md` — справочник backend-функций
-- `docs/DATABASE.md` — схема данных
-- `.env.example` — шаблон переменных окружения
-
-**Файлы, которые будут обновлены:**
-- `README.md` — полное переписывание
-- Ключевые `index.ts` файлы — добавление JSDoc
-
-**Не будут затронуты:**
-- Бизнес-логика и функциональность
-- Авто-генерируемые файлы (`integrations/supabase/*`)
-- Конфигурация сборки
-
-## Результат
-
-Новый разработчик сможет за 30 минут:
-1. Понять что это за проект и его архитектуру
-2. Запустить локально
-3. Найти нужный компонент/хук/функцию
-4. Следовать установленным паттернам при написании нового кода
+All changes are simple string replacements in hardcoded configuration objects. No logic, routing, or component structure changes required. Total: 4 files, 4 line-level edits.
 
