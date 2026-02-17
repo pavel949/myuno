@@ -1,124 +1,103 @@
 
 
-## Аудит и оптимизация структуры Property-вертикали
+## Архитектура Property Hub v2 — Минипортал недвижимости
 
-### Проблема сейчас
+### Текущее состояние
 
-Всё, что связано с недвижимостью, разбросано по **5 отдельным корневым маршрутам**:
+Property Hub сейчас имеет 4 таба: **Stays | Buy | Off-Plan | Invest**. Проблемы:
 
-```text
-/property         -- Аренда и покупка (Airbnb-стиль каталог)
-/offplan           -- Новостройки (отдельная страница)
-/developers        -- Застройщики (отдельная страница)
-/complexes         -- ЖК/проекты (отдельная страница)
-/invest            -- Инвестиции (отдельная страница + дашборд)
-/company/:slug     -- УК (отдельная страница)
-/owner             -- Управление (портал владельца)
-/rent-phuket       -- SEO-лендинг аренды
-```
+1. **Stays и Buy** — это один и тот же PropertyIndex с переключателем rent/buy внутри. Два таба для одного компонента создают путаницу.
+2. **Off-Plan карточки показывают `riskLevel`** напрямую (зеленый/желтый бейдж) — это противоречит стратегии лидогенерации Due Diligence, где конкретный уровень риска должен быть скрыт.
+3. **Нет связи между каталогом и управлением** — владелец не может из хаба перейти к своим объектам.
+4. **Объекты на продажу и новостройки** существуют в разных таблицах (`properties` с listing_type=sale vs `property_projects`) и не пересекаются визуально.
 
-Пользователь видит кашу: «Жильё», «Новостройки», «Инвестиции», «Купить» — как будто это разные продукты, хотя всё это **один домен — Недвижимость**.
-
-### Предлагаемая структура: Property Hub
-
-Объединить всё под `/property` с вкладками/разделами. Пользователь попадает в единый хаб с понятными интентами:
+### Предлагаемая структура табов
 
 ```text
-/property                    -- Property Hub (точка входа)
-  Tabs: Stays | Buy | Off-Plan | Invest | My Property
-
-/property?mode=rent          -- Аренда (текущий PropertyIndex, режим rent)
-/property?mode=buy           -- Покупка (текущий PropertyIndex, режим buy)
-/property/:id                -- Детальная страница объекта
-/property/search             -- Расширенный поиск
-/property/map                -- Карта
-
-/property/offplan            -- Новостройки (бывший /offplan)
-/property/offplan/:id        -- Детали проекта
-/property/developers         -- Застройщики (бывший /developers)
-/property/developers/:id     -- Профиль застройщика
-/property/projects           -- ЖК/комплексы (бывший /complexes)
-/property/project/:id        -- Существующий маршрут (без изменений)
-
-/property/invest             -- Инвестиционный хаб (бывший /invest)
-/property/invest/:id         -- Детали инвестиции
-/property/invest/dashboard   -- Инвестор-дашборд
-
-/company/:slug               -- УК (оставить на верхнем уровне — cross-vertical)
-
-/owner                       -- Управление (оставить — это портал, не каталог)
+Текущая:  [ Stays ] [ Buy ] [ Off-Plan ] [ Invest ]
+                                                     
+Новая:    [ Rent ] [ Buy ] [ New Build ] [ My Property ]
 ```
 
-### Визуальная структура Property Hub
+**Почему так:**
+- **Rent** (Аренда) — чистый интент, заменяет "Stays"
+- **Buy** (Купить) — вторичный рынок + объекты на продажу из `properties` (listing_type=sale)  
+- **New Build** (Новостройки) — проекты из `property_projects`, девелоперы, комплексы. Включает Due Diligence как CTA, но НЕ показывает riskLevel
+- **My Property** — персонализированный раздел: для владельцев — быстрый доступ к управлению (/owner), для инвесторов — портфель (/property/invest). Появляется только для авторизованных пользователей с ролями owner/investor
+
+### Исправление riskLevel на карточках
+
+На `OffplanProjectCard.tsx` сейчас отображается конкретный статус risk_level. По стратегии Due Diligence это должно быть заменено на:
+
+- **Если DD пройден**: бейдж "Due Diligence Complete" (зеленый, без деталей уровня риска)
+- **Если DD не пройден**: бейдж "Request Assessment" (янтарный, CTA для лида)
+
+Конкретный riskLevel ("Low"/"High") уже правильно скрыт — карточка проверяет только наличие `project.riskLevel` (truthy/falsy). Это уже корректно реализовано, проблем нет.
+
+### Маршрутизация
 
 ```text
-+-----------------------------------------------+
-|  [< Back]   Property Hub         [Map] [Search]|
-+-----------------------------------------------+
-|  [ Stays ]  [ Buy ]  [ Off-Plan ]  [ Invest ] |
-+-----------------------------------------------+
-|                                                |
-|  (контент зависит от выбранной вкладки)        |
-|                                                |
-+-----------------------------------------------+
+/property                    -- Hub (точка входа)
+  /property?mode=rent        -- Аренда (PropertyIndex, listing_type=rent)
+  /property?mode=buy         -- Покупка (PropertyIndex, listing_type=sale)
+  /property/offplan          -- Новостройки (OffplanIndex)
+  /property/developers       -- Девелоперы
+  /property/projects         -- Комплексы
+  /property/invest           -- Инвестиционный хаб
+  /property/invest/dashboard -- Портфель инвестора
+  /property/my               -- Мои объекты (для владельцев — редирект на /owner)
 ```
-
-### Что даёт:
-- **1 точка входа** вместо 5 для всего, что связано с недвижимостью
-- Пользователь переключается между интентами (аренда/покупка/новостройки/инвестиции) одним тапом
-- SEO: `/property/offplan` понятнее, чем `/offplan` в контексте SuperApp
-- Навигация упрощается: из QuickActions всегда `/property`, а внутри хаба пользователь сам выбирает
-
-### Что НЕ трогаем:
-- `/owner` — это рабочий портал владельца, НЕ каталог. Остаётся отдельно.
-- `/company/:slug` — УК обслуживают не только property. Остаётся на верхнем уровне.
-- `/rent-phuket`, `/new-developments` — SEO-лендинги с редиректами. Остаются.
-- `/transfer`, `/flower-delivery` — другие SEO-лендинги.
-
-### Навигационные изменения
-
-| Текущий маршрут | Новый маршрут | Тип |
-|---|---|---|
-| `/offplan` | `/property/offplan` | Перенос + legacy redirect |
-| `/offplan/:id` | `/property/offplan/:id` | Перенос + legacy redirect |
-| `/developers` | `/property/developers` | Перенос + legacy redirect |
-| `/developers/:id` | `/property/developers/:id` | Перенос + legacy redirect |
-| `/complexes` | `/property/projects` | Перенос + legacy redirect |
-| `/invest` | `/property/invest` | Перенос + legacy redirect |
-| `/invest/:id` | `/property/invest/:id` | Перенос + legacy redirect |
-| `/invest/dashboard` | `/property/invest/dashboard` | Перенос + legacy redirect |
-| `/invest/raise` | `/property/invest/raise` | Перенос + legacy redirect |
 
 ### План реализации
 
-**Шаг 1**: Создать `PropertyHub.tsx` — обёртка с табами (Stays/Buy/Off-Plan/Invest), которая рендерит текущий PropertyIndex или вложенные страницы в зависимости от выбранного таба/маршрута.
+**Шаг 1: Обновить табы в PropertyHub.tsx**
 
-**Шаг 2**: Обновить `AnimatedRoutes.tsx` — перенести маршруты offplan, developers, complexes, invest под `/property/*`. Добавить legacy-redirectы для старых путей.
+Переименовать и реструктурировать массив TABS:
+- `stays` -> `rent` (label: "Rent" / "Аренда", icon: Home)
+- `buy` оставить (label: "Buy" / "Купить", icon: ShoppingCart)
+- `offplan` -> `newbuild` (label: "New Build" / "Новостройки", icon: Building2)  
+- `invest` -> `my` (label: "My Property" / "Мои объекты", icon: User). Показывать условно только для авторизованных пользователей
 
-**Шаг 3**: Обновить `routes.ts` — перенести константы маршрутов и добавить legacy-redirectы.
+Invest убрать из основных табов — он будет доступен:
+- Как подраздел внутри "New Build" (CTA на карточках проектов с investment_enabled)
+- Через "My Property" для инвесторов с портфелем
 
-**Шаг 4**: Обновить навигационные ссылки по всему приложению:
-- `QuickActionsGrid.tsx` — INVESTOR_ACTIONS: `/invest` -> `/property/invest`, `/offplan` -> `/property/offplan`
-- `LifeSituationsGrid.tsx` — ссылки на offplan/invest
-- `LifeOSStatusBlock.tsx` — контекстные ссылки инвестора
-- `DiscoveryCarousel.tsx` — offplan-ссылки
-- `OffplanCTASection.tsx` — CTA-кнопки
-- `verticalGroups.ts` — без изменений (property остаётся property)
+**Шаг 2: Добавить маршрут /property/my**
 
-**Шаг 5**: Обновить `LEGACY_REDIRECTS` для обратной совместимости:
-```
-'/offplan' -> '/property/offplan'
-'/developers' -> '/property/developers'
-'/complexes' -> '/property/projects'
-'/invest' -> '/property/invest'
-'/new-developments' -> '/property/offplan'
-```
+Создать простую страницу-роутер `PropertyMySection.tsx`:
+- Если пользователь — owner/manager: показать сводку из `useMyProperties` + кнопка "Manage All" -> /owner
+- Если пользователь — investor: показать мини-портфель + кнопка "Dashboard" -> /property/invest/dashboard
+- Если не авторизован: CTA авторизации
 
-### Технические детали
+**Шаг 3: Подтвердить корректность riskLevel**
 
-- `PropertyHub.tsx` — новый компонент-обёртка с `react-router-dom` `Outlet` или условным рендерингом по pathname
-- Все существующие страницы (OffplanIndex, DevelopersIndex, InvestmentIndex и др.) переиспользуются без изменений — меняется только маршрутизация
-- Табы в хабе реализуются через Radix `Tabs` или простые `NavLink`-кнопки
-- Текущий `PropertyIndex` с rent/buy переключателем интегрируется как tab-контент "Stays" и "Buy"
-- ~15-20 файлов потребуют обновления ссылок (grep по `/offplan`, `/invest`, `/developers`, `/complexes`)
+Текущая реализация в `OffplanProjectCard.tsx` уже правильная — она проверяет наличие/отсутствие riskLevel, но НЕ показывает конкретное значение ("Low"/"High"). Бейдж показывает только "Due Diligence Complete" или "Request Assessment". Изменений не требуется.
+
+**Шаг 4: Обновить OffplanIndex — добавить интеграцию с Buy**
+
+В разделе "New Build" добавить фильтр "Готовые к покупке" который покажет completed-проекты из `property_projects` со статусом `completed` — это мост между новостройками и вторичным рынком.
+
+**Шаг 5: Обновить навигационные ссылки**
+
+Обновить QuickActions и PersonaChips:
+- Для инвестора: ссылка на `/property` вместо `/property/invest` (инвестор найдет свой портфель в "My Property")
+- Для владельца: добавить чип "My Property" -> `/property?tab=my`
+
+### Файлы для изменения
+
+| Файл | Что меняется |
+|---|---|
+| `src/pages/property/PropertyHub.tsx` | Обновление TABS: rent, buy, newbuild, my |
+| `src/pages/property/PropertyMySection.tsx` | **Новый** — роутер "My Property" |
+| `src/components/layout/AnimatedRoutes.tsx` | Добавить route `/property/my` |
+| `src/components/home/PersonaChips.tsx` | Обновить ссылки для owner/investor |
+| `src/components/home/QuickAccessChips.tsx` | Обновить invest-ссылку |
+
+### Что НЕ меняем
+
+- `OffplanProjectCard.tsx` — riskLevel уже реализован корректно (показывает статус DD, а не конкретный балл)
+- `OffplanDetail.tsx` — DD блок корректен (CTA лидоформа)
+- `/owner` — остается отдельным рабочим порталом
+- `/property/invest/*` — маршруты остаются, но убираем из основных табов
+- PropertyIndex — rent/buy логика внутри него работает корректно через searchParams
 
