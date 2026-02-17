@@ -164,7 +164,7 @@ export const THEMATIC_SECTIONS: ThematicSectionData[] = [
     emoji: '🏠',
     defaultOpen: false,
     categories: [
-      { id: 'property', slug: 'property', nameEn: 'Property Rental', nameRu: 'Аренда жилья', icon: '🏡', path: '/property' },
+      { id: 'property', slug: 'property', nameEn: 'Housing', nameRu: 'Жильё', icon: '🏡', path: '/property' },
       { id: 'transport', slug: 'transport', nameEn: 'Transport', nameRu: 'Транспорт', icon: '🚗', path: '/transport' },
       { id: 'medical', slug: 'medical', nameEn: 'Medical', nameRu: 'Медицина', icon: '🏥', path: '/medical' },
       { id: 'education', slug: 'education', nameEn: 'Education', nameRu: 'Образование', icon: '📚', path: '/education' },

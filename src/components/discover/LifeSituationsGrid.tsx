@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plane, Home, Palmtree, Heart, Users, Building, FileText, Briefcase,
   ArrowUpRight, Dumbbell, Music, ShoppingBag, GraduationCap, PawPrint,
-  MapPin, PartyPopper, Armchair, ChevronDown,
+  MapPin, PartyPopper, Armchair, ChevronDown, CalendarCheck,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -150,7 +150,7 @@ const SECONDARY_SITUATIONS: Array<{
   { code: 'education', icon: GraduationCap, titleEn: 'Education', titleRu: 'Образование', descEn: 'Schools, courses, tutors', descRu: 'Школы, курсы, репетиторы', route: '/life/education' },
   { code: 'pets', icon: PawPrint, titleEn: 'Pet Care', titleRu: 'Питомцы', descEn: 'Vets, shops, pet sitting', descRu: 'Ветклиники, зоомагазины', route: '/life/pets' },
   { code: 'visa_travel', icon: MapPin, titleEn: 'Visa & Travel', titleRu: 'Виза и поездки', descEn: 'Visa runs, insurance, transfers', descRu: 'Виза-раны, страховка, трансферы', route: '/life/visa_travel' },
-  { code: 'planning', icon: Plane, titleEn: 'Trip Planning', titleRu: 'Планирование', descEn: 'Prepare before you arrive', descRu: 'Подготовка к поездке', route: '/life/planning' },
+  { code: 'planning', icon: CalendarCheck, titleEn: 'Vacation Planning', titleRu: 'Планирование отпуска', descEn: 'Prepare before you arrive', descRu: 'Жильё, билеты, страховка', route: '/life/planning' },
   { code: 'wedding_event', icon: PartyPopper, titleEn: 'Wedding & Events', titleRu: 'Свадьба и праздники', descEn: 'Venues, flowers, catering', descRu: 'Площадки, цветы, кейтеринг', route: '/life/wedding_event' },
   { code: 'retirement_living', icon: Armchair, titleEn: 'Retirement', titleRu: 'Пенсия на Пхукете', descEn: 'Healthcare, housing, insurance', descRu: 'Медицина, жильё, страховка', route: '/life/retirement_living' },
 ];
