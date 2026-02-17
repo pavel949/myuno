@@ -1,39 +1,124 @@
 
 
-## Audit: Navigation Links and Mini-App Context Consistency
+## Аудит и оптимизация структуры Property-вертикали
 
-### Issues Found
+### Проблема сейчас
 
-**1. Broken Route: `/banks` (2 places)**
-- `LifeOSStatusBlock.tsx` — business context links to `/banks`
-- `TripServicesGrid.tsx` — "Open Account" links to `/banks`
-- Route `/banks` does NOT exist. The correct route is `/banking`.
+Всё, что связано с недвижимостью, разбросано по **5 отдельным корневым маршрутам**:
 
-**2. Broken Route: `/nightlife` (1 place)**
-- `LifeOSStatusBlock.tsx` — nightlife context links to `/nightlife`
-- Route `/nightlife` does NOT exist in `AnimatedRoutes.tsx` and has no legacy redirect.
-- Fix: change to `/events` (the closest existing vertical for clubs/bars/events).
+```text
+/property         -- Аренда и покупка (Airbnb-стиль каталог)
+/offplan           -- Новостройки (отдельная страница)
+/developers        -- Застройщики (отдельная страница)
+/complexes         -- ЖК/проекты (отдельная страница)
+/invest            -- Инвестиции (отдельная страница + дашборд)
+/company/:slug     -- УК (отдельная страница)
+/owner             -- Управление (портал владельца)
+/rent-phuket       -- SEO-лендинг аренды
+```
 
-**3. Inconsistent Transfer Links**
-- `LifeOSStatusBlock.tsx` (arrival, visa_travel contexts): links to `/transfer` — this is a **landing page** (SEO), not the booking flow.
-- `QuickActionsGrid.tsx` (tourist): links to `/transport/airport-transfer` — this is the **actual booking flow**.
-- For context actions (LifeOS), linking to the landing page is acceptable since it acts as an entry funnel. **No change needed**, but worth noting.
+Пользователь видит кашу: «Жильё», «Новостройки», «Инвестиции», «Купить» — как будто это разные продукты, хотя всё это **один домен — Недвижимость**.
 
-**4. Inconsistent Label: QuickAccessStrip**
-- Uses "Real Estate" / "Недвижимость" for `/property`
-- All other components use "Housing" / "Жильё" per the standardized naming convention.
-- Fix: align to "Housing" / "Жильё".
+### Предлагаемая структура: Property Hub
 
-### Changes Plan
+Объединить всё под `/property` с вкладками/разделами. Пользователь попадает в единый хаб с понятными интентами:
 
-| File | Change |
-|------|--------|
-| `src/components/home/LifeOSStatusBlock.tsx` | `business.banks`: `/banks` -> `/banking` |
-| `src/components/home/LifeOSStatusBlock.tsx` | `nightlife.clubs`: `/nightlife` -> `/events` |
-| `src/components/property/TripServicesGrid.tsx` | bank path: `/banks` -> `/banking` |
-| `src/components/home/QuickAccessStrip.tsx` | Label: "Real Estate"/"Недвижимость" -> "Housing"/"Жильё" |
+```text
+/property                    -- Property Hub (точка входа)
+  Tabs: Stays | Buy | Off-Plan | Invest | My Property
 
-### Technical Details
+/property?mode=rent          -- Аренда (текущий PropertyIndex, режим rent)
+/property?mode=buy           -- Покупка (текущий PropertyIndex, режим buy)
+/property/:id                -- Детальная страница объекта
+/property/search             -- Расширенный поиск
+/property/map                -- Карта
 
-All changes are simple string replacements in hardcoded configuration objects. No logic, routing, or component structure changes required. Total: 4 files, 4 line-level edits.
+/property/offplan            -- Новостройки (бывший /offplan)
+/property/offplan/:id        -- Детали проекта
+/property/developers         -- Застройщики (бывший /developers)
+/property/developers/:id     -- Профиль застройщика
+/property/projects           -- ЖК/комплексы (бывший /complexes)
+/property/project/:id        -- Существующий маршрут (без изменений)
+
+/property/invest             -- Инвестиционный хаб (бывший /invest)
+/property/invest/:id         -- Детали инвестиции
+/property/invest/dashboard   -- Инвестор-дашборд
+
+/company/:slug               -- УК (оставить на верхнем уровне — cross-vertical)
+
+/owner                       -- Управление (оставить — это портал, не каталог)
+```
+
+### Визуальная структура Property Hub
+
+```text
++-----------------------------------------------+
+|  [< Back]   Property Hub         [Map] [Search]|
++-----------------------------------------------+
+|  [ Stays ]  [ Buy ]  [ Off-Plan ]  [ Invest ] |
++-----------------------------------------------+
+|                                                |
+|  (контент зависит от выбранной вкладки)        |
+|                                                |
++-----------------------------------------------+
+```
+
+### Что даёт:
+- **1 точка входа** вместо 5 для всего, что связано с недвижимостью
+- Пользователь переключается между интентами (аренда/покупка/новостройки/инвестиции) одним тапом
+- SEO: `/property/offplan` понятнее, чем `/offplan` в контексте SuperApp
+- Навигация упрощается: из QuickActions всегда `/property`, а внутри хаба пользователь сам выбирает
+
+### Что НЕ трогаем:
+- `/owner` — это рабочий портал владельца, НЕ каталог. Остаётся отдельно.
+- `/company/:slug` — УК обслуживают не только property. Остаётся на верхнем уровне.
+- `/rent-phuket`, `/new-developments` — SEO-лендинги с редиректами. Остаются.
+- `/transfer`, `/flower-delivery` — другие SEO-лендинги.
+
+### Навигационные изменения
+
+| Текущий маршрут | Новый маршрут | Тип |
+|---|---|---|
+| `/offplan` | `/property/offplan` | Перенос + legacy redirect |
+| `/offplan/:id` | `/property/offplan/:id` | Перенос + legacy redirect |
+| `/developers` | `/property/developers` | Перенос + legacy redirect |
+| `/developers/:id` | `/property/developers/:id` | Перенос + legacy redirect |
+| `/complexes` | `/property/projects` | Перенос + legacy redirect |
+| `/invest` | `/property/invest` | Перенос + legacy redirect |
+| `/invest/:id` | `/property/invest/:id` | Перенос + legacy redirect |
+| `/invest/dashboard` | `/property/invest/dashboard` | Перенос + legacy redirect |
+| `/invest/raise` | `/property/invest/raise` | Перенос + legacy redirect |
+
+### План реализации
+
+**Шаг 1**: Создать `PropertyHub.tsx` — обёртка с табами (Stays/Buy/Off-Plan/Invest), которая рендерит текущий PropertyIndex или вложенные страницы в зависимости от выбранного таба/маршрута.
+
+**Шаг 2**: Обновить `AnimatedRoutes.tsx` — перенести маршруты offplan, developers, complexes, invest под `/property/*`. Добавить legacy-redirectы для старых путей.
+
+**Шаг 3**: Обновить `routes.ts` — перенести константы маршрутов и добавить legacy-redirectы.
+
+**Шаг 4**: Обновить навигационные ссылки по всему приложению:
+- `QuickActionsGrid.tsx` — INVESTOR_ACTIONS: `/invest` -> `/property/invest`, `/offplan` -> `/property/offplan`
+- `LifeSituationsGrid.tsx` — ссылки на offplan/invest
+- `LifeOSStatusBlock.tsx` — контекстные ссылки инвестора
+- `DiscoveryCarousel.tsx` — offplan-ссылки
+- `OffplanCTASection.tsx` — CTA-кнопки
+- `verticalGroups.ts` — без изменений (property остаётся property)
+
+**Шаг 5**: Обновить `LEGACY_REDIRECTS` для обратной совместимости:
+```
+'/offplan' -> '/property/offplan'
+'/developers' -> '/property/developers'
+'/complexes' -> '/property/projects'
+'/invest' -> '/property/invest'
+'/new-developments' -> '/property/offplan'
+```
+
+### Технические детали
+
+- `PropertyHub.tsx` — новый компонент-обёртка с `react-router-dom` `Outlet` или условным рендерингом по pathname
+- Все существующие страницы (OffplanIndex, DevelopersIndex, InvestmentIndex и др.) переиспользуются без изменений — меняется только маршрутизация
+- Табы в хабе реализуются через Radix `Tabs` или простые `NavLink`-кнопки
+- Текущий `PropertyIndex` с rent/buy переключателем интегрируется как tab-контент "Stays" и "Buy"
+- ~15-20 файлов потребуют обновления ссылок (grep по `/offplan`, `/invest`, `/developers`, `/complexes`)
 
