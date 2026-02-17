@@ -9,6 +9,7 @@ interface MuunoScoreWidgetProps {
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
   showRisk?: boolean;
+  showScore?: boolean;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function MuunoScoreWidget({
   size = 'md',
   showLabel = true,
   showRisk = true,
+  showScore = true,
   className,
 }: MuunoScoreWidgetProps) {
   const { language } = useLanguage();
@@ -121,9 +123,11 @@ export function MuunoScoreWidget({
         </div>
         
         {/* Numeric score */}
-        <span className={cn(styles.score, config.color)}>
-          {score}
-        </span>
+        {showScore && (
+          <span className={cn(styles.score, config.color)}>
+            {score}
+          </span>
+        )}
       </div>
 
       {/* Risk label */}

@@ -134,12 +134,17 @@ export default function OffplanIndex() {
                 <Building2 className="w-4 h-4 text-muted-foreground" />
                 <span>{projects.length} {isRu ? 'проектов' : 'projects'}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-green-500" />
-                <span>
-                  {isRu ? 'до' : 'up to'} {Math.max(...projects.map(p => p.roiProjected || 0))}% ROI
-                </span>
-              </div>
+              {(() => {
+                const maxRoi = Math.max(...projects.map(p => p.roiProjected || 0));
+                return maxRoi > 0 ? (
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span>
+                      {isRu ? 'до' : 'up to'} {maxRoi}% ROI
+                    </span>
+                  </div>
+                ) : null;
+              })()}
             </div>
           )}
         </div>
