@@ -29,7 +29,7 @@ interface OrderNotificationPayload {
   }>;
 }
 
-const ADMIN_EMAIL = 'pavel@ignatevestate.com'; // Admin email
+const ADMIN_EMAILS = ['pavel@ignatevestate.com', 'pi@myuno.app']; // Admin emails
 const ADMIN_WHATSAPP = '66922407355'; // Admin WhatsApp number
 
 // Send WhatsApp notification via URL API
@@ -301,7 +301,8 @@ Deno.serve(async (req) => {
 
     const emailResponse = await resend.emails.send({
       from: 'UNO Orders <orders@resend.dev>',
-      to: [ADMIN_EMAIL],
+      to: ADMIN_EMAILS,
+      subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
       subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
       html: emailHtml,
     });
