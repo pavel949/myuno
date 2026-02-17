@@ -37,18 +37,41 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('consultation_requests').insert({
+      const preferredDates = formData.preferredDate 
+        ? [{ date: formData.preferredDate, time: '' }] 
+        : null;
+
+      const { data, error } = await supabase.from('consultation_requests').insert({
         user_id: user?.id || null,
         request_type: 'property_tour',
         name: formData.name,
         phone: formData.phone,
-        preferred_date: formData.preferredDate || null,
-        notes: `[Free Property Tour] Guests: ${formData.guests}. Source: ${source}. ${formData.notes}`,
-        status: 'new',
+        preferred_dates: preferredDates,
+        guests_count: parseInt(formData.guests) || 2,
+        notes: `[Free Property Tour] Source: ${source}. ${formData.notes}`.trim(),
+        status: 'pending',
         vertical_id: 'property',
-      });
+        lead_source: 'website',
+        entry_point: source,
+      }).select().single();
 
       if (error) throw error;
+
+      // Send email notification to admin
+      if (data) {
+        supabase.functions.invoke('notify-admin-order', {
+          body: {
+            order_id: data.id,
+            order_number: `TOUR-${data.id.slice(0, 8).toUpperCase()}`,
+            order_type: 'property',
+            total_amount: 0,
+            currency: 'THB',
+            customer_name: formData.name,
+            customer_phone: formData.phone,
+            notes: `🏠 Free Property Tour Request\nGuests: ${formData.guests}\nPreferred date: ${formData.preferredDate || 'Flexible'}\n${formData.notes}`,
+          },
+        }).catch(err => console.error('Failed to send tour notification:', err));
+      }
 
       setIsSuccess(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Request submitted!');
