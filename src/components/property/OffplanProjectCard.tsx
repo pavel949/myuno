@@ -124,10 +124,10 @@ export function OffplanProjectCard({
           )}
         </div>
 
-        {/* muUNO Score badge */}
+        {/* muUNO Score badge — show only score dots, no risk label or numeric value on public cards */}
         {project.muunoScore && (
           <div className="absolute top-3 right-3">
-            <MuunoScoreWidget score={project.muunoScore} size="sm" />
+            <MuunoScoreWidget score={project.muunoScore} size="sm" showRisk={false} showLabel={false} showScore={false} />
           </div>
         )}
 

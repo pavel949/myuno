@@ -168,47 +168,7 @@ export default function PropertyIndex() {
               <div className="flex-1">
                 <AirbnbSearchBar onSearch={handleSearch} />
               </div>
-              {/* Rent/Buy toggle — compact, desktop-like */}
-              <div className="hidden sm:flex p-0.5 bg-muted/60 rounded-lg shrink-0">
-                <button
-                  onClick={() => setPropertyMode('rent')}
-                  className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'rent' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                >
-                  {isRu ? 'Аренда' : 'Rent'}
-                </button>
-                <button
-                  onClick={() => setPropertyMode('buy')}
-                  className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", propertyMode === 'buy' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-                >
-                  {isRu ? 'Покупка' : 'Buy'}
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile: Rent/Buy as subtle text tabs */}
-            <div className="sm:hidden flex items-center gap-4 mt-2">
-              <button
-                onClick={() => setPropertyMode('rent')}
-                className={cn(
-                  "text-sm font-medium pb-1 border-b-2 transition-all",
-                  propertyMode === 'rent'
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground"
-                )}
-              >
-                {isRu ? 'Аренда' : 'Stays'}
-              </button>
-              <button
-                onClick={() => setPropertyMode('buy')}
-                className={cn(
-                  "text-sm font-medium pb-1 border-b-2 transition-all",
-                  propertyMode === 'buy'
-                    ? "border-foreground text-foreground"
-                    : "border-transparent text-muted-foreground"
-                )}
-              >
-                {isRu ? 'Покупка' : 'Buy'}
-              </button>
+              {/* Rent/Buy toggle removed — handled by PropertyHub tabs */}
             </div>
           </div>
 
