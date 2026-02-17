@@ -76,7 +76,7 @@ export const InlineSearch = memo(function InlineSearch() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
         <Input
           ref={inputRef}
-          placeholder={language === 'ru' ? 'Поиск услуг, мест, товаров...' : 'Search services, places, products...'}
+          placeholder={language === 'ru' ? 'Ищите что угодно...' : 'Search anything...'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsExpanded(true)}
