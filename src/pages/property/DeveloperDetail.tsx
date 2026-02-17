@@ -55,7 +55,7 @@ export default function DeveloperDetail() {
           <p className="text-muted-foreground">
             {isRu ? 'Застройщик не найден' : 'Developer not found'}
           </p>
-          <Button variant="link" onClick={() => navigate('/developers')}>
+          <Button variant="link" onClick={() => navigate('/property/developers')}>
             {isRu ? 'Вернуться к списку' : 'Back to list'}
           </Button>
         </div>

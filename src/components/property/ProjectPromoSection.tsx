@@ -140,7 +140,7 @@ export function ProjectPromoSection({ className, mode = 'rent', onProjectSelect,
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate('/complexes')}
+          onClick={() => navigate('/property/projects')}
           className="gap-2 rounded-full"
         >
           {isRu ? 'Смотреть все комплексы' : 'View all complexes'}

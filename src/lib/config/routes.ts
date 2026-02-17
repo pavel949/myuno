@@ -60,7 +60,7 @@ export const APP_ROUTES = {
   BEAUTY_SERVICES: '/beauty/services',
   BEAUTY_MAP: '/beauty/map',
 
-  // ── Property ──
+  // ── Property Hub ──
   PROPERTY: '/property',
   PROPERTY_DETAIL: (id: string) => `/property/${id}`,
   PROPERTY_INQUIRY: (id: string) => `/property/${id}/inquiry`,
@@ -68,20 +68,20 @@ export const APP_ROUTES = {
   PROPERTY_CONSULTATION: '/property/consultation',
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
-  COMPLEXES: '/complexes',
+  COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
 
-  // ── Offplan & Developers ──
-  OFFPLAN: '/offplan',
-  OFFPLAN_DETAIL: (id: string) => `/offplan/${id}`,
-  DEVELOPERS: '/developers',
-  DEVELOPER_DETAIL: (id: string) => `/developers/${id}`,
+  // ── Offplan & Developers (under Property Hub) ──
+  OFFPLAN: '/property/offplan',
+  OFFPLAN_DETAIL: (id: string) => `/property/offplan/${id}`,
+  DEVELOPERS: '/property/developers',
+  DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
 
-  // ── Investment ──
-  INVEST: '/invest',
-  INVEST_DASHBOARD: '/invest/dashboard',
-  INVEST_RAISE: '/invest/raise',
-  INVEST_DETAIL: (id: string) => `/invest/${id}`,
+  // ── Investment (under Property Hub) ──
+  INVEST: '/property/invest',
+  INVEST_DASHBOARD: '/property/invest/dashboard',
+  INVEST_RAISE: '/property/invest/raise',
+  INVEST_DETAIL: (id: string) => `/property/invest/${id}`,
 
   // ── Restaurants ──
   RESTAURANTS: '/restaurants',
@@ -281,6 +281,14 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/food': '/restaurants',
   '/view-history': '/history',
   '/demo': '/',
+  // Property Hub legacy redirects
+  '/offplan': '/property/offplan',
+  '/developers': '/property/developers',
+  '/complexes': '/property/projects',
+  '/invest': '/property/invest',
+  '/invest/dashboard': '/property/invest/dashboard',
+  '/invest/raise': '/property/invest/raise',
+  '/new-developments': '/property/offplan',
 } as const;
 
 /**
@@ -295,7 +303,7 @@ export const ROUTE_OWNERSHIP = {
     '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
-    '/list-with-us', '/invest', '/offplan', '/developers', '/complexes'],
+    '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects'],
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],
@@ -319,6 +327,9 @@ export function isValidRoute(path: string): boolean {
     /^\/cleaning\/[^/]+$/,
     /^\/experiences\/[^/]+$/,
     /^\/property\/[^/]+$/,
+    /^\/property\/offplan\/[^/]+$/,
+    /^\/property\/developers\/[^/]+$/,
+    /^\/property\/invest\/[^/]+$/,
     /^\/market\/category\/[^/]+$/,
     /^\/market\/product\/[^/]+$/,
     /^\/yachts\/[^/]+$/,
@@ -329,9 +340,6 @@ export function isValidRoute(path: string): boolean {
     /^\/restaurants\/[^/]+$/,
     /^\/pets\/[^/]+$/,
     /^\/life-flow\/[^/]+$/,
-    /^\/offplan\/[^/]+$/,
-    /^\/developers\/[^/]+$/,
-    /^\/invest\/[^/]+$/,
     /^\/pharmacy\/[^/]+$/,
     /^\/flowers\/[^/]+$/,
     /^\/babysitter\/[^/]+$/,

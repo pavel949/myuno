@@ -113,7 +113,7 @@ ${description}
               : 'Our investment expert will contact you within 24 hours to discuss details.'
             }
           </p>
-          <Button onClick={() => navigate('/invest')} className="mt-4">
+          <Button onClick={() => navigate('/property/invest')} className="mt-4">
             {isRu ? 'Вернуться к каталогу' : 'Back to Catalog'}
           </Button>
         </div>

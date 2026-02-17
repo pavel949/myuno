@@ -100,7 +100,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
     if (selectedPersonas.includes('property_owner')) {
       navigate('/owner');
     } else if (selectedPersonas.includes('investor')) {
-      navigate('/invest');
+      navigate('/property/invest');
     }
   }, [onComplete, activeCity, setCity, selectedPersonas, togglePersona, navigate]);
 

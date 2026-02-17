@@ -52,8 +52,8 @@ const SOLUTIONS: QuickSolution[] = [
   { id: 'plumber-r', image: plumberImg, labelRu: 'Вызвать сантехника', labelEn: 'Call a plumber', path: '/services', personas: ['resident'] },
 
   // Investor
-  { id: 'risks', image: risksImg, labelRu: 'Риски новостроек', labelEn: 'Off-plan risks report', path: '/invest', personas: ['investor'] },
-  { id: 'roi', image: roiImg, labelRu: 'Сравнить доходность', labelEn: 'Compare ROI', path: '/offplan', personas: ['investor'] },
+  { id: 'risks', image: risksImg, labelRu: 'Риски новостроек', labelEn: 'Off-plan risks report', path: '/property/invest', personas: ['investor'] },
+  { id: 'roi', image: roiImg, labelRu: 'Сравнить доходность', labelEn: 'Compare ROI', path: '/property/offplan', personas: ['investor'] },
   { id: 'legal-check', image: legalImg, labelRu: 'Юридическая проверка', labelEn: 'Legal check', path: '/legal', personas: ['investor'] },
   { id: 'rental-mgmt', image: rentalMgmtImg, labelRu: 'Управление арендой', labelEn: 'Rental management', path: '/owner', personas: ['investor'] },
 

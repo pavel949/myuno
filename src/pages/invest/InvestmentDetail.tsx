@@ -60,7 +60,7 @@ export default function InvestmentDetail() {
           <p className="text-muted-foreground">
             {isRu ? 'Проект не найден' : 'Project not found'}
           </p>
-          <Button variant="outline" onClick={() => navigate('/invest')}>
+          <Button variant="outline" onClick={() => navigate('/property/invest')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {isRu ? 'Назад к каталогу' : 'Back to catalog'}
           </Button>
@@ -89,7 +89,7 @@ export default function InvestmentDetail() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/invest')}
+              onClick={() => navigate('/property/invest')}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>

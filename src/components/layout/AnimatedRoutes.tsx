@@ -26,6 +26,9 @@ import NotFound from '@/pages/NotFound';
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
 
+// Property Hub wrapper
+const PropertyHub = React.lazy(() => import('@/pages/property/PropertyHub'));
+
 // ── Redirect Helpers ──
 
 const TransportIdRedirect = () => {
@@ -40,6 +43,11 @@ const TourRedirect = () => { const { id } = useParams(); return <Navigate to={`/
 const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
 const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
+
+// Legacy redirect helpers for Property Hub migration
+const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
+const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
+const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/invest/${id}`} replace />; };
 
 // ── Layout Wrappers ──
 
@@ -161,30 +169,45 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/clinics" element={<Navigate to="/medical" replace />} />
         <Route path="/water_activities" element={<Navigate to="/experiences?type=activity" replace />} />
         
-        {/* ── Property ── */}
+        {/* ── Property Hub ── */}
         <Route path="/properties" element={<Navigate to="/property" replace />} />
-        <Route path="/property" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
-        <Route path="/property/search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
-        <Route path="/property/consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
-        <Route path="/property/deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
-        <Route path="/property/project/:id" element={<LazyPage><Pages.ProjectDetail /></LazyPage>} />
-        <Route path="/property/:id" element={<LazyPage><Pages.PropertyDetail /></LazyPage>} />
-        <Route path="/property/:id/inquiry" element={<LazyPage><Pages.PropertyInquiry /></LazyPage>} />
-        <Route path="/property/map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
-        <Route path="/complexes" element={<LazyPage><Pages.ProjectsIndex /></LazyPage>} />
+        <Route path="/property" element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
+          <Route index element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+          <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
+          <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
+          <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
+          <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
+          <Route path="project/:id" element={<LazyPage><Pages.ProjectDetail /></LazyPage>} />
+          
+          {/* Off-Plan & Developers (moved from /offplan, /developers, /complexes) */}
+          <Route path="offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
+          <Route path="offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
+          <Route path="developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
+          <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
+          <Route path="projects" element={<LazyPage><Pages.ProjectsIndex /></LazyPage>} />
+          
+          {/* Investment (moved from /invest) */}
+          <Route path="invest" element={<LazyPage><Pages.InvestmentIndex /></LazyPage>} />
+          <Route path="invest/dashboard" element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
+          <Route path="invest/raise" element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
+          <Route path="invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
+          
+          {/* Property Detail (must be last — catches :id) */}
+          <Route path=":id" element={<LazyPage><Pages.PropertyDetail /></LazyPage>} />
+          <Route path=":id/inquiry" element={<LazyPage><Pages.PropertyInquiry /></LazyPage>} />
+        </Route>
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
         
-        {/* ── Offplan & Developers ── */}
-        <Route path="/offplan" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
-        <Route path="/offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
-        <Route path="/developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
-        <Route path="/developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
-        
-        {/* ── Investment ── */}
-        <Route path="/invest" element={<LazyPage><Pages.InvestmentIndex /></LazyPage>} />
-        <Route path="/invest/dashboard" element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
-        <Route path="/invest/raise" element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
-        <Route path="/invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
+        {/* ── Legacy Property Hub Redirects ── */}
+        <Route path="/offplan" element={<Navigate to="/property/offplan" replace />} />
+        <Route path="/offplan/:id" element={<OffplanIdRedirect />} />
+        <Route path="/developers" element={<Navigate to="/property/developers" replace />} />
+        <Route path="/developers/:id" element={<DeveloperIdRedirect />} />
+        <Route path="/complexes" element={<Navigate to="/property/projects" replace />} />
+        <Route path="/invest" element={<Navigate to="/property/invest" replace />} />
+        <Route path="/invest/dashboard" element={<Navigate to="/property/invest/dashboard" replace />} />
+        <Route path="/invest/raise" element={<Navigate to="/property/invest/raise" replace />} />
+        <Route path="/invest/:id" element={<InvestIdRedirect />} />
         
         {/* ── Restaurants ── */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />
@@ -209,7 +232,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/transfer" element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
         <Route path="/flower-delivery" element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
         <Route path="/rent-phuket" element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
-        <Route path="/new-developments" element={<Navigate to="/offplan" replace />} />
+        <Route path="/new-developments" element={<Navigate to="/property/offplan" replace />} />
         <Route path="/transport/taxi" element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
         <Route path="/transfers" element={<Navigate to="/transfer" replace />} />

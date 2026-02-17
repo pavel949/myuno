@@ -49,7 +49,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   ],
   property: [
     { labelEn: 'Housing', labelRu: 'Жильё', path: '/property', icon: 'Home' },
-    { labelEn: 'Investment', labelRu: 'Инвестиции', path: '/invest', icon: 'TrendingUp' },
+    { labelEn: 'Investment', labelRu: 'Инвестиции', path: '/property/invest', icon: 'TrendingUp' },
     { labelEn: 'Legal help', labelRu: 'Юрист', path: '/legal', icon: 'Scale' },
   ],
   business: [

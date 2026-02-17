@@ -46,7 +46,7 @@ export default function ProjectDetail() {
         <h1 className="text-xl font-semibold mb-2">
           {isRu ? 'Комплекс не найден' : 'Complex not found'}
         </h1>
-        <Button variant="outline" onClick={() => navigate('/complexes')}>
+        <Button variant="outline" onClick={() => navigate('/property/projects')}>
           {isRu ? 'К каталогу комплексов' : 'Back to complexes'}
         </Button>
       </div>
