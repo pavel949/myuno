@@ -31,7 +31,7 @@ const chips: ChipData[] = [
     icon: TrendingUp,
     label: 'Invest',
     labelRu: 'Инвестиции',
-    path: '/property/invest',
+    path: '/property/my',
     gradient: 'from-emerald-500 to-green-600',
   },
   {

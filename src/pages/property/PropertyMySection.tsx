@@ -1,0 +1,126 @@
+/**
+ * PropertyMySection — Personal property hub
+ * Routes owners to management, investors to portfolio, guests to auth CTA
+ */
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Building2, TrendingUp, LogIn, ArrowRight, Home } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMyProperties } from '@/hooks/useMyProperties';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+export default function PropertyMySection() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <LogIn className="w-8 h-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-semibold text-foreground">
+          {isRu ? 'Войдите, чтобы управлять недвижимостью' : 'Sign in to manage your property'}
+        </h2>
+        <p className="text-muted-foreground text-sm max-w-sm">
+          {isRu
+            ? 'Добавляйте объекты, отслеживайте бронирования и управляйте портфелем'
+            : 'Add properties, track bookings, and manage your portfolio'}
+        </p>
+        <Button onClick={() => navigate('/auth')} size="lg">
+          {isRu ? 'Войти' : 'Sign In'}
+        </Button>
+      </div>
+    );
+  }
+
+  return <AuthenticatedMySection />;
+}
+
+function AuthenticatedMySection() {
+  const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const { allProperties, isLoading, isOwner, isManager, hasProperties } = useMyProperties();
+
+  const sections = [
+    {
+      id: 'manage',
+      icon: Building2,
+      title: isRu ? 'Управление объектами' : 'Property Management',
+      description: isRu
+        ? `${allProperties.length} объект${allProperties.length !== 1 ? 'ов' : ''} в управлении`
+        : `${allProperties.length} propert${allProperties.length !== 1 ? 'ies' : 'y'} managed`,
+      path: '/owner',
+      show: isOwner || isManager || hasProperties,
+      gradient: 'from-sky-500 to-blue-600',
+    },
+    {
+      id: 'invest',
+      icon: TrendingUp,
+      title: isRu ? 'Инвестиционный портфель' : 'Investment Portfolio',
+      description: isRu ? 'Проекты и аналитика' : 'Projects & analytics',
+      path: '/property/invest',
+      show: true,
+      gradient: 'from-emerald-500 to-green-600',
+    },
+    {
+      id: 'add',
+      icon: Home,
+      title: isRu ? 'Добавить объект' : 'Add Property',
+      description: isRu ? 'Разместить на платформе' : 'List on the platform',
+      path: '/owner',
+      show: true,
+      gradient: 'from-amber-500 to-orange-600',
+    },
+  ];
+
+  return (
+    <div className="px-4 py-6 space-y-4 max-w-2xl mx-auto">
+      <h1 className="text-lg font-semibold text-foreground">
+        {isRu ? 'Мои объекты' : 'My Property'}
+      </h1>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sections.filter(s => s.show).map((section) => {
+            const Icon = section.icon;
+            return (
+              <Card
+                key={section.id}
+                className="cursor-pointer hover:shadow-md transition-shadow border-border/50"
+                onClick={() => navigate(section.path)}
+              >
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br flex-shrink-0",
+                    section.gradient
+                  )}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground">{section.title}</h3>
+                    <p className="text-sm text-muted-foreground">{section.description}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
