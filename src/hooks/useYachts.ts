@@ -43,6 +43,9 @@ export interface Yacht {
   addons?: unknown;
   charter_options?: unknown;
   departure_times?: string[] | null;
+  booking_flow?: string | null;         // 'instant' | 'in_app_request'
+  deposit_percent?: number | null;      // default 50
+  balance_due_hours?: number | null;    // default 48
 }
 
 export function useYachts(yachtType?: string) {

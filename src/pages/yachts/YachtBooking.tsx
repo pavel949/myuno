@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { Anchor, Users, Clock, Loader2, AlertCircle, Info } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -127,6 +127,10 @@ export default function YachtBooking() {
     );
   }
 
+  // Booking mode & deposit calculation
+  const isInstant = yacht.booking_flow === 'instant';
+  const depositPercent = yacht.deposit_percent ?? 50;
+
   // Calculate experiences total
   const experiencesTotal = selectedExperiences.reduce((sum, expId) => {
     const exp = yachtExperiences.find(e => e.id === expId);
@@ -142,6 +146,8 @@ export default function YachtBooking() {
   const basePrice = priceMap[charterType];
   const serviceFee = Math.round((basePrice + experiencesTotal) * (platformFeePercent / 100));
   const total = basePrice + experiencesTotal + serviceFee;
+  const depositAmount = Math.round(total * depositPercent / 100);
+  const balanceAmount = total - depositAmount;
 
   const defaultTimesMap: Record<CharterType, string[]> = {
     half_day: ['09:00', '14:00'],
@@ -226,8 +232,8 @@ export default function YachtBooking() {
         is_primary: true,
       }],
       payment: {
-        amount: total,
-        payment_method: paymentMethod,
+        amount: isInstant ? depositAmount : total,
+        payment_method: isInstant ? paymentMethod : 'cash',
         status: 'pending',
       },
       addresses: [],
@@ -238,10 +244,15 @@ export default function YachtBooking() {
         crew_included: yacht.has_crew || false,
         catering_included: yacht.has_catering || false,
         experiences: selectedExperiences,
+        booking_flow: yacht.booking_flow || 'in_app_request',
+        deposit_percent: depositPercent,
+        deposit_amount: depositAmount,
+        balance_amount: balanceAmount,
+        balance_due_hours: yacht.balance_due_hours ?? 48,
       },
       serviceName: yachtName,
       providerName: yacht.provider_id ? undefined : 'UNO Yachts',
-      openWhatsAppOnCash: true,
+      openWhatsAppOnCash: !isInstant, // Open WhatsApp for request flow
     });
 
     if (result.booking_id) {
@@ -282,6 +293,9 @@ export default function YachtBooking() {
         onViewBookings={() => navigate('/bookings')}
         continuePath="/yachts"
         continueLabel={language === 'ru' ? 'К яхтам' : 'Browse Yachts'}
+        bookingMode={isInstant ? 'instant' : 'request'}
+        depositAmount={depositAmount}
+        balanceAmount={balanceAmount}
       />
     );
   }
@@ -292,11 +306,22 @@ export default function YachtBooking() {
     <AppLayout>
       <PageContainer className="pb-40">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <BackButton fallbackPath="/yachts" variant="ghost" />
-          <h1 className="text-2xl font-bold tracking-tight">
-            {language === 'ru' ? 'Бронирование яхты' : 'Book Yacht'}
-          </h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {language === 'ru' ? 'Бронирование яхты' : 'Book Yacht'}
+            </h1>
+            <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 ${
+              isInstant
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+            }`}>
+              {isInstant
+                ? (language === 'ru' ? '⚡ Мгновенное бронирование' : '⚡ Instant Booking')
+                : (language === 'ru' ? '📋 Бронирование по заявке' : '📋 Request to Book')}
+            </span>
+          </div>
         </div>
 
         {/* Yacht Summary */}
@@ -376,20 +401,41 @@ export default function YachtBooking() {
             />
           </div>
 
-          {/* Payment */}
-          <div>
-            <h3 className="font-semibold mb-3">
-              {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
-            </h3>
-            <BookingPaymentSelect
-              selected={paymentMethod}
-              onSelect={setPaymentMethod}
-              amount={total}
-              currency="THB"
-              showWallet
-              showCash
-            />
-          </div>
+          {/* Payment — only for instant booking */}
+          {isInstant ? (
+            <div>
+              <h3 className="font-semibold mb-3">
+                {language === 'ru' ? 'Способ оплаты депозита' : 'Deposit Payment Method'}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                {language === 'ru'
+                  ? `Сейчас оплачивается депозит ${depositPercent}% — ${(yacht.currency === 'THB' ? '฿' : yacht.currency)}${depositAmount.toLocaleString()}`
+                  : `You pay a ${depositPercent}% deposit now — ${(yacht.currency === 'THB' ? '฿' : yacht.currency)}${depositAmount.toLocaleString()}`}
+              </p>
+              <BookingPaymentSelect
+                selected={paymentMethod}
+                onSelect={setPaymentMethod}
+                amount={depositAmount}
+                currency="THB"
+                showWallet
+                showCash
+              />
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-xl">
+              <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                  {language === 'ru' ? 'Депозит будет выставлен отдельно' : 'Deposit will be invoiced separately'}
+                </p>
+                <p className="text-xs text-amber-700/80 dark:text-amber-400/70 mt-0.5">
+                  {language === 'ru'
+                    ? `После подтверждения заявки менеджер myUNO выставит счёт на депозит (${depositPercent}% от стоимости).`
+                    : `After the request is confirmed, a myUNO manager will send a deposit invoice (${depositPercent}% of total).`}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Summary */}
           <BookingSummary
@@ -424,16 +470,51 @@ export default function YachtBooking() {
             ]}
             sourceCurrency={yacht.currency || 'THB'}
           />
+
+          {/* Deposit block in summary */}
+          <div className="bg-card rounded-2xl border overflow-hidden">
+            <div className="p-4 border-b bg-muted/30 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{language === 'ru' ? 'Полная стоимость' : 'Total charter'}</span>
+                <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{total.toLocaleString()}</span>
+              </div>
+              {isInstant ? (
+                <>
+                  <div className="flex justify-between text-sm font-medium text-primary">
+                    <span>{language === 'ru' ? `Депозит сейчас (${depositPercent}%)` : `Deposit now (${depositPercent}%)`}</span>
+                    <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{depositAmount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{language === 'ru' ? 'Остаток при посадке' : 'Balance at boarding'}</span>
+                    <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{balanceAmount.toLocaleString()}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-sm font-medium text-amber-600 dark:text-amber-400">
+                  <span>{language === 'ru' ? `Депозит (${depositPercent}%) — после подтверждения` : `Deposit (${depositPercent}%) — after confirmation`}</span>
+                  <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{depositAmount.toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </PageContainer>
 
       <BookingBottomBar
-        total={total}
+        total={isInstant ? depositAmount : total}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         disabled={!canSubmit}
-        submitLabel={language === 'ru' ? 'Забронировать' : 'Confirm Booking'}
-        hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните все поля' : '🔒 Secure booking — complete all fields'}
+        submitLabel={
+          isInstant
+            ? (language === 'ru' ? `Оплатить депозит ฿${depositAmount.toLocaleString()}` : `Pay Deposit ฿${depositAmount.toLocaleString()}`)
+            : (language === 'ru' ? 'Отправить заявку' : 'Send Request')
+        }
+        hint={
+          isInstant
+            ? (language === 'ru' ? '🔒 Оплата депозита — остаток при посадке' : '🔒 Deposit payment — balance at boarding')
+            : (language === 'ru' ? '📋 Заявка бесплатна — депозит после подтверждения' : '📋 Free request — deposit after confirmation')
+        }
       />
     </AppLayout>
   );
