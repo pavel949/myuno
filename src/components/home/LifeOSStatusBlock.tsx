@@ -130,13 +130,14 @@ export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {
 
   return (
     <section className="space-y-4">
-      {/* Status card */}
+      {/* Status card — uses CSS custom property to apply dynamic color cleanly */}
       <div
         className="rounded-xl border p-4 space-y-3"
         style={{
-          backgroundColor: `${activeColor}06`,
-          borderColor: `${activeColor}20`,
-        }}
+          '--situation-color': activeColor || 'hsl(var(--primary))',
+          backgroundColor: 'color-mix(in srgb, var(--situation-color) 6%, transparent)',
+          borderColor: 'color-mix(in srgb, var(--situation-color) 20%, transparent)',
+        } as React.CSSProperties}
       >
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -144,11 +145,11 @@ export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {
             {activeSituation && (
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${activeColor}12` }}
+                style={{ backgroundColor: 'color-mix(in srgb, var(--situation-color) 12%, transparent)' }}
               >
                 {React.createElement(getIcon(activeSituation.icon), {
                   className: "w-4 h-4",
-                  style: { color: activeColor || undefined },
+                  style: { color: 'var(--situation-color)' },
                 })}
               </div>
             )}

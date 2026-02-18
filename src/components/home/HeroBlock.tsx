@@ -130,8 +130,10 @@ export const HeroBlock = memo(function HeroBlock() {
   if (!isDesktop) {
     return (
     <div className="relative rounded-2xl overflow-hidden">
-        {/* Deep navy solid with subtle gradient — high contrast for white text */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(225,40%,18%)] to-[hsl(230,45%,22%)]" />
+        {/* Hero gradient — uses CSS vars for theme consistency */}
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 18%) 55%, hsl(230 45% 22%) 100%)'
+        }} />
         
         <div className="relative px-5 py-5 space-y-4">
           {/* Location + SOS */}
@@ -173,7 +175,7 @@ export const HeroBlock = memo(function HeroBlock() {
                 )}
                 {activityStreak && activityStreak > 0 ? (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-xs">
-                    <Flame className="w-3 h-3 text-orange-300" />
+                    <Flame className="w-3 h-3" style={{ color: 'hsl(var(--warning))' }} />
                     <span className="font-medium text-white">
                       {activityStreak} {isRu ? 'заказов' : 'orders'}
                     </span>
@@ -196,8 +198,10 @@ export const HeroBlock = memo(function HeroBlock() {
   // Desktop
   return (
     <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10">
-      {/* Deep navy solid with subtle gradient — high contrast for white text */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(225,40%,18%)] to-[hsl(230,45%,22%)]" />
+      {/* Hero gradient — uses CSS vars for theme consistency */}
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 18%) 55%, hsl(230 45% 22%) 100%)'
+      }} />
       
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
@@ -236,7 +240,7 @@ export const HeroBlock = memo(function HeroBlock() {
               <>
                 <span className="text-white/20">·</span>
                 <div className="flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-orange-300" />
+                  <Flame className="w-4 h-4" style={{ color: 'hsl(var(--warning))' }} />
                   <span>{activityStreak} {isRu ? 'заказов за 30д' : 'orders in 30d'}</span>
                 </div>
               </>
