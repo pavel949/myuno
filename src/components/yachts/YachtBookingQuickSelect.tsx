@@ -344,7 +344,9 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                   </Button>
                   <Button className="flex-1 h-12 gap-2" disabled={!canProceed} onClick={handleBookNow}>
                     <Zap className="w-4 h-4" />
-                    {language === 'ru' ? 'Забронировать' : 'Book Now'}
+                    {yacht.booking_flow === 'instant'
+                      ? (language === 'ru' ? 'Забронировать' : 'Book Now')
+                      : (language === 'ru' ? 'Отправить заявку' : 'Send Request')}
                   </Button>
                 </div>
               </div>
