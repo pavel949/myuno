@@ -1,8 +1,7 @@
-import React, { memo, useMemo, useCallback } from 'react';
-import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar, Trophy, Flame } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { memo, useMemo, useCallback, useState } from 'react';
+import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { InlineSearch } from '@/components/search/InlineSearch';
 import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +12,37 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 const PERSONA_OPTIONS: UserPersona[] = ['tourist', 'resident', 'property_owner', 'investor'];
+
+/** Inline search bar that navigates to /search?q=... */
+function HeroSearchInput({ isRu }: { isRu: boolean }) {
+  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = useCallback(() => {
+    const q = query.trim();
+    navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+  }, [query, navigate]);
+
+  return (
+    <div className="flex items-center gap-2 bg-background/95 backdrop-blur-sm rounded-xl px-3 py-2.5 shadow-sm border border-border/40">
+      <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+      <input
+        className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+        placeholder={isRu ? 'Ищите что угодно...' : 'Search anything...'}
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+      />
+      <button
+        onClick={handleSubmit}
+        aria-label={isRu ? 'Искать' : 'Search'}
+        className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary text-primary-foreground shrink-0 transition-opacity hover:opacity-90 active:scale-95"
+      >
+        <ArrowRight className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
 
 /** Compact segmented persona switcher */
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
@@ -204,9 +234,7 @@ export const HeroBlock = memo(function HeroBlock() {
           <PersonaSwitcher isRu={isRu} />
           
           {/* Search */}
-          <div className="lg:hidden">
-            <InlineSearch />
-          </div>
+          <HeroSearchInput isRu={isRu} />
         </div>
       </div>
     );
