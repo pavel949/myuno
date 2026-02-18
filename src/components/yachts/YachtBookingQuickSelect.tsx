@@ -152,8 +152,8 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               </div>
             </SheetTrigger>
             
-            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
-              <SheetHeader className="text-left pb-4 border-b">
+            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl flex flex-col overflow-hidden !p-0">
+              <SheetHeader className="text-left pb-4 border-b px-6 pt-6 shrink-0">
                 <SheetTitle className="flex items-center gap-2">
                   <Anchor className="w-5 h-5 text-primary" />
                   {language === 'ru' ? 'Спланируйте морской день' : 'Plan Your Sea Day'}
@@ -161,7 +161,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                 <p className="text-sm text-muted-foreground">{yachtName}</p>
               </SheetHeader>
               
-              <div className="overflow-y-auto py-4 space-y-6 pb-32">
+              <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4 space-y-6 pb-32">
                 {/* Charter Type Selection */}
                 <div>
                   <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
@@ -337,7 +337,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               </div>
 
               {/* Action Buttons — intent-based CTA */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
+              <div className="shrink-0 px-6 py-4 bg-background border-t">
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1 h-12 gap-2" disabled={!canProceed || isInCart} onClick={handleAddToCart}>
                     {isInCart ? (<><Check className="w-4 h-4" />{language === 'ru' ? 'В корзине' : 'In Cart'}</>) : (<><ShoppingCart className="w-4 h-4" />{language === 'ru' ? 'В корзину' : 'Add to Cart'}</>)}
