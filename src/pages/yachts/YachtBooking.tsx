@@ -198,7 +198,7 @@ export default function YachtBooking() {
       scheduled_at: scheduledAt.toISOString(),
       total_amount: total,
       currency: yacht.currency || 'THB',
-      provider_id: yacht.provider_id || undefined,
+      provider_id: undefined, // yacht.provider_id is from legacy providers table, not orgs
       notes: `Yacht: ${yacht.name_en}. ${charterLabel.en} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
       items: [
         {
