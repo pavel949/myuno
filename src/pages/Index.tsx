@@ -38,7 +38,8 @@ const Index = () => {
   const { activeCode } = useLifeSituationContext();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem('myuno-onboarding-complete');
+    return !localStorage.getItem('myuno-onboarding-complete') &&
+           !sessionStorage.getItem('myuno-onboarding-complete');
   });
   const { pendingReview, isOpen: reviewOpen, setIsOpen: setReviewOpen, dismiss: dismissReview } = usePostOrderReview();
 
