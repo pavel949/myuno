@@ -243,7 +243,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
                         onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
                         disabled={(date) => date < today}
                         locale={language === 'ru' ? ru : enUS}
-                        className="rounded-xl border p-3"
+                        className="rounded-xl border p-3 pointer-events-auto"
                       />
                       <Button variant="ghost" size="sm" onClick={() => setShowCalendar(false)} className="w-full">
                         {language === 'ru' ? 'Назад' : 'Back'}
