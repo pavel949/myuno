@@ -1,7 +1,14 @@
 // App version for PWA cache busting
 // Increment this when deploying significant changes
 export const APP_VERSION = '3.35.0';
-export const BUILD_TIMESTAMP = new Date().toISOString();
+
+// Injected by vite `define` at build-time — always reflects the actual build moment,
+// not the runtime moment (which would be wrong after caching).
+declare const __BUILD_TIMESTAMP__: string;
+export const BUILD_TIMESTAMP: string =
+  typeof __BUILD_TIMESTAMP__ !== 'undefined'
+    ? __BUILD_TIMESTAMP__
+    : new Date().toISOString(); // fallback for dev / tests
 
 // Check for updates via network (bypasses cache)
 export async function checkForUpdates(): Promise<boolean> {
