@@ -44,8 +44,21 @@ export async function forceCleanAllCaches(): Promise<void> {
   console.log('[myUNO] All caches cleared');
 }
 
-// Log version on load — NO automatic reload to prevent loops
+// Log version on load — clean up stale keys on version change
 if (typeof window !== 'undefined') {
   console.log(`[myUNO] v${APP_VERSION} | ${BUILD_TIMESTAMP}`);
+
+  const storedVersion = localStorage.getItem('app_version');
+  if (storedVersion && storedVersion !== APP_VERSION) {
+    // Version changed — purge stale keys accumulated by old builds
+    const STALE_KEYS = ['manifest_version', 'last_cache_cleanup', 'pwa_installed'];
+    STALE_KEYS.forEach((key) => {
+      if (localStorage.getItem(key) !== null) {
+        console.log(`[myUNO] Purging stale key: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+  }
+
   localStorage.setItem('app_version', APP_VERSION);
 }

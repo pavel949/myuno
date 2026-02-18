@@ -8,8 +8,11 @@ import { APP_VERSION } from '@/lib/appVersion';
 
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
-  const [dismissed, setDismissed] = React.useState(false);
-  
+  const DISMISSED_KEY = `pwa_prompt_dismissed_v${APP_VERSION}`;
+  const [dismissed, setDismissed] = React.useState(
+    () => sessionStorage.getItem(DISMISSED_KEY) === 'true'
+  );
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -18,13 +21,16 @@ export function PWAUpdatePrompt() {
     onRegisteredSW(swUrl, r) {
       console.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
       if (r) {
-        // Immediate check
+        // Immediate check on registration
         r.update();
-        // Check for updates every 2 minutes
-        setInterval(() => {
-          console.log('[PWA] Checking for SW updates...');
-          r.update();
-        }, 2 * 60 * 1000);
+        // Check for updates when tab regains focus (instead of polling every 2min)
+        const handleVisibility = () => {
+          if (document.visibilityState === 'visible') {
+            console.log('[PWA] Tab visible — checking for SW updates...');
+            r.update();
+          }
+        };
+        document.addEventListener('visibilitychange', handleVisibility);
       }
     },
     onRegisterError(error) {
@@ -39,6 +45,7 @@ export function PWAUpdatePrompt() {
   };
 
   const handleDismiss = () => {
+    sessionStorage.setItem(DISMISSED_KEY, 'true');
     setDismissed(true);
     setNeedRefresh(false);
   };
