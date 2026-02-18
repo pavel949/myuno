@@ -3,10 +3,34 @@
  * Used on account page and wallet/loyalty page.
  */
 import React from 'react';
-import { Trophy, Lock, Star, Sparkles } from 'lucide-react';
+import {
+  Lock, Sparkles,
+  Rocket, Star, Trophy, MessageCircle, Camera, Users, Heart, Sunrise,
+  Award, Gift, Zap, Shield, Crown, Gem, Target, TrendingUp
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoyalty } from '@/hooks/useLoyalty';
 import { Progress } from '@/components/ui/progress';
+
+/** Map icon string from DB → Lucide component */
+const ICON_MAP: Record<string, React.ReactNode> = {
+  rocket: <Rocket className="w-5 h-5" />,
+  star: <Star className="w-5 h-5" />,
+  trophy: <Trophy className="w-5 h-5" />,
+  'message-circle': <MessageCircle className="w-5 h-5" />,
+  camera: <Camera className="w-5 h-5" />,
+  users: <Users className="w-5 h-5" />,
+  heart: <Heart className="w-5 h-5" />,
+  sunrise: <Sunrise className="w-5 h-5" />,
+  award: <Award className="w-5 h-5" />,
+  gift: <Gift className="w-5 h-5" />,
+  zap: <Zap className="w-5 h-5" />,
+  shield: <Shield className="w-5 h-5" />,
+  crown: <Crown className="w-5 h-5" />,
+  gem: <Gem className="w-5 h-5" />,
+  target: <Target className="w-5 h-5" />,
+  'trending-up': <TrendingUp className="w-5 h-5" />,
+};
 
 export function AchievementShowcase() {
   const { language } = useLanguage();
@@ -74,10 +98,12 @@ export function AchievementShowcase() {
                   }`}
                   title={!earned && description ? description : undefined}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                    earned ? 'bg-primary/10' : 'bg-muted'
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    earned ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
                   }`}>
-                    {earned ? (def.icon || '🏆') : (def.icon || <Lock className="w-4 h-4 text-muted-foreground" />)}
+                    {earned
+                      ? (ICON_MAP[def.icon] || <Award className="w-5 h-5" />)
+                      : <Lock className="w-4 h-4 text-muted-foreground" />}
                   </div>
                   <p className={`text-[10px] text-center font-medium leading-tight ${
                     earned ? 'text-foreground' : 'text-muted-foreground'
