@@ -1,53 +1,123 @@
 
-## Проблема
+## Депозит и двухрежимное бронирование яхт
 
-Календарь в шите бронирования яхты не реагирует на клики. Это классический баг Radix UI `Dialog/Sheet`: оверлей перехватывает все события мыши, а без `pointer-events-auto` на компоненте `CalendarComponent` — даты нельзя выбрать.
+### Контекст
 
-Консольный лог подтверждает: `DayPicker → Calendar → Sheet → Dialog` — компонент рендерится внутри `DialogPortal`, который блокирует события.
+В таблице `yachts` уже есть нужные поля:
+- `booking_flow` — `'in_app_request'` (все яхты сейчас) или `'instant'`
+- `deposit_percent` — процент депозита (сейчас у всех стоит 50 по умолчанию)
+- `balance_due_hours` — за сколько часов нужно оплатить остаток (48 по умолчанию)
+
+Проблема: эти поля есть в БД, но **никак не используются в UI**. Страница бронирования всегда показывает один и тот же флоу без учёта режима и депозита.
 
 ---
 
-## Решение
+### Как будет работать
 
-Одно изменение в одном файле.
+**Режим 1 — `in_app_request` (запрос на бронирование)**  
+Большинство яхт. Похоже на "Request to Book" в недвижимости:
+- Кнопка: "Отправить заявку" / "Send Request"
+- Заказ создаётся со статусом `pending`
+- Подтверждение: "Заявка отправлена — myUNO свяжется с вами в течение 2 часов"
+- Оплата депозита происходит после подтверждения менеджером
+- Оплата онлайн на этом этапе **не предлагается**
 
-**Файл:** `src/components/yachts/YachtBookingQuickSelect.tsx`
+**Режим 2 — `instant` (мгновенное бронирование)**  
+Яхты с живым календарём:
+- Кнопка: "Забронировать и оплатить депозит" / "Book & Pay Deposit"
+- Показывается сумма депозита (например, 50% = ฿15,000 из ฿30,000)
+- Оплата депозита онлайн сразу
+- Заказ создаётся со статусом `confirmed`
 
-**Строка 246** — добавить `pointer-events-auto` к `className` календаря:
+---
 
-```tsx
-// Было:
-<CalendarComponent
-  mode="single"
-  selected={selectedDate}
-  onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
-  disabled={(date) => date < today}
-  locale={language === 'ru' ? ru : enUS}
-  className="rounded-xl border p-3"
-/>
+### Что меняется
 
-// Станет:
-<CalendarComponent
-  mode="single"
-  selected={selectedDate}
-  onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
-  disabled={(date) => date < today}
-  locale={language === 'ru' ? ru : enUS}
-  className="rounded-xl border p-3 pointer-events-auto"
-/>
+**1. `src/hooks/useYachts.ts`**  
+Добавить поля `booking_flow`, `deposit_percent`, `balance_due_hours` в интерфейс `Yacht`.
+
+**2. `src/pages/yachts/YachtBooking.tsx`**  
+Главная страница бронирования — основные изменения:
+
+- Читать `yacht.booking_flow` и `yacht.deposit_percent`
+- Вычислять сумму депозита: `depositAmount = Math.round(total * depositPercent / 100)`
+- **Блок "Депозит"** в `BookingSummary`: отдельная строка вместо "Итого" показывает:
+  - Стоимость чартера: ฿30,000
+  - Депозит сейчас (50%): ฿15,000 🔶
+  - Остаток при посадке: ฿15,000
+- **Оплата**: для `in_app_request` — скрыть online/card, оставить только информационный блок "Депозит будет выставлен менеджером"
+- **Кнопка**:
+  - `in_app_request` → "Отправить заявку" (без суммы)
+  - `instant` → "Оплатить депозит ฿15,000"
+- **Метаданные заказа**: добавить `booking_flow`, `deposit_percent`, `deposit_amount`, `balance_due_hours`
+- **Статус заказа**: для `in_app_request` передавать статус `pending` (а не `confirmed`)
+
+**3. `src/components/booking/BookingConfirmation.tsx`**  
+Добавить prop `bookingMode` (`'instant' | 'request'`) и адаптировать текст:
+
+- `request` mode:
+  - Заголовок: "Заявка отправлена!" / "Request Sent!"
+  - Иконка: `Clock` (жёлтая), а не `CheckCircle` (зелёная)
+  - Текст: "Наш менеджер myUNO свяжется с вами в течение 2 часов для подтверждения и выставления счёта на депозит"
+  
+- `instant` mode:
+  - Остаётся как сейчас: "Бронирование подтверждено!"
+  - Добавить строку: "Депозит оплачен: ฿15,000 • Остаток: ฿15,000 при посадке"
+
+**4. `src/components/yachts/YachtBookingQuickSelect.tsx`**  
+Мини-шит выбора даты — адаптировать лейбл кнопки Book Now под режим:
+- `in_app_request` → "Отправить заявку"
+- `instant` → "Забронировать"
+
+---
+
+### Структура изменений
+
+```text
+Файлы для редактирования:
+├── src/hooks/useYachts.ts                      (+3 поля в интерфейсе)
+├── src/pages/yachts/YachtBooking.tsx           (основная логика депозита + режима)
+├── src/components/booking/BookingConfirmation.tsx  (+prop bookingMode)
+└── src/components/yachts/YachtBookingQuickSelect.tsx  (лейбл кнопки)
+
+БД: изменений НЕ нужно — поля уже есть
+Миграций: НЕ нужно
 ```
 
 ---
 
-## Почему это работает
+### Детали реализации
 
-Компонент `Calendar` уже передаёт `pointer-events-auto` на сам `DayPicker` внутри (`cn("p-3 pointer-events-auto", className)`). Добавление `pointer-events-auto` в `className` через props усиливает этот эффект и гарантирует, что обёртка `div` также не блокирует события.
+**Расчёт депозита** (в `YachtBooking.tsx`):
+```
+const depositPercent = yacht.deposit_percent ?? 50;
+const depositAmount = Math.round(total * depositPercent / 100);
+const balanceAmount = total - depositAmount;
+const isInstant = yacht.booking_flow === 'instant';
+```
+
+**Блок депозита в Summary**:
+- Строка чартера: ฿30,000
+- Строка "Депозит (50%) — оплатить сейчас": ฿15,000 с бейджем 🔶
+- Строка "Остаток — при посадке": ฿15,000
+- Итого: ฿30,000
+
+**Кнопка BottomBar**:
+- `in_app_request`: label = "Отправить заявку", amount не показывать
+- `instant`: label = "Оплатить депозит", amount = depositAmount
+
+**Экран подтверждения** (`BookingConfirmation`):
+- Новый prop: `bookingMode?: 'instant' | 'request'`
+- Новый prop: `depositAmount?: number`
+- При `request`: иконка Clock жёлтая + другой текст
+- При `instant`: добавить инфо о депозите и остатке
 
 ---
 
-## Технические детали
+### Технические детали
 
-- **Файлы:** только `src/components/yachts/YachtBookingQuickSelect.tsx`
-- **Строк изменено:** 1
-- **Риск регрессий:** нулевой — изменение локальное, не затрагивает другие компоненты
-- **База данных:** изменений нет
+- **Тип**: только фронтенд, никакой работы с БД
+- **Файлов**: 4
+- **Риск регрессий**: минимальный — все изменения изолированы в `YachtBooking.tsx`, остальные компоненты получают новые необязательные пропы
+- **Property вертикаль**: не затрагивается
+- **Другие вертикали**: не затрагиваются
