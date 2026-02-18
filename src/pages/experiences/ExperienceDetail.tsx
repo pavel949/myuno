@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Compass, Waves, Star, Shield, Clock, MapPin, Users, Calendar,
-  Check, X, AlertTriangle, Info, Phone, MessageCircle, ExternalLink, Truck
+  Check, X, AlertTriangle, Info, ExternalLink, Truck
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { experience, isLoading, error } = useExperience(id);
   const { data: pricingOptions = [] } = useExperiencePricing(id);
@@ -81,12 +81,11 @@ export default function ExperienceDetail() {
             
             {/* Type badge */}
             <Badge 
-              className={cn(
-                "absolute top-4 left-4 text-sm",
-                isTour 
-                  ? "bg-amber-500 text-white" 
-                  : "bg-cyan-500 text-white"
-              )}
+              className="absolute top-4 left-4 text-sm"
+              style={isTour
+                ? { backgroundColor: 'hsl(var(--warning))', color: 'hsl(var(--primary-foreground))' }
+                : { backgroundColor: 'hsl(var(--info))', color: 'hsl(var(--primary-foreground))' }
+              }
             >
               {isTour ? (
                 <>
@@ -136,7 +135,7 @@ export default function ExperienceDetail() {
           
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4" style={{ fill: 'hsl(var(--warning))', color: 'hsl(var(--warning))' }} />
               {experience.rating.toFixed(1)}
               <span className="text-xs">({experience.review_count} {isRu ? 'отзывов' : 'reviews'})</span>
             </span>
@@ -256,14 +255,14 @@ export default function ExperienceDetail() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500" />
+                <Star className="w-5 h-5" style={{ color: 'hsl(var(--warning))' }} />
                 {isRu ? 'Особенности' : 'Highlights'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {experience.highlights.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--success))' }} />
                   <span>{typeof item === 'string' ? item : (isRu ? item.text_ru : item.text_en) || item.text_en}</span>
                 </div>
               ))}
@@ -315,14 +314,14 @@ export default function ExperienceDetail() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: 'hsl(var(--warning))' }} />
                 {isRu ? 'Требования' : 'Requirements'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {experience.requirements.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <Info className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--warning))' }} />
                   <span>{typeof item === 'string' ? item : (isRu ? item.text_ru : item.text_en) || item.text_en}</span>
                 </div>
               ))}
@@ -335,14 +334,14 @@ export default function ExperienceDetail() {
           {experience.includes.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base text-green-600">
+                <CardTitle className="text-base" style={{ color: 'hsl(var(--success))' }}>
                   {isRu ? 'Включено' : 'Included'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {experience.includes.map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--success))' }} />
                     <span>{typeof item === 'string' ? item : (isRu ? item.text_ru : item.text_en) || item.text_en}</span>
                   </div>
                 ))}
@@ -353,14 +352,14 @@ export default function ExperienceDetail() {
           {experience.excludes.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base text-red-600">
+                <CardTitle className="text-base" style={{ color: 'hsl(var(--destructive))' }}>
                   {isRu ? 'Не включено' : 'Not Included'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {experience.excludes.map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2 text-sm">
-                    <X className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                    <X className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--destructive))' }} />
                     <span>{typeof item === 'string' ? item : (isRu ? item.text_ru : item.text_en) || item.text_en}</span>
                   </div>
                 ))}
@@ -386,14 +385,14 @@ export default function ExperienceDetail() {
 
         {/* Safety Info for activities */}
         {!isTour && experience.safety_briefing_required && (
-          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <Card className="border-border bg-muted/30">
             <CardContent className="p-4 flex items-start gap-3">
-              <Shield className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <Shield className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'hsl(var(--warning))' }} />
               <div>
-                <p className="font-medium text-amber-800 dark:text-amber-200">
+                <p className="font-medium text-foreground">
                   {isRu ? 'Инструктаж по безопасности' : 'Safety Briefing Required'}
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
+                <p className="text-sm text-muted-foreground">
                   {isRu 
                     ? 'Перед началом активности вы получите инструктаж по технике безопасности'
                     : 'You will receive a safety briefing before the activity begins'

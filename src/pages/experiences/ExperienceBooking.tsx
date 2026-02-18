@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { experience, isLoading } = useExperience(id);
   const { createBooking, isSubmitting } = useBooking();
