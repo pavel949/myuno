@@ -98,17 +98,28 @@ registerRoute(
   })
 );
 
-// ─── MESSAGE: Handle SKIP_WAITING command ───
+// ─── MESSAGE: Handle SKIP_WAITING + CACHE_SOS ───
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+
+  if (event.data?.type === 'CACHE_SOS') {
+    event.waitUntil(
+      caches.open('uno-sos-cache-v1').then((cache) => {
+        console.log('[SW] Caching /sos page for offline use');
+        return cache.add('/sos');
+      }).catch((err) => {
+        console.error('[SW] CACHE_SOS failed:', err);
+      })
+    );
   }
 });
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
   console.log('[SW v3.35] Activated — cleaning ALL old caches');
-  const CURRENT_CACHES = ['navigation-v3', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3'];
+  const CURRENT_CACHES = ['navigation-v3', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
