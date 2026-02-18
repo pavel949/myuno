@@ -89,6 +89,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
 
   const handleComplete = useCallback(() => {
     localStorage.setItem('myuno-onboarding-complete', 'true');
+    sessionStorage.setItem('myuno-onboarding-complete', 'true');
     if (activeCity) {
       setCity(activeCity.slug);
     }
@@ -103,6 +104,12 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
       navigate('/property/invest');
     }
   }, [onComplete, activeCity, setCity, selectedPersonas, togglePersona, navigate]);
+
+  const handleSkip = useCallback(() => {
+    localStorage.setItem('myuno-onboarding-complete', 'true');
+    sessionStorage.setItem('myuno-onboarding-complete', 'true');
+    onComplete();
+  }, [onComplete]);
 
   const getCityName = (city: typeof activeCity, lang: Language) => {
     if (!city) return '';
@@ -208,7 +215,7 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                 </div>
 
                 {/* CTA → next step */}
-                <div className="w-full">
+                <div className="w-full space-y-2">
                   <Button 
                     className="w-full h-12 text-base font-medium rounded-xl" 
                     onClick={handleContinueToPersona}
@@ -217,6 +224,12 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                     {texts.continue[lang]}
                     <ChevronRight className="w-5 h-5 ml-1" />
                   </Button>
+                  <button
+                    onClick={handleSkip}
+                    className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+                  >
+                    {lang === 'ru' ? 'Пропустить' : lang === 'th' ? 'ข้าม' : 'Skip'}
+                  </button>
                 </div>
               </MotionDiv>
             ) : (
