@@ -1,65 +1,50 @@
 import React from 'react';
-import { Bell, Calendar, Tag, Info, Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 
 export type NotificationFilterType = 'all' | 'booking' | 'promotion' | 'status';
 
 interface NotificationFiltersProps {
   activeFilter: NotificationFilterType;
   onFilterChange: (filter: NotificationFilterType) => void;
-  counts: {
-    all: number;
-    booking: number;
-    promotion: number;
-    status: number;
-  };
+  counts: Record<NotificationFilterType, number>;
 }
-
-const filters: { id: NotificationFilterType; icon: React.ElementType; labelEn: string; labelRu: string }[] = [
-  { id: 'all', icon: Bell, labelEn: 'All', labelRu: 'Все' },
-  { id: 'booking', icon: Calendar, labelEn: 'Bookings', labelRu: 'Брони' },
-  { id: 'promotion', icon: Tag, labelEn: 'Promos', labelRu: 'Акции' },
-  { id: 'status', icon: Info, labelEn: 'Updates', labelRu: 'Статус' },
-];
 
 export function NotificationFilters({ activeFilter, onFilterChange, counts }: NotificationFiltersProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide touch-pan-y">
-      {filters.map((filter) => {
-        const Icon = filter.icon;
-        const count = counts[filter.id];
-        const isActive = activeFilter === filter.id;
+  const filters: { key: NotificationFilterType; label: string }[] = [
+    { key: 'all', label: isRu ? 'Все' : 'All' },
+    { key: 'booking', label: isRu ? 'Бронирования' : 'Bookings' },
+    { key: 'promotion', label: isRu ? 'Акции' : 'Promotions' },
+    { key: 'status', label: isRu ? 'Статусы' : 'Status' },
+  ];
 
-        return (
-          <Button
-            key={filter.id}
-            variant={isActive ? 'default' : 'outline'}
-            size="sm"
-            className={cn(
-              "flex-shrink-0 gap-1.5 h-8 px-3",
-              isActive && "shadow-md"
-            )}
-            onClick={() => onFilterChange(filter.id)}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            <span className="text-xs">{isRu ? filter.labelRu : filter.labelEn}</span>
-            {count > 0 && (
-              <Badge 
-                variant={isActive ? "secondary" : "outline"} 
-                className="h-4 min-w-4 px-1 text-[10px]"
-              >
-                {count > 99 ? '99+' : count}
-              </Badge>
-            )}
-          </Button>
-        );
-      })}
+  return (
+    <div className="flex gap-2 flex-wrap">
+      {filters.map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => onFilterChange(key)}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+            activeFilter === key
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+          )}
+        >
+          {label}
+          {counts[key] > 0 && (
+            <span className={cn(
+              'text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center',
+              activeFilter === key ? 'bg-primary-foreground/20' : 'bg-background'
+            )}>
+              {counts[key]}
+            </span>
+          )}
+        </button>
+      ))}
     </div>
   );
 }
