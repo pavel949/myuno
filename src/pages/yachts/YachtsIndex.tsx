@@ -126,6 +126,7 @@ export default function YachtsIndex() {
   const [typeFilter, setTypeFilter] = useState<YachtTypeFilter>('all');
   const [sortKey, setSortKey] = useState<SortKey>('featured');
   const [showSort, setShowSort] = useState(false);
+  const [instantOnly, setInstantOnly] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,6 +165,11 @@ export default function YachtsIndex() {
     }
   }, [yachts, sortKey]);
 
+  const filtered = useMemo(() => {
+    if (!instantOnly) return sorted;
+    return sorted.filter(y => y.booking_flow === 'instant');
+  }, [sorted, instantOnly]);
+
   return (
     <AppLayout showHeader={false} showBottomNav>
       <div className="min-h-screen bg-background">
@@ -173,13 +179,28 @@ export default function YachtsIndex() {
           categories={YACHT_TYPES.map(t => ({ id: t.id, label: isRu ? t.labelRu : t.labelEn }))}
           selectedCategory={typeFilter}
           onCategoryChange={(id) => setTypeFilter(id as YachtTypeFilter)}
-        />
+        >
+          <div className="max-w-7xl mx-auto px-4 pb-2.5 flex items-center gap-2">
+            <button
+              onClick={() => setInstantOnly(v => !v)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                instantOnly
+                  ? "bg-white text-[hsl(var(--icon-dark))] border-white"
+                  : "bg-white/15 text-white border-white/20 hover:bg-white/25"
+              )}
+            >
+              <Zap className="w-3 h-3" />
+              {isRu ? 'Мгновенное бронирование' : 'Instant Booking'}
+            </button>
+          </div>
+        </CatalogHeader>
 
         {/* Count + sort */}
         <div className="container max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {sorted.length} {isRu ? 'судов' : 'vessels'}
+              {filtered.length} {isRu ? 'судов' : 'vessels'}
             </p>
             <div className="relative" ref={sortRef}>
               <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowSort(!showSort)}>
@@ -218,7 +239,7 @@ export default function YachtsIndex() {
                 </div>
               ))}
             </div>
-          ) : sorted.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <EmptyState
               icon={Ship}
               title={isRu ? 'Ничего не найдено' : 'No boats found'}
@@ -226,7 +247,7 @@ export default function YachtsIndex() {
             />
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
-              {sorted.map(yacht => (
+              {filtered.map(yacht => (
                 <YachtCard key={yacht.id} yacht={yacht} language={language} />
               ))}
             </div>
