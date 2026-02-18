@@ -84,10 +84,10 @@ const Index = () => {
           {/* ─── SECTION 5: Products (marketplace carousel) ─── */}
           <HomeProductsSection />
 
-          {/* ─── SECTION 5: Discover CTA ─── */}
+          {/* ─── SECTION 6: Discover CTA ─── */}
           <DiscoverCTABanner />
 
-          {/* ─── SECTION 6: Support layer ─── */}
+          {/* ─── SECTION 7: Support layer ─── */}
           <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
             {hasContext ? (
               <Suspense fallback={null}>
@@ -101,7 +101,7 @@ const Index = () => {
             <EmergencyQuickAccess />
           </div>
 
-          {/* ─── SECTION 6: Trust ─── */}
+          {/* ─── SECTION 8: Trust ─── */}
           <Suspense fallback={null}>
             <TrustBanner />
           </Suspense>
