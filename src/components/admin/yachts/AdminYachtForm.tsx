@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Loader2, Ship, DollarSign, MapPin, Wrench, Sparkles, Clock, Settings } from 'lucide-react';
+import { Loader2, Ship, DollarSign, MapPin, Wrench, Sparkles, Clock, Settings, Zap, FileText } from 'lucide-react';
 
 const yachtTypes = [
   { value: 'motor_yacht', label: 'Motor Yacht', labelRu: 'Моторная яхта' },
@@ -63,6 +63,9 @@ export interface YachtFormData {
   is_featured: boolean;
   is_active: boolean;
   departure_times: string;
+  booking_flow: string;       // 'in_app_request' | 'instant'
+  deposit_percent: string;    // 0-100
+  balance_due_hours: string;  // hours before boarding to pay balance
 }
 
 export const emptyFormData: YachtFormData = {
@@ -95,6 +98,9 @@ export const emptyFormData: YachtFormData = {
   is_featured: false,
   is_active: true,
   departure_times: '',
+  booking_flow: 'in_app_request',
+  deposit_percent: '50',
+  balance_due_hours: '48',
 };
 
 export function yachtToFormData(yacht: Yacht): YachtFormData {
@@ -128,6 +134,9 @@ export function yachtToFormData(yacht: Yacht): YachtFormData {
     is_featured: yacht.is_featured,
     is_active: yacht.is_active ?? true,
     departure_times: yacht.departure_times?.join(', ') || '',
+    booking_flow: yacht.booking_flow || 'in_app_request',
+    deposit_percent: yacht.deposit_percent?.toString() || '50',
+    balance_due_hours: yacht.balance_due_hours?.toString() || '48',
   };
 }
 
@@ -163,6 +172,9 @@ export function formDataToPayload(formData: YachtFormData) {
     is_featured: formData.is_featured,
     is_active: formData.is_active,
     departure_times: formData.departure_times ? formData.departure_times.split(',').map(t => t.trim()).filter(Boolean) : null,
+    booking_flow: formData.booking_flow,
+    deposit_percent: formData.deposit_percent ? parseInt(formData.deposit_percent) : 50,
+    balance_due_hours: formData.balance_due_hours ? parseInt(formData.balance_due_hours) : 48,
   };
 }
 
@@ -404,6 +416,97 @@ export function AdminYachtForm({
                     ? 'Оставьте пустым для стандартного расписания (полдня: 09:00, 14:00 / день: 08:00, 09:00, 10:00)'
                     : 'Leave empty for default schedule (half day: 09:00, 14:00 / full day: 08:00, 09:00, 10:00)'}
                 </p>
+              </div>
+            </VendorFormSection>
+
+            {/* === Booking Flow === */}
+            <VendorFormSection
+              title={isRu ? 'Режим бронирования' : 'Booking Flow'}
+              icon={<Zap className="h-4 w-4" />}
+              badge={isRu ? 'Важно' : 'Important'}
+            >
+              {/* Mode toggle */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => update('booking_flow', 'in_app_request')}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.booking_flow === 'in_app_request'
+                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-border hover:border-amber-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="w-4 h-4 text-amber-600" />
+                    <span className="font-medium text-sm">{isRu ? 'По заявке' : 'Request to Book'}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Клиент отправляет заявку, менеджер подтверждает и выставляет счёт на депозит'
+                      : 'Client submits request, manager confirms and sends deposit invoice'}
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => update('booking_flow', 'instant')}
+                  className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.booking_flow === 'instant'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-sm">{isRu ? 'Мгновенное' : 'Instant Booking'}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Депозит оплачивается сразу онлайн, бронирование подтверждается автоматически'
+                      : 'Deposit paid immediately online, booking confirmed automatically'}
+                  </p>
+                </button>
+              </div>
+
+              {/* Deposit percent */}
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="space-y-2">
+                  <Label>
+                    {isRu ? 'Депозит (% от стоимости)' : 'Deposit (% of total)'}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.deposit_percent}
+                      onChange={(e) => update('deposit_percent', e.target.value)}
+                      placeholder="50"
+                      className="pr-8"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'Стандарт: 50%. Депозит всегда обязателен.' : 'Default: 50%. Deposit is always required.'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>
+                    {isRu ? 'Остаток — за сколько часов до посадки' : 'Balance due hours before boarding'}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.balance_due_hours}
+                      onChange={(e) => update('balance_due_hours', e.target.value)}
+                      placeholder="48"
+                      className="pr-14"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                      {isRu ? 'часов' : 'hours'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </VendorFormSection>
 
