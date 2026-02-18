@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship } from 'lucide-react';
+import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship, Zap, Clock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
@@ -62,11 +62,18 @@ function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
             {card.badge.text}
           </Badge>
         )}
-        {card.isVerified && (
-          <span className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] font-medium px-2 py-0.5 rounded-full">
-            ✓ {isRu ? 'Проверено' : 'Verified'}
-          </span>
-        )}
+        {/* Booking flow badge */}
+        <span className={cn(
+          "absolute top-2 right-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full",
+          yacht.booking_flow === 'instant'
+            ? "bg-success/90 text-white"
+            : "bg-muted/90 text-foreground"
+        )}>
+          {yacht.booking_flow === 'instant'
+            ? <><Zap className="w-2.5 h-2.5" />{isRu ? 'Сразу' : 'Instant'}</>
+            : <><Clock className="w-2.5 h-2.5" />{isRu ? 'По запросу' : 'On request'}</>
+          }
+        </span>
         {card.experienceLabel && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6">
             <span className="text-white text-xs font-medium">{card.experienceLabel}</span>
