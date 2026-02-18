@@ -65,10 +65,20 @@ export function LifecycleSmartTip() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
+  // TTL-aware dismissed tips: stored as { [tipId]: expiresAt (ms) }
+  const TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+
   const [dismissedTips, setDismissedTips] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem('myuno-dismissed-tips');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
+      const saved = localStorage.getItem('myuno-dismissed-tips-v2');
+      if (!saved) return new Set();
+      const parsed: Record<string, number> = JSON.parse(saved);
+      const now = Date.now();
+      // Only keep non-expired entries
+      const valid = Object.entries(parsed)
+        .filter(([, exp]) => exp > now)
+        .map(([id]) => id);
+      return new Set(valid);
     } catch { return new Set(); }
   });
 
@@ -76,10 +86,23 @@ export function LifecycleSmartTip() {
     setDismissedTips(prev => {
       const next = new Set(prev);
       next.add(tipId);
-      localStorage.setItem('myuno-dismissed-tips', JSON.stringify([...next]));
+      // Persist as { tipId: expiresAt } map so TTL can be checked on load
+      try {
+        const existing: Record<string, number> = (() => {
+          const s = localStorage.getItem('myuno-dismissed-tips-v2');
+          return s ? JSON.parse(s) : {};
+        })();
+        existing[tipId] = Date.now() + TTL_MS;
+        // Prune expired entries before saving
+        const now = Date.now();
+        const pruned = Object.fromEntries(
+          Object.entries(existing).filter(([, exp]) => exp > now)
+        );
+        localStorage.setItem('myuno-dismissed-tips-v2', JSON.stringify(pruned));
+      } catch { /* ignore */ }
       return next;
     });
-  }, []);
+  }, [TTL_MS]);
 
   const situationKey = useMemo(() => {
     if (activeCode) return activeCode;

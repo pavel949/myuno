@@ -5,11 +5,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useHeroData } from '@/hooks/useHeroData';
 import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
 
 const PERSONA_OPTIONS: UserPersona[] = ['tourist', 'resident', 'property_owner', 'investor'];
 
@@ -101,62 +101,15 @@ export const HeroBlock = memo(function HeroBlock() {
   const isDesktop = useIsDesktop();
   const isRu = language === 'ru';
 
-  // Fetch profile + loyalty in parallel
-  const { data: profile } = useQuery({
-    queryKey: ['hero-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, avatar_url')
-        .eq('id', user.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
+  // Single parallel query replacing 3 separate round-trips
+  const { data: heroData } = useHeroData(user?.id);
+  const { firstName, loyaltyTier, activityStreak } = heroData ?? {
+    firstName: null,
+    loyaltyTier: null,
+    activityStreak: 0,
+  };
 
-  const { data: loyaltyTier } = useQuery({
-    queryKey: ['hero-loyalty-tier', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      try {
-        const { data } = await supabase
-          .rpc('get_or_create_loyalty_status', { p_user_id: user.id });
-        const parsed = data as any;
-        return parsed?.current_tier ? {
-          name: parsed.current_tier.tier_name,
-          icon: parsed.current_tier.icon,
-          color: parsed.current_tier.color,
-          cashback: parsed.current_tier.cashback_percent,
-        } : null;
-      } catch { return null; }
-    },
-    enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
-  });
 
-  const { data: activityStreak } = useQuery({
-    queryKey: ['hero-streak', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return 0;
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const { count } = await supabase
-        .from('orders')
-        .select('id', { count: 'exact', head: true })
-        .eq('customer_user_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
-      return count || 0;
-    },
-    enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const firstName = useMemo(() => {
-    if (!profile?.full_name) return null;
-    return profile.full_name.split(' ')[0];
-  }, [profile]);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
