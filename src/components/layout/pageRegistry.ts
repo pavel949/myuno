@@ -355,6 +355,7 @@ export const ChannelManager = lazy(() => import('@/pages/owner/ChannelManager'))
 export const JuristicRequestsPage = lazy(() => import('@/pages/owner/JuristicRequestsPage'));
 export const MessageTemplates = lazy(() => import('@/pages/owner/MessageTemplates'));
 export const QuickExpense = lazy(() => import('@/pages/owner/QuickExpense'));
+export const QuickIncome = lazy(() => import('@/pages/owner/QuickIncome'));
 export const OwnerReviews = lazy(() => import('@/pages/owner/OwnerReviews'));
 export const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuickSetup'));
 export const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));

@@ -117,6 +117,35 @@ export function usePropertyFinancialsFull(propertyId?: string) {
  * Cursor-based paginated financials for scalability
  * Uses transaction_date as cursor for efficient pagination
  */
+/**
+ * Get property IDs accessible to user:
+ * - Properties the user owns
+ * - Properties where user is an active delegate with financials permission
+ */
+export async function getAccessiblePropertyIds(userId: string): Promise<string[]> {
+  const [ownedRes, delegatedRes] = await Promise.all([
+    supabase
+      .from('owner_properties')
+      .select('id')
+      .eq('owner_id', userId),
+    supabase
+      .from('property_delegates')
+      .select('property_id, permissions')
+      .eq('user_id', userId)
+      .eq('status', 'active'),
+  ]);
+
+  const ownedIds = (ownedRes.data || []).map(p => p.id);
+  const delegatedIds = (delegatedRes.data || [])
+    .filter(d => {
+      const perms = d.permissions as any;
+      return perms?.financials === true;
+    })
+    .map(d => d.property_id);
+
+  return [...new Set([...ownedIds, ...delegatedIds])];
+}
+
 export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 50) {
   const { user } = useAuth();
 
@@ -124,38 +153,41 @@ export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 5
     queryKey: ['property-financials-paginated', user?.id, propertyId, pageSize],
     queryFn: async ({ pageParam }) => {
       if (!user) return { data: [], nextCursor: null, hasMore: false };
-      
+
+      // Determine accessible property ids (УК видит управляемые объекты)
+      let propertyIds: string[] | undefined;
+      if (!propertyId) {
+        propertyIds = await getAccessiblePropertyIds(user.id);
+        if (propertyIds.length === 0) return { data: [], nextCursor: null, hasMore: false };
+      }
+
       let query = supabase
         .from('property_financials')
         .select('*, property:owner_properties(id, title, title_ru)')
-        .eq('owner_id', user.id)
         .order('transaction_date', { ascending: false })
-        .limit(pageSize + 1); // Fetch one extra to determine if there's more
-      
+        .limit(pageSize + 1);
+
       if (propertyId) {
         query = query.eq('property_id', propertyId);
+      } else if (propertyIds) {
+        query = query.in('property_id', propertyIds);
       }
-      
-      // Cursor-based pagination using transaction_date
+
       if (pageParam) {
         query = query.lt('transaction_date', pageParam);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
-      
+
       const items = data as unknown as PropertyFinancialFull[];
       const hasMore = items.length > pageSize;
       const paginatedItems = hasMore ? items.slice(0, pageSize) : items;
-      const nextCursor = hasMore && paginatedItems.length > 0 
-        ? paginatedItems[paginatedItems.length - 1].transaction_date 
+      const nextCursor = hasMore && paginatedItems.length > 0
+        ? paginatedItems[paginatedItems.length - 1].transaction_date
         : null;
-      
-      return {
-        data: paginatedItems,
-        nextCursor,
-        hasMore,
-      };
+
+      return { data: paginatedItems, nextCursor, hasMore };
     },
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -173,16 +205,19 @@ export function usePropertyFinancialsCount(propertyId?: string) {
     queryKey: ['property-financials-count', user?.id, propertyId],
     queryFn: async () => {
       if (!user) return 0;
-      
+
       let query = supabase
         .from('property_financials')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_id', user.id);
-      
+        .select('id', { count: 'exact', head: true });
+
       if (propertyId) {
         query = query.eq('property_id', propertyId);
+      } else {
+        const ids = await getAccessiblePropertyIds(user.id);
+        if (ids.length === 0) return 0;
+        query = query.in('property_id', ids);
       }
-      
+
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
@@ -201,11 +236,14 @@ export function useFinancialStats(propertyId?: string) {
 
       let query = supabase
         .from('property_financials')
-        .select('amount, transaction_type, category, status, transaction_date')
-        .eq('owner_id', user.id);
-      
+        .select('amount, transaction_type, category, status, transaction_date');
+
       if (propertyId) {
         query = query.eq('property_id', propertyId);
+      } else {
+        const ids = await getAccessiblePropertyIds(user.id);
+        if (ids.length === 0) return null;
+        query = query.in('property_id', ids);
       }
 
       const { data, error } = await query;
