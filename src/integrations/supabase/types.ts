@@ -10970,121 +10970,91 @@ export type Database = {
           },
         ]
       }
-      profile_details: {
+      profiles: {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          avatar_url: string | null
           city: string | null
           country: string | null
           created_at: string
           date_of_birth: string | null
           dietary_restrictions: string[] | null
-          emergency_contact_name: string | null
-          emergency_contact_phone: string | null
-          emergency_contact_relation: string | null
-          gender: string | null
-          id: string
-          medical_conditions: string | null
-          nationality: string | null
-          postal_code: string | null
-          state_province: string | null
-          travel_preferences: Json | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          address_line1?: string | null
-          address_line2?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          dietary_restrictions?: string[] | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relation?: string | null
-          gender?: string | null
-          id?: string
-          medical_conditions?: string | null
-          nationality?: string | null
-          postal_code?: string | null
-          state_province?: string | null
-          travel_preferences?: Json | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          address_line1?: string | null
-          address_line2?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string
-          date_of_birth?: string | null
-          dietary_restrictions?: string[] | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          emergency_contact_relation?: string | null
-          gender?: string | null
-          id?: string
-          medical_conditions?: string | null
-          nationality?: string | null
-          postal_code?: string | null
-          state_province?: string | null
-          travel_preferences?: Json | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
           email: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relationship: string | null
           full_name: string | null
+          gender: string | null
           id: string
+          medical_conditions: string | null
+          nationality: string | null
           phone: string | null
+          postal_code: string | null
           preferred_language: string | null
           referral_balance: number
           referral_code: string | null
           referred_by: string | null
+          state_province: string | null
+          travel_preferences: Json | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"] | null
         }
         Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           full_name?: string | null
+          gender?: string | null
           id: string
+          medical_conditions?: string | null
+          nationality?: string | null
           phone?: string | null
+          postal_code?: string | null
           preferred_language?: string | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          state_province?: string | null
+          travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
         Update: {
+          address_line1?: string | null
+          address_line2?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
+          medical_conditions?: string | null
+          nationality?: string | null
           phone?: string | null
+          postal_code?: string | null
           preferred_language?: string | null
           referral_balance?: number
           referral_code?: string | null
           referred_by?: string | null
+          state_province?: string | null
+          travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
