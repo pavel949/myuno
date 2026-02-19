@@ -1,131 +1,165 @@
 
-# Отчёты об управлении для УК и собственников
+# Условия управления УК по объектам (Management Terms per Property)
 
-## Анализ текущего состояния
+## Проблема
 
-Система отчётов (`/owner/reports`) уже работает для **собственников**, но имеет три критических ограничения для **УК (управляющих компаний)**:
+Сейчас в системе **нет** механизма для УК, чтобы зафиксировать коммерческие условия работы с каждым конкретным объектом. У УК с 20–50 объектами это критично — невозможно отследить, у кого какая комиссия, кто платит за уборку, кто за ремонт.
 
-| Проблема | Где | Критичность |
-|---|---|---|
-| `usePropertyReports` фильтрует только по `owner_id` — менеджер не видит отчёты | `usePropertyReports.ts` строка 110 | Высокая |
-| RLS на INSERT не проверяет делегирование — менеджер не может создавать отчёты | `property_reports` политика INSERT | Высокая |
-| Нет шаблона "Отчёт об управлении" с KPI для УК | Везде | Средняя |
-| Нет агрегированного вида по портфелю объектов УК | `ReportsPage.tsx` | Средняя |
-| Нет расписания автоматической отправки | `usePropertyReports.ts` | Низкая |
+Таблица `property_delegates` хранит только роли/права (access control), а не бизнес-условия.
 
 ---
 
 ## Что будет реализовано
 
-### 1. Исправление доступа УК к отчётам
+### 1. Новая таблица `property_management_terms` (БД)
 
-**Файл:** `src/hooks/usePropertyReports.ts`
+Коммерческие условия по каждому объекту — отдельная запись, привязанная к `owner_properties.id` и `user_id` (УК или менеджер):
 
-`usePropertyReports` будет расширен: помимо `owner_id = user.id` запрос будет проверять `property_delegates` (как уже сделано в `usePropertyFinancials`). Менеджер сможет видеть все отчёты по объектам, которыми управляет.
+| Поле | Тип | Описание |
+|---|---|---|
+| `property_id` | uuid | Объект |
+| `manager_user_id` | uuid | Менеджер / УК |
+| `commission_rate` | numeric | % комиссии УК |
+| `commission_type` | text | `percent` / `fixed` |
+| `commission_amount` | numeric | Фиксированная сумма (если fixed) |
+| `commission_base` | text | `gross` / `net` — от чего считается |
+| `revenue_split_owner` | numeric | % дохода собственнику |
+| `revenue_split_manager` | numeric | % дохода УК |
+| `expense_responsibility` | jsonb | Кто платит за что |
+| `payment_day` | integer | День месяца выплаты |
+| `payment_currency` | text | Валюта |
+| `valid_from` | date | Начало действия условий |
+| `valid_until` | date | Конец (null = бессрочно) |
+| `notes` | text | Примечания |
+| `status` | text | `draft / active / archived` |
 
-`useGenerateReport` будет передавать `generated_by = user.id` и не требовать совпадения `owner_id` — УК создаёт отчёт от имени собственника.
+Поле `expense_responsibility` (JSONB) хранит структуру ответственности за расходы:
 
-### 2. Исправление RLS на property_reports
-
-**Миграция БД**
-
-Текущая политика `INSERT` не имеет `WITH CHECK` — добавим условие, разрешающее создание отчёта если пользователь является делегатом с разрешением `financials`:
-
-```sql
-DROP POLICY IF EXISTS "Users can create reports for their properties" ON property_reports;
-
-CREATE POLICY "Owners and managers can create reports"
-ON property_reports FOR INSERT
-WITH CHECK (
-  auth.uid() = owner_id
-  OR
-  EXISTS (
-    SELECT 1 FROM property_delegates pd
-    WHERE pd.property_id = property_reports.property_id
-      AND pd.user_id = auth.uid()
-      AND pd.status = 'active'
-      AND (pd.permissions->>'financials')::boolean = true
-  )
-);
+```json
+{
+  "cleaning": "manager",
+  "electricity": "owner",
+  "water": "owner", 
+  "internet": "split",
+  "repairs_minor": "manager",
+  "repairs_major": "owner",
+  "cam_fees": "owner",
+  "insurance": "owner",
+  "marketing": "manager"
+}
 ```
 
-Также исправим политику SELECT — текущий ключ `financial` (без `s`) не соответствует ключу `financials` используемому в коде:
+Значения: `"owner"` / `"manager"` / `"split"` / `"shared_XX"` (доля %)
 
-```sql
--- Унифицировать ключ: financial → financials
-```
+### 2. Новый хук `usePropertyManagementTerms`
 
-### 3. Новый шаблон: "Отчёт об управлении"
+Запросы к новой таблице:
+- `getTerms(propertyId)` — условия по объекту
+- `getAllTermsForManager()` — все объекты текущего менеджера с условиями (для портфеля УК)
+- `createTerms(data)` / `updateTerms(id, data)` — создание/обновление
 
-**Новый тип отчёта:** `management`
+RLS: видеть и редактировать может менеджер объекта (через `property_delegates`) или собственник.
 
-**Новый файл:** `src/components/owner/reports/ManagementReportDetail.tsx`
+### 3. UI — Форма условий управления (новый компонент)
 
-Этот компонент показывает:
-- Заполняемость объекта (%) с графиком по неделям
-- Список выполненных работ (уборки, ремонты, сервисные вызовы)
-- Расходы УК: комиссия, управленческие работы
-- Чистый доход собственника после вычета комиссии УК
-- Сравнение с прошлым периодом (MoM)
-- Рекомендации (из поля `recommendations` в `ReportData`)
+**Путь:** `src/components/owner/management/ManagementTermsForm.tsx`
 
-**Расширение типа:** добавить `'management'` к `ReportType`
+Встраивается в двух местах:
+- При добавлении объекта (шаг `basic` / после него) — если тип управления `full` или `partial`
+- На странице детали объекта в разделе "Условия управления"
 
-### 4. Агрегированный портфельный вид для УК
+**Структура формы (4 секции):**
 
-**Файл:** `src/pages/owner/ReportsPage.tsx`
+**A. Комиссия УК**
+- Тип: % от дохода / фиксированная сумма
+- Процент (слайдер 5–50%) или фиксированная сумма
+- База расчёта: от валовой выручки / от чистого дохода
+- Разбивка: собственнику X% / УК Y%
 
-Если пользователь является менеджером (есть делегирования), добавить вкладку **"Портфель"** ("Portfolio"), которая показывает:
-- Суммарный доход по всем управляемым объектам за выбранный период
-- Таблицу: объект → доход → расходы → заполняемость → чистый доход
-- Кнопку "Сформировать сводный PDF" — один PDF с таблицей по всем объектам
+**B. Расходы — кто платит (чеклист)**
+Список статей с выбором: Собственник / УК / Пополам
 
-### 5. Расписание автоотправки (опционально по кнопке)
+| Статья | Выбор |
+|---|---|
+| Уборка между гостями | ○ Собственник ● УК ○ Пополам |
+| Электричество | ● Собственник ○ УК ○ Пополам |
+| Вода | ● Собственник ○ УК ○ Пополам |
+| Интернет | ● Собственник ○ УК ○ Пополам |
+| Мелкий ремонт (до X ฿) | ○ Собственник ● УК ○ Пополам |
+| Крупный ремонт | ● Собственник ○ УК ○ Пополам |
+| Взносы в фонд (CAM) | ● Собственник ○ УК ○ Пополам |
+| Страховка | ● Собственник ○ УК ○ Пополам |
+| Маркетинг/реклама | ○ Собственник ● УК ○ Пополам |
 
-**Файл:** `src/pages/owner/ReportsPage.tsx`
+**C. Условия выплат**
+- День выплаты собственнику (1–31 числа)
+- Валюта (THB / USD / EUR / RUB)
+- Период действия условий (дата начала / конца)
 
-Добавить кнопку **"Настроить автоотправку"** (Schedule). Это простой UI с:
-- Выбором периодичности: ежемесячно / ежеквартально
-- Полем email получателя (по умолчанию — email собственника)
-- Сохранением в `property_reports` с флагом `auto_send: true` в поле `data`
+**D. Примечания**
+- Свободный текст для особых условий
 
-(Без cron-а — УК нажимает "Отправить за месяц" одним кликом, выбирая объект)
+### 4. Портфельный вид для УК — таблица "Условия по объектам"
+
+**Путь:** `src/pages/owner/ManagementPortfolio.tsx`
+
+Страница `/owner/portfolio` со сводной таблицей для УК:
+
+| Объект | Тип | Комиссия | Уборка | Ремонт | Выплата | Статус |
+|---|---|---|---|---|---|---|
+| Апт. 301 | % | 20% от gross | УК | Собственник | 5-е число | Активно |
+| Апт. 502 | Фикс | ฿15,000/мес | Пополам | УК | 10-е | Активно |
+| Вилла Sunrise | % | 30% | УК | УК | 1-е | Черновик |
+
+- Быстрая фильтрация по статусу условий / объектам без условий
+- Иконка ⚠️ на объектах, у которых условия не заданы или просрочены
+- Кнопка "Задать условия" прямо из таблицы (открывает sheet)
+
+### 5. Интеграция в Wizard добавления объекта
+
+В шаге `basic` (BasicInfoStep), при выборе `management_type = full` или `partial`, появляется блок "Условия управления" с кратким вариантом формы:
+- Комиссия %
+- Кто платит уборку (самое частое)
+- День выплаты
+
+С кнопкой "Настроить подробнее" → открывает полную форму в drawer.
 
 ---
 
 ## Технические детали
 
-### Файлы и изменения
-
-```text
-БД (миграция):
-  - Исправить INSERT RLS policy на property_reports
-  - Исправить ключ financial → financials в SELECT policy
-
-src/hooks/usePropertyReports.ts:
-  - usePropertyReports() → добавить JOIN через property_delegates
-  - useGenerateReport() → не требовать owner_id === user.id (разрешить менеджеру)
-  - Добавить тип 'management' к ReportType
-
-src/pages/owner/ReportsPage.tsx:
-  - Добавить вкладку "Портфель" для УК/менеджеров
-  - Показывать управляемые объекты в селекторе
-  - Кнопка генерации сводного PDF
-
-src/components/owner/reports/ManagementReportDetail.tsx (новый):
-  - Шаблон для отчёта типа 'management'
-  - KPI: заполняемость, работы, комиссия УК, чистый доход собственника
-
-src/utils/generateReportPdf.ts:
-  - Добавить шаблон PDF для management-отчёта
-  - Добавить секцию "Работы и обслуживание"
-  - Строку "Комиссия УК" и "Доход собственника"
-```
-
 ### Порядок реализации
 
-1. Миграция БД (исправить RLS) — без этого УК вообще не может создавать отчёты
-2. Исправить `usePropertyReports` — дать доступ для чтения
-3. Добавить тип `management` и шаблон `ManagementReportDetail`
-4. Добавить вкладку "Портфель" в `ReportsPage`
-5. Расширить PDF-генератор для management-отчёта
+1. **Миграция БД** — создать `property_management_terms` + RLS
+2. **Хук** `usePropertyManagementTerms` — CRUD + fetch для портфеля
+3. **Форма** `ManagementTermsForm.tsx` — полная форма с 4 секциями
+4. **Страница портфеля** `ManagementPortfolio.tsx` + маршрут `/owner/portfolio`
+5. **Интеграция в BasicInfoStep** — краткая версия при добавлении объекта
+
+### Файлы
+
+```text
+НОВЫЕ:
+  supabase/migrations/...  — таблица property_management_terms + RLS
+  src/hooks/usePropertyManagementTerms.ts
+  src/components/owner/management/ManagementTermsForm.tsx
+  src/pages/owner/ManagementPortfolio.tsx
+
+ИЗМЕНЁННЫЕ:
+  src/components/owner/property-wizard/steps/BasicInfoStep.tsx
+    → добавить блок условий при management_type full/partial
+  src/components/layout/AnimatedRoutes.tsx
+    → маршрут /owner/portfolio
+  src/components/layout/pageRegistry.ts
+    → заголовок для /owner/portfolio
+  src/pages/owner/OwnerDashboard.tsx (или навигация)
+    → ссылка "Портфель условий" для менеджеров
+```
+
+### Безопасность (RLS)
+
+```sql
+-- Собственник видит условия своих объектов
+-- Менеджер видит условия объектов, которыми управляет (через property_delegates)
+-- Только менеджер или собственник могут изменять условия
+```
