@@ -1,42 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown,
-  DollarSign,
-  Users,
-  Target,
-  Calendar,
-  Download
+  BarChart3, TrendingUp, TrendingDown, DollarSign, Users, Target, Calendar, Download, Loader2
 } from 'lucide-react';
+import { useMCCAnalytics, AnalyticsPeriod } from '@/hooks/useMCCAnalytics';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export function MCCAnalyticsTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [period, setPeriod] = useState<AnalyticsPeriod>('30d');
 
-  // Mock channel performance data
-  const channelPerformance = [
-    { channel: 'Google Ads', impressions: 125000, clicks: 4200, leads: 892, conversions: 127, spend: 2340, revenue: 8900, roas: 3.8 },
-    { channel: 'Meta Ads', impressions: 89000, clicks: 2800, leads: 567, conversions: 78, spend: 1560, revenue: 5200, roas: 3.3 },
-    { channel: 'TikTok', impressions: 234000, clicks: 5600, leads: 234, conversions: 23, spend: 890, revenue: 1800, roas: 2.0 },
-    { channel: 'Organic', impressions: 45000, clicks: 3200, leads: 456, conversions: 89, spend: 0, revenue: 4500, roas: null },
-    { channel: 'Email', impressions: 12000, clicks: 1800, leads: 234, conversions: 67, spend: 120, revenue: 3400, roas: 28.3 },
-    { channel: 'WhatsApp', impressions: 3400, clicks: 890, leads: 123, conversions: 45, spend: 50, revenue: 2100, roas: 42.0 },
-  ];
+  const {
+    channelSummary,
+    topPages,
+    segmentsDistribution,
+    eventsByType,
+    summary,
+    isLoading,
+    hasRealData,
+  } = useMCCAnalytics(period);
 
-  // Attribution models
-  const attributionModels = [
-    { model: 'Last Click', conversions: 429, revenue: 25900 },
-    { model: 'First Click', conversions: 389, revenue: 23400 },
-    { model: 'Linear', conversions: 412, revenue: 24800 },
-    { model: 'Time Decay', conversions: 421, revenue: 25200 },
-    { model: 'Position-Based', conversions: 418, revenue: 25100 },
-  ];
+  const lifecycleData = segmentsDistribution
+    ? Object.entries(segmentsDistribution.lifecycle).map(([name, value]) => ({ name, value }))
+    : [];
+
+  const eventData = Object.entries(eventsByType)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, value]) => ({ name, value }));
 
   return (
     <div className="space-y-6">
@@ -47,11 +45,11 @@ export function MCCAnalyticsTab() {
             {isRu ? 'Аналитика и атрибуция' : 'Analytics & Attribution'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Полная картина эффективности маркетинга' : 'Complete view of marketing performance'}
+            {isRu ? 'Реальные данные платформы' : 'Live platform data'}
           </p>
         </div>
         <div className="flex gap-2">
-          <Select defaultValue="30d">
+          <Select value={period} onValueChange={(v) => setPeriod(v as AnalyticsPeriod)}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="h-4 w-4 mr-2" />
               <SelectValue />
@@ -63,12 +61,27 @@ export function MCCAnalyticsTab() {
               <SelectItem value="ytd">{isRu ? 'С начала года' : 'Year to date'}</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             {isRu ? 'Экспорт' : 'Export'}
           </Button>
         </div>
       </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {!isLoading && !hasRealData && (
+        <Card>
+          <CardContent className="p-6 text-center text-muted-foreground">
+            <BarChart3 className="h-10 w-10 mx-auto mb-3 opacity-30" />
+            <p>{isRu ? 'Данные пока собираются. Трекинг активирован — метрики появятся в течение часа.' : 'Data is being collected. Tracking is active — metrics will appear within an hour.'}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -76,11 +89,13 @@ export function MCCAnalyticsTab() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground uppercase">{isRu ? 'Общий расход' : 'Total Spend'}</p>
-                <p className="text-2xl font-bold">$4,960</p>
-                <div className="flex items-center gap-1 text-xs text-destructive">
-                  <TrendingUp className="h-3 w-3" />
-                  +12% vs prev
+                <p className="text-xs text-muted-foreground uppercase">{isRu ? 'Выручка' : 'Revenue'}</p>
+                <p className="text-2xl font-bold">
+                  {summary.revenue >= 1000 ? `$${(summary.revenue / 1000).toFixed(1)}k` : `$${Math.round(summary.revenue)}`}
+                </p>
+                <div className={`flex items-center gap-1 text-xs ${summary.revenueChange >= 0 ? 'text-green-500' : 'text-destructive'}`}>
+                  {summary.revenueChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {summary.revenueChange !== 0 ? `${summary.revenueChange > 0 ? '+' : ''}${summary.revenueChange.toFixed(1)}%` : '—'}
                 </div>
               </div>
               <DollarSign className="h-8 w-8 text-muted-foreground" />
@@ -91,12 +106,11 @@ export function MCCAnalyticsTab() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground uppercase">{isRu ? 'Выручка' : 'Revenue'}</p>
-                <p className="text-2xl font-bold">$25,900</p>
-                <div className="flex items-center gap-1 text-xs text-success">
-                  <TrendingUp className="h-3 w-3" />
-                  +18% vs prev
-                </div>
+                <p className="text-xs text-muted-foreground uppercase">{isRu ? 'Расход' : 'Spend'}</p>
+                <p className="text-2xl font-bold">
+                  {summary.spend >= 1000 ? `$${(summary.spend / 1000).toFixed(1)}k` : `$${Math.round(summary.spend)}`}
+                </p>
+                <div className="text-xs text-muted-foreground">{isRu ? 'каналы' : 'channels'}</div>
               </div>
               <BarChart3 className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -107,11 +121,8 @@ export function MCCAnalyticsTab() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase">ROAS</p>
-                <p className="text-2xl font-bold">5.2x</p>
-                <div className="flex items-center gap-1 text-xs text-success">
-                  <TrendingUp className="h-3 w-3" />
-                  +0.4x vs prev
-                </div>
+                <p className="text-2xl font-bold">{summary.roas > 0 ? `${summary.roas.toFixed(1)}x` : '—'}</p>
+                <div className="text-xs text-muted-foreground">{isRu ? 'возврат на расход' : 'return on spend'}</div>
               </div>
               <Target className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -121,11 +132,10 @@ export function MCCAnalyticsTab() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground uppercase">CAC</p>
-                <p className="text-2xl font-bold">$11.57</p>
-                <div className="flex items-center gap-1 text-xs text-success">
-                  <TrendingDown className="h-3 w-3" />
-                  -8% vs prev
+                <p className="text-xs text-muted-foreground uppercase">{isRu ? 'Сегменты' : 'Segments'}</p>
+                <p className="text-2xl font-bold">{segmentsDistribution?.total || '—'}</p>
+                <div className="text-xs text-muted-foreground">
+                  {segmentsDistribution ? `${segmentsDistribution.vipCount} VIP` : isRu ? 'пользователей' : 'users'}
                 </div>
               </div>
               <Users className="h-8 w-8 text-muted-foreground" />
@@ -134,82 +144,117 @@ export function MCCAnalyticsTab() {
         </Card>
       </div>
 
-      {/* Channel Performance Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{isRu ? 'Эффективность по каналам' : 'Channel Performance'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left p-3 font-medium">{isRu ? 'Канал' : 'Channel'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Показы' : 'Impressions'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Клики' : 'Clicks'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Лиды' : 'Leads'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Конверсии' : 'Conversions'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Расход' : 'Spend'}</th>
-                  <th className="text-right p-3 font-medium">{isRu ? 'Выручка' : 'Revenue'}</th>
-                  <th className="text-right p-3 font-medium">ROAS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {channelPerformance.map((row, idx) => (
-                  <tr key={idx} className="border-t">
-                    <td className="p-3 font-medium">{row.channel}</td>
-                    <td className="p-3 text-right">{row.impressions.toLocaleString()}</td>
-                    <td className="p-3 text-right">{row.clicks.toLocaleString()}</td>
-                    <td className="p-3 text-right">{row.leads.toLocaleString()}</td>
-                    <td className="p-3 text-right">{row.conversions}</td>
-                    <td className="p-3 text-right">${row.spend.toLocaleString()}</td>
-                    <td className="p-3 text-right">${row.revenue.toLocaleString()}</td>
-                    <td className="p-3 text-right">
-                      {row.roas ? (
-                        <Badge variant={row.roas >= 3 ? 'default' : 'secondary'}>
-                          {row.roas}x
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">N/A</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot className="bg-muted/30 font-medium">
-                <tr>
-                  <td className="p-3">{isRu ? 'Итого' : 'Total'}</td>
-                  <td className="p-3 text-right">508,400</td>
-                  <td className="p-3 text-right">18,490</td>
-                  <td className="p-3 text-right">2,506</td>
-                  <td className="p-3 text-right">429</td>
-                  <td className="p-3 text-right">$4,960</td>
-                  <td className="p-3 text-right">$25,900</td>
-                  <td className="p-3 text-right"><Badge>5.2x</Badge></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Lifecycle Distribution */}
+        {lifecycleData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{isRu ? 'Стадии жизненного цикла' : 'Lifecycle Stages'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={lifecycleData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {lifecycleData.map((_, idx) => (
+                      <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Attribution Comparison */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{isRu ? 'Сравнение моделей атрибуции' : 'Attribution Model Comparison'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {attributionModels.map((model, idx) => (
-              <div key={idx} className="p-4 rounded-lg bg-muted/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">{model.model}</p>
-                <p className="text-lg font-bold">{model.conversions}</p>
-                <p className="text-xs text-muted-foreground">${model.revenue.toLocaleString()}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Events by type */}
+        {eventData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{isRu ? 'События по категориям' : 'Events by Category'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={eventData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Channel Performance Table */}
+      {channelSummary.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{isRu ? 'Эффективность по каналам' : 'Channel Performance'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 font-medium">{isRu ? 'Канал' : 'Channel'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Показы' : 'Impressions'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Клики' : 'Clicks'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Лиды' : 'Leads'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Конверсии' : 'Conversions'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Расход' : 'Spend'}</th>
+                    <th className="text-right p-3 font-medium">{isRu ? 'Выручка' : 'Revenue'}</th>
+                    <th className="text-right p-3 font-medium">ROAS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {channelSummary.map((row, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-3 font-medium">{row.channel}</td>
+                      <td className="p-3 text-right">{row.impressions.toLocaleString()}</td>
+                      <td className="p-3 text-right">{row.clicks.toLocaleString()}</td>
+                      <td className="p-3 text-right">{row.leads.toLocaleString()}</td>
+                      <td className="p-3 text-right">{row.conversions}</td>
+                      <td className="p-3 text-right">${row.spend.toFixed(0)}</td>
+                      <td className="p-3 text-right">${row.revenue.toFixed(0)}</td>
+                      <td className="p-3 text-right">
+                        {row.roas != null ? (
+                          <Badge variant={row.roas >= 3 ? 'default' : 'secondary'}>
+                            {row.roas}x
+                          </Badge>
+                        ) : <span className="text-muted-foreground">N/A</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Pages */}
+      {topPages.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{isRu ? 'Топ страниц' : 'Top Pages'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {topPages.map((page, idx) => (
+                <div key={idx} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <span className="text-sm font-mono text-muted-foreground truncate max-w-[60%]">{page.path}</span>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span>{page.views} {isRu ? 'просм.' : 'views'}</span>
+                    <span className="text-muted-foreground">{page.avgTime}s avg</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

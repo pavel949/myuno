@@ -5,6 +5,7 @@ import { Footer } from './Footer';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
+import { useUserTracking } from '@/hooks/useUserTracking';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -33,6 +34,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     ref
   ) => {
     const isDesktop = useIsDesktop();
+    // Activate global behavioral tracking
+    useUserTracking();
     // Desktop: always show header and footer for consistent navigation
     const finalShowHeader = isDesktop ? true : showHeader;
     const finalShowFooter = isDesktop ? true : showFooter;
