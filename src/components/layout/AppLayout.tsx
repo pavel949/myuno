@@ -4,6 +4,7 @@ import { AppHeader } from './AppHeader';
 import { Footer } from './Footer';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { useIsDesktop } from '@/hooks/use-desktop';
+import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -39,6 +40,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     return (
       <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip", className)}>
         {finalShowHeader && <AppHeader title={title} />}
+        <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}
         
         <main
