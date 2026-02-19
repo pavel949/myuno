@@ -1,189 +1,131 @@
 
-# Комплексный план: Поведенческая аналитика и маркетинговые инструменты
+# Отчёты об управлении для УК и собственников
 
-## Текущее состояние (после аудита)
+## Анализ текущего состояния
 
-Инфраструктура частично создана, но не подключена к реальным данным:
+Система отчётов (`/owner/reports`) уже работает для **собственников**, но имеет три критических ограничения для **УК (управляющих компаний)**:
 
-| Компонент | Статус | Проблема |
+| Проблема | Где | Критичность |
 |---|---|---|
-| `user_events` | Таблица есть | 0 строк — `useUserTracking` нигде не вызывается |
-| `page_views` | Таблица есть | 0 строк — трекинг не активирован |
-| `user_sessions` | Таблица есть | Не используется |
-| `user_segments` | Таблица есть | Не обновляется автоматически |
-| `MCCAnalyticsTab` | Компонент есть | Работает на mock-данных |
-| `MCCAutomationTab` | Компонент есть | Работает на mock-данных |
-| `send-promotions` | Edge Function есть | Нет UI для сегментированной рассылки |
+| `usePropertyReports` фильтрует только по `owner_id` — менеджер не видит отчёты | `usePropertyReports.ts` строка 110 | Высокая |
+| RLS на INSERT не проверяет делегирование — менеджер не может создавать отчёты | `property_reports` политика INSERT | Высокая |
+| Нет шаблона "Отчёт об управлении" с KPI для УК | Везде | Средняя |
+| Нет агрегированного вида по портфелю объектов УК | `ReportsPage.tsx` | Средняя |
+| Нет расписания автоматической отправки | `usePropertyReports.ts` | Низкая |
 
 ---
 
-## Архитектура решения
+## Что будет реализовано
 
-```text
-┌─────────────────────────────────────────────────────────┐
-│  СЛОЙ 1: СБОР ДАННЫХ                                    │
-│  AppLayout → useUserTracking() → user_events + page_views│
-└──────────────────────┬──────────────────────────────────┘
-                       │ (автоматически)
-┌──────────────────────▼──────────────────────────────────┐
-│  СЛОЙ 2: ОБРАБОТКА                                      │
-│  Edge Function (cron) → обновление user_segments        │
-│  на основе user_events + orders + sessions              │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│  СЛОЙ 3: ИНТЕРФЕЙС ADMIN                                │
-│  MCCAnalyticsTab (реальные данные)                      │
-│  MCCLeadsTab → CRM с сегментами                         │
-│  Broadcast Panel (рассылка по сегментам)                │
-└─────────────────────────────────────────────────────────┘
+### 1. Исправление доступа УК к отчётам
+
+**Файл:** `src/hooks/usePropertyReports.ts`
+
+`usePropertyReports` будет расширен: помимо `owner_id = user.id` запрос будет проверять `property_delegates` (как уже сделано в `usePropertyFinancials`). Менеджер сможет видеть все отчёты по объектам, которыми управляет.
+
+`useGenerateReport` будет передавать `generated_by = user.id` и не требовать совпадения `owner_id` — УК создаёт отчёт от имени собственника.
+
+### 2. Исправление RLS на property_reports
+
+**Миграция БД**
+
+Текущая политика `INSERT` не имеет `WITH CHECK` — добавим условие, разрешающее создание отчёта если пользователь является делегатом с разрешением `financials`:
+
+```sql
+DROP POLICY IF EXISTS "Users can create reports for their properties" ON property_reports;
+
+CREATE POLICY "Owners and managers can create reports"
+ON property_reports FOR INSERT
+WITH CHECK (
+  auth.uid() = owner_id
+  OR
+  EXISTS (
+    SELECT 1 FROM property_delegates pd
+    WHERE pd.property_id = property_reports.property_id
+      AND pd.user_id = auth.uid()
+      AND pd.status = 'active'
+      AND (pd.permissions->>'financials')::boolean = true
+  )
+);
 ```
 
----
+Также исправим политику SELECT — текущий ключ `financial` (без `s`) не соответствует ключу `financials` используемому в коде:
 
-## Модуль 1 — Активация трекинга поведения
-
-**Проблема**: `useUserTracking` написан, но не вызывается нигде в приложении. Данные не собираются.
-
-**Что делаем**:
-- Подключить `useUserTracking()` в `src/components/layout/AppLayout.tsx` (один раз, глобально)
-- Добавить вызовы `trackEvent()` в ключевых точках:
-  - Поиск (search queries)
-  - Просмотр карточки товара/услуги
-  - Нажатие CTA-кнопок
-  - Добавление в избранное
-  - Начало и завершение заказа/букинга
-- Добавить `user_id` при записи в `user_events` (сейчас поле есть, но хук его не передаёт — нужно получать из `supabase.auth.getUser()`)
-
-**Файлы**:
-- `src/components/layout/AppLayout.tsx` — добавить вызов хука
-- `src/hooks/useUserTracking.ts` — исправить запись `user_id` в `user_events`
-
----
-
-## Модуль 2 — Автоматическое обновление сегментов
-
-**Проблема**: Таблица `user_segments` существует с богатой структурой (LTV, engagement_level, is_vip, is_at_risk), но никогда не заполняется.
-
-**Что делаем**:
-- Создать Edge Function `update-user-segments` (cron раз в час):
-  - Считает метрики каждого пользователя: количество заказов, сумма, сессии, дни с последнего визита
-  - Присваивает `lifecycle_stage`: `new` → `active` → `at_risk` → `dormant` → `churned`
-  - Присваивает `value_segment`: `low` / `mid` / `high` / `vip`
-  - Флаги `is_vip` (total_spent > 50,000 THB) и `is_at_risk` (не было визита > 21 дня)
-- Обновить `mcc_user_states` синхронно с переходами сегментов
-
-**Новые файлы**:
-- `supabase/functions/update-user-segments/index.ts`
-
----
-
-## Модуль 3 — MCCAnalyticsTab на реальных данных
-
-**Проблема**: Вкладка Analytics показывает hardcoded mock-данные.
-
-**Что делаем**:
-- Создать хук `useMCCAnalytics(period)`, который читает реальные данные из:
-  - `user_events` — по типам событий и каналам
-  - `mcc_events` — маркетинговые события кампаний
-  - `mcc_channel_metrics` — данные по каналам
-  - `orders` — выручка
-- Заменить mock на реальные графики (уже есть `recharts` в проекте):
-  - График трафика по дням
-  - Разбивка по источникам (utm_source из `user_sessions`)
-  - Top страниц по просмотрам (из `page_views`)
-
-**Файлы**:
-- `src/hooks/useMCCAnalytics.ts` — новый хук
-- `src/components/admin/marketing/MCCAnalyticsTab.tsx` — переключение с mock на реальные данные
-
----
-
-## Модуль 4 — MCCAutomationTab на реальных данных
-
-**Проблема**: Автоматизация показывает статичные mock-правила, не связанные с `mcc_automation_rules`.
-
-**Что делаем**:
-- Создать хук `useMCCAutomation()`, который читает/пишет `mcc_automation_rules`
-- UI позволяет включать/выключать правила (Switch → UPDATE в БД)
-- Добавить форму создания нового правила:
-  - Триггер: `signup` / `dormant_30d` / `high_score` / `cart_abandoned`
-  - Действие: `email` / `push` / `whatsapp`
-  - Фильтр по состоянию пользователя (`user_state_filter`) и лендингу
-- Показывать реальный счётчик `executions_count` и `last_executed_at`
-
-**Файлы**:
-- `src/hooks/useMCCAutomation.ts` — новый хук
-- `src/components/admin/marketing/MCCAutomationTab.tsx` — реальные данные + форма создания
-
----
-
-## Модуль 5 — Сегментированные рассылки (Broadcast Panel)
-
-**Проблема**: Edge Function `send-promotions` отправляет всем с `promotions=true`, но нет UI для таргетинга по сегментам.
-
-**Что делаем**:
-- Создать новый компонент `MCCBroadcastPanel` внутри вкладки Automation:
-  - Выбор аудитории: ВСЕ / по `lifecycle_stage` / по `value_segment` / VIP / At-Risk
-  - Превью: "Охват: ~N пользователей"
-  - Форма сообщения: заголовок (RU/EN), тело, опциональный promo-код
-  - Канал: In-app уведомление / Email (через Resend)
-  - Кнопка "Запустить рассылку" → вызов `send-promotions` с параметрами фильтрации
-- Обновить `send-promotions` Edge Function для поддержки фильтрации по сегменту
-
-**Новые файлы**:
-- `src/components/admin/marketing/MCCBroadcastPanel.tsx`
-
-**Изменяемые файлы**:
-- `supabase/functions/send-promotions/index.ts` — добавить параметр `segment_filter`
-
----
-
-## Модуль 6 — Подписки пользователей на категории
-
-**Проблема**: Пользователи не могут подписаться на уведомления о предложениях по интересующим вертикалям.
-
-**Что делаем**:
-- Новая таблица `vertical_subscriptions` (user_id, vertical_slug, notify_email, notify_push, created_at)
-- UI в профиле пользователя (`/account`): карточки вертикалей с переключателями
-- В `notification_preferences` добавить поле `preferred_verticals` (jsonb массив)
-- При появлении нового листинга/предложения — фильтровать пользователей по подпискам и отправлять уведомление
-
-**Новые файлы**:
-- `src/components/account/VerticalSubscriptions.tsx` — UI в профиле
-- Миграция для таблицы `vertical_subscriptions`
-
----
-
-## Последовательность реализации
-
-```text
-Неделя 1:
-  [1] Активация трекинга → AppLayout + useUserTracking fix
-  [2] update-user-segments Edge Function (cron)
-
-Неделя 2:
-  [3] MCCAnalyticsTab → реальные данные + recharts
-  [4] MCCAutomationTab → реальные данные + форма правил
-
-Неделя 3:
-  [5] Broadcast Panel с сегментацией
-  [6] Vertical Subscriptions в профиле
-
+```sql
+-- Унифицировать ключ: financial → financials
 ```
+
+### 3. Новый шаблон: "Отчёт об управлении"
+
+**Новый тип отчёта:** `management`
+
+**Новый файл:** `src/components/owner/reports/ManagementReportDetail.tsx`
+
+Этот компонент показывает:
+- Заполняемость объекта (%) с графиком по неделям
+- Список выполненных работ (уборки, ремонты, сервисные вызовы)
+- Расходы УК: комиссия, управленческие работы
+- Чистый доход собственника после вычета комиссии УК
+- Сравнение с прошлым периодом (MoM)
+- Рекомендации (из поля `recommendations` в `ReportData`)
+
+**Расширение типа:** добавить `'management'` к `ReportType`
+
+### 4. Агрегированный портфельный вид для УК
+
+**Файл:** `src/pages/owner/ReportsPage.tsx`
+
+Если пользователь является менеджером (есть делегирования), добавить вкладку **"Портфель"** ("Portfolio"), которая показывает:
+- Суммарный доход по всем управляемым объектам за выбранный период
+- Таблицу: объект → доход → расходы → заполняемость → чистый доход
+- Кнопку "Сформировать сводный PDF" — один PDF с таблицей по всем объектам
+
+### 5. Расписание автоотправки (опционально по кнопке)
+
+**Файл:** `src/pages/owner/ReportsPage.tsx`
+
+Добавить кнопку **"Настроить автоотправку"** (Schedule). Это простой UI с:
+- Выбором периодичности: ежемесячно / ежеквартально
+- Полем email получателя (по умолчанию — email собственника)
+- Сохранением в `property_reports` с флагом `auto_send: true` в поле `data`
+
+(Без cron-а — УК нажимает "Отправить за месяц" одним кликом, выбирая объект)
 
 ---
 
 ## Технические детали
 
-**База данных**:
-- Новая таблица `vertical_subscriptions` с RLS (пользователь видит только свои)
-- Добавить `user_id` к записи в `user_events` (поле есть, хук его не передаёт)
-- Cron-job для `update-user-segments` через `pg_cron` или scheduled Edge Function
+### Файлы и изменения
 
-**Безопасность**:
-- `user_events`: RLS — пользователь пишет только свои события
-- `user_segments`: RLS — читают только admin/uno_team, обновляет только service role
-- `mcc_automation_rules`: RLS — только admin/uno_team
+```text
+БД (миграция):
+  - Исправить INSERT RLS policy на property_reports
+  - Исправить ключ financial → financials в SELECT policy
 
-**Приоритет**: Модули 1 и 2 являются фундаментом — без реальных данных в `user_events` остальные модули не дадут ценности. Рекомендуется начать именно с них.
+src/hooks/usePropertyReports.ts:
+  - usePropertyReports() → добавить JOIN через property_delegates
+  - useGenerateReport() → не требовать owner_id === user.id (разрешить менеджеру)
+  - Добавить тип 'management' к ReportType
+
+src/pages/owner/ReportsPage.tsx:
+  - Добавить вкладку "Портфель" для УК/менеджеров
+  - Показывать управляемые объекты в селекторе
+  - Кнопка генерации сводного PDF
+
+src/components/owner/reports/ManagementReportDetail.tsx (новый):
+  - Шаблон для отчёта типа 'management'
+  - KPI: заполняемость, работы, комиссия УК, чистый доход собственника
+
+src/utils/generateReportPdf.ts:
+  - Добавить шаблон PDF для management-отчёта
+  - Добавить секцию "Работы и обслуживание"
+  - Строку "Комиссия УК" и "Доход собственника"
+```
+
+### Порядок реализации
+
+1. Миграция БД (исправить RLS) — без этого УК вообще не может создавать отчёты
+2. Исправить `usePropertyReports` — дать доступ для чтения
+3. Добавить тип `management` и шаблон `ManagementReportDetail`
+4. Добавить вкладку "Портфель" в `ReportsPage`
+5. Расширить PDF-генератор для management-отчёта
