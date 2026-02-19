@@ -3,7 +3,7 @@
  * Displays: progress, checklist summary, next steps
  * Core of the "dashboard" experience
  */
-import React, { memo } from 'react';
+import React, { memo, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
@@ -109,7 +109,7 @@ const CONTEXT_ACTIONS: Record<string, Array<{
   ],
 };
 
-export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {
+export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSStatusBlock(_, ref) {
   const { activeCode, activeTitle, activeColor } = useLifeSituationContext();
   const { data: situations } = useLifeSituations();
   const { language } = useLanguage();
@@ -214,6 +214,7 @@ export const LifeOSStatusBlock = memo(function LifeOSStatusBlock() {
       )}
     </section>
   );
-});
+}));
+
 
 export default LifeOSStatusBlock;
