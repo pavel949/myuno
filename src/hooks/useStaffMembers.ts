@@ -90,6 +90,7 @@ export function useCreateStaffMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-members'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
       toast.success('Сотрудник добавлен');
     },
     onError: (e) => {
