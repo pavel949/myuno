@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { createErrorHandler } from '@/lib/errorHandler';
 
+/** @deprecated Use AppRole from user_roles table instead. Kept for backward compat only. */
 export type UserType = 'tourist' | 'resident' | 'owner' | 'vendor' | 'admin' | 'uno_team';
 
 export interface UserProfile {
@@ -14,6 +15,7 @@ export interface UserProfile {
   avatar_url: string | null;
   preferred_language: string | null;
   email: string | null;
+  /** @deprecated Stored in user_roles table. This field is kept for UI fallback only. */
   user_type: UserType | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;

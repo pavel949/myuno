@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
-import { useProfile, type UserType } from '@/hooks/useProfile';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -17,6 +16,7 @@ import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { prefetchRoute } from '@/lib/routePrefetch';
+
 
 interface QuickAction {
   id: string;
@@ -122,15 +122,7 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
   return Object.values(actionScores).sort((a, b) => b.score - a.score).slice(0, 8).map(item => item.action);
 }
 
-function getActionsForUserType(userType: UserType | null | undefined): QuickAction[] {
-  switch (userType) {
-    case 'tourist': return TOURIST_ACTIONS;
-    case 'resident': return RESIDENT_ACTIONS;
-    case 'owner': return OWNER_ACTIONS;
-    case 'vendor': case 'admin': case 'uno_team': return RESIDENT_ACTIONS;
-    default: return DEFAULT_ACTIONS;
-  }
-}
+
 
 function getActionsForRole(role: AppRole): QuickAction[] {
   switch (role) {
@@ -168,7 +160,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 }: QuickActionsGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { profile } = useProfile();
+  
   const { personas } = useUserPersonas();
   const { activeRole, isLoading: roleLoading } = useUserContext();
   const queryClient = useQueryClient();
@@ -176,15 +168,18 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
     if (!roleLoading && activeRole && activeRole !== 'user') {
+      // Use active role from user_roles table (source of truth)
       userActions = getActionsForRole(activeRole);
     } else if (personas.length > 0) {
+      // Use personas from user_roles table
       userActions = getActionsForPersonas(personas);
     } else {
-      userActions = getActionsForUserType(profile?.user_type);
+      // Default actions for unauthenticated or plain users
+      userActions = DEFAULT_ACTIONS;
     }
     const moreAction = getMoreAction(contentMode);
     return [...userActions.slice(0, 7), moreAction];
-  }, [activeRole, roleLoading, personas, profile?.user_type, contentMode]);
+  }, [activeRole, roleLoading, personas, contentMode]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);
