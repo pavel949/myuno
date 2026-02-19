@@ -38,6 +38,9 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string; fullName?: string; phone?: string }>({});
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [signupStep, setSignupStep] = useState<SignupStep>('info');
+  // Track failed login attempts to show "Forgot password?" hint
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const SHOW_FORGOT_AFTER = 3;
 
   const { user, signIn, signUp } = useAuth();
   const { t, language } = useLanguage();
@@ -184,11 +187,19 @@ export default function Auth() {
       });
       
       if (error) {
+        let description = error.message;
+        if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+          description = isRu
+            ? 'Этот email уже зарегистрирован. Войдите в аккаунт.'
+            : 'This email is already registered. Please sign in instead.';
+        } else if (error.message.includes('Password should be')) {
+          description = isRu
+            ? 'Пароль должен содержать не менее 6 символов'
+            : 'Password must be at least 6 characters';
+        }
         toast({
-          title: isRu ? 'Ошибка' : 'Error',
-          description: error.message.includes('already registered')
-            ? (isRu ? 'Этот email уже зарегистрирован. Войдите в аккаунт.' : 'This email is already registered. Please log in instead.')
-            : error.message,
+          title: isRu ? 'Ошибка регистрации' : 'Registration failed',
+          description,
           variant: 'destructive',
         });
       } else {
@@ -215,9 +226,14 @@ export default function Auth() {
         }).catch(err => console.error('Signup notification error:', err));
         
         toast({
-          title: t('message.success'),
-          description: isRu ? 'Аккаунт успешно создан!' : 'Account created successfully!',
+          title: isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
+          description: isRu
+            ? 'Аккаунт создан. Проверьте почту для подтверждения email.'
+            : 'Account created. Check your email to verify your address.',
         });
+
+        // Navigate immediately — email verification is soft (banner shown in app)
+        navigate(redirectPath, { replace: true });
       }
     } catch (error) {
       toast({
@@ -240,14 +256,29 @@ export default function Auth() {
     try {
       const { error } = await signIn(email, password);
       if (error) {
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+
+        let description: string;
+        if (error.message === 'Invalid login credentials' || error.message.includes('invalid_credentials')) {
+          description = isRu ? 'Неверный email или пароль' : 'Invalid email or password';
+        } else if (error.message.includes('Email not confirmed')) {
+          description = isRu
+            ? 'Email не подтверждён. Проверьте почту и перейдите по ссылке.'
+            : 'Email not confirmed. Check your inbox and click the verification link.';
+        } else {
+          description = error.message;
+        }
+
         toast({
-          title: isRu ? 'Ошибка' : 'Error',
-          description: error.message === 'Invalid login credentials' 
-            ? (isRu ? 'Неверный email или пароль' : 'Invalid email or password')
-            : error.message,
+          title: isRu ? 'Ошибка входа' : 'Login failed',
+          description,
           variant: 'destructive',
         });
       } else {
+        // Reset attempt counter on success
+        setLoginAttempts(0);
+
         // Update refresh_token in localStorage if PIN is already set up
         const { data: sessionData } = await supabase.auth.getSession();
         const refreshToken = sessionData.session?.refresh_token;
@@ -263,6 +294,7 @@ export default function Auth() {
         });
       }
     } catch (error) {
+      setLoginAttempts(prev => prev + 1);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred',
@@ -433,11 +465,31 @@ export default function Auth() {
                       {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     </div>
 
-                    <div className="text-right">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground" />
                       <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
                         {t('auth.forgotPassword')}
                       </Link>
                     </div>
+
+                    {/* Hint after 3 failed attempts */}
+                    {loginAttempts >= SHOW_FORGOT_AFTER && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm"
+                      >
+                        <p className="text-destructive font-medium mb-1">
+                          {isRu ? 'Несколько неудачных попыток' : 'Multiple failed attempts'}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {isRu ? 'Может быть, ' : 'Maybe '}
+                          <Link to="/auth/forgot-password" className="text-primary font-medium hover:underline">
+                            {isRu ? 'восстановить пароль?' : 'reset your password?'}
+                          </Link>
+                        </p>
+                      </motion.div>
+                    )}
 
                     <PremiumButton type="submit" className="w-full" size="lg" isLoading={isLoading} data-testid="login-button">
                       {t('auth.login')}
