@@ -9460,6 +9460,7 @@ export type Database = {
           cleaning_frequency: string | null
           cleaning_included: boolean | null
           commercial_terms_redacted: boolean | null
+          complex_id: string | null
           cover_image: string | null
           created_at: string
           created_on_behalf: boolean | null
@@ -9615,6 +9616,7 @@ export type Database = {
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
           commercial_terms_redacted?: boolean | null
+          complex_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_on_behalf?: boolean | null
@@ -9770,6 +9772,7 @@ export type Database = {
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
           commercial_terms_redacted?: boolean | null
+          complex_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_on_behalf?: boolean | null
@@ -9906,6 +9909,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_complex_id_fkey"
+            columns: ["complex_id"]
+            isOneToOne: false
+            referencedRelation: "property_complexes"
             referencedColumns: ["id"]
           },
           {
@@ -12038,6 +12048,42 @@ export type Database = {
           },
         ]
       }
+      property_complexes: {
+        Row: {
+          address: string | null
+          created_at: string
+          description: string | null
+          district: string | null
+          id: string
+          name: string
+          name_ru: string | null
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          id?: string
+          name: string
+          name_ru?: string | null
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          district?: string | null
+          id?: string
+          name?: string
+          name_ru?: string | null
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       property_delegates: {
         Row: {
           accepted_at: string | null
@@ -12318,6 +12364,7 @@ export type Database = {
         Row: {
           amount: number
           category: string | null
+          cost_source: string | null
           created_at: string
           currency: string | null
           description: string | null
@@ -12336,6 +12383,7 @@ export type Database = {
           recurring_interval: string | null
           reference_id: string | null
           reference_type: string | null
+          staff_member_id: string | null
           status: string | null
           tax_deductible: boolean | null
           transaction_date: string
@@ -12348,6 +12396,7 @@ export type Database = {
         Insert: {
           amount: number
           category?: string | null
+          cost_source?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
@@ -12366,6 +12415,7 @@ export type Database = {
           recurring_interval?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          staff_member_id?: string | null
           status?: string | null
           tax_deductible?: boolean | null
           transaction_date?: string
@@ -12378,6 +12428,7 @@ export type Database = {
         Update: {
           amount?: number
           category?: string | null
+          cost_source?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
@@ -12396,6 +12447,7 @@ export type Database = {
           recurring_interval?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          staff_member_id?: string | null
           status?: string | null
           tax_deductible?: boolean | null
           transaction_date?: string
@@ -12411,6 +12463,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_financials_staff_member_id_fkey"
+            columns: ["staff_member_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
             referencedColumns: ["id"]
           },
         ]
@@ -15657,6 +15716,57 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_members: {
+        Row: {
+          created_at: string
+          daily_rate: number | null
+          email: string | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean
+          monthly_salary: number | null
+          name: string
+          notes: string | null
+          owner_id: string
+          pay_type: string
+          phone: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_rate?: number | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          monthly_salary?: number | null
+          name: string
+          notes?: string | null
+          owner_id: string
+          pay_type?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_rate?: number | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean
+          monthly_salary?: number | null
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          pay_type?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       staff_profiles: {
         Row: {
           avg_rating: number | null
@@ -15713,6 +15823,44 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: []
+      }
+      staff_property_assignments: {
+        Row: {
+          assigned_at: string
+          id: string
+          is_primary: boolean
+          owner_id: string
+          property_id: string
+          role_at_property: string | null
+          staff_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          is_primary?: boolean
+          owner_id: string
+          property_id: string
+          role_at_property?: string | null
+          staff_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          is_primary?: boolean
+          owner_id?: string
+          property_id?: string
+          role_at_property?: string | null
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_property_assignments_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       store_products: {
         Row: {

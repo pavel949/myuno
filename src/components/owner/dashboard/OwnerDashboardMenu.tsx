@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
 import {
   Download,
   Sparkles,
@@ -11,6 +10,7 @@ import {
   HelpCircle,
   BookOpen,
   FileText,
+  Users,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -25,6 +25,7 @@ const MENU_ITEMS: MenuItem[] = [
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
   { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
   { path: '/owner/management-terms', icon: FileText, labelEn: 'Management Terms', labelRu: 'Условия управления' },
+  { path: '/owner/staff', icon: Users, labelEn: 'Staff Directory', labelRu: 'Реестр сотрудников' },
   { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения' },
   { path: '/owner/guide', icon: BookOpen, labelEn: 'Owner Guide', labelRu: 'Материалы для хозяев' },
   { path: '/support', icon: HelpCircle, labelEn: 'Help', labelRu: 'Помощь' },

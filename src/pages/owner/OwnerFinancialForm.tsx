@@ -12,6 +12,7 @@ import {
   PAYMENT_METHODS,
   PropertyFinancialFull
 } from '@/hooks/usePropertyFinancials';
+import { useStaffMembers } from '@/hooks/useStaffMembers';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
@@ -45,6 +46,7 @@ export default function OwnerFinancialForm() {
 
   const { data: properties } = useOwnerProperties();
   const { data: financials } = usePropertyFinancialsFull();
+  const { data: staffList } = useStaffMembers();
   const createFinancial = useCreateFinancial();
   const updateFinancial = useUpdateFinancial();
 
@@ -67,6 +69,8 @@ export default function OwnerFinancialForm() {
     vendor_name: '',
     invoice_number: '',
     notes: '',
+    cost_source: 'external' as 'internal' | 'external' | 'mixed',
+    staff_member_id: '',
   });
 
   useEffect(() => {
@@ -88,6 +92,8 @@ export default function OwnerFinancialForm() {
         vendor_name: existingItem.vendor_name || '',
         invoice_number: existingItem.invoice_number || '',
         notes: existingItem.notes || '',
+        cost_source: ((existingItem as any).cost_source || 'external') as 'internal' | 'external' | 'mixed',
+        staff_member_id: (existingItem as any).staff_member_id || '',
       });
     }
   }, [existingItem]);
@@ -119,6 +125,10 @@ export default function OwnerFinancialForm() {
       vendor_name: formData.vendor_name || null,
       invoice_number: formData.invoice_number || null,
       notes: formData.notes || null,
+      cost_source: transactionType === 'expense' ? formData.cost_source : undefined,
+      staff_member_id: (transactionType === 'expense' && formData.cost_source === 'internal' && formData.staff_member_id)
+        ? formData.staff_member_id
+        : null,
     };
 
     try {
@@ -158,11 +168,11 @@ export default function OwnerFinancialForm() {
         }}>
           <TabsList className="w-full">
             <TabsTrigger value="income" className="flex-1">
-              <ArrowUpCircle className="h-4 w-4 mr-2 text-green-500" />
+              <ArrowUpCircle className="h-4 w-4 mr-2 text-success" />
               {isRu ? 'Доход' : 'Income'}
             </TabsTrigger>
             <TabsTrigger value="expense" className="flex-1">
-              <ArrowDownCircle className="h-4 w-4 mr-2 text-red-500" />
+              <ArrowDownCircle className="h-4 w-4 mr-2 text-destructive" />
               {isRu ? 'Расход' : 'Expense'}
             </TabsTrigger>
           </TabsList>
@@ -321,15 +331,66 @@ export default function OwnerFinancialForm() {
               </div>
             </div>
 
+
             {transactionType === 'expense' && (
-              <div className="space-y-2">
-                <Label>{isRu ? 'Поставщик/Исполнитель' : 'Vendor Name'}</Label>
-                <Input
-                  placeholder={isRu ? 'Название компании или ФИО' : 'Company or person name'}
-                  value={formData.vendor_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, vendor_name: e.target.value }))}
-                />
-              </div>
+              <>
+                {/* Cost Source: internal staff vs external vendor */}
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Источник расхода' : 'Cost Source'}</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { value: 'external', labelRu: 'Внешний поставщик', labelEn: 'External Vendor' },
+                      { value: 'internal', labelRu: 'Штатный сотрудник', labelEn: 'Internal Staff' },
+                      { value: 'mixed', labelRu: 'Смешанный', labelEn: 'Mixed' },
+                    ] as const).map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, cost_source: opt.value, staff_member_id: '' }))}
+                        className={`rounded-xl border p-2 text-xs font-medium transition-colors ${
+                          formData.cost_source === opt.value
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-card text-muted-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {isRu ? opt.labelRu : opt.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* If internal — pick staff member */}
+                {formData.cost_source === 'internal' && staffList && staffList.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Сотрудник' : 'Staff Member'}</Label>
+                    <Select
+                      value={formData.staff_member_id}
+                      onValueChange={v => setFormData(prev => ({ ...prev, staff_member_id: v, vendor_name: '' }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={isRu ? 'Выберите сотрудника' : 'Select staff'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {staffList.map(s => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* If external — show vendor name */}
+                {formData.cost_source !== 'internal' && (
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Поставщик/Исполнитель' : 'Vendor Name'}</Label>
+                    <Input
+                      placeholder={isRu ? 'Название компании или ФИО' : 'Company or person name'}
+                      value={formData.vendor_name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, vendor_name: e.target.value }))}
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             <div className="space-y-2">
