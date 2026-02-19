@@ -10,6 +10,7 @@ import {
   ChevronRight,
   HelpCircle,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -23,6 +24,7 @@ const MENU_ITEMS: MenuItem[] = [
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
   { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
+  { path: '/owner/management-terms', icon: FileText, labelEn: 'Management Terms', labelRu: 'Условия управления' },
   { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения' },
   { path: '/owner/guide', icon: BookOpen, labelEn: 'Owner Guide', labelRu: 'Материалы для хозяев' },
   { path: '/support', icon: HelpCircle, labelEn: 'Help', labelRu: 'Помощь' },
