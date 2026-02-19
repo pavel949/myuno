@@ -10,6 +10,7 @@ import {
   ReportType,
   PropertyReport 
 } from '@/hooks/usePropertyReports';
+import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +64,7 @@ export default function ReportsPage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedReportForSend, setSelectedReportForSend] = useState<string | null>(null);
+  const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
   const [emailRecipients, setEmailRecipients] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [selectedReportType, setSelectedReportType] = useState<ReportType>('monthly');
@@ -346,7 +348,7 @@ export default function ReportsPage() {
 
                   {/* Actions */}
                   <div className="flex md:flex-col gap-2 p-4 bg-muted/30 justify-center">
-                    <Button variant="outline" size="sm" className="flex-1 md:flex-none">
+                    <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={() => setViewReport(report)}>
                       <Eye className="h-4 w-4 mr-2" />
                       {isRu ? 'Просмотр' : 'View'}
                     </Button>
@@ -476,6 +478,13 @@ export default function ReportsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Report Detail Sheet */}
+      <ReportDetailSheet
+        report={viewReport}
+        open={!!viewReport}
+        onOpenChange={(open) => { if (!open) setViewReport(null); }}
+      />
     </div>
   );
 }
