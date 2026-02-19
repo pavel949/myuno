@@ -365,6 +365,7 @@ export const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'))
 export const OwnerPropertyImport = lazy(() => import('@/pages/owner/OwnerPropertyImport'));
 export const TeamPage = lazy(() => import('@/pages/owner/TeamPage'));
 export const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
+export const ManagementPortfolio = lazy(() => import('@/pages/owner/ManagementPortfolio'));
 export const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit'));
 
 // ── Staff ──
