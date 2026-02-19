@@ -1,53 +1,39 @@
 
-# Очистка и починка Build/PWA инфраструктуры
+## Fix: Circular Chunk Dependency in vite.config.ts
 
-## Что будет исправлено
+The build is failing with:
+```
+Circular chunk: vendor-charts -> feature-admin -> vendor-charts
+```
 
-### Проблема 1 — Сломанный CACHE_SOS (нет обработчика в SW)
-`useOfflineStatus.ts` отправляет `postMessage({ type: 'CACHE_SOS' })` в Service Worker, но `sw.ts` не обрабатывает это сообщение. Функция "Сохранить SOS офлайн" никогда не работала.
+This means one or more admin pages (in `feature-admin`) import `recharts` (which is in `vendor-charts`), and `vendor-charts` somehow references back to `feature-admin`, creating a loop.
 
-**Исправление:** добавить обработчик `CACHE_SOS` в `sw.ts`, который кэширует `/sos` страницу в `uno-sos-cache-v1`. Также добавить `uno-sos-cache-v1` в список актуальных кэшей (чтобы SW не удалял его при активации).
+### Root Cause
 
-### Проблема 2 — PWAUpdatePrompt показывается при каждом перезапуске
-`dismissed` хранится только в `React.useState` (in-memory). После перезагрузки страницы промпт появляется снова, если Service Worker ещё не установился.
+In `vite.config.ts`, the `manualChunks` config lists specific file paths for `feature-admin`. When Rollup processes these, it finds they import `recharts` → goes to `vendor-charts` → but Rollup's chunk resolution creates a back-reference to `feature-admin`. This is a known Rollup limitation with static `manualChunks` arrays that include files importing from other manual chunks.
 
-**Исправление:** хранить `dismissed` в `sessionStorage` (сброс при закрытии вкладки — разумный TTL).
+### Fix
 
-### Проблема 3 — Накопленный мусор в localStorage
-Ключи `manifest_version`, `last_cache_cleanup`, `pwa_installed` прописаны в `Install.tsx` как "нужно удалить при сбросе", но нигде не создаются с TTL. При каждой загрузке `app_version` перезаписывается, но старые значения могут оставаться.
+Remove the `feature-admin` and `feature-vendor` entries from `manualChunks`. These are lazy-loaded routes — Rollup/Vite already splits them automatically via dynamic imports (`React.lazy()`). Manually listing their paths in `manualChunks` is redundant and causes the circular reference.
 
-**Исправление:** в `appVersion.ts` добавить разовую очистку устаревших ключей при несовпадении версий.
+The `vendor-*` chunks for libraries remain intact — only the feature-specific page arrays are removed.
 
-### Проблема 4 — Автоматическая проверка обновлений каждые 2 минуты — избыточно
-`PWAUpdatePrompt` ставит `setInterval` на 2 минуты. Для типичного PWA достаточно одной проверки при фокусе вкладки (`visibilitychange`).
+### Technical Change (single file: `vite.config.ts`)
 
-**Исправление:** заменить `setInterval(2 min)` на `document.addEventListener('visibilitychange')`.
+Remove these two blocks from `manualChunks`:
 
----
+```diff
+- // ── Feature: Admin (lazy-loaded, only staff) ──────────────────
+- 'feature-admin': [
+-   './src/pages/admin/AdminDashboard.tsx',
+-   ...
+- ],
+-
+- // ── Feature: Vendor portal (lazy-loaded, only vendors) ────────
+- 'feature-vendor': [
+-   './src/pages/vendor/VendorDashboard.tsx',
+-   ...
+- ],
+```
 
-## Технические детали
-
-### `src/sw.ts`
-- Добавить `uno-sos-cache-v1` в `CURRENT_CACHES` (чтобы не удалялся при активации)
-- Добавить обработчик сообщения `CACHE_SOS`:
-  ```ts
-  if (event.data?.type === 'CACHE_SOS') {
-    const cache = await caches.open('uno-sos-cache-v1');
-    await cache.add('/sos');
-  }
-  ```
-
-### `src/components/pwa/PWAUpdatePrompt.tsx`
-- Заменить `setInterval(2 min)` на `visibilitychange` listener
-- Сохранять `dismissed` в `sessionStorage` с ключом `pwa_prompt_dismissed_v3.35.0`
-
-### `src/lib/appVersion.ts`
-- При несовпадении сохранённой версии с `APP_VERSION` — очищать устаревшие localStorage ключи (`manifest_version`, `last_cache_cleanup`, `pwa_installed`)
-
----
-
-## Что НЕ изменится
-- Визуальный UI не меняется
-- Логика кэширования статики (workbox precache) не трогается
-- Версия `3.35.0` и имена кэшей `*-v3` остаются
-- Авторизация и данные пользователей не затрагиваются
+This resolves the circular dependency while keeping all vendor library chunking intact. Build performance and chunk sizes are unaffected — lazy routes are still split automatically by Vite.
