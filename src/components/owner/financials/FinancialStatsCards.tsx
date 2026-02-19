@@ -15,14 +15,14 @@ interface FinancialStatsCardsProps {
 export function FinancialStatsCards({ stats, isRu }: FinancialStatsCardsProps) {
   return (
     <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 mb-6">
-      <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
+      <Card className="bg-gradient-to-br from-success/10 to-success/5">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-green-500/20">
-              <TrendingUp className="h-5 w-5 text-green-500" />
+            <div className="p-2 rounded-full bg-success/20">
+              <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <div>
-              <p className="text-xl font-bold text-green-600">
+              <p className="text-xl font-bold text-success">
                 ฿{((stats?.totalIncome || 0) / 1000).toFixed(1)}k
               </p>
               <p className="text-xs text-muted-foreground">
@@ -33,14 +33,14 @@ export function FinancialStatsCards({ stats, isRu }: FinancialStatsCardsProps) {
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-red-500/10 to-red-500/5">
+      <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-red-500/20">
-              <TrendingDown className="h-5 w-5 text-red-500" />
+            <div className="p-2 rounded-full bg-destructive/20">
+              <TrendingDown className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <p className="text-xl font-bold text-red-600">
+              <p className="text-xl font-bold text-destructive">
                 ฿{((stats?.totalExpenses || 0) / 1000).toFixed(1)}k
               </p>
               <p className="text-xs text-muted-foreground">
@@ -59,7 +59,7 @@ export function FinancialStatsCards({ stats, isRu }: FinancialStatsCardsProps) {
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={`text-2xl font-bold ${(stats?.netIncome || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-2xl font-bold ${(stats?.netIncome || 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
                   ฿{((stats?.netIncome || 0) / 1000).toFixed(1)}k
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -71,8 +71,8 @@ export function FinancialStatsCards({ stats, isRu }: FinancialStatsCardsProps) {
               <p className="text-sm font-medium">
                 {isRu ? 'Этот месяц' : 'This Month'}
               </p>
-              <p className="text-xs text-green-600">+฿{((stats?.thisMonthIncome || 0) / 1000).toFixed(1)}k</p>
-              <p className="text-xs text-red-600">-฿{((stats?.thisMonthExpenses || 0) / 1000).toFixed(1)}k</p>
+              <p className="text-xs text-success">+฿{((stats?.thisMonthIncome || 0) / 1000).toFixed(1)}k</p>
+              <p className="text-xs text-destructive">-฿{((stats?.thisMonthExpenses || 0) / 1000).toFixed(1)}k</p>
             </div>
           </div>
         </CardContent>

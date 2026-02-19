@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
@@ -31,9 +31,11 @@ export default function OwnerOperations() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const [searchParams] = useSearchParams();
   
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'completed'>('today');
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(searchParams.get('task'));
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
@@ -209,14 +211,19 @@ export default function OwnerOperations() {
               </Card>
             ) : (
               filteredTasks.map((task) => (
-                <OperationalTaskCard 
-                  key={task.id} 
-                  task={task} 
-                  isRu={isRu}
-                  onComplete={handleCompleteTask}
-                  onStartProgress={(id) => updateTaskStatus.mutate({ taskId: id, status: 'in_progress' })}
-                  isPending={completeTask.isPending || updateTaskStatus.isPending}
-                />
+                <div
+                  key={task.id}
+                  id={`task-${task.id}`}
+                  className={highlightedTaskId === task.id ? 'ring-2 ring-primary rounded-xl' : ''}
+                >
+                  <OperationalTaskCard 
+                    task={task} 
+                    isRu={isRu}
+                    onComplete={handleCompleteTask}
+                    onStartProgress={(id) => updateTaskStatus.mutate({ taskId: id, status: 'in_progress' })}
+                    isPending={completeTask.isPending || updateTaskStatus.isPending}
+                  />
+                </div>
               ))
             )}
           </TabsContent>
