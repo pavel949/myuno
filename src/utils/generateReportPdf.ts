@@ -10,11 +10,13 @@ interface GeneratePdfOptions {
   data: ReportData;
   language?: 'en' | 'ru';
   currency?: string;
+  isManagement?: boolean;
 }
 
 const translations = {
   en: {
     title: 'Property Report',
+    managementTitle: 'Management Report',
     period: 'Period',
     summary: 'Summary',
     income: 'Income',
@@ -27,6 +29,7 @@ const translations = {
     bookingsCount: 'Bookings Count',
     incomeBreakdown: 'Income by Category',
     expenseBreakdown: 'Expenses by Category',
+    maintenanceSection: 'Maintenance & Works',
     bookings: 'Bookings',
     guestName: 'Guest',
     checkIn: 'Check-in',
@@ -38,11 +41,16 @@ const translations = {
     category: 'Category',
     description: 'Description',
     vendor: 'Vendor',
+    type: 'Type',
+    cost: 'Cost',
+    managementCommission: 'Management Commission',
+    ownerNetIncome: 'Owner Net Income',
     generatedOn: 'Generated on',
     page: 'Page',
   },
   ru: {
     title: 'Отчёт по объекту',
+    managementTitle: 'Управленческий отчёт',
     period: 'Период',
     summary: 'Сводка',
     income: 'Доход',
@@ -55,6 +63,7 @@ const translations = {
     bookingsCount: 'Количество броней',
     incomeBreakdown: 'Доход по категориям',
     expenseBreakdown: 'Расходы по категориям',
+    maintenanceSection: 'Работы и обслуживание',
     bookings: 'Бронирования',
     guestName: 'Гость',
     checkIn: 'Заезд',
@@ -66,6 +75,10 @@ const translations = {
     category: 'Категория',
     description: 'Описание',
     vendor: 'Поставщик',
+    type: 'Тип',
+    cost: 'Стоимость',
+    managementCommission: 'Комиссия УК',
+    ownerNetIncome: 'Доход собственника',
     generatedOn: 'Сгенерировано',
     page: 'Страница',
   },
@@ -121,6 +134,7 @@ function formatDate(dateString: string): string {
 
 export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   const { propertyTitle, reportType, periodStart, periodEnd, data, language = 'ru', currency = 'THB' } = options;
+  const isManagement = reportType === 'management' || options.isManagement;
   const t = translations[language];
   const catLabels = categoryLabels[language];
 
@@ -130,7 +144,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   // Header
   doc.setFontSize(20);
   doc.setTextColor(40, 40, 40);
-  doc.text(t.title, 20, yPosition);
+  doc.text(isManagement ? t.managementTitle : t.title, 20, yPosition);
   
   yPosition += 10;
   doc.setFontSize(14);
@@ -267,12 +281,12 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       doc.addPage();
       yPosition = 20;
     }
-    
+
     doc.setFontSize(12);
     doc.setTextColor(40, 40, 40);
     doc.text(`${t.expenses} — ${t.transactions}`, 20, yPosition);
     yPosition += 5;
-    
+
     const transData = data.expenses.transactions.slice(0, 20).map(tr => [
       formatDate(tr.date),
       catLabels[tr.category] || tr.category,
@@ -280,7 +294,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       tr.description.substring(0, 30),
       formatCurrency(tr.amount, currency),
     ]);
-    
+
     autoTable(doc, {
       startY: yPosition,
       head: [[t.date, t.category, t.vendor, t.description, t.amount]],
@@ -290,6 +304,64 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       margin: { left: 20, right: 20 },
       styles: { fontSize: 8 },
     });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 15;
+  }
+
+  // ---- Management-specific sections ----
+  if (isManagement) {
+    // Maintenance / works done
+    if (data.maintenance && data.maintenance.length > 0) {
+      if (yPosition > 200) { doc.addPage(); yPosition = 20; }
+
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text(t.maintenanceSection, 20, yPosition);
+      yPosition += 5;
+
+      const maintData = data.maintenance.map(m => [
+        formatDate(m.date),
+        catLabels[m.type] || m.type,
+        m.description.substring(0, 40),
+        formatCurrency(m.cost, currency),
+      ]);
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [[t.date, t.type, t.description, t.cost]],
+        body: maintData,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 88, 12] },
+        margin: { left: 20, right: 20 },
+        styles: { fontSize: 9 },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+
+    // Commission & owner net income box
+    const mgmtCommission = (data as any).management_commission ?? 0;
+    const ownerNet = (data as any).owner_net_income ?? data.net_income;
+    if (mgmtCommission > 0) {
+      if (yPosition > 240) { doc.addPage(); yPosition = 20; }
+
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(15, yPosition - 5, 180, 35, 3, 3, 'F');
+
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${t.managementCommission}:`, 25, yPosition + 5);
+      doc.setTextColor(220, 38, 38);
+      doc.text(`-${formatCurrency(mgmtCommission, currency)}`, 110, yPosition + 5);
+
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${t.ownerNetIncome}:`, 25, yPosition + 18);
+      doc.setFontSize(12);
+      doc.setTextColor(ownerNet >= 0 ? 22 : 220, ownerNet >= 0 ? 163 : 38, ownerNet >= 0 ? 74 : 38);
+      doc.text(formatCurrency(ownerNet, currency), 110, yPosition + 18);
+
+      yPosition += 45;
+    }
   }
 
   // Footer
