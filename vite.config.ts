@@ -128,25 +128,6 @@ export default defineConfig(({ mode }) => {
             'vendor-pdf': ['jspdf', 'jspdf-autotable', 'exceljs'],
             'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
 
-            // ── Feature: Admin (lazy-loaded, only staff) ──────────────────
-            'feature-admin': [
-              './src/pages/admin/AdminDashboard.tsx',
-              './src/pages/admin/AdminControlCenter.tsx',
-              './src/pages/admin/AdminProviders.tsx',
-              './src/pages/admin/AdminProperties.tsx',
-              './src/pages/admin/AdminOperations.tsx',
-              './src/pages/admin/AcquisitionMetrics.tsx',
-              './src/pages/admin/OperationsHub.tsx',
-            ],
-
-            // ── Feature: Vendor portal (lazy-loaded, only vendors) ────────
-            'feature-vendor': [
-              './src/pages/vendor/VendorDashboard.tsx',
-              './src/pages/vendor/VendorAnalytics.tsx',
-              './src/pages/vendor/VendorBookings.tsx',
-              './src/pages/vendor/VendorSettings.tsx',
-              './src/pages/vendor/VendorOnboarding.tsx',
-            ],
           },
         },
       },
