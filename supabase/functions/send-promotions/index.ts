@@ -1,5 +1,4 @@
-import { createClient } from '../_shared/supabase.ts';
-import { createServiceClient } from '../_shared/supabase.ts';
+import { createClient, createServiceClient } from '../_shared/supabase.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
