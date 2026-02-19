@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QuickPropertySelector } from '@/components/owner/QuickPropertySelector';
 import { QuickCategoryGrid } from '@/components/owner/QuickCategoryGrid';
 import { DragDropReceiptUpload } from '@/components/upload/DragDropReceiptUpload';
 import { VendorCombobox } from '@/components/owner/expense/VendorCombobox';
 import { VoiceInput } from '@/components/ui/voice-input';
-import { 
+import {
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
-  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp
+  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp, RefreshCw
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -52,11 +54,11 @@ export default function QuickExpense() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringInterval, setRecurringInterval] = useState('monthly');
 
   const handleCategorySuggestion = (suggestedCategory: string) => {
-    if (!category) {
-      setCategory(suggestedCategory);
-    }
+    if (!category) setCategory(suggestedCategory);
   };
 
   const handleVoiceTranscript = (transcript: string) => {
@@ -80,26 +82,23 @@ export default function QuickExpense() {
         status: 'completed',
         receipt_url: receiptUrl || undefined,
         vendor_name: vendorName || undefined,
+        recurring: isRecurring || undefined,
+        recurring_interval: isRecurring ? recurringInterval : undefined,
       });
-      
+
       setIsSuccess(true);
-      setTimeout(() => {
-        navigate('/owner/financials');
-      }, 1500);
+      setTimeout(() => navigate('/owner/financials'), 1500);
     } catch (error) {
-      errorHandler.error(error, { 
-        toastTitleRu: 'Ошибка при сохранении расхода', 
-        toastTitle: 'Error saving expense' 
+      errorHandler.error(error, {
+        toastTitleRu: 'Ошибка при сохранении расхода',
+        toastTitle: 'Error saving expense',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!user) {
-    navigate('/auth');
-    return null;
-  }
+  if (!user) { navigate('/auth'); return null; }
 
   if (isSuccess) {
     return (
@@ -108,12 +107,8 @@ export default function QuickExpense() {
           <div className="w-20 h-20 mx-auto rounded-full bg-success/20 flex items-center justify-center animate-in zoom-in-50">
             <Check className="h-10 w-10 text-success" />
           </div>
-          <h2 className="text-xl font-semibold">
-            {isRu ? 'Расход добавлен!' : 'Expense Added!'}
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            {isRu ? 'Перенаправляем...' : 'Redirecting...'}
-          </p>
+          <h2 className="text-xl font-semibold">{isRu ? 'Расход добавлен!' : 'Expense Added!'}</h2>
+          <p className="text-muted-foreground text-sm">{isRu ? 'Перенаправляем...' : 'Redirecting...'}</p>
         </div>
       </div>
     );
@@ -123,31 +118,19 @@ export default function QuickExpense() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Compact Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-9 w-9 shrink-0"
-            onClick={() => navigate(-1)}
-          >
+          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate(-1)}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-semibold truncate">
-              {isRu ? 'Быстрый расход' : 'Quick Expense'}
-            </h1>
-          </div>
+          <h1 className="font-semibold">{isRu ? 'Быстрый расход' : 'Quick Expense'}</h1>
         </div>
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Property Selection - Full width swipe */}
+        {/* Property */}
         <div>
-          <Label className="text-xs text-muted-foreground mb-1.5 block">
-            {isRu ? 'Объект' : 'Property'}
-          </Label>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Объект' : 'Property'}</Label>
           <QuickPropertySelector
             properties={properties || []}
             selectedId={selectedPropertyId}
@@ -156,13 +139,9 @@ export default function QuickExpense() {
           />
         </div>
 
-        {/* Amount - Large input with quick buttons */}
+        {/* Amount */}
         <div className="bg-card rounded-2xl p-4 border">
-          <Label className="text-xs text-muted-foreground mb-2 block">
-            {isRu ? 'Сумма' : 'Amount'}
-          </Label>
-          
-          {/* Quick Amount Chips */}
+          <Label className="text-xs text-muted-foreground mb-2 block">{isRu ? 'Сумма' : 'Amount'}</Label>
           <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide -mx-1 px-1 touch-pan-y">
             {QUICK_AMOUNTS.map(amt => (
               <Button
@@ -177,8 +156,6 @@ export default function QuickExpense() {
               </Button>
             ))}
           </div>
-          
-          {/* Large Amount Input */}
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-semibold text-muted-foreground">฿</span>
             <Input
@@ -192,18 +169,13 @@ export default function QuickExpense() {
           </div>
         </div>
 
-        {/* Category Grid - Compact */}
+        {/* Category */}
         <div>
-          <Label className="text-xs text-muted-foreground mb-1.5 block">
-            {isRu ? 'Категория' : 'Category'}
-          </Label>
-          <QuickCategoryGrid
-            selectedCategory={category}
-            onSelect={setCategory}
-          />
+          <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Категория' : 'Category'}</Label>
+          <QuickCategoryGrid selectedCategory={category} onSelect={setCategory} />
         </div>
 
-        {/* Payment Method - Inline */}
+        {/* Payment Method */}
         <div className="flex gap-2">
           {QUICK_PAYMENT_METHODS.map((method) => {
             const Icon = method.icon;
@@ -214,10 +186,7 @@ export default function QuickExpense() {
                 type="button"
                 variant={isSelected ? 'default' : 'outline'}
                 size="sm"
-                className={cn(
-                  'flex-1 h-10 gap-1.5',
-                  isSelected && 'ring-2 ring-primary ring-offset-2'
-                )}
+                className={cn('flex-1 h-10 gap-1.5', isSelected && 'ring-2 ring-primary ring-offset-2')}
                 onClick={() => setPaymentMethod(method.value)}
               >
                 <Icon className="h-4 w-4" />
@@ -227,13 +196,40 @@ export default function QuickExpense() {
           })}
         </div>
 
+        {/* Recurring toggle */}
+        <div className={cn(
+          'flex items-center justify-between p-3 rounded-xl border transition-colors',
+          isRecurring ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
+        )}>
+          <div className="flex items-center gap-2">
+            <RefreshCw className={cn('h-4 w-4', isRecurring ? 'text-primary' : 'text-muted-foreground')} />
+            <div>
+              <p className="text-sm font-medium">{isRu ? 'Повторяется' : 'Recurring'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Электричество, аренда...' : 'Electricity, rent...'}</p>
+            </div>
+          </div>
+          <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
+        </div>
+
+        {isRecurring && (
+          <Select value={recurringInterval} onValueChange={setRecurringInterval}>
+            <SelectTrigger className="h-10">
+              <RefreshCw className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="weekly">{isRu ? 'Еженедельно' : 'Weekly'}</SelectItem>
+              <SelectItem value="monthly">{isRu ? 'Ежемесячно' : 'Monthly'}</SelectItem>
+              <SelectItem value="quarterly">{isRu ? 'Ежеквартально' : 'Quarterly'}</SelectItem>
+              <SelectItem value="annual">{isRu ? 'Ежегодно' : 'Annually'}</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+
         {/* Collapsible Extras */}
         <Collapsible open={showExtras} onOpenChange={setShowExtras}>
           <CollapsibleTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="w-full h-10 text-muted-foreground hover:text-foreground gap-2"
-            >
+            <Button variant="ghost" className="w-full h-10 text-muted-foreground hover:text-foreground gap-2">
               {showExtras ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {isRu ? 'Дополнительно' : 'More details'}
               {(vendorName || description || receiptUrl) && (
@@ -242,23 +238,16 @@ export default function QuickExpense() {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 pt-2">
-            {/* Vendor */}
             <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 block">
-                {isRu ? 'Поставщик' : 'Vendor'}
-              </Label>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Поставщик' : 'Vendor'}</Label>
               <VendorCombobox
                 value={vendorName}
                 onChange={setVendorName}
                 onCategorySuggestion={handleCategorySuggestion}
               />
             </div>
-
-            {/* Description with Voice */}
             <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 block">
-                {isRu ? 'Описание' : 'Description'}
-              </Label>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Описание' : 'Description'}</Label>
               <div className="flex gap-2">
                 <Textarea
                   placeholder={isRu ? 'Что купили?' : 'What was purchased?'}
@@ -267,20 +256,13 @@ export default function QuickExpense() {
                   rows={2}
                   className="flex-1 text-sm resize-none"
                 />
-                <VoiceInput
-                  onTranscript={handleVoiceTranscript}
-                  className="self-end shrink-0"
-                />
+                <VoiceInput onTranscript={handleVoiceTranscript} className="self-end shrink-0" />
               </div>
             </div>
-
-            {/* Receipt Photo */}
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">
                 <Camera className="h-3.5 w-3.5 text-muted-foreground" />
-                <Label className="text-xs text-muted-foreground">
-                  {isRu ? 'Фото чека' : 'Receipt'}
-                </Label>
+                <Label className="text-xs text-muted-foreground">{isRu ? 'Фото чека' : 'Receipt'}</Label>
               </div>
               <DragDropReceiptUpload
                 value={receiptUrl}
@@ -294,23 +276,16 @@ export default function QuickExpense() {
         </Collapsible>
       </div>
 
-      {/* Sticky Bottom Button */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t safe-area-bottom">
-        <Button 
-          className="w-full h-12 text-base font-semibold shadow-lg" 
+        <Button
+          className="w-full h-12 text-base font-semibold shadow-lg"
           disabled={!canSubmit || isSubmitting}
           onClick={handleSubmit}
         >
           {isSubmitting ? (
-            <>
-              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-              {isRu ? 'Сохранение...' : 'Saving...'}
-            </>
+            <><Loader2 className="h-5 w-5 mr-2 animate-spin" />{isRu ? 'Сохранение...' : 'Saving...'}</>
           ) : (
-            <>
-              <Receipt className="h-5 w-5 mr-2" />
-              {isRu ? 'Записать' : 'Save'} {amount ? `฿${parseInt(amount).toLocaleString()}` : ''}
-            </>
+            <><Receipt className="h-5 w-5 mr-2" />{isRu ? 'Записать' : 'Save'} {amount ? `฿${parseInt(amount).toLocaleString()}` : ''}</>
           )}
         </Button>
       </div>

@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   Plus, ArrowUpCircle, ArrowDownCircle, Receipt, 
-  Zap, Download, Loader2, Building, BarChart3, TrendingUp
+  Zap, Download, Loader2, Building, BarChart3, TrendingUp, CalendarClock
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
@@ -35,7 +35,7 @@ import { ReceiptViewer } from '@/components/owner/ReceiptViewer';
 import { FinancialStatsCards } from '@/components/owner/financials/FinancialStatsCards';
 import { TransactionCard } from '@/components/owner/financials/TransactionCard';
 import { ExpenseTemplates } from '@/components/owner/expense/ExpenseTemplates';
-
+import { CashFlowForecast } from '@/components/owner/financials/CashFlowForecast';
 
 export default function OwnerFinancials() {
   const { language } = useLanguage();
@@ -45,7 +45,7 @@ export default function OwnerFinancials() {
 
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'all' | 'income' | 'expense'>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'charts'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'charts' | 'forecast'>('list');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewReceiptUrl, setViewReceiptUrl] = useState<string | null>(null);
   const [datePreset, setDatePreset] = useState<DatePreset>('all_time');
@@ -170,9 +170,12 @@ export default function OwnerFinancials() {
         <Button variant={viewMode === 'charts' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('charts')}>
           <BarChart3 className="h-4 w-4 mr-2" />{isRu ? 'Графики' : 'Charts'}
         </Button>
+        <Button variant={viewMode === 'forecast' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('forecast')}>
+          <CalendarClock className="h-4 w-4 mr-2" />{isRu ? 'Прогноз' : 'Forecast'}
+        </Button>
       </div>
 
-      <FinancialStatsCards stats={stats} isRu={isRu} />
+      {viewMode !== 'forecast' && <FinancialStatsCards stats={stats} isRu={isRu} />}
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -196,6 +199,10 @@ export default function OwnerFinancials() {
           <Download className="h-4 w-4" />
         </Button>
       </div>
+
+      {viewMode === 'forecast' && (
+        <CashFlowForecast propertyId={selectedProperty === 'all' ? undefined : selectedProperty} />
+      )}
 
       {viewMode === 'charts' && financials && (
         <FinancialCharts financials={financials} dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined} />
