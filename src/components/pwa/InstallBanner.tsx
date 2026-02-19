@@ -19,7 +19,7 @@ export function InstallBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { isInstalled, canInstall, isIOS, isAndroid, install } = usePWAInstall();
+  const { isInstalled, canInstall, isIOS, isAndroid, isMobile, install } = usePWAInstall();
   const { trackInstall } = usePWATracking();
   const isMobileViewport = useIsMobile();
   const { language } = useLanguage();
@@ -32,8 +32,10 @@ export function InstallBanner() {
       setIsVisible(false); return;
     }
     if (dismissedAt) localStorage.removeItem(BANNER_DISMISSED_KEY);
-    setIsVisible(isMobileViewport || isIOS || isAndroid);
-  }, [isMobileViewport, isInstalled, isIOS, isAndroid]);
+    // Show on any mobile device: PWA context detection OR viewport < 768px
+    const shouldShow = isMobile || isIOS || isAndroid || isMobileViewport;
+    setIsVisible(shouldShow);
+  }, [isMobileViewport, isInstalled, isIOS, isAndroid, isMobile]);
 
   const handleDismiss = () => {
     localStorage.setItem(BANNER_DISMISSED_KEY, Date.now().toString());

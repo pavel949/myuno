@@ -20,6 +20,7 @@ import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { DiscoverCTABanner } from '@/components/home/DiscoverCTABanner';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
+import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
@@ -66,6 +67,11 @@ const Index = () => {
       )}
 
       <ActiveSituationBanner />
+
+      {/* ─── PWA Install Banner ─── */}
+      <div className="px-4 md:px-6 lg:px-8 pt-3 w-full max-w-7xl mx-auto">
+        <InstallBanner />
+      </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 py-5 pb-20 md:pb-8 w-full max-w-7xl mx-auto space-y-6 lg:space-y-12">

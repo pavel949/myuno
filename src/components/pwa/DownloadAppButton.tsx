@@ -67,6 +67,10 @@ export function DownloadAppButton() {
       }
       setInstallState('idle');
     }
+    // iOS or no native prompt — redirect to install guide page
+    if (!canInstall) {
+      window.location.href = '/install';
+    }
   };
 
   return (
