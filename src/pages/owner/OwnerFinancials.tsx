@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { 
   usePropertyFinancialsPaginated, 
   useFinancialStats,
@@ -25,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   Plus, ArrowUpCircle, ArrowDownCircle, Receipt, 
-  Zap, Download, Loader2, Building, BarChart3
+  Zap, Download, Loader2, Building, BarChart3, TrendingUp
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
@@ -33,6 +34,8 @@ import { FinancialCharts } from '@/components/owner/FinancialCharts';
 import { ReceiptViewer } from '@/components/owner/ReceiptViewer';
 import { FinancialStatsCards } from '@/components/owner/financials/FinancialStatsCards';
 import { TransactionCard } from '@/components/owner/financials/TransactionCard';
+import { ExpenseTemplates } from '@/components/owner/expense/ExpenseTemplates';
+
 
 export default function OwnerFinancials() {
   const { language } = useLanguage();
@@ -50,7 +53,20 @@ export default function OwnerFinancials() {
     from: undefined, to: undefined,
   });
 
-  const { data: properties } = useOwnerProperties();
+  const { data: ownedProperties } = useOwnerProperties();
+  const { data: delegations } = useMyDelegations();
+
+  // Merge owned + delegated properties for the selector
+  const delegatedProperties = (delegations || [])
+    .filter(d => d.status === 'active' && (d.permissions as any)?.financials)
+    .map(d => d.property)
+    .filter(Boolean);
+
+  const allProperties = [
+    ...(ownedProperties || []),
+    ...delegatedProperties.filter(dp => !(ownedProperties || []).some(op => op.id === dp.id)),
+  ];
+
   const { data: financialsData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePropertyFinancialsPaginated(
     selectedProperty === 'all' ? undefined : selectedProperty
   );
@@ -138,8 +154,8 @@ export default function OwnerFinancials() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{isRu ? 'Все объекты' : 'All properties'}</SelectItem>
-            {properties?.map(p => (
-              <SelectItem key={p.id} value={p.id}>{isRu && p.title_ru ? p.title_ru : p.title}</SelectItem>
+            {allProperties?.map(p => (
+              <SelectItem key={p.id} value={p.id}>{isRu && (p as any).title_ru ? (p as any).title_ru : p.title}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -159,13 +175,23 @@ export default function OwnerFinancials() {
       <FinancialStatsCards stats={stats} isRu={isRu} />
 
       {/* Action Buttons */}
-      <div className="flex gap-2 mb-6">
-        <Button variant="default" className="flex-1" onClick={() => navigate('/owner/expenses/quick')}>
-          <Zap className="h-4 w-4 mr-2" />{isRu ? 'Быстрый расход' : 'Quick Expense'}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button variant="default" className="flex-1 min-w-0" onClick={() => navigate('/owner/expenses/quick')}>
+          <Zap className="h-4 w-4 mr-2" />{isRu ? 'Расход' : 'Expense'}
         </Button>
-        <Button variant="outline" className="flex-1" onClick={() => navigate('/owner/financials/new')}>
-          <Plus className="h-4 w-4 mr-2" />{isRu ? 'Добавить' : 'Add'}
+        <Button
+          variant="outline"
+          className="flex-1 min-w-0 border-success text-success hover:bg-success/10"
+          onClick={() => navigate(`/owner/income/quick${selectedProperty !== 'all' ? `?propertyId=${selectedProperty}` : ''}`)}
+        >
+          <TrendingUp className="h-4 w-4 mr-2" />{isRu ? 'Доход' : 'Income'}
         </Button>
+        <Button variant="outline" className="flex-1 min-w-0" onClick={() => navigate('/owner/financials/new')}>
+          <Plus className="h-4 w-4 mr-2" />{isRu ? 'Ещё' : 'More'}
+        </Button>
+        {selectedProperty !== 'all' && (
+          <ExpenseTemplates propertyId={selectedProperty} onApplied={() => {}} />
+        )}
         <Button variant="outline" size="icon" onClick={handleExportCSV} disabled={!filteredFinancials.length} title={isRu ? 'Экспорт CSV' : 'Export CSV'}>
           <Download className="h-4 w-4" />
         </Button>

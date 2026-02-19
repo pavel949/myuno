@@ -29,6 +29,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner/financials': { en: 'Financials', ru: 'Финансы' },
   '/owner/financials/new': { en: 'New Entry', ru: 'Новая запись' },
   '/owner/expenses/quick': { en: 'Quick Expense', ru: 'Быстрый расход' },
+  '/owner/income/quick': { en: 'Record Income', ru: 'Записать доход' },
   '/owner/portfolio': { en: 'Portfolio', ru: 'Портфолио' },
   '/owner/reviews': { en: 'Reviews', ru: 'Отзывы' },
   '/owner/superhost': { en: 'Superhost', ru: 'Суперхозяин' },
