@@ -2,8 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getAccessiblePropertyIds } from '@/hooks/usePropertyFinancials';
 
-export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom';
+export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management';
 export type ReportStatus = 'generating' | 'draft' | 'ready' | 'sent' | 'viewed' | 'error';
 
 export interface ReportData {
@@ -52,6 +53,8 @@ export interface ReportData {
     description: string;
   }>;
   net_income: number;
+  management_commission?: number;
+  owner_net_income?: number;
   roi_percent?: number;
   mom_change?: number;
   highlights?: string[];
@@ -92,7 +95,7 @@ export interface GenerateReportInput {
   period_end: string;
 }
 
-// Fetch reports for a property
+// Fetch reports for a property (owners + delegates with financials permission)
 export function usePropertyReports(propertyId?: string) {
   const { user } = useAuth();
 
@@ -107,11 +110,15 @@ export function usePropertyReports(propertyId?: string) {
           *,
           property:owner_properties(id, title, title_ru)
         `)
-        .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
       if (propertyId) {
         query = query.eq('property_id', propertyId);
+      } else {
+        // Load all accessible property IDs (owned + managed)
+        const ids = await getAccessiblePropertyIds(user.id);
+        if (ids.length === 0) return [];
+        query = query.in('property_id', ids);
       }
 
       const { data, error } = await query;
@@ -131,23 +138,31 @@ export function useGenerateReport() {
     mutationFn: async (input: GenerateReportInput) => {
       if (!user) throw new Error('Not authenticated');
 
-      // First, fetch financial data for the period
-      const { data: financials, error: finError } = await supabase
-        .from('property_financials')
-        .select('*')
-        .eq('property_id', input.property_id)
-        .gte('transaction_date', input.period_start)
-        .lte('transaction_date', input.period_end);
+      // Resolve the actual owner_id for the property (manager creates on behalf of owner)
+      const { data: prop, error: propError } = await supabase
+        .from('owner_properties')
+        .select('owner_id')
+        .eq('id', input.property_id)
+        .single();
+      if (propError) throw propError;
+      const ownerId = prop.owner_id;
+
+      // Fetch financial data for the period
+      const [{ data: financials, error: finError }, { data: bookings, error: bookError }] = await Promise.all([
+        supabase
+          .from('property_financials')
+          .select('*')
+          .eq('property_id', input.property_id)
+          .gte('transaction_date', input.period_start)
+          .lte('transaction_date', input.period_end),
+        supabase
+          .from('property_bookings')
+          .select('*')
+          .eq('property_id', input.property_id)
+          .or(`check_in_date.gte.${input.period_start},check_out_date.lte.${input.period_end}`),
+      ]);
 
       if (finError) throw finError;
-
-      // Fetch bookings for the period
-      const { data: bookings, error: bookError } = await supabase
-        .from('property_bookings')
-        .select('*')
-        .eq('property_id', input.property_id)
-        .or(`check_in_date.gte.${input.period_start},check_out_date.lte.${input.period_end}`);
-
       if (bookError) throw bookError;
 
       // Calculate report data
@@ -166,7 +181,7 @@ export function useGenerateReport() {
       (financials || []).forEach((f: any) => {
         if (f.transaction_type === 'income') {
           income.total += Number(f.amount);
-          income.by_category[f.category || 'other'] = 
+          income.by_category[f.category || 'other'] =
             (income.by_category[f.category || 'other'] || 0) + Number(f.amount);
           income.transactions.push({
             id: f.id,
@@ -177,7 +192,7 @@ export function useGenerateReport() {
           });
         } else if (f.transaction_type === 'expense') {
           expenses.total += Number(f.amount);
-          expenses.by_category[f.category || 'other'] = 
+          expenses.by_category[f.category || 'other'] =
             (expenses.by_category[f.category || 'other'] || 0) + Number(f.amount);
           expenses.transactions.push({
             id: f.id,
@@ -194,7 +209,7 @@ export function useGenerateReport() {
       const startDate = new Date(input.period_start);
       const endDate = new Date(input.period_end);
       const totalNights = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+
       let nightsBooked = 0;
       (bookings || []).forEach((b: any) => {
         const checkIn = new Date(b.check_in_date);
@@ -202,6 +217,11 @@ export function useGenerateReport() {
         const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
         nightsBooked += nights;
       });
+
+      // Management commission (expenses in category 'management_fee' or 'commission')
+      const mgmtCommission = expenses.transactions
+        .filter(t => t.category === 'management_fee' || t.category === 'commission')
+        .reduce((sum, t) => sum + t.amount, 0);
 
       const reportData: ReportData = {
         income,
@@ -230,6 +250,8 @@ export function useGenerateReport() {
             description: t.description,
           })),
         net_income: income.total - expenses.total,
+        management_commission: mgmtCommission,
+        owner_net_income: income.total - expenses.total,
       };
 
       // Create the report
@@ -237,7 +259,7 @@ export function useGenerateReport() {
         .from('property_reports')
         .insert({
           property_id: input.property_id,
-          owner_id: user.id,
+          owner_id: ownerId,
           generated_by: user.id,
           report_type: input.report_type,
           period_start: input.period_start,
@@ -328,6 +350,7 @@ export function useGeneratePdf() {
         data: report.data,
         language,
         currency: 'THB',
+        isManagement: report.report_type === 'management',
       }, `report-${report.property?.title?.replace(/\s+/g, '-') || 'property'}-${report.period_start}.pdf`);
       
       return { success: true };
