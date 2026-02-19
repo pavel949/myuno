@@ -303,7 +303,6 @@ Deno.serve(async (req) => {
       from: 'UNO Orders <orders@resend.dev>',
       to: ADMIN_EMAILS,
       subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
-      subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
       html: emailHtml,
     });
 
