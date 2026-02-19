@@ -167,6 +167,7 @@ export function useUserTracking() {
       await supabase
         .from('user_events')
         .insert([{
+          user_id: userId,
           event_type: eventType,
           event_name: eventName,
           event_category: eventCategory,

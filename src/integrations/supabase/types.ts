@@ -19130,6 +19130,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vertical_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          notify_email: boolean
+          notify_push: boolean
+          updated_at: string
+          user_id: string
+          vertical_slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notify_email?: boolean
+          notify_push?: boolean
+          updated_at?: string
+          user_id: string
+          vertical_slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notify_email?: boolean
+          notify_push?: boolean
+          updated_at?: string
+          user_id?: string
+          vertical_slug?: string
+        }
+        Relationships: []
+      }
       veterinary_clinics: {
         Row: {
           address: string | null

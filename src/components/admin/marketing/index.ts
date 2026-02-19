@@ -17,3 +17,4 @@ export { CampaignCard } from './CampaignCard';
 export { ABVariantManager } from './ABVariantManager';
 export { ABVariantEditorModal } from './ABVariantEditorModal';
 export { ABVariantPerformancePanel } from './ABVariantPerformancePanel';
+export { MCCBroadcastPanel } from './MCCBroadcastPanel';

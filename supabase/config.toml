@@ -104,3 +104,7 @@ verify_jwt = false
 
 [functions.enrich-projects]
 verify_jwt = false
+
+[functions.update-user-segments]
+verify_jwt = false
+

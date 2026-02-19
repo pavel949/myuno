@@ -1,4 +1,5 @@
 import { createClient } from '../_shared/supabase.ts';
+import { createServiceClient } from '../_shared/supabase.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,11 +15,21 @@ interface PromotionPayload {
   discount?: number;
   valid_until?: string;
   category?: string;
-  target_users?: 'all' | 'subscribed' | 'active';
+  channel?: 'inapp' | 'email';
+  segment_filter?: 
+    | 'all'
+    | 'new'
+    | 'active'
+    | 'at_risk'
+    | 'dormant'
+    | 'churned'
+    | 'vip'
+    | 'high'
+    | 'mid'
+    | 'low';
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -29,35 +40,72 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const payload: PromotionPayload = await req.json();
-    
-    console.log('Sending promotion:', payload);
+    const segmentFilter = payload.segment_filter || 'all';
 
-    // Get users who have promotions enabled
-    const { data: preferences, error: prefError } = await supabase
-      .from('notification_preferences')
-      .select('user_id')
-      .eq('promotions', true);
+    console.log('Sending promotion with segment filter:', segmentFilter);
 
-    if (prefError) {
-      console.error('Error fetching preferences:', prefError);
-      throw prefError;
+    // Get eligible user IDs based on segment filter
+    let userIds: string[] = [];
+
+    if (segmentFilter === 'all') {
+      // All users with promotions enabled
+      const { data: preferences, error: prefError } = await supabase
+        .from('notification_preferences')
+        .select('user_id')
+        .eq('promotions', true);
+      if (prefError) throw prefError;
+      userIds = preferences?.map(p => p.user_id) || [];
+    } else {
+      // Filter by user segment
+      const lifecycleStages = ['new', 'active', 'at_risk', 'dormant', 'churned'];
+      const isLifecycle = lifecycleStages.includes(segmentFilter);
+      const isVip = segmentFilter === 'vip';
+
+      let segmentQuery = supabase
+        .from('user_segments')
+        .select('user_id');
+
+      if (isLifecycle) {
+        segmentQuery = segmentQuery.eq('lifecycle_stage', segmentFilter);
+      } else if (isVip) {
+        segmentQuery = segmentQuery.eq('is_vip', true);
+      } else {
+        // value segment: high, mid, low
+        segmentQuery = segmentQuery.eq('value_segment', segmentFilter);
+      }
+
+      const { data: segments, error: segError } = await segmentQuery;
+      if (segError) throw segError;
+
+      const segmentUserIds = segments?.map(s => s.user_id) || [];
+
+      if (segmentUserIds.length === 0) {
+        return new Response(
+          JSON.stringify({ success: true, sent: 0, message: 'No users in this segment' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Cross with notification preferences
+      const { data: prefs } = await supabase
+        .from('notification_preferences')
+        .select('user_id')
+        .eq('promotions', true)
+        .in('user_id', segmentUserIds);
+
+      userIds = prefs?.map(p => p.user_id) || segmentUserIds;
     }
 
-    const userIds = preferences?.map(p => p.user_id) || [];
-    console.log(`Found ${userIds.length} users with promotions enabled`);
+    console.log(`Found ${userIds.length} eligible users for segment: ${segmentFilter}`);
 
     if (userIds.length === 0) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          sent: 0, 
-          message: 'No users have promotions enabled' 
-        }),
+        JSON.stringify({ success: true, sent: 0, message: 'No users match the criteria' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create notifications for all eligible users
+    // Create in-app notifications
     const notifications = userIds.map(user_id => ({
       user_id,
       title: payload.title_ru || payload.title,
@@ -68,6 +116,7 @@ Deno.serve(async (req) => {
         discount: payload.discount,
         valid_until: payload.valid_until,
         category: payload.category,
+        segment_filter: segmentFilter,
       },
       is_read: false,
     }));
@@ -81,46 +130,56 @@ Deno.serve(async (req) => {
       throw insertError;
     }
 
-    console.log(`Created ${notifications.length} notifications`);
+    console.log(`Created ${notifications.length} in-app notifications`);
 
-    // Get push subscriptions for these users
-    const { data: subscriptions, error: subError } = await supabase
-      .from('push_subscriptions')
-      .select('*')
-      .in('user_id', userIds);
+    // Email channel via Resend (if requested)
+    let emailsSent = 0;
+    if (payload.channel === 'email') {
+      const resendKey = Deno.env.get('RESEND_API_KEY');
+      if (resendKey) {
+        // Get emails for these users from profiles
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email, first_name')
+          .in('id', userIds.slice(0, 100)); // Limit for safety
 
-    if (subError) {
-      console.error('Error fetching subscriptions:', subError);
+        for (const profile of profiles || []) {
+          if (!profile.email) continue;
+          try {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: 'UNO Platform <noreply@myuno.app>',
+                to: profile.email,
+                subject: payload.title_ru || payload.title,
+                html: `<p>Hi ${profile.first_name || ''},</p><p>${payload.body_ru || payload.body}</p>${payload.promo_code ? `<p><strong>Promo code: ${payload.promo_code}</strong></p>` : ''}`,
+              }),
+            });
+            emailsSent++;
+          } catch (emailErr) {
+            console.error(`Email error for ${profile.email}:`, emailErr);
+          }
+        }
+      }
     }
-
-    const pushCount = subscriptions?.length || 0;
-    console.log(`Found ${pushCount} push subscriptions`);
-
-    // Note: Actual push notification sending would require web-push library
-    // and VAPID keys. For now, we create in-app notifications.
 
     return new Response(
       JSON.stringify({
         success: true,
         sent: notifications.length,
-        push_eligible: pushCount,
-        message: `Promotion sent to ${notifications.length} users`,
+        emails_sent: emailsSent,
+        segment: segmentFilter,
+        message: `Promotion sent to ${notifications.length} users in segment: ${segmentFilter}`,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
     console.error('Error sending promotions:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: errorMessage 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      JSON.stringify({ success: false, error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

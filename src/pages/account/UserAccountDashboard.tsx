@@ -12,6 +12,7 @@ import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AchievementShowcase } from '@/components/gamification/AchievementShowcase';
 import { ActivityPulse } from '@/components/home/ActivityPulse';
+import { VerticalSubscriptions } from '@/components/account/VerticalSubscriptions';
 
 export default function UserAccountDashboard() {
   const navigate = useNavigate();
@@ -46,6 +47,11 @@ export default function UserAccountDashboard() {
 
         {/* Menu */}
         <AccountFlatMenu />
+
+        <Separator className="bg-border/50" />
+
+        {/* Category Subscriptions */}
+        <VerticalSubscriptions />
 
         <Separator className="bg-border/50" />
 
