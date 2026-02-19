@@ -78,7 +78,7 @@ export default function ManagementPortfolio() {
   const { data: allTerms, isLoading } = useAllManagementTerms();
 
   const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'missing'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'draft' | 'archived'>('all');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedTerms, setSelectedTerms] = useState<ManagementTerms | undefined>(undefined);
@@ -88,9 +88,7 @@ export default function ManagementPortfolio() {
     return allTerms.filter(t => {
       const title = t.property?.title || t.property?.title_ru || '';
       const matchSearch = !search || title.toLowerCase().includes(search.toLowerCase());
-      const matchStatus =
-        filterStatus === 'all' ||
-        (filterStatus === 'missing' ? !t.status : t.status === filterStatus);
+      const matchStatus = filterStatus === 'all' || t.status === filterStatus;
       return matchSearch && matchStatus;
     });
   }, [allTerms, search, filterStatus]);
@@ -173,6 +171,13 @@ export default function ManagementPortfolio() {
           onClick={() => setFilterStatus('draft')}
         >
           {isRu ? 'Черновики' : 'Drafts'}
+        </Button>
+        <Button
+          variant={filterStatus === 'archived' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterStatus('archived')}
+        >
+          {isRu ? 'Архив' : 'Archived'}
         </Button>
       </div>
 
@@ -289,8 +294,8 @@ export default function ManagementPortfolio() {
         </div>
       )}
 
-      {/* Empty state CTA */}
-      {!isLoading && filtered.length === 0 && search === '' && (
+      {/* Empty state CTA — only when no data at all, not when filtered */}
+      {!isLoading && (allTerms?.length ?? 0) === 0 && (
         <div className="text-center mt-4">
           <Button
             variant="outline"

@@ -20,7 +20,6 @@ import {
   Eye,
   DollarSign,
   CalendarDays,
-  MoreVertical
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -157,12 +156,16 @@ export default function TeamPage() {
                         <p className="text-sm text-muted-foreground truncate">
                           {delegate.invited_email}
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            Property
-                          </span>
-                        </div>
+                        {delegate.property_id && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground truncate">
+                              {isRu
+                                ? ((delegate as any).property?.title_ru || (delegate as any).property?.title || delegate.property_id)
+                                : ((delegate as any).property?.title || (delegate as any).property?.title_ru || delegate.property_id)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1">
                         <PermissionIcon permission="view" enabled={delegate.permissions?.view} />
@@ -217,7 +220,9 @@ export default function TeamPage() {
                         </div>
                         <p className="text-sm mb-2">
                           {isRu ? 'От: ' : 'From: '}
-                          <span className="font-medium">{request.requester_id}</span>
+                          <span className="font-medium">
+                            {request.requester?.email || request.target_email || request.requester_id}
+                          </span>
                         </p>
                         {request.message && (
                           <p className="text-sm text-muted-foreground italic">

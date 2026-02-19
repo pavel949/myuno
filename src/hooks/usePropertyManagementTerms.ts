@@ -188,7 +188,7 @@ export function useDeleteManagementTerms() {
     onSuccess: ({ propertyId }: { id: string; propertyId: string }) => {
       queryClient.invalidateQueries({ queryKey: ['management-terms', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['management-terms-all'] });
-      toast.success('Terms deleted');
+      toast.success('Условия управления удалены');
     },
   });
 }
