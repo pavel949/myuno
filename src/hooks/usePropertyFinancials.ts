@@ -67,7 +67,7 @@ export const EXPENSE_CATEGORIES = [
   { value: 'income_tax', labelEn: 'Income Tax', labelRu: 'Налог на доход' },
   { value: 'management_fee', labelEn: 'Management Fee', labelRu: 'Комиссия управляющего' },
   { value: 'platform_fee', labelEn: 'Platform Commission', labelRu: 'Комиссия платформы' },
-  { value: 'supplies', labelEn: 'Supplies & Amenities', labelRu: 'Расходники и амениту' },
+  { value: 'supplies', labelEn: 'Supplies & Amenities', labelRu: 'Расходники и аменити' },
   { value: 'shopping', labelEn: 'Shopping', labelRu: 'Закупки' },
   { value: 'furniture', labelEn: 'Furniture', labelRu: 'Мебель' },
   { value: 'appliances', labelEn: 'Appliances', labelRu: 'Бытовая техника' },
@@ -351,6 +351,9 @@ export function useUpdateFinancial() {
       queryClient.invalidateQueries({ queryKey: ['property-care-stats'] });
       toast.success('Транзакция обновлена!');
     },
+    onError: (error: Error) => {
+      toast.error('Ошибка обновления: ' + error.message);
+    },
   });
 }
 
@@ -369,9 +372,14 @@ export function useDeleteFinancial() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-financials'] });
       queryClient.invalidateQueries({ queryKey: ['property-financials-full'] });
+      queryClient.invalidateQueries({ queryKey: ['property-financials-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['property-financials-count'] });
       queryClient.invalidateQueries({ queryKey: ['financial-stats'] });
       queryClient.invalidateQueries({ queryKey: ['property-care-stats'] });
       toast.success('Транзакция удалена!');
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка удаления: ' + error.message);
     },
   });
 }

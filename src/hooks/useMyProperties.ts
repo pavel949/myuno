@@ -83,7 +83,8 @@ export function useMyProperties() {
     const hasManaged = managedProperties.length > 0 || isManager;
     if (hasOwned && hasManaged) return 'both';
     if (hasManaged) return 'manager';
-    return 'owner';
+    if (hasOwned) return 'owner';
+    return 'owner'; // default fallback when user has neither role yet
   }, [ownedProperties, managedProperties, isOwner, isManager]);
 
   return {

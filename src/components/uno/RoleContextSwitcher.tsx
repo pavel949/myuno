@@ -4,7 +4,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import type { AppRole } from '@/types/auth';
 import { ROLE_METADATA } from '@/types/auth';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -159,10 +158,13 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative" disabled={isSwitching}>
+          <button
+            className="relative inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 transition-colors"
+            disabled={isSwitching}
+          >
             <CurrentIcon className="h-5 w-5" />
             <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${currentConfig.color}`} />
-          </Button>
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
@@ -200,9 +202,8 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2 h-10"
+        <button 
+          className="flex items-center gap-2 h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50"
           disabled={isSwitching}
         >
           <div className={`p-1 rounded ${currentConfig.color}`}>
@@ -212,7 +213,7 @@ export function RoleContextSwitcher({ compact = false }: RoleContextSwitcherProp
             {isRussian ? currentConfig.labelRu : currentConfig.labelEn}
           </span>
           <ChevronDown className="h-4 w-4 opacity-50" />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="flex items-center justify-between">
