@@ -119,6 +119,10 @@ export function useUpdateStaffMember() {
       queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
       toast.success('Данные сотрудника обновлены');
     },
+    onError: (e) => {
+      console.error(e);
+      toast.error('Ошибка при обновлении сотрудника');
+    },
   });
 }
 

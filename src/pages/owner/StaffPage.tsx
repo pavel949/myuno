@@ -2,19 +2,29 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
@@ -119,6 +129,7 @@ export default function StaffPage() {
   const [editing, setEditing] = useState<StaffMember | null>(null);
   const [form, setForm] = useState<StaffFormState>(DEFAULT_FORM);
   const [tab, setTab] = useState<'active' | 'all'>('active');
+  const [deactivateTarget, setDeactivateTarget] = useState<StaffMember | null>(null);
 
   const shown = (staff ?? []).filter(s =>
     tab === 'active' ? s.is_active : true
@@ -150,12 +161,16 @@ export default function StaffPage() {
       is_active: form.is_active,
     };
 
-    if (editing) {
-      await updateMutation.mutateAsync({ id: editing.id, ...payload });
-    } else {
-      await createMutation.mutateAsync(payload);
+    try {
+      if (editing) {
+        await updateMutation.mutateAsync({ id: editing.id, ...payload });
+      } else {
+        await createMutation.mutateAsync(payload);
+      }
+      setSheetOpen(false);
+    } catch {
+      // errors are handled by mutation onError callbacks
     }
-    setSheetOpen(false);
   };
 
   const isBusy = createMutation.isPending || updateMutation.isPending;
@@ -270,7 +285,7 @@ export default function StaffPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => deactivateMutation.mutate(s.id)}
+                          onClick={() => setDeactivateTarget(s)}
                           className="text-muted-foreground hover:text-destructive"
                         >
                           <UserX className="h-4 w-4" />
@@ -389,6 +404,17 @@ export default function StaffPage() {
                 />
               </div>
             )}
+            {form.pay_type === 'per_task' && (
+              <div>
+                <Label>{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
+                <Input
+                  type="number"
+                  value={form.daily_rate}
+                  onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))}
+                  placeholder="500"
+                />
+              </div>
+            )}
 
             <div>
               <Label>{t('Notes', 'Примечания')}</Label>
@@ -410,6 +436,35 @@ export default function StaffPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Deactivation confirm dialog */}
+      <AlertDialog open={!!deactivateTarget} onOpenChange={open => { if (!open) setDeactivateTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Deactivate Staff Member?', 'Деактивировать сотрудника?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                `${deactivateTarget?.name} will be marked as inactive and hidden from active lists.`,
+                `${deactivateTarget?.name} будет помечен как неактивный и скрыт из активных списков.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('Cancel', 'Отмена')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deactivateTarget) {
+                  deactivateMutation.mutate(deactivateTarget.id);
+                  setDeactivateTarget(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('Deactivate', 'Деактивировать')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
