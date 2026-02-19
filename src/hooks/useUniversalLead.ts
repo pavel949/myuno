@@ -35,7 +35,7 @@ export interface UniversalLeadInput {
   notes?: string;
 }
 
-// Verticals that should trigger WhatsApp notifications
+// Verticals that trigger WhatsApp notifications (home_services goes via dedicated function, others via notify-admin-order)
 const WHATSAPP_NOTIFICATION_VERTICALS = ['home_services'];
 
 export function useUniversalLead() {
