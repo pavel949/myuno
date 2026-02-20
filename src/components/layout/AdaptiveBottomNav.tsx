@@ -170,7 +170,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                 className={cn(
                   "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
                   active
-                    ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(210,35%,55%)] shadow-md scale-105"
+                    ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
                 )}
               >
