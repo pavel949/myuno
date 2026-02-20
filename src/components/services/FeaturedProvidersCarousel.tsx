@@ -40,7 +40,7 @@ export function FeaturedProvidersCarousel() {
       <div className="px-4">
         <UnifiedSectionHeader
           icon={Star}
-          iconColor="text-amber-500"
+          iconColor="text-primary"
           title={isRu ? 'Топ мастера' : 'Top Professionals'}
           viewAllPath="/services?sort=rating"
           viewAllLabel={isRu ? 'Все' : 'All'}
@@ -78,7 +78,7 @@ export function FeaturedProvidersCarousel() {
               {/* Rating */}
               {provider.rating && (
                 <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <Star className="w-3.5 h-3.5 fill-primary text-primary" />
                   <span className="text-xs font-bold">{provider.rating.toFixed(1)}</span>
                   {provider.review_count && (
                     <span className="text-[10px] text-muted-foreground">({provider.review_count})</span>
@@ -98,7 +98,7 @@ export function FeaturedProvidersCarousel() {
               <div className="flex items-center gap-1 mt-1.5 text-muted-foreground">
                 <Users className="w-3 h-3" />
                 <span className="text-[10px]">
-                  {Math.floor(Math.random() * 50 + 20)}+ {isRu ? 'клиентов' : 'clients'}
+                  {(provider.review_count ?? 0) + 20}+ {isRu ? 'клиентов' : 'clients'}
                 </span>
               </div>
               
@@ -116,7 +116,7 @@ export function FeaturedProvidersCarousel() {
                   </Badge>
                 )}
                 {provider.has_guarantee && (
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground">
                     {isRu ? 'Гарантия' : 'Guaranteed'}
                   </Badge>
                 )}

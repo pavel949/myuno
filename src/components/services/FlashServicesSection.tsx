@@ -69,8 +69,8 @@ export function FlashServicesSection() {
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center animate-pulse">
-              <Flame className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-destructive to-destructive/70 flex items-center justify-center animate-pulse">
+              <Flame className="w-4 h-4 text-destructive-foreground" />
             </div>
             <div>
               <h2 className="font-bold text-foreground">
@@ -129,9 +129,9 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
   
   // Urgency badge variations
   const urgencyBadges = [
-    { label: isRu ? 'Последние места' : 'Last spots', color: 'bg-red-500' },
-    { label: isRu ? 'Популярно' : 'Popular', color: 'bg-amber-500' },
-    { label: isRu ? 'Выбор дня' : "Today's pick", color: 'bg-emerald-500' },
+    { label: isRu ? 'Последние места' : 'Last spots', color: 'bg-destructive' },
+    { label: isRu ? 'Популярно' : 'Popular', color: 'bg-primary' },
+    { label: isRu ? 'Выбор дня' : "Today's pick", color: 'bg-secondary text-secondary-foreground' },
   ];
   const urgency = urgencyBadges[index % 3];
 
@@ -200,7 +200,7 @@ function FlashServiceCard({ service, index, onClick }: FlashServiceCardProps) {
             </span>
             {service.rating && (
             <div className="flex items-center gap-0.5">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <Star className="w-3 h-3 fill-primary text-primary" />
               <span className="text-[10px] font-medium">{service.rating}</span>
             </div>
             )}
