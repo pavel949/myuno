@@ -32,12 +32,12 @@ function SectionSkeleton() {
 }
 
 /** Maps widget keys to their React components */
-function DashboardWidget({ widgetKey }: { widgetKey: DashboardWidgetKey }) {
+function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; role?: import('@/lib/businessRoles').BusinessRole }) {
   switch (widgetKey) {
     case 'kpi':
       return (
         <Suspense fallback={<SectionSkeleton />}>
-          <BusinessKPIWidget />
+          <BusinessKPIWidget role={role} />
         </Suspense>
       );
     case 'invites':
@@ -150,7 +150,7 @@ export default function OwnerDashboard() {
       {config.widgets.map((widgetKey, idx) => (
         <div key={widgetKey}>
           {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && <Separator className="mb-6" />}
-          <DashboardWidget widgetKey={widgetKey} />
+          <DashboardWidget widgetKey={widgetKey} role={role} />
         </div>
       ))}
     </div>

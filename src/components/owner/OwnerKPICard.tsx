@@ -14,6 +14,7 @@ interface OwnerKPICardProps {
   href?: string;
   loading?: boolean;
   badge?: React.ReactNode;
+  compact?: boolean;
 }
 
 export function OwnerKPICard({
@@ -27,6 +28,7 @@ export function OwnerKPICard({
   href,
   loading = false,
   badge,
+  compact = false,
 }: OwnerKPICardProps) {
   const navigate = useNavigate();
 
@@ -45,13 +47,43 @@ export function OwnerKPICard({
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-muted" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-16 bg-muted rounded" />
-              <div className="h-6 w-12 bg-muted rounded" />
+      <Card className={cn("animate-pulse", compact && "min-w-[120px]")}>
+        <CardContent className={compact ? "p-3" : "p-4"}>
+          <div className="flex items-center gap-2">
+            <div className={cn("rounded-lg bg-muted", compact ? "w-8 h-8" : "w-10 h-10")} />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3 w-12 bg-muted rounded" />
+              <div className={cn("bg-muted rounded", compact ? "h-5 w-8" : "h-6 w-12")} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (compact) {
+    return (
+      <Card
+        className={cn(
+          "min-w-[120px] transition-all duration-200 flex-shrink-0",
+          href && "cursor-pointer hover:shadow-md hover:border-primary/30"
+        )}
+        onClick={handleClick}
+      >
+        <CardContent className="p-3">
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              "p-1.5 rounded-lg bg-muted/80",
+              iconColor.replace('text-', 'bg-').replace(/(\w+)$/, '$1/10')
+            )}>
+              <Icon className={cn("h-4 w-4", iconColor)} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground truncate leading-tight">{title}</p>
+              <div className="flex items-baseline gap-1">
+                <p className="text-sm font-bold">{value}</p>
+                {badge}
+              </div>
             </div>
           </div>
         </CardContent>
