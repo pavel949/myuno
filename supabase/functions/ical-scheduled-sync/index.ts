@@ -84,13 +84,11 @@ function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
       }
       currentEvent = null;
     } else if (currentEvent) {
-      // Parse property:value or property;params:value
       const colonIndex = line.indexOf(':');
       if (colonIndex > 0) {
         let propName = line.slice(0, colonIndex);
         const propValue = line.slice(colonIndex + 1);
         
-        // Remove parameters from property name (e.g., DTSTART;VALUE=DATE)
         const semiIndex = propName.indexOf(';');
         if (semiIndex > 0) {
           propName = propName.slice(0, semiIndex);
@@ -118,6 +116,87 @@ function detectChannelType(url: string, name: string): string {
   return 'other';
 }
 
+// Create or update an order for an external calendar event (unified orders table)
+async function upsertOrderForEvent(
+  supabase: any,
+  event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string; price?: number; guestCount?: number; location?: string; organizer?: string },
+  calendar: any,
+  existingOrderId?: string
+): Promise<string> {
+  const startAt = `${event.dtstart}T14:00:00Z`;
+  const endAt = `${event.dtend}T12:00:00Z`;
+
+  // Build notes from available info
+  const notesParts = [];
+  if (event.description) notesParts.push(event.description);
+  if (event.location) notesParts.push(`Location: ${event.location}`);
+  if (event.organizer) notesParts.push(`Contact: ${event.organizer}`);
+  notesParts.push(`Synced from ${calendar.name}`);
+
+  const orderData = {
+    order_type: 'property',
+    vertical: 'property',
+    start_at: startAt,
+    end_at: endAt,
+    status: 'confirmed',
+    notes: notesParts.join('\n'),
+    metadata: {
+      source: 'ical',
+      source_calendar_id: calendar.id,
+      source_calendar_name: calendar.name,
+      external_id: event.uid,
+      guest_name: event.summary || 'External Booking',
+      channel_type: detectChannelType(calendar.ical_url, calendar.name),
+      sync_priority: calendar.priority || 0,
+    },
+  };
+
+  if (existingOrderId) {
+    await supabase
+      .from('orders')
+      .update(orderData)
+      .eq('id', existingOrderId);
+    return existingOrderId;
+  } else {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .insert(orderData)
+      .select('id')
+      .single();
+
+    if (error) throw error;
+
+    // Create order_item linking to property
+    await supabase
+      .from('order_items')
+      .insert({
+        order_id: order.id,
+        item_type: 'property',
+        item_name: event.summary || 'External Booking',
+        qty: 1,
+        unit_price: event.price || 0,
+        amount: event.price || 0,
+        start_at: startAt,
+        end_at: endAt,
+        metadata: {
+          property_id: calendar.property_id,
+          guest_count: event.guestCount,
+        },
+      });
+
+    // Create guest participant
+    await supabase
+      .from('order_participants')
+      .insert({
+        order_id: order.id,
+        role: 'guest',
+        name: event.summary || 'External Booking',
+      });
+
+    return order.id;
+  }
+}
+
 // Sync a single calendar with detailed logging
 async function syncCalendar(
   supabase: any,
@@ -129,21 +208,18 @@ async function syncCalendar(
   eventsAdded: number;
   eventsUpdated: number;
   eventsRemoved: number;
-  newBookingIds: string[];
+  newOrderIds: string[];
   error?: string;
   durationMs: number;
 }> {
   const startTime = Date.now();
-  const newBookingIds: string[] = [];
+  const newOrderIds: string[] = [];
   
   try {
     console.log(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
     
-    // Fetch iCal content
     const response = await fetch(calendar.ical_url, {
-      headers: {
-        'User-Agent': 'UNO Calendar Sync/2.0',
-      },
+      headers: { 'User-Agent': 'UNO Calendar Sync/2.0' },
     });
 
     if (!response.ok) {
@@ -155,84 +231,55 @@ async function syncCalendar(
     
     console.log(`Parsed ${events.length} events from ${calendar.name}`);
 
-    // Get existing bookings from this calendar
-    const { data: existingBookings } = await supabase
-      .from('property_bookings')
-      .select('id, external_id')
-      .eq('property_id', calendar.property_id)
-      .eq('source_calendar_id', calendar.id);
+    // Get existing orders from this calendar (stored in metadata)
+    const { data: existingOrders } = await supabase
+      .from('orders')
+      .select('id, metadata')
+      .eq('vertical', 'property')
+      .is('deleted_at', null);
 
-    const existingIds = new Set((existingBookings || []).map((b: any) => b.external_id));
-    const existingMap = new Map((existingBookings || []).map((b: any) => [b.external_id, b.id]));
+    // Filter orders that came from this calendar
+    const calendarOrders = (existingOrders || []).filter((o: any) =>
+      o.metadata?.source_calendar_id === calendar.id
+    );
+
+    // Map external_id -> order.id
+    const existingIdMap = new Map<string, string>();
+    for (const order of calendarOrders) {
+      const extId = order.metadata?.external_id;
+      if (extId) existingIdMap.set(extId, order.id);
+    }
+
     const newEventIds = new Set(events.map(e => e.uid));
 
-    // Delete bookings that no longer exist in external calendar
-    const toDelete = (existingBookings || []).filter((b: any) => !newEventIds.has(b.external_id));
+    // Soft-delete orders that no longer exist in external calendar
+    const toDelete = calendarOrders.filter((o: any) =>
+      o.metadata?.external_id && !newEventIds.has(o.metadata.external_id)
+    );
     const eventsRemoved = toDelete.length;
-    
+
     if (toDelete.length > 0) {
       await supabase
-        .from('property_bookings')
-        .delete()
-        .in('id', toDelete.map((b: any) => b.id));
-      console.log(`Deleted ${toDelete.length} cancelled bookings`);
+        .from('orders')
+        .update({ deleted_at: new Date().toISOString() })
+        .in('id', toDelete.map((o: any) => o.id));
+      console.log(`Soft-deleted ${toDelete.length} cancelled bookings`);
     }
 
     // Insert or update events
     let eventsAdded = 0;
     let eventsUpdated = 0;
-    
+
     for (const event of events) {
       if (!event.dtstart || !event.dtend) continue;
 
-      const bookingData: any = {
-        property_id: calendar.property_id,
-        owner_id: calendar.owner_id,
-        guest_name: event.summary || 'External Booking',
-        check_in: event.dtstart,
-        check_out: event.dtend,
-        source: calendar.name,
-        source_calendar_id: calendar.id,
-        external_id: event.uid,
-        status: 'confirmed',
-        sync_priority: calendar.priority || 0,
-      };
-      
-      // Add extended fields if available
-      if (event.price) {
-        bookingData.total_amount = event.price;
-      }
-      if (event.guestCount) {
-        bookingData.number_of_guests = event.guestCount;
-      }
-      
-      // Build notes from available info
-      const notesParts = [];
-      if (event.description) notesParts.push(event.description);
-      if (event.location) notesParts.push(`Location: ${event.location}`);
-      if (event.organizer) notesParts.push(`Contact: ${event.organizer}`);
-      notesParts.push(`Synced from ${calendar.name}`);
-      bookingData.notes = notesParts.join('\n');
+      const existingOrderId = existingIdMap.get(event.uid);
+      const orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
 
-      if (existingIds.has(event.uid)) {
-        // Update existing
-        await supabase
-          .from('property_bookings')
-          .update(bookingData)
-          .eq('external_id', event.uid)
-          .eq('source_calendar_id', calendar.id);
+      if (existingOrderId) {
         eventsUpdated++;
       } else {
-        // Insert new
-        const { data: newBooking } = await supabase
-          .from('property_bookings')
-          .insert(bookingData)
-          .select('id')
-          .single();
-        
-        if (newBooking) {
-          newBookingIds.push(newBooking.id);
-        }
+        newOrderIds.push(orderId);
         eventsAdded++;
       }
     }
@@ -256,7 +303,7 @@ async function syncCalendar(
       eventsAdded,
       eventsUpdated,
       eventsRemoved,
-      newBookingIds,
+      newOrderIds,
       durationMs,
     };
 
@@ -264,12 +311,9 @@ async function syncCalendar(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error(`Error syncing calendar ${calendar.name}:`, error);
     
-    // Update with error
     await supabase
       .from('property_external_calendars')
-      .update({
-        sync_error: errorMessage,
-      })
+      .update({ sync_error: errorMessage })
       .eq('id', calendar.id);
 
     return {
@@ -278,7 +322,7 @@ async function syncCalendar(
       eventsAdded: 0,
       eventsUpdated: 0,
       eventsRemoved: 0,
-      newBookingIds: [],
+      newOrderIds: [],
       error: errorMessage,
       durationMs: Date.now() - startTime,
     };
@@ -286,7 +330,6 @@ async function syncCalendar(
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -296,7 +339,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Parse request for optional filters
     let ownerId: string | null = null;
     let propertyId: string | null = null;
     let syncType = 'scheduled';
@@ -308,7 +350,6 @@ Deno.serve(async (req) => {
       syncType = body.sync_type || 'scheduled';
     }
 
-    // Build query for calendars to sync (only auto_sync enabled)
     let query = supabase
       .from('property_external_calendars')
       .select('*, owner_properties!inner(id, owner_id)')
@@ -343,7 +384,7 @@ Deno.serve(async (req) => {
       events_added: number;
       events_updated: number;
       events_removed: number;
-      new_booking_ids: string[];
+      new_order_ids: string[];
       error?: string;
       duration_ms: number;
     }> = [];
@@ -384,7 +425,7 @@ Deno.serve(async (req) => {
             events_added: result.eventsAdded,
             events_updated: result.eventsUpdated,
             events_removed: result.eventsRemoved,
-            new_booking_ids: result.newBookingIds,
+            new_order_ids: result.newOrderIds,
             error: result.error,
             duration_ms: result.durationMs,
           };
@@ -394,7 +435,6 @@ Deno.serve(async (req) => {
       results.push(...batchResults);
     }
 
-    // Summary
     const summary = {
       total_calendars: results.length,
       successful: results.filter(r => r.success).length,
@@ -402,7 +442,7 @@ Deno.serve(async (req) => {
       total_events_added: results.reduce((sum, r) => sum + r.events_added, 0),
       total_events_updated: results.reduce((sum, r) => sum + r.events_updated, 0),
       total_events_removed: results.reduce((sum, r) => sum + r.events_removed, 0),
-      total_new_bookings: results.reduce((sum, r) => sum + r.new_booking_ids.length, 0),
+      total_new_orders: results.reduce((sum, r) => sum + r.new_order_ids.length, 0),
     };
 
     console.log('Scheduled sync completed:', summary);
