@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Eye, ChevronRight } from 'lucide-react';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface DocumentTemplate {
   id: string;
@@ -20,6 +26,8 @@ interface DocumentTemplate {
   variables: string[];
   bodyEn: string;
   bodyRu: string;
+  hasTable?: boolean;
+  autoFillFrom?: 'inventory' | 'inventory_damaged';
 }
 
 const TEMPLATES: DocumentTemplate[] = [
@@ -207,6 +215,151 @@ Provider Signature: ___________________  Date: ____________`,
 Подпись Заказчика: ___________________    Дата: ____________
 Подпись Исполнителя: ___________________  Дата: ____________`,
   },
+  // === NEW TEMPLATES ===
+  {
+    id: 'damage_report',
+    nameEn: 'Damage Report',
+    nameRu: 'Акт повреждений',
+    descEn: 'Document damages found during check-out or inspection',
+    descRu: 'Фиксация повреждений при выезде или инспекции',
+    category: 'operations',
+    variables: ['tenant_name', 'property_address', 'inspection_date', 'damage_details', 'total_cost', 'currency'],
+    hasTable: true,
+    autoFillFrom: 'inventory_damaged',
+    bodyEn: `DAMAGE REPORT
+
+Date: {{inspection_date}}
+Property: {{property_address}}
+Tenant: {{tenant_name}}
+
+DAMAGED ITEMS:
+{{damage_details}}
+
+Total Estimated Cost: {{total_cost}} {{currency}}
+
+The tenant is responsible for the damages described above.
+
+Inspector: ___________________    Date: ____________
+Tenant: ___________________       Date: ____________`,
+    bodyRu: `АКТ ПОВРЕЖДЕНИЙ
+
+Дата: {{inspection_date}}
+Объект: {{property_address}}
+Арендатор: {{tenant_name}}
+
+ПОВРЕЖДЁННЫЕ ПРЕДМЕТЫ:
+{{damage_details}}
+
+Общая оценочная стоимость: {{total_cost}} {{currency}}
+
+Арендатор несёт ответственность за описанные повреждения.
+
+Инспектор: ___________________    Дата: ____________
+Арендатор: ___________________    Дата: ____________`,
+  },
+  {
+    id: 'inventory_list',
+    nameEn: 'Property Inventory List',
+    nameRu: 'Опись имущества',
+    descEn: 'Complete inventory of property contents with conditions',
+    descRu: 'Полная опись имущества объекта с состоянием',
+    category: 'operations',
+    variables: ['property_address', 'inventory_date'],
+    hasTable: true,
+    autoFillFrom: 'inventory',
+    bodyEn: `PROPERTY INVENTORY LIST
+
+Date: {{inventory_date}}
+Property: {{property_address}}
+
+ITEMS: See table below.
+
+Both parties confirm the inventory as listed above.
+
+Owner/Manager: ___________________   Date: ____________
+Tenant: ___________________          Date: ____________`,
+    bodyRu: `ОПИСЬ ИМУЩЕСТВА
+
+Дата: {{inventory_date}}
+Объект: {{property_address}}
+
+ПРЕДМЕТЫ: см. таблицу ниже.
+
+Стороны подтверждают опись имущества.
+
+Собственник/Управляющий: ___________________  Дата: ____________
+Арендатор: ___________________                 Дата: ____________`,
+  },
+  {
+    id: 'cleaning_checklist',
+    nameEn: 'Cleaning Checklist',
+    nameRu: 'Чек-лист уборки',
+    descEn: 'Room-by-room cleaning task checklist',
+    descRu: 'Чек-лист уборки по комнатам',
+    category: 'operations',
+    variables: ['property_address', 'cleaning_date', 'cleaner_name'],
+    hasTable: true,
+    bodyEn: `CLEANING CHECKLIST
+
+Date: {{cleaning_date}}
+Property: {{property_address}}
+Cleaner: {{cleaner_name}}
+
+See checklist table below.
+
+Cleaner Signature: ___________________   Date: ____________
+Inspector: ___________________           Date: ____________`,
+    bodyRu: `ЧЕК-ЛИСТ УБОРКИ
+
+Дата: {{cleaning_date}}
+Объект: {{property_address}}
+Клинер: {{cleaner_name}}
+
+См. таблицу чек-листа ниже.
+
+Подпись Клинера: ___________________   Дата: ____________
+Инспектор: ___________________         Дата: ____________`,
+  },
+  {
+    id: 'deposit_return',
+    nameEn: 'Deposit Return Act',
+    nameRu: 'Акт возврата залога',
+    descEn: 'Security deposit return with deductions breakdown',
+    descRu: 'Возврат залога с расшифровкой удержаний',
+    category: 'rental',
+    variables: ['tenant_name', 'property_address', 'deposit_amount', 'deductions_details', 'refund_amount', 'currency', 'return_date'],
+    hasTable: true,
+    bodyEn: `DEPOSIT RETURN ACT
+
+Date: {{return_date}}
+Property: {{property_address}}
+Tenant: {{tenant_name}}
+
+Original Deposit: {{deposit_amount}} {{currency}}
+
+DEDUCTIONS:
+{{deductions_details}}
+
+Refund Amount: {{refund_amount}} {{currency}}
+
+Owner/Manager: ___________________   Date: ____________
+Tenant: ___________________          Date: ____________`,
+    bodyRu: `АКТ ВОЗВРАТА ЗАЛОГА
+
+Дата: {{return_date}}
+Объект: {{property_address}}
+Арендатор: {{tenant_name}}
+
+Сумма залога: {{deposit_amount}} {{currency}}
+
+УДЕРЖАНИЯ:
+{{deductions_details}}
+
+Сумма к возврату: {{refund_amount}} {{currency}}
+
+Собственник/Управляющий: ___________________  Дата: ____________
+Арендатор: ___________________                 Дата: ____________`,
+  },
 ];
 
 const VARIABLE_LABELS: Record<string, { en: string; ru: string }> = {
@@ -228,6 +381,15 @@ const VARIABLE_LABELS: Record<string, { en: string; ru: string }> = {
   provider_name: { en: 'Provider Name', ru: 'Исполнитель' },
   service_description: { en: 'Service Description', ru: 'Описание услуг' },
   monthly_fee: { en: 'Monthly Fee', ru: 'Месячная плата' },
+  inspection_date: { en: 'Inspection Date', ru: 'Дата инспекции' },
+  damage_details: { en: 'Damage Details', ru: 'Описание повреждений' },
+  total_cost: { en: 'Total Cost', ru: 'Общая стоимость' },
+  inventory_date: { en: 'Inventory Date', ru: 'Дата описи' },
+  cleaning_date: { en: 'Cleaning Date', ru: 'Дата уборки' },
+  cleaner_name: { en: 'Cleaner Name', ru: 'Имя клинера' },
+  deductions_details: { en: 'Deductions Details', ru: 'Детали удержаний' },
+  refund_amount: { en: 'Refund Amount', ru: 'Сумма возврата' },
+  return_date: { en: 'Return Date', ru: 'Дата возврата' },
 };
 
 const CATEGORY_LABELS: Record<string, { en: string; ru: string }> = {
@@ -236,12 +398,64 @@ const CATEGORY_LABELS: Record<string, { en: string; ru: string }> = {
   legal: { en: 'Legal', ru: 'Юридическое' },
 };
 
+// Cleaning checklist data
+const CLEANING_ROOMS = [
+  { en: 'Living Room', ru: 'Гостиная', tasks: [
+    { en: 'Vacuum/Mop floors', ru: 'Пропылесосить/помыть полы' },
+    { en: 'Dust all surfaces', ru: 'Протереть пыль' },
+    { en: 'Clean windows', ru: 'Помыть окна' },
+    { en: 'Wipe switches & outlets', ru: 'Протереть выключатели' },
+  ]},
+  { en: 'Kitchen', ru: 'Кухня', tasks: [
+    { en: 'Clean countertops', ru: 'Протереть столешницы' },
+    { en: 'Clean stove & oven', ru: 'Помыть плиту и духовку' },
+    { en: 'Clean refrigerator', ru: 'Помыть холодильник' },
+    { en: 'Wash dishes / check dishwasher', ru: 'Помыть посуду / проверить посудомойку' },
+    { en: 'Empty trash', ru: 'Вынести мусор' },
+  ]},
+  { en: 'Bedroom', ru: 'Спальня', tasks: [
+    { en: 'Change linens', ru: 'Сменить бельё' },
+    { en: 'Vacuum/Mop floors', ru: 'Пропылесосить/помыть полы' },
+    { en: 'Dust furniture', ru: 'Протереть мебель' },
+  ]},
+  { en: 'Bathroom', ru: 'Ванная', tasks: [
+    { en: 'Clean toilet', ru: 'Помыть унитаз' },
+    { en: 'Clean shower/bathtub', ru: 'Помыть душ/ванну' },
+    { en: 'Clean sink & mirror', ru: 'Помыть раковину и зеркало' },
+    { en: 'Replace towels', ru: 'Заменить полотенца' },
+    { en: 'Restock toiletries', ru: 'Пополнить косметику' },
+  ]},
+  { en: 'Balcony/Terrace', ru: 'Балкон/Терраса', tasks: [
+    { en: 'Sweep floor', ru: 'Подмести пол' },
+    { en: 'Wipe furniture', ru: 'Протереть мебель' },
+  ]},
+];
+
 export default function DocumentTemplatesPage() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
+  const { allProperties } = useMyProperties();
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [previewMode, setPreviewMode] = useState(false);
+  const [autoFillPropertyId, setAutoFillPropertyId] = useState('');
+
+  // Fetch inventory for autofill
+  const { data: inventoryItems } = useQuery({
+    queryKey: ['inventory-for-doc', autoFillPropertyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('property_inventory_items')
+        .select('*')
+        .eq('property_id', autoFillPropertyId)
+        .eq('is_active', true)
+        .order('category');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!autoFillPropertyId && !!selectedTemplate?.autoFillFrom,
+  });
 
   const fillTemplate = (template: DocumentTemplate) => {
     const body = isRu ? template.bodyRu : template.bodyEn;
@@ -253,26 +467,94 @@ export default function DocumentTemplatesPage() {
     const filled = fillTemplate(selectedTemplate);
     const doc = new jsPDF();
     const title = isRu ? selectedTemplate.nameRu : selectedTemplate.nameEn;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
 
-    doc.setFontSize(16);
-    doc.text(title, 20, 20);
+    // Header with brand
+    doc.setFillColor(30, 41, 59);
+    doc.rect(0, 0, pageW, 18, 'F');
+    doc.setTextColor(255);
+    doc.setFontSize(14);
+    doc.text('myUNO', 15, 12);
+    doc.setFontSize(9);
+    doc.text(title, pageW - 15, 12, { align: 'right' });
+
+    // Body
+    doc.setTextColor(30, 41, 59);
     doc.setFontSize(10);
+    const lines = doc.splitTextToSize(filled, pageW - 30);
+    let y = 28;
+    doc.text(lines, 15, y);
+    y += lines.length * 5;
 
-    const lines = doc.splitTextToSize(filled, 170);
-    doc.text(lines, 20, 35);
+    // Add table for inventory/cleaning templates
+    if (selectedTemplate.hasTable && selectedTemplate.id === 'inventory_list' && inventoryItems?.length) {
+      y += 5;
+      (doc as any).autoTable({
+        startY: y,
+        head: [[isRu ? '№' : '#', isRu ? 'Название' : 'Name', isRu ? 'Категория' : 'Category', isRu ? 'Кол-во' : 'Qty', isRu ? 'Состояние' : 'Condition']],
+        body: inventoryItems.map((item, i) => [
+          i + 1,
+          isRu && item.name_ru ? item.name_ru : item.name,
+          item.category,
+          item.quantity ?? 0,
+          item.condition || 'good',
+        ]),
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [30, 41, 59] },
+        theme: 'grid',
+      });
+    }
 
-    doc.setFontSize(7);
-    doc.setTextColor(150);
-    doc.text('Generated by myUNO', 105, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    if (selectedTemplate.hasTable && selectedTemplate.id === 'cleaning_checklist') {
+      y += 5;
+      const rows: any[] = [];
+      CLEANING_ROOMS.forEach(room => {
+        room.tasks.forEach((task, i) => {
+          rows.push([
+            i === 0 ? (isRu ? room.ru : room.en) : '',
+            isRu ? task.ru : task.en,
+            '☐',
+          ]);
+        });
+      });
+      (doc as any).autoTable({
+        startY: y,
+        head: [[isRu ? 'Комната' : 'Room', isRu ? 'Задача' : 'Task', isRu ? 'Готово' : 'Done']],
+        body: rows,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [30, 41, 59] },
+        theme: 'grid',
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 35 }, 2: { cellWidth: 20, halign: 'center' } },
+      });
+    }
+
+    // Footer
+    const totalPages = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(150);
+      doc.text(`Generated by myUNO  |  Page ${i}/${totalPages}`, pageW / 2, pageH - 8, { align: 'center' });
+    }
 
     doc.save(`${selectedTemplate.id}-${Date.now()}.pdf`);
   };
+
+  const handleSelectTemplate = (t: DocumentTemplate) => {
+    setSelectedTemplate(t);
+    setValues({});
+    setPreviewMode(false);
+    setAutoFillPropertyId('');
+  };
+
+  const needsPropertySelect = selectedTemplate?.autoFillFrom;
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto space-y-5">
       <h1 className="text-xl font-bold">{isRu ? 'Шаблоны документов' : 'Document Templates'}</h1>
       <p className="text-sm text-muted-foreground">
-        {isRu ? 'Выберите шаблон, заполните переменные и скачайте PDF' : 'Choose a template, fill in variables, and download PDF'}
+        {isRu ? '8 шаблонов с профессиональным PDF-экспортом' : '8 templates with professional PDF export'}
       </p>
 
       <div className="space-y-3">
@@ -280,7 +562,7 @@ export default function DocumentTemplatesPage() {
           <Card
             key={t.id}
             className="p-4 cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]"
-            onClick={() => { setSelectedTemplate(t); setValues({}); setPreviewMode(false); }}
+            onClick={() => handleSelectTemplate(t)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -293,6 +575,7 @@ export default function DocumentTemplatesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {t.hasTable && <Badge variant="secondary" className="text-[10px]">📊</Badge>}
                 <Badge variant="outline" className="text-[10px]">
                   {CATEGORY_LABELS[t.category] ? (isRu ? CATEGORY_LABELS[t.category].ru : CATEGORY_LABELS[t.category].en) : t.category}
                 </Badge>
@@ -313,13 +596,38 @@ export default function DocumentTemplatesPage() {
 
               {!previewMode ? (
                 <div className="space-y-4 mt-4">
+                  {needsPropertySelect && (
+                    <div className="p-3 bg-muted/50 rounded-lg space-y-2 border border-border">
+                      <Label className="text-xs font-semibold">
+                        {isRu ? '🏠 Автозаполнение из инвентаря' : '🏠 Auto-fill from inventory'}
+                      </Label>
+                      <Select value={autoFillPropertyId} onValueChange={setAutoFillPropertyId}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allProperties.map(p => (
+                            <SelectItem key={p.property_id} value={p.property_id}>
+                              {isRu ? p.title_ru : p.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {inventoryItems && inventoryItems.length > 0 && (
+                        <p className="text-xs text-green-600">
+                          ✓ {inventoryItems.length} {isRu ? 'предметов загружено' : 'items loaded'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <p className="text-sm text-muted-foreground">
                     {isRu ? 'Заполните поля для подстановки в документ:' : 'Fill in the fields to populate the document:'}
                   </p>
                   {selectedTemplate.variables.map(v => (
                     <div key={v}>
                       <Label>{VARIABLE_LABELS[v] ? (isRu ? VARIABLE_LABELS[v].ru : VARIABLE_LABELS[v].en) : v}</Label>
-                      {v === 'condition_notes' || v === 'service_description' ? (
+                      {v === 'condition_notes' || v === 'service_description' || v === 'damage_details' || v === 'deductions_details' ? (
                         <Textarea
                           value={values[v] || ''}
                           onChange={e => setValues({ ...values, [v]: e.target.value })}
@@ -350,6 +658,54 @@ export default function DocumentTemplatesPage() {
                   <div className="bg-muted/50 rounded-lg p-4 whitespace-pre-wrap text-sm font-mono leading-relaxed border border-border">
                     {fillTemplate(selectedTemplate)}
                   </div>
+                  {selectedTemplate.hasTable && selectedTemplate.id === 'inventory_list' && inventoryItems?.length ? (
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="p-2 text-left">#</th>
+                            <th className="p-2 text-left">{isRu ? 'Название' : 'Name'}</th>
+                            <th className="p-2 text-left">{isRu ? 'Кат.' : 'Cat.'}</th>
+                            <th className="p-2 text-right">{isRu ? 'Кол.' : 'Qty'}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {inventoryItems.map((item, i) => (
+                            <tr key={item.id} className="border-t">
+                              <td className="p-2">{i + 1}</td>
+                              <td className="p-2">{isRu && item.name_ru ? item.name_ru : item.name}</td>
+                              <td className="p-2">{item.category}</td>
+                              <td className="p-2 text-right">{item.quantity ?? 0}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
+                  {selectedTemplate.hasTable && selectedTemplate.id === 'cleaning_checklist' && (
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-xs">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="p-2 text-left">{isRu ? 'Комната' : 'Room'}</th>
+                            <th className="p-2 text-left">{isRu ? 'Задача' : 'Task'}</th>
+                            <th className="p-2 text-center">✓</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {CLEANING_ROOMS.map(room =>
+                            room.tasks.map((task, i) => (
+                              <tr key={`${room.en}-${i}`} className="border-t">
+                                <td className="p-2 font-medium">{i === 0 ? (isRu ? room.ru : room.en) : ''}</td>
+                                <td className="p-2">{isRu ? task.ru : task.en}</td>
+                                <td className="p-2 text-center">☐</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" onClick={() => setPreviewMode(false)}>
                       {isRu ? '← Редактировать' : '← Edit'}

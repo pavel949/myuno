@@ -5448,6 +5448,44 @@ export type Database = {
           },
         ]
       }
+      inventory_inspections: {
+        Row: {
+          created_at: string
+          id: string
+          inspection_type: string
+          inspector_id: string
+          items: Json
+          notes: string | null
+          property_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inspection_type: string
+          inspector_id: string
+          items?: Json
+          notes?: string | null
+          property_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inspection_type?: string
+          inspector_id?: string
+          items?: Json
+          notes?: string | null
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       investment_documents: {
         Row: {
           created_at: string
