@@ -4,6 +4,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useCrmContacts, CONTACT_TYPES, CONTACT_TAGS } from '@/hooks/useCrmContacts';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { maskPhone } from '@/lib/contactProtection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +23,8 @@ export default function ContactsList() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
+  const { roles } = useUserRoles();
+  const isOwnerOrAdmin = roles.some(r => r.role === 'admin' || r.role === 'owner');
   const { data: membership } = useMyCompanyId();
   const companyId = membership?.company_id;
 
@@ -168,7 +172,7 @@ export default function ContactsList() {
                   )}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                  {contact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>}
+                  {contact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{isOwnerOrAdmin ? contact.phone : maskPhone(contact.phone)}</span>}
                   {contact.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" />{contact.email}</span>}
                 </div>
               </div>
