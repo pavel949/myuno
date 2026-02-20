@@ -19,6 +19,7 @@ export interface BusinessRoleConfig {
 }
 
 export type DashboardWidgetKey =
+  | 'kpi'
   | 'invites'
   | 'active_stays'
   | 'properties'
@@ -35,6 +36,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Управляющий',
     icon: '🏠',
     widgets: [
+      'kpi',
       'invites',
       'active_stays',
       'properties',
@@ -51,6 +53,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Агент по продажам',
     icon: '💼',
     widgets: [
+      'kpi',
       'active_deals',
       'crm_tasks',
       'properties',
@@ -64,6 +67,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Поставщик услуг',
     icon: '🔧',
     widgets: [
+      'kpi',
       'operations',
       'upcoming_payments',
       'crm_tasks',
@@ -76,6 +80,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Все модули',
     icon: '⚡',
     widgets: [
+      'kpi',
       'invites',
       'active_stays',
       'properties',
