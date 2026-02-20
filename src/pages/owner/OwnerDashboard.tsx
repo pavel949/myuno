@@ -17,6 +17,8 @@ import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidge
 import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
+import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
+import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 
 function SectionSkeleton() {
   return (
@@ -125,9 +127,17 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-24 space-y-6 overflow-x-hidden max-w-lg mx-auto">
-      {/* Role Switcher */}
-      <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
+    <div className="px-4 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg mx-auto">
+      {/* Header: Greeting + Role Switcher */}
+      <div className="space-y-4">
+        <DashboardGreeting roleConfig={config} />
+        <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
+      </div>
+
+      {/* Quick Actions */}
+      <RoleQuickActions role={role} />
+
+      <Separator />
 
       {/* Composed Widgets */}
       {config.widgets.map((widgetKey, idx) => (
