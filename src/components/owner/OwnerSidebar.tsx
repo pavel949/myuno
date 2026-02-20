@@ -8,7 +8,8 @@ import {
   Users,
   LogOut,
   Home,
-  ChevronDown
+  ChevronDown,
+  TrendingUp,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -53,6 +54,14 @@ const navigationGroups: NavGroup[] = [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
       { title: 'Properties', titleRu: 'Объекты', path: '/owner/properties', icon: Building2 },
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
+    ],
+  },
+  {
+    label: 'Sales',
+    labelRu: 'Продажи',
+    defaultOpen: false,
+    items: [
+      { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
     ],
   },
   {

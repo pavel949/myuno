@@ -98,6 +98,160 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_deal_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          deal_id: string
+          description: string | null
+          id: string
+          stage_from: string | null
+          stage_to: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type?: string
+          created_at?: string
+          deal_id: string
+          description?: string | null
+          id?: string
+          stage_from?: string | null
+          stage_to?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          deal_id?: string
+          description?: string | null
+          id?: string
+          stage_from?: string | null
+          stage_to?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_deal_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_deals: {
+        Row: {
+          agent_id: string
+          bedrooms_min: number | null
+          budget_max: number | null
+          budget_min: number | null
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          client_source: string | null
+          closed_at: string | null
+          commission_amount: number | null
+          commission_percent: number | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          deal_value: number | null
+          id: string
+          lost_reason: string | null
+          next_action: string | null
+          next_action_date: string | null
+          notes: string | null
+          preferred_districts: string[] | null
+          preferred_types: string[] | null
+          property_id: string | null
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          client_source?: string | null
+          closed_at?: string | null
+          commission_amount?: number | null
+          commission_percent?: number | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          deal_value?: number | null
+          id?: string
+          lost_reason?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          preferred_districts?: string[] | null
+          preferred_types?: string[] | null
+          property_id?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          client_source?: string | null
+          closed_at?: string | null
+          commission_amount?: number | null
+          commission_percent?: number | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          deal_value?: number | null
+          id?: string
+          lost_reason?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          preferred_districts?: string[] | null
+          preferred_types?: string[] | null
+          property_id?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agent_knowledge: {
         Row: {
           agent_id: string
@@ -21317,6 +21471,10 @@ export type Database = {
       }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_all_currency_rates: { Args: never; Returns: Json }
+      get_company_member_role: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: string
+      }
       get_currency_rate: {
         Args: { p_base?: string; p_target?: string }
         Returns: number
@@ -21417,6 +21575,10 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
+      is_company_member: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
       is_property_owner: {
