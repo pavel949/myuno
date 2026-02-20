@@ -1,4 +1,5 @@
 import { createClient } from '../_shared/supabase.ts';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +35,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Rate limiting - public read endpoints (100/min)
+    const rateLimitResponse = await withRateLimit(
+      req,
+      'yacht-calendar-export',
+      RATE_LIMITS.publicRead,
+      corsHeaders
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
     const yachtId = url.searchParams.get('yacht');
