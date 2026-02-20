@@ -379,6 +379,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/partner-terms" element={<LazyPage><Pages.PartnerAgreementPage /></LazyPage>} />
         <Route path="/dispute-resolution" element={<LazyPage><Pages.DisputeResolutionPage /></LazyPage>} />
         <Route path="/view-history" element={<Navigate to="/history" replace />} />
+        <Route path="/guide/:token" element={<LazyPage><Pages.PublicGuidebook /></LazyPage>} />
         
         {/* ── Legacy redirects ── */}
         <Route path="/demo" element={<Navigate to="/" replace />} />

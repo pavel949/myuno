@@ -35,6 +35,16 @@ export interface LocalTip {
   image_url?: string;
 }
 
+export interface DirectionStep {
+  id: string;
+  order: number;
+  instruction: string;
+  instruction_ru?: string;
+  photo_url?: string;
+  landmark?: string;
+  landmark_ru?: string;
+}
+
 export interface PropertyGuidebook {
   id: string;
   property_id: string;
@@ -47,6 +57,7 @@ export interface PropertyGuidebook {
   appliance_guides: ApplianceGuide[];
   emergency_contacts: EmergencyContact[];
   local_tips: LocalTip[];
+  directions: DirectionStep[];
   trash_instructions: string | null;
   trash_instructions_ru: string | null;
   parking_instructions: string | null;
@@ -54,6 +65,11 @@ export interface PropertyGuidebook {
   checkout_instructions: string | null;
   checkout_instructions_ru: string | null;
   house_manual_url: string | null;
+  welcome_message: string | null;
+  welcome_message_ru: string | null;
+  share_token: string | null;
+  is_public: boolean;
+  property_photos: string[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +84,7 @@ export interface GuidebookFormData {
   appliance_guides?: ApplianceGuide[];
   emergency_contacts?: EmergencyContact[];
   local_tips?: LocalTip[];
+  directions?: DirectionStep[];
   trash_instructions?: string;
   trash_instructions_ru?: string;
   parking_instructions?: string;
@@ -75,6 +92,21 @@ export interface GuidebookFormData {
   checkout_instructions?: string;
   checkout_instructions_ru?: string;
   house_manual_url?: string;
+  welcome_message?: string;
+  welcome_message_ru?: string;
+  is_public?: boolean;
+}
+
+function parseGuidebook(data: Record<string, unknown>): PropertyGuidebook {
+  return {
+    ...data,
+    appliance_guides: (data.appliance_guides as unknown[] as ApplianceGuide[]) || [],
+    emergency_contacts: (data.emergency_contacts as unknown[] as EmergencyContact[]) || [],
+    local_tips: (data.local_tips as unknown[] as LocalTip[]) || [],
+    directions: (data.directions as unknown[] as DirectionStep[]) || [],
+    is_public: (data.is_public as boolean) || false,
+    property_photos: (data.property_photos as string[]) || [],
+  } as PropertyGuidebook;
 }
 
 export function usePropertyGuidebook(propertyId?: string) {
@@ -84,7 +116,6 @@ export function usePropertyGuidebook(propertyId?: string) {
 
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
-  // Fetch guidebook for a property
   const { data: guidebook, isLoading } = useQuery({
     queryKey: ['property-guidebook', propertyId],
     queryFn: async () => {
@@ -97,21 +128,11 @@ export function usePropertyGuidebook(propertyId?: string) {
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (data) {
-        return {
-          ...data,
-          appliance_guides: (data.appliance_guides as unknown[] as ApplianceGuide[]) || [],
-          emergency_contacts: (data.emergency_contacts as unknown[] as EmergencyContact[]) || [],
-          local_tips: (data.local_tips as unknown[] as LocalTip[]) || [],
-        } as PropertyGuidebook;
-      }
-      return null;
+      return data ? parseGuidebook(data as Record<string, unknown>) : null;
     },
     enabled: !!propertyId,
   });
 
-  // Create or update guidebook
   const saveGuidebook = useMutation({
     mutationFn: async (formData: GuidebookFormData) => {
       if (!propertyId) throw new Error('Property ID is required');
@@ -127,6 +148,7 @@ export function usePropertyGuidebook(propertyId?: string) {
         appliance_guides: formData.appliance_guides || [],
         emergency_contacts: formData.emergency_contacts || [],
         local_tips: formData.local_tips || [],
+        directions: formData.directions || [],
         trash_instructions: formData.trash_instructions,
         trash_instructions_ru: formData.trash_instructions_ru,
         parking_instructions: formData.parking_instructions,
@@ -134,10 +156,12 @@ export function usePropertyGuidebook(propertyId?: string) {
         checkout_instructions: formData.checkout_instructions,
         checkout_instructions_ru: formData.checkout_instructions_ru,
         house_manual_url: formData.house_manual_url,
+        welcome_message: formData.welcome_message,
+        welcome_message_ru: formData.welcome_message_ru,
+        is_public: formData.is_public ?? false,
       };
 
       if (guidebook?.id) {
-        // Update existing
         const { data, error } = await supabase
           .from('property_guidebook')
           .update(payload as never)
@@ -148,7 +172,6 @@ export function usePropertyGuidebook(propertyId?: string) {
         if (error) throw error;
         return data;
       } else {
-        // Create new
         const { data, error } = await supabase
           .from('property_guidebook')
           .insert(payload as never)
@@ -175,11 +198,19 @@ export function usePropertyGuidebook(propertyId?: string) {
     },
   });
 
+  // Generate share link
+  const getShareUrl = () => {
+    if (!guidebook?.share_token || !guidebook.is_public) return null;
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/guide/${guidebook.share_token}`;
+  };
+
   return {
     guidebook,
     isLoading,
     saveGuidebook,
     hasGuidebook: !!guidebook,
+    shareUrl: getShareUrl(),
   };
 }
 
@@ -192,7 +223,6 @@ export function useGuestGuidebook(propertyId?: string) {
     queryFn: async () => {
       if (!propertyId || !user?.id) return null;
 
-      // First check if user has an active booking for this property
       const { data: booking, error: bookingError } = await supabase
         .from('property_bookings')
         .select('id, status, check_in, check_out')
@@ -204,7 +234,6 @@ export function useGuestGuidebook(propertyId?: string) {
       if (bookingError) throw bookingError;
       
       if (!booking) {
-        // Also check via check-in data
         const { data: checkIn } = await supabase
           .from('guest_check_in_data')
           .select(`
@@ -224,7 +253,6 @@ export function useGuestGuidebook(propertyId?: string) {
         }
       }
 
-      // Fetch guidebook
       const { data, error } = await supabase
         .from('property_guidebook')
         .select('*')
@@ -232,17 +260,57 @@ export function useGuestGuidebook(propertyId?: string) {
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (data) {
-        return {
-          ...data,
-          appliance_guides: (data.appliance_guides as unknown[] as ApplianceGuide[]) || [],
-          emergency_contacts: (data.emergency_contacts as unknown[] as EmergencyContact[]) || [],
-          local_tips: (data.local_tips as unknown[] as LocalTip[]) || [],
-        } as PropertyGuidebook;
-      }
-      return null;
+      return data ? parseGuidebook(data as Record<string, unknown>) : null;
     },
     enabled: !!propertyId && !!user?.id,
+  });
+}
+
+// Hook for public guidebook access via share token
+export function usePublicGuidebook(shareToken?: string) {
+  return useQuery({
+    queryKey: ['public-guidebook', shareToken],
+    queryFn: async () => {
+      if (!shareToken) return null;
+
+      const { data, error } = await supabase
+        .from('property_guidebook')
+        .select(`
+          *,
+          owner_properties (
+            title,
+            title_ru,
+            address,
+            cover_image,
+            images,
+            check_in_time,
+            check_out_time,
+            house_rules,
+            house_rules_ru
+          )
+        `)
+        .eq('share_token', shareToken)
+        .eq('is_public', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return null;
+
+      return {
+        guidebook: parseGuidebook(data as Record<string, unknown>),
+        property: (data as Record<string, unknown>).owner_properties as {
+          title: string;
+          title_ru: string | null;
+          address: string | null;
+          cover_image: string | null;
+          images: string[] | null;
+          check_in_time: string | null;
+          check_out_time: string | null;
+          house_rules: string | null;
+          house_rules_ru: string | null;
+        } | null,
+      };
+    },
+    enabled: !!shareToken,
   });
 }

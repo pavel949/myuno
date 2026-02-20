@@ -13234,20 +13234,26 @@ export type Database = {
           checkout_instructions: string | null
           checkout_instructions_ru: string | null
           created_at: string | null
+          directions: Json | null
           door_code: string | null
           emergency_contacts: Json | null
           gate_code: string | null
           house_manual_url: string | null
           id: string
+          is_public: boolean | null
           local_tips: Json | null
           lockbox_code: string | null
           lockbox_location: string | null
           parking_instructions: string | null
           parking_instructions_ru: string | null
           property_id: string | null
+          property_photos: string[] | null
+          share_token: string | null
           trash_instructions: string | null
           trash_instructions_ru: string | null
           updated_at: string | null
+          welcome_message: string | null
+          welcome_message_ru: string | null
           wifi_name: string | null
           wifi_password: string | null
         }
@@ -13256,20 +13262,26 @@ export type Database = {
           checkout_instructions?: string | null
           checkout_instructions_ru?: string | null
           created_at?: string | null
+          directions?: Json | null
           door_code?: string | null
           emergency_contacts?: Json | null
           gate_code?: string | null
           house_manual_url?: string | null
           id?: string
+          is_public?: boolean | null
           local_tips?: Json | null
           lockbox_code?: string | null
           lockbox_location?: string | null
           parking_instructions?: string | null
           parking_instructions_ru?: string | null
           property_id?: string | null
+          property_photos?: string[] | null
+          share_token?: string | null
           trash_instructions?: string | null
           trash_instructions_ru?: string | null
           updated_at?: string | null
+          welcome_message?: string | null
+          welcome_message_ru?: string | null
           wifi_name?: string | null
           wifi_password?: string | null
         }
@@ -13278,20 +13290,26 @@ export type Database = {
           checkout_instructions?: string | null
           checkout_instructions_ru?: string | null
           created_at?: string | null
+          directions?: Json | null
           door_code?: string | null
           emergency_contacts?: Json | null
           gate_code?: string | null
           house_manual_url?: string | null
           id?: string
+          is_public?: boolean | null
           local_tips?: Json | null
           lockbox_code?: string | null
           lockbox_location?: string | null
           parking_instructions?: string | null
           parking_instructions_ru?: string | null
           property_id?: string | null
+          property_photos?: string[] | null
+          share_token?: string | null
           trash_instructions?: string | null
           trash_instructions_ru?: string | null
           updated_at?: string | null
+          welcome_message?: string | null
+          welcome_message_ru?: string | null
           wifi_name?: string | null
           wifi_password?: string | null
         }
