@@ -1274,6 +1274,89 @@ export type Database = {
           },
         ]
       }
+      booking_message_rules: {
+        Row: {
+          channel: string
+          created_at: string
+          custom_body: string | null
+          custom_body_ru: string | null
+          custom_subject: string | null
+          custom_subject_ru: string | null
+          delay_hours: number
+          id: string
+          is_active: boolean
+          owner_id: string
+          property_id: string | null
+          sort_order: number | null
+          template_id: string | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          custom_body?: string | null
+          custom_body_ru?: string | null
+          custom_subject?: string | null
+          custom_subject_ru?: string | null
+          delay_hours?: number
+          id?: string
+          is_active?: boolean
+          owner_id: string
+          property_id?: string | null
+          sort_order?: number | null
+          template_id?: string | null
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          custom_body?: string | null
+          custom_body_ru?: string | null
+          custom_subject?: string | null
+          custom_subject_ru?: string | null
+          delay_hours?: number
+          id?: string
+          is_active?: boolean
+          owner_id?: string
+          property_id?: string | null
+          sort_order?: number | null
+          template_id?: string | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_message_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_message_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_message_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_message_rules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_messages: {
         Row: {
           booking_id: string
@@ -1592,6 +1675,68 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_scheduled_messages: {
+        Row: {
+          body: string
+          booking_id: string
+          channel: string
+          created_at: string
+          error_message: string | null
+          guest_user_id: string
+          id: string
+          metadata: Json | null
+          owner_id: string
+          property_id: string
+          rule_id: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          body: string
+          booking_id: string
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          guest_user_id: string
+          id?: string
+          metadata?: Json | null
+          owner_id: string
+          property_id: string
+          rule_id?: string | null
+          scheduled_at: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          body?: string
+          booking_id?: string
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          guest_user_id?: string
+          id?: string
+          metadata?: Json | null
+          owner_id?: string
+          property_id?: string
+          rule_id?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_scheduled_messages_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "booking_message_rules"
             referencedColumns: ["id"]
           },
         ]

@@ -373,6 +373,7 @@ export const SalesPipeline = lazy(() => import('@/pages/owner/SalesPipeline'));
 export const SalesDealDetail = lazy(() => import('@/pages/owner/SalesDealDetail'));
 export const SalesAnalytics = lazy(() => import('@/pages/owner/SalesAnalytics'));
 export const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit'));
+export const OwnerAutoMessaging = lazy(() => import('@/pages/owner/OwnerAutoMessaging'));
 export const ContactsList = lazy(() => import('@/pages/owner/ContactsList'));
 export const ContactDetail = lazy(() => import('@/pages/owner/ContactDetail'));
 export const InvoicesPage = lazy(() => import('@/pages/owner/InvoicesPage'));
