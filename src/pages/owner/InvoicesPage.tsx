@@ -12,9 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, FileText, Trash2, Send, Check, X } from 'lucide-react';
+import { Plus, FileText, Trash2, Send, Check, X, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { generateInvoicePdf } from '@/lib/invoicePdf';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -136,6 +137,30 @@ export default function InvoicesPage() {
     deleteInvoice.mutate(id, {
       onSuccess: () => toast.success(isRu ? 'Удалено' : 'Deleted'),
     });
+  };
+
+  const handleDownloadPdf = (inv: any) => {
+    try {
+      const doc = generateInvoicePdf({
+        invoice_number: inv.invoice_number,
+        recipient_name: inv.recipient_name,
+        recipient_email: inv.recipient_email,
+        issued_date: inv.issued_date,
+        due_date: inv.due_date,
+        items: inv.items || [],
+        subtotal: Number(inv.subtotal),
+        tax_rate: Number(inv.tax_rate || 0),
+        tax_amount: Number(inv.tax_amount || 0),
+        total: Number(inv.total),
+        currency: inv.currency,
+        notes: inv.notes,
+        status: inv.status,
+      });
+      doc.save(`invoice-${inv.invoice_number}.pdf`);
+      toast.success(isRu ? 'PDF скачан' : 'PDF downloaded');
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   return (
@@ -321,6 +346,9 @@ export default function InvoicesPage() {
                     <Send className="h-3 w-3 mr-1" />
                     {isRu ? 'Отправить' : 'Send'}
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                    <Download className="h-3 w-3" />
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => handleDelete(inv.id)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -333,6 +361,9 @@ export default function InvoicesPage() {
                     <Check className="h-3 w-3 mr-1" />
                     {isRu ? 'Оплачен' : 'Paid'}
                   </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                    <Download className="h-3 w-3" />
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => handleCancel(inv.id)}>
                     <X className="h-3 w-3" />
                   </Button>
@@ -340,10 +371,24 @@ export default function InvoicesPage() {
               )}
 
               {inv.status === 'overdue' && (
-                <Button size="sm" variant="default" className="w-full" onClick={() => handleMarkPaid(inv.id)}>
-                  <Check className="h-3 w-3 mr-1" />
-                  {isRu ? 'Отметить оплату' : 'Mark Paid'}
-                </Button>
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" variant="default" className="flex-1" onClick={() => handleMarkPaid(inv.id)}>
+                    <Check className="h-3 w-3 mr-1" />
+                    {isRu ? 'Отметить оплату' : 'Mark Paid'}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                    <Download className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+
+              {inv.status === 'paid' && (
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                    <Download className="h-3 w-3 mr-1" />
+                    PDF
+                  </Button>
+                </div>
               )}
             </Card>
           ))}

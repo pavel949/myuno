@@ -375,6 +375,8 @@ export const ContactsList = lazy(() => import('@/pages/owner/ContactsList'));
 export const ContactDetail = lazy(() => import('@/pages/owner/ContactDetail'));
 export const InvoicesPage = lazy(() => import('@/pages/owner/InvoicesPage'));
 export const CrmTasksPage = lazy(() => import('@/pages/owner/CrmTasksPage'));
+export const VendorDirectoryPage = lazy(() => import('@/pages/owner/VendorDirectoryPage'));
+export const InventoryPage = lazy(() => import('@/pages/owner/InventoryPage'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));

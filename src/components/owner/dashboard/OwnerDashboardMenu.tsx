@@ -15,6 +15,8 @@ import {
   ContactRound,
   Receipt,
   ListTodo,
+  Building2,
+  Package,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -29,6 +31,8 @@ const MENU_ITEMS: MenuItem[] = [
   { path: '/owner/tasks', icon: ListTodo, labelEn: 'CRM Tasks', labelRu: 'Задачи CRM' },
   { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
   { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
+  { path: '/owner/vendors', icon: Building2, labelEn: 'Vendor Directory', labelRu: 'Поставщики' },
+  { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
   { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
