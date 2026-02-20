@@ -17,6 +17,8 @@ const translations = {
   en: {
     title: 'Property Report',
     managementTitle: 'Management Report',
+    ownerStatementTitle: 'Owner Statement',
+    pnlTitle: 'Profit & Loss Report',
     period: 'Period',
     summary: 'Summary',
     income: 'Income',
@@ -47,10 +49,24 @@ const translations = {
     ownerNetIncome: 'Owner Net Income',
     generatedOn: 'Generated on',
     page: 'Page',
+    // P&L
+    grossProfit: 'Gross Profit',
+    costOfServices: 'Cost of Services',
+    operatingExpenses: 'Operating Expenses',
+    operatingIncome: 'Operating Income',
+    expenseRatio: 'Expense Ratio',
+    profitMargin: 'Profit Margin',
+    // Owner Statement
+    totalRevenue: 'Total Revenue',
+    deductions: 'Deductions',
+    netPayout: 'Net Payout to Owner',
+    payoutSummary: 'Payout Summary',
   },
   ru: {
     title: 'Отчёт по объекту',
     managementTitle: 'Управленческий отчёт',
+    ownerStatementTitle: 'Отчёт собственнику',
+    pnlTitle: 'Отчёт о прибылях и убытках',
     period: 'Период',
     summary: 'Сводка',
     income: 'Доход',
@@ -81,6 +97,18 @@ const translations = {
     ownerNetIncome: 'Доход собственника',
     generatedOn: 'Сгенерировано',
     page: 'Страница',
+    // P&L
+    grossProfit: 'Валовая прибыль',
+    costOfServices: 'Себестоимость услуг',
+    operatingExpenses: 'Операционные расходы',
+    operatingIncome: 'Операционная прибыль',
+    expenseRatio: 'Коэффициент расходов',
+    profitMargin: 'Маржа прибыли',
+    // Owner Statement
+    totalRevenue: 'Общий доход',
+    deductions: 'Удержания',
+    netPayout: 'К выплате собственнику',
+    payoutSummary: 'Итоги выплаты',
   },
 };
 
@@ -135,6 +163,8 @@ function formatDate(dateString: string): string {
 export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   const { propertyTitle, reportType, periodStart, periodEnd, data, language = 'ru', currency = 'THB' } = options;
   const isManagement = reportType === 'management' || options.isManagement;
+  const isOwnerStatement = reportType === 'owner_statement';
+  const isPnl = reportType === 'pnl';
   const t = translations[language];
   const catLabels = categoryLabels[language];
 
@@ -142,9 +172,14 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   let yPosition = 20;
 
   // Header
+  const titleText = isOwnerStatement ? t.ownerStatementTitle
+    : isPnl ? t.pnlTitle
+    : isManagement ? t.managementTitle
+    : t.title;
+
   doc.setFontSize(20);
   doc.setTextColor(40, 40, 40);
-  doc.text(isManagement ? t.managementTitle : t.title, 20, yPosition);
+  doc.text(titleText, 20, yPosition);
   
   yPosition += 10;
   doc.setFontSize(14);
@@ -364,7 +399,112 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
     }
   }
 
-  // Footer
+  // ---- P&L Report Section ----
+  if (isPnl) {
+    if (yPosition > 200) { doc.addPage(); yPosition = 20; }
+
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text(t.pnlTitle, 20, yPosition);
+    yPosition += 10;
+
+    const costOfServices = data.expenses.transactions
+      .filter(tr => ['cleaning', 'supplies', 'cleaning_fee'].includes(tr.category))
+      .reduce((s, tr) => s + tr.amount, 0);
+    const grossProfit = data.income.total - costOfServices;
+    const operatingExpenses = data.expenses.total - costOfServices;
+    const operatingIncome = grossProfit - operatingExpenses;
+    const profitMargin = data.income.total > 0 ? Math.round((operatingIncome / data.income.total) * 100) : 0;
+    const expenseRatio = data.income.total > 0 ? Math.round((data.expenses.total / data.income.total) * 100) : 0;
+
+    const pnlRows = [
+      [t.totalRevenue, '', formatCurrency(data.income.total, currency)],
+      [t.costOfServices, `(${formatCurrency(costOfServices, currency)})`, ''],
+      [t.grossProfit, '', formatCurrency(grossProfit, currency)],
+      ['', '', ''],
+      [t.operatingExpenses, `(${formatCurrency(operatingExpenses, currency)})`, ''],
+      [t.operatingIncome, '', formatCurrency(operatingIncome, currency)],
+      ['', '', ''],
+      [t.expenseRatio, '', `${expenseRatio}%`],
+      [t.profitMargin, '', `${profitMargin}%`],
+    ];
+
+    autoTable(doc, {
+      startY: yPosition,
+      head: [['', '', t.amount]],
+      body: pnlRows,
+      theme: 'plain',
+      headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+      margin: { left: 20, right: 20 },
+      styles: { fontSize: 10 },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 }, 1: { halign: 'right', cellWidth: 50 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 } },
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 15;
+  }
+
+  // ---- Owner Statement Section ----
+  if (isOwnerStatement) {
+    if (yPosition > 200) { doc.addPage(); yPosition = 20; }
+
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text(t.payoutSummary, 20, yPosition);
+    yPosition += 10;
+
+    const mgmtComm = data.management_commission ?? 0;
+    const payout = data.owner_payout ?? (data.income.total - data.expenses.total - mgmtComm);
+
+    // Deductions table
+    const deductionRows = (data.deductions || Object.entries(data.expenses.by_category).map(([cat, amt]) => ({
+      category: cat, amount: amt as number, description: cat.replace(/_/g, ' '),
+    }))).map(d => [
+      catLabels[d.category] || d.category.replace(/_/g, ' '),
+      `-${formatCurrency(d.amount, currency)}`,
+    ]);
+
+    if (mgmtComm > 0) {
+      deductionRows.push([t.managementCommission, `-${formatCurrency(mgmtComm, currency)}`]);
+    }
+
+    const statementRows = [
+      [t.totalRevenue, formatCurrency(data.income.total, currency)],
+      ['', ''],
+      ...deductionRows,
+      ['', ''],
+      [t.netPayout, formatCurrency(payout, currency)],
+    ];
+
+    autoTable(doc, {
+      startY: yPosition,
+      head: [[t.description, t.amount]],
+      body: statementRows,
+      theme: 'striped',
+      headStyles: { fillColor: [22, 163, 74] },
+      margin: { left: 20, right: 20 },
+      styles: { fontSize: 10 },
+      columnStyles: { 1: { halign: 'right' } },
+      didParseCell: (hookData: any) => {
+        // Bold the payout row
+        if (hookData.section === 'body' && hookData.row.index === statementRows.length - 1) {
+          hookData.cell.styles.fontStyle = 'bold';
+          hookData.cell.styles.fontSize = 12;
+        }
+      },
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 15;
+
+    // Payout highlight box
+    if (yPosition > 250) { doc.addPage(); yPosition = 20; }
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(15, yPosition - 5, 180, 25, 3, 3, 'F');
+    doc.setFontSize(12);
+    doc.setTextColor(22, 163, 74);
+    doc.text(`${t.netPayout}: ${formatCurrency(payout, currency)}`, 25, yPosition + 8);
+    yPosition += 35;
+  }
+
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);

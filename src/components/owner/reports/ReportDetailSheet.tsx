@@ -39,6 +39,12 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
 
   // Management reports get their own detailed template
   const isManagementReport = report.report_type === 'management';
+  const isOwnerStatement = report.report_type === 'owner_statement';
+  const isPnl = report.report_type === 'pnl';
+  const mgmtCommission = Number(data.management_commission || 0);
+  const ownerPayout = Number(data.owner_payout || netIncome - mgmtCommission);
+  const expenseRatio = Number(data.expense_ratio || (income.total ? Math.round((expenses.total / income.total) * 100) : 0));
+  const grossProfit = Number(data.gross_profit || income.total);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -70,9 +76,102 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
 
         <Separator className="mb-4" />
 
-        {/* Management report uses dedicated template */}
+        {/* Management reports get their own detailed template */}
         {isManagementReport ? (
           <ManagementReportDetail report={report} />
+        ) : isPnl ? (
+          /* P&L inline view */
+          <div className="space-y-4">
+            <div className="rounded-xl p-4 bg-muted/50 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span>{isRu ? 'Выручка' : 'Revenue'}</span>
+                <span className="font-bold text-success">{formatCurrency(income.total || 0)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{isRu ? 'Себестоимость' : 'Cost of Services'}</span>
+                <span className="text-destructive">-{formatCurrency((income.total || 0) - grossProfit)}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-sm font-semibold">
+                <span>{isRu ? 'Валовая прибыль' : 'Gross Profit'}</span>
+                <span className={grossProfit >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(grossProfit)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{isRu ? 'Операционные расходы' : 'Operating Expenses'}</span>
+                <span className="text-destructive">-{formatCurrency(Number(data.operating_expenses || 0))}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between font-bold">
+                <span>{isRu ? 'Операционная прибыль' : 'Operating Income'}</span>
+                <span className={netIncome >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(netIncome)}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-muted/50 p-3 text-center">
+                <p className="text-xs text-muted-foreground">{isRu ? 'Коэфф. расходов' : 'Expense Ratio'}</p>
+                <p className="text-lg font-bold">{expenseRatio}%</p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3 text-center">
+                <p className="text-xs text-muted-foreground">{isRu ? 'Маржа' : 'Margin'}</p>
+                <p className="text-lg font-bold">{income.total ? Math.round((netIncome / income.total) * 100) : 0}%</p>
+              </div>
+            </div>
+            {expenseCategories.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold mb-2">{isRu ? 'Структура расходов' : 'Expense Breakdown'}</h3>
+                <div className="space-y-1.5">
+                  {expenseCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
+                    <div key={cat} className="flex justify-between text-sm py-1 border-b border-border/30 last:border-0">
+                      <span className="capitalize">{cat.replace(/_/g, ' ')}</span>
+                      <span className="text-destructive">{formatCurrency(amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : isOwnerStatement ? (
+          /* Owner Statement inline view */
+          <div className="space-y-4">
+            <div className={`rounded-xl p-4 text-center ${ownerPayout >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+              <p className="text-xs text-muted-foreground mb-1">{isRu ? 'К выплате собственнику' : 'Net Payout to Owner'}</p>
+              <p className={`text-3xl font-bold ${ownerPayout >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {formatCurrency(ownerPayout)}
+              </p>
+            </div>
+            <div className="rounded-xl bg-muted/50 p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>{isRu ? 'Общий доход' : 'Total Revenue'}</span>
+                <span className="font-bold text-success">{formatCurrency(income.total || 0)}</span>
+              </div>
+              <Separator />
+              {expenseCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
+                <div key={cat} className="flex justify-between text-sm">
+                  <span className="capitalize text-muted-foreground">{cat.replace(/_/g, ' ')}</span>
+                  <span className="text-destructive">-{formatCurrency(amount)}</span>
+                </div>
+              ))}
+              {mgmtCommission > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{isRu ? 'Комиссия УК' : 'Mgmt Commission'}</span>
+                  <span className="text-destructive">-{formatCurrency(mgmtCommission)}</span>
+                </div>
+              )}
+              <Separator />
+              <div className="flex justify-between font-bold">
+                <span>{isRu ? 'Итого к выплате' : 'Net Payout'}</span>
+                <span className={ownerPayout >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(ownerPayout)}</span>
+              </div>
+            </div>
+            {data.occupancy !== undefined && (
+              <div className="rounded-lg bg-muted/50 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{isRu ? 'Заполняемость' : 'Occupancy'}</span>
+                  <Badge variant="secondary">{Math.round(data.occupancy?.rate || 0)}%</Badge>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             {/* Net income hero */}
