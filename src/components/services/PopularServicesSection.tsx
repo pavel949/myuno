@@ -36,7 +36,7 @@ export function PopularServicesSection() {
       <div className="px-4">
         <UnifiedSectionHeader
           icon={Flame}
-          iconColor="text-orange-500"
+          iconColor="text-primary"
           title={isRu ? 'Популярные услуги' : 'Popular Services'}
           viewAllPath="/services?sort=popular"
           viewAllLabel={isRu ? 'Все' : 'All'}
@@ -173,7 +173,7 @@ export function ServiceCard({ service, onClick, compact = false }: ServiceCardPr
         {/* Rating */}
         {service.rating && !compact && (
           <div className="flex items-center gap-1 mt-1.5">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <Star className="w-3 h-3 fill-primary text-primary" />
             <span className="text-xs font-medium">{service.rating.toFixed(1)}</span>
             {service.review_count && (
               <span className="text-[10px] text-muted-foreground">({service.review_count})</span>
