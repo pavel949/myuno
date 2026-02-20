@@ -29,7 +29,7 @@ export const DiscoverHero = memo(function DiscoverHero() {
 
       {/* Location pill */}
       <div className="absolute top-3 left-3">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 border border-white/20">
           <MapPin className="w-3 h-3 text-white" />
           <span className="text-[10px] font-medium text-white">Phuket, Thailand</span>
         </div>

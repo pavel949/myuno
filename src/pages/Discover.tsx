@@ -10,8 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Phone, MessageCircle, Headphones } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { VERTICALS } from '@/lib/verticals';
-import { VERTICAL_GROUPS, type VerticalGroupItem } from '@/lib/verticalGroups';
+import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
+import { resolveVerticalItem } from '@/lib/resolveVerticalItem';
 import { resolveIcon } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -41,24 +41,6 @@ const LIFE_CONTEXTS_SEARCH = [
   { code: 'retirement_living', titleEn: 'Retirement Living', titleRu: 'Пенсия на Пхукете', route: '/life/retirement_living' },
 ];
 
-function resolveItem(item: VerticalGroupItem, language: string) {
-  if (item.verticalId) {
-    const v = Object.values(VERTICALS).find(v => v.id === item.verticalId);
-    if (!v) return null;
-    return {
-      id: v.id,
-      icon: v.icon,
-      label: language === 'ru' ? v.labelRu : v.labelEn,
-      route: `/${v.plural}`,
-    };
-  }
-  return {
-    id: item.route || '',
-    icon: item.icon || '📦',
-    label: language === 'ru' ? (item.labelRu || '') : (item.labelEn || ''),
-    route: item.route || '/',
-  };
-}
 
 export default function Discover() {
   const { language } = useLanguage();
@@ -74,8 +56,8 @@ export default function Discover() {
   const allItems = useMemo(() => {
     return VERTICAL_GROUPS.flatMap(g =>
       g.items
-        .map(item => resolveItem(item, language))
-        .filter(Boolean) as NonNullable<ReturnType<typeof resolveItem>>[]
+        .map(item => resolveVerticalItem(item, language))
+        .filter(Boolean) as NonNullable<ReturnType<typeof resolveVerticalItem>>[]
     );
   }, [language]);
 
@@ -177,7 +159,7 @@ export default function Discover() {
           {/* Support block */}
           <div className="rounded-2xl bg-muted/30 border border-border/50 p-4 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Headphones className="w-5 h-5 text-primary" />
               </div>
               <div>
