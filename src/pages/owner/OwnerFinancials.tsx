@@ -12,6 +12,7 @@ import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
 } from '@/hooks/usePropertyFinancials';
+import { exportTransactionsExcel } from '@/utils/exportFinancialsExcel';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   Plus, ArrowUpCircle, ArrowDownCircle, Receipt, 
-  Zap, Download, Loader2, Building, BarChart3, TrendingUp, CalendarClock
+  Zap, Download, Loader2, Building, BarChart3, TrendingUp, CalendarClock, Target, FileSpreadsheet
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { FinancialDateFilter, DatePreset } from '@/components/owner/FinancialDateFilter';
@@ -141,10 +142,16 @@ export default function OwnerFinancials() {
           <h1 className="text-2xl font-bold">{isRu ? 'Финансы' : 'Financials'}</h1>
           <p className="text-sm text-muted-foreground">{isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate('/owner/portfolio')}>
-          <BarChart3 className="h-4 w-4 mr-1" />
-          {isRu ? 'Портфель' : 'Portfolio'}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/owner/budget')}>
+            <Target className="h-4 w-4 mr-1" />
+            {isRu ? 'Бюджет' : 'Budget'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/owner/portfolio')}>
+            <BarChart3 className="h-4 w-4 mr-1" />
+            {isRu ? 'Портфель' : 'Portfolio'}
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -199,6 +206,15 @@ export default function OwnerFinancials() {
         )}
         <Button variant="outline" size="icon" onClick={handleExportCSV} disabled={!filteredFinancials.length} title={isRu ? 'Экспорт CSV' : 'Export CSV'}>
           <Download className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => exportTransactionsExcel(filteredFinancials, language as 'ru' | 'en')}
+          disabled={!filteredFinancials.length}
+          title={isRu ? 'Экспорт Excel' : 'Export Excel'}
+        >
+          <FileSpreadsheet className="h-4 w-4" />
         </Button>
       </div>
 
