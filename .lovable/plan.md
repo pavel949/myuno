@@ -1,140 +1,87 @@
 
-# Агентская CRM для Управляющих Компаний
 
-## Контекст
+# CRM: Bug Fixes + Pro-Level Upgrade
 
-Многие УК на Пхукете начинали как агенты по продаже недвижимости. Продав квартиры, они стали управлять ими. Сейчас в системе есть:
-- `management_companies` -- профили УК
-- `management_company_members` -- команда УК (owner, admin, member)
-- `properties` -- объекты с `listing_type` (rent/sale) и `management_company_id`
-- `consultation_requests` -- лиды (property_tour, investment_advice, etc.)
-- `lead_activity_log` -- история действий по лидам
+## Bugs Found
 
-Чего **нет**: инструментов для самих УК, чтобы управлять продажами. Вся работа с лидами сейчас только в админке myUNO.
+1. **SalesAnalytics.tsx** -- Unused imports (`FunnelChart`, `Funnel`, `LabelList`) from recharts cause bundle bloat and potential warnings
+2. **KanbanBoard.tsx** -- Click-to-navigate fires unreliably after drag because `isDragging` from `useSortable` doesn't reflect drag state correctly for droppable-only cards. Cards use `useSortable` but they're not actually sorted within columns, leading to incorrect behavior
+3. **SalesAnalytics monthly chart** -- Off-by-one edge case: when `i=0`, `subMonths(new Date(), -1)` creates a future date filter that misses current month deals
+4. **CreateDealSheet** -- Missing fields that exist in the schema: `preferred_districts`, `preferred_types`, `bedrooms_min`. This breaks PropertyMatching since it can never filter by type/bedrooms
+5. **EditDealSheet** -- Same missing fields, plus no currency selector (hardcoded to THB in create)
+6. **DealStageBar** -- Labels are hidden on mobile (`hidden sm:inline`), rendering empty buttons with no visible text on phones
+7. **PropertyMatching** -- Uses `<a href>` instead of React Router `<Link>`, causing full page reloads
 
-## Архитектурное решение
+## Upgrades (Odoo/HubSpot Parity)
 
-Не создавать отдельную "агентскую" роль. Вместо этого -- расширить Owner Hub (`/owner`) модулем **Sales Pipeline**, доступным членам УК. Это логично, потому что:
+### 1. Search and Filtering
+- Full-text search across client name, phone, email, notes on the Pipeline page
+- Filter by agent (for owners/admins who see all deals)
+- Filter by budget range and property type
 
-1. УК уже привязаны к объектам через `management_company_id`
-2. Команда УК уже существует в `management_company_members`
-3. Те же люди управляют и арендой, и продажами
+### 2. Weighted Pipeline Value
+- Show total pipeline value per stage in Kanban column headers
+- Summary bar at top: "Pipeline: 45M THB | Weighted: 18M THB" (weighted by stage probability)
 
-## Что будет создано
+### 3. Deal Age and Velocity Tracking
+- Show "days in stage" and "total deal age" on DealCard and DealDetail
+- Color-code stale deals (e.g., >14 days in same stage = yellow, >30 = red)
 
-### 1. Таблица `agent_deals` -- Сделки/Воронка продаж
+### 4. Bulk Actions
+- Multi-select checkboxes in list view
+- Bulk stage change, bulk assign to agent, bulk delete
 
-Центральная сущность агентского модуля. Каждая сделка -- это путь клиента от первого контакта до закрытия.
+### 5. Quick Communication Actions
+- Click-to-call (`tel:`) and click-to-WhatsApp (`wa.me/`) buttons on DealCard
+- Quick WhatsApp message from deal detail page
 
-| Поле | Тип | Назначение |
-|------|-----|-----------|
-| id | uuid | PK |
-| company_id | uuid | FK на management_companies |
-| agent_id | uuid | Ответственный агент (user_id из members) |
-| property_id | uuid | Привязка к объекту (nullable -- может быть без конкретного объекта) |
-| client_name | text | Имя клиента |
-| client_phone | text | Телефон |
-| client_email | text | Email |
-| client_source | text | Откуда пришёл (website, referral, walk-in, social_media) |
-| stage | text | Этап воронки: new, contacted, showing, negotiation, contract, closed_won, closed_lost |
-| budget_min / budget_max | numeric | Бюджет клиента |
-| currency | text | Валюта |
-| preferred_districts | text[] | Желаемые районы |
-| preferred_types | text[] | Типы недвижимости |
-| bedrooms_min | int | Мин. спален |
-| notes | text | Заметки агента |
-| next_action | text | Следующий шаг |
-| next_action_date | timestamptz | Когда |
-| deal_value | numeric | Сумма сделки |
-| commission_percent | numeric | Процент комиссии |
-| commission_amount | numeric | Сумма комиссии |
-| closed_at | timestamptz | Дата закрытия |
-| lost_reason | text | Причина проигрыша |
+### 6. Enhanced CreateDealSheet
+- Add preferred_districts (multi-select from known Phuket districts)
+- Add preferred_types (villa, condo, townhouse, land)
+- Add bedrooms_min selector
+- Add currency selector (THB, USD, RUB, CNY)
 
-RLS: доступ только членам своей УК через `management_company_members`.
+### 7. Agent Performance (for owners/admins)
+- Leaderboard widget: deals won, total volume, conversion rate per agent
+- Filter analytics by agent
 
-### 2. Таблица `agent_deal_activities` -- История действий
+### 8. Contact Timeline Improvements
+- Show relative timestamps ("2 hours ago", "3 days ago")
+- Activity icons with color coding by type
+- Collapsible activity groups by date
 
-| Поле | Тип | Назначение |
-|------|-----|-----------|
-| id | uuid | PK |
-| deal_id | uuid | FK на agent_deals |
-| user_id | uuid | Кто сделал |
-| activity_type | text | call, meeting, showing, message, note, stage_change |
-| description | text | Описание |
-| stage_from / stage_to | text | При смене этапа |
+### 9. Deal Duplicate Detection
+- When creating a deal, check if client_phone or client_email already exists in another deal
+- Show warning with link to existing deal
 
-### 3. UI: Страницы в Owner Hub
+### 10. Stage Probability and Forecast
+- Assign win probability to each stage (new=10%, contacted=20%, showing=40%, negotiation=60%, contract=80%)
+- Show forecast on analytics: expected revenue = sum(deal_value * stage_probability)
 
-#### 3.1 `/owner/sales` -- Sales Pipeline (главная страница)
+## Technical Implementation
 
-- Kanban-доска с колонками по этапам (new -> contacted -> showing -> negotiation -> contract -> closed)
-- Переключатель Kanban / Список
-- Счётчики: общий объём, конверсия, средний цикл
-- Фильтры: по агенту, району, бюджету
-- Быстрое создание сделки (+ кнопка)
+### Files to modify:
+| File | Changes |
+|------|---------|
+| `SalesAnalytics.tsx` | Remove unused imports, fix monthly calc, add agent filter, forecast section, leaderboard |
+| `KanbanBoard.tsx` | Fix drag/click, add pipeline value per column, use `useDraggable` instead of `useSortable` for cards |
+| `SalesPipeline.tsx` | Add search bar, agent filter, bulk actions, weighted pipeline summary |
+| `DealCard.tsx` | Add deal age indicator, WhatsApp/call quick actions, stale deal coloring, checkbox for bulk |
+| `SalesDealDetail.tsx` | Add WhatsApp button, relative timestamps, deal age display |
+| `CreateDealSheet.tsx` | Add districts, types, bedrooms, currency fields, duplicate detection |
+| `EditDealSheet.tsx` | Add same missing fields + currency |
+| `DealStageBar.tsx` | Fix mobile -- show abbreviated labels or icons instead of hiding text |
+| `PropertyMatching.tsx` | Use React Router Link, show match score |
+| `useAgentDeals.ts` | Add stage probabilities, add `useCompanyMembers` hook for agent filter |
 
-#### 3.2 `/owner/sales/:id` -- Карточка сделки
+### New files:
+| File | Purpose |
+|------|---------|
+| `src/components/owner/sales/DealSearchBar.tsx` | Search + filters component |
+| `src/components/owner/sales/PipelineSummary.tsx` | Weighted pipeline value bar |
+| `src/components/owner/sales/AgentLeaderboard.tsx` | Agent performance ranking |
+| `src/components/owner/sales/BulkActions.tsx` | Multi-select toolbar |
 
-- Профиль клиента (имя, контакты, источник)
-- Текущий этап с кнопками перехода
-- Подходящие объекты из портфолио УК (автоподбор по бюджету/району/типу)
-- Лента активности (звонки, показы, заметки)
-- Быстрые действия: "Записать звонок", "Назначить показ", "Добавить заметку"
+### Database changes:
+None required -- all new features use existing schema fields.
 
-#### 3.3 `/owner/sales/analytics` -- Аналитика продаж
-
-- Конверсия по этапам (воронка)
-- Объём сделок по месяцам
-- Топ-агенты по закрытым сделкам
-- Источники клиентов (pie chart)
-
-### 4. Интеграция с существующим
-
-- **Навигация**: добавить "Sales" в `OwnerDashboardMenu` и `OwnerSidebar`
-- **Dashboard**: виджет "Active Deals" на `OwnerDashboard` (количество сделок по этапам)
-- **Properties**: на карточке объекта -- бейдж "For Sale" и количество активных сделок
-- **consultation_requests**: автоматическое создание deal из лидов типа `property_tour` и `investment_advice`, если привязаны к УК
-
-### 5. Права доступа
-
-- `company_id` + `management_company_members` -- основа RLS
-- Роль `owner` в members видит все сделки компании
-- Роль `member` видит только свои сделки (где agent_id = auth.uid())
-- Роль `admin` видит все + может переназначать
-
-## Порядок реализации
-
-Рекомендую разбить на 3 фазы:
-
-**Фаза 1 -- MVP** (этот план):
-- Таблицы agent_deals + agent_deal_activities
-- Страница Pipeline (список + создание/редактирование)
-- Карточка сделки с лентой активности
-- Виджет на Dashboard
-
-**Фаза 2 -- Продвинутые инструменты**:
-- Kanban-доска с drag-and-drop
-- Автоподбор объектов по критериям клиента
-- Аналитика продаж с графиками
-
-**Фаза 3 -- Автоматизация**:
-- Авто-создание сделок из входящих лидов
-- Напоминания о follow-up
-- WhatsApp-интеграция для уведомлений агентов
-
-## Итого: затронутые файлы
-
-| Файл | Изменение |
-|------|----------|
-| SQL миграция | Создание agent_deals, agent_deal_activities + RLS |
-| `src/hooks/useAgentDeals.ts` | Новый -- CRUD для сделок |
-| `src/hooks/useAgentDealActivities.ts` | Новый -- активности сделок |
-| `src/pages/owner/SalesPipeline.tsx` | Новый -- список/воронка |
-| `src/pages/owner/SalesDealDetail.tsx` | Новый -- карточка сделки |
-| `src/components/owner/sales/*` | Новые -- компоненты pipeline |
-| `src/components/owner/dashboard/ActiveDealsWidget.tsx` | Новый -- виджет на dashboard |
-| `src/components/owner/OwnerSidebar.tsx` | + пункт Sales |
-| `src/components/owner/dashboard/OwnerDashboardMenu.tsx` | + пункт Sales |
-| `src/pages/owner/OwnerDashboard.tsx` | + виджет ActiveDeals |
-| `App.tsx` | + маршруты /owner/sales, /owner/sales/:id |
