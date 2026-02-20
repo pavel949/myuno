@@ -44,45 +44,49 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   );
 }
 
-/** Compact segmented persona switcher */
+/** Compact 2×2 persona switcher with multi-select */
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
-  const { personas, setPersonas } = useUserPersonas();
+  const { personas, togglePersona } = useUserPersonas();
 
-  const activePersona = useMemo(() => {
-    if (personas.length === 0) return 'tourist';
-    return personas[0];
+  const activePersonas = useMemo(() => {
+    return personas.length > 0 ? personas : ['tourist' as UserPersona];
   }, [personas]);
 
-  const handleSelect = useCallback((p: UserPersona) => {
-    setPersonas([p]);
-  }, [setPersonas]);
-
   return (
-    <div className="grid grid-cols-4 gap-1.5 p-1.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
+    <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
       {PERSONA_OPTIONS.map((p) => {
         const info = PERSONA_INFO[p];
-        const isActive = activePersona === p;
+        const isActive = activePersonas.includes(p);
         return (
           <button
             key={p}
-            onClick={() => handleSelect(p)}
+            onClick={() => togglePersona(p)}
             className={cn(
-              "relative flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap",
+              "relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all",
               "focus-visible:ring-2 focus-visible:ring-white/50",
-              !isActive && "text-white/50 hover:text-white/80"
+              isActive
+                ? "bg-white/20 shadow-sm border border-white/25"
+                : "text-white/50 hover:text-white/80 hover:bg-white/5"
             )}
           >
+            <span className="text-lg shrink-0">{info.icon}</span>
+            <div className="min-w-0">
+              <span className={cn(
+                "block text-xs font-semibold leading-tight",
+                isActive ? "text-white" : ""
+              )}>
+                {isRu ? info.labelRu : info.labelEn}
+              </span>
+              <span className={cn(
+                "block text-[10px] leading-tight mt-0.5",
+                isActive ? "text-white/70" : "text-white/40"
+              )}>
+                {isRu ? info.descRu : info.descEn}
+              </span>
+            </div>
             {isActive && (
-              <motion.div
-                layoutId="persona-pill"
-                className="absolute inset-0 rounded-lg bg-white/20 shadow-sm border border-white/25"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
+              <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-white/80" />
             )}
-            <span className="relative z-10">{info.icon}</span>
-            <span className={cn("relative z-10", isActive ? "text-white" : "")}>
-              {isRu ? info.labelRu : info.labelEn}
-            </span>
           </button>
         );
       })}
