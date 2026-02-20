@@ -1,6 +1,6 @@
 import React, { memo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronDown, Grid3X3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
@@ -86,18 +86,15 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
           );
         })}
 
-        <AnimatePresence>
-          {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
-            <motion.button
-              layout
+        {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
+            <button
               onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
               className="flex items-center gap-1.5 mx-auto py-2 px-4 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
             >
               <span>{isRu ? (expanded ? 'Свернуть' : 'Показать все') : (expanded ? 'Show less' : 'Show all')}</span>
               <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", expanded && "rotate-180")} />
-            </motion.button>
-          )}
-        </AnimatePresence>
+            </button>
+        )}
       </div>
     </section>
   );
