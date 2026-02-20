@@ -62,7 +62,7 @@ export function ActiveStaysWidget() {
           guestsCount: booking.guests_count,
           checkIn,
           checkOut,
-          daysRemaining: differenceInDays(checkOut, today),
+          daysRemaining: Math.max(0, differenceInDays(checkOut, today)),
           totalNights: differenceInDays(checkOut, checkIn),
         };
       })
@@ -106,7 +106,7 @@ export function ActiveStaysWidget() {
         {activeStays.map((stay) => (
           <Card 
             key={stay.bookingId}
-            className="shrink-0 w-[85vw] max-w-[288px] snap-start touch-manipulation overflow-hidden cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-green-500"
+            className="shrink-0 w-[85vw] max-w-[288px] snap-start touch-manipulation overflow-hidden cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-success"
             onClick={() => navigate(`/owner/bookings/${stay.bookingId}`)}
           >
             <CardContent className="p-0">

@@ -168,20 +168,30 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
         const interval = tx.recurring_interval;
         const lastDate = parseISO(tx.transaction_date);
         const prop = tx.property as any;
+        const lastMonth = lastDate.getMonth();
 
-        // Calculate if this recurring expense falls in this month
-        let shouldInclude = false;
-        if (interval === 'monthly') shouldInclude = true;
-        if (interval === 'weekly') shouldInclude = true;
-        if (interval === 'quarterly' && i % 3 === 0) shouldInclude = true;
-        if (interval === 'annual' && i === 0) shouldInclude = false; // skip annual
+        // Calculate how many times this recurring expense appears in this month
+        let occurrences = 0;
+        if (interval === 'monthly') {
+          occurrences = 1;
+        } else if (interval === 'weekly') {
+          // ~4 occurrences per month
+          occurrences = 4;
+        } else if (interval === 'quarterly') {
+          // Include if this month aligns with the quarterly cycle
+          const monthDiff = (monthDate.getFullYear() - lastDate.getFullYear()) * 12 + (monthDate.getMonth() - lastMonth);
+          if (monthDiff >= 0 && monthDiff % 3 === 0) occurrences = 1;
+        } else if (interval === 'annual') {
+          // Include only if the month matches the original transaction month
+          if (monthDate.getMonth() === lastMonth) occurrences = 1;
+        }
 
-        if (shouldInclude) {
+        if (occurrences > 0) {
           const catLabel = tx.category ? tx.category.replace(/_/g, ' ') : '';
           items.push({
             date: format(mStart, 'yyyy-MM-dd'),
             type: tx.transaction_type === 'income' ? 'income' : 'expense',
-            amount: Number(tx.amount) || 0,
+            amount: (Number(tx.amount) || 0) * occurrences,
             label: (isRu ? tx.description_ru : tx.description) || catLabel || (isRu ? 'Повторяющийся расход' : 'Recurring expense'),
             source: 'recurring',
             status: 'expected',
