@@ -1,159 +1,173 @@
 
 
-# Комплексный план устранения gaps в CRM-модуле
+# UNO как единая система управления для агента на Пхукете: аудит и план развития
 
-## Обзор выявленных проблем
+## Сценарий: Агент с 50 объектами
 
-| # | Gap | Критичность | Описание |
-|---|-----|-------------|----------|
-| 1 | Context Loss: "New Deal" из ContactDetail | Высокая | Кнопка "Новая сделка" на странице контакта ведёт на `/owner/sales` без передачи данных контакта |
-| 2 | Type Safety: `useContactDeals` возвращает `any[]` | Средняя | Нет типизации, возможны runtime-ошибки |
-| 3 | Scalability: нет серверной пагинации | Средняя | `useAgentDeals` и `useCrmContacts` загружают ВСЕ записи разом |
-| 4 | CSV Import/Export | Средняя | Невозможно мигрировать данные из других CRM |
-| 5 | Удаление заметок в Timeline | Низкая | Нет кнопки удаления заметок в ContactDetail |
+Представим реального агента: 50 объектов на управлении, продажи + аренда, сотрудники (клинеры, мастера), поставщики, десятки контактов, коммунальные платежи, отчёты собственникам. Оценим каждую боль.
 
 ---
 
-## 1. Context Loss: Pre-fill контакта при создании сделки
+## Что UNO уже решает (СИЛЬНЫЕ СТОРОНЫ)
 
-**Проблема**: В `ContactDetail.tsx` кнопка "Новая сделка" просто делает `navigate('/owner/sales')`, теряя контекст контакта.
+| Боль агента | Решение в UNO | Оценка |
+|---|---|---|
+| Контакты разбросаны | CRM-модуль с досье, историей сделок, pipeline Kanban | 9/10 |
+| Бронирования хаотичны | Airbnb-style календарь, синхронизация iCal, Channel Manager | 9/10 |
+| Финансы непрозрачны | property_financials с 20+ категориями, прогноз cash flow на 3 мес. | 8/10 |
+| Нет операционного контроля | OwnerOperations с задачами today/upcoming/completed, привязка к объектам | 8/10 |
+| Отчёты собственникам | Генерация PDF-отчётов (jsPDF), отправка по email, тип "management" для УК | 8/10 |
+| Учёт сотрудников | StaffPage с реестром, типами оплаты (salary/daily/per_task), привязка расходов к cost_source | 7/10 |
+| Условия управления | property_management_terms с комиссиями, распределением ответственности за 9 категорий | 8/10 |
+| Контракты с поставщиками | provider_contracts с commission_rate, статусами, документами | 7/10 |
+| Шаблоны расходов | ExpenseTemplates для быстрого ввода (электричество, вода, уборка) | 8/10 |
+| Делегирование прав | property_delegates с гранулярными permissions (financials, calendar...) | 7/10 |
+
+---
+
+## Критические пробелы (ЧТО НУЖНО ДОБАВИТЬ)
+
+### GAP 1: Генерация инвойсов для арендаторов/собственников
+**Боль**: Агент не может выставить счёт арендатору за электричество или собственнику за комиссию. Нет системы инвойсов вообще.
+
+**Текущее состояние**: Поле `invoice_number` в `property_financials` -- просто текстовое поле для ручного ввода. Нет генерации, нет PDF-инвойсов, нет нумерации.
 
 **Решение**:
-- Добавить кнопку "Создать сделку" прямо в `ContactDetail`, которая открывает `CreateDealSheet` с передачей `prefilledContact`
-- Добавить prop `prefilledContact?: CrmContact` в `CreateDealSheet`
-- При наличии `prefilledContact` -- автоматически заполнять поля формы и устанавливать `selectedContact`
+- Создать таблицу `owner_invoices` (номер, тип: tenant/owner, items, total, status: draft/sent/paid/overdue, due_date)
+- Компонент `InvoiceBuilder.tsx` -- выбор объекта, добавление строк (аренда, электричество, вода, уборка), автоматический расчёт
+- Генерация PDF через jsPDF (уже установлен) с брендингом УК
+- Отправка по email через существующий Resend-интеграцию
+- Автоматическое создание инвойса при checkout/заселении
 
-**Файлы**:
-- `src/components/owner/sales/CreateDealSheet.tsx` -- добавить prop `prefilledContact`, при его наличии вызывать `setSelectedContact` и заполнять форму в `useEffect`
-- `src/pages/owner/ContactDetail.tsx` -- заменить `navigate('/owner/sales')` на локальное открытие `CreateDealSheet` с передачей текущего контакта
+### GAP 2: Напоминания об оплате коммунальных услуг
+**Боль**: "Забываешь оплатить свет" -- нет автоматических напоминаний о recurring платежах.
 
----
-
-## 2. Type Safety: типизация `useContactDeals`
-
-**Проблема**: `useContactDeals` возвращает `any[]`, и в `ContactDetail` deals отображаются через `(d: any)`.
+**Текущее состояние**: Есть поля `recurring`, `recurring_interval`, `due_date` в `property_financials`, но нет Edge Function для напоминаний.
 
 **Решение**:
-- Типизировать возвращаемое значение `useContactDeals` как `AgentDeal[]`
-- Убрать `as any` из шаблона в `ContactDetail`
+- Создать Edge Function `utility-payment-reminders` -- ежедневный cron, проверяет `due_date` за 3 и 1 день, отправляет push/email
+- В OwnerDashboard добавить виджет "Предстоящие платежи" с красными маркерами для просроченных
+- Автоматическое создание recurring записей (копирование по интервалу)
 
-**Файлы**:
-- `src/hooks/useCrmContacts.ts` -- изменить возвращаемый тип `useContactDeals` на `Promise<AgentDeal[]>` с импортом `AgentDeal`
-- `src/pages/owner/ContactDetail.tsx` -- убрать `(d: any)` в map, использовать типизированный объект
+### GAP 3: Защита контактной базы от кражи сотрудниками
+**Боль**: "Работники воруют контакты"
 
----
-
-## 3. Серверная пагинация для контактов и сделок
-
-**Проблема**: При 500+ контактах или сделках загрузка всех записей замедлит приложение.
-
-**Решение**: Добавить offset-based пагинацию с параметрами `page` и `pageSize`.
-
-**Файлы**:
-
-- `src/hooks/useCrmContacts.ts`:
-  - Добавить параметры `page: number`, `pageSize: number` в `useCrmContacts`
-  - Использовать `.range(from, to)` в запросе
-  - Добавить `useCrmContactsCount(companyId, filters)` для получения общего количества (с `.select('id', { count: 'exact', head: true })`)
-
-- `src/hooks/useAgentDeals.ts`:
-  - Аналогично добавить пагинацию в `useAgentDeals`
-  - Добавить `useAgentDealsCount`
-
-- `src/pages/owner/ContactsList.tsx`:
-  - Добавить состояние `page`, передавать в хук
-  - Добавить компонент `Pagination` из `@/components/ui/pagination` внизу списка
-  - Показывать "1-20 из 150"
-
-- `src/pages/owner/SalesPipeline.tsx` (или аналогичный файл списка сделок):
-  - Аналогичная пагинация
-
----
-
-## 4. CSV Import / Export контактов
-
-**Проблема**: Нет возможности массово загрузить/выгрузить контакты для миграции с других CRM.
-
-**Решение**: Добавить кнопки Import/Export на странице контактов.
-
-**Файлы**:
-
-- `src/components/owner/contacts/ContactExportButton.tsx` (новый):
-  - Кнопка "Export CSV"
-  - Использовать библиотеку `papaparse` (уже установлена) для генерации CSV
-  - Экспорт всех не-архивированных контактов текущей компании
-
-- `src/components/owner/contacts/ContactImportSheet.tsx` (новый):
-  - Sheet с drag-and-drop зоной для CSV файла
-  - Парсинг через `papaparse`
-  - Маппинг колонок: автоматическое определение `first_name`, `last_name`, `phone`, `email` и т.д.
-  - Предпросмотр первых 5 строк перед импортом
-  - Batch-insert через supabase `.insert(rows)`
-  - Обработка дубликатов по телефону (skip / overwrite)
-
-- `src/pages/owner/ContactsList.tsx`:
-  - Добавить кнопки Import/Export в header рядом с "Новый"
-
----
-
-## 5. Удаление заметок в Timeline
-
-**Проблема**: В `ContactDetail` заметки нельзя удалить.
+**Текущее состояние**: CRM-контакты привязаны к `company_id` через RLS, но нет аудит-лога доступа, нет ограничения экспорта, нет маскирования телефонов.
 
 **Решение**:
-- Добавить кнопку удаления (иконка Trash2) в каждую заметку
-- Использовать существующий хук `useDeleteContactNote`
+- Таблица `crm_access_log` -- логирование просмотра/экспорта контактов (кто, когда, какие)
+- Гранулярные роли в `management_company_members`: `can_view_contacts`, `can_export_contacts`, `can_see_phone`
+- Маскирование телефонов для ролей без `can_see_phone` (показывать +66***1234)
+- Водяные знаки в CSV-экспорте (имя сотрудника + дата)
+- Уведомление менеджеру при массовом просмотре (>20 контактов за час)
 
-**Файлы**:
-- `src/pages/owner/ContactDetail.tsx` -- добавить кнопку удаления в рендер заметок, подключить `useDeleteContactNote`
+### GAP 4: Оценка и рейтинг поставщиков услуг
+**Боль**: "Некоторые поставщики плохо работают"
+
+**Текущее состояние**: `provider_contracts` хранит условия, но нет системы оценки качества работы поставщиков.
+
+**Решение**:
+- Таблица `vendor_performance_reviews` (vendor_id, property_id, task_id, score 1-5, categories: quality/speed/communication, notes)
+- Автоматический запрос оценки после завершения operational_task
+- Агрегированный scorecard на странице поставщика
+- Алерт менеджеру при среднем рейтинге ниже 3.0
+
+### GAP 5: CRM-задачи с напоминаниями (follow-ups)
+**Боль**: Забываешь перезвонить клиенту, пропускаешь follow-up по сделке.
+
+**Текущее состояние**: `operational_tasks` существуют для property-задач (уборка, ремонт), но нет CRM-задач (звонок клиенту, отправить документы, follow-up).
+
+**Решение**:
+- Таблица `crm_tasks` (contact_id?, deal_id?, title, due_date, reminder_at, priority, status, assigned_to)
+- Виджет "Мои задачи сегодня" на главном экране Owner
+- Push-напоминания через существующую систему уведомлений
+- Автосоздание задач при смене стадии сделки (например: "Отправить договор" при переходе в "Negotiation")
+
+### GAP 6: Шаблоны документов (договоры аренды, акты)
+**Боль**: Для каждого арендатора нужно вручную заполнять договор.
+
+**Текущее состояние**: Нет системы шаблонов документов.
+
+**Решение**:
+- Таблица `document_templates` (name, type: lease/handover_act/invoice, content_template, variables)
+- Генератор документов с подстановкой переменных (имя, даты, суммы, адрес)
+- Предустановленные шаблоны: Lease Agreement (EN/RU/TH), Check-in/Check-out Act, Damage Report
+- Генерация PDF и отправка на подпись
 
 ---
 
 ## Порядок реализации
 
-1. Type Safety (Gap 2) -- быстрый fix, 2 файла
-2. Context Loss (Gap 1) -- 2 файла, критичный UX
-3. Удаление заметок (Gap 5) -- 1 файл, простой fix
-4. Серверная пагинация (Gap 3) -- 4-5 файлов, масштабируемость
-5. CSV Import/Export (Gap 4) -- 3 новых файла, полезная фича
+| Приоритет | Gap | Сложность | Влияние на бизнес |
+|---|---|---|---|
+| P0 | GAP 1: Инвойсы | Высокая | Критично -- агент теряет деньги |
+| P0 | GAP 2: Напоминания о платежах | Средняя | Критично -- забытые счета = штрафы |
+| P1 | GAP 5: CRM-задачи | Средняя | Высокое -- потеря сделок |
+| P1 | GAP 4: Рейтинг поставщиков | Низкая | Среднее -- качество сервиса |
+| P2 | GAP 3: Защита контактов | Средняя | Среднее -- безопасность |
+| P2 | GAP 6: Шаблоны документов | Высокая | Среднее -- экономия времени |
 
 ---
 
-## Технические детали
+## Технические детали реализации
 
-### Пагинация -- формат запроса
+### Таблица owner_invoices
 ```text
-const pageSize = 20;
-const from = page * pageSize;
-const to = from + pageSize - 1;
-
-supabase
-  .from('crm_contacts')
-  .select('*', { count: 'exact' })
-  .eq('company_id', companyId)
-  .range(from, to)
+owner_invoices:
+  id: uuid PK
+  company_id: uuid FK -> management_companies
+  property_id: uuid FK -> owner_properties
+  invoice_number: text (auto: INV-2026-0001)
+  invoice_type: enum (tenant_billing, owner_report, service_fee)
+  recipient_name: text
+  recipient_email: text
+  items: jsonb [{description, quantity, unit_price, amount}]
+  subtotal: numeric
+  tax_rate: numeric (default 0)
+  tax_amount: numeric
+  total: numeric
+  currency: text (default THB)
+  status: enum (draft, sent, paid, overdue, cancelled)
+  issued_date: date
+  due_date: date
+  paid_date: date
+  notes: text
+  pdf_url: text
+  created_by: uuid
+  created_at: timestamptz
 ```
 
-### CSV Import -- формат маппинга
+### Edge Function: utility-payment-reminders
 ```text
-CSV колонка    -->  DB поле
-Name           -->  first_name + last_name (split по пробелу)
-Phone          -->  phone
-Email          -->  email
-Type           -->  contact_type
-Source         -->  source
-Budget         -->  budget_max
+Cron: daily at 09:00 ICT
+Logic:
+  1. SELECT * FROM property_financials 
+     WHERE recurring = true AND status = 'pending' 
+     AND due_date BETWEEN now() AND now() + interval '3 days'
+  2. For each: send push notification to owner_id
+  3. For overdue (due_date < now()): send urgent email
+  4. Auto-create next recurring entry if current one is completed
 ```
 
-### Pre-fill контакта -- prop interface
+### Защита контактов -- маскирование
 ```text
-CreateDealSheet props:
-  + prefilledContact?: CrmContact
+Phone masking for restricted roles:
+  Full: +66 812 345 678
+  Masked: +66 8** *** *78
 
-При наличии prefilledContact:
-  - selectedContact = prefilledContact
-  - form.client_name = "first_name last_name"
-  - form.client_phone = contact.phone
-  - form.client_email = contact.email
+CSV watermark:
+  Header row: "Exported by: {employee_name} on {date}"
+  Footer row: "Confidential — {company_name}"
 ```
 
+---
+
+## Итоговая оценка: может ли UNO стать единой системой?
+
+**Сейчас UNO покрывает ~70% потребностей агента с 50 объектами.**
+
+Сильнейшие стороны: CRM + Pipeline, Финансовый учёт, Операционные задачи, Календарь, Отчёты.
+
+После реализации 6 gap'ов покрытие вырастет до ~90%, что сделает UNO полноценной альтернативой связке "Excel + WhatsApp + отдельная CRM + бухгалтер".
+
+Оставшиеся 10% -- это deep accounting (полноценный бухучёт по тайским стандартам), юридическое сопровождение и банковская интеграция для автоплатежей, которые требуют сторонних интеграций.
