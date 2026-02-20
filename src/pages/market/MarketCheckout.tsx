@@ -41,6 +41,7 @@ import {
 import { InternationalAddressForm } from '@/components/market/InternationalAddressForm';
 import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 // Order Item Card Component
 interface OrderItemProps {
@@ -736,6 +737,7 @@ const MarketCheckout = () => {
           submitLabel={language === 'ru' ? 'Оформить заказ' : 'Place Order'}
         />
       </PageContainer>
+      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };
