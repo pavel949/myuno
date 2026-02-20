@@ -1,88 +1,99 @@
 
+# Апгрейд инструментов собственника: Инвентарь по объектам + Расширенные шаблоны
 
-# Расширение KPI-блока: полная картина бизнеса
+## Что сейчас
 
-## Проблема
+### Инвентарь (`/owner/inventory`)
+- Плоский список предметов без привязки к конкретному объекту
+- Нет фото-фиксации
+- Нет чек-листа заезда/выезда
+- 7 категорий, +-кнопки для количества, low-stock алерты
 
-Текущий `BusinessKPIWidget` показывает только 4 метрики:
-- Доход / Расходы / Маржа / Загрузка
+### Шаблоны документов (`/owner/documents`)
+- 4 шаблона: Договор аренды, Акт приёма-передачи, Доверенность, Договор на услуги
+- Простой PDF (текст без форматирования, без таблиц)
+- Нет шаблонов для: акт повреждений, опись имущества, чек-лист уборки
 
-Это покрывает **только финансы и заполняемость**. Владелец малого бизнеса не видит:
+---
 
-| Направление | Сейчас в KPI | Данные в БД |
-|-------------|-------------|-------------|
-| Финансы | Да (4 карточки) | property_financials |
-| CRM / Задачи | Нет | crm_tasks |
-| Продажи / Сделки | Нет | agent_deals |
-| Персонал | Нет | staff_members, staff_payroll |
-| Операции (заявки) | Нет | service_requests |
-| Бронирования | Нет | property_bookings |
-| Инвентарь | Нет | property_inventory_items |
+## Что будет сделано
 
-## Решение
+### 1. Инвентарь по объектам + фото
 
-Расширить KPI-виджет до **2-уровневой структуры**:
+**Привязка к объекту:**
+- Добавить фильтр по объекту (Select с property_id) в InventoryPage
+- При добавлении предмета -- обязательный выбор объекта (dropdown с owner_properties)
+- Группировка списка по объектам (как в File Vault)
 
-1. **Верхний ряд (2x2)** -- финансовые метрики (как сейчас): Доход, Расходы, Маржа, Загрузка
-2. **Нижний ряд (скроллируемый)** -- операционные метрики по направлениям:
+**Фото-фиксация:**
+- Кнопка "Фото" при добавлении/редактировании предмета
+- Загрузка в storage bucket `owner-vault` (папка `inventory/`)
+- Миниатюра в карточке предмета
 
-| Карточка | Значение | Источник | Ссылка |
-|----------|---------|----------|--------|
-| Открытые задачи | Кол-во незакрытых crm_tasks | crm_tasks (status != done) | /owner/crm-tasks |
-| Активные сделки | Кол-во + сумма воронки | agent_deals (is_closed=false) | /owner/sales |
-| Бронирования | Кол-во текущих/предстоящих | property_bookings | /owner/bookings |
-| Персонал | Кол-во сотрудников + расходы на ЗП за месяц | staff_members + staff_payroll | /owner/staff |
-| Заявки на сервис | Кол-во открытых | service_requests (status=pending) | /owner/operations |
-| Инвентарь (алерт) | Позиций ниже минимума | property_inventory_items | /owner/inventory |
+**Чек-лист заезда/выезда:**
+- Новая вкладка "Check-in/out" в инвентаре
+- Автогенерация чек-листа из инвентаря объекта (мебель, электроника, кухня)
+- Статусы: OK / Повреждено / Отсутствует
+- Фото для повреждённых позиций
+- Сохранение результатов проверки (новая таблица `inventory_inspections`)
+
+### 2. Расширенные шаблоны документов
+
+**Новые шаблоны (+4):**
+
+| Шаблон | Переменные |
+|--------|-----------|
+| Акт повреждений (Damage Report) | tenant, property, date, items[], photos, total_cost |
+| Опись имущества (Property Inventory List) | property, date, items[] из inventory |
+| Чек-лист уборки (Cleaning Checklist) | property, date, rooms[], tasks[] |
+| Акт возврата залога (Deposit Return) | tenant, property, deposit, deductions[], refund |
+
+**Улучшенный PDF:**
+- Таблицы через `jspdf-autotable` (уже установлен)
+- Логотип и брендирование
+- Нумерация страниц
+- Секции с рамками
+
+### 3. Автозаполнение из базы
+
+- При выборе шаблона "Опись имущества" -- автоподгрузка items из `property_inventory_items`
+- При выборе шаблона "Акт повреждений" -- подтягивание инвентаря + возможность отметить повреждения
+
+---
 
 ## Технические детали
 
+### Новая таблица БД
+
+```text
+inventory_inspections
+  - id (uuid PK)
+  - property_id (FK -> owner_properties)
+  - inspector_id (FK -> auth.users)
+  - inspection_type: 'check_in' | 'check_out'
+  - items: jsonb[] (item_id, status, notes, photos[])
+  - created_at
+  RLS: owner_id match через property_id
+```
+
 ### Файлы для изменения
 
-**1. `src/components/owner/dashboard/BusinessKPIWidget.tsx`**
-- Добавить запросы к 6 новым таблицам в `Promise.all`
-- Добавить горизонтальный скролл с мини-карточками под основной 2x2 сеткой
-- Каждая мини-карточка: иконка + название + число + badge (если требует внимания)
+1. **`src/pages/owner/InventoryPage.tsx`** -- полная переработка:
+   - Фильтр по объекту
+   - Группировка по объектам
+   - Фото-загрузка через UnifiedMediaUploader
+   - Новая вкладка "Инспекции"
 
-**2. `src/components/owner/OwnerKPICard.tsx`**
-- Добавить вариант `compact` для мини-карточек нижнего ряда (меньший padding, без changeLabel)
+2. **`src/pages/owner/DocumentTemplatesPage.tsx`** -- расширение:
+   - +4 новых шаблона
+   - Профессиональный PDF с таблицами
+   - Автозаполнение из inventory при выборе объекта
 
-### Новые запросы к БД (все в одном Promise.all)
+3. **Новый файл: `src/components/owner/inventory/InspectionChecklist.tsx`**
+   - Компонент чек-листа с фото-фиксацией
 
-```text
-crm_tasks        -> count where status != 'done' AND (assigned_to = user OR company match)
-agent_deals      -> count + sum(deal_value) where is_closed = false
-property_bookings -> count where check_in <= end_of_month AND check_out >= today
-staff_members    -> count where company_id matches
-staff_payroll    -> sum(amount) for current month
-service_requests -> count where status IN ('pending','in_progress')
-property_inventory_items -> count where current_quantity < min_quantity
-```
+4. **SQL миграция** -- таблица `inventory_inspections` + RLS
 
-### UI-структура
-
-```text
-+-------------------+-------------------+
-|   Revenue ฿93K    |   Expenses ฿18K   |
-|   +12% vs prev    |   -5% vs prev     |
-+-------------------+-------------------+
-|   Margin 81%      |   Occupancy 72%   |
-+-------------------+-------------------+
-
-[Задачи: 5] [Сделки: 3 / ฿2.1M] [Броней: 8] [Персонал: 12] [Заявки: 2] [Склад: !3]
-   ^^^ горизонтальный скролл с компактными карточками ^^^
-```
-
-- Карточки с проблемами (просроченные задачи, инвентарь ниже минимума) подсвечиваются оранжевым/красным badge
-- Каждая карточка кликабельна и ведёт на соответствующую страницу
-
-### Адаптация по ролям
-
-Набор операционных карточек адаптируется к активной бизнес-роли:
-- **Property Manager**: все 6 карточек
-- **Sales Agent**: Задачи, Сделки, Бронирования
-- **Service Provider**: Задачи, Заявки, Инвентарь
-- **General**: все 6 карточек
-
-Роль передаётся как prop из `OwnerDashboard` -> `BusinessKPIWidget`.
-
+### Объём работ
+- ~400 строк нового кода
+- 2 файла на модификацию, 1 новый компонент, 1 миграция
