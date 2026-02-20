@@ -123,7 +123,9 @@ export default function ReportsPage() {
   const getReportPeriod = (type: ReportType): { start: string; end: string } => {
     const now = new Date();
     switch (type) {
-      case 'monthly': {
+      case 'monthly':
+      case 'owner_statement':
+      case 'pnl': {
         const lastMonth = subMonths(now, 1);
         return { start: format(startOfMonth(lastMonth), 'yyyy-MM-dd'), end: format(endOfMonth(lastMonth), 'yyyy-MM-dd') };
       }
@@ -194,6 +196,8 @@ export default function ReportsPage() {
       annual: { en: 'Annual', ru: 'Годовой' },
       custom: { en: 'Custom', ru: 'Произвольный' },
       management: { en: 'Management', ru: 'Управленческий' },
+      owner_statement: { en: 'Owner Statement', ru: 'Отчёт собственнику' },
+      pnl: { en: 'P&L Report', ru: 'Отчёт P&L' },
     };
     return labels[type]?.[isRu ? 'ru' : 'en'] || type;
   };
@@ -382,6 +386,8 @@ export default function ReportsPage() {
                     <SelectItem value="monthly">{isRu ? 'Ежемесячный (прошлый месяц)' : 'Monthly (last month)'}</SelectItem>
                     <SelectItem value="quarterly">{isRu ? 'Квартальный (прошлый квартал)' : 'Quarterly (last quarter)'}</SelectItem>
                     <SelectItem value="annual">{isRu ? 'Годовой (прошлый год)' : 'Annual (last year)'}</SelectItem>
+                    <SelectItem value="owner_statement">{isRu ? 'Отчёт собственнику (Owner Statement)' : 'Owner Statement'}</SelectItem>
+                    <SelectItem value="pnl">{isRu ? 'Прибыль и убытки (P&L)' : 'Profit & Loss (P&L)'}</SelectItem>
                     <SelectItem value="management">{isRu ? 'Управленческий отчёт (УК)' : 'Management Report'}</SelectItem>
                     <SelectItem value="custom">{isRu ? 'Произвольный период' : 'Custom period'}</SelectItem>
                   </SelectContent>
@@ -391,6 +397,20 @@ export default function ReportsPage() {
                     {isRu
                       ? 'Включает заполняемость, комиссию УК, обслуживание и чистый доход собственника'
                       : 'Includes occupancy, mgmt commission, maintenance and owner net income'}
+                  </p>
+                )}
+                {selectedReportType === 'owner_statement' && (
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Ежемесячный отчёт собственнику: доходы, расходы, комиссия, итого к выплате'
+                      : 'Monthly owner report: income, expenses, commission, net payout'}
+                  </p>
+                )}
+                {selectedReportType === 'pnl' && (
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Прибыль и убытки: валовая прибыль, операционные расходы, чистый доход, коэффициент расходов'
+                      : 'Profit & Loss: gross profit, operating expenses, net income, expense ratio'}
                   </p>
                 )}
               </div>

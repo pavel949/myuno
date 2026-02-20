@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { getAccessiblePropertyIds } from '@/hooks/usePropertyFinancials';
 
-export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management';
+export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management' | 'owner_statement' | 'pnl';
 export type ReportStatus = 'generating' | 'draft' | 'ready' | 'sent' | 'viewed' | 'error';
 
 export interface ReportData {
@@ -59,6 +59,16 @@ export interface ReportData {
   mom_change?: number;
   highlights?: string[];
   recommendations?: string[];
+  // P&L specific
+  gross_profit?: number;
+  operating_expenses?: number;
+  operating_income?: number;
+  expense_ratio?: number;
+  // Owner Statement specific
+  owner_payout?: number;
+  deductions?: Array<{ category: string; amount: number; description: string }>;
+  deposit_held?: number;
+  deposit_returned?: number;
 }
 
 export interface PropertyReport {
@@ -252,6 +262,22 @@ export function useGenerateReport() {
         net_income: income.total - expenses.total,
         management_commission: mgmtCommission,
         owner_net_income: income.total - expenses.total,
+        // P&L fields
+        gross_profit: income.total - expenses.transactions
+          .filter(t => ['cleaning', 'supplies', 'cleaning_fee'].includes(t.category))
+          .reduce((s, t) => s + t.amount, 0),
+        operating_expenses: expenses.transactions
+          .filter(t => !['cleaning', 'supplies', 'cleaning_fee'].includes(t.category))
+          .reduce((s, t) => s + t.amount, 0),
+        operating_income: income.total - expenses.total,
+        expense_ratio: income.total > 0 ? Math.round((expenses.total / income.total) * 100) : 0,
+        // Owner Statement fields
+        owner_payout: income.total - expenses.total - mgmtCommission,
+        deductions: Object.entries(expenses.by_category).map(([cat, amount]) => ({
+          category: cat,
+          amount: amount as number,
+          description: cat.replace(/_/g, ' '),
+        })),
       };
 
       // Create the report
