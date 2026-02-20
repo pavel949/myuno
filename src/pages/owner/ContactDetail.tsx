@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact, CONTACT_TAGS } from '@/hooks/useCrmContacts';
-import { useContactNotes, useAddContactNote } from '@/hooks/useCrmContactNotes';
+import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
-import { DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
+import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage, AgentDeal } from '@/hooks/useAgentDeals';
+import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -39,8 +40,11 @@ export default function ContactDetail() {
   const updateContact = useUpdateContact();
   const deleteContact = useDeleteContact();
   const addNote = useAddContactNote();
+  const deleteNote = useDeleteContactNote();
+  const { data: membership } = useMyCompanyId();
 
   const [showEdit, setShowEdit] = useState(false);
+  const [showCreateDeal, setShowCreateDeal] = useState(false);
   const [noteType, setNoteType] = useState('note');
   const [noteText, setNoteText] = useState('');
 
@@ -236,7 +240,7 @@ export default function ContactDetail() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-medium">{isRu ? 'Сделки' : 'Deals'} ({deals.length})</p>
-          <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/sales')}>
+          <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowCreateDeal(true)}>
             <Plus className="h-3 w-3 mr-1" />
             {isRu ? 'Новая' : 'New'}
           </Button>
@@ -245,7 +249,7 @@ export default function ContactDetail() {
           <p className="text-xs text-muted-foreground">{isRu ? 'Нет связанных сделок' : 'No linked deals'}</p>
         ) : (
           <div className="space-y-2">
-            {deals.map((d: any) => {
+            {deals.map((d) => {
               const stage = d.stage as DealStage;
               const label = isRu ? DEAL_STAGE_LABELS[stage]?.ru : DEAL_STAGE_LABELS[stage]?.en;
               return (
@@ -301,7 +305,7 @@ export default function ContactDetail() {
         ) : (
           <div className="space-y-3">
             {notes.map(note => (
-              <div key={note.id} className="flex gap-3 text-sm">
+              <div key={note.id} className="flex gap-3 text-sm group">
                 <span className="text-lg mt-0.5">{noteTypeIcons[note.note_type] || '📝'}</span>
                 <div className="flex-1 min-w-0">
                   <p>{note.content}</p>
@@ -309,6 +313,12 @@ export default function ContactDetail() {
                     {formatDistanceToNow(new Date(note.created_at), { addSuffix: true, locale })}
                   </p>
                 </div>
+                <button
+                  onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             ))}
           </div>
@@ -317,6 +327,16 @@ export default function ContactDetail() {
 
       {/* Edit sheet */}
       {contact && <EditContactSheet open={showEdit} onOpenChange={setShowEdit} contact={contact} />}
+
+      {/* Create deal sheet with prefilled contact */}
+      {contact && membership?.company_id && (
+        <CreateDealSheet
+          open={showCreateDeal}
+          onOpenChange={setShowCreateDeal}
+          companyId={membership.company_id}
+          prefilledContact={contact}
+        />
+      )}
     </div>
   );
 }

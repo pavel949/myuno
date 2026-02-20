@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +20,10 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
+  prefilledContact?: CrmContact | null;
 }
 
-export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
+export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -30,7 +31,27 @@ export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
   const navigate = useNavigate();
   const createDeal = useCreateDeal();
   const createContact = useCreateContact();
-  const [selectedContact, setSelectedContact] = useState<CrmContact | null>(null);
+  const [selectedContact, setSelectedContact] = useState<CrmContact | null>(prefilledContact || null);
+
+  // Pre-fill form when prefilledContact is provided
+  useEffect(() => {
+    if (prefilledContact && open) {
+      setSelectedContact(prefilledContact);
+      setForm(f => ({
+        ...f,
+        client_name: `${prefilledContact.first_name} ${prefilledContact.last_name}`.trim(),
+        client_phone: prefilledContact.phone || '',
+        client_email: prefilledContact.email || '',
+        client_source: prefilledContact.source || 'website',
+        budget_min: prefilledContact.budget_min ? String(prefilledContact.budget_min) : '',
+        budget_max: prefilledContact.budget_max ? String(prefilledContact.budget_max) : '',
+        currency: prefilledContact.currency || 'THB',
+        bedrooms_min: prefilledContact.bedrooms_min ? String(prefilledContact.bedrooms_min) : '',
+        preferred_types: prefilledContact.preferred_types || [],
+        preferred_districts: prefilledContact.preferred_districts || [],
+      }));
+    }
+  }, [prefilledContact, open]);
 
   const [form, setForm] = useState({
     client_name: '',

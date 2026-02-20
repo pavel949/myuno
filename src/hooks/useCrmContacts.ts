@@ -40,17 +40,20 @@ export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord
 export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
-export function useCrmContacts(companyId: string | undefined) {
+export function useCrmContacts(companyId: string | undefined, page = 0, pageSize = 20) {
   return useQuery({
-    queryKey: ['crm-contacts', companyId],
-    queryFn: async (): Promise<CrmContact[]> => {
-      const { data, error } = await supabase
+    queryKey: ['crm-contacts', companyId, page, pageSize],
+    queryFn: async (): Promise<{ data: CrmContact[]; count: number }> => {
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+      const { data, error, count } = await supabase
         .from('crm_contacts')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('company_id', companyId!)
-        .order('updated_at', { ascending: false });
+        .order('updated_at', { ascending: false })
+        .range(from, to);
       if (error) throw error;
-      return (data || []) as unknown as CrmContact[];
+      return { data: (data || []) as unknown as CrmContact[], count: count || 0 };
     },
     enabled: !!companyId,
   });
@@ -154,7 +157,7 @@ export function useContactDeals(contactId: string | undefined) {
         .eq('contact_id', contactId!)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as import('@/hooks/useAgentDeals').AgentDeal[];
     },
     enabled: !!contactId,
   });
