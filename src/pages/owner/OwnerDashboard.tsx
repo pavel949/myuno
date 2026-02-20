@@ -11,6 +11,7 @@ import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidge
 import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
 import { OwnerOperationsFlat } from '@/components/owner/dashboard/OwnerOperationsFlat';
 import { OwnerDashboardMenu } from '@/components/owner/dashboard/OwnerDashboardMenu';
+import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
 
 function SectionSkeleton() {
   return (
@@ -75,6 +76,15 @@ export default function OwnerDashboard() {
       <div data-tour="operations">
         <Suspense fallback={<SectionSkeleton />}>
           <OwnerOperationsFlat />
+        </Suspense>
+      </div>
+
+      <Separator />
+
+      {/* Active Deals */}
+      <div data-tour="deals">
+        <Suspense fallback={<SectionSkeleton />}>
+          <ActiveDealsWidget />
         </Suspense>
       </div>
 

@@ -367,6 +367,8 @@ export const TeamPage = lazy(() => import('@/pages/owner/TeamPage'));
 export const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
 export const ManagementPortfolio = lazy(() => import('@/pages/owner/ManagementPortfolio'));
 export const StaffPage = lazy(() => import('@/pages/owner/StaffPage'));
+export const SalesPipeline = lazy(() => import('@/pages/owner/SalesPipeline'));
+export const SalesDealDetail = lazy(() => import('@/pages/owner/SalesDealDetail'));
 export const OwnerGuidebookEdit = lazy(() => import('@/pages/owner/OwnerGuidebookEdit'));
 
 // ── Staff ──
