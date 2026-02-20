@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
@@ -129,7 +129,9 @@ export default function OwnerFinancials() {
     URL.revokeObjectURL(url);
   };
 
-  if (!user) { navigate('/auth'); return null; }
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <PageContainer>

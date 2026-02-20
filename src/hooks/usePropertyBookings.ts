@@ -101,7 +101,7 @@ export function usePropertyBookings(propertyId?: string) {
       const { data: delegated } = await (supabase as any)
         .from('property_delegates')
         .select('property_id')
-        .eq('delegate_user_id', user.id)
+        .eq('user_id', user.id)
         .eq('status', 'active');
       
       const delegatedIds = ((delegated || []) as { property_id: string }[]).map((d: { property_id: string }) => d.property_id);
