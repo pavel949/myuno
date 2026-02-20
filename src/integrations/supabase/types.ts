@@ -3186,6 +3186,47 @@ export type Database = {
           },
         ]
       }
+      crm_access_log: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          entity_ids: string[] | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          entity_ids?: string[] | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          entity_ids?: string[] | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_access_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contact_notes: {
         Row: {
           contact_id: string
@@ -3318,6 +3359,109 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tasks: {
+        Row: {
+          assigned_to: string | null
+          company_id: string
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          property_id: string | null
+          reminder_at: string | null
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_id: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          property_id?: string | null
+          reminder_at?: string | null
+          status?: string
+          task_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          company_id?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          property_id?: string | null
+          reminder_at?: string | null
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -9724,6 +9868,110 @@ export type Database = {
           tier_order?: number
         }
         Relationships: []
+      }
+      owner_invoices: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          due_date: string | null
+          id: string
+          invoice_number: string
+          invoice_type: Database["public"]["Enums"]["invoice_type"]
+          issued_date: string
+          items: Json
+          notes: string | null
+          paid_date: string | null
+          pdf_url: string | null
+          property_id: string | null
+          recipient_email: string | null
+          recipient_name: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          invoice_type?: Database["public"]["Enums"]["invoice_type"]
+          issued_date?: string
+          items?: Json
+          notes?: string | null
+          paid_date?: string | null
+          pdf_url?: string | null
+          property_id?: string | null
+          recipient_email?: string | null
+          recipient_name: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          invoice_type?: Database["public"]["Enums"]["invoice_type"]
+          issued_date?: string
+          items?: Json
+          notes?: string | null
+          paid_date?: string | null
+          pdf_url?: string | null
+          property_id?: string | null
+          recipient_email?: string | null
+          recipient_name?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       owner_performance_metrics: {
         Row: {
@@ -19093,6 +19341,87 @@ export type Database = {
           },
         ]
       }
+      vendor_performance_reviews: {
+        Row: {
+          communication_score: number
+          company_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          overall_score: number | null
+          property_id: string | null
+          quality_score: number
+          reviewed_by: string
+          speed_score: number
+          task_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          communication_score: number
+          company_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          overall_score?: number | null
+          property_id?: string | null
+          quality_score: number
+          reviewed_by: string
+          speed_score: number
+          task_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          communication_score?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          overall_score?: number | null
+          property_id?: string | null
+          quality_score?: number
+          reviewed_by?: string
+          speed_score?: number
+          task_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_performance_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_performance_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_performance_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_performance_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_performance_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_prospect_activity: {
         Row: {
           activity_type: string
@@ -22005,6 +22334,8 @@ export type Database = {
         | "failed"
         | "cancelled"
         | "refunded"
+      invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
+      invoice_type: "tenant_billing" | "owner_report" | "service_fee"
       item_condition: "new" | "like_new" | "good" | "fair" | "for_parts"
       listing_application_status:
         | "draft"
@@ -22233,6 +22564,8 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
+      invoice_type: ["tenant_billing", "owner_report", "service_fee"],
       item_condition: ["new", "like_new", "good", "fair", "for_parts"],
       listing_application_status: [
         "draft",

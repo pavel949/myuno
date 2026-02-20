@@ -12,6 +12,8 @@ import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertie
 import { OwnerOperationsFlat } from '@/components/owner/dashboard/OwnerOperationsFlat';
 import { OwnerDashboardMenu } from '@/components/owner/dashboard/OwnerDashboardMenu';
 import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
+import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
+import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
 
 function SectionSkeleton() {
   return (
@@ -78,6 +80,18 @@ export default function OwnerDashboard() {
           <OwnerOperationsFlat />
         </Suspense>
       </div>
+
+      <Separator />
+
+      {/* CRM Tasks Widget */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <CrmTasksWidget />
+      </Suspense>
+
+      {/* Upcoming Payments */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <UpcomingPaymentsWidget />
+      </Suspense>
 
       <Separator />
 

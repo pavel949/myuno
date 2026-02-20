@@ -117,3 +117,6 @@ verify_jwt = false
 [functions.post-order-autopilot]
 verify_jwt = false
 
+[functions.utility-payment-reminders]
+verify_jwt = false
+

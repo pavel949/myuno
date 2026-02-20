@@ -13,6 +13,8 @@ import {
   Users,
   TrendingUp,
   ContactRound,
+  Receipt,
+  ListTodo,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -23,6 +25,8 @@ interface MenuItem {
 }
 
 const MENU_ITEMS: MenuItem[] = [
+  { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы' },
+  { path: '/owner/tasks', icon: ListTodo, labelEn: 'CRM Tasks', labelRu: 'Задачи CRM' },
   { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
   { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
