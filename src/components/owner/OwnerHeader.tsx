@@ -43,6 +43,8 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner/guide': { en: 'Guide', ru: 'Руководство' },
   '/owner/vendors': { en: 'Vendor Directory', ru: 'Поставщики' },
   '/owner/inventory': { en: 'Inventory', ru: 'Инвентарь' },
+  '/owner/documents': { en: 'Documents', ru: 'Документы' },
+  '/owner/marketing': { en: 'Marketing', ru: 'Маркетинг' },
 };
 
 export function OwnerHeader() {
