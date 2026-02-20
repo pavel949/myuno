@@ -82,15 +82,16 @@ export function QuickSolutionsGallery() {
     { loop: false, align: 'start', skipSnaps: false, slidesToScroll: 2 }
   );
 
-  const activePersona = useMemo(() => {
-    if (personas.includes('property_owner')) return 'property_owner';
-    if (personas.includes('investor')) return 'investor';
-    if (personas.includes('resident')) return 'resident';
-    return 'tourist';
+  const activePersonas = useMemo(() => {
+    if (personas.length === 0) return ['tourist' as string];
+    return personas as string[];
   }, [personas]);
 
   const solutions = useMemo(() => {
-    const personaItems = SOLUTIONS.filter(s => s.personas.includes(activePersona));
+    // Collect items matching ANY of the selected personas
+    const personaItems = SOLUTIONS.filter(s => 
+      activePersonas.some(p => s.personas.includes(p))
+    );
     const universalItems = SOLUTIONS.filter(s => s.personas.includes('all'));
     const seen = new Set<string>();
     const result: QuickSolution[] = [];
@@ -102,7 +103,7 @@ export function QuickSolutionsGallery() {
       if (result.length >= 10) break;
     }
     return result;
-  }, [activePersona]);
+  }, [activePersonas]);
 
   return (
     <section className="space-y-3">
