@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { 
-  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download, Zap
+  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download, Zap, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -41,6 +41,13 @@ const actions = [
     labelEn: 'Auto Msgs', 
     labelRu: 'Авто-сообщ.',
     path: '/owner/auto-messaging',
+  },
+  { 
+    id: 'revenue', 
+    icon: TrendingUp, 
+    labelEn: 'Revenue', 
+    labelRu: 'Доходы',
+    path: '/owner/revenue',
   },
   { 
     id: 'property', 
