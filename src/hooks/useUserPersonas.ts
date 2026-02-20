@@ -236,8 +236,8 @@ export const PERSONA_INFO: Record<UserPersona, {
     bgColor: 'bg-emerald-500/10',
   },
   property_owner: {
-    labelEn: 'Owner',
-    labelRu: 'Владелец',
+    labelEn: 'Owner / MC',
+    labelRu: 'Владелец / УК',
     icon: '🏢',
     color: 'text-amber-600',
     bgColor: 'bg-amber-500/10',
