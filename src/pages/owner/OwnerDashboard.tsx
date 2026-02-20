@@ -117,9 +117,9 @@ export default function OwnerDashboard() {
         <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
           <Home className="h-10 w-10 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">myUNO</h2>
+        <h2 className="text-2xl font-bold mb-2">{isRu ? 'Управление недвижимостью' : 'Property Management'}</h2>
         <p className="text-muted-foreground mb-8 max-w-sm">
-          {isRu ? 'Управляйте своей недвижимостью на Пхукете профессионально' : 'Manage your Phuket property professionally'}
+          {isRu ? 'Профессиональное управление вашей недвижимостью на Пхукете' : 'Professional property management in Phuket'}
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Button onClick={() => navigate('/auth')} size="lg" className="h-12">
