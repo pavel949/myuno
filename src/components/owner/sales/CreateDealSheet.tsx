@@ -10,6 +10,8 @@ import { AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
+import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
+import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -27,6 +29,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const createDeal = useCreateDeal();
+  const createContact = useCreateContact();
+  const [selectedContact, setSelectedContact] = useState<CrmContact | null>(null);
 
   const [form, setForm] = useState({
     client_name: '',
@@ -63,18 +67,50 @@ export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (!form.client_name.trim()) {
-      toast({ title: isRu ? 'Введите имя клиента' : 'Enter client name', variant: 'destructive' });
+    if (!form.client_name.trim() && !selectedContact) {
+      toast({ title: isRu ? 'Введите имя клиента или выберите контакт' : 'Enter client name or select a contact', variant: 'destructive' });
       return;
     }
     try {
+      let contactId: string | null = selectedContact?.id || null;
+      const clientName = selectedContact ? `${selectedContact.first_name} ${selectedContact.last_name}`.trim() : form.client_name.trim();
+      const clientPhone = selectedContact ? selectedContact.phone : (form.client_phone || null);
+      const clientEmail = selectedContact ? selectedContact.email : (form.client_email || null);
+
+      // Auto-create contact if not selected
+      if (!contactId && (form.client_phone || form.client_email)) {
+        try {
+          const nameParts = form.client_name.trim().split(' ');
+          const newContact = await createContact.mutateAsync({
+            company_id: companyId,
+            first_name: nameParts[0] || '',
+            last_name: nameParts.slice(1).join(' ') || '',
+            phone: form.client_phone || null,
+            phone2: null, email: form.client_email || null,
+            whatsapp: null, telegram: null, line_id: null,
+            nationality: null, language: 'en',
+            source: form.client_source, contact_type: 'buyer',
+            company_name: null,
+            budget_min: form.budget_min ? Number(form.budget_min) : null,
+            budget_max: form.budget_max ? Number(form.budget_max) : null,
+            currency: form.currency,
+            preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
+            preferred_types: form.preferred_types.length ? form.preferred_types : null,
+            bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
+            notes: null, tags: [], avatar_url: null, is_archived: false,
+            created_by: user?.id || null,
+          });
+          contactId = (newContact as any)?.id || null;
+        } catch { /* ignore contact creation failure */ }
+      }
+
       await createDeal.mutateAsync({
         company_id: companyId,
         agent_id: user!.id,
         property_id: null,
-        client_name: form.client_name.trim(),
-        client_phone: form.client_phone || null,
-        client_email: form.client_email || null,
+        client_name: clientName,
+        client_phone: clientPhone,
+        client_email: clientEmail,
         client_source: form.client_source,
         stage: 'new',
         budget_min: form.budget_min ? Number(form.budget_min) : null,
@@ -84,16 +120,14 @@ export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
         preferred_types: form.preferred_types.length ? form.preferred_types : null,
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         notes: form.notes || null,
-        next_action: null,
-        next_action_date: null,
-        deal_value: null,
-        commission_percent: null,
-        commission_amount: null,
-        closed_at: null,
-        lost_reason: null,
-      });
+        next_action: null, next_action_date: null, deal_value: null,
+        commission_percent: null, commission_amount: null,
+        closed_at: null, lost_reason: null,
+        ...(contactId ? { contact_id: contactId } : {}),
+      } as any);
       toast({ title: isRu ? 'Сделка создана' : 'Deal created' });
       onOpenChange(false);
+      setSelectedContact(null);
       setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка при создании' : 'Failed to create deal', variant: 'destructive' });
@@ -125,6 +159,26 @@ export function CreateDealSheet({ open, onOpenChange, companyId }: Props) {
               ))}
             </div>
           )}
+
+          {/* Contact search */}
+          <div>
+            <Label>{isRu ? 'Привязать контакт' : 'Link Contact'}</Label>
+            <ContactSearchInput
+              companyId={companyId}
+              selectedContact={selectedContact}
+              onSelect={(c) => {
+                setSelectedContact(c);
+                setForm(f => ({
+                  ...f,
+                  client_name: `${c.first_name} ${c.last_name}`.trim(),
+                  client_phone: c.phone || '',
+                  client_email: c.email || '',
+                }));
+              }}
+              onClear={() => setSelectedContact(null)}
+              isRu={isRu}
+            />
+          </div>
 
           <div>
             <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>

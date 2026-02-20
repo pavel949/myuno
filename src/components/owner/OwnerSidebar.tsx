@@ -7,6 +7,7 @@ import {
   DollarSign,
   Users,
   LogOut,
+  ContactRound,
   Home,
   ChevronDown,
   TrendingUp,
@@ -62,6 +63,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
+      { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
     ],
   },
   {
