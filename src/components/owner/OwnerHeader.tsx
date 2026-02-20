@@ -17,6 +17,7 @@ import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -48,6 +49,7 @@ export function OwnerHeader() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { roles } = useUserRoles();
+  const { unreadCount } = useNotificationActions();
   
   const isPropertyManager = roles?.some(r => r.role === 'property_manager');
   const isOwner = roles?.some(r => r.role === 'owner' || r.role === 'property_owner');
@@ -177,6 +179,11 @@ export function OwnerHeader() {
           onClick={() => navigate('/notifications')}
         >
           <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </Button>
       </div>
     </header>
