@@ -9645,7 +9645,7 @@ export type Database = {
           concierge_fee_amount: number | null
           created_at: string | null
           currency: string | null
-          customer_user_id: string
+          customer_user_id: string | null
           deleted_at: string | null
           deleted_by: string | null
           discount_amount: number | null
@@ -9673,7 +9673,7 @@ export type Database = {
           concierge_fee_amount?: number | null
           created_at?: string | null
           currency?: string | null
-          customer_user_id: string
+          customer_user_id?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           discount_amount?: number | null
@@ -9701,7 +9701,7 @@ export type Database = {
           concierge_fee_amount?: number | null
           created_at?: string | null
           currency?: string | null
-          customer_user_id?: string
+          customer_user_id?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           discount_amount?: number | null
