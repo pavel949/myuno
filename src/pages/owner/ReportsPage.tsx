@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import {
@@ -98,6 +102,7 @@ export default function ReportsPage() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedReportForSend, setSelectedReportForSend] = useState<string | null>(null);
+  const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
   const [emailRecipients, setEmailRecipients] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
@@ -297,7 +302,7 @@ export default function ReportsPage() {
               <Send className="h-4 w-4 mr-2" />
               {isRu ? 'Отправить' : 'Send'}
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => deleteReport.mutate(report.id)} disabled={deleteReport.isPending}>
+            <Button variant="ghost" size="sm" onClick={() => setDeleteReportId(report.id)} disabled={deleteReport.isPending}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
@@ -617,6 +622,25 @@ export default function ReportsPage() {
         open={!!viewReport}
         onOpenChange={(open) => { if (!open) setViewReport(null); }}
       />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteReportId} onOpenChange={() => setDeleteReportId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isRu ? 'Удалить отчёт?' : 'Delete report?'}</AlertDialogTitle>
+            <AlertDialogDescription>{isRu ? 'Это действие нельзя отменить.' : 'This action cannot be undone.'}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { if (deleteReportId) { deleteReport.mutate(deleteReportId); setDeleteReportId(null); } }}
+              className="bg-destructive text-destructive-foreground"
+            >
+              {isRu ? 'Удалить' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

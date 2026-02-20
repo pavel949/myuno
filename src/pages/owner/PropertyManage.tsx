@@ -71,14 +71,15 @@ export default function PropertyManage() {
 
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
 
   // Form state that all sections can update
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [localAvailability, setLocalAvailability] = useState(availability || []);
 
-  // Initialize form data from property
+  // Initialize form data from property — only once, not on every refetch
   useEffect(() => {
-    if (property) {
+    if (property && !formInitialized) {
       setFormData({
         title: property.title || '',
         title_ru: property.title_ru || '',
@@ -131,8 +132,9 @@ export default function PropertyManage() {
         parties_allowed: property.parties_allowed || false,
         smoking_penalty: property.smoking_penalty,
       });
+      setFormInitialized(true);
     }
-  }, [property]);
+  }, [property, formInitialized]);
 
   // Sync availability when loaded
   useEffect(() => {
@@ -185,6 +187,7 @@ export default function PropertyManage() {
       });
       
       setHasChanges(false);
+      setFormInitialized(false); // Allow re-sync from server after save
     } catch (error) {
       errorLog.error(error, 'save_property');
     } finally {
