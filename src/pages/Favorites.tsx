@@ -71,12 +71,20 @@ export default function Favorites() {
       tutor: `/education/tutor/${item.item_id}`,
       event: `/events/${item.item_id}`,
       property: `/property/${item.item_id}`,
-      vehicle: `/transport/${item.item_id}`,
+      vehicle: `/transport/vehicle/${item.item_id}`,
       clinic: `/medical/clinic/${item.item_id}`,
       gym: `/fitness/${item.item_id}`,
       tour: `/experiences/${item.item_id}`,
       water_activity: `/experiences/${item.item_id}`,
       restaurant: `/restaurants/${item.item_id}`,
+      yacht: `/yachts/${item.item_id}`,
+      salon: `/beauty/${item.item_id}`,
+      experience: `/experiences/${item.item_id}`,
+      transfer: `/transfer`,
+      flower_shop: `/flowers/${item.item_id}`,
+      babysitter: `/babysitter/${item.item_id}`,
+      legal_service: `/legal/${item.item_id}`,
+      pet_service: `/pets/${item.item_id}`,
     };
     const route = routes[item.item_type];
     if (route) navigate(route);
