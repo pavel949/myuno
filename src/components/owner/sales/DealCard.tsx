@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Mail, ChevronRight, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
+import { Phone, Mail, ChevronRight, Calendar, AlertCircle } from 'lucide-react';
+import { format, isPast, isToday } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const stageBadgeVariant: Record<DealStage, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = {
   new: 'default',
@@ -21,10 +22,18 @@ export function DealCard({ deal }: { deal: AgentDeal }) {
   const isRu = language === 'ru';
   const stageLabel = isRu ? DEAL_STAGE_LABELS[deal.stage].ru : DEAL_STAGE_LABELS[deal.stage].en;
 
+  const nextDate = deal.next_action_date ? new Date(deal.next_action_date) : null;
+  const isOverdue = nextDate ? isPast(nextDate) && !isToday(nextDate) : false;
+  const isDueToday = nextDate ? isToday(nextDate) : false;
+
   return (
     <button
       onClick={() => navigate(`/owner/sales/${deal.id}`)}
-      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
+      className={cn(
+        'w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors',
+        isOverdue && 'border-destructive/50 bg-destructive/5',
+        isDueToday && 'border-primary/50 bg-primary/5',
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -47,10 +56,15 @@ export function DealCard({ deal }: { deal: AgentDeal }) {
               {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
             </p>
           )}
-          {deal.next_action_date && (
-            <p className="flex items-center gap-1 text-xs text-primary mt-1">
-              <Calendar className="h-3 w-3" />
-              {deal.next_action}: {format(new Date(deal.next_action_date), 'dd.MM')}
+          {nextDate && (
+            <p className={cn(
+              'flex items-center gap-1 text-xs mt-1',
+              isOverdue ? 'text-destructive font-medium' : isDueToday ? 'text-primary font-medium' : 'text-muted-foreground',
+            )}>
+              {isOverdue ? <AlertCircle className="h-3 w-3" /> : <Calendar className="h-3 w-3" />}
+              {deal.next_action}{deal.next_action ? ': ' : ''}{format(nextDate, 'dd.MM')}
+              {isOverdue && ` (${isRu ? 'просрочено' : 'overdue'})`}
+              {isDueToday && ` (${isRu ? 'сегодня' : 'today'})`}
             </p>
           )}
         </div>
