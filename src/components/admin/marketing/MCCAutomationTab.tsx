@@ -9,10 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
-  Plus, Zap, Mail, MessageSquare, Bell, Clock, Target, Users, MoreHorizontal, Loader2, Trash2
+  Plus, Zap, Mail, MessageSquare, Bell, Clock, Target, Users, Loader2, Trash2,
+  Timer, RefreshCcw, ShoppingCart, Heart, CalendarSync
 } from 'lucide-react';
-import { useMCCAutomation } from '@/hooks/useMCCAutomation';
+import { useMCCAutomation, type LifecycleTemplate } from '@/hooks/useMCCAutomation';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { MCCBroadcastPanel } from './MCCBroadcastPanel';
@@ -33,6 +35,26 @@ const ACTION_OPTIONS = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
 ];
 
+const LIFECYCLE_TRIGGER_TYPES = [
+  { value: 'welcome', label: 'Welcome' },
+  { value: 'at_risk_reactivation', label: 'At Risk Reactivation' },
+  { value: 'dormant_winback', label: 'Dormant Winback' },
+  { value: 'vip_reward', label: 'VIP Reward' },
+  { value: 'post_order_review', label: 'Post-Order Review' },
+  { value: 'cross_sell', label: 'Cross-Sell' },
+];
+
+const CHANNEL_OPTIONS = ['email', 'push', 'inapp'];
+
+const CRON_JOBS = [
+  { name: 'update-user-segments', schedule: 'Каждые 6 часов', icon: RefreshCcw, description: 'Обновление сегментов пользователей' },
+  { name: 'booking-reminders', schedule: 'Каждый час', icon: Timer, description: 'Напоминания о бронированиях' },
+  { name: 'auto-lifecycle-actions', schedule: 'Ежедневно 10:00', icon: Heart, description: 'Реактивация и welcome-цепочки' },
+  { name: 'auto-vendor-nurture', schedule: 'Ежедневно 11:00', icon: ShoppingCart, description: 'Скоринг и outreach поставщиков' },
+  { name: 'post-order-autopilot', schedule: 'Каждые 2 часа', icon: Target, description: 'Отзывы и cross-sell' },
+  { name: 'ical-scheduled-sync', schedule: 'Каждые 4 часа', icon: CalendarSync, description: 'Синхронизация календарей' },
+];
+
 function getTriggerIcon(trigger: string) {
   if (trigger.includes('signup') || trigger.includes('user')) return Users;
   if (trigger.includes('cart') || trigger.includes('lead')) return Target;
@@ -45,6 +67,10 @@ function getActionIcon(action: string) {
   if (action === 'whatsapp') return MessageSquare;
   if (action === 'push' || action === 'notification') return Bell;
   return Zap;
+}
+
+function getTriggerLabel(type: string) {
+  return LIFECYCLE_TRIGGER_TYPES.find(t => t.value === type)?.label || type;
 }
 
 function CreateRuleDialog({ onCreate, isCreating }: { onCreate: (rule: any) => void; isCreating: boolean }) {
@@ -103,9 +129,7 @@ function CreateRuleDialog({ onCreate, isCreating }: { onCreate: (rule: any) => v
           <div>
             <Label>{isRu ? 'Триггер' : 'Trigger'}</Label>
             <Select value={triggerType} onValueChange={setTriggerType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {TRIGGER_OPTIONS.map(t => (
                   <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
@@ -145,7 +169,10 @@ export function MCCAutomationTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const { rules, activeRules, totalExecutions, isLoading, toggleRule, createRule, deleteRule, isCreating } = useMCCAutomation();
+  const {
+    rules, activeRules, totalExecutions, isLoading, toggleRule, createRule, deleteRule, isCreating,
+    lifecycleTemplates, isLoadingTemplates, toggleTemplate, deleteTemplate,
+  } = useMCCAutomation();
 
   return (
     <div className="space-y-6">
@@ -157,11 +184,115 @@ export function MCCAutomationTab() {
             {isRu ? 'Автоматизация' : 'Automation'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Правила и триггеры для автоматических действий' : 'Rules and triggers for automated actions'}
+            {isRu ? 'Cron-задачи, lifecycle-шаблоны и правила автоматизации' : 'Cron jobs, lifecycle templates and automation rules'}
           </p>
         </div>
         <CreateRuleDialog onCreate={createRule} isCreating={isCreating} />
       </div>
+
+      {/* Cron Jobs */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Timer className="h-4 w-4 text-primary" />
+            {isRu ? 'Cron-задачи (автозапуск)' : 'Cron Jobs (Scheduled)'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {CRON_JOBS.map((job) => {
+              const Icon = job.icon;
+              return (
+                <div key={job.name} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                  <div className="p-2 rounded-md bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{job.name}</p>
+                    <p className="text-xs text-muted-foreground">{job.description}</p>
+                    <Badge variant="outline" className="text-xs mt-1">{job.schedule}</Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lifecycle Templates */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Heart className="h-4 w-4 text-primary" />
+            {isRu ? 'Lifecycle-шаблоны' : 'Lifecycle Templates'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingTemplates ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : lifecycleTemplates.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              {isRu ? 'Нет шаблонов' : 'No templates'}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{isRu ? 'Тип' : 'Type'}</TableHead>
+                    <TableHead>{isRu ? 'Канал' : 'Channel'}</TableHead>
+                    <TableHead>{isRu ? 'Заголовок' : 'Title'}</TableHead>
+                    <TableHead>{isRu ? 'Промокод' : 'Promo'}</TableHead>
+                    <TableHead>{isRu ? 'Активен' : 'Active'}</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lifecycleTemplates.map((tpl) => {
+                    const ChannelIcon = tpl.channel === 'email' ? Mail : tpl.channel === 'push' ? Bell : MessageSquare;
+                    return (
+                      <TableRow key={tpl.id}>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{getTriggerLabel(tpl.trigger_type)}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <ChannelIcon className="h-4 w-4 text-muted-foreground" />
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate text-sm">
+                          {isRu ? tpl.title_ru : tpl.title_en}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {tpl.promo_code ? (
+                            <span className="font-mono">{tpl.promo_code} ({tpl.discount_percent}%)</span>
+                          ) : '—'}
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={tpl.is_active}
+                            onCheckedChange={(checked) => toggleTemplate(tpl.id, checked)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() => deleteTemplate(tpl.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

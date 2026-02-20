@@ -108,3 +108,12 @@ verify_jwt = false
 [functions.update-user-segments]
 verify_jwt = false
 
+[functions.auto-lifecycle-actions]
+verify_jwt = false
+
+[functions.auto-vendor-nurture]
+verify_jwt = false
+
+[functions.post-order-autopilot]
+verify_jwt = false
+

@@ -29,9 +29,25 @@ export interface NewAutomationRule {
   landing_filter?: string[];
 }
 
+export interface LifecycleTemplate {
+  id: string;
+  trigger_type: string;
+  channel: string;
+  title_ru: string;
+  title_en: string;
+  body_ru: string;
+  body_en: string;
+  promo_code: string | null;
+  discount_percent: number | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useMCCAutomation() {
   const queryClient = useQueryClient();
 
+  // --- Automation Rules ---
   const rules = useQuery({
     queryKey: ['mcc-automation-rules'],
     queryFn: async () => {
@@ -98,6 +114,63 @@ export function useMCCAutomation() {
     onError: () => toast.error('Ошибка при удалении правила'),
   });
 
+  // --- Lifecycle Templates ---
+  const lifecycleTemplates = useQuery({
+    queryKey: ['lifecycle-templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lifecycle_templates')
+        .select('*')
+        .order('trigger_type', { ascending: true });
+      if (error) throw error;
+      return (data || []) as LifecycleTemplate[];
+    },
+  });
+
+  const toggleTemplate = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from('lifecycle_templates')
+        .update({ is_active: isActive })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lifecycle-templates'] });
+      toast.success('Шаблон обновлён');
+    },
+    onError: () => toast.error('Ошибка при обновлении шаблона'),
+  });
+
+  const createTemplate = useMutation({
+    mutationFn: async (tpl: Omit<LifecycleTemplate, 'id' | 'created_at' | 'updated_at'>) => {
+      const { error } = await supabase
+        .from('lifecycle_templates')
+        .insert(tpl);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lifecycle-templates'] });
+      toast.success('Шаблон создан');
+    },
+    onError: () => toast.error('Ошибка при создании шаблона'),
+  });
+
+  const deleteTemplate = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('lifecycle_templates')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lifecycle-templates'] });
+      toast.success('Шаблон удалён');
+    },
+    onError: () => toast.error('Ошибка при удалении шаблона'),
+  });
+
   const activeRules = rules.data?.filter(r => r.is_active) || [];
   const totalExecutions = rules.data?.reduce((s, r) => s + (r.executions_count || 0), 0) || 0;
 
@@ -111,5 +184,12 @@ export function useMCCAutomation() {
     deleteRule: (id: string) => deleteRule.mutate(id),
     isCreating: createRule.isPending,
     isDeleting: deleteRule.isPending,
+    // Lifecycle templates
+    lifecycleTemplates: lifecycleTemplates.data || [],
+    isLoadingTemplates: lifecycleTemplates.isLoading,
+    toggleTemplate: (id: string, isActive: boolean) => toggleTemplate.mutate({ id, isActive }),
+    createTemplate: (tpl: Omit<LifecycleTemplate, 'id' | 'created_at' | 'updated_at'>) => createTemplate.mutate(tpl),
+    deleteTemplate: (id: string) => deleteTemplate.mutate(id),
+    isCreatingTemplate: createTemplate.isPending,
   };
 }

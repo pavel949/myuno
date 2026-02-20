@@ -5974,6 +5974,51 @@ export type Database = {
           },
         ]
       }
+      lifecycle_templates: {
+        Row: {
+          body_en: string
+          body_ru: string
+          channel: string
+          created_at: string
+          discount_percent: number | null
+          id: string
+          is_active: boolean
+          promo_code: string | null
+          title_en: string
+          title_ru: string
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          body_en?: string
+          body_ru?: string
+          channel?: string
+          created_at?: string
+          discount_percent?: number | null
+          id?: string
+          is_active?: boolean
+          promo_code?: string | null
+          title_en?: string
+          title_ru?: string
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          body_en?: string
+          body_ru?: string
+          channel?: string
+          created_at?: string
+          discount_percent?: number | null
+          id?: string
+          is_active?: boolean
+          promo_code?: string | null
+          title_en?: string
+          title_ru?: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lifeos_governance: {
         Row: {
           description: string | null
