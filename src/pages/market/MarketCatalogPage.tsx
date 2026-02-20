@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Search, ArrowLeft, ChevronRight, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CategoryDrawer } from '@/components/market/CategoryDrawer';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 // Fallback icons
 const getCategoryIcon = (slug: string): string => {
@@ -180,6 +181,7 @@ const MarketCatalogPage = () => {
           )}
         </div>
       </div>
+      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };

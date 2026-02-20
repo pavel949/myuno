@@ -24,6 +24,7 @@ import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { ProductCard } from '@/components/market/ProductCard';
 import { useVendor, useVendorProducts } from '@/hooks/useMarketplaceVendors';
 import { useCartToast } from '@/hooks/useCartToast';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 const VendorPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -287,6 +288,7 @@ const VendorPage = () => {
 
         <StickyCartBar checkoutPath="/market/checkout" itemType="product" />
       </PageContainer>
+      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };

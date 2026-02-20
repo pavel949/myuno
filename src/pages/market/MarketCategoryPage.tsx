@@ -16,6 +16,7 @@ import { MarketplaceProduct, MarketplaceSubcategory } from '@/types/marketplace'
 import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 // Special virtual categories
 const SPECIAL_CATEGORIES = {
@@ -312,6 +313,7 @@ const MarketCategoryPage = () => {
           checkoutPath="/market/checkout" 
         />
       </PageContainer>
+      <MarketComingSoonOverlay />
     </AppLayout>
   );
 };

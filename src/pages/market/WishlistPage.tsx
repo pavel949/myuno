@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ProductCard } from '@/components/market/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 export default function WishlistPage() {
   const { language } = useLanguage();
@@ -102,6 +103,7 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
+      <MarketComingSoonOverlay />
     </div>
   );
 }

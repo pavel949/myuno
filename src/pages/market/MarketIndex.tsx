@@ -26,6 +26,7 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
 import { CrossSellSection } from '@/components/crosssell';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 // Unified components
 import { 
@@ -363,7 +364,7 @@ const MarketIndex = () => {
             
             <UnifiedScrollSection>
               {popularProducts.slice(0, 12).map(product => (
-                <div key={product.id} className="w-[160px] shrink-0">
+              <div key={product.id} className="w-[180px] md:w-[200px] lg:w-[220px] shrink-0">
                   <ProfessionalProductCard
                     product={product}
                     quantity={getQuantity(product.id)}
@@ -398,7 +399,7 @@ const MarketIndex = () => {
             
             <UnifiedScrollSection variant="muted">
               {newProducts.slice(0, 10).map(product => (
-                <div key={product.id} className="w-[160px] shrink-0">
+                <div key={product.id} className="w-[180px] md:w-[200px] lg:w-[220px] shrink-0">
                   <ProfessionalProductCard
                     product={product}
                     quantity={getQuantity(product.id)}
@@ -438,7 +439,7 @@ const MarketIndex = () => {
               
               <UnifiedScrollSection variant={isMuted ? 'muted' : 'default'}>
                 {categoryProducts.map(product => (
-                  <div key={product.id} className="w-[160px] shrink-0">
+                  <div key={product.id} className="w-[180px] md:w-[200px] lg:w-[220px] shrink-0">
                     <ProfessionalProductCard
                       product={product}
                       quantity={getQuantity(product.id)}
@@ -464,7 +465,7 @@ const MarketIndex = () => {
             count={allProducts.length}
           />
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
             {allProducts.slice(0, 20).map(product => (
               <ProfessionalProductCard
                 key={product.id}
@@ -500,6 +501,8 @@ const MarketIndex = () => {
           checkoutPath="/market/checkout"
         />
       </div>
+
+      <MarketComingSoonOverlay />
     </MiniAppLayout>
   );
 };

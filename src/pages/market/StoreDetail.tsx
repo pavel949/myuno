@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useStore } from '@/hooks/useStores';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
+import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
 // Products data
 const storeProducts: Record<string, Array<{
@@ -202,6 +203,7 @@ const StoreDetail = () => {
             minOrder: store?.min_order_amount,
           }}
         />
+        <MarketComingSoonOverlay />
       </div>
     </AppLayout>
   );
