@@ -217,6 +217,8 @@ export function hasPersona(personas: UserPersona[], persona: UserPersona): boole
 export const PERSONA_INFO: Record<UserPersona, {
   labelEn: string;
   labelRu: string;
+  descEn: string;
+  descRu: string;
   icon: string;
   color: string;
   bgColor: string;
@@ -224,6 +226,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   tourist: {
     labelEn: 'Tourist',
     labelRu: 'Турист',
+    descEn: 'Trips, tours, transfers',
+    descRu: 'Поездки, туры, трансферы',
     icon: '✈️',
     color: 'text-cyan-600',
     bgColor: 'bg-cyan-500/10',
@@ -231,6 +235,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   resident: {
     labelEn: 'Resident',
     labelRu: 'Резидент',
+    descEn: 'Daily life & services',
+    descRu: 'Быт и сервисы',
     icon: '🏠',
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-500/10',
@@ -238,6 +244,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   property_owner: {
     labelEn: 'Owner / MC',
     labelRu: 'Владелец / УК',
+    descEn: 'Property management',
+    descRu: 'Управление недвижимостью',
     icon: '🏢',
     color: 'text-amber-600',
     bgColor: 'bg-amber-500/10',
@@ -245,6 +253,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   investor: {
     labelEn: 'Investor',
     labelRu: 'Инвестор',
+    descEn: 'Projects & opportunities',
+    descRu: 'Проекты и возможности',
     icon: '📈',
     color: 'text-purple-600',
     bgColor: 'bg-purple-500/10',
