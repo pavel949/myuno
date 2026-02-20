@@ -62,7 +62,7 @@ export function OwnerPropertiesList() {
             </div>
           )}
           {property.is_active && (
-            <div className="absolute top-1.5 left-1.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+            <div className="absolute top-1.5 left-1.5 w-3 h-3 rounded-full bg-success border-2 border-background" />
           )}
         </div>
 

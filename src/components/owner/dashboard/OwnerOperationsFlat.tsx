@@ -29,7 +29,7 @@ export function OwnerOperationsFlat() {
       <div>
         <h2 className="text-xl font-semibold mb-3">{isRu ? 'Сегодня' : 'Today'}</h2>
         <div className="flex items-center gap-3 py-3">
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
+          <CheckCircle2 className="h-5 w-5 text-success" />
           <p className="text-[15px] text-muted-foreground">
             {isRu ? 'Нет задач на сегодня' : 'No tasks for today'}
           </p>
@@ -44,7 +44,9 @@ export function OwnerOperationsFlat() {
         <h2 className="text-xl font-semibold">
           {isRu ? 'Сегодня' : 'Today'}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
-            {pendingTasks.length} {isRu ? 'задач' : 'tasks'}
+            {pendingTasks.length} {isRu 
+              ? (pendingTasks.length === 1 ? 'задача' : pendingTasks.length < 5 ? 'задачи' : 'задач')
+              : (pendingTasks.length === 1 ? 'task' : 'tasks')}
           </span>
         </h2>
         <button
@@ -59,10 +61,10 @@ export function OwnerOperationsFlat() {
         {pendingTasks.slice(0, 5).map(task => {
           const config = TASK_TYPE_CONFIG[task.task_type] || TASK_TYPE_CONFIG.maintenance;
           const Icon = config.icon;
-          const dotColor = task.task_type === 'check_in' ? 'bg-green-500'
-            : task.task_type === 'check_out' ? 'bg-yellow-500'
-            : task.task_type === 'cleaning' ? 'bg-blue-500'
-            : 'bg-orange-500';
+          const dotColor = task.task_type === 'check_in' ? 'bg-success'
+            : task.task_type === 'check_out' ? 'bg-warning'
+            : task.task_type === 'cleaning' ? 'bg-primary'
+            : 'bg-destructive';
 
           return (
             <button

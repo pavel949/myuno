@@ -29,11 +29,11 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className={`p-2 rounded-full ${isIncome ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+          <div className={`p-2 rounded-full ${isIncome ? 'bg-success/20' : 'bg-destructive/20'}`}>
             {isIncome ? (
-              <ArrowUpCircle className="h-5 w-5 text-green-500" />
+              <ArrowUpCircle className="h-5 w-5 text-success" />
             ) : (
-              <ArrowDownCircle className="h-5 w-5 text-red-500" />
+              <ArrowDownCircle className="h-5 w-5 text-destructive" />
             )}
           </div>
           
@@ -58,7 +58,7 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
                   </p>
                 )}
               </div>
-              <p className={`font-bold whitespace-nowrap ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`font-bold whitespace-nowrap ${isIncome ? 'text-success' : 'text-destructive'}`}>
                 {isIncome ? '+' : '-'}฿{item.amount.toLocaleString()}
               </p>
             </div>
@@ -82,7 +82,7 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
               )}
               
               {item.tax_deductible && (
-                <Badge variant="outline" className="text-xs text-green-600">
+                <Badge variant="outline" className="text-xs text-success">
                   {isRu ? 'Вычет' : 'Deductible'}
                 </Badge>
               )}
