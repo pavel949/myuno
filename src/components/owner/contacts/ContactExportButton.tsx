@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { CrmContact } from '@/hooks/useCrmContacts';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContactExportButtonProps {
   contacts: CrmContact[];
@@ -31,12 +33,28 @@ const EXPORT_FIELDS = [
 
 export function ContactExportButton({ contacts }: ContactExportButtonProps) {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (contacts.length === 0) {
       toast.error(isRu ? 'Нет контактов для экспорта' : 'No contacts to export');
       return;
+    }
+
+    // Log export to crm_access_log
+    if (user) {
+      try {
+        await supabase.from('crm_access_log').insert({
+          user_id: user.id,
+          action: 'export_csv',
+          entity_type: 'contacts',
+          entity_count: contacts.length,
+          metadata: { format: 'csv', timestamp: new Date().toISOString() },
+        } as any);
+      } catch {
+        // Don't block export if logging fails
+      }
     }
 
     const rows = contacts.map(c => {
@@ -49,11 +67,17 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
     });
 
     const csv = Papa.unparse(rows);
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+
+    // Add watermark
+    const exporterName = user?.email || 'Unknown';
+    const exportDate = new Date().toISOString().split('T')[0];
+    const watermark = `\n# Exported by: ${exporterName} on ${exportDate}\n# Confidential — Do not distribute`;
+
+    const blob = new Blob(['\ufeff' + csv + watermark], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `contacts-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `contacts-${exportDate}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
