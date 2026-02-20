@@ -18,8 +18,10 @@ export interface EntityTypeDefinition {
   type: string;
   /** Icon component */
   icon: LucideIcon;
-  /** Route prefix for navigation */
+  /** Route prefix for index/listing page */
   route: string;
+  /** Route prefix for detail page (e.g. /medical/clinic). Falls back to route if not set. null = no detail page (navigate to index). */
+  detailRoute?: string | null;
   /** English label */
   labelEn: string;
   /** Russian label */
@@ -51,6 +53,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'vehicle',
     icon: Car,
     route: '/transport',
+    detailRoute: '/transport/vehicle',
     labelEn: 'Car & Bike Rental',
     labelRu: 'Аренда авто и мото',
     pluralEn: 'Car & Bike Rental',
@@ -111,6 +114,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'salon',
     icon: Scissors,
     route: '/beauty',
+    detailRoute: '/beauty/salon',
     labelEn: 'Beauty & Wellness',
     labelRu: 'Красота и велнес',
     pluralEn: 'Beauty & Wellness',
@@ -121,6 +125,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'clinic',
     icon: Building2,
     route: '/medical',
+    detailRoute: '/medical/clinic',
     labelEn: 'Healthcare',
     labelRu: 'Здоровье',
     pluralEn: 'Healthcare',
@@ -131,6 +136,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'gym',
     icon: Dumbbell,
     route: '/fitness',
+    detailRoute: '/fitness/gym',
     labelEn: 'Fitness & Gyms',
     labelRu: 'Фитнес и залы',
     pluralEn: 'Fitness & Gyms',
@@ -161,6 +167,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'legal_service',
     icon: Scale,
     route: '/legal',
+    detailRoute: '/legal/provider',
     labelEn: 'Legal Services',
     labelRu: 'Юридические услуги',
     pluralEn: 'Legal Services',
@@ -171,6 +178,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'flower_shop',
     icon: Flower2,
     route: '/flowers',
+    detailRoute: '/flowers/shop',
     labelEn: 'Flower Delivery',
     labelRu: 'Доставка цветов',
     pluralEn: 'Flower Delivery',
@@ -181,6 +189,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'marketplace_product',
     icon: ShoppingBag,
     route: '/market',
+    detailRoute: '/market/product',
     labelEn: 'Product',
     labelRu: 'Товар',
     pluralEn: 'Marketplace',
@@ -191,6 +200,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'school',
     icon: GraduationCap,
     route: '/education',
+    detailRoute: '/education/course',
     labelEn: 'Education & Courses',
     labelRu: 'Образование',
     pluralEn: 'Education & Courses',
@@ -201,6 +211,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'kindergarten',
     icon: Baby,
     route: '/education',
+    detailRoute: null,
     labelEn: 'Kindergarten',
     labelRu: 'Детский сад',
     pluralEn: 'Kindergartens',
@@ -211,6 +222,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'coworking',
     icon: Briefcase,
     route: '/services',
+    detailRoute: '/services/provider',
     labelEn: 'Coworking',
     labelRu: 'Коворкинг',
     pluralEn: 'Coworking Spaces',
@@ -221,6 +233,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'spa',
     icon: Sparkles,
     route: '/beauty',
+    detailRoute: '/beauty/salon',
     labelEn: 'Beauty & Wellness',
     labelRu: 'Красота и велнес',
     pluralEn: 'Beauty & Wellness',
@@ -231,6 +244,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'wellness',
     icon: Heart,
     route: '/beauty',
+    detailRoute: '/beauty/salon',
     labelEn: 'Beauty & Wellness',
     labelRu: 'Красота и велнес',
     pluralEn: 'Beauty & Wellness',
@@ -281,6 +295,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'education',
     icon: GraduationCap,
     route: '/education',
+    detailRoute: '/education/course',
     labelEn: 'Education & Courses',
     labelRu: 'Образование',
     pluralEn: 'Education & Courses',
@@ -301,6 +316,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
     type: 'transfer',
     icon: Car,
     route: '/transfer',
+    detailRoute: null,
     labelEn: 'Airport & City Transfers',
     labelRu: 'Трансферы',
     pluralEn: 'Airport & City Transfers',
