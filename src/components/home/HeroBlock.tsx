@@ -53,7 +53,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   }, [personas]);
 
   return (
-    <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15">
+    <div className="grid grid-cols-2 gap-2">
       {PERSONA_OPTIONS.map((p) => {
         const info = PERSONA_INFO[p];
         const isActive = activePersonas.includes(p);
@@ -62,30 +62,30 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
             key={p}
             onClick={() => togglePersona(p)}
             className={cn(
-              "relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all",
-              "focus-visible:ring-2 focus-visible:ring-white/50",
+              "relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all",
+              "focus-visible:ring-2 focus-visible:ring-primary/50",
               isActive
-                ? "bg-white/20 shadow-sm border border-white/25"
-                : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                ? "bg-white shadow-md border border-white/90"
+                : "bg-white/10 border border-white/15 hover:bg-white/15"
             )}
           >
-            <span className="text-lg shrink-0">{info.icon}</span>
-            <div className="min-w-0">
+            <span className="text-xl shrink-0">{info.icon}</span>
+            <div className="min-w-0 flex-1">
               <span className={cn(
-                "block text-xs font-semibold leading-tight",
-                isActive ? "text-white" : ""
+                "block text-[13px] font-bold leading-tight",
+                isActive ? "text-gray-900" : "text-white"
               )}>
                 {isRu ? info.labelRu : info.labelEn}
               </span>
               <span className={cn(
-                "block text-[10px] leading-tight mt-0.5",
-                isActive ? "text-white/70" : "text-white/40"
+                "block text-[11px] leading-tight mt-0.5",
+                isActive ? "text-gray-500" : "text-white/60"
               )}>
                 {isRu ? info.descRu : info.descEn}
               </span>
             </div>
             {isActive && (
-              <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-white/80" />
+              <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-primary shadow-sm" />
             )}
           </button>
         );
