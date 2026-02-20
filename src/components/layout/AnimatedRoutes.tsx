@@ -567,6 +567,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="sales/:id" element={<LazyPage><Pages.SalesDealDetail /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.ContactsList /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.ContactDetail /></LazyPage>} />
+          <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
+          <Route path="tasks" element={<LazyPage><Pages.CrmTasksPage /></LazyPage>} />
         </Route>
         
         {/* ── Catch-all ── */}
