@@ -19,6 +19,9 @@ import {
   Wrench,
   Loader2,
   CheckCircle2,
+  ShieldCheck,
+  Zap,
+  Send,
 } from 'lucide-react';
 import {
   ManagementTerms,
@@ -29,12 +32,13 @@ import {
   useCreateManagementTerms,
   useUpdateManagementTerms,
 } from '@/hooks/usePropertyManagementTerms';
+import { cn } from '@/lib/utils';
 
 interface ManagementTermsFormProps {
   propertyId: string;
   existing?: ManagementTerms;
   onSaved?: (terms: ManagementTerms) => void;
-  compact?: boolean; // simplified view for wizard
+  compact?: boolean;
 }
 
 type ExpenseKey = keyof ExpenseResponsibility;
@@ -59,11 +63,84 @@ const PARTY_OPTIONS: { value: ExpenseParty; labelEn: string; labelRu: string }[]
 
 const CURRENCIES = ['THB', 'USD', 'EUR', 'RUB', 'GBP'];
 
-function partyBadgeVariant(party: ExpenseParty) {
-  if (party === 'owner') return 'secondary';
-  if (party === 'manager') return 'default';
-  return 'outline';
+/** ── Quick Setup Presets ── */
+interface TermsPreset {
+  id: string;
+  labelEn: string;
+  labelRu: string;
+  descEn: string;
+  descRu: string;
+  commission_rate: number;
+  commission_type: 'percent' | 'fixed';
+  commission_base: 'gross' | 'net';
+  expenses: ExpenseResponsibility;
 }
+
+const PRESETS: TermsPreset[] = [
+  {
+    id: 'standard_70_30',
+    labelEn: 'Standard 70/30',
+    labelRu: 'Стандарт 70/30',
+    descEn: 'Owner 70% / Manager 30% of gross. Manager covers cleaning & minor repairs.',
+    descRu: 'Собственник 70% / УК 30% от валовой. УК покрывает уборку и мелкий ремонт.',
+    commission_rate: 30,
+    commission_type: 'percent',
+    commission_base: 'gross',
+    expenses: {
+      cleaning: 'manager',
+      electricity: 'owner',
+      water: 'owner',
+      internet: 'owner',
+      repairs_minor: 'manager',
+      repairs_major: 'owner',
+      cam_fees: 'owner',
+      insurance: 'owner',
+      marketing: 'manager',
+    },
+  },
+  {
+    id: 'premium_80_20',
+    labelEn: 'Premium 80/20',
+    labelRu: 'Премиум 80/20',
+    descEn: 'Owner 80% / Manager 20% of gross. Owner covers most expenses.',
+    descRu: 'Собственник 80% / УК 20% от валовой. Собственник покрывает большинство расходов.',
+    commission_rate: 20,
+    commission_type: 'percent',
+    commission_base: 'gross',
+    expenses: {
+      cleaning: 'owner',
+      electricity: 'owner',
+      water: 'owner',
+      internet: 'owner',
+      repairs_minor: 'split',
+      repairs_major: 'owner',
+      cam_fees: 'owner',
+      insurance: 'owner',
+      marketing: 'split',
+    },
+  },
+  {
+    id: 'full_service',
+    labelEn: 'Full Service',
+    labelRu: 'Полный сервис',
+    descEn: 'Owner 60% / Manager 40% net. Manager handles everything.',
+    descRu: 'Собственник 60% / УК 40% от чистого дохода. УК берёт всё на себя.',
+    commission_rate: 40,
+    commission_type: 'percent',
+    commission_base: 'net',
+    expenses: {
+      cleaning: 'manager',
+      electricity: 'manager',
+      water: 'manager',
+      internet: 'manager',
+      repairs_minor: 'manager',
+      repairs_major: 'split',
+      cam_fees: 'owner',
+      insurance: 'owner',
+      marketing: 'manager',
+    },
+  },
+];
 
 export function ManagementTermsForm({ propertyId, existing, onSaved, compact = false }: ManagementTermsFormProps) {
   const { language } = useLanguage();
@@ -92,8 +169,11 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
     status: existing?.status || 'draft',
   }));
 
+  const [presetApplied, setPresetApplied] = useState<string | null>(null);
+
   const update = (updates: Partial<ManagementTermsUpdate>) => {
     setForm(prev => ({ ...prev, ...updates }));
+    setPresetApplied(null); // custom changes clear preset
   };
 
   const setExpense = (key: ExpenseKey, value: ExpenseParty) => {
@@ -105,7 +185,21 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
     });
   };
 
-  const handleSave = async (status: 'draft' | 'active' = 'active') => {
+  const applyPreset = (preset: TermsPreset) => {
+    setForm(prev => ({
+      ...prev,
+      commission_type: preset.commission_type,
+      commission_rate: preset.commission_rate,
+      commission_base: preset.commission_base,
+      revenue_split_owner: 100 - preset.commission_rate,
+      revenue_split_manager: preset.commission_rate,
+      expense_responsibility: { ...preset.expenses },
+    }));
+    setPresetApplied(preset.id);
+    toast.success(isRu ? `Шаблон "${preset.labelRu}" применён` : `"${preset.labelEn}" preset applied`);
+  };
+
+  const handleSave = async (status: 'draft' | 'active' | 'pending_approval' = 'active') => {
     const payload = { ...form, status, property_id: propertyId };
     try {
       let result: ManagementTerms;
@@ -114,7 +208,11 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
       } else {
         result = await createTerms.mutateAsync(payload as ManagementTermsUpdate & { property_id: string });
       }
-      toast.success(isRu ? 'Условия сохранены' : 'Terms saved');
+      toast.success(
+        status === 'pending_approval'
+          ? (isRu ? 'Отправлено на согласование' : 'Sent for approval')
+          : (isRu ? 'Условия сохранены' : 'Terms saved')
+      );
       onSaved?.(result);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error';
@@ -126,7 +224,6 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
   const commissionRate = form.commission_rate ?? 20;
   const ownerSplit = 100 - commissionRate;
 
-  // Sync splits with commission rate (percent mode)
   const handleCommissionRateChange = (val: number) => {
     update({ commission_rate: val, revenue_split_owner: 100 - val, revenue_split_manager: val });
   };
@@ -137,6 +234,26 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         <p className="text-sm font-medium text-foreground">
           {isRu ? 'Условия управления (кратко)' : 'Management Terms (Quick Setup)'}
         </p>
+
+        {/* Quick preset buttons */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {PRESETS.map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0',
+                presetApplied === preset.id
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'border-muted hover:border-primary/40'
+              )}
+            >
+              <Zap className="h-3 w-3 inline mr-1" />
+              {isRu ? preset.labelRu : preset.labelEn}
+            </button>
+          ))}
+        </div>
 
         {/* Commission rate */}
         <div className="space-y-2">
@@ -204,7 +321,44 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
 
   return (
     <div className="space-y-6">
-      {/* Section A: Commission */}
+      {/* ── Quick Setup Presets ── */}
+      <Card className="border-dashed border-primary/30 bg-primary/3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            {isRu ? 'Быстрые шаблоны' : 'Quick Presets'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {PRESETS.map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => applyPreset(preset)}
+              className={cn(
+                'w-full text-left p-3 rounded-xl border-2 transition-all',
+                presetApplied === preset.id
+                  ? 'border-primary bg-primary/5'
+                  : 'border-transparent bg-muted/40 hover:bg-muted/60'
+              )}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-sm font-semibold">
+                  {isRu ? preset.labelRu : preset.labelEn}
+                </span>
+                <Badge variant="secondary" className="text-xs">
+                  {100 - preset.commission_rate}/{preset.commission_rate}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isRu ? preset.descRu : preset.descEn}
+              </p>
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* ── Section A: Commission ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -213,7 +367,6 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Commission type */}
           <div className="grid grid-cols-2 gap-2">
             {[
               { value: 'percent', labelEn: '% of revenue', labelRu: '% от дохода' },
@@ -280,7 +433,6 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
             </div>
           )}
 
-          {/* Commission base */}
           <div className="space-y-2">
             <Label className="text-sm text-muted-foreground">{isRu ? 'База расчёта комиссии' : 'Commission base'}</Label>
             <div className="flex gap-2">
@@ -306,7 +458,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* Section B: Expense Responsibility */}
+      {/* ── Section B: Expense Responsibility ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -333,9 +485,9 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                     key={opt.value}
                     type="button"
                     onClick={() => setExpense(key, opt.value)}
-                    className={`rounded-lg border text-xs font-medium transition-all ${
-                      opt.value === 'owner' ? 'w-16' : opt.value === 'manager' ? 'w-12' : 'w-16'
-                    } py-1 ${
+                    className={cn(
+                      'rounded-lg border text-xs font-medium transition-all py-1',
+                      opt.value === 'owner' ? 'w-16' : opt.value === 'manager' ? 'w-12' : 'w-16',
                       expenses[key] === opt.value
                         ? opt.value === 'owner'
                           ? 'bg-secondary text-secondary-foreground border-secondary'
@@ -343,7 +495,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                           ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-accent text-accent-foreground border-accent'
                         : 'border-muted hover:border-muted-foreground/30'
-                    }`}
+                    )}
                   >
                     {isRu ? opt.labelRu : opt.labelEn}
                   </button>
@@ -354,7 +506,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* Section C: Payment Terms */}
+      {/* ── Section C: Payment Terms ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -408,7 +560,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* Section D: Notes */}
+      {/* ── Section D: Notes ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -426,30 +578,46 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="flex gap-3">
+      {/* ── Actions with pending_approval ── */}
+      <div className="space-y-2">
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleSave('draft')}
+            disabled={isLoading}
+            className="flex-1"
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isRu ? 'Черновик' : 'Save Draft'}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleSave('active')}
+            disabled={isLoading}
+            className="flex-1"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+            )}
+            {isRu ? 'Активировать' : 'Activate'}
+          </Button>
+        </div>
         <Button
           type="button"
-          variant="outline"
-          onClick={() => handleSave('draft')}
+          variant="secondary"
+          onClick={() => handleSave('pending_approval')}
           disabled={isLoading}
-          className="flex-1"
-        >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          {isRu ? 'Сохранить черновик' : 'Save as Draft'}
-        </Button>
-        <Button
-          type="button"
-          onClick={() => handleSave('active')}
-          disabled={isLoading}
-          className="flex-1"
+          className="w-full"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 mr-2" />
+            <Send className="h-4 w-4 mr-2" />
           )}
-          {isRu ? 'Активировать' : 'Activate'}
+          {isRu ? 'Отправить на согласование собственнику' : 'Send for Owner Approval'}
         </Button>
       </div>
     </div>
