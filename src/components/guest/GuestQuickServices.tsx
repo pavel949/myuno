@@ -6,8 +6,6 @@ import {
   Utensils, 
   Car, 
   Sparkles, 
-  Stethoscope,
-  ShoppingBag,
   Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -39,20 +37,12 @@ const quickServices: QuickService[] = [
     color: 'text-info'
   },
   { 
-    id: 'health',
-    icon: Stethoscope, 
-    title: 'Health', 
-    titleRu: 'Здоровье',
-    href: '/health',
-    color: 'text-success'
-  },
-  { 
-    id: 'shopping',
-    icon: ShoppingBag, 
-    title: 'Shopping', 
-    titleRu: 'Покупки',
-    href: '/shopping',
-    color: 'text-purple-500'
+    id: 'beauty',
+    icon: Sparkles, 
+    title: 'Beauty', 
+    titleRu: 'Красота',
+    href: '/beauty',
+    color: 'text-pink-500'
   },
 ];
 
