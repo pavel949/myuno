@@ -133,12 +133,23 @@ async function upsertOrderForEvent(
   if (event.organizer) notesParts.push(`Contact: ${event.organizer}`);
   notesParts.push(`Synced from ${calendar.name}`);
 
-  const orderData = {
+  // Generate order number for new orders
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  const orderNumber = `UNO-${dateStr}-${rand}`;
+
+  const totalAmount = event.price || 0;
+
+  const orderData: Record<string, any> = {
     order_type: 'property',
     vertical: 'property',
     start_at: startAt,
     end_at: endAt,
     status: 'confirmed',
+    total_amount: totalAmount,
+    subtotal: totalAmount,
+    order_number: orderNumber,
     notes: notesParts.join('\n'),
     metadata: {
       source: 'ical',
@@ -150,6 +161,12 @@ async function upsertOrderForEvent(
       sync_priority: calendar.priority || 0,
     },
   };
+
+  // customer_user_id is NULL for external OTA bookings
+  // owner_id from calendar can be set if needed for reference
+  if (calendar.owner_id) {
+    orderData.provider_org_id = null; // no org, just owner
+  }
 
   if (existingOrderId) {
     await supabase
