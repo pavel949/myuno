@@ -3,30 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Grid3X3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { VERTICAL_GROUPS, type VerticalGroupItem } from '@/lib/verticalGroups';
-import { VERTICALS } from '@/lib/verticals';
+import { VERTICAL_GROUPS } from '@/lib/verticalGroups';
+import { resolveVerticalItem } from '@/lib/resolveVerticalItem';
 import { resolveIcon } from '@/lib/iconMap';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
 
-function resolveItem(item: VerticalGroupItem, language: string) {
-  if (item.verticalId) {
-    const v = Object.values(VERTICALS).find(v => v.id === item.verticalId);
-    if (!v) return null;
-    return {
-      id: v.id,
-      icon: v.icon,
-      label: language === 'ru' ? v.labelRu : v.labelEn,
-      route: `/${v.plural}`,
-    };
-  }
-  return {
-    id: item.route || '',
-    icon: item.icon || '📦',
-    label: language === 'ru' ? (item.labelRu || '') : (item.labelEn || ''),
-    route: item.route || '/',
-  };
-}
 
 const INITIAL_GROUPS_VISIBLE = 3;
 
@@ -57,8 +39,8 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
       <div className="rounded-2xl bg-muted/20 border border-border/40 p-4 space-y-5">
         {visibleGroups.map((group, gi) => {
           const items = group.items
-            .map(item => resolveItem(item, language))
-            .filter(Boolean) as NonNullable<ReturnType<typeof resolveItem>>[];
+            .map(item => resolveVerticalItem(item, language))
+            .filter(Boolean) as NonNullable<ReturnType<typeof resolveVerticalItem>>[];
 
           return (
             <motion.div
