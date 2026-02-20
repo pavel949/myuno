@@ -300,7 +300,7 @@ export const ENTITY_TYPES: Record<string, EntityTypeDefinition> = {
   transfer: {
     type: 'transfer',
     icon: Car,
-    route: '/transport/airport-transfer',
+    route: '/transfer',
     labelEn: 'Airport & City Transfers',
     labelRu: 'Трансферы',
     pluralEn: 'Airport & City Transfers',

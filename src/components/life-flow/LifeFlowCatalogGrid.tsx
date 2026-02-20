@@ -105,12 +105,16 @@ export function LifeFlowCatalogGrid({ items, accentColor }: LifeFlowCatalogGridP
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
+  // Filter out non-renderable entity types
+  const HIDDEN_ENTITY_TYPES = new Set(['page', 'insurance', 'airport_service']);
+
   // Group items by entity_type, sorted by weight desc
   const sections: GroupedSection[] = React.useMemo(() => {
     if (!items?.length) return [];
 
     const grouped: Record<string, EnrichedCatalogItem[]> = {};
     for (const item of items) {
+      if (HIDDEN_ENTITY_TYPES.has(item.entity_type)) continue;
       if (!grouped[item.entity_type]) grouped[item.entity_type] = [];
       grouped[item.entity_type].push(item);
     }

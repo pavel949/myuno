@@ -80,6 +80,38 @@ const TABLE_CONFIG: Record<string, {
     coverImage: 'photo', rating: 'rating', reviewCount: 'review_count',
     isVerified: 'is_verified',
   },
+  transfer: {
+    table: 'transfers', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+    isVerified: 'is_verified',
+  },
+  event: {
+    table: 'events', nameEn: 'title_en', nameRu: 'title_ru',
+    coverImage: 'cover_image',
+  },
+  water_activity: {
+    table: 'water_activities', nameEn: 'title_en', nameRu: 'title_ru',
+    coverImage: 'cover_image',
+  },
+  flower_shop: {
+    table: 'flower_shops', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+    isVerified: 'is_verified',
+  },
+  cleaning: {
+    table: 'cleaning_services', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+    isVerified: 'is_verified',
+  },
+  pet_service: {
+    table: 'pet_services', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating',
+    isVerified: 'is_verified',
+  },
+  marketplace_product: {
+    table: 'marketplace_products', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+  },
 };
 
 async function fetchEntityData(entityType: string, entityIds: string[]): Promise<Record<string, Partial<EnrichedCatalogItem>>> {
