@@ -1,87 +1,129 @@
 
 
-# CRM: Bug Fixes + Pro-Level Upgrade
+# CRM Contacts: Адресная книга и Досье клиентов для УК
 
-## Bugs Found
+## Проблема
 
-1. **SalesAnalytics.tsx** -- Unused imports (`FunnelChart`, `Funnel`, `LabelList`) from recharts cause bundle bloat and potential warnings
-2. **KanbanBoard.tsx** -- Click-to-navigate fires unreliably after drag because `isDragging` from `useSortable` doesn't reflect drag state correctly for droppable-only cards. Cards use `useSortable` but they're not actually sorted within columns, leading to incorrect behavior
-3. **SalesAnalytics monthly chart** -- Off-by-one edge case: when `i=0`, `subMonths(new Date(), -1)` creates a future date filter that misses current month deals
-4. **CreateDealSheet** -- Missing fields that exist in the schema: `preferred_districts`, `preferred_types`, `bedrooms_min`. This breaks PropertyMatching since it can never filter by type/bedrooms
-5. **EditDealSheet** -- Same missing fields, plus no currency selector (hardcoded to THB in create)
-6. **DealStageBar** -- Labels are hidden on mobile (`hidden sm:inline`), rendering empty buttons with no visible text on phones
-7. **PropertyMatching** -- Uses `<a href>` instead of React Router `<Link>`, causing full page reloads
+Сейчас клиентские данные "размазаны" по сделкам. Один человек может быть в 5 сделках с разным написанием имени. Нет единого профиля, нет истории, нет досье.
 
-## Upgrades (Odoo/HubSpot Parity)
+## Решение: таблица `crm_contacts` + UI модуль
 
-### 1. Search and Filtering
-- Full-text search across client name, phone, email, notes on the Pipeline page
-- Filter by agent (for owners/admins who see all deals)
-- Filter by budget range and property type
+### 1. Новая таблица `crm_contacts`
 
-### 2. Weighted Pipeline Value
-- Show total pipeline value per stage in Kanban column headers
-- Summary bar at top: "Pipeline: 45M THB | Weighted: 18M THB" (weighted by stage probability)
+| Поле | Тип | Назначение |
+|------|-----|-----------|
+| id | uuid | PK |
+| company_id | uuid | FK на management_companies |
+| first_name | text | Имя |
+| last_name | text | Фамилия |
+| phone | text | Основной телефон |
+| phone2 | text | Доп. телефон |
+| email | text | Email |
+| whatsapp | text | WhatsApp (если отличается от phone) |
+| telegram | text | Telegram username |
+| line_id | text | LINE ID (важно для Таиланда) |
+| nationality | text | Гражданство |
+| language | text | Предпочитаемый язык общения |
+| source | text | Откуда пришёл (website, referral, walk-in, social, agent_network) |
+| contact_type | text | buyer, seller, investor, tenant, landlord, agent |
+| company_name | text | Компания клиента (если есть) |
+| budget_min | numeric | Бюджет от |
+| budget_max | numeric | Бюджет до |
+| currency | text | Валюта бюджета |
+| preferred_districts | text[] | Желаемые районы |
+| preferred_types | text[] | Типы недвижимости |
+| bedrooms_min | int | Мин. спален |
+| notes | text | Общие заметки |
+| tags | text[] | Теги (VIP, hot, cold, follow-up) |
+| avatar_url | text | Фото контакта |
+| is_archived | boolean | Архивирован |
+| created_by | uuid | Кто создал |
+| created_at | timestamptz | Дата создания |
+| updated_at | timestamptz | Дата обновления |
 
-### 3. Deal Age and Velocity Tracking
-- Show "days in stage" and "total deal age" on DealCard and DealDetail
-- Color-code stale deals (e.g., >14 days in same stage = yellow, >30 = red)
+**Уникальность**: `(company_id, phone)` -- один телефон = один контакт в рамках УК.
 
-### 4. Bulk Actions
-- Multi-select checkboxes in list view
-- Bulk stage change, bulk assign to agent, bulk delete
+**RLS**: аналогично `agent_deals` -- доступ через `management_company_members`.
 
-### 5. Quick Communication Actions
-- Click-to-call (`tel:`) and click-to-WhatsApp (`wa.me/`) buttons on DealCard
-- Quick WhatsApp message from deal detail page
+### 2. Связь с существующими сделками
 
-### 6. Enhanced CreateDealSheet
-- Add preferred_districts (multi-select from known Phuket districts)
-- Add preferred_types (villa, condo, townhouse, land)
-- Add bedrooms_min selector
-- Add currency selector (THB, USD, RUB, CNY)
+- Добавить колонку `contact_id uuid REFERENCES crm_contacts(id)` в `agent_deals`
+- Миграция: НЕ удалять старые поля `client_name/phone/email` (обратная совместимость)
+- При создании сделки -- автоматически привязывать или создавать контакт
 
-### 7. Agent Performance (for owners/admins)
-- Leaderboard widget: deals won, total volume, conversion rate per agent
-- Filter analytics by agent
+### 3. Таблица `crm_contact_notes` -- Заметки по контакту
 
-### 8. Contact Timeline Improvements
-- Show relative timestamps ("2 hours ago", "3 days ago")
-- Activity icons with color coding by type
-- Collapsible activity groups by date
+| Поле | Тип | Назначение |
+|------|-----|-----------|
+| id | uuid | PK |
+| contact_id | uuid | FK на crm_contacts |
+| user_id | uuid | Автор |
+| note_type | text | note, call, meeting, email, whatsapp |
+| content | text | Текст заметки |
+| created_at | timestamptz | Когда |
 
-### 9. Deal Duplicate Detection
-- When creating a deal, check if client_phone or client_email already exists in another deal
-- Show warning with link to existing deal
+### 4. UI: Страницы
 
-### 10. Stage Probability and Forecast
-- Assign win probability to each stage (new=10%, contacted=20%, showing=40%, negotiation=60%, contract=80%)
-- Show forecast on analytics: expected revenue = sum(deal_value * stage_probability)
+#### 4.1 `/owner/contacts` -- Адресная книга
 
-## Technical Implementation
+- Список контактов с поиском по имени, телефону, email
+- Фильтры: по типу (buyer/seller/investor), по тегам (VIP/hot/cold), по источнику
+- Сортировка: по дате создания, по имени, по последней активности
+- Быстрые действия: WhatsApp, звонок, email
+- Создание нового контакта (кнопка +)
 
-### Files to modify:
-| File | Changes |
-|------|---------|
-| `SalesAnalytics.tsx` | Remove unused imports, fix monthly calc, add agent filter, forecast section, leaderboard |
-| `KanbanBoard.tsx` | Fix drag/click, add pipeline value per column, use `useDraggable` instead of `useSortable` for cards |
-| `SalesPipeline.tsx` | Add search bar, agent filter, bulk actions, weighted pipeline summary |
-| `DealCard.tsx` | Add deal age indicator, WhatsApp/call quick actions, stale deal coloring, checkbox for bulk |
-| `SalesDealDetail.tsx` | Add WhatsApp button, relative timestamps, deal age display |
-| `CreateDealSheet.tsx` | Add districts, types, bedrooms, currency fields, duplicate detection |
-| `EditDealSheet.tsx` | Add same missing fields + currency |
-| `DealStageBar.tsx` | Fix mobile -- show abbreviated labels or icons instead of hiding text |
-| `PropertyMatching.tsx` | Use React Router Link, show match score |
-| `useAgentDeals.ts` | Add stage probabilities, add `useCompanyMembers` hook for agent filter |
+#### 4.2 `/owner/contacts/:id` -- Карточка клиента (Досье)
 
-### New files:
-| File | Purpose |
-|------|---------|
-| `src/components/owner/sales/DealSearchBar.tsx` | Search + filters component |
-| `src/components/owner/sales/PipelineSummary.tsx` | Weighted pipeline value bar |
-| `src/components/owner/sales/AgentLeaderboard.tsx` | Agent performance ranking |
-| `src/components/owner/sales/BulkActions.tsx` | Multi-select toolbar |
+Секции:
+- **Профиль**: имя, фото, контакты, мессенджеры, национальность, язык
+- **Предпочтения**: бюджет, районы, типы, кол-во спален
+- **Сделки**: все связанные agent_deals (список с этапами)
+- **Хронология**: все заметки + активности из сделок, объединённые в единый timeline
+- **Теги и статус**: VIP, hot, cold, archived
 
-### Database changes:
-None required -- all new features use existing schema fields.
+#### 4.3 Интеграция с Pipeline
+
+- При создании сделки в CreateDealSheet -- поиск по существующим контактам (автокомплит по телефону/имени)
+- Если контакт найден -- подставить данные и привязать `contact_id`
+- Если не найден -- создать нового контакта автоматически
+- В DealCard и DealDetail -- ссылка на карточку контакта
+
+### 5. Навигация
+
+- Добавить пункт "Contacts" / "Контакты" в OwnerSidebar и OwnerDashboardMenu
+- Иконка: Users или ContactRound из lucide-react
+- Виджет "Recent Contacts" на OwnerDashboard
+
+## Затронутые файлы
+
+| Файл | Изменение |
+|------|----------|
+| SQL миграция | Создание crm_contacts, crm_contact_notes + RLS + contact_id в agent_deals |
+| `src/hooks/useCrmContacts.ts` | Новый -- CRUD для контактов |
+| `src/hooks/useCrmContactNotes.ts` | Новый -- заметки по контакту |
+| `src/pages/owner/ContactsList.tsx` | Новый -- адресная книга |
+| `src/pages/owner/ContactDetail.tsx` | Новый -- досье клиента |
+| `src/components/owner/contacts/ContactCard.tsx` | Новый -- карточка в списке |
+| `src/components/owner/contacts/CreateContactSheet.tsx` | Новый -- создание контакта |
+| `src/components/owner/contacts/EditContactSheet.tsx` | Новый -- редактирование |
+| `src/components/owner/contacts/ContactTimeline.tsx` | Новый -- хронология |
+| `src/components/owner/contacts/ContactSearchInput.tsx` | Новый -- автокомплит для CreateDealSheet |
+| `src/components/owner/contacts/ContactTagsEditor.tsx` | Новый -- управление тегами |
+| `src/components/owner/sales/CreateDealSheet.tsx` | + поиск/привязка контакта |
+| `src/components/owner/sales/DealCard.tsx` | + ссылка на контакт |
+| `src/pages/owner/SalesDealDetail.tsx` | + ссылка на карточку контакта |
+| `src/components/owner/OwnerSidebar.tsx` | + пункт Contacts |
+| `src/components/owner/dashboard/OwnerDashboardMenu.tsx` | + пункт Contacts |
+| `src/pages/owner/OwnerDashboard.tsx` | + виджет Recent Contacts |
+| `src/components/layout/pageRegistry.ts` | + маршруты |
+| `src/components/layout/AnimatedRoutes.tsx` | + маршруты |
+
+## Порядок реализации
+
+1. SQL миграция (таблицы + RLS + новая колонка в agent_deals)
+2. Хуки useCrmContacts + useCrmContactNotes
+3. Страница адресной книги (ContactsList)
+4. Карточка/досье клиента (ContactDetail)
+5. Интеграция с CreateDealSheet (автокомплит)
+6. Навигация и виджет на Dashboard
 
