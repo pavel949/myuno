@@ -88,10 +88,27 @@ export function usePropertyBookings(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Query orders where vertical = 'property' and user is the owner
-      // We need to find orders linked to properties the user owns
-      // Fetch orders with property vertical
-      // Note: property_id is stored in order_items.metadata.property_id
+      // Query orders where vertical = 'property'
+      // Filter by user's own properties to prevent data leaks
+      const { data: userProperties } = await supabase
+        .from('owner_properties')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      const userPropertyIds = (userProperties || []).map(p => p.id);
+      
+      // Also include properties user manages via delegation
+      const { data: delegated } = await (supabase as any)
+        .from('property_delegates')
+        .select('property_id')
+        .eq('delegate_user_id', user.id)
+        .eq('status', 'active');
+      
+      const delegatedIds = ((delegated || []) as { property_id: string }[]).map((d: { property_id: string }) => d.property_id);
+      const allPropertyIds = [...new Set([...userPropertyIds, ...delegatedIds])];
+      
+      if (allPropertyIds.length === 0) return [];
+
       let query = supabase
         .from('orders')
         .select(`
@@ -108,8 +125,14 @@ export function usePropertyBookings(propertyId?: string) {
         .is('deleted_at', null)
         .order('start_at', { ascending: true });
 
-      // Filter by specific property if provided - check in metadata
-      // Note: PostgREST doesn't support filtering by JSONB deeply, so we filter in JS
+      // Filter by specific property if provided
+      if (propertyId) {
+        if (!allPropertyIds.includes(propertyId)) return [];
+        query = query.eq('order_items.resource_id', propertyId);
+      } else {
+        query = query.in('order_items.resource_id', allPropertyIds);
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -117,19 +140,8 @@ export function usePropertyBookings(propertyId?: string) {
         throw error;
       }
 
-      // Filter by property_id in metadata if specified
-      let filteredData = data || [];
-      if (propertyId) {
-        filteredData = filteredData.filter((order) => {
-          const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
-          const meta = propertyItem?.metadata as Record<string, unknown> | null;
-          const itemPropertyId = meta?.property_id || propertyItem?.resource_id;
-          return itemPropertyId === propertyId;
-        });
-      }
-
       // Map orders to PropertyBooking format
-      return filteredData.map((order) => 
+      return (data || []).map((order) => 
         mapOrderToBooking(order, propertyId || '')
       );
     },
@@ -172,8 +184,8 @@ export function usePropertyBookings(propertyId?: string) {
       }
 
       // Create order_item linking to property
-      // NOTE: We store property_id in metadata instead of resource_id 
-      // because resource_id has FK constraint to resources table
+      // Store property_id in BOTH resource_id and metadata for compatibility
+      // resource_id is used by useAllPropertyBookings for filtering
       const { error: itemError } = await supabase
         .from('order_items')
         .insert({
@@ -183,6 +195,7 @@ export function usePropertyBookings(propertyId?: string) {
           unit_price: input.total_amount || 0,
           amount: input.total_amount || 0,
           qty: 1,
+          resource_id: input.property_id,
           start_at: `${input.check_in}T${input.check_in_time || '14:00'}:00Z`,
           end_at: `${input.check_out}T${input.check_out_time || '12:00'}:00Z`,
           metadata: {
@@ -229,8 +242,15 @@ export function usePropertyBookings(propertyId?: string) {
       
       // Update the order
       const orderUpdates: any = {};
-      if (updates.check_in) orderUpdates.start_at = `${updates.check_in}T14:00:00Z`;
-      if (updates.check_out) orderUpdates.end_at = `${updates.check_out}T12:00:00Z`;
+      if (updates.check_in) {
+        // Preserve custom check-in time from metadata if available
+        const checkInTime = (updates as any).check_in_time || '14:00';
+        orderUpdates.start_at = `${updates.check_in}T${checkInTime}:00Z`;
+      }
+      if (updates.check_out) {
+        const checkOutTime = (updates as any).check_out_time || '12:00';
+        orderUpdates.end_at = `${updates.check_out}T${checkOutTime}:00Z`;
+      }
       if (updates.total_amount !== undefined) orderUpdates.total_amount = updates.total_amount;
       if (updates.currency) orderUpdates.currency = updates.currency;
       if (updates.status) orderUpdates.status = updates.status;
