@@ -7,6 +7,7 @@ import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActiv
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
 import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
+import { PropertyMatching } from '@/components/owner/sales/PropertyMatching';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -199,6 +200,12 @@ export default function SalesDealDetail() {
           </Button>
         </div>
       )}
+
+      {/* Property matching */}
+      <div className="border rounded-xl p-4 bg-card">
+        <p className="text-sm font-medium mb-3">{isRu ? 'Подходящие объекты' : 'Matching Properties'}</p>
+        <PropertyMatching deal={deal} />
+      </div>
 
       {/* Quick actions: add activity */}
       <div className="space-y-3 border rounded-xl p-4 bg-card">

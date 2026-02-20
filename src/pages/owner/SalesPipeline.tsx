@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAgentDeals, useMyCompanyId, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { DealCard } from '@/components/owner/sales/DealCard';
@@ -6,10 +7,11 @@ import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, LayoutList, Columns3 } from 'lucide-react';
+import { Plus, LayoutList, Columns3, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function SalesPipeline() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
@@ -58,6 +60,9 @@ export default function SalesPipeline() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{isRu ? 'Воронка продаж' : 'Sales Pipeline'}</h1>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/analytics')}>
+            <BarChart3 className="h-4 w-4" />
+          </Button>
           <div className="flex border rounded-lg overflow-hidden">
             <button
               onClick={() => setView('list')}
