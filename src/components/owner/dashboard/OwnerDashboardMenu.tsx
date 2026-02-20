@@ -17,6 +17,7 @@ import {
   ListTodo,
   Building2,
   Package,
+  Megaphone,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -33,6 +34,8 @@ const MENU_ITEMS: MenuItem[] = [
   { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
   { path: '/owner/vendors', icon: Building2, labelEn: 'Vendor Directory', labelRu: 'Поставщики' },
   { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
+  { path: '/owner/documents', icon: FileText, labelEn: 'Documents', labelRu: 'Документы' },
+  { path: '/owner/marketing', icon: Megaphone, labelEn: 'Marketing', labelRu: 'Маркетинг' },
   { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
   { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
   { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
