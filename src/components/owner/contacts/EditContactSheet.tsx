@@ -1,0 +1,196 @@
+import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useUpdateContact, CrmContact, CONTACT_TYPES, CONTACT_SOURCES } from '@/hooks/useCrmContacts';
+import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  contact: CrmContact;
+}
+
+export function EditContactSheet({ open, onOpenChange, contact }: Props) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const { toast } = useToast();
+  const updateContact = useUpdateContact();
+
+  const [form, setForm] = useState({
+    first_name: contact.first_name,
+    last_name: contact.last_name,
+    phone: contact.phone || '',
+    email: contact.email || '',
+    whatsapp: contact.whatsapp || '',
+    telegram: contact.telegram || '',
+    contact_type: contact.contact_type || 'buyer',
+    source: contact.source || 'website',
+    nationality: contact.nationality || '',
+    company_name: contact.company_name || '',
+    notes: contact.notes || '',
+    budget_min: contact.budget_min?.toString() || '',
+    budget_max: contact.budget_max?.toString() || '',
+    currency: contact.currency || 'THB',
+    bedrooms_min: contact.bedrooms_min?.toString() || '',
+    preferred_types: contact.preferred_types || [],
+    preferred_districts: contact.preferred_districts || [],
+  });
+
+  useEffect(() => {
+    setForm({
+      first_name: contact.first_name,
+      last_name: contact.last_name,
+      phone: contact.phone || '',
+      email: contact.email || '',
+      whatsapp: contact.whatsapp || '',
+      telegram: contact.telegram || '',
+      contact_type: contact.contact_type || 'buyer',
+      source: contact.source || 'website',
+      nationality: contact.nationality || '',
+      company_name: contact.company_name || '',
+      notes: contact.notes || '',
+      budget_min: contact.budget_min?.toString() || '',
+      budget_max: contact.budget_max?.toString() || '',
+      currency: contact.currency || 'THB',
+      bedrooms_min: contact.bedrooms_min?.toString() || '',
+      preferred_types: contact.preferred_types || [],
+      preferred_districts: contact.preferred_districts || [],
+    });
+  }, [contact]);
+
+  const handleSubmit = async () => {
+    if (!form.first_name.trim()) {
+      toast({ title: isRu ? 'Введите имя' : 'Enter first name', variant: 'destructive' });
+      return;
+    }
+    try {
+      await updateContact.mutateAsync({
+        id: contact.id,
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        phone: form.phone || null,
+        email: form.email || null,
+        whatsapp: form.whatsapp || null,
+        telegram: form.telegram || null,
+        contact_type: form.contact_type,
+        source: form.source,
+        nationality: form.nationality || null,
+        company_name: form.company_name || null,
+        notes: form.notes || null,
+        budget_min: form.budget_min ? Number(form.budget_min) : null,
+        budget_max: form.budget_max ? Number(form.budget_max) : null,
+        currency: form.currency,
+        bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
+        preferred_types: form.preferred_types.length ? form.preferred_types : null,
+        preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
+      });
+      toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
+      onOpenChange(false);
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  const toggleArray = (key: 'preferred_types' | 'preferred_districts', val: string) => {
+    setForm(f => ({
+      ...f,
+      [key]: f[key].includes(val) ? f[key].filter(x => x !== val) : [...f[key], val],
+    }));
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+        <SheetHeader>
+          <SheetTitle>{isRu ? 'Редактировать контакт' : 'Edit Contact'}</SheetTitle>
+        </SheetHeader>
+        <div className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
+              <Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>{isRu ? 'Фамилия' : 'Last Name'}</Label>
+              <Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+            <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} /></div>
+            <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label>{isRu ? 'Тип' : 'Type'}</Label>
+              <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{CONTACT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{isRu ? 'Источник' : 'Source'}</Label>
+              <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{CONTACT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
+          </div>
+          <div><Label>{isRu ? 'Компания клиента' : 'Client company'}</Label><Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
+          <div className="grid grid-cols-3 gap-3">
+            <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
+            <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
+            <div>
+              <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
+              <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Типы' : 'Types'}</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {PROPERTY_TYPES.map(t => (
+                <button key={t} onClick={() => toggleArray('preferred_types', t)}
+                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                    form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+                  )}>{t}</button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {PHUKET_DISTRICTS.map(d => (
+                <button key={d} onClick={() => toggleArray('preferred_districts', d)}
+                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                    form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+                  )}>{d}</button>
+              ))}
+            </div>
+          </div>
+
+          <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
+
+          <Button onClick={handleSubmit} disabled={updateContact.isPending} className="w-full">
+            {updateContact.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

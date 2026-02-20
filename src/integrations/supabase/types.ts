@@ -153,6 +153,7 @@ export type Database = {
           commission_amount: number | null
           commission_percent: number | null
           company_id: string
+          contact_id: string | null
           created_at: string
           currency: string | null
           deal_value: number | null
@@ -180,6 +181,7 @@ export type Database = {
           commission_amount?: number | null
           commission_percent?: number | null
           company_id: string
+          contact_id?: string | null
           created_at?: string
           currency?: string | null
           deal_value?: number | null
@@ -207,6 +209,7 @@ export type Database = {
           commission_amount?: number | null
           commission_percent?: number | null
           company_id?: string
+          contact_id?: string | null
           created_at?: string
           currency?: string | null
           deal_value?: number | null
@@ -227,6 +230,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
             referencedColumns: ["id"]
           },
           {
@@ -3172,6 +3182,142 @@ export type Database = {
             columns: ["conversion_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contact_notes: {
+        Row: {
+          contact_id: string
+          content: string
+          created_at: string
+          id: string
+          note_type: string
+          user_id: string
+        }
+        Insert: {
+          contact_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          note_type?: string
+          user_id: string
+        }
+        Update: {
+          contact_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          note_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contact_notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contacts: {
+        Row: {
+          avatar_url: string | null
+          bedrooms_min: number | null
+          budget_max: number | null
+          budget_min: number | null
+          company_id: string
+          company_name: string | null
+          contact_type: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          email: string | null
+          first_name: string
+          id: string
+          is_archived: boolean
+          language: string | null
+          last_name: string
+          line_id: string | null
+          nationality: string | null
+          notes: string | null
+          phone: string | null
+          phone2: string | null
+          preferred_districts: string[] | null
+          preferred_types: string[] | null
+          source: string | null
+          tags: string[] | null
+          telegram: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          company_id: string
+          company_name?: string | null
+          contact_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          is_archived?: boolean
+          language?: string | null
+          last_name?: string
+          line_id?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone2?: string | null
+          preferred_districts?: string[] | null
+          preferred_types?: string[] | null
+          source?: string | null
+          tags?: string[] | null
+          telegram?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bedrooms_min?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          company_id?: string
+          company_name?: string | null
+          contact_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          is_archived?: boolean
+          language?: string | null
+          last_name?: string
+          line_id?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone2?: string | null
+          preferred_districts?: string[] | null
+          preferred_types?: string[] | null
+          source?: string | null
+          tags?: string[] | null
+          telegram?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
