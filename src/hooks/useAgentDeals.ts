@@ -46,6 +46,7 @@ export interface AgentDeal {
   company_id: string;
   agent_id: string;
   property_id: string | null;
+  contact_id: string | null;
   client_name: string;
   client_phone: string | null;
   client_email: string | null;

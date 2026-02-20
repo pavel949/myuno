@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -167,6 +167,18 @@ export default function SalesDealDetail() {
             {dealAge}d {isRu ? 'всего' : 'total'} · {stageAge}d {isRu ? 'в этапе' : 'in stage'}
           </span>
         </div>
+
+        {/* Link to contact dossier */}
+        {deal.contact_id && (
+          <button
+            onClick={() => navigate(`/owner/contacts/${deal.contact_id}`)}
+            className="flex items-center gap-1.5 mt-2 text-xs text-primary hover:text-primary/80 transition-colors"
+          >
+            <ContactRound className="h-3.5 w-3.5" />
+            {isRu ? 'Открыть досье контакта' : 'Open contact dossier'}
+          </button>
+        )}
+
         <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
           {deal.client_phone && (
             <a href={`tel:${deal.client_phone}`} className="flex items-center gap-1 hover:text-foreground">

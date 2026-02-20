@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, daysSince } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Phone, Mail, ChevronRight, Calendar, AlertCircle, MessageCircle, Clock } from 'lucide-react';
+import { Phone, Mail, ChevronRight, Calendar, AlertCircle, MessageCircle, Clock, ContactRound } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -60,6 +60,16 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-semibold text-[15px] truncate">{deal.client_name}</span>
+              {deal.contact_id && (
+                <a
+                  href={`/owner/contacts/${deal.contact_id}`}
+                  onClick={e => { e.stopPropagation(); navigate(`/owner/contacts/${deal.contact_id}`); e.preventDefault(); }}
+                  className="text-primary/60 hover:text-primary shrink-0"
+                  title={isRu ? 'Досье' : 'Dossier'}
+                >
+                  <ContactRound className="h-3.5 w-3.5" />
+                </a>
+              )}
               <Badge variant={stageBadgeVariant[deal.stage]} className="text-[10px] shrink-0">
                 {stageLabel}
               </Badge>
