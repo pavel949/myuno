@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessRole } from '@/hooks/useBusinessRole';
+import { type DashboardWidgetKey } from '@/lib/businessRoles';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +16,7 @@ import { OwnerDashboardMenu } from '@/components/owner/dashboard/OwnerDashboardM
 import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
 import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
+import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
 
 function SectionSkeleton() {
   return (
@@ -25,11 +28,79 @@ function SectionSkeleton() {
   );
 }
 
+/** Maps widget keys to their React components */
+function DashboardWidget({ widgetKey }: { widgetKey: DashboardWidgetKey }) {
+  switch (widgetKey) {
+    case 'invites':
+      return <OwnershipInviteBanner />;
+    case 'active_stays':
+      return (
+        <div data-tour="active-stays">
+          <Suspense fallback={<SectionSkeleton />}>
+            <ActiveStaysWidget />
+          </Suspense>
+        </div>
+      );
+    case 'properties':
+      return (
+        <div data-tour="properties">
+          <Suspense fallback={<SectionSkeleton />}>
+            <OwnerPropertiesList />
+          </Suspense>
+        </div>
+      );
+    case 'operations':
+      return (
+        <div data-tour="operations">
+          <Suspense fallback={<SectionSkeleton />}>
+            <OwnerOperationsFlat />
+          </Suspense>
+        </div>
+      );
+    case 'crm_tasks':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <CrmTasksWidget />
+        </Suspense>
+      );
+    case 'upcoming_payments':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <UpcomingPaymentsWidget />
+        </Suspense>
+      );
+    case 'active_deals':
+      return (
+        <div data-tour="deals">
+          <Suspense fallback={<SectionSkeleton />}>
+            <ActiveDealsWidget />
+          </Suspense>
+        </div>
+      );
+    case 'menu':
+      return (
+        <div data-tour="menu">
+          <OwnerDashboardMenu />
+        </div>
+      );
+    default:
+      return null;
+  }
+}
+
+/** Widgets that should have a separator before them */
+const SEPARATOR_BEFORE: Set<DashboardWidgetKey> = new Set([
+  'operations',
+  'active_deals',
+  'menu',
+]);
+
 export default function OwnerDashboard() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const { role, setRole, config } = useBusinessRole();
 
   if (!user) {
     return (
@@ -54,60 +125,17 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-24 space-y-8 overflow-x-hidden max-w-lg mx-auto">
-      {/* Invites */}
-      <OwnershipInviteBanner />
+    <div className="px-4 pt-6 pb-24 space-y-6 overflow-x-hidden max-w-lg mx-auto">
+      {/* Role Switcher */}
+      <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
 
-      {/* Active Stays */}
-      <div data-tour="active-stays">
-        <Suspense fallback={<SectionSkeleton />}>
-          <ActiveStaysWidget />
-        </Suspense>
-      </div>
-
-      {/* Properties */}
-      <div data-tour="properties">
-        <Suspense fallback={<SectionSkeleton />}>
-          <OwnerPropertiesList />
-        </Suspense>
-      </div>
-
-      <Separator />
-
-      {/* Today's Operations */}
-      <div data-tour="operations">
-        <Suspense fallback={<SectionSkeleton />}>
-          <OwnerOperationsFlat />
-        </Suspense>
-      </div>
-
-      <Separator />
-
-      {/* CRM Tasks Widget */}
-      <Suspense fallback={<SectionSkeleton />}>
-        <CrmTasksWidget />
-      </Suspense>
-
-      {/* Upcoming Payments */}
-      <Suspense fallback={<SectionSkeleton />}>
-        <UpcomingPaymentsWidget />
-      </Suspense>
-
-      <Separator />
-
-      {/* Active Deals */}
-      <div data-tour="deals">
-        <Suspense fallback={<SectionSkeleton />}>
-          <ActiveDealsWidget />
-        </Suspense>
-      </div>
-
-      <Separator />
-
-      {/* Menu */}
-      <div data-tour="menu">
-        <OwnerDashboardMenu />
-      </div>
+      {/* Composed Widgets */}
+      {config.widgets.map((widgetKey, idx) => (
+        <div key={widgetKey}>
+          {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && <Separator className="mb-6" />}
+          <DashboardWidget widgetKey={widgetKey} />
+        </div>
+      ))}
     </div>
   );
 }
