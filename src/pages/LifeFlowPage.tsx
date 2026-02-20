@@ -163,8 +163,8 @@ export default function LifeFlowPage() {
                 className="text-center text-xs text-muted-foreground/50 pt-4 pb-2"
               >
                 {isRussian
-                  ? 'Мы рядом. Если нужна помощь — напишите нам в любое время.'
-                  : "We're here for you. Reach out anytime you need help."}
+                  ? 'Если нужна помощь — напишите. Отвечаем каждый день.'
+                  : 'Need help? Write to us. We respond daily.'}
               </motion.p>
             </>
           )}
