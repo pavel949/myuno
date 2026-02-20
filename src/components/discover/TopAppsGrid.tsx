@@ -29,8 +29,8 @@ const TOP_APPS: TopApp[] = [
     descRu: 'Виллы и кондо',
     countLabel: 'Top',
     path: '/property',
-    gradient: 'from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30',
-    iconColor: 'text-amber-600 dark:text-amber-400',
+    gradient: 'from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5',
+    iconColor: 'text-primary',
   },
   {
     id: 'yachts',
@@ -41,8 +41,8 @@ const TOP_APPS: TopApp[] = [
     descRu: 'Катера и круизы',
     countLabel: 'Hot',
     path: '/yachts',
-    gradient: 'from-sky-50 to-blue-50 dark:from-sky-950/30 dark:to-blue-950/30',
-    iconColor: 'text-sky-600 dark:text-sky-400',
+    gradient: 'from-accent/50 to-muted/50 dark:from-accent/30 dark:to-muted/30',
+    iconColor: 'text-accent-foreground',
   },
   {
     id: 'transport',
@@ -53,8 +53,8 @@ const TOP_APPS: TopApp[] = [
     descRu: 'Авто и мото',
     countLabel: 'New',
     path: '/transport',
-    gradient: 'from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30',
-    iconColor: 'text-emerald-600 dark:text-emerald-400',
+    gradient: 'from-muted/50 to-accent/50 dark:from-muted/30 dark:to-accent/30',
+    iconColor: 'text-primary',
   },
   {
     id: 'beauty',
@@ -65,8 +65,8 @@ const TOP_APPS: TopApp[] = [
     descRu: 'СПА и массаж',
     countLabel: 'Top',
     path: '/beauty',
-    gradient: 'from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30',
-    iconColor: 'text-rose-600 dark:text-rose-400',
+    gradient: 'from-primary/5 to-accent/50 dark:from-primary/10 dark:to-accent/30',
+    iconColor: 'text-primary',
   },
 ];
 
@@ -116,8 +116,8 @@ const TopAppCard = memo(function TopAppCard({ app, isRu, onClick, index }: TopAp
       </div>
       
       {/* Count badge */}
-      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-white/90 dark:bg-black/40 shadow-sm">
-        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+      <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-card/90 dark:bg-card/60 shadow-sm border border-border/30">
+        <Star className="w-3 h-3 text-primary fill-primary" />
         <span className="text-[10px] font-semibold text-foreground">
           {app.countLabel}
         </span>

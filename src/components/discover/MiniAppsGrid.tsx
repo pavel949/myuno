@@ -110,7 +110,7 @@ const MiniAppCard = memo(function MiniAppCard({
         "rounded-2xl p-3 md:p-4 min-h-[100px] md:min-h-[120px]",
         "bg-card/80 backdrop-blur-sm border",
         isFeatured
-          ? "border-amber-400/50 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
+          ? "border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.15)]"
           : "border-primary/20 shadow-[0_0_10px_rgba(var(--primary),0.05)]",
         "hover:border-primary/40 hover:bg-card hover:shadow-lg hover:-translate-y-1",
         "active:scale-95",
@@ -120,28 +120,28 @@ const MiniAppCard = memo(function MiniAppCard({
     >
       {/* Badges */}
       {isFeatured && (
-        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 flex items-center gap-0.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm">
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 flex items-center gap-0.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm">
           <Crown className="w-2.5 h-2.5 md:w-3 md:h-3" />
           PRO
         </div>
       )}
       
       {!isFeatured && isNew && (
-        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-emerald-500 text-white shadow-sm">
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-secondary text-secondary-foreground shadow-sm">
           <Sparkles className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5" />
           NEW
         </div>
       )}
       
       {!isFeatured && !isNew && isHot && (
-        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-sm">
+        <div className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 text-[8px] md:text-[9px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-bold bg-destructive text-destructive-foreground shadow-sm">
           <Flame className="w-2.5 h-2.5 md:w-3 md:h-3 inline" />
         </div>
       )}
       
       {/* Icon */}
       <div className={cn(
-        "w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3",
+        "relative w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-3",
         "bg-gradient-to-br from-[hsl(var(--icon-dark))] via-[hsl(var(--primary))] to-[hsl(var(--icon-dark))] shadow-md",
         "group-hover:scale-110 group-hover:shadow-lg transition-all duration-200"
       )}>
