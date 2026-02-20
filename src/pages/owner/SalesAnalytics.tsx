@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAgentDeals, useMyCompanyId, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
+import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, STAGE_PROBABILITIES, formatValue } from '@/hooks/useAgentDeals';
+import { AgentLeaderboard } from '@/components/owner/sales/AgentLeaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, FunnelChart, Funnel, LabelList } from 'recharts';
-import { format, subMonths, startOfMonth } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { format, subMonths, startOfMonth, addMonths } from 'date-fns';
 
 const STAGE_COLORS: Record<DealStage, string> = {
   new: '#3b82f6',
@@ -26,6 +26,7 @@ export default function SalesAnalytics() {
   const isRu = language === 'ru';
   const { data: membership, isLoading: ml } = useMyCompanyId();
   const { data: deals = [], isLoading } = useAgentDeals(membership?.company_id);
+  const { data: members = [] } = useCompanyMembers(membership?.company_id);
 
   // Funnel data
   const funnelData = useMemo(() => {
@@ -38,15 +39,17 @@ export default function SalesAnalytics() {
     }));
   }, [deals, isRu]);
 
-  // Deals by month (last 6 months)
+  // Monthly data (last 6 months) — fixed off-by-one
   const monthlyData = useMemo(() => {
     const months: { month: string; won: number; lost: number; active: number }[] = [];
+    const now = new Date();
     for (let i = 5; i >= 0; i--) {
-      const start = startOfMonth(subMonths(new Date(), i));
+      const start = startOfMonth(subMonths(now, i));
+      const end = startOfMonth(i === 0 ? addMonths(now, 1) : subMonths(now, i - 1));
       const label = format(start, 'MMM yy');
       const monthDeals = deals.filter(d => {
         const created = new Date(d.created_at);
-        return created >= start && created < startOfMonth(subMonths(new Date(), i - 1));
+        return created >= start && created < end;
       });
       months.push({
         month: label,
@@ -74,7 +77,13 @@ export default function SalesAnalytics() {
     const won = deals.filter(d => d.stage === 'closed_won').length;
     const totalValue = deals.filter(d => d.stage === 'closed_won' && d.deal_value).reduce((s, d) => s + Number(d.deal_value), 0);
     const totalCommission = deals.filter(d => d.stage === 'closed_won' && d.commission_amount).reduce((s, d) => s + Number(d.commission_amount), 0);
-    return { total, won, conversionRate: total ? ((won / total) * 100).toFixed(1) : '0', totalValue, totalCommission };
+    // Forecast
+    const active = deals.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost');
+    const forecast = active.reduce((s, d) => {
+      const val = Number(d.deal_value || d.budget_max || 0);
+      return s + val * (STAGE_PROBABILITIES[d.stage as DealStage] || 0);
+    }, 0);
+    return { total, won, conversionRate: total ? ((won / total) * 100).toFixed(1) : '0', totalValue, totalCommission, forecast };
   }, [deals]);
 
   if (ml || isLoading) {
@@ -91,12 +100,14 @@ export default function SalesAnalytics() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
           { label: isRu ? 'Всего сделок' : 'Total Deals', value: kpis.total },
           { label: isRu ? 'Конверсия' : 'Conversion', value: `${kpis.conversionRate}%` },
-          { label: isRu ? 'Объём продаж' : 'Sales Volume', value: `${(kpis.totalValue / 1e6).toFixed(1)}M` },
-          { label: isRu ? 'Комиссия' : 'Commission', value: `${(kpis.totalCommission / 1e6).toFixed(2)}M` },
+          { label: isRu ? 'Объём продаж' : 'Sales Volume', value: formatValue(kpis.totalValue) },
+          { label: isRu ? 'Комиссия' : 'Commission', value: formatValue(kpis.totalCommission) },
+          { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.forecast) },
+          { label: isRu ? 'Выиграно' : 'Won Deals', value: kpis.won },
         ].map(k => (
           <div key={k.label} className="p-3 rounded-xl border bg-card text-center">
             <p className="text-2xl font-bold">{k.value}</p>
@@ -109,7 +120,7 @@ export default function SalesAnalytics() {
       <div className="border rounded-xl p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Воронка продаж' : 'Sales Funnel'}</p>
         <div className="space-y-2">
-          {funnelData.map((item, idx) => {
+          {funnelData.map((item) => {
             const maxVal = Math.max(...funnelData.map(f => f.value), 1);
             const width = Math.max((item.value / maxVal) * 100, 8);
             return (
@@ -167,6 +178,9 @@ export default function SalesAnalytics() {
           </div>
         </div>
       )}
+
+      {/* Agent Leaderboard */}
+      <AgentLeaderboard deals={deals} agents={members} />
     </div>
   );
 }

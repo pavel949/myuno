@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AgentDeal, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, useUpdateDeal } from '@/hooks/useAgentDeals';
+import { AgentDeal, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, STAGE_PROBABILITIES, useUpdateDeal, daysSince, formatValue } from '@/hooks/useAgentDeals';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Calendar } from 'lucide-react';
+import { Phone, Calendar, MessageCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -19,9 +19,7 @@ import {
   useSensors,
   useDroppable,
 } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 
 const stageColors: Record<DealStage, string> = {
   new: 'border-t-blue-500',
@@ -37,12 +35,13 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: deal.id });
+  const dragRef = useRef(false);
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id });
+  const age = daysSince(deal.updated_at);
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-  };
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+  } : undefined;
 
   return (
     <div
@@ -52,10 +51,14 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
       {...listeners}
       className={cn(
         'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none',
-        isDragging && 'opacity-50 shadow-lg',
+        isDragging && 'opacity-50 shadow-lg z-50',
+        age > 30 && 'border-l-2 border-l-red-500',
+        age > 14 && age <= 30 && 'border-l-2 border-l-amber-500',
       )}
-      onClick={(e) => {
-        if (!isDragging) {
+      onPointerDown={() => { dragRef.current = false; }}
+      onPointerMove={() => { dragRef.current = true; }}
+      onPointerUp={(e) => {
+        if (!dragRef.current) {
           e.stopPropagation();
           navigate(`/owner/sales/${deal.id}`);
         }
@@ -63,21 +66,41 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
     >
       <p className="font-medium text-sm truncate">{deal.client_name}</p>
       {deal.client_phone && (
-        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-          <Phone className="h-3 w-3" />{deal.client_phone}
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Phone className="h-3 w-3" />{deal.client_phone}
+          </p>
+          <a
+            href={`https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="text-green-600 hover:text-green-500"
+          >
+            <MessageCircle className="h-3 w-3" />
+          </a>
+        </div>
       )}
-      {deal.budget_max && (
+      {deal.deal_value ? (
+        <p className="text-xs font-medium text-foreground mt-1">{formatValue(deal.deal_value, deal.currency)}</p>
+      ) : deal.budget_max ? (
         <p className="text-xs text-muted-foreground mt-1">
           {deal.budget_min ? `${(Number(deal.budget_min)/1e6).toFixed(1)}–` : ''}{(Number(deal.budget_max)/1e6).toFixed(1)}M {deal.currency}
         </p>
-      )}
-      {deal.next_action_date && (
-        <p className="flex items-center gap-1 text-xs text-primary mt-1">
-          <Calendar className="h-3 w-3" />
-          {format(new Date(deal.next_action_date), 'dd.MM')}
-        </p>
-      )}
+      ) : null}
+      <div className="flex items-center justify-between mt-1">
+        {deal.next_action_date && (
+          <p className="flex items-center gap-1 text-xs text-primary">
+            <Calendar className="h-3 w-3" />
+            {format(new Date(deal.next_action_date), 'dd.MM')}
+          </p>
+        )}
+        {age > 7 && (
+          <p className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-red-500' : age > 14 ? 'text-amber-500' : 'text-muted-foreground')}>
+            <Clock className="h-2.5 w-2.5" />{age}d
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -88,6 +111,9 @@ function KanbanColumn({ stage, deals }: { stage: DealStage; deals: AgentDeal[] }
   const { setNodeRef, isOver } = useDroppable({ id: stage });
   const label = isRu ? DEAL_STAGE_LABELS[stage].ru : DEAL_STAGE_LABELS[stage].en;
 
+  const totalValue = deals.reduce((s, d) => s + (Number(d.deal_value || d.budget_max || 0)), 0);
+  const prob = STAGE_PROBABILITIES[stage];
+
   return (
     <div
       ref={setNodeRef}
@@ -97,11 +123,18 @@ function KanbanColumn({ stage, deals }: { stage: DealStage; deals: AgentDeal[] }
         isOver && 'ring-2 ring-primary/50',
       )}
     >
-      <div className="p-3 pb-2 flex items-center justify-between">
-        <span className="text-xs font-semibold">{label}</span>
-        <Badge variant="secondary" className="text-[10px] h-5">{deals.length}</Badge>
+      <div className="p-3 pb-1">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold">{label}</span>
+          <Badge variant="secondary" className="text-[10px] h-5">{deals.length}</Badge>
+        </div>
+        {totalValue > 0 && (
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            {formatValue(totalValue)} · {Math.round(prob * 100)}%
+          </p>
+        )}
       </div>
-      <div className="p-2 pt-0 space-y-2 flex-1 min-h-[100px] overflow-y-auto max-h-[60vh]">
+      <div className="p-2 pt-1 space-y-2 flex-1 min-h-[100px] overflow-y-auto max-h-[60vh]">
         {deals.map(deal => (
           <KanbanCard key={deal.id} deal={deal} />
         ))}

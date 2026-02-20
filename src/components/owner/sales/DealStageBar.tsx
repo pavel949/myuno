@@ -26,6 +26,7 @@ export function DealStageBar({ currentStage, onStageClick }: Props) {
     <div className="flex gap-1">
       {DEAL_STAGES.filter(s => s !== 'closed_lost').map((stage, idx) => {
         const label = isRu ? DEAL_STAGE_LABELS[stage].ru : DEAL_STAGE_LABELS[stage].en;
+        const shortLabel = DEAL_STAGE_LABELS[stage].short;
         const isActive = idx <= currentIdx && currentStage !== 'closed_lost';
         return (
           <button
@@ -40,6 +41,7 @@ export function DealStageBar({ currentStage, onStageClick }: Props) {
             title={label}
           >
             <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{shortLabel}</span>
           </button>
         );
       })}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
+import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
@@ -15,8 +15,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
+import { ru, enUS } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -27,11 +29,21 @@ const activityIcons: Record<string, React.ElementType> = {
   stage_change: Clock,
 };
 
+const activityColors: Record<string, string> = {
+  call: 'bg-blue-500/10 text-blue-600',
+  meeting: 'bg-purple-500/10 text-purple-600',
+  showing: 'bg-amber-500/10 text-amber-600',
+  message: 'bg-green-500/10 text-green-600',
+  note: 'bg-muted text-muted-foreground',
+  stage_change: 'bg-primary/10 text-primary',
+};
+
 export default function SalesDealDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const locale = isRu ? ru : enUS;
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -63,6 +75,9 @@ export default function SalesDealDetail() {
       </div>
     );
   }
+
+  const dealAge = daysSince(deal.created_at);
+  const stageAge = daysSince(deal.updated_at);
 
   const handleStageChange = async (newStage: DealStage) => {
     if (newStage === deal.stage) return;
@@ -106,6 +121,7 @@ export default function SalesDealDetail() {
   };
 
   const isClosed = deal.stage === 'closed_won' || deal.stage === 'closed_lost';
+  const whatsappUrl = deal.client_phone ? `https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}` : null;
 
   return (
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-6">
@@ -144,11 +160,22 @@ export default function SalesDealDetail() {
 
       {/* Client info */}
       <div>
-        <h1 className="text-xl font-bold">{deal.client_name}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold">{deal.client_name}</h1>
+          <span className={cn('flex items-center gap-1 text-xs', stageAge > 30 ? 'text-red-500' : stageAge > 14 ? 'text-amber-500' : 'text-muted-foreground')}>
+            <Clock className="h-3 w-3" />
+            {dealAge}d {isRu ? 'всего' : 'total'} · {stageAge}d {isRu ? 'в этапе' : 'in stage'}
+          </span>
+        </div>
         <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
           {deal.client_phone && (
             <a href={`tel:${deal.client_phone}`} className="flex items-center gap-1 hover:text-foreground">
               <Phone className="h-3.5 w-3.5" />{deal.client_phone}
+            </a>
+          )}
+          {whatsappUrl && (
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-600 hover:text-green-500">
+              <MessageCircle className="h-3.5 w-3.5" />WhatsApp
             </a>
           )}
           {deal.client_email && (
@@ -163,6 +190,13 @@ export default function SalesDealDetail() {
             {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
           </p>
         )}
+        {(deal.preferred_types?.length || deal.preferred_districts?.length) && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {deal.preferred_types?.map(t => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
+            {deal.preferred_districts?.map(d => <Badge key={d} variant="secondary" className="text-[10px]">{d}</Badge>)}
+            {deal.bedrooms_min && <Badge variant="secondary" className="text-[10px]">{deal.bedrooms_min}+ {isRu ? 'спален' : 'beds'}</Badge>}
+          </div>
+        )}
         {deal.next_action && (
           <p className="text-sm mt-1 text-primary">
             {isRu ? 'Следующий шаг' : 'Next'}: {deal.next_action}
@@ -172,8 +206,8 @@ export default function SalesDealDetail() {
         {deal.notes && <p className="text-sm text-muted-foreground mt-2">{deal.notes}</p>}
         {deal.deal_value && (
           <div className="mt-2 p-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-sm">
-            {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} THB
-            {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} THB`}
+            {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
+            {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
           </div>
         )}
       </div>
@@ -231,7 +265,7 @@ export default function SalesDealDetail() {
         </div>
       </div>
 
-      {/* Activity feed */}
+      {/* Activity feed with relative timestamps */}
       <div>
         <p className="text-sm font-medium mb-3">{isRu ? 'Лента активности' : 'Activity Feed'} ({activities.length})</p>
         {activities.length === 0 ? (
@@ -240,16 +274,19 @@ export default function SalesDealDetail() {
           <div className="space-y-3">
             {activities.map(a => {
               const Icon = activityIcons[a.activity_type] || FileText;
+              const colorClass = activityColors[a.activity_type] || 'bg-muted text-muted-foreground';
               return (
                 <div key={a.id} className="flex gap-3 text-sm">
                   <div className="mt-0.5">
-                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center">
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className={cn('h-7 w-7 rounded-full flex items-center justify-center', colorClass)}>
+                      <Icon className="h-3.5 w-3.5" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p>{a.description}</p>
-                    <p className="text-xs text-muted-foreground">{format(new Date(a.created_at), 'dd.MM.yy HH:mm')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale })}
+                    </p>
                   </div>
                 </div>
               );
