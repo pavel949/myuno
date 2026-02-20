@@ -12689,6 +12689,56 @@ export type Database = {
           },
         ]
       }
+      property_budgets: {
+        Row: {
+          budget_month: string
+          category: string
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          owner_id: string
+          planned_amount: number
+          property_id: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          budget_month: string
+          category: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          planned_amount?: number
+          property_id: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Update: {
+          budget_month?: string
+          category?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          planned_amount?: number
+          property_id?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_budgets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_chat_messages: {
         Row: {
           attachments: Json | null

@@ -52,6 +52,7 @@ import {
   Loader2,
   LayoutGrid,
   Briefcase,
+  FileSpreadsheet,
 } from 'lucide-react';
 import {
   format,
@@ -63,6 +64,7 @@ import { ru, enUS } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import { exportReportExcel } from '@/utils/exportFinancialsExcel';
 
 // Hook to load managed properties (via property_delegates)
 function useManagedProperties() {
@@ -293,6 +295,10 @@ export default function ReportsPage() {
             <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={() => handleGeneratePdf(report)} disabled={generatePdf.isPending}>
               {generatePdf.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileDown className="h-4 w-4 mr-2" />}
               PDF
+            </Button>
+            <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={() => exportReportExcel(report, isRu ? 'ru' : 'en')}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Excel
             </Button>
             {report.pdf_url && (
               <Button variant="outline" size="sm" className="flex-1 md:flex-none" asChild>
