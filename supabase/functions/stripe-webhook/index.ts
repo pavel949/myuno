@@ -7,8 +7,37 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-const logStep = (step: string, details?: unknown) => {
-  console.log(`[STRIPE-WEBHOOK] ${step}`, details ? JSON.stringify(details) : '');
+/**
+ * Redacted logger — logs event flow without sensitive data (PCI/GDPR).
+ * Only IDs are partially masked; amounts, metadata, and user data are omitted.
+ */
+const redactId = (id?: string | null): string => {
+  if (!id) return '[none]';
+  if (id.length <= 8) return '***';
+  return `${id.slice(0, 4)}...${id.slice(-4)}`;
+};
+
+const logStep = (step: string, details?: string | Record<string, unknown>) => {
+  if (!details) {
+    console.log(`[STRIPE-WEBHOOK] ${step}`);
+    return;
+  }
+  if (typeof details === 'string') {
+    // Error messages — no sensitive data redaction needed, they're internal
+    console.log(`[STRIPE-WEBHOOK] ${step}`, details);
+    return;
+  }
+  // Redact sensitive keys from structured logs
+  const safe: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(details)) {
+    if (['metadata', 'amount', 'total_amount', 'newBalance', 'new_balance', 'currency', 'error'].includes(k)) continue;
+    if (k.endsWith('Id') || k === 'orderId' || k === 'bookingId' || k === 'sessionId' || k === 'userId' || k === 'paymentIntentId') {
+      safe[k] = redactId(String(v));
+    } else {
+      safe[k] = v;
+    }
+  }
+  console.log(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
 };
 
 serve(async (req) => {
@@ -61,13 +90,13 @@ serve(async (req) => {
     // =====================================================
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      logStep("Processing checkout.session.completed", { sessionId: session.id, metadata: session.metadata });
+      logStep("Processing checkout.session.completed", { sessionId: redactId(session.id) });
 
       // ===== CANONICAL ORDER PAYMENT =====
       if (session.metadata?.order_id) {
         const orderId = session.metadata.order_id;
         const paymentIntentId = session.metadata.payment_intent_id;
-        logStep("Processing order payment", { orderId, paymentIntentId });
+        logStep("Processing order payment", { orderId: redactId(orderId) });
 
         // Get current order
         const { data: order, error: orderFetchError } = await supabaseAdmin
@@ -148,7 +177,7 @@ serve(async (req) => {
           logStep("IDEMPOTENCY: Ledger entries already exist, skipping", { orderId });
         } else {
           // ===== CREATE LEDGER ENTRIES =====
-          logStep("Creating ledger entries", { orderId, amount: order.total_amount });
+          logStep("Creating ledger entries", { orderId: redactId(orderId) });
 
           // Get or create platform revenue account
           let platformAccountId: string | null = null;
@@ -307,7 +336,7 @@ serve(async (req) => {
               }
             );
             const emailResult = await emailResponse.json();
-            logStep("Confirmation email sent", emailResult);
+            logStep("Confirmation email sent", { status: emailResult?.success ? 'ok' : 'fail' });
           } catch (emailError) {
             logStep("WARN", `Failed to send confirmation email: ${emailError}`);
           }
@@ -403,7 +432,7 @@ serve(async (req) => {
         const amount = parseFloat(session.metadata.amount);
         const currency = session.metadata.currency || "THB";
 
-        logStep("Processing wallet top-up", { userId, amount });
+        logStep("Processing wallet top-up", { userId: redactId(userId) });
 
         // ===== IDEMPOTENCY CHECK: Check if this session was already processed =====
         const { data: existingTransaction } = await supabaseAdmin
@@ -431,7 +460,7 @@ serve(async (req) => {
           }
 
           const newBalance = topupResult.new_balance;
-          logStep("Wallet topped up atomically", { userId, amount, newBalance });
+          logStep("Wallet topped up atomically", { userId: redactId(userId) });
 
           // ===== IDEMPOTENCY CHECK: Notification =====
           const { data: existingWalletNotification } = await supabaseAdmin
@@ -473,13 +502,13 @@ serve(async (req) => {
                 }
               );
               const emailResult = await emailResponse.json();
-              logStep("Wallet top-up email sent", emailResult);
+              logStep("Wallet top-up email sent", { status: emailResult?.success ? 'ok' : 'fail' });
             } catch (emailError) {
               logStep("WARN", `Failed to send wallet top-up email: ${emailError}`);
             }
           }
 
-          logStep("Wallet top-up completed", { userId, newBalance });
+          logStep("Wallet top-up completed", { userId: redactId(userId) });
         }
       }
     }
@@ -590,7 +619,7 @@ serve(async (req) => {
                 }
               );
               const emailResult = await emailResponse.json();
-              logStep("Cancellation email sent", emailResult);
+              logStep("Cancellation email sent", { status: emailResult?.success ? 'ok' : 'fail' });
             } catch (emailError) {
               logStep("WARN", `Failed to send cancellation email: ${emailError}`);
             }
