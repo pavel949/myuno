@@ -21721,6 +21721,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
+      is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
       is_company_member: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
