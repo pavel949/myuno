@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isPast, isToday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAgentDeals, useMyCompanyId, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { DealCard } from '@/components/owner/sales/DealCard';
@@ -17,11 +18,28 @@ export default function SalesPipeline() {
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
   const { data: deals = [], isLoading } = useAgentDeals(membership?.company_id);
   const [showCreate, setShowCreate] = useState(false);
-  const [filterStage, setFilterStage] = useState<DealStage | 'all'>('all');
+  const [filterStage, setFilterStage] = useState<DealStage | 'all' | 'follow_up'>('all');
   const [view, setView] = useState<'list' | 'kanban'>('list');
+
+  const overdueCount = useMemo(() => {
+    return deals.filter(d => {
+      if (d.stage === 'closed_won' || d.stage === 'closed_lost') return false;
+      if (!d.next_action_date) return false;
+      const nd = new Date(d.next_action_date);
+      return isPast(nd) || isToday(nd);
+    }).length;
+  }, [deals]);
 
   const filtered = useMemo(() => {
     if (filterStage === 'all') return deals;
+    if (filterStage === 'follow_up') {
+      return deals.filter(d => {
+        if (d.stage === 'closed_won' || d.stage === 'closed_lost') return false;
+        if (!d.next_action_date) return false;
+        const nd = new Date(d.next_action_date);
+        return isPast(nd) || isToday(nd);
+      });
+    }
     return deals.filter(d => d.stage === filterStage);
   }, [deals, filterStage]);
 
@@ -99,6 +117,17 @@ export default function SalesPipeline() {
             >
               {isRu ? 'Все' : 'All'} ({deals.length})
             </button>
+            {overdueCount > 0 && (
+              <button
+                onClick={() => setFilterStage('follow_up')}
+                className={cn(
+                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  filterStage === 'follow_up' ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-destructive/10 border-destructive/30 text-destructive',
+                )}
+              >
+                🔔 {isRu ? 'Follow-up' : 'Follow-up'} ({overdueCount})
+              </button>
+            )}
             {activeStages.map(stage => (
               <button
                 key={stage}
