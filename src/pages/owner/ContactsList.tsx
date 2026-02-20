@@ -8,9 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Phone, Mail, MessageCircle, ChevronRight, Filter, UserCircle } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload } from 'lucide-react';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
+import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
+import { ContactImportSheet } from '@/components/owner/contacts/ContactImportSheet';
 import { cn } from '@/lib/utils';
+
+const PAGE_SIZE = 20;
 
 export default function ContactsList() {
   const navigate = useNavigate();
@@ -19,12 +23,18 @@ export default function ContactsList() {
   const { user } = useAuth();
   const { data: membership } = useMyCompanyId();
   const companyId = membership?.company_id;
-  const { data: contacts = [], isLoading } = useCrmContacts(companyId);
+
+  const [page, setPage] = useState(0);
+  const { data: result, isLoading } = useCrmContacts(companyId, page, PAGE_SIZE);
+  const contacts = result?.data || [];
+  const totalCount = result?.count || 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const filtered = useMemo(() => {
@@ -55,10 +65,17 @@ export default function ContactsList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{isRu ? 'Контакты' : 'Contacts'}</h1>
-        <Button size="sm" onClick={() => setShowCreate(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          {isRu ? 'Новый' : 'New'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ContactExportButton contacts={contacts} />
+          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
+            <Upload className="h-4 w-4 mr-1" />
+            {isRu ? 'Импорт' : 'Import'}
+          </Button>
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            {isRu ? 'Новый' : 'New'}
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -113,7 +130,9 @@ export default function ContactsList() {
       )}
 
       {/* Count */}
-      <p className="text-xs text-muted-foreground">{filtered.length} {isRu ? 'контактов' : 'contacts'}</p>
+      <p className="text-xs text-muted-foreground">
+        {totalCount > 0 ? `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, totalCount)} ${isRu ? 'из' : 'of'} ${totalCount}` : '0'} {isRu ? 'контактов' : 'contacts'}
+      </p>
 
       {/* List */}
       {isLoading ? (
@@ -159,8 +178,26 @@ export default function ContactsList() {
         </div>
       )}
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page + 1} / {totalPages}
+          </span>
+          <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       {companyId && (
-        <CreateContactSheet open={showCreate} onOpenChange={setShowCreate} companyId={companyId} />
+        <>
+          <CreateContactSheet open={showCreate} onOpenChange={setShowCreate} companyId={companyId} />
+          <ContactImportSheet open={showImport} onOpenChange={setShowImport} companyId={companyId} />
+        </>
       )}
     </div>
   );
