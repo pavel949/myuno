@@ -123,7 +123,7 @@ export function QuickSolutionsGallery() {
             <button
               key={s.id}
               onClick={() => navigate(s.path)}
-              className="shrink-0 min-w-0 basis-[130px] lg:basis-[150px] group text-left"
+              className="shrink-0 min-w-0 basis-[180px] lg:basis-[210px] group text-left"
             >
               {/* Photo */}
               <div className="aspect-[4/3] rounded-xl overflow-hidden mb-2 transition-transform duration-200 group-active:scale-[0.97]">

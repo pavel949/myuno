@@ -155,7 +155,7 @@ export const ProductSection = forwardRef<HTMLElement, ProductSectionProps>(funct
               {displayProducts.map((product) => (
                 <div 
                   key={product.id} 
-                  className="shrink-0 min-w-0 basis-[170px] lg:basis-[200px]"
+                  className="shrink-0 min-w-0 basis-[150px] lg:basis-[170px]"
                 >
                   <ProfessionalProductCard
                     product={product}
