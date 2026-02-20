@@ -24,7 +24,7 @@ interface LifeSituation {
   accentBorder: string;
 }
 
-const ICON_GRADIENT = 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600';
+const ICON_GRADIENT = 'bg-gradient-to-br from-primary via-primary/80 to-primary/60';
 
 /** Primary 8 — large cards */
 const PRIMARY_SITUATIONS: LifeSituation[] = [
@@ -36,10 +36,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Airport, transport, essentials',
     descRu: 'Аэропорт, трансфер, первый день',
     route: '/life/arrival',
-    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    bg: 'bg-primary/5 dark:bg-primary/10',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
+    accentBorder: 'border-primary/15 dark:border-primary/20',
   },
   {
     code: 'living',
@@ -49,10 +49,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Home, groceries, routines',
     descRu: 'Дом, быт, задачи',
     route: '/life/living',
-    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    bg: 'bg-muted/50 dark:bg-muted/30',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
+    accentBorder: 'border-border/60 dark:border-border/30',
   },
   {
     code: 'leisure',
@@ -62,10 +62,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Tours, yachts, activities',
     descRu: 'Туры, яхты, активности',
     route: '/life/leisure',
-    bg: 'bg-cyan-50/50 dark:bg-cyan-950/20',
+    bg: 'bg-accent/50 dark:bg-accent/30',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
+    accentBorder: 'border-border/60 dark:border-border/30',
   },
   {
     code: 'health',
@@ -75,10 +75,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Clinics, insurance, pharmacy',
     descRu: 'Клиники, страховка, аптека',
     route: '/life/health',
-    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    bg: 'bg-primary/5 dark:bg-primary/10',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
+    accentBorder: 'border-primary/15 dark:border-primary/20',
   },
   {
     code: 'family',
@@ -88,10 +88,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Childcare, schools, activities',
     descRu: 'Няни, школы, занятия',
     route: '/life/family',
-    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    bg: 'bg-muted/50 dark:bg-muted/30',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
+    accentBorder: 'border-border/60 dark:border-border/30',
   },
   {
     code: 'property',
@@ -101,10 +101,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Rent, buy, manage',
     descRu: 'Аренда, покупка, управление',
     route: '/life/property',
-    bg: 'bg-cyan-50/50 dark:bg-cyan-950/20',
+    bg: 'bg-accent/50 dark:bg-accent/30',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-cyan-200/60 dark:border-cyan-800/30',
+    accentBorder: 'border-border/60 dark:border-border/30',
   },
   {
     code: 'relocation',
@@ -114,10 +114,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Visa, banking, legal help',
     descRu: 'Виза, банки, юрист',
     route: '/life/relocation',
-    bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
+    bg: 'bg-primary/5 dark:bg-primary/10',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-emerald-200/60 dark:border-emerald-800/30',
+    accentBorder: 'border-primary/15 dark:border-primary/20',
   },
   {
     code: 'business',
@@ -127,10 +127,10 @@ const PRIMARY_SITUATIONS: LifeSituation[] = [
     descEn: 'Coworking, company setup',
     descRu: 'Коворкинг, компания',
     route: '/life/business',
-    bg: 'bg-teal-50/50 dark:bg-teal-950/20',
+    bg: 'bg-muted/50 dark:bg-muted/30',
     iconBg: ICON_GRADIENT,
     iconColor: 'text-white',
-    accentBorder: 'border-teal-200/60 dark:border-teal-800/30',
+    accentBorder: 'border-border/60 dark:border-border/30',
   },
 ];
 
@@ -229,7 +229,7 @@ export const LifeSituationsGrid = memo(function LifeSituationsGrid() {
         onClick={() => { setShowMore(!showMore); triggerHaptic('light'); }}
         className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/5 active:scale-[0.98] transition-all touch-manipulation"
       >
-        <span>{isRu ? (showMore ? 'Свернуть' : 'Ещё 9 ситуаций') : (showMore ? 'Show less' : '9 more situations')}</span>
+        <span>{isRu ? (showMore ? 'Свернуть' : `Ещё ${SECONDARY_SITUATIONS.length} ситуаций`) : (showMore ? 'Show less' : `${SECONDARY_SITUATIONS.length} more situations`)}</span>
         <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", showMore && "rotate-180")} />
       </button>
 
