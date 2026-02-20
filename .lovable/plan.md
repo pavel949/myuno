@@ -1,129 +1,159 @@
 
 
-# CRM Contacts: Адресная книга и Досье клиентов для УК
+# Комплексный план устранения gaps в CRM-модуле
 
-## Проблема
+## Обзор выявленных проблем
 
-Сейчас клиентские данные "размазаны" по сделкам. Один человек может быть в 5 сделках с разным написанием имени. Нет единого профиля, нет истории, нет досье.
+| # | Gap | Критичность | Описание |
+|---|-----|-------------|----------|
+| 1 | Context Loss: "New Deal" из ContactDetail | Высокая | Кнопка "Новая сделка" на странице контакта ведёт на `/owner/sales` без передачи данных контакта |
+| 2 | Type Safety: `useContactDeals` возвращает `any[]` | Средняя | Нет типизации, возможны runtime-ошибки |
+| 3 | Scalability: нет серверной пагинации | Средняя | `useAgentDeals` и `useCrmContacts` загружают ВСЕ записи разом |
+| 4 | CSV Import/Export | Средняя | Невозможно мигрировать данные из других CRM |
+| 5 | Удаление заметок в Timeline | Низкая | Нет кнопки удаления заметок в ContactDetail |
 
-## Решение: таблица `crm_contacts` + UI модуль
+---
 
-### 1. Новая таблица `crm_contacts`
+## 1. Context Loss: Pre-fill контакта при создании сделки
 
-| Поле | Тип | Назначение |
-|------|-----|-----------|
-| id | uuid | PK |
-| company_id | uuid | FK на management_companies |
-| first_name | text | Имя |
-| last_name | text | Фамилия |
-| phone | text | Основной телефон |
-| phone2 | text | Доп. телефон |
-| email | text | Email |
-| whatsapp | text | WhatsApp (если отличается от phone) |
-| telegram | text | Telegram username |
-| line_id | text | LINE ID (важно для Таиланда) |
-| nationality | text | Гражданство |
-| language | text | Предпочитаемый язык общения |
-| source | text | Откуда пришёл (website, referral, walk-in, social, agent_network) |
-| contact_type | text | buyer, seller, investor, tenant, landlord, agent |
-| company_name | text | Компания клиента (если есть) |
-| budget_min | numeric | Бюджет от |
-| budget_max | numeric | Бюджет до |
-| currency | text | Валюта бюджета |
-| preferred_districts | text[] | Желаемые районы |
-| preferred_types | text[] | Типы недвижимости |
-| bedrooms_min | int | Мин. спален |
-| notes | text | Общие заметки |
-| tags | text[] | Теги (VIP, hot, cold, follow-up) |
-| avatar_url | text | Фото контакта |
-| is_archived | boolean | Архивирован |
-| created_by | uuid | Кто создал |
-| created_at | timestamptz | Дата создания |
-| updated_at | timestamptz | Дата обновления |
+**Проблема**: В `ContactDetail.tsx` кнопка "Новая сделка" просто делает `navigate('/owner/sales')`, теряя контекст контакта.
 
-**Уникальность**: `(company_id, phone)` -- один телефон = один контакт в рамках УК.
+**Решение**:
+- Добавить кнопку "Создать сделку" прямо в `ContactDetail`, которая открывает `CreateDealSheet` с передачей `prefilledContact`
+- Добавить prop `prefilledContact?: CrmContact` в `CreateDealSheet`
+- При наличии `prefilledContact` -- автоматически заполнять поля формы и устанавливать `selectedContact`
 
-**RLS**: аналогично `agent_deals` -- доступ через `management_company_members`.
+**Файлы**:
+- `src/components/owner/sales/CreateDealSheet.tsx` -- добавить prop `prefilledContact`, при его наличии вызывать `setSelectedContact` и заполнять форму в `useEffect`
+- `src/pages/owner/ContactDetail.tsx` -- заменить `navigate('/owner/sales')` на локальное открытие `CreateDealSheet` с передачей текущего контакта
 
-### 2. Связь с существующими сделками
+---
 
-- Добавить колонку `contact_id uuid REFERENCES crm_contacts(id)` в `agent_deals`
-- Миграция: НЕ удалять старые поля `client_name/phone/email` (обратная совместимость)
-- При создании сделки -- автоматически привязывать или создавать контакт
+## 2. Type Safety: типизация `useContactDeals`
 
-### 3. Таблица `crm_contact_notes` -- Заметки по контакту
+**Проблема**: `useContactDeals` возвращает `any[]`, и в `ContactDetail` deals отображаются через `(d: any)`.
 
-| Поле | Тип | Назначение |
-|------|-----|-----------|
-| id | uuid | PK |
-| contact_id | uuid | FK на crm_contacts |
-| user_id | uuid | Автор |
-| note_type | text | note, call, meeting, email, whatsapp |
-| content | text | Текст заметки |
-| created_at | timestamptz | Когда |
+**Решение**:
+- Типизировать возвращаемое значение `useContactDeals` как `AgentDeal[]`
+- Убрать `as any` из шаблона в `ContactDetail`
 
-### 4. UI: Страницы
+**Файлы**:
+- `src/hooks/useCrmContacts.ts` -- изменить возвращаемый тип `useContactDeals` на `Promise<AgentDeal[]>` с импортом `AgentDeal`
+- `src/pages/owner/ContactDetail.tsx` -- убрать `(d: any)` в map, использовать типизированный объект
 
-#### 4.1 `/owner/contacts` -- Адресная книга
+---
 
-- Список контактов с поиском по имени, телефону, email
-- Фильтры: по типу (buyer/seller/investor), по тегам (VIP/hot/cold), по источнику
-- Сортировка: по дате создания, по имени, по последней активности
-- Быстрые действия: WhatsApp, звонок, email
-- Создание нового контакта (кнопка +)
+## 3. Серверная пагинация для контактов и сделок
 
-#### 4.2 `/owner/contacts/:id` -- Карточка клиента (Досье)
+**Проблема**: При 500+ контактах или сделках загрузка всех записей замедлит приложение.
 
-Секции:
-- **Профиль**: имя, фото, контакты, мессенджеры, национальность, язык
-- **Предпочтения**: бюджет, районы, типы, кол-во спален
-- **Сделки**: все связанные agent_deals (список с этапами)
-- **Хронология**: все заметки + активности из сделок, объединённые в единый timeline
-- **Теги и статус**: VIP, hot, cold, archived
+**Решение**: Добавить offset-based пагинацию с параметрами `page` и `pageSize`.
 
-#### 4.3 Интеграция с Pipeline
+**Файлы**:
 
-- При создании сделки в CreateDealSheet -- поиск по существующим контактам (автокомплит по телефону/имени)
-- Если контакт найден -- подставить данные и привязать `contact_id`
-- Если не найден -- создать нового контакта автоматически
-- В DealCard и DealDetail -- ссылка на карточку контакта
+- `src/hooks/useCrmContacts.ts`:
+  - Добавить параметры `page: number`, `pageSize: number` в `useCrmContacts`
+  - Использовать `.range(from, to)` в запросе
+  - Добавить `useCrmContactsCount(companyId, filters)` для получения общего количества (с `.select('id', { count: 'exact', head: true })`)
 
-### 5. Навигация
+- `src/hooks/useAgentDeals.ts`:
+  - Аналогично добавить пагинацию в `useAgentDeals`
+  - Добавить `useAgentDealsCount`
 
-- Добавить пункт "Contacts" / "Контакты" в OwnerSidebar и OwnerDashboardMenu
-- Иконка: Users или ContactRound из lucide-react
-- Виджет "Recent Contacts" на OwnerDashboard
+- `src/pages/owner/ContactsList.tsx`:
+  - Добавить состояние `page`, передавать в хук
+  - Добавить компонент `Pagination` из `@/components/ui/pagination` внизу списка
+  - Показывать "1-20 из 150"
 
-## Затронутые файлы
+- `src/pages/owner/SalesPipeline.tsx` (или аналогичный файл списка сделок):
+  - Аналогичная пагинация
 
-| Файл | Изменение |
-|------|----------|
-| SQL миграция | Создание crm_contacts, crm_contact_notes + RLS + contact_id в agent_deals |
-| `src/hooks/useCrmContacts.ts` | Новый -- CRUD для контактов |
-| `src/hooks/useCrmContactNotes.ts` | Новый -- заметки по контакту |
-| `src/pages/owner/ContactsList.tsx` | Новый -- адресная книга |
-| `src/pages/owner/ContactDetail.tsx` | Новый -- досье клиента |
-| `src/components/owner/contacts/ContactCard.tsx` | Новый -- карточка в списке |
-| `src/components/owner/contacts/CreateContactSheet.tsx` | Новый -- создание контакта |
-| `src/components/owner/contacts/EditContactSheet.tsx` | Новый -- редактирование |
-| `src/components/owner/contacts/ContactTimeline.tsx` | Новый -- хронология |
-| `src/components/owner/contacts/ContactSearchInput.tsx` | Новый -- автокомплит для CreateDealSheet |
-| `src/components/owner/contacts/ContactTagsEditor.tsx` | Новый -- управление тегами |
-| `src/components/owner/sales/CreateDealSheet.tsx` | + поиск/привязка контакта |
-| `src/components/owner/sales/DealCard.tsx` | + ссылка на контакт |
-| `src/pages/owner/SalesDealDetail.tsx` | + ссылка на карточку контакта |
-| `src/components/owner/OwnerSidebar.tsx` | + пункт Contacts |
-| `src/components/owner/dashboard/OwnerDashboardMenu.tsx` | + пункт Contacts |
-| `src/pages/owner/OwnerDashboard.tsx` | + виджет Recent Contacts |
-| `src/components/layout/pageRegistry.ts` | + маршруты |
-| `src/components/layout/AnimatedRoutes.tsx` | + маршруты |
+---
+
+## 4. CSV Import / Export контактов
+
+**Проблема**: Нет возможности массово загрузить/выгрузить контакты для миграции с других CRM.
+
+**Решение**: Добавить кнопки Import/Export на странице контактов.
+
+**Файлы**:
+
+- `src/components/owner/contacts/ContactExportButton.tsx` (новый):
+  - Кнопка "Export CSV"
+  - Использовать библиотеку `papaparse` (уже установлена) для генерации CSV
+  - Экспорт всех не-архивированных контактов текущей компании
+
+- `src/components/owner/contacts/ContactImportSheet.tsx` (новый):
+  - Sheet с drag-and-drop зоной для CSV файла
+  - Парсинг через `papaparse`
+  - Маппинг колонок: автоматическое определение `first_name`, `last_name`, `phone`, `email` и т.д.
+  - Предпросмотр первых 5 строк перед импортом
+  - Batch-insert через supabase `.insert(rows)`
+  - Обработка дубликатов по телефону (skip / overwrite)
+
+- `src/pages/owner/ContactsList.tsx`:
+  - Добавить кнопки Import/Export в header рядом с "Новый"
+
+---
+
+## 5. Удаление заметок в Timeline
+
+**Проблема**: В `ContactDetail` заметки нельзя удалить.
+
+**Решение**:
+- Добавить кнопку удаления (иконка Trash2) в каждую заметку
+- Использовать существующий хук `useDeleteContactNote`
+
+**Файлы**:
+- `src/pages/owner/ContactDetail.tsx` -- добавить кнопку удаления в рендер заметок, подключить `useDeleteContactNote`
+
+---
 
 ## Порядок реализации
 
-1. SQL миграция (таблицы + RLS + новая колонка в agent_deals)
-2. Хуки useCrmContacts + useCrmContactNotes
-3. Страница адресной книги (ContactsList)
-4. Карточка/досье клиента (ContactDetail)
-5. Интеграция с CreateDealSheet (автокомплит)
-6. Навигация и виджет на Dashboard
+1. Type Safety (Gap 2) -- быстрый fix, 2 файла
+2. Context Loss (Gap 1) -- 2 файла, критичный UX
+3. Удаление заметок (Gap 5) -- 1 файл, простой fix
+4. Серверная пагинация (Gap 3) -- 4-5 файлов, масштабируемость
+5. CSV Import/Export (Gap 4) -- 3 новых файла, полезная фича
+
+---
+
+## Технические детали
+
+### Пагинация -- формат запроса
+```text
+const pageSize = 20;
+const from = page * pageSize;
+const to = from + pageSize - 1;
+
+supabase
+  .from('crm_contacts')
+  .select('*', { count: 'exact' })
+  .eq('company_id', companyId)
+  .range(from, to)
+```
+
+### CSV Import -- формат маппинга
+```text
+CSV колонка    -->  DB поле
+Name           -->  first_name + last_name (split по пробелу)
+Phone          -->  phone
+Email          -->  email
+Type           -->  contact_type
+Source         -->  source
+Budget         -->  budget_max
+```
+
+### Pre-fill контакта -- prop interface
+```text
+CreateDealSheet props:
+  + prefilledContact?: CrmContact
+
+При наличии prefilledContact:
+  - selectedContact = prefilledContact
+  - form.client_name = "first_name last_name"
+  - form.client_phone = contact.phone
+  - form.client_email = contact.email
+```
 
