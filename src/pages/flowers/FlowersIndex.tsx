@@ -259,7 +259,7 @@ export default function FlowersIndex() {
                         )}
                         {boxType && boxType !== 'wrap' && (
                           <Badge variant="secondary" className="text-[10px]">
-                            {boxType === 'velvet_box' ? '🎁 Velvet Box' : boxType === 'luxury_box' ? '👑 Luxury Box' : boxType}
+                            {boxType === 'velvet_box' ? (isRu ? '🎁 Бархатная коробка' : '🎁 Velvet Box') : boxType === 'luxury_box' ? (isRu ? '👑 Люкс коробка' : '👑 Luxury Box') : boxType}
                           </Badge>
                         )}
                         {scarcityLevel === 'high' && (
@@ -273,8 +273,12 @@ export default function FlowersIndex() {
                       {socialProof && (
                         <div className="absolute bottom-2 left-2 right-2">
                           <Badge className="bg-background/90 text-foreground text-[9px] backdrop-blur-sm border-0 w-full justify-center">
-                            <Star className="w-2.5 h-2.5 mr-0.5 text-amber-500" />
-                            {socialProof}
+                          <Star className="w-2.5 h-2.5 mr-0.5 text-amber-500" />
+                            {isRu 
+                              ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
+                                : socialProof === 'Customer favorite' ? 'Любимец покупателей'
+                                : socialProof
+                              : socialProof}
                           </Badge>
                         </div>
                       )}

@@ -199,7 +199,11 @@ const BouquetDetail = () => {
             {socialProof && (
               <Badge className="bg-background/90 text-foreground text-xs backdrop-blur-sm border-0">
                 <Star className="w-3 h-3 mr-1 text-amber-500" />
-                {socialProof}
+                {isRu 
+                  ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
+                    : socialProof === 'Customer favorite' ? 'Любимец покупателей'
+                    : socialProof
+                  : socialProof}
               </Badge>
             )}
             {scarcityLevel === 'high' && (

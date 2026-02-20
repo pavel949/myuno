@@ -5,10 +5,9 @@ import {
   Utensils, 
   Car, 
   Sparkles, 
-  Stethoscope,
-  ShoppingBag,
   ChevronRight,
-  Zap
+  Zap,
+  Flower2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,8 +15,8 @@ const SERVICES = [
   { id: 'food', icon: Utensils, label: 'Food', labelRu: 'Еда', href: '/food', color: 'text-warning' },
   { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', href: '/transport', color: 'text-info' },
   
-  { id: 'health', icon: Stethoscope, label: 'Health', labelRu: 'Здоровье', href: '/health', color: 'text-success' },
-  { id: 'shopping', icon: ShoppingBag, label: 'Shopping', labelRu: 'Покупки', href: '/shopping', color: 'text-purple-500' },
+  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', href: '/beauty', color: 'text-pink-500' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', href: '/flowers', color: 'text-rose-500' },
 ];
 
 export function GuestServicesBlock() {
