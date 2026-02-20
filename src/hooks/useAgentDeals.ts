@@ -11,17 +11,35 @@ export const DEAL_STAGES = [
 
 export type DealStage = typeof DEAL_STAGES[number];
 
-export const DEAL_STAGE_LABELS: Record<DealStage, { en: string; ru: string }> = {
-  new: { en: 'New', ru: 'Новый' },
-  contacted: { en: 'Contacted', ru: 'Контакт' },
-  showing: { en: 'Showing', ru: 'Показ' },
-  negotiation: { en: 'Negotiation', ru: 'Переговоры' },
-  contract: { en: 'Contract', ru: 'Договор' },
-  closed_won: { en: 'Won', ru: 'Успех' },
-  closed_lost: { en: 'Lost', ru: 'Проигрыш' },
+export const DEAL_STAGE_LABELS: Record<DealStage, { en: string; ru: string; short: string }> = {
+  new: { en: 'New', ru: 'Новый', short: 'New' },
+  contacted: { en: 'Contacted', ru: 'Контакт', short: 'Call' },
+  showing: { en: 'Showing', ru: 'Показ', short: 'Show' },
+  negotiation: { en: 'Negotiation', ru: 'Торг', short: 'Nego' },
+  contract: { en: 'Contract', ru: 'Договор', short: 'Deal' },
+  closed_won: { en: 'Won', ru: 'Успех', short: 'Won' },
+  closed_lost: { en: 'Lost', ru: 'Проигрыш', short: 'Lost' },
+};
+
+export const STAGE_PROBABILITIES: Record<DealStage, number> = {
+  new: 0.10,
+  contacted: 0.20,
+  showing: 0.40,
+  negotiation: 0.60,
+  contract: 0.80,
+  closed_won: 1.0,
+  closed_lost: 0,
 };
 
 export const CLIENT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent', 'other'] as const;
+
+export const PHUKET_DISTRICTS = [
+  'Chalong', 'Rawai', 'Kata', 'Karon', 'Patong', 'Kamala', 'Surin', 'Bang Tao',
+  'Layan', 'Cherng Talay', 'Thalang', 'Phuket Town', 'Kathu', 'Mai Khao', 'Nai Harn',
+] as const;
+
+export const PROPERTY_TYPES = ['villa', 'condo', 'townhouse', 'land', 'apartment', 'penthouse'] as const;
+export const CURRENCIES = ['THB', 'USD', 'RUB', 'CNY', 'EUR'] as const;
 
 export interface AgentDeal {
   id: string;
@@ -72,6 +90,61 @@ export function useMyCompanyId() {
       return data as { company_id: string; role: string } | null;
     },
     enabled: !!user,
+  });
+}
+
+/** Fetch company members for agent filter */
+export function useCompanyMembers(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ['company-members', companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('management_company_members')
+        .select('user_id, role, profiles:user_id(full_name)')
+        .eq('company_id', companyId!)
+        .eq('is_active', true);
+      if (error) throw error;
+      return (data || []).map((m: any) => ({
+        user_id: m.user_id,
+        role: m.role,
+        name: m.profiles?.full_name || m.user_id.slice(0, 8),
+      }));
+    },
+    enabled: !!companyId,
+  });
+}
+
+/** Check for duplicate client by phone or email */
+export function useDuplicateCheck(companyId: string | undefined, phone: string, email: string) {
+  return useQuery({
+    queryKey: ['deal-duplicate', companyId, phone, email],
+    queryFn: async (): Promise<AgentDeal[]> => {
+      if (!companyId) return [];
+      let results: AgentDeal[] = [];
+      if (phone && phone.length >= 6) {
+        const { data } = await supabase
+          .from('agent_deals')
+          .select('*')
+          .eq('company_id', companyId)
+          .eq('client_phone', phone)
+          .limit(3);
+        if (data) results = [...results, ...(data as unknown as AgentDeal[])];
+      }
+      if (email && email.includes('@')) {
+        const { data } = await supabase
+          .from('agent_deals')
+          .select('*')
+          .eq('company_id', companyId)
+          .eq('client_email', email)
+          .limit(3);
+        if (data) {
+          const ids = new Set(results.map(r => r.id));
+          results = [...results, ...(data as unknown as AgentDeal[]).filter(d => !ids.has(d.id))];
+        }
+      }
+      return results;
+    },
+    enabled: !!companyId && ((!!phone && phone.length >= 6) || (!!email && email.includes('@'))),
   });
 }
 
@@ -162,4 +235,51 @@ export function useDeleteDeal() {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
     },
   });
+}
+
+/** Bulk update stage */
+export function useBulkUpdateStage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ ids, stage }: { ids: string[]; stage: DealStage }) => {
+      const { error } = await supabase
+        .from('agent_deals')
+        .update({ stage } as any)
+        .in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['agent-deals'] });
+    },
+  });
+}
+
+/** Bulk delete deals */
+export function useBulkDeleteDeals() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from('agent_deals')
+        .delete()
+        .in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['agent-deals'] });
+    },
+  });
+}
+
+/** Utility: days since a given date */
+export function daysSince(dateStr: string): number {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/** Utility: format deal value in millions */
+export function formatValue(val: number | null, currency?: string | null): string {
+  if (!val) return '—';
+  if (val >= 1e6) return `${(val / 1e6).toFixed(1)}M ${currency || ''}`.trim();
+  if (val >= 1e3) return `${(val / 1e3).toFixed(0)}K ${currency || ''}`.trim();
+  return `${val.toLocaleString()} ${currency || ''}`.trim();
 }

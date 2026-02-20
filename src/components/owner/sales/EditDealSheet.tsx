@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUpdateDeal, CLIENT_SOURCES, AgentDeal } from '@/hooks/useAgentDeals';
+import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, AgentDeal } from '@/hooks/useAgentDeals';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -29,6 +30,10 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
     notes: '',
     budget_min: '',
     budget_max: '',
+    currency: 'THB',
+    bedrooms_min: '',
+    preferred_types: [] as string[],
+    preferred_districts: [] as string[],
     next_action: '',
     next_action_date: '',
   });
@@ -43,11 +48,29 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         notes: deal.notes || '',
         budget_min: deal.budget_min?.toString() || '',
         budget_max: deal.budget_max?.toString() || '',
+        currency: deal.currency || 'THB',
+        bedrooms_min: deal.bedrooms_min?.toString() || '',
+        preferred_types: deal.preferred_types || [],
+        preferred_districts: deal.preferred_districts || [],
         next_action: deal.next_action || '',
         next_action_date: deal.next_action_date ? deal.next_action_date.slice(0, 10) : '',
       });
     }
   }, [deal, open]);
+
+  const toggleType = (t: string) => {
+    setForm(f => ({
+      ...f,
+      preferred_types: f.preferred_types.includes(t) ? f.preferred_types.filter(x => x !== t) : [...f.preferred_types, t],
+    }));
+  };
+
+  const toggleDistrict = (d: string) => {
+    setForm(f => ({
+      ...f,
+      preferred_districts: f.preferred_districts.includes(d) ? f.preferred_districts.filter(x => x !== d) : [...f.preferred_districts, d],
+    }));
+  };
 
   const handleSubmit = async () => {
     if (!form.client_name.trim()) {
@@ -64,6 +87,10 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         notes: form.notes || null,
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null,
+        currency: form.currency,
+        bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
+        preferred_types: form.preferred_types.length ? form.preferred_types : null,
+        preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
         next_action: form.next_action || null,
         next_action_date: form.next_action_date || null,
       });
@@ -95,18 +122,27 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
               <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
             </div>
           </div>
-          <div>
-            <Label>{isRu ? 'Источник' : 'Source'}</Label>
-            <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CLIENT_SOURCES.map(s => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{isRu ? 'Источник' : 'Source'}</Label>
+              <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CLIENT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
+              <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
               <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
@@ -115,10 +151,41 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
               <Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label>
               <Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
             </div>
+            <div>
+              <Label>{isRu ? 'Спален от' : 'Beds Min'}</Label>
+              <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} />
+            </div>
           </div>
+
+          {/* Property Types */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Типы недвижимости' : 'Property Types'}</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {PROPERTY_TYPES.map(t => (
+                <button key={t} onClick={() => toggleType(t)} className={cn(
+                  'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                  form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+                )}>{t}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Districts */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {PHUKET_DISTRICTS.map(d => (
+                <button key={d} onClick={() => toggleDistrict(d)} className={cn(
+                  'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                  form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+                )}>{d}</button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <Label>{isRu ? 'Следующий шаг' : 'Next Action'}</Label>
-            <Input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))} placeholder={isRu ? 'Напр.: Позвонить, Показ...' : 'e.g.: Call, Showing...'} />
+            <Input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))} placeholder={isRu ? 'Напр.: Позвонить...' : 'e.g.: Call...'} />
           </div>
           <div>
             <Label>{isRu ? 'Дата следующего шага' : 'Next Action Date'}</Label>
