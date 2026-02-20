@@ -33,7 +33,7 @@ export interface ManagementTerms {
   valid_from: string | null;
   valid_until: string | null;
   notes: string | null;
-  status: 'draft' | 'active' | 'archived';
+  status: 'draft' | 'active' | 'pending_approval' | 'archived';
   created_at: string;
   updated_at: string;
   // joined
