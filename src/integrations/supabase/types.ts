@@ -13313,6 +13313,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           location_in_property: string | null
+          min_quantity: number | null
           name: string
           name_ru: string | null
           owner_id: string
@@ -13320,6 +13321,7 @@ export type Database = {
           property_id: string
           purchase_date: string | null
           quantity: number | null
+          reorder_note: string | null
           updated_at: string
         }
         Insert: {
@@ -13332,6 +13334,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           location_in_property?: string | null
+          min_quantity?: number | null
           name: string
           name_ru?: string | null
           owner_id: string
@@ -13339,6 +13342,7 @@ export type Database = {
           property_id: string
           purchase_date?: string | null
           quantity?: number | null
+          reorder_note?: string | null
           updated_at?: string
         }
         Update: {
@@ -13351,6 +13355,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           location_in_property?: string | null
+          min_quantity?: number | null
           name?: string
           name_ru?: string | null
           owner_id?: string
@@ -13358,6 +13363,7 @@ export type Database = {
           property_id?: string
           purchase_date?: string | null
           quantity?: number | null
+          reorder_note?: string | null
           updated_at?: string
         }
         Relationships: [

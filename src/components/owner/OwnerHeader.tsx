@@ -41,6 +41,8 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner/support-chat': { en: 'Support', ru: 'Поддержка' },
   '/owner/message-templates': { en: 'Templates', ru: 'Шаблоны' },
   '/owner/guide': { en: 'Guide', ru: 'Руководство' },
+  '/owner/vendors': { en: 'Vendor Directory', ru: 'Поставщики' },
+  '/owner/inventory': { en: 'Inventory', ru: 'Инвентарь' },
 };
 
 export function OwnerHeader() {
