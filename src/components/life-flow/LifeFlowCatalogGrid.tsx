@@ -30,7 +30,17 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
   const config = getEntityType(item.entity_type);
 
   const handleClick = () => {
-    navigate(`${config.route}/${item.entity_id}`);
+    // detailRoute === null means no detail page — navigate to index
+    // detailRoute === undefined means use route as detail prefix
+    const detailPrefix = config.detailRoute === null
+      ? null
+      : (config.detailRoute ?? config.route);
+    
+    if (detailPrefix === null) {
+      navigate(config.route);
+    } else {
+      navigate(`${detailPrefix}/${item.entity_id}`);
+    }
   };
 
   return (
