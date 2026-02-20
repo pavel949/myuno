@@ -552,6 +552,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="expenses/quick" element={<LazyPage><Pages.QuickExpense /></LazyPage>} />
           <Route path="income/quick" element={<LazyPage><Pages.QuickIncome /></LazyPage>} />
           <Route path="messages" element={<LazyPage><Pages.OwnerMessages /></LazyPage>} />
+          <Route path="auto-messaging" element={<LazyPage><Pages.OwnerAutoMessaging /></LazyPage>} />
           <Route path="chat/:type/:id" element={<LazyPage><Pages.OwnerChatRoom /></LazyPage>} />
           <Route path="support-chat" element={<LazyPage><Pages.OwnerSupportChat /></LazyPage>} />
           <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />

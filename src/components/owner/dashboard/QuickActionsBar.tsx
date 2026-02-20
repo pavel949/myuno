@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { 
-  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download
+  Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download, Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +34,13 @@ const actions = [
     labelEn: 'Calendar', 
     labelRu: 'Календарь',
     path: '/owner/calendar',
+  },
+  { 
+    id: 'auto-msg', 
+    icon: Zap, 
+    labelEn: 'Auto Msgs', 
+    labelRu: 'Авто-сообщ.',
+    path: '/owner/auto-messaging',
   },
   { 
     id: 'property', 
