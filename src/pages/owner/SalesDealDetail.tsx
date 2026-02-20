@@ -2,18 +2,20 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAgentDeal, useUpdateDeal, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
+import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
+import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
+import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -35,10 +37,13 @@ export default function SalesDealDetail() {
   const { data: deal, isLoading } = useAgentDeal(id);
   const { data: activities = [] } = useDealActivities(id);
   const updateDeal = useUpdateDeal();
+  const deleteDeal = useDeleteDeal();
   const addActivity = useAddDealActivity();
 
   const [activityType, setActivityType] = useState('note');
   const [activityText, setActivityText] = useState('');
+  const [showEdit, setShowEdit] = useState(false);
+  const [closeMode, setCloseMode] = useState<'won' | 'lost' | null>(null);
 
   if (isLoading) {
     return (
@@ -60,19 +65,14 @@ export default function SalesDealDetail() {
 
   const handleStageChange = async (newStage: DealStage) => {
     if (newStage === deal.stage) return;
+    if (newStage === 'closed_won') { setCloseMode('won'); return; }
+    if (newStage === 'closed_lost') { setCloseMode('lost'); return; }
     try {
-      await updateDeal.mutateAsync({
-        id: deal.id,
-        stage: newStage,
-        ...(newStage === 'closed_won' ? { closed_at: new Date().toISOString() } : {}),
-      });
+      await updateDeal.mutateAsync({ id: deal.id, stage: newStage });
       await addActivity.mutateAsync({
-        deal_id: deal.id,
-        user_id: user!.id,
-        activity_type: 'stage_change',
+        deal_id: deal.id, user_id: user!.id, activity_type: 'stage_change',
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
-        stage_from: deal.stage,
-        stage_to: newStage,
+        stage_from: deal.stage, stage_to: newStage,
       });
       toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
     } catch {
@@ -84,12 +84,8 @@ export default function SalesDealDetail() {
     if (!activityText.trim()) return;
     try {
       await addActivity.mutateAsync({
-        deal_id: deal.id,
-        user_id: user!.id,
-        activity_type: activityType,
-        description: activityText.trim(),
-        stage_from: null,
-        stage_to: null,
+        deal_id: deal.id, user_id: user!.id, activity_type: activityType,
+        description: activityText.trim(), stage_from: null, stage_to: null,
       });
       setActivityText('');
       toast({ title: isRu ? 'Добавлено' : 'Added' });
@@ -98,13 +94,52 @@ export default function SalesDealDetail() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteDeal.mutateAsync(deal.id);
+      toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
+      navigate('/owner/sales');
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  const isClosed = deal.stage === 'closed_won' || deal.stage === 'closed_lost';
+
   return (
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-6">
       {/* Back */}
-      <button onClick={() => navigate('/owner/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" />
-        {isRu ? 'Назад' : 'Back'}
-      </button>
+      <div className="flex items-center justify-between">
+        <button onClick={() => navigate('/owner/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          {isRu ? 'Назад' : 'Back'}
+        </button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+            <Pencil className="h-3.5 w-3.5 mr-1" />
+            {isRu ? 'Ред.' : 'Edit'}
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{isRu ? 'Удалить сделку?' : 'Delete deal?'}</AlertDialogTitle>
+                <AlertDialogDescription>{isRu ? 'Это действие нельзя отменить' : 'This action cannot be undone'}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  {isRu ? 'Удалить' : 'Delete'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
 
       {/* Client info */}
       <div>
@@ -120,26 +155,50 @@ export default function SalesDealDetail() {
               <Mail className="h-3.5 w-3.5" />{deal.client_email}
             </a>
           )}
-          {deal.client_source && (
-            <Badge variant="secondary" className="text-[10px]">{deal.client_source}</Badge>
-          )}
+          {deal.client_source && <Badge variant="secondary" className="text-[10px]">{deal.client_source}</Badge>}
         </div>
         {deal.budget_max && (
           <p className="text-sm mt-2">
             {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
           </p>
         )}
+        {deal.next_action && (
+          <p className="text-sm mt-1 text-primary">
+            {isRu ? 'Следующий шаг' : 'Next'}: {deal.next_action}
+            {deal.next_action_date && ` — ${format(new Date(deal.next_action_date), 'dd.MM.yy')}`}
+          </p>
+        )}
         {deal.notes && <p className="text-sm text-muted-foreground mt-2">{deal.notes}</p>}
+        {deal.deal_value && (
+          <div className="mt-2 p-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-sm">
+            {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} THB
+            {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} THB`}
+          </div>
+        )}
       </div>
 
       {/* Stage bar */}
       <div>
         <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Этап сделки' : 'Deal Stage'}</p>
-        <DealStageBar currentStage={deal.stage} onStageClick={handleStageChange} />
+        <DealStageBar currentStage={deal.stage} onStageClick={!isClosed ? handleStageChange : undefined} />
         {deal.stage === 'closed_lost' && (
           <p className="text-xs text-destructive mt-1">{isRu ? 'Проигрыш' : 'Lost'}{deal.lost_reason ? `: ${deal.lost_reason}` : ''}</p>
         )}
       </div>
+
+      {/* Close buttons */}
+      {!isClosed && (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="flex-1 text-green-600 border-green-600/30 hover:bg-green-500/10" onClick={() => setCloseMode('won')}>
+            <Trophy className="h-4 w-4 mr-1" />
+            {isRu ? 'Успех' : 'Won'}
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setCloseMode('lost')}>
+            <X className="h-4 w-4 mr-1" />
+            {isRu ? 'Проигрыш' : 'Lost'}
+          </Button>
+        </div>
+      )}
 
       {/* Quick actions: add activity */}
       <div className="space-y-3 border rounded-xl p-4 bg-card">
@@ -161,9 +220,7 @@ export default function SalesDealDetail() {
             onChange={e => setActivityText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddActivity()}
           />
-          <Button size="sm" onClick={handleAddActivity} disabled={addActivity.isPending || !activityText.trim()}>
-            +
-          </Button>
+          <Button size="sm" onClick={handleAddActivity} disabled={addActivity.isPending || !activityText.trim()}>+</Button>
         </div>
       </div>
 
@@ -193,6 +250,18 @@ export default function SalesDealDetail() {
           </div>
         )}
       </div>
+
+      {/* Sheets & Dialogs */}
+      <EditDealSheet open={showEdit} onOpenChange={setShowEdit} deal={deal} />
+      {closeMode && (
+        <CloseDealDialog
+          open={!!closeMode}
+          onOpenChange={open => !open && setCloseMode(null)}
+          dealId={deal.id}
+          currentStage={deal.stage}
+          mode={closeMode}
+        />
+      )}
     </div>
   );
 }

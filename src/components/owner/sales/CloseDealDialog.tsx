@@ -1,0 +1,117 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useUpdateDeal, DealStage } from '@/hooks/useAgentDeals';
+import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  dealId: string;
+  currentStage: DealStage;
+  mode: 'won' | 'lost';
+}
+
+export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode }: Props) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const updateDeal = useUpdateDeal();
+  const addActivity = useAddDealActivity();
+
+  const [dealValue, setDealValue] = useState('');
+  const [commissionPercent, setCommissionPercent] = useState('');
+  const [lostReason, setLostReason] = useState('');
+
+  const handleSubmit = async () => {
+    try {
+      if (mode === 'won') {
+        await updateDeal.mutateAsync({
+          id: dealId,
+          stage: 'closed_won',
+          closed_at: new Date().toISOString(),
+          deal_value: dealValue ? Number(dealValue) : null,
+          commission_percent: commissionPercent ? Number(commissionPercent) : null,
+          commission_amount: dealValue && commissionPercent ? Number(dealValue) * Number(commissionPercent) / 100 : null,
+        });
+      } else {
+        await updateDeal.mutateAsync({
+          id: dealId,
+          stage: 'closed_lost',
+          closed_at: new Date().toISOString(),
+          lost_reason: lostReason || null,
+        });
+      }
+      await addActivity.mutateAsync({
+        deal_id: dealId,
+        user_id: user!.id,
+        activity_type: 'stage_change',
+        description: mode === 'won'
+          ? (isRu ? 'Сделка закрыта — успех' : 'Deal closed — won')
+          : (isRu ? `Сделка проиграна: ${lostReason}` : `Deal lost: ${lostReason}`),
+        stage_from: currentStage,
+        stage_to: mode === 'won' ? 'closed_won' : 'closed_lost',
+      });
+      toast({ title: mode === 'won' ? (isRu ? 'Поздравляем! 🎉' : 'Congratulations! 🎉') : (isRu ? 'Сделка закрыта' : 'Deal closed') });
+      onOpenChange(false);
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>
+            {mode === 'won'
+              ? (isRu ? '🎉 Закрыть как успех' : '🎉 Close as Won')
+              : (isRu ? 'Закрыть как проигрыш' : 'Close as Lost')}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {mode === 'won' ? (
+            <>
+              <div>
+                <Label>{isRu ? 'Сумма сделки' : 'Deal Value'}</Label>
+                <Input type="number" value={dealValue} onChange={e => setDealValue(e.target.value)} placeholder="e.g. 5000000" />
+              </div>
+              <div>
+                <Label>{isRu ? 'Комиссия (%)' : 'Commission (%)'}</Label>
+                <Input type="number" value={commissionPercent} onChange={e => setCommissionPercent(e.target.value)} placeholder="e.g. 3" />
+              </div>
+              {dealValue && commissionPercent && (
+                <p className="text-sm text-muted-foreground">
+                  {isRu ? 'Комиссия' : 'Commission'}: {(Number(dealValue) * Number(commissionPercent) / 100).toLocaleString()} THB
+                </p>
+              )}
+            </>
+          ) : (
+            <div>
+              <Label>{isRu ? 'Причина проигрыша' : 'Lost Reason'}</Label>
+              <Textarea value={lostReason} onChange={e => setLostReason(e.target.value)} rows={3}
+                placeholder={isRu ? 'Почему сделка не состоялась...' : 'Why did the deal fall through...'} />
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={updateDeal.isPending}
+            variant={mode === 'lost' ? 'destructive' : 'default'}
+          >
+            {updateDeal.isPending ? '...' : (mode === 'won' ? (isRu ? 'Закрыть сделку' : 'Close Deal') : (isRu ? 'Проиграна' : 'Mark Lost'))}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
