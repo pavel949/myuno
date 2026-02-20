@@ -29,7 +29,7 @@ export function TeamLayout({
 
   return (
     <AppLayout 
-      title={title || (isRu ? 'Команда myUNO' : 'myUNO Team')}
+      title={title || (isRu ? 'Управление недвижимостью — Команда' : 'Property Management — Team')}
     >
       <div className="flex h-[calc(100vh-64px)] overflow-x-hidden max-w-full">
         {/* Desktop Sidebar */}

@@ -13,8 +13,8 @@ const navItems = [
   {
     id: 'dashboard',
     icon: LayoutDashboard,
-    labelEn: 'Home',
-    labelRu: 'Главная',
+    labelEn: 'Dashboard',
+    labelRu: 'Управление',
     path: '/owner',
   },
   {

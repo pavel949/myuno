@@ -32,8 +32,8 @@ export type DashboardWidgetKey =
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
   property_manager: {
     id: 'property_manager',
-    labelEn: 'Property Manager',
-    labelRu: 'Управляющий',
+    labelEn: 'Property Management',
+    labelRu: 'Управление недвижимостью',
     icon: '🏠',
     widgets: [
       'kpi',
@@ -76,7 +76,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
   },
   general: {
     id: 'general',
-    labelEn: 'All-in-One',
+    labelEn: 'All Modules',
     labelRu: 'Все модули',
     icon: '⚡',
     widgets: [
