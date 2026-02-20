@@ -62,8 +62,9 @@ const propertyTypes = PROPERTY_TYPES.map(t => ({
 }));
 
 const managementTypes = [
-  { value: 'full', labelEn: 'Full Management', labelRu: 'Полное управление', desc: 'UNO handles everything' },
-  { value: 'partial', labelEn: 'Service Partner', labelRu: 'Сервис-партнёр', desc: 'UNO handles operations' },
+  { value: 'owner', labelEn: 'Self-Managed by Owner', labelRu: 'Управление собственником', desc: 'Owner manages everything' },
+  { value: 'full', labelEn: 'Full Management (MC)', labelRu: 'Полное управление (УК)', desc: 'Management company handles everything' },
+  { value: 'partial', labelEn: 'Service Partner', labelRu: 'Сервис-партнёр', desc: 'Shared responsibilities' },
   { value: 'self', labelEn: 'Listing Only', labelRu: 'Только листинг', desc: 'Platform listing only' },
 ];
 
