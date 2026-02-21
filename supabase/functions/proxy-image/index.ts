@@ -21,9 +21,20 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log(`[proxy-image] ${req.method} ${req.url}`);
+
   // Rate limit: public read endpoint
   const rateLimitResponse = await withRateLimit(req, "proxy-image", RATE_LIMITS.publicRead, corsHeaders);
   if (rateLimitResponse) return rateLimitResponse;
+
+  // Health check
+  const reqUrl = new URL(req.url);
+  if (req.method === "GET" && reqUrl.searchParams.get("health") === "1") {
+    return new Response(
+      JSON.stringify({ ok: true, fn: "proxy-image", ts: new Date().toISOString() }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -31,8 +42,7 @@ Deno.serve(async (req) => {
   try {
     // Extract URL from query param or POST body
     let imageUrl: string | null = null;
-    const url = new URL(req.url);
-    imageUrl = url.searchParams.get("url");
+    imageUrl = reqUrl.searchParams.get("url");
 
     if (!imageUrl && req.method === "POST") {
       const body = await req.json();

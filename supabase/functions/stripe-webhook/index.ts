@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 
@@ -40,7 +40,7 @@ const logStep = (step: string, details?: string | Record<string, unknown>) => {
   console.log(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

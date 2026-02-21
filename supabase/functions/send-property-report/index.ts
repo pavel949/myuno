@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
@@ -279,4 +279,4 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
-serve(handler);
+Deno.serve(handler);

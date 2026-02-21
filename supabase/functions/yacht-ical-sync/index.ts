@@ -93,6 +93,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log(`[yacht-ical-sync] ${req.method} ${req.url}`);
+
   // Rate limit
   const rlResponse = await withRateLimit(req, 'yacht-ical-sync', RATE_LIMITS.default, corsHeaders);
   if (rlResponse) return rlResponse;
@@ -100,6 +102,15 @@ Deno.serve(async (req) => {
   // Require internal secret for cron/service calls
   const internalErr = requireInternalSecret(req, corsHeaders);
   if (internalErr) return internalErr;
+
+  // Health check (still requires secret)
+  const reqUrl = new URL(req.url);
+  if (req.method === "GET" && reqUrl.searchParams.get("health") === "1") {
+    return new Response(
+      JSON.stringify({ ok: true, fn: "yacht-ical-sync", ts: new Date().toISOString() }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

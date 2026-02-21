@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS, getClientIdentifier } from "../_shared/rate-limit.ts";
 import { createClient } from "../_shared/supabase.ts";
 
@@ -26,7 +26,7 @@ const SYSTEM_PROMPT = `Ты — myUNO Assistant, дружелюбный AI-по�
 Контакты поддержки: WhatsApp +66922407355
 Рабочие часы живой поддержки: 9:00-21:00 (время Таиланда)`;
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

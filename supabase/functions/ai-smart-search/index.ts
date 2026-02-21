@@ -3,7 +3,7 @@
  * PUBLIC_ENDPOINT: Visitor-facing search. Rate-limited.
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
@@ -143,7 +143,7 @@ RULES:
 - Maximum 4 service recommendations
 - Consider Phuket and Thailand context`;
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

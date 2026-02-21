@@ -2,7 +2,7 @@
  * Extract Images from URL Edge Function
  * AUTH_REQUIRED: Fetches external URLs (SSRF risk). Requires authentication.
  */
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
@@ -213,7 +213,7 @@ async function extractFromWebsite(url: string, apiKey: string): Promise<ImageRes
   return filteredImages.map(imgUrl => ({ url: imgUrl }));
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

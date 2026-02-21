@@ -2,7 +2,7 @@
  * AI Intake Extract Edge Function
  * AUTH_REQUIRED: Admin data extraction tool. Requires authentication.
  */
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
@@ -67,7 +67,7 @@ const entitySchemas: Record<string, any> = {
   },
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

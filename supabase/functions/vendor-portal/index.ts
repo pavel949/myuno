@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
@@ -12,7 +12,7 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[VENDOR-PORTAL] ${step}`, details ? JSON.stringify(details) : '');
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
@@ -44,7 +44,7 @@ function getWeatherInfo(code: number): { condition: 'sunny' | 'cloudy' | 'rainy'
   return weatherCodeMap[code] || weatherCodeMap[0];
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });

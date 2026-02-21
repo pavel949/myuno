@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
@@ -440,4 +440,4 @@ function generateReportHtml(params: {
   `;
 }
 
-serve(handler);
+Deno.serve(handler);
