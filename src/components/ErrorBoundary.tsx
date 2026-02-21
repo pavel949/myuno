@@ -87,15 +87,17 @@ export class ErrorBoundary extends Component<Props, State> {
             {messages.desc[lang]}
           </p>
           <div className="flex gap-2">
-            <Button onClick={this.handleReset} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              {ERROR_MESSAGES.tryAgain[lang]}
-            </Button>
-            {isChunkError && (
+            {!isChunkError && (
+              <Button onClick={this.handleReset} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {ERROR_MESSAGES.tryAgain[lang]}
+              </Button>
+            )}
+            {isChunkError ? (
               <Button onClick={this.handleReload} variant="default" size="sm">
                 {ERROR_MESSAGES.reload[lang]}
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       );

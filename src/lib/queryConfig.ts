@@ -176,9 +176,9 @@ export const queryKeys = {
  * These routes are prefetched during idle time
  */
 export const PREFETCH_ROUTES = [
-  '/properties',
+  '/property',
   '/restaurants', 
-  '/tours',
+  '/experiences',
   '/beauty',
   '/flowers',
 ] as const;

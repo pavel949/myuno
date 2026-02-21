@@ -76,7 +76,7 @@ function detectErrorType(error: unknown): keyof typeof DEFAULT_MESSAGES {
 // Get current language (simplified - in real app would use context)
 function getCurrentLanguage(): 'en' | 'ru' {
   if (typeof window !== 'undefined') {
-    return (localStorage.getItem('uno-language') as 'en' | 'ru') || 'en';
+    return (localStorage.getItem('myuno-language') as 'en' | 'ru') || 'en';
   }
   return 'en';
 }

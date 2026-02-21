@@ -4,7 +4,7 @@
  * All lazy-loaded page imports centralized here.
  * AnimatedRoutes.tsx consumes these for route definitions.
  */
-import { lazy } from 'react';
+import { lazyWithRetry as lazy } from '@/lib/lazyWithRetry';
 
 // ── Auth ──
 export const AccountTypeSelection = lazy(() => import('@/pages/auth/AccountTypeSelection'));

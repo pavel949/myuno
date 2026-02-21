@@ -2,7 +2,7 @@
 
 export const STORAGE_KEYS = {
   CART: 'uno-cart',
-  LANGUAGE: 'uno-language',
+  LANGUAGE: 'myuno-language',
   CURRENCY: 'uno-currency',
   THEME: 'uno-theme',
   VIEW_HISTORY: 'uno-view-history',

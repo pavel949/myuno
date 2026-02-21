@@ -9,7 +9,7 @@ const errorLog = createErrorHandler('useStaffProfile');
 // Get language for toasts
 function getLang(): 'ru' | 'en' {
   if (typeof window !== 'undefined') {
-    return (localStorage.getItem('uno-language') as 'ru' | 'en') || 'en';
+    return (localStorage.getItem('myuno-language') as 'ru' | 'en') || 'en';
   }
   return 'en';
 }
