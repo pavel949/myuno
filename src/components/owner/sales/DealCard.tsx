@@ -61,7 +61,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              {(deal as any).priority > 0 && <DealPriorityStars priority={(deal as any).priority} size="sm" />}
+              {deal.priority > 0 && <DealPriorityStars priority={deal.priority} size="sm" />}
               <span className="font-semibold text-[15px] truncate">{deal.client_name}</span>
               {deal.contact_id && (
                 <a
@@ -76,15 +76,15 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
               <Badge variant={stageBadgeVariant[deal.stage]} className="text-[10px] shrink-0">
                 {stageLabel}
               </Badge>
-              {(deal as any).deal_type && (deal as any).deal_type !== 'sale' && (
+              {deal.deal_type && deal.deal_type !== 'sale' && (
                 <Badge variant="outline" className="text-[10px] shrink-0">
-                  {isRu ? DEAL_TYPE_LABELS[(deal as any).deal_type as DealType]?.ru : DEAL_TYPE_LABELS[(deal as any).deal_type as DealType]?.en}
+                  {isRu ? DEAL_TYPE_LABELS[deal.deal_type]?.ru : DEAL_TYPE_LABELS[deal.deal_type]?.en}
                 </Badge>
               )}
-              {(deal as any).deal_status === 'on_hold' && (
+              {deal.deal_status === 'on_hold' && (
                 <Badge variant="secondary" className="text-[10px] shrink-0">{isRu ? 'Пауза' : 'Hold'}</Badge>
               )}
-              {(deal as any).deal_status === 'archived' && (
+              {deal.deal_status === 'archived' && (
                 <Badge variant="outline" className="text-[10px] shrink-0 opacity-60">{isRu ? 'Архив' : 'Archived'}</Badge>
               )}
               {age > 14 && (
@@ -121,9 +121,9 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{deal.client_email}</span>
               )}
             </div>
-            {(deal as any).tags?.length > 0 && (
+            {deal.tags?.length > 0 && (
               <div className="mt-1">
-                <DealTagsDisplay tags={(deal as any).tags} />
+                <DealTagsDisplay tags={deal.tags} />
               </div>
             )}
             {deal.budget_max && (
