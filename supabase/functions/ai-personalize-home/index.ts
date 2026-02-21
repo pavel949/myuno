@@ -3,7 +3,7 @@
  * PUBLIC_ENDPOINT: Visitor-facing personalization. Rate-limited. No sensitive data exposed.
  */
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
@@ -138,7 +138,7 @@ function getSuggestedServices(
   return services.slice(0, 6);
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

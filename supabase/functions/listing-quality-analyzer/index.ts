@@ -2,7 +2,7 @@
  * Listing Quality Analyzer
  * AUTH_REQUIRED: Analyzes listing quality with AI. Requires authentication.
  */
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
@@ -291,7 +291,7 @@ Respond in JSON format: { "explanation": "...", "confidence": 0.0-1.0 }`;
   }
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { Resend } from 'https://esm.sh/resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
 
@@ -362,4 +362,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-serve(handler);
+Deno.serve(handler);

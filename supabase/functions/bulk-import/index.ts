@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
@@ -52,7 +52,7 @@ function getProviderField(table: string): string {
   return PROVIDER_ID_FIELD[table] || 'provider_id';
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });

@@ -3,7 +3,7 @@
  * AUTH_REQUIRED: Exposes sensitive analytics data. Requires authentication.
  */
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+// Deno.serve used (native edge runtime)
 import { createClient } from '../_shared/supabase.ts';
 import { requireAuth } from '../_shared/auth-guard.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
@@ -13,7 +13,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }

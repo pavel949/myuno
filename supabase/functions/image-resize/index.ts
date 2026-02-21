@@ -3,7 +3,7 @@
  * PUBLIC_ENDPOINT: Used by frontend for image optimization. Rate-limited.
  */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
@@ -19,7 +19,7 @@ interface ResizeRequest {
   format?: 'webp' | 'jpeg' | 'png';
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
