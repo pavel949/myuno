@@ -11,14 +11,14 @@ export const DEAL_STAGES = [
 
 export type DealStage = typeof DEAL_STAGES[number];
 
-export const DEAL_STAGE_LABELS: Record<DealStage, { en: string; ru: string; short: string }> = {
-  new: { en: 'New', ru: 'Новый', short: 'New' },
-  contacted: { en: 'Contacted', ru: 'Контакт', short: 'Call' },
-  showing: { en: 'Showing', ru: 'Показ', short: 'Show' },
-  negotiation: { en: 'Negotiation', ru: 'Торг', short: 'Nego' },
-  contract: { en: 'Contract', ru: 'Договор', short: 'Deal' },
-  closed_won: { en: 'Won', ru: 'Успех', short: 'Won' },
-  closed_lost: { en: 'Lost', ru: 'Проигрыш', short: 'Lost' },
+export const DEAL_STAGE_LABELS: Record<DealStage, { en: string; ru: string; short: string; shortRu: string }> = {
+  new: { en: 'New', ru: 'Новый', short: 'New', shortRu: 'Нов' },
+  contacted: { en: 'Contacted', ru: 'Контакт', short: 'Call', shortRu: 'Зв' },
+  showing: { en: 'Showing', ru: 'Показ', short: 'Show', shortRu: 'Пок' },
+  negotiation: { en: 'Negotiation', ru: 'Торг', short: 'Nego', shortRu: 'Торг' },
+  contract: { en: 'Contract', ru: 'Договор', short: 'Deal', shortRu: 'Дог' },
+  closed_won: { en: 'Won', ru: 'Успех', short: 'Won', shortRu: 'Усп' },
+  closed_lost: { en: 'Lost', ru: 'Проигрыш', short: 'Lost', shortRu: 'Пр' },
 };
 
 export const STAGE_PROBABILITIES: Record<DealStage, number> = {

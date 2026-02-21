@@ -151,7 +151,7 @@ export default function SalesDealDetail() {
   const whatsappUrl = deal.client_phone ? `https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}` : null;
 
   return (
-    <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-6">
+    <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
       {/* Back */}
       <div className="flex items-center justify-between">
         <button onClick={() => navigate('/owner/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -186,9 +186,9 @@ export default function SalesDealDetail() {
       </div>
 
       {/* Client info */}
-      <div>
+      <div className="border rounded-xl p-4 bg-card space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-xl font-bold">{deal.client_name}</h1>
+          <h1 className="text-lg font-bold">{deal.client_name}</h1>
           {deal.priority > 0 && <DealPriorityStars priority={deal.priority} size="md" />}
           <Badge variant="outline" className="text-[10px]">
             {isRu ? DEAL_TYPE_LABELS[dealType as DealType]?.ru : DEAL_TYPE_LABELS[dealType as DealType]?.en}
@@ -266,7 +266,7 @@ export default function SalesDealDetail() {
       </div>
 
       {/* Stage bar */}
-      <div>
+      <div className="border rounded-xl p-4 bg-card">
         <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Этап сделки' : 'Deal Stage'}</p>
         <DealStageBar currentStage={deal.stage} onStageClick={!isClosed ? handleStageChange : undefined} />
         {deal.stage === 'closed_lost' && (
