@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS, AgentDeal, DealType } from '@/hooks/useAgentDeals';
 import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
+import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
+import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +41,8 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
     preferred_districts: [] as string[],
     next_action: '',
     next_action_date: '',
+    priority: 0,
+    tags: [] as string[],
   });
 
   useEffect(() => {
@@ -58,6 +62,8 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         preferred_districts: deal.preferred_districts || [],
         next_action: deal.next_action || '',
         next_action_date: deal.next_action_date ? deal.next_action_date.slice(0, 10) : '',
+        priority: (deal as any).priority || 0,
+        tags: (deal as any).tags || [],
       });
     }
   }, [deal, open]);
@@ -97,6 +103,8 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
         next_action: form.next_action || null,
         next_action_date: form.next_action_date || null,
+        priority: form.priority,
+        tags: form.tags,
       };
 
       // Log field changes
@@ -228,6 +236,16 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
           <div>
             <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
             <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
+          </div>
+          {/* Priority */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Приоритет' : 'Priority'}</Label>
+            <DealPriorityStars priority={form.priority} onChange={p => setForm(f => ({ ...f, priority: p }))} size="md" />
+          </div>
+          {/* Tags */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
+            <DealTagsInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
           </div>
           <Button onClick={handleSubmit} disabled={updateDeal.isPending} className="w-full">
             {updateDeal.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}

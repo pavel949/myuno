@@ -87,6 +87,8 @@ export interface AgentDeal {
   commission_amount: number | null;
   closed_at: string | null;
   lost_reason: string | null;
+  tags: string[];
+  priority: number;
   created_at: string;
   updated_at: string;
 }

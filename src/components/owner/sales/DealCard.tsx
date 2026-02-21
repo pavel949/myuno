@@ -4,6 +4,8 @@ import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, da
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Phone, Mail, ChevronRight, Calendar, AlertCircle, MessageCircle, Clock, ContactRound } from 'lucide-react';
+import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
+import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +61,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
+              {(deal as any).priority > 0 && <DealPriorityStars priority={(deal as any).priority} size="sm" />}
               <span className="font-semibold text-[15px] truncate">{deal.client_name}</span>
               {deal.contact_id && (
                 <a
@@ -118,6 +121,11 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
                 <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{deal.client_email}</span>
               )}
             </div>
+            {(deal as any).tags?.length > 0 && (
+              <div className="mt-1">
+                <DealTagsDisplay tags={(deal as any).tags} />
+              </div>
+            )}
             {deal.budget_max && (
               <p className="text-xs text-muted-foreground mt-1">
                 {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}

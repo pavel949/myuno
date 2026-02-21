@@ -5,7 +5,7 @@ import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Calendar, MessageCircle, Clock } from 'lucide-react';
+import { Phone, Calendar, MessageCircle, Clock, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -64,7 +64,16 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
         }
       }}
     >
-      <p className="font-medium text-sm truncate">{deal.client_name}</p>
+      <div className="flex items-center gap-1">
+        {deal.priority > 0 && (
+          <div className="flex">
+            {Array.from({ length: deal.priority }).map((_, i) => (
+              <Star key={i} className="h-3 w-3 fill-warning text-warning" />
+            ))}
+          </div>
+        )}
+        <p className="font-medium text-sm truncate">{deal.client_name}</p>
+      </div>
       {deal.client_phone && (
         <div className="flex items-center gap-2 mt-1">
           <p className="text-xs text-muted-foreground flex items-center gap-1">

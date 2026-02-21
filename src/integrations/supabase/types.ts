@@ -166,8 +166,10 @@ export type Database = {
           notes: string | null
           preferred_districts: string[] | null
           preferred_types: string[] | null
+          priority: number | null
           property_id: string | null
           stage: string
+          tags: string[] | null
           updated_at: string
         }
         Insert: {
@@ -196,8 +198,10 @@ export type Database = {
           notes?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          priority?: number | null
           property_id?: string | null
           stage?: string
+          tags?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -226,8 +230,10 @@ export type Database = {
           notes?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          priority?: number | null
           property_id?: string | null
           stage?: string
+          tags?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -3954,6 +3960,82 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_scheduled_activities: {
+        Row: {
+          activity_type: string
+          assigned_to: string
+          cancelled_at: string | null
+          company_id: string
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string
+          deal_id: string
+          due_date: string
+          due_time: string | null
+          id: string
+          note: string | null
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          activity_type?: string
+          assigned_to: string
+          cancelled_at?: string | null
+          company_id: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by: string
+          deal_id: string
+          due_date: string
+          due_time?: string | null
+          id?: string
+          note?: string | null
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          activity_type?: string
+          assigned_to?: string
+          cancelled_at?: string | null
+          company_id?: string
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string
+          due_date?: string
+          due_time?: string | null
+          id?: string
+          note?: string | null
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_scheduled_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scheduled_activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scheduled_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
             referencedColumns: ["id"]
           },
         ]

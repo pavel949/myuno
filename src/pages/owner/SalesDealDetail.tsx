@@ -9,6 +9,9 @@ import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
 import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
 import { PropertyMatching } from '@/components/owner/sales/PropertyMatching';
+import { DealScheduledActivities } from '@/components/owner/sales/DealScheduledActivities';
+import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
+import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -186,6 +189,7 @@ export default function SalesDealDetail() {
       <div>
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-xl font-bold">{deal.client_name}</h1>
+          {(deal as any).priority > 0 && <DealPriorityStars priority={(deal as any).priority} size="md" />}
           <Badge variant="outline" className="text-[10px]">
             {isRu ? DEAL_TYPE_LABELS[dealType as DealType]?.ru : DEAL_TYPE_LABELS[dealType as DealType]?.en}
           </Badge>
@@ -248,6 +252,11 @@ export default function SalesDealDetail() {
           </p>
         )}
         {deal.notes && <p className="text-sm text-muted-foreground mt-2">{deal.notes}</p>}
+        {(deal as any).tags?.length > 0 && (
+          <div className="mt-2">
+            <DealTagsDisplay tags={(deal as any).tags} />
+          </div>
+        )}
         {deal.deal_value && (
           <div className="mt-2 p-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-sm">
             {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
@@ -296,6 +305,9 @@ export default function SalesDealDetail() {
           ) : null}
         </div>
       )}
+
+      {/* Scheduled Activities */}
+      <DealScheduledActivities dealId={deal.id} companyId={deal.company_id} />
 
       {/* Property matching */}
       <div className="border rounded-xl p-4 bg-card">
