@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { useCreateFinancial } from '@/hooks/usePropertyFinancials';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,8 +41,35 @@ export default function QuickExpense() {
   const isRu = language === 'ru';
 
   const preselectedPropertyId = searchParams.get('propertyId');
-
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { data: properties, isLoading: propertiesLoading } = useQuery({
+    queryKey: ['owner-properties-for-financials', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('owner_properties')
+        .select('id, title, title_ru, cover_image, images, address, district, bedrooms, bathrooms, price_per_night, deposit_currency')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map(p => ({
+        id: p.id,
+        title: p.title || 'Untitled',
+        title_en: p.title,
+        title_ru: p.title_ru,
+        cover_image: p.cover_image,
+        images: p.images,
+        address: p.address,
+        district: p.district,
+        is_active: true,
+        bedrooms: p.bedrooms,
+        bathrooms: p.bathrooms,
+        price_per_night: p.price_per_night,
+        currency: p.deposit_currency || 'THB',
+        deposit_currency: p.deposit_currency,
+      }));
+    },
+    enabled: !!user,
+  });
   const createFinancial = useCreateFinancial();
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>(preselectedPropertyId || '');
@@ -132,7 +160,7 @@ export default function QuickExpense() {
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Объект' : 'Property'}</Label>
           <QuickPropertySelector
-            properties={properties || []}
+            properties={(properties || []) as any}
             selectedId={selectedPropertyId}
             onSelect={setSelectedPropertyId}
             isLoading={propertiesLoading}
