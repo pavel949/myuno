@@ -43,6 +43,8 @@ import {
   ManagementTerms,
 } from '@/hooks/usePropertyManagementTerms';
 import { ManagementTermsForm } from '@/components/owner/management/ManagementTermsForm';
+import { TermsActivityLog } from '@/components/owner/management/TermsActivityLog';
+import { InlineStatusSelect } from '@/components/owner/management/InlineStatusSelect';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -100,10 +102,12 @@ function TermsMobileCard({
   terms,
   isRu,
   onEdit,
+  onNavigate,
 }: {
   terms: ManagementTerms;
   isRu: boolean;
   onEdit: () => void;
+  onNavigate: (path: string) => void;
 }) {
   const title = isRu
     ? (terms.property?.title_ru || terms.property?.title || '—')
@@ -117,7 +121,12 @@ function TermsMobileCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               {isExpired && <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />}
-              <p className="font-semibold text-sm truncate">{title}</p>
+              <button
+                onClick={() => onNavigate(`/owner/properties/${terms.property_id}`)}
+                className="font-semibold text-sm truncate text-left hover:text-primary transition-colors hover:underline"
+              >
+                {title}
+              </button>
             </div>
             {terms.property?.address && (
               <p className="text-xs text-muted-foreground truncate">{terms.property.address}</p>
@@ -129,7 +138,7 @@ function TermsMobileCard({
         </div>
 
         <div className="flex items-center gap-2 mb-3">
-          {statusBadge(terms.status, isRu)}
+          <InlineStatusSelect terms={terms} />
           {isExpired && (
             <span className="text-xs text-destructive font-medium">
               {isRu ? 'Истёк' : 'Expired'}
@@ -342,6 +351,7 @@ export default function ManagementPortfolio() {
               terms={terms}
               isRu={isRu}
               onEdit={() => openSheet(terms.property_id, terms)}
+              onNavigate={navigate}
             />
           ))}
         </div>
@@ -375,7 +385,12 @@ export default function ManagementPortfolio() {
                           <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
                         )}
                         <div>
-                          <p className="font-medium text-sm line-clamp-1">{title}</p>
+                          <button
+                            onClick={() => navigate(`/owner/properties/${terms.property_id}`)}
+                            className="font-medium text-sm line-clamp-1 text-left hover:text-primary hover:underline transition-colors"
+                          >
+                            {title}
+                          </button>
                           {terms.property?.address && (
                             <p className="text-xs text-muted-foreground line-clamp-1">
                               {terms.property.address}
@@ -418,7 +433,7 @@ export default function ManagementPortfolio() {
                       {' '}{terms.payment_currency}
                     </TableCell>
                     <TableCell>
-                      {statusBadge(terms.status, isRu)}
+                      <InlineStatusSelect terms={terms} />
                       {isExpired && (
                         <p className="text-xs text-destructive mt-0.5">
                           {isRu ? 'Истёк' : 'Expired'}
@@ -466,11 +481,19 @@ export default function ManagementPortfolio() {
             </SheetTitle>
           </SheetHeader>
           {selectedPropertyId && (
-            <ManagementTermsForm
-              propertyId={selectedPropertyId}
-              existing={selectedTerms}
-              onSaved={() => setSheetOpen(false)}
-            />
+            <>
+              <ManagementTermsForm
+                propertyId={selectedPropertyId}
+                existing={selectedTerms}
+                onSaved={() => setSheetOpen(false)}
+              />
+              {selectedTerms && (
+                <>
+                  <Separator className="my-6" />
+                  <TermsActivityLog termsId={selectedTerms.id} />
+                </>
+              )}
+            </>
           )}
         </SheetContent>
       </Sheet>

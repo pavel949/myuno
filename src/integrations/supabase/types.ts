@@ -7191,6 +7191,42 @@ export type Database = {
           },
         ]
       }
+      management_terms_activity: {
+        Row: {
+          action: string
+          created_at: string
+          field_name: string | null
+          id: string
+          new_value: string | null
+          note: string | null
+          old_value: string | null
+          terms_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          new_value?: string | null
+          note?: string | null
+          old_value?: string | null
+          terms_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          new_value?: string | null
+          note?: string | null
+          old_value?: string | null
+          terms_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       marketplace_categories: {
         Row: {
           category_group: string | null

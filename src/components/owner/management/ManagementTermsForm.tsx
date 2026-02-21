@@ -32,6 +32,7 @@ import {
   useCreateManagementTerms,
   useUpdateManagementTerms,
 } from '@/hooks/usePropertyManagementTerms';
+import { useLogTermsActivity } from '@/hooks/useManagementTermsActivity';
 import { cn } from '@/lib/utils';
 
 interface ManagementTermsFormProps {
@@ -149,6 +150,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
 
   const createTerms = useCreateManagementTerms();
   const updateTerms = useUpdateManagementTerms();
+  const logActivity = useLogTermsActivity();
   const isLoading = createTerms.isPending || updateTerms.isPending;
 
   const [form, setForm] = useState<ManagementTermsUpdate>(() => ({
@@ -205,8 +207,40 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
       let result: ManagementTerms;
       if (existing) {
         result = await updateTerms.mutateAsync({ id: existing.id, updates: { ...payload } });
+        // Log changes
+        const changes: { field: string; old: string; new_: string }[] = [];
+        if (existing.commission_rate !== form.commission_rate) {
+          changes.push({ field: 'commission_rate', old: `${existing.commission_rate}%`, new_: `${form.commission_rate}%` });
+        }
+        if (existing.status !== status) {
+          changes.push({ field: 'status', old: existing.status, new_: status });
+        }
+        if (existing.commission_base !== form.commission_base) {
+          changes.push({ field: 'commission_base', old: existing.commission_base, new_: form.commission_base || '' });
+        }
+        for (const change of changes) {
+          await logActivity.mutateAsync({
+            terms_id: existing.id,
+            action: change.field === 'status' ? 'status_changed' : 'updated',
+            field_name: change.field,
+            old_value: change.old,
+            new_value: change.new_,
+          });
+        }
+        if (changes.length === 0) {
+          await logActivity.mutateAsync({
+            terms_id: existing.id,
+            action: 'updated',
+            note: 'Terms updated',
+          });
+        }
       } else {
         result = await createTerms.mutateAsync(payload as ManagementTermsUpdate & { property_id: string });
+        await logActivity.mutateAsync({
+          terms_id: result.id,
+          action: 'created',
+          new_value: `${form.commission_rate}% ${form.commission_base}`,
+        });
       }
       toast.success(
         status === 'pending_approval'
