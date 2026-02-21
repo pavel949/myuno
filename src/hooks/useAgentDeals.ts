@@ -31,6 +31,25 @@ export const STAGE_PROBABILITIES: Record<DealStage, number> = {
   closed_lost: 0,
 };
 
+/** Deal types */
+export const DEAL_TYPES = ['sale', 'rent', 'investment', 'management'] as const;
+export type DealType = typeof DEAL_TYPES[number];
+export const DEAL_TYPE_LABELS: Record<DealType, { en: string; ru: string }> = {
+  sale: { en: 'Sale', ru: 'Продажа' },
+  rent: { en: 'Rent', ru: 'Аренда' },
+  investment: { en: 'Investment', ru: 'Инвестиция' },
+  management: { en: 'Management', ru: 'Управление' },
+};
+
+/** Deal statuses (active / on_hold / archived) */
+export const DEAL_STATUSES = ['active', 'on_hold', 'archived'] as const;
+export type DealStatus = typeof DEAL_STATUSES[number];
+export const DEAL_STATUS_LABELS: Record<DealStatus, { en: string; ru: string }> = {
+  active: { en: 'Active', ru: 'Активная' },
+  on_hold: { en: 'On Hold', ru: 'На паузе' },
+  archived: { en: 'Archived', ru: 'Архив' },
+};
+
 export const CLIENT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent', 'other'] as const;
 
 export const PHUKET_DISTRICTS = [
@@ -52,6 +71,8 @@ export interface AgentDeal {
   client_email: string | null;
   client_source: string | null;
   stage: DealStage;
+  deal_type: DealType;
+  deal_status: DealStatus;
   budget_min: number | null;
   budget_max: number | null;
   currency: string | null;

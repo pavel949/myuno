@@ -156,6 +156,8 @@ export type Database = {
           contact_id: string | null
           created_at: string
           currency: string | null
+          deal_status: string
+          deal_type: string
           deal_value: number | null
           id: string
           lost_reason: string | null
@@ -184,6 +186,8 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_status?: string
+          deal_type?: string
           deal_value?: number | null
           id?: string
           lost_reason?: string | null
@@ -212,6 +216,8 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           currency?: string | null
+          deal_status?: string
+          deal_type?: string
           deal_value?: number | null
           id?: string
           lost_reason?: string | null
@@ -3854,6 +3860,103 @@ export type Database = {
           severity?: string
         }
         Relationships: []
+      }
+      deal_field_changes: {
+        Row: {
+          created_at: string
+          deal_id: string
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_field_changes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_pipeline_stages: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          deal_type: string
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name_en: string
+          name_ru: string
+          probability: number
+          short_label: string
+          sort_order: number
+          stage_key: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          deal_type?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name_en: string
+          name_ru: string
+          probability?: number
+          short_label?: string
+          sort_order?: number
+          stage_key: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          deal_type?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name_en?: string
+          name_ru?: string
+          probability?: number
+          short_label?: string
+          sort_order?: number
+          stage_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_pipeline_stages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       developers: {
         Row: {

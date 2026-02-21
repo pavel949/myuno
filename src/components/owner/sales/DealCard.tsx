@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AgentDeal, DEAL_STAGE_LABELS, DealStage, daysSince } from '@/hooks/useAgentDeals';
+import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, daysSince } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Phone, Mail, ChevronRight, Calendar, AlertCircle, MessageCircle, Clock, ContactRound } from 'lucide-react';
@@ -73,6 +73,17 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
               <Badge variant={stageBadgeVariant[deal.stage]} className="text-[10px] shrink-0">
                 {stageLabel}
               </Badge>
+              {(deal as any).deal_type && (deal as any).deal_type !== 'sale' && (
+                <Badge variant="outline" className="text-[10px] shrink-0">
+                  {isRu ? DEAL_TYPE_LABELS[(deal as any).deal_type as DealType]?.ru : DEAL_TYPE_LABELS[(deal as any).deal_type as DealType]?.en}
+                </Badge>
+              )}
+              {(deal as any).deal_status === 'on_hold' && (
+                <Badge variant="secondary" className="text-[10px] shrink-0">{isRu ? 'Пауза' : 'Hold'}</Badge>
+              )}
+              {(deal as any).deal_status === 'archived' && (
+                <Badge variant="outline" className="text-[10px] shrink-0 opacity-60">{isRu ? 'Архив' : 'Archived'}</Badge>
+              )}
               {age > 14 && (
                 <span className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-red-500' : 'text-amber-500')}>
                   <Clock className="h-2.5 w-2.5" />{age}d
