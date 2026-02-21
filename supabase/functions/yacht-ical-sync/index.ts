@@ -1,9 +1,10 @@
 /**
  * Yacht iCal Sync Edge Function
- * INTERNAL: Cron/service-role endpoint. Validates service role key.
+ * INTERNAL: Cron/service-role endpoint. Requires X-Internal-Secret header.
  */
 import { createClient } from '../_shared/supabase.ts';
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -95,6 +96,10 @@ Deno.serve(async (req) => {
   // Rate limit
   const rlResponse = await withRateLimit(req, 'yacht-ical-sync', RATE_LIMITS.default, corsHeaders);
   if (rlResponse) return rlResponse;
+
+  // Require internal secret for cron/service calls
+  const internalErr = requireInternalSecret(req, corsHeaders);
+  if (internalErr) return internalErr;
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

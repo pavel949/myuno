@@ -1,51 +1,32 @@
 /**
  * SSRF Protection Guard
- * Validates URLs to prevent Server-Side Request Forgery attacks.
+ * Validates URLs against a strict allowlist to prevent Server-Side Request Forgery.
+ * Non-allowlisted hostnames are BLOCKED (no "allow but log").
  */
 
-// Allowlisted hostname patterns for image proxying
+// Strict allowlist — only these hostname patterns are permitted
 const ALLOWED_HOSTNAME_PATTERNS: RegExp[] = [
-  // Supabase storage
-  /\.supabase\.co$/,
-  /\.supabase\.in$/,
-  // Common image CDNs
-  /\.cloudinary\.com$/,
-  /\.imgix\.net$/,
-  /\.unsplash\.com$/,
-  /\.pexels\.com$/,
-  /\.cloudfront\.net$/,
-  /\.amazonaws\.com$/,
-  /\.googleusercontent\.com$/,
-  /\.ggpht\.com$/,
-  /\.fbcdn\.net$/,
-  /\.cdninstagram\.com$/,
-  // Yandex
-  /\.yandex\.(ru|net|com)$/,
-  /\.yastatic\.net$/,
-  // Common hosting
-  /\.wp\.com$/,
-  /\.wordpress\.com$/,
-  /\.squarespace-cdn\.com$/,
-  /\.wixstatic\.com$/,
-  /\.shopify\.com$/,
+  /\.supabase\.co$/i,
+  /\.supabase\.in$/i,
 ];
 
-// Blocked IP ranges (private, loopback, metadata)
+// Blocked IP ranges (private, loopback, metadata, link-local)
 const BLOCKED_IP_PATTERNS: RegExp[] = [
-  /^127\./,                    // Loopback
-  /^0\./,                      // 0.0.0.0/8
-  /^10\./,                     // 10/8
-  /^172\.(1[6-9]|2[0-9]|3[01])\./, // 172.16/12
-  /^192\.168\./,               // 192.168/16
-  /^169\.254\./,               // Link-local / AWS metadata
-  /^fc00:/i,                   // IPv6 ULA
-  /^fe80:/i,                   // IPv6 link-local
-  /^::1$/,                     // IPv6 loopback
-  /^fd/i,                      // IPv6 ULA
+  /^127\./,                          // Loopback
+  /^0\./,                            // 0.0.0.0/8
+  /^10\./,                           // 10/8
+  /^172\.(1[6-9]|2[0-9]|3[01])\./,  // 172.16/12
+  /^192\.168\./,                     // 192.168/16
+  /^169\.254\./,                     // Link-local / AWS metadata
+  /^fc00:/i,                         // IPv6 ULA
+  /^fe80:/i,                         // IPv6 link-local
+  /^::1$/,                           // IPv6 loopback
+  /^fd/i,                            // IPv6 ULA
 ];
 
 const BLOCKED_HOSTNAMES = new Set([
   "localhost",
+  "0.0.0.0",
   "metadata.google.internal",
   "metadata.google",
 ]);
@@ -57,7 +38,7 @@ export interface SSRFValidationResult {
 
 /**
  * Validate a URL for SSRF safety.
- * Returns { allowed: true } if safe, { allowed: false, reason } otherwise.
+ * Returns { allowed: true } only if the hostname matches the allowlist.
  */
 export function validateUrlForSSRF(rawUrl: string): SSRFValidationResult {
   let parsed: URL;
@@ -79,26 +60,27 @@ export function validateUrlForSSRF(rawUrl: string): SSRFValidationResult {
     return { allowed: false, reason: `Hostname '${hostname}' is blocked` };
   }
 
-  // Block .local domains
+  // Block .local / .internal domains
   if (hostname.endsWith(".local") || hostname.endsWith(".internal")) {
     return { allowed: false, reason: `Domain '${hostname}' is blocked (local/internal)` };
   }
 
   // Block IP addresses in private ranges
-  if (BLOCKED_IP_PATTERNS.some(pattern => pattern.test(hostname))) {
+  if (BLOCKED_IP_PATTERNS.some((pattern) => pattern.test(hostname))) {
     return { allowed: false, reason: `IP '${hostname}' is in a blocked range` };
   }
 
-  // Check allowlist (if hostname looks like a public domain)
-  const isAllowed = ALLOWED_HOSTNAME_PATTERNS.some(pattern => pattern.test(hostname));
-  
-  // If it's an IP address and not in the allowlist, block it
+  // Block all bare IP literals (v4 and v6) unless they match the allowlist
   const isIpAddress = /^[\d.:]+$/.test(hostname) || hostname.includes(":");
-  if (isIpAddress && !isAllowed) {
+  if (isIpAddress) {
     return { allowed: false, reason: `Direct IP access '${hostname}' is not allowed` };
   }
 
-  // For non-allowlisted domains, still allow but log
-  // This allows fetching from arbitrary public domains while blocking private ones
+  // Require allowlist match — NO fallback "allow but log"
+  const isAllowed = ALLOWED_HOSTNAME_PATTERNS.some((pattern) => pattern.test(hostname));
+  if (!isAllowed) {
+    return { allowed: false, reason: `Hostname '${hostname}' is not allowlisted` };
+  }
+
   return { allowed: true };
 }
