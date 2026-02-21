@@ -7225,7 +7225,15 @@ export type Database = {
           terms_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "management_terms_activity_terms_id_fkey"
+            columns: ["terms_id"]
+            isOneToOne: false
+            referencedRelation: "property_management_terms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketplace_categories: {
         Row: {
@@ -13958,6 +13966,77 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_management_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_management_terms: {
+        Row: {
+          commission_amount: number | null
+          commission_base: string
+          commission_rate: number | null
+          commission_type: string
+          created_at: string
+          expense_responsibility: Json
+          id: string
+          manager_user_id: string
+          notes: string | null
+          payment_currency: string
+          payment_day: number | null
+          property_id: string
+          revenue_split_manager: number | null
+          revenue_split_owner: number | null
+          status: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          commission_amount?: number | null
+          commission_base?: string
+          commission_rate?: number | null
+          commission_type?: string
+          created_at?: string
+          expense_responsibility?: Json
+          id?: string
+          manager_user_id: string
+          notes?: string | null
+          payment_currency?: string
+          payment_day?: number | null
+          property_id: string
+          revenue_split_manager?: number | null
+          revenue_split_owner?: number | null
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          commission_amount?: number | null
+          commission_base?: string
+          commission_rate?: number | null
+          commission_type?: string
+          created_at?: string
+          expense_responsibility?: Json
+          id?: string
+          manager_user_id?: string
+          notes?: string | null
+          payment_currency?: string
+          payment_day?: number | null
+          property_id?: string
+          revenue_split_manager?: number | null
+          revenue_split_owner?: number | null
+          status?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_management_terms_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
