@@ -58,6 +58,7 @@ export function DownloadAppButton() {
   }
 
   const handleClick = async () => {
+    // If prompt is already available, use it immediately
     if (canInstall) {
       setInstallState('installing');
       const success = await install();
@@ -66,11 +67,35 @@ export function DownloadAppButton() {
         return;
       }
       setInstallState('idle');
+      return;
     }
-    // iOS or no native prompt — redirect to install guide page
-    if (!canInstall) {
-      window.location.href = '/install';
+
+    // On Android: wait up to 3s for the beforeinstallprompt event
+    if (!isIOS) {
+      setInstallState('installing');
+      const installed = await new Promise<boolean>((resolve) => {
+        const handler = async (e: Event) => {
+          e.preventDefault();
+          window.removeEventListener('beforeinstallprompt', handler);
+          // Trigger install via the context (it picks up the global prompt)
+          const success = await install();
+          resolve(success);
+        };
+        window.addEventListener('beforeinstallprompt', handler);
+        setTimeout(() => {
+          window.removeEventListener('beforeinstallprompt', handler);
+          resolve(false);
+        }, 3000);
+      });
+      if (installed) {
+        setInstallState('success');
+        return;
+      }
+      setInstallState('idle');
     }
+
+    // iOS or prompt never fired — fallback to instructions
+    window.location.href = '/install';
   };
 
   return (
