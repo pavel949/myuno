@@ -188,15 +188,33 @@ export const VERTICALS = {
       bookable: false,
     },
     TRANSFER: {
-      id: 'transfer',
-      plural: 'transfers',
-      table: 'transfers',
-      icon: '🚕',
-      labelEn: 'Airport & City Transfers',
-      labelRu: 'Трансферы',
-      bookable: true,
+       id: 'transfer',
+       plural: 'transfers',
+       table: 'transfers',
+       icon: '🚕',
+       labelEn: 'Airport & City Transfers',
+       labelRu: 'Трансферы',
+       bookable: true,
+     },
+    PHARMACY: {
+      id: 'pharmacy',
+      plural: 'pharmacies',
+      table: 'pharmacies',
+      icon: '💊',
+      labelEn: 'Pharmacy',
+      labelRu: 'Аптеки',
+      bookable: false,
     },
-  } as const;
+    BANK: {
+      id: 'bank',
+      plural: 'banks',
+      table: 'banks',
+      icon: '🏦',
+      labelEn: 'Banking',
+      labelRu: 'Банки',
+      bookable: false,
+    },
+   } as const;
  
  export type VerticalKey = keyof typeof VERTICALS;
  export type VerticalId = typeof VERTICALS[VerticalKey]['id'];
