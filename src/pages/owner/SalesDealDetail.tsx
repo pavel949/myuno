@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince } from '@/hooks/useAgentDeals';
+import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
+import { useDealFieldChanges, useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
 import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
@@ -13,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -49,9 +51,11 @@ export default function SalesDealDetail() {
 
   const { data: deal, isLoading } = useAgentDeal(id);
   const { data: activities = [] } = useDealActivities(id);
+  const { data: fieldChanges = [] } = useDealFieldChanges(id);
   const updateDeal = useUpdateDeal();
   const deleteDeal = useDeleteDeal();
   const addActivity = useAddDealActivity();
+  const logChanges = useLogDealChanges();
 
   const [activityType, setActivityType] = useState('note');
   const [activityText, setActivityText] = useState('');
@@ -84,6 +88,7 @@ export default function SalesDealDetail() {
     if (newStage === 'closed_won') { setCloseMode('won'); return; }
     if (newStage === 'closed_lost') { setCloseMode('lost'); return; }
     try {
+      await logChanges.mutateAsync({ dealId: deal.id, changes: [{ field_name: 'stage', old_value: deal.stage, new_value: newStage }] });
       await updateDeal.mutateAsync({ id: deal.id, stage: newStage });
       await addActivity.mutateAsync({
         deal_id: deal.id, user_id: user!.id, activity_type: 'stage_change',
@@ -91,6 +96,23 @@ export default function SalesDealDetail() {
         stage_from: deal.stage, stage_to: newStage,
       });
       toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  const handleStatusChange = async (newStatus: DealStatus) => {
+    if ((deal as any).deal_status === newStatus) return;
+    try {
+      const oldStatus = (deal as any).deal_status || 'active';
+      await logChanges.mutateAsync({ dealId: deal.id, changes: [{ field_name: 'deal_status', old_value: oldStatus, new_value: newStatus }] });
+      await updateDeal.mutateAsync({ id: deal.id, deal_status: newStatus } as any);
+      await addActivity.mutateAsync({
+        deal_id: deal.id, user_id: user!.id, activity_type: 'status_change',
+        description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
+        stage_from: null, stage_to: null,
+      });
+      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
@@ -121,6 +143,8 @@ export default function SalesDealDetail() {
   };
 
   const isClosed = deal.stage === 'closed_won' || deal.stage === 'closed_lost';
+  const dealStatus = (deal as any).deal_status || 'active';
+  const dealType = (deal as any).deal_type || 'sale';
   const whatsappUrl = deal.client_phone ? `https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}` : null;
 
   return (
@@ -160,9 +184,17 @@ export default function SalesDealDetail() {
 
       {/* Client info */}
       <div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-xl font-bold">{deal.client_name}</h1>
-          <span className={cn('flex items-center gap-1 text-xs', stageAge > 30 ? 'text-red-500' : stageAge > 14 ? 'text-amber-500' : 'text-muted-foreground')}>
+          <Badge variant="outline" className="text-[10px]">
+            {isRu ? DEAL_TYPE_LABELS[dealType as DealType]?.ru : DEAL_TYPE_LABELS[dealType as DealType]?.en}
+          </Badge>
+          {dealStatus !== 'active' && (
+            <Badge variant={dealStatus === 'on_hold' ? 'secondary' : 'outline'} className="text-[10px]">
+              {isRu ? DEAL_STATUS_LABELS[dealStatus as DealStatus]?.ru : DEAL_STATUS_LABELS[dealStatus as DealStatus]?.en}
+            </Badge>
+          )}
+          <span className={cn('flex items-center gap-1 text-xs', stageAge > 30 ? 'text-destructive' : stageAge > 14 ? 'text-warning' : 'text-muted-foreground')}>
             <Clock className="h-3 w-3" />
             {dealAge}d {isRu ? 'всего' : 'total'} · {stageAge}d {isRu ? 'в этапе' : 'in stage'}
           </span>
@@ -233,7 +265,7 @@ export default function SalesDealDetail() {
         )}
       </div>
 
-      {/* Close buttons */}
+      {/* Close / Status buttons */}
       {!isClosed && (
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1 text-green-600 border-green-600/30 hover:bg-green-500/10" onClick={() => setCloseMode('won')}>
@@ -244,6 +276,24 @@ export default function SalesDealDetail() {
             <X className="h-4 w-4 mr-1" />
             {isRu ? 'Проигрыш' : 'Lost'}
           </Button>
+          {dealStatus === 'active' ? (
+            <>
+              <Button variant="outline" size="sm" onClick={() => handleStatusChange('on_hold')} title={isRu ? 'На паузу' : 'Put on hold'}>
+                <Pause className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleStatusChange('archived')} title={isRu ? 'В архив' : 'Archive'}>
+                <Archive className="h-4 w-4" />
+              </Button>
+            </>
+          ) : dealStatus === 'on_hold' ? (
+            <Button variant="outline" size="sm" onClick={() => handleStatusChange('active')} title={isRu ? 'Активировать' : 'Activate'}>
+              <Play className="h-4 w-4" />
+            </Button>
+          ) : dealStatus === 'archived' ? (
+            <Button variant="outline" size="sm" onClick={() => handleStatusChange('active')} title={isRu ? 'Вернуть' : 'Restore'}>
+              <Play className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       )}
 
@@ -277,35 +327,79 @@ export default function SalesDealDetail() {
         </div>
       </div>
 
-      {/* Activity feed with relative timestamps */}
-      <div>
-        <p className="text-sm font-medium mb-3">{isRu ? 'Лента активности' : 'Activity Feed'} ({activities.length})</p>
-        {activities.length === 0 ? (
-          <p className="text-xs text-muted-foreground">{isRu ? 'Пока нет записей' : 'No activities yet'}</p>
-        ) : (
-          <div className="space-y-3">
-            {activities.map(a => {
-              const Icon = activityIcons[a.activity_type] || FileText;
-              const colorClass = activityColors[a.activity_type] || 'bg-muted text-muted-foreground';
-              return (
-                <div key={a.id} className="flex gap-3 text-sm">
-                  <div className="mt-0.5">
-                    <div className={cn('h-7 w-7 rounded-full flex items-center justify-center', colorClass)}>
-                      <Icon className="h-3.5 w-3.5" />
+      {/* Activity feed & Change history tabs */}
+      <Tabs defaultValue="activities" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="activities" className="flex-1 text-xs">
+            {isRu ? 'Активность' : 'Activity'} ({activities.length})
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex-1 text-xs">
+            <History className="h-3 w-3 mr-1" />
+            {isRu ? 'История' : 'History'} ({fieldChanges.length})
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="activities" className="mt-3">
+          {activities.length === 0 ? (
+            <p className="text-xs text-muted-foreground">{isRu ? 'Пока нет записей' : 'No activities yet'}</p>
+          ) : (
+            <div className="space-y-3">
+              {activities.map(a => {
+                const Icon = activityIcons[a.activity_type] || FileText;
+                const colorClass = activityColors[a.activity_type] || 'bg-muted text-muted-foreground';
+                return (
+                  <div key={a.id} className="flex gap-3 text-sm">
+                    <div className="mt-0.5">
+                      <div className={cn('h-7 w-7 rounded-full flex items-center justify-center', colorClass)}>
+                        <Icon className="h-3.5 w-3.5" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p>{a.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale })}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p>{a.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale })}
-                    </p>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="history" className="mt-3">
+          {fieldChanges.length === 0 ? (
+            <p className="text-xs text-muted-foreground">{isRu ? 'Нет изменений' : 'No changes recorded'}</p>
+          ) : (
+            <div className="space-y-2">
+              {fieldChanges.map(ch => {
+                const fieldLabel = ch.field_name.replace(/_/g, ' ');
+                const oldDisplay = ch.old_value ? ch.old_value.replace(/"/g, '') : '—';
+                const newDisplay = ch.new_value ? ch.new_value.replace(/"/g, '') : '—';
+                return (
+                  <div key={ch.id} className="flex gap-3 text-sm border-b border-border/50 pb-2">
+                    <div className="mt-0.5">
+                      <div className="h-7 w-7 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
+                        <History className="h-3.5 w-3.5" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs">
+                        <span className="font-medium capitalize">{fieldLabel}</span>
+                        {': '}
+                        <span className="text-destructive line-through">{oldDisplay}</span>
+                        {' → '}
+                        <span className="text-primary">{newDisplay}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(ch.created_at), { addSuffix: true, locale })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Sheets & Dialogs */}
       <EditDealSheet open={showEdit} onOpenChange={setShowEdit} deal={deal} />

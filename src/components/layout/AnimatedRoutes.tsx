@@ -568,6 +568,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="staff" element={<LazyPage><Pages.StaffPage /></LazyPage>} />
           <Route path="sales" element={<LazyPage><Pages.SalesPipeline /></LazyPage>} />
           <Route path="sales/analytics" element={<LazyPage><Pages.SalesAnalytics /></LazyPage>} />
+          <Route path="sales/settings" element={<LazyPage>{React.createElement(React.lazy(() => import('@/pages/owner/PipelineSettingsPage')))}</LazyPage>} />
           <Route path="sales/:id" element={<LazyPage><Pages.SalesDealDetail /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.ContactsList /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.ContactDetail /></LazyPage>} />

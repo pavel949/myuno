@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, AgentDeal } from '@/hooks/useAgentDeals';
+import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS, AgentDeal, DealType } from '@/hooks/useAgentDeals';
+import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -21,12 +22,14 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
   const isRu = language === 'ru';
   const { toast } = useToast();
   const updateDeal = useUpdateDeal();
+  const logChanges = useLogDealChanges();
 
   const [form, setForm] = useState({
     client_name: '',
     client_phone: '',
     client_email: '',
     client_source: 'website',
+    deal_type: 'sale' as string,
     notes: '',
     budget_min: '',
     budget_max: '',
@@ -45,6 +48,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         client_phone: deal.client_phone || '',
         client_email: deal.client_email || '',
         client_source: deal.client_source || 'website',
+        deal_type: deal.deal_type || 'sale',
         notes: deal.notes || '',
         budget_min: deal.budget_min?.toString() || '',
         budget_max: deal.budget_max?.toString() || '',
@@ -78,12 +82,12 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       return;
     }
     try {
-      await updateDeal.mutateAsync({
-        id: deal.id,
+      const updates: Record<string, any> = {
         client_name: form.client_name.trim(),
         client_phone: form.client_phone || null,
         client_email: form.client_email || null,
         client_source: form.client_source,
+        deal_type: form.deal_type,
         notes: form.notes || null,
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null,
@@ -93,7 +97,15 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
         next_action: form.next_action || null,
         next_action_date: form.next_action_date || null,
-      });
+      };
+
+      // Log field changes
+      const changes = diffDealFields(deal as any, updates, TRACKED_DEAL_FIELDS);
+      if (changes.length > 0) {
+        await logChanges.mutateAsync({ dealId: deal.id, changes });
+      }
+
+      await updateDeal.mutateAsync({ id: deal.id, ...updates });
       toast({ title: isRu ? 'Сделка обновлена' : 'Deal updated' });
       onOpenChange(false);
     } catch {
@@ -108,6 +120,28 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
           <SheetTitle>{isRu ? 'Редактировать сделку' : 'Edit Deal'}</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-4">
+          {/* Deal Type */}
+          <div>
+            <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
+            <div className="flex gap-1.5 mt-1">
+              {DEAL_TYPES.map(dt => (
+                <button
+                  key={dt}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                    form.deal_type === dt
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+                  )}
+                >
+                  {isRu ? DEAL_TYPE_LABELS[dt as DealType].ru : DEAL_TYPE_LABELS[dt as DealType].en}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
             <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />

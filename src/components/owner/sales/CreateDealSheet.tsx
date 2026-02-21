@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
+import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
 import { useToast } from '@/hooks/use-toast';
@@ -58,6 +58,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     client_phone: '',
     client_email: '',
     client_source: 'website',
+    deal_type: 'sale',
     notes: '',
     budget_min: '',
     budget_max: '',
@@ -134,6 +135,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         client_email: clientEmail,
         client_source: form.client_source,
         stage: 'new',
+        deal_type: form.deal_type,
+        deal_status: 'active',
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null,
         currency: form.currency,
@@ -149,7 +152,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       toast({ title: isRu ? 'Сделка создана' : 'Deal created' });
       onOpenChange(false);
       setSelectedContact(null);
-      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [] });
+      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка при создании' : 'Failed to create deal', variant: 'destructive' });
     }
@@ -199,6 +202,28 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
               onClear={() => setSelectedContact(null)}
               isRu={isRu}
             />
+          </div>
+
+          {/* Deal Type */}
+          <div>
+            <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
+            <div className="flex gap-1.5 mt-1">
+              {DEAL_TYPES.map(dt => (
+                <button
+                  key={dt}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                    form.deal_type === dt
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+                  )}
+                >
+                  {isRu ? DEAL_TYPE_LABELS[dt].ru : DEAL_TYPE_LABELS[dt].en}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

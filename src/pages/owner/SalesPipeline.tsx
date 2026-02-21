@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isPast, isToday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
+import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUSES, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { DealCard } from '@/components/owner/sales/DealCard';
 import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
@@ -11,7 +11,7 @@ import { PipelineSummary } from '@/components/owner/sales/PipelineSummary';
 import { BulkActions } from '@/components/owner/sales/BulkActions';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, LayoutList, Columns3, BarChart3, CheckSquare } from 'lucide-react';
+import { Plus, LayoutList, Columns3, BarChart3, CheckSquare, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function SalesPipeline() {
@@ -23,6 +23,8 @@ export default function SalesPipeline() {
   const { data: members = [] } = useCompanyMembers(membership?.company_id);
   const [showCreate, setShowCreate] = useState(false);
   const [filterStage, setFilterStage] = useState<DealStage | 'all' | 'follow_up'>('all');
+  const [filterType, setFilterType] = useState<DealType | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [search, setSearch] = useState('');
   const [agentFilter, setAgentFilter] = useState('all');
@@ -44,6 +46,16 @@ export default function SalesPipeline() {
 
   const filtered = useMemo(() => {
     let result = deals;
+
+    // Status filter (default: active)
+    if (filterStatus !== 'all') {
+      result = result.filter(d => (d as any).deal_status === filterStatus || (!( d as any).deal_status && filterStatus === 'active'));
+    }
+
+    // Type filter
+    if (filterType !== 'all') {
+      result = result.filter(d => (d as any).deal_type === filterType || (!(d as any).deal_type && filterType === 'sale'));
+    }
 
     // Agent filter
     if (agentFilter !== 'all') {
@@ -74,7 +86,7 @@ export default function SalesPipeline() {
     }
 
     return result;
-  }, [deals, filterStage, search, agentFilter]);
+  }, [deals, filterStage, filterType, filterStatus, search, agentFilter]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -109,6 +121,9 @@ export default function SalesPipeline() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{isRu ? 'Воронка продаж' : 'Sales Pipeline'}</h1>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
+            <Settings className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/analytics')}>
             <BarChart3 className="h-4 w-4" />
           </Button>
@@ -143,8 +158,39 @@ export default function SalesPipeline() {
         </div>
       </div>
 
+      {/* Deal Status + Type filters */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {/* Status tabs */}
+        {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s === 'all' ? 'all' : s)}
+            className={cn(
+              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              filterStatus === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+            )}
+          >
+            {s === 'all' ? (isRu ? 'Все' : 'All') : (isRu ? DEAL_STATUS_LABELS[s].ru : DEAL_STATUS_LABELS[s].en)}
+          </button>
+        ))}
+        <span className="w-px bg-border shrink-0" />
+        {/* Type tabs */}
+        {(['all', ...DEAL_TYPES] as const).map(t => (
+          <button
+            key={t}
+            onClick={() => setFilterType(t === 'all' ? 'all' : t)}
+            className={cn(
+              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              filterType === t ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+            )}
+          >
+            {t === 'all' ? (isRu ? 'Все типы' : 'All types') : (isRu ? DEAL_TYPE_LABELS[t].ru : DEAL_TYPE_LABELS[t].en)}
+          </button>
+        ))}
+      </div>
+
       {/* Pipeline Summary */}
-      <PipelineSummary deals={deals} />
+      <PipelineSummary deals={filtered} />
 
       {/* Search + Agent Filter */}
       <DealSearchBar
