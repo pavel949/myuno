@@ -192,16 +192,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = async (newItem: Omit<CartItem, 'quantity'>) => {
     const existingItem = items.find(item => item.id === newItem.id);
     
+    // Optimistic update
+    const previousItems = [...items];
+    setItems(prev => {
+      const existingIndex = prev.findIndex(item => item.id === newItem.id);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
+        return updated;
+      }
+      return [...prev, { ...newItem, quantity: 1 }];
+    });
+
     if (user) {
       try {
         if (existingItem) {
-          await supabase
+          const { error } = await supabase
             .from('cart_items')
             .update({ quantity: existingItem.quantity + 1 })
             .eq('user_id', user.id)
             .eq('item_id', newItem.id);
+          if (error) throw error;
         } else {
-          await supabase.from('cart_items').insert({
+          const { error } = await supabase.from('cart_items').insert({
             user_id: user.id,
             item_id: newItem.id,
             item_type: newItem.type,
@@ -216,21 +229,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
             provider_name_ru: newItem.providerNameRu,
             options: newItem.options,
           });
+          if (error) throw error;
         }
       } catch (error) {
+        // Rollback on failure
+        setItems(previousItems);
         errorLog.silent(error, 'add_item_to_cart');
       }
     }
-
-    setItems(prev => {
-      const existingIndex = prev.findIndex(item => item.id === newItem.id);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += 1;
-        return updated;
-      }
-      return [...prev, { ...newItem, quantity: 1 }];
-    });
   };
 
   const removeItem = async (id: string) => {

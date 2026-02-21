@@ -443,7 +443,6 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/cities" element={<Pages.AdminCities />} />
           <Route path="/admin/translations" element={<Pages.AdminTranslations />} />
           <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
-          <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/user-analytics" element={<Navigate to="/admin/control" replace />} />
           <Route path="/admin/marketplace/products" element={<Navigate to="/admin/catalog" replace />} />
           <Route path="/admin/marketplace/categories" element={<Navigate to="/admin/catalog" replace />} />

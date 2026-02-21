@@ -9,7 +9,7 @@ const errorLog = createErrorHandler('useQuickListing');
 // Get language from localStorage for toast messages
 function getLang(): 'ru' | 'en' {
   if (typeof window !== 'undefined') {
-    return (localStorage.getItem('uno-language') as 'ru' | 'en') || 'en';
+    return (localStorage.getItem('myuno-language') as 'ru' | 'en') || 'en';
   }
   return 'en';
 }
