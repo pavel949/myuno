@@ -15,6 +15,22 @@ export function CompactFooter() {
     if (canInstall) {
       const success = await install();
       if (success) return;
+    } else if (!isIOS) {
+      // Android: wait up to 3s for beforeinstallprompt
+      const installed = await new Promise<boolean>((resolve) => {
+        const handler = async (e: Event) => {
+          e.preventDefault();
+          window.removeEventListener('beforeinstallprompt', handler);
+          const success = await install();
+          resolve(success);
+        };
+        window.addEventListener('beforeinstallprompt', handler);
+        setTimeout(() => {
+          window.removeEventListener('beforeinstallprompt', handler);
+          resolve(false);
+        }, 3000);
+      });
+      if (installed) return;
     }
     window.location.href = '/install';
   };
