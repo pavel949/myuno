@@ -22,7 +22,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 // ─── NAVIGATION: ALWAYS NetworkFirst (NEVER cache HTML) ───
 // This ensures index.html is ALWAYS fetched from network first
 const navigationStrategy = new NetworkFirst({
-  cacheName: 'navigation-v4',
+  cacheName: 'navigation-v5',
   networkTimeoutSeconds: 5, // Increased timeout
   plugins: [
     new CacheableResponsePlugin({ statuses: [200] }), // Only cache 200, not 0
@@ -118,8 +118,8 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.35.6] Activated — cleaning ALL old caches');
-  const CURRENT_CACHES = ['navigation-v4', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
+  console.log('[SW v3.35.7] Activated — cleaning ALL old caches');
+  const CURRENT_CACHES = ['navigation-v5', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -143,5 +143,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.35.6] Installing new service worker...');
+  console.log('[SW v3.35.7] Installing new service worker...');
 });

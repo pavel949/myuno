@@ -13,7 +13,7 @@
     <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="author" content="myUNO" />
     <meta name="theme-color" content="#4a5da6" />
-    <meta name="version" content="3.35.6" />
+    <meta name="version" content="3.35.7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="myUNO" />
@@ -71,17 +71,25 @@
         }
         
         // Version check — clear caches AND reload on mismatch
+        // Compare BOTH localStorage AND the baked-in meta tag to catch stale HTML
         fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
           .then(function(r) { return r.json(); })
           .then(function(data) {
             var serverVersion = data.version;
             var storedVersion = localStorage.getItem('manifest_version');
+            var metaTag = document.querySelector('meta[name="version"]');
+            var htmlVersion = metaTag ? metaTag.getAttribute('content') : null;
             
-            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion);
+            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion + ', HTML: ' + htmlVersion);
             localStorage.setItem('manifest_version', serverVersion);
             localStorage.setItem('app_version', serverVersion);
             
-            if (storedVersion && storedVersion !== serverVersion) {
+            // Mismatch if EITHER stored version or baked HTML version differs from server
+            var needsReload = false;
+            if (storedVersion && storedVersion !== serverVersion) needsReload = true;
+            if (htmlVersion && htmlVersion !== serverVersion) needsReload = true;
+            
+            if (needsReload) {
               console.log('[myUNO] Version mismatch! Clearing all caches and reloading...');
               
               // Guard against reload loops: max 1 reload per version change
