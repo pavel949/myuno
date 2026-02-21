@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, forwardRef } from 'react';
 import { Shield, Users, Headphones } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
  * TrustBanner — real trust signals from DB
  * Provider count is live; support is always 24/7; verified badge is static.
  */
-export const TrustBanner = memo(function TrustBanner() {
+export const TrustBanner = memo(forwardRef<HTMLDivElement>(function TrustBanner(_props, ref) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -37,7 +37,7 @@ export const TrustBanner = memo(function TrustBanner() {
   ];
 
   return (
-    <div className="flex items-center justify-around py-3 rounded-xl bg-muted/40 border border-border/40">
+    <div ref={ref} className="flex items-center justify-around py-3 rounded-xl bg-muted/40 border border-border/40">
       {stats.map((stat, i) => {
         const Icon = stat.icon;
         return (
@@ -53,4 +53,6 @@ export const TrustBanner = memo(function TrustBanner() {
       })}
     </div>
   );
-});
+}));
+
+TrustBanner.displayName = 'TrustBanner';

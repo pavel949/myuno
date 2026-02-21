@@ -45,6 +45,7 @@ const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate
 const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
 
 // Legacy redirect helpers for Property Hub migration
+const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/restaurants/${id}`} replace />; };
 const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
 const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
 const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/invest/${id}`} replace />; };
@@ -155,7 +156,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/life-flow/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/life/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
         <Route path="/trip-planner" element={<LazyPage><Pages.TripPlannerPage /></LazyPage>} />
-        <Route path="/list-with-us" element={<Pages.ListWithUsPage />} />
+        <Route path="/list-with-us" element={<LazyPage><Pages.ListWithUsPage /></LazyPage>} />
         
         {/* ── Beauty & Spa ── */}
         <Route path="/beauty" element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
@@ -214,7 +215,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Restaurants ── */}
         <Route path="/food" element={<Navigate to="/restaurants" replace />} />
-        <Route path="/food/restaurant/:id" element={<Navigate to="/restaurants" replace />} />
+        <Route path="/food/restaurant/:id" element={<FoodRestaurantIdRedirect />} />
         <Route path="/food/checkout" element={<Navigate to="/restaurants" replace />} />
         <Route path="/restaurants" element={<LazyPage><Pages.RestaurantsIndex /></LazyPage>} />
         <Route path="/restaurants/map" element={<LazyPage><Pages.RestaurantMap /></LazyPage>} />
@@ -338,6 +339,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/cleaning/:id/book" element={<LazyPage><Pages.CleaningBooking /></LazyPage>} />
         
         {/* ── Babysitter ── */}
+        <Route path="/babysitters" element={<Navigate to="/babysitter" replace />} />
         <Route path="/babysitter" element={<LazyPage><Pages.BabysitterIndex /></LazyPage>} />
         <Route path="/babysitter/:id" element={<LazyPage><Pages.BabysitterDetail /></LazyPage>} />
         <Route path="/babysitter/:id/book" element={<LazyPage><Pages.BabysitterBooking /></LazyPage>} />
@@ -567,9 +569,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="management-terms" element={<LazyPage><Pages.ManagementPortfolio /></LazyPage>} />
           <Route path="staff" element={<LazyPage><Pages.StaffPage /></LazyPage>} />
           <Route path="sales" element={<LazyPage><Pages.SalesPipeline /></LazyPage>} />
-          <Route path="sales/new" element={<LazyPage>{React.createElement(React.lazy(() => import('@/pages/owner/NewDealPage')))}</LazyPage>} />
+          <Route path="sales/new" element={<LazyPage><Pages.NewDealPage /></LazyPage>} />
           <Route path="sales/analytics" element={<LazyPage><Pages.SalesAnalytics /></LazyPage>} />
-          <Route path="sales/settings" element={<LazyPage>{React.createElement(React.lazy(() => import('@/pages/owner/PipelineSettingsPage')))}</LazyPage>} />
+          <Route path="sales/settings" element={<LazyPage><Pages.PipelineSettingsPage /></LazyPage>} />
           <Route path="sales/:id" element={<LazyPage><Pages.SalesDealDetail /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.ContactsList /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.ContactDetail /></LazyPage>} />
