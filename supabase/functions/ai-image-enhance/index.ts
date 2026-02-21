@@ -1,9 +1,11 @@
 /**
  * AI Image Enhancement Edge Function
- * Uses Lovable AI to enhance property photos
+ * AUTH_REQUIRED: Uses expensive AI compute. Requires authentication.
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +21,14 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'ai-image-enhance', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: expensive AI compute
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const { imageUrl, enhancement = 'auto' } = await req.json() as EnhanceRequest;
@@ -41,7 +51,6 @@ serve(async (req) => {
 
     console.log('Enhancing image:', imageUrl.substring(0, 100));
 
-    // Build enhancement prompt based on type
     let prompt = '';
     switch (enhancement) {
       case 'brightness':
@@ -58,7 +67,6 @@ serve(async (req) => {
         prompt = 'Professionally enhance this real estate photo to make it look more appealing for property listings. Improve lighting, make colors more vibrant, increase clarity, and ensure the space looks inviting. Keep the enhancement subtle and realistic - do not add or remove any objects.';
     }
 
-    // Call Lovable AI for image enhancement
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -71,16 +79,8 @@ serve(async (req) => {
           {
             role: 'user',
             content: [
-              {
-                type: 'text',
-                text: prompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl
-                }
-              }
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: imageUrl } }
             ]
           }
         ],
@@ -95,8 +95,6 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    
-    // Extract the enhanced image from response
     const enhancedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     
     if (!enhancedImageUrl) {

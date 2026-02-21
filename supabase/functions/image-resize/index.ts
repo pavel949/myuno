@@ -1,4 +1,10 @@
+/**
+ * Image Resize Edge Function
+ * PUBLIC_ENDPOINT: Used by frontend for image optimization. Rate-limited.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,10 +20,13 @@ interface ResizeRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit: public read
+  const rlResponse = await withRateLimit(req, 'image-resize', RATE_LIMITS.publicRead, corsHeaders);
+  if (rlResponse) return rlResponse;
 
   try {
     const { url, width, height, quality = 80, format = 'webp' } = await req.json() as ResizeRequest;
@@ -29,13 +38,10 @@ serve(async (req) => {
       );
     }
 
-    // Check if URL is from Supabase Storage
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const isSupabaseStorage = url.includes(supabaseUrl || '') && url.includes('/storage/v1/object/public/');
 
     if (isSupabaseStorage) {
-      // Use Supabase Storage Image Transformations
-      // Format: /storage/v1/render/image/public/{bucket}/{path}?width=X&height=Y&quality=Q
       const transformedUrl = url
         .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
         + `?width=${width || 800}&height=${height || ''}&quality=${quality}&format=${format}`;
@@ -50,8 +56,6 @@ serve(async (req) => {
       );
     }
 
-    // For external URLs, return optimization parameters for client-side handling
-    // Many CDNs support similar transformation parameters
     return new Response(
       JSON.stringify({ 
         original: url,

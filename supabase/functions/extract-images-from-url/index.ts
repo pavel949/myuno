@@ -1,4 +1,10 @@
+/**
+ * Extract Images from URL Edge Function
+ * AUTH_REQUIRED: Fetches external URLs (SSRF risk). Requires authentication.
+ */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -211,6 +217,14 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'extract-images-from-url', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: fetches external URLs
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const { url } = await req.json();

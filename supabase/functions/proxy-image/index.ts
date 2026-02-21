@@ -1,4 +1,12 @@
+/**
+ * Image Proxy Edge Function
+ * PUBLIC_ENDPOINT: Used by frontend to proxy external images for CORS bypass.
+ * Protected by rate limiting and SSRF guards.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { validateUrlForSSRF } from "../_shared/ssrf-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +17,10 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit: public read endpoint
+  const rateLimitResponse = await withRateLimit(req, 'proxy-image', RATE_LIMITS.publicRead, corsHeaders);
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     // Support both GET with query param and POST with JSON body
@@ -29,7 +41,17 @@ serve(async (req) => {
       );
     }
 
-    console.log('Proxying image:', imageUrl);
+    // SSRF protection
+    const ssrfCheck = validateUrlForSSRF(imageUrl);
+    if (!ssrfCheck.allowed) {
+      console.warn(`[PROXY-IMAGE] SSRF blocked: ${ssrfCheck.reason} — ${imageUrl}`);
+      return new Response(
+        JSON.stringify({ error: 'URL not allowed', reason: ssrfCheck.reason }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Proxying image:', imageUrl.substring(0, 120));
 
     const response = await fetch(imageUrl, {
       headers: {

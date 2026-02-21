@@ -1,11 +1,17 @@
+/**
+ * Business Card Scanner Edge Function
+ * AUTH_REQUIRED: Processes personal contact data. Requires authentication.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Vertical categories for AI classification
 const VERTICALS = [
   { id: 'restaurants', nameEn: 'Restaurants & Cafes', nameRu: 'Рестораны и кафе', keywords: ['restaurant', 'cafe', 'food', 'catering', 'bar', 'kitchen', 'chef', 'dining'] },
   { id: 'salons', nameEn: 'Beauty Salons', nameRu: 'Салоны красоты', keywords: ['salon', 'spa', 'beauty', 'hair', 'nails', 'massage', 'wellness', 'cosmetics'] },
@@ -32,6 +38,14 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'scan-business-card', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: personal contact data
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const { imageBase64 } = await req.json();
 
@@ -46,7 +60,6 @@ serve(async (req) => {
 
     console.log('Processing business card image...');
 
-    // Extract pure base64 and detect mime type from data URL
     let pureBase64 = imageBase64;
     let mimeType = 'image/jpeg';
     
@@ -56,14 +69,12 @@ serve(async (req) => {
         mimeType = matches[1];
         pureBase64 = matches[2];
       } else {
-        // Fallback: just strip the prefix
         pureBase64 = imageBase64.replace(/^data:[^;]+;base64,/, '');
       }
     }
 
     console.log('Image mime type:', mimeType, 'Base64 length:', pureBase64.length);
 
-    // Use Gemini for multimodal OCR and analysis
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -113,39 +124,14 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
               parameters: {
                 type: 'object',
                 properties: {
-                  company_name: {
-                    type: 'string',
-                    description: 'Name of the company/business'
-                  },
-                  company_name_thai: {
-                    type: 'string',
-                    description: 'Thai name of the company if present'
-                  },
-                  contact_person: {
-                    type: 'string',
-                    description: 'Name of the contact person'
-                  },
-                  position: {
-                    type: 'string',
-                    description: 'Job title/position'
-                  },
-                  phone: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Phone numbers found on card'
-                  },
-                  email: {
-                    type: 'string',
-                    description: 'Email address'
-                  },
-                  website: {
-                    type: 'string',
-                    description: 'Website URL'
-                  },
-                  address: {
-                    type: 'string',
-                    description: 'Physical address'
-                  },
+                  company_name: { type: 'string', description: 'Name of the company/business' },
+                  company_name_thai: { type: 'string', description: 'Thai name of the company if present' },
+                  contact_person: { type: 'string', description: 'Name of the contact person' },
+                  position: { type: 'string', description: 'Job title/position' },
+                  phone: { type: 'array', items: { type: 'string' }, description: 'Phone numbers found on card' },
+                  email: { type: 'string', description: 'Email address' },
+                  website: { type: 'string', description: 'Website URL' },
+                  address: { type: 'string', description: 'Physical address' },
                   social_media: {
                     type: 'object',
                     properties: {
@@ -156,28 +142,11 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
                     },
                     description: 'Social media handles'
                   },
-                  vertical: {
-                    type: 'string',
-                    enum: VERTICALS.map(v => v.id),
-                    description: 'Business category/vertical'
-                  },
-                  suggested_services: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Services or products this business likely offers'
-                  },
-                  description: {
-                    type: 'string',
-                    description: 'Brief description of the business based on card info'
-                  },
-                  raw_text: {
-                    type: 'string',
-                    description: 'All raw text visible on the card'
-                  },
-                  confidence: {
-                    type: 'number',
-                    description: 'Confidence score 0-100 for the extraction quality'
-                  }
+                  vertical: { type: 'string', enum: VERTICALS.map(v => v.id), description: 'Business category/vertical' },
+                  suggested_services: { type: 'array', items: { type: 'string' }, description: 'Services or products this business likely offers' },
+                  description: { type: 'string', description: 'Brief description of the business based on card info' },
+                  raw_text: { type: 'string', description: 'All raw text visible on the card' },
+                  confidence: { type: 'number', description: 'Confidence score 0-100 for the extraction quality' }
                 },
                 required: ['company_name', 'vertical', 'confidence']
               }
@@ -194,14 +163,12 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       
@@ -209,20 +176,14 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
     }
 
     const aiResult = await response.json();
-    console.log('AI response received');
-
-    // Extract the tool call result
     const toolCall = aiResult.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall || toolCall.function.name !== 'extract_business_card') {
       throw new Error('Unexpected AI response format');
     }
 
     const extractedData = JSON.parse(toolCall.function.arguments);
-
-    // Find vertical details
     const verticalInfo = VERTICALS.find(v => v.id === extractedData.vertical) || VERTICALS.find(v => v.id === 'other');
 
-    // Structure final response
     const result = {
       ...extractedData,
       vertical_info: verticalInfo,
@@ -245,10 +206,7 @@ ${VERTICALS.map(v => `- ${v.id}: ${v.nameEn} (keywords: ${v.keywords.join(', ')}
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'Failed to process business card' 
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

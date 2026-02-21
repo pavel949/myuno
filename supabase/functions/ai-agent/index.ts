@@ -1,5 +1,11 @@
+/**
+ * AI Agent Chat Edge Function
+ * PUBLIC_ENDPOINT: Visitor-facing AI chat. Rate-limited. Auth optional (for logging).
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,10 +25,13 @@ interface AgentRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit: AI endpoint
+  const rlResponse = await withRateLimit(req, 'ai-agent', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
 
   const startTime = Date.now();
 
@@ -48,7 +57,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get user ID from auth header if available
+    // Get user ID from auth header if available (optional auth)
     let userId: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {

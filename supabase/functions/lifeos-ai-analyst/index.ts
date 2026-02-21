@@ -1,11 +1,11 @@
 /**
  * LifeOS AI Analyst - READ-ONLY AI Assist
- * 
- * Provides structured suggestions and diagnostics for LifeOS without
- * executing any changes. All outputs require human confirmation.
+ * AUTH_REQUIRED: Admin-only analysis tool. Requires authentication.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +51,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'lifeos-ai-analyst', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: admin analysis tool
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   const startTime = Date.now();
 

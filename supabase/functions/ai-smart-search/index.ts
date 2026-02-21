@@ -1,5 +1,11 @@
+/**
+ * AI Smart Search Edge Function
+ * PUBLIC_ENDPOINT: Visitor-facing search. Rate-limited.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +29,6 @@ interface AISearchResponse {
   }>;
 }
 
-// Keywords that indicate a question vs simple search
 const QUESTION_INDICATORS_RU = [
   "где", "как", "что", "куда", "когда", "почему", "зачем", "какой", "какая", "какие",
   "можно", "лучше", "посоветуй", "подскажи", "помоги", "хочу", "нужен", "нужна", "нужно",
@@ -142,6 +147,10 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit: public AI search
+  const rlResponse = await withRateLimit(req, 'ai-smart-search', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
 
   try {
     const { query, language = "en", personas = [] } = await req.json() as SearchRequest;

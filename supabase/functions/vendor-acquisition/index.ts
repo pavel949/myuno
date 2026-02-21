@@ -1,11 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Interfaces
 interface ProspectData {
   id?: string;
   business_name: string;
@@ -45,6 +48,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'vendor-acquisition', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // AUTH REQUIRED: admin-only endpoint
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+  const userId = authResult.user.id;
+
   const url = new URL(req.url);
   const path = url.pathname.split('/').pop();
 
@@ -53,19 +65,6 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    // Verify admin access
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (!user) {
-        return new Response(
-          JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    }
-
     const body = await req.json();
 
     switch (path) {
@@ -120,7 +119,6 @@ async function handleScore(supabase: any, body: { prospectId?: string; prospectD
     );
   }
 
-  // Get agent config
   const { data: agent } = await supabase
     .from('ai_agents')
     .select(`*, ai_agent_knowledge!inner(system_prompt, knowledge_base)`)
@@ -206,7 +204,6 @@ Respond with JSON:
     };
   }
 
-  // Update prospect if ID provided
   if (prospectId) {
     await supabase
       .from('vendor_prospects')
@@ -220,7 +217,6 @@ Respond with JSON:
       })
       .eq('id', prospectId);
 
-    // Log activity
     await supabase
       .from('vendor_prospect_activity')
       .insert({
@@ -230,7 +226,6 @@ Respond with JSON:
       });
   }
 
-  // Log AI usage
   await supabase.from('ai_agent_logs').insert({
     agent_id: agent.id,
     messages_count: 1,
@@ -251,7 +246,6 @@ async function handleGenerateOutreach(supabase: any, body: {
 }) {
   const { prospectId, channel, language, stage, managerName } = body;
 
-  // Get prospect
   const { data: prospect, error } = await supabase
     .from('vendor_prospects')
     .select('*')
@@ -265,7 +259,6 @@ async function handleGenerateOutreach(supabase: any, body: {
     );
   }
 
-  // Get template if exists
   const { data: template } = await supabase
     .from('vendor_outreach_templates')
     .select('*')
@@ -276,7 +269,6 @@ async function handleGenerateOutreach(supabase: any, body: {
     .limit(1)
     .single();
 
-  // Get agent config
   const { data: agent } = await supabase
     .from('ai_agents')
     .select(`*, ai_agent_knowledge!inner(system_prompt, knowledge_base)`)
@@ -379,7 +371,6 @@ Generate a personalized message. Respond with JSON:
     };
   }
 
-  // Log AI usage
   await supabase.from('ai_agent_logs').insert({
     agent_id: agent.id,
     messages_count: 1,
@@ -439,10 +430,7 @@ async function handleBatchImport(supabase: any, body: {
         results.errors.push(`${prospect.business_name}: ${error.message}`);
       } else {
         results.imported++;
-        
-        // Auto-score if requested
         if (autoScore && data) {
-          // Fire and forget - don't wait
           handleScore(supabase, { prospectId: data.id }).catch(console.error);
         }
       }
@@ -468,7 +456,6 @@ async function handleAnalyzeUrl(supabase: any, body: { url: string; sourceType: 
     );
   }
 
-  // Try to use Firecrawl if available
   const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
   
   let scrapedData: Record<string, unknown> = {};
@@ -497,7 +484,6 @@ async function handleAnalyzeUrl(supabase: any, body: { url: string; sourceType: 
     }
   }
 
-  // Get agent for analysis
   const { data: agent } = await supabase
     .from('ai_agents')
     .select(`*, ai_agent_knowledge!inner(system_prompt, knowledge_base)`)
@@ -526,24 +512,24 @@ async function handleAnalyzeUrl(supabase: any, body: { url: string; sourceType: 
     );
   }
 
-  const userPrompt = `Extract business information from this ${sourceType} URL.
+  const userPrompt = `Analyze this URL and extract vendor prospect information:
 
 URL: ${url}
-${scrapedData.markdown ? `\nSCRAPED CONTENT:\n${(scrapedData.markdown as string).slice(0, 3000)}` : ''}
+Source Type: ${sourceType}
+Scraped Content: ${JSON.stringify(scrapedData).substring(0, 3000)}
 
-Extract and return JSON:
+Extract business information and respond with JSON:
 {
   "business_name": "<name>",
-  "business_type": "<type: restaurant, salon, clinic, tour, rental, fitness, etc.>",
-  "contact_name": "<if found>",
-  "email": "<if found>",
-  "phone": "<if found>",
-  "instagram": "<if found>",
-  "website": "<if found>",
-  "address": "<if found>",
-  "district": "<Phuket district if identifiable>",
-  "description": "<brief description of the business>",
-  "confidence": "<high, medium, low>"
+  "business_type": "<type>",
+  "contact_name": "<name if found>",
+  "email": "<email if found>",
+  "phone": "<phone if found>",
+  "instagram": "<handle if found>",
+  "website": "<website>",
+  "address": "<address if found>",
+  "district": "<district if found>",
+  "description": "<brief description>"
 }`;
 
   const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -578,8 +564,13 @@ Extract and return JSON:
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     result = JSON.parse(jsonMatch?.[0] || content);
   } catch {
-    result = { error: "Could not parse response", raw: content };
+    result = { raw_response: content };
   }
+
+  await supabase.from('ai_agent_logs').insert({
+    agent_id: agent.id,
+    messages_count: 1,
+  });
 
   return new Response(
     JSON.stringify({ success: true, data: result }),
