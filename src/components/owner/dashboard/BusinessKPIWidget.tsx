@@ -214,7 +214,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: String(ops?.openTasks ?? 0),
       icon: ClipboardList,
       iconColor: 'text-primary',
-      href: '/owner/crm-tasks',
+      href: '/owner/tasks',
       badge: ops && ops.openTasks > 5 ? alertBadge(ops.openTasks) : undefined,
     },
     deals: {
