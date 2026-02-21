@@ -26,11 +26,11 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
   sales_agent: [
     { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Новая сделка', path: '/owner/sales/new' },
     { id: 'contact', icon: Users, labelEn: 'Add Contact', labelRu: 'Контакт', path: '/owner/contacts' },
-    { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Мои задачи', path: '/owner/crm-tasks' },
+    { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Мои задачи', path: '/owner/tasks' },
     { id: 'call', icon: Phone, labelEn: 'Call Log', labelRu: 'Звонки', path: '/owner/contacts' },
   ],
   service_provider: [
-    { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Задачи', path: '/owner/crm-tasks' },
+    { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Задачи', path: '/owner/tasks' },
     { id: 'invoice', icon: FileText, labelEn: 'New Invoice', labelRu: 'Счёт', path: '/owner/invoices' },
     { id: 'calendar', icon: Calendar, labelEn: 'Schedule', labelRu: 'Расписание', path: '/owner/calendar' },
     { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Расход', path: '/owner/quick-expense' },
