@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { getStoredLang as getLang } from '@/lib/languageConfig';
 
 const errorLog = createErrorHandler('ErrorBoundary');
 
@@ -31,13 +32,6 @@ const ERROR_MESSAGES = {
   reload: { en: 'Reload page', ru: 'Перезагрузить' },
 };
 
-function getLang(): 'en' | 'ru' {
-  try {
-    const stored = localStorage.getItem('myuno-language');
-    if (stored === 'ru') return 'ru';
-  } catch {}
-  return 'en';
-}
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {

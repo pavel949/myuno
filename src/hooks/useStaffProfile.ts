@@ -6,13 +6,7 @@ import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('useStaffProfile');
 
-// Get language for toasts
-function getLang(): 'ru' | 'en' {
-  if (typeof window !== 'undefined') {
-    return (localStorage.getItem('myuno-language') as 'ru' | 'en') || 'en';
-  }
-  return 'en';
-}
+import { getStoredLang as getLang } from '@/lib/languageConfig';
 
 export interface StaffProfile {
   id: string;

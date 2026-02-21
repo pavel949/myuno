@@ -217,3 +217,18 @@ export function normalizeLanguages(languages: string[]): string[] {
       return SUPPORTED_LANGUAGES[code] !== undefined;
     });
 }
+
+/**
+ * Get stored UI language from localStorage (outside of React context).
+ * Use this in non-component code (error handlers, hooks with toast messages, etc.)
+ * instead of duplicating localStorage reads.
+ */
+export function getStoredLang(): 'en' | 'ru' {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('myuno-language');
+      if (stored === 'ru') return 'ru';
+    } catch {}
+  }
+  return 'en';
+}
