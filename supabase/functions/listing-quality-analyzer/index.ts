@@ -1,5 +1,11 @@
+/**
+ * Listing Quality Analyzer
+ * AUTH_REQUIRED: Analyzes listing quality with AI. Requires authentication.
+ */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -286,10 +292,17 @@ Respond in JSON format: { "explanation": "...", "confidence": 0.0-1.0 }`;
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'listing-quality-analyzer', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   const startTime = Date.now();
   let correlationId = "";

@@ -1,6 +1,11 @@
+/**
+ * AI Personalize Home Edge Function
+ * PUBLIC_ENDPOINT: Visitor-facing personalization. Rate-limited. No sensitive data exposed.
+ */
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -134,10 +139,13 @@ function getSuggestedServices(
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Rate limit: public personalization
+  const rlResponse = await withRateLimit(req, 'ai-personalize-home', RATE_LIMITS.publicRead, corsHeaders);
+  if (rlResponse) return rlResponse;
 
   const startTime = Date.now();
 

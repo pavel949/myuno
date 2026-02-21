@@ -1,4 +1,11 @@
+/**
+ * OCR Receipt Edge Function
+ * AUTH_REQUIRED: Processes personal financial data. Requires authentication.
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,10 +23,17 @@ interface OCRResult {
 }
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'ocr-receipt', RATE_LIMITS.ai, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: personal financial data
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const { image_url } = await req.json();
@@ -31,7 +45,6 @@ serve(async (req) => {
       );
     }
 
-    // Call Lovable AI for OCR
     const aiResponse = await fetch('https://api.lovable.dev/v1/ai/chat', {
       method: 'POST',
       headers: {
@@ -89,10 +102,8 @@ If any field cannot be determined, omit it. Return ONLY valid JSON, no markdown 
       );
     }
 
-    // Parse the JSON response
     let parsedData: OCRResult;
     try {
-      // Remove markdown code blocks if present
       const cleanContent = content.replace(/```json\n?|\n?```/g, '').trim();
       parsedData = JSON.parse(cleanContent);
     } catch (parseError) {

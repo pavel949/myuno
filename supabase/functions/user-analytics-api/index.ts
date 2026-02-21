@@ -1,5 +1,12 @@
+/**
+ * User Analytics API Edge Function
+ * AUTH_REQUIRED: Exposes sensitive analytics data. Requires authentication.
+ */
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from '../_shared/supabase.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,6 +18,14 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  // Rate limit
+  const rlResponse = await withRateLimit(req, 'user-analytics-api', RATE_LIMITS.default, corsHeaders);
+  if (rlResponse) return rlResponse;
+
+  // Auth required: sensitive analytics data
+  const authResult = await requireAuth(req, corsHeaders);
+  if (authResult instanceof Response) return authResult;
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -21,15 +36,6 @@ serve(async (req) => {
     const days = parseInt(url.searchParams.get('days') || '30');
     const responseFormat = url.searchParams.get('format') || 'json';
 
-    // Verify API key or admin auth
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Calculate date range
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -39,7 +45,6 @@ serve(async (req) => {
 
     switch (endpoint) {
       case 'summary': {
-        // Get analytics summary
         const { data: daily, error } = await supabase
           .from('user_analytics_daily')
           .select('*')
@@ -62,7 +67,6 @@ serve(async (req) => {
       }
 
       case 'daily': {
-        // Get daily metrics
         const { data: daily, error } = await supabase
           .from('user_analytics_daily')
           .select('*')
@@ -75,7 +79,6 @@ serve(async (req) => {
       }
 
       case 'segments': {
-        // Get user segments
         const { data: segments, error } = await supabase
           .from('user_segments')
           .select('lifecycle_stage, value_segment, is_vip, is_at_risk');
@@ -104,7 +107,6 @@ serve(async (req) => {
       }
 
       case 'cohorts': {
-        // Get cohort data
         const { data: cohorts, error } = await supabase
           .from('cohort_analytics')
           .select('*')
@@ -117,7 +119,6 @@ serve(async (req) => {
       }
 
       case 'users': {
-        // Get user list with segments
         const limit = parseInt(url.searchParams.get('limit') || '100');
         const offset = parseInt(url.searchParams.get('offset') || '0');
 
@@ -155,7 +156,6 @@ serve(async (req) => {
       }
 
       case 'realtime': {
-        // Get realtime stats
         const { data: stats, error } = await supabase
           .from('realtime_stats')
           .select('*')
@@ -176,7 +176,6 @@ serve(async (req) => {
       }
 
       case 'events': {
-        // Get recent events
         const limit = parseInt(url.searchParams.get('limit') || '100');
         const eventType = url.searchParams.get('event_type');
 
@@ -203,7 +202,6 @@ serve(async (req) => {
         });
     }
 
-    // Format response
     if (responseFormat === 'csv' && Array.isArray(data)) {
       const headers = Object.keys((data as Record<string, unknown>[])[0] || {}).join(',');
       const rows = (data as Record<string, unknown>[]).map((row) =>
