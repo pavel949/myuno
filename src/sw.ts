@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
-import { NetworkFirst, CacheFirst } from 'workbox-strategies';
+import { NetworkFirst, NetworkOnly, CacheFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { clientsClaim } from 'workbox-core';
@@ -19,22 +19,12 @@ cleanupOutdatedCaches();
 // index.html is explicitly EXCLUDED via globPatterns in vite config
 precacheAndRoute(self.__WB_MANIFEST);
 
-// ─── NAVIGATION: ALWAYS NetworkFirst (NEVER cache HTML) ───
-// This ensures index.html is ALWAYS fetched from network first
-const navigationStrategy = new NetworkFirst({
-  cacheName: 'navigation-v5',
-  networkTimeoutSeconds: 5, // Increased timeout
-  plugins: [
-    new CacheableResponsePlugin({ statuses: [200] }), // Only cache 200, not 0
-    new ExpirationPlugin({
-      maxEntries: 1,
-      maxAgeSeconds: 60, // 1 minute max
-    }),
-  ],
-});
+// ─── NAVIGATION: ALWAYS NetworkOnly (NEVER serve cached HTML) ───
+// This ensures index.html is ALWAYS fetched from network, never from cache
+const navigationStrategy = new NetworkOnly();
 
 registerRoute(new NavigationRoute(navigationStrategy, {
-  denylist: [/^\/api/, /^\/supabase/, /^\/__/],
+  denylist: [/^\/api/, /^\/supabase/, /^\/__/, /^\/~oauth/],
 }));
 
 // ─── IMAGES: CacheFirst (they rarely change) ───
@@ -118,8 +108,8 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.35.8] Activated — cleaning ALL old caches');
-  const CURRENT_CACHES = ['navigation-v5', 'images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
+  console.log('[SW v3.35.9] Activated — cleaning ALL old caches');
+  const CURRENT_CACHES = ['images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -143,5 +133,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.35.8] Installing new service worker...');
+  console.log('[SW v3.35.9] Installing new service worker...');
 });
