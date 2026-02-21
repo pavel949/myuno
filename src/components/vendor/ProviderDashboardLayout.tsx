@@ -148,42 +148,6 @@ export function DashboardGrid({
   );
 }
 
-/**
- * EmptyState - Consistent empty state display
- */
-interface EmptyStateProps {
-  icon: React.ReactNode;
-  title: string;
-  titleRu?: string;
-  description?: string;
-  descriptionRu?: string;
-  action?: React.ReactNode;
-  isRu?: boolean;
-}
-
-export function EmptyState({
-  icon,
-  title,
-  titleRu,
-  description,
-  descriptionRu,
-  action,
-  isRu = false,
-}: EmptyStateProps) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-        {icon}
-      </div>
-      <h3 className="font-semibold text-lg mb-1">
-        {isRu ? (titleRu || title) : title}
-      </h3>
-      {description && (
-        <p className="text-sm text-muted-foreground max-w-sm mb-4">
-          {isRu ? (descriptionRu || description) : description}
-        </p>
-      )}
-      {action}
-    </div>
-  );
-}
+// EmptyState moved to @/components/uno/EmptyState (canonical version)
+// Re-export for backward compatibility
+export { EmptyState } from '@/components/uno/EmptyState';

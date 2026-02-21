@@ -1,4 +1,5 @@
 import { toast } from '@/hooks/use-toast';
+import { getStoredLang } from '@/lib/languageConfig';
 
 type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
 
@@ -73,13 +74,7 @@ function detectErrorType(error: unknown): keyof typeof DEFAULT_MESSAGES {
   return 'unknown';
 }
 
-// Get current language (simplified - in real app would use context)
-function getCurrentLanguage(): 'en' | 'ru' {
-  if (typeof window !== 'undefined') {
-    return (localStorage.getItem('myuno-language') as 'en' | 'ru') || 'en';
-  }
-  return 'en';
-}
+const getCurrentLanguage = getStoredLang;
 
 // Format error for logging
 function formatError(error: unknown): string {

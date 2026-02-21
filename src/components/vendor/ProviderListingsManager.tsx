@@ -43,7 +43,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { EmptyState } from './ProviderDashboardLayout';
+import { EmptyState } from '@/components/uno/EmptyState';
 import { CanonicalListingWizard, CategoryNode, CanonicalListingData } from './wizard';
 import { toast } from 'sonner';
 
