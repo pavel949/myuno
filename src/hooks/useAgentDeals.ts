@@ -124,14 +124,20 @@ export function useCompanyMembers(companyId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('management_company_members')
-        .select('user_id, role, profiles:user_id(full_name)')
+        .select('user_id, role')
         .eq('company_id', companyId!)
         .eq('is_active', true);
       if (error) throw error;
+      // Fetch profile names separately to avoid join issues
+      const userIds = (data || []).map((m: any) => m.user_id);
+      const { data: profiles } = userIds.length > 0
+        ? await supabase.from('profiles').select('id, full_name').in('id', userIds)
+        : { data: [] };
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.full_name]));
       return (data || []).map((m: any) => ({
         user_id: m.user_id,
         role: m.role,
-        name: m.profiles?.full_name || m.user_id.slice(0, 8),
+        name: profileMap.get(m.user_id) || m.user_id.slice(0, 8),
       }));
     },
     enabled: !!companyId,
@@ -190,20 +196,24 @@ export function useAgentDeals(companyId: string | undefined) {
 }
 
 /** Fetch a single deal */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Fetch a single deal */
 export function useAgentDeal(dealId: string | undefined) {
+  const isValidId = !!dealId && UUID_RE.test(dealId);
   return useQuery({
     queryKey: ['agent-deal', dealId],
     queryFn: async (): Promise<AgentDeal | null> => {
-      if (!dealId) return null;
+      if (!isValidId) return null;
       const { data, error } = await supabase
         .from('agent_deals')
         .select('*')
-        .eq('id', dealId)
+        .eq('id', dealId!)
         .maybeSingle();
       if (error) throw error;
       return data as unknown as AgentDeal | null;
     },
-    enabled: !!dealId,
+    enabled: isValidId,
   });
 }
 

@@ -28,7 +28,7 @@ export function useDealFieldChanges(dealId: string | undefined) {
       if (error) throw error;
       return (data || []) as unknown as DealFieldChange[];
     },
-    enabled: !!dealId,
+    enabled: !!dealId && /^[0-9a-f]{8}-/i.test(dealId),
   });
 }
 

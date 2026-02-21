@@ -5,6 +5,7 @@ import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { Phone, Calendar, MessageCircle, Clock, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -97,6 +98,11 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
           {deal.budget_min ? `${(Number(deal.budget_min)/1e6).toFixed(1)}–` : ''}{(Number(deal.budget_max)/1e6).toFixed(1)}M {deal.currency}
         </p>
       ) : null}
+      {deal.tags?.length > 0 && (
+        <div className="mt-1">
+          <DealTagsDisplay tags={deal.tags} />
+        </div>
+      )}
       <div className="flex items-center justify-between mt-1">
         {deal.next_action_date && (
           <p className="flex items-center gap-1 text-xs text-primary">

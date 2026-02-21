@@ -105,11 +105,11 @@ export default function SalesDealDetail() {
   };
 
   const handleStatusChange = async (newStatus: DealStatus) => {
-    if ((deal as any).deal_status === newStatus) return;
+    if (deal.deal_status === newStatus) return;
     try {
-      const oldStatus = (deal as any).deal_status || 'active';
+      const oldStatus = deal.deal_status || 'active';
       await logChanges.mutateAsync({ dealId: deal.id, changes: [{ field_name: 'deal_status', old_value: oldStatus, new_value: newStatus }] });
-      await updateDeal.mutateAsync({ id: deal.id, deal_status: newStatus } as any);
+      await updateDeal.mutateAsync({ id: deal.id, deal_status: newStatus });
       await addActivity.mutateAsync({
         deal_id: deal.id, user_id: user!.id, activity_type: 'status_change',
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
@@ -146,8 +146,8 @@ export default function SalesDealDetail() {
   };
 
   const isClosed = deal.stage === 'closed_won' || deal.stage === 'closed_lost';
-  const dealStatus = (deal as any).deal_status || 'active';
-  const dealType = (deal as any).deal_type || 'sale';
+  const dealStatus = deal.deal_status || 'active';
+  const dealType = deal.deal_type || 'sale';
   const whatsappUrl = deal.client_phone ? `https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}` : null;
 
   return (
@@ -189,7 +189,7 @@ export default function SalesDealDetail() {
       <div>
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-xl font-bold">{deal.client_name}</h1>
-          {(deal as any).priority > 0 && <DealPriorityStars priority={(deal as any).priority} size="md" />}
+          {deal.priority > 0 && <DealPriorityStars priority={deal.priority} size="md" />}
           <Badge variant="outline" className="text-[10px]">
             {isRu ? DEAL_TYPE_LABELS[dealType as DealType]?.ru : DEAL_TYPE_LABELS[dealType as DealType]?.en}
           </Badge>
@@ -252,9 +252,9 @@ export default function SalesDealDetail() {
           </p>
         )}
         {deal.notes && <p className="text-sm text-muted-foreground mt-2">{deal.notes}</p>}
-        {(deal as any).tags?.length > 0 && (
+        {deal.tags?.length > 0 && (
           <div className="mt-2">
-            <DealTagsDisplay tags={(deal as any).tags} />
+            <DealTagsDisplay tags={deal.tags} />
           </div>
         )}
         {deal.deal_value && (
