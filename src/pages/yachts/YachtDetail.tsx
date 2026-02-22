@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Anchor, Star, Users, MapPin, Clock, Ruler } from 'lucide-react';
+import { Anchor, Star, Users, MapPin, Clock, Ruler, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -84,7 +85,12 @@ export default function YachtDetail() {
 
       <PageContainer className="-mt-4 relative z-10 bg-background rounded-t-3xl pt-6">
         {/* Header */}
-        <div className="mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="mb-4"
+        >
           <div className="flex items-start justify-between">
             <h1 className="text-2xl font-bold">{name}</h1>
             <Badge variant="secondary" className="capitalize">{yacht.yacht_type?.replace('_', ' ')}</Badge>
@@ -97,16 +103,27 @@ export default function YachtDetail() {
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span>{yacht.rating}</span><span>({yacht.review_count})</span>
             </div>
+            {yacht.is_verified && (
+              <div className="flex items-center gap-1 text-primary">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-xs font-medium">{language === 'ru' ? 'Проверено' : 'Verified'}</span>
+              </div>
+            )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Quick specs */}
-        <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 p-4 bg-muted/50 rounded-xl mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="grid grid-cols-2 xs:grid-cols-4 gap-3 p-4 bg-muted/50 rounded-xl mb-6"
+        >
           <QuickStat icon={Users} value={`${yacht.capacity}`} label={language === 'ru' ? 'гостей' : 'guests'} />
           <QuickStat icon={Ruler} value={yacht.length_meters ? `${yacht.length_meters}m` : '—'} label={language === 'ru' ? 'длина' : 'length'} />
           <QuickStat icon={Clock} value={`${yacht.year_built || '—'}`} label={language === 'ru' ? 'год' : 'year'} />
           <QuickStat icon={Anchor} value={`${yacht.cabins || '—'}`} label={language === 'ru' ? 'каюты' : 'cabins'} />
-        </div>
+        </motion.div>
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="mb-32">
@@ -170,11 +187,18 @@ export default function YachtDetail() {
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-4">
-            <div className="text-center py-8 text-muted-foreground">
-              <Star className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="font-medium">{yacht.rating} / 5</p>
-              <p className="text-sm">{yacht.review_count} {language === 'ru' ? 'отзывов' : 'reviews'}</p>
-              <p className="text-sm mt-4">{language === 'ru' ? 'Подробные отзывы скоро появятся' : 'Detailed reviews coming soon'}</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/80 flex items-center justify-center">
+                <Star className="w-8 h-8 text-muted-foreground/40" />
+              </div>
+              <div className="flex items-center justify-center gap-1 mb-1">
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} className={`w-4 h-4 ${i <= Math.round(yacht.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/20'}`} />
+                ))}
+              </div>
+              <p className="font-semibold text-foreground">{yacht.rating} / 5</p>
+              <p className="text-sm mt-1">{yacht.review_count} {language === 'ru' ? 'отзывов' : 'reviews'}</p>
+              <p className="text-xs mt-4 max-w-xs mx-auto">{language === 'ru' ? 'Подробные отзывы от гостей скоро появятся на этой странице' : 'Detailed guest reviews will appear here soon'}</p>
             </div>
           </TabsContent>
         </Tabs>
