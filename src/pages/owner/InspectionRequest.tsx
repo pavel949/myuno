@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useOwnerProperties, useCreateInspection } from '@/hooks/usePropertyCare';
+import { useCreateInspection } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
@@ -27,7 +28,7 @@ export default function InspectionRequest() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties: properties, isLoading: propertiesLoading } = useMyProperties();
   const createInspection = useCreateInspection();
 
   const [formData, setFormData] = useState({
@@ -194,9 +195,10 @@ export default function InspectionRequest() {
               </SelectTrigger>
               <SelectContent>
                 {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
+                  <SelectItem key={property.property_id} value={property.property_id}>
                     {isRu && property.title_ru ? property.title_ru : property.title}
                     {property.district && ` • ${property.district}`}
+                    {property.source === 'managed' && ` (${isRu ? 'управл.' : 'managed'})`}
                   </SelectItem>
                 ))}
               </SelectContent>

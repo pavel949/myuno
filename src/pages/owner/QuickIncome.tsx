@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { useCreateFinancial, INCOME_CATEGORIES, PAYMENT_METHODS } from '@/hooks/usePropertyFinancials';
 import { Button } from '@/components/ui/button';
@@ -46,19 +46,19 @@ export default function QuickIncome() {
 
   const preselectedPropertyId = searchParams.get('propertyId');
 
-  const { data: ownedProperties, isLoading: ownedLoading } = useOwnerProperties();
+  const { allProperties: myProps, isLoading: ownedLoading } = useMyProperties();
   const { data: delegations } = useMyDelegations();
   const createFinancial = useCreateFinancial();
 
-  // Merge owned + delegated (with financials permission) properties
+  // Merge myProperties + delegated (with financials permission) properties
   const delegatedProperties = (delegations || [])
     .filter(d => d.status === 'active' && (d.permissions as any)?.financials)
     .map(d => d.property)
     .filter(Boolean);
 
   const allProperties = [
-    ...(ownedProperties || []),
-    ...delegatedProperties.filter(dp => !ownedProperties?.some(op => op.id === dp.id)),
+    ...myProps,
+    ...delegatedProperties.filter(dp => !myProps.some(op => op.property_id === dp.id)),
   ];
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>(preselectedPropertyId || '');

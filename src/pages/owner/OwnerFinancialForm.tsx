@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { 
   usePropertyFinancialsFull,
   useCreateFinancial, 
@@ -44,7 +44,8 @@ export default function OwnerFinancialForm() {
   const isRu = language === 'ru';
   const isEditing = !!id;
 
-  const { data: properties } = useOwnerProperties();
+  const { allProperties } = useMyProperties();
+  const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
   const { data: financials } = usePropertyFinancialsFull();
   const { data: staffList } = useStaffMembers();
   const createFinancial = useCreateFinancial();

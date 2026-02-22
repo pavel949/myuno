@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { useCreateManagementRequest } from '@/hooks/useManagementRequests';
 import {
   Dialog,
@@ -85,7 +85,8 @@ const ROLES = [
 export function InviteTeamMemberDialog({ open, onOpenChange, preselectedPropertyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: properties } = useOwnerProperties();
+  const { allProperties } = useMyProperties();
+  const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
   const createRequest = useCreateManagementRequest();
 
   const [step, setStep] = useState<Step>('role');
