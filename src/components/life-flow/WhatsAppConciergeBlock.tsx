@@ -19,8 +19,8 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
 
   const messages: Record<string, { ru: string; en: string }> = {
     trip: {
-      ru: 'Здравствуйте! Помогите спланировать поездку на о. Пхукет',
-      en: 'Hi! Please help me plan a trip to Phuket',
+      ru: 'Здравствуйте! Помогите с моей ситуацией на Пхукете',
+      en: 'Hi! I need help with my situation in Phuket',
     },
     general: {
       ru: 'Здравствуйте! Мне нужна помощь',

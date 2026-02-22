@@ -14,7 +14,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { cn } from '@/lib/utils';
 import {
-  ShieldCheck, Users, Handshake, TrendingDown,
+  ShieldCheck, Users, Handshake, CheckCircle,
   Clock, ThumbsUp, BadgeCheck,
   type LucideIcon,
 } from 'lucide-react';
@@ -93,7 +93,7 @@ export function SituationalTrustSignals({
 
   if (isPredictable) {
     signals.push({
-      icon: TrendingDown,
+      icon: CheckCircle,
       labelEn: 'Predictable outcome',
       labelRu: 'Предсказуемый результат',
     });
