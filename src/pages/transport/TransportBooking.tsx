@@ -86,7 +86,7 @@ export default function TransportBooking() {
       
       setAvailabilityError(null);
       const result = await checkAvailability({
-        vertical: 'service', // Using service type for transport
+        vertical: 'service', // Transport uses service-type availability check
         entityId: id,
         startDatetime: pickupDate,
         endDatetime: returnDate,
@@ -156,7 +156,7 @@ export default function TransportBooking() {
     ? (vehicleData.name_ru || vehicleData.nameRu) 
     : (vehicleData.name_en || vehicleData.nameEn);
 
-  const vehicleImage = vehicleData.images?.[0] || vehicleData.image || '';
+  const vehicleImage = vehicleData.cover_image || vehicleData.images?.[0] || vehicleData.image || '';
 
   // Success state
   if (bookingResult?.success && bookingResult.bookingId) {
@@ -237,7 +237,7 @@ export default function TransportBooking() {
         .limit(1);
 
       if (orderItems && orderItems.length > 0) {
-        await supabase
+        const { error: detailsError } = await supabase
           .from('order_item_transport_details')
           .insert({
             order_item_id: orderItems[0].id,
@@ -247,6 +247,10 @@ export default function TransportBooking() {
             luggage_count: 0,
             is_round_trip: false,
           });
+
+        if (detailsError) {
+          console.error('Failed to save transport details:', detailsError);
+        }
       }
 
       // Handle payment method routing
