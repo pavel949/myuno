@@ -5,6 +5,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
+import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
@@ -161,6 +162,12 @@ export default function ExperiencesIndex() {
 
   return (
     <AppLayout showHeader={false} showBottomNav>
+      <SEOHead
+        title={isRu ? 'Туры и экскурсии на Пхукете' : 'Tours & Experiences in Phuket'}
+        description={isRu
+          ? 'Лучшие туры, экскурсии и активности на Пхукете. Морские прогулки, дайвинг, кулинарные мастер-классы.'
+          : 'Best tours, excursions, and activities in Phuket. Boat trips, diving, cooking classes.'}
+      />
       <div className="min-h-screen bg-background">
         <CatalogHeader
           title={isRu ? 'Туры и активности' : 'Tours & Activities'}

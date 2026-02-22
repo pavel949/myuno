@@ -16,6 +16,7 @@ import { YachtPolicies } from '@/components/yachts/YachtPolicies';
 import { YachtOperatorCard } from '@/components/yachts/YachtOperatorCard';
 import { YachtSimilarSection } from '@/components/yachts/YachtSimilarSection';
 import { RelatedServicesSection } from '@/components/crosssell';
+import { SEOHead, createServiceSchema } from '@/components/seo';
 
 export default function YachtDetail() {
   const { id } = useParams();
@@ -59,6 +60,21 @@ export default function YachtDetail() {
 
   return (
     <AppLayout>
+      <SEOHead
+        title={name}
+        description={(description || '').slice(0, 160)}
+        image={coverImage}
+        type="product"
+        jsonLd={createServiceSchema({
+          name: name || '',
+          description: (description || '').slice(0, 300),
+          price: yacht.price_half_day || yacht.price_full_day || undefined,
+          currency: 'THB',
+          rating: yacht.rating || undefined,
+          reviewCount: yacht.review_count || undefined,
+          image: coverImage,
+        })}
+      />
       <YachtImageGallery
         images={images}
         name={name}
