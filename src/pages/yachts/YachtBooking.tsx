@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Anchor, Users, Clock, Loader2, AlertCircle, Info } from 'lucide-react';
+import { Anchor, Users, Clock, Loader2, AlertCircle, Info, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -306,7 +307,12 @@ export default function YachtBooking() {
     <AppLayout>
       <PageContainer className="pb-40">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-3 mb-4"
+        >
           <BackButton fallbackPath="/yachts" variant="ghost" />
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -314,15 +320,15 @@ export default function YachtBooking() {
             </h1>
             <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 ${
               isInstant
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                ? 'bg-primary/10 text-primary'
+                : 'bg-accent text-accent-foreground'
             }`}>
               {isInstant
                 ? (language === 'ru' ? '⚡ Мгновенное бронирование' : '⚡ Instant Booking')
                 : (language === 'ru' ? '📋 Бронирование по заявке' : '📋 Request to Book')}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Yacht Summary */}
         <div className="flex gap-4 p-4 bg-card rounded-xl border mb-6">
@@ -381,7 +387,7 @@ export default function YachtBooking() {
           />
 
           {/* Experiences */}
-          <div className="p-4 bg-gradient-to-br from-amber-500/5 to-orange-500/5 rounded-xl border border-amber-500/20">
+          <div className="p-4 bg-gradient-to-br from-primary/5 to-accent/10 rounded-xl border border-primary/15">
             <YachtExperienceSelect
               selected={selectedExperiences}
               onChange={setSelectedExperiences}
@@ -422,13 +428,13 @@ export default function YachtBooking() {
               />
             </div>
           ) : (
-            <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-xl">
-              <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-4 bg-accent/50 border border-border rounded-xl">
+              <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                <p className="text-sm font-medium">
                   {language === 'ru' ? 'Депозит будет выставлен отдельно' : 'Deposit will be invoiced separately'}
                 </p>
-                <p className="text-xs text-amber-700/80 dark:text-amber-400/70 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {language === 'ru'
                     ? `После подтверждения заявки менеджер myUNO выставит счёт на депозит (${depositPercent}% от стоимости).`
                     : `After the request is confirmed, a myUNO manager will send a deposit invoice (${depositPercent}% of total).`}
@@ -490,7 +496,7 @@ export default function YachtBooking() {
                   </div>
                 </>
               ) : (
-                <div className="flex justify-between text-sm font-medium text-amber-600 dark:text-amber-400">
+                <div className="flex justify-between text-sm font-medium text-muted-foreground">
                   <span>{language === 'ru' ? `Депозит (${depositPercent}%) — после подтверждения` : `Deposit (${depositPercent}%) — after confirmation`}</span>
                   <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{depositAmount.toLocaleString()}</span>
                 </div>

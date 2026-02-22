@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Home } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidget';
 import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
@@ -136,22 +137,38 @@ export default function OwnerDashboard() {
   return (
     <div className="px-4 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg mx-auto">
       {/* Header: Greeting + Role Switcher */}
-      <div className="space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-4"
+      >
         <DashboardGreeting roleConfig={config} />
         <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
-      </div>
+      </motion.div>
 
       {/* Quick Actions */}
-      <RoleQuickActions role={role} />
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <RoleQuickActions role={role} />
+      </motion.div>
 
       <Separator />
 
       {/* Composed Widgets */}
       {config.widgets.map((widgetKey, idx) => (
-        <div key={widgetKey}>
+        <motion.div
+          key={widgetKey}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
+        >
           {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && <Separator className="mb-6" />}
           <DashboardWidget widgetKey={widgetKey} role={role} />
-        </div>
+        </motion.div>
       ))}
     </div>
   );

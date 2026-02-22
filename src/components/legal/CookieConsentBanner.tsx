@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Cookie, X, Settings } from 'lucide-react';
@@ -25,7 +25,7 @@ function getStoredConsent(): CookiePreferences | null {
   }
 }
 
-export function CookieConsentBanner() {
+export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieConsentBanner(_props, ref) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [visible, setVisible] = useState(false);
@@ -65,11 +65,12 @@ export function CookieConsentBanner() {
     saveConsent({ essential: true, analytics: false, functional: false, marketing: false, timestamp: '' });
   };
 
-  if (!visible) return null;
+  if (!visible) return <div ref={ref} />;
 
   return (
     <AnimatePresence>
       <motion.div
+        ref={ref}
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
@@ -161,7 +162,7 @@ export function CookieConsentBanner() {
       </motion.div>
     </AnimatePresence>
   );
-}
+});
 
 /** Utility to check if user consented to a specific category */
 export function hasCookieConsent(category: 'analytics' | 'functional' | 'marketing'): boolean {

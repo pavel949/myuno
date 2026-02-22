@@ -36,7 +36,7 @@ export function OwnerLayout({ children }: OwnerLayoutProps) {
         <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full">
           <OwnerHeader />
           <main 
-            className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4 max-w-full"
+            className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4 max-w-full scroll-smooth"
             style={{ 
               WebkitOverflowScrolling: 'touch',
               touchAction: 'pan-x pan-y pinch-zoom',
