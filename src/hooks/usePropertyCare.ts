@@ -21,6 +21,44 @@ import type {
   PropertyFinancial 
 } from '@/types/property';
 
+/**
+ * Helper: get all property IDs the user can manage (owned + assigned).
+ * Returns { ownedIds, managedIds, allIds }.
+ */
+async function getUserPropertyIds(userId: string) {
+  const [ownedRes, assignedRes] = await Promise.all([
+    supabase.from('properties').select('id').eq('owner_id', userId),
+    supabase.from('property_manager_assignments').select('property_id').eq('manager_user_id', userId).eq('is_active', true),
+  ]);
+  const ownedIds = (ownedRes.data || []).map(p => p.id);
+  const managedIds = (assignedRes.data || []).map(a => a.property_id);
+  const allIds = [...new Set([...ownedIds, ...managedIds])];
+  return { ownedIds, managedIds, allIds };
+}
+
+/**
+ * Check if user has access to a specific property (owner OR assigned manager).
+ */
+async function canAccessProperty(userId: string, propertyId: string): Promise<boolean> {
+  // Check ownership first (fast path)
+  const { data: owned } = await supabase
+    .from('properties')
+    .select('id')
+    .eq('id', propertyId)
+    .eq('owner_id', userId)
+    .maybeSingle();
+  if (owned) return true;
+
+  // Check management assignment
+  const { data: assigned } = await supabase
+    .from('property_manager_assignments')
+    .select('id')
+    .eq('property_id', propertyId)
+    .eq('manager_user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle();
+  return !!assigned;
+}
 
 export function useOwnerProperties() {
   const { user } = useAuth();
@@ -40,10 +78,13 @@ export function useOwnerProperties() {
       return data as OwnerProperty[];
     },
     enabled: !!user,
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 }
 
+/**
+ * Fetch a single property — accessible by owner OR assigned manager.
+ */
 export function useOwnerProperty(id: string | undefined) {
   const { user } = useAuth();
 
@@ -51,16 +92,36 @@ export function useOwnerProperty(id: string | undefined) {
     queryKey: ['owner-property', id],
     queryFn: async () => {
       if (!id || !user) return null;
-      // Query unified properties table
-      const { data, error } = await supabase
+
+      // Try as owner first
+      const { data: owned } = await supabase
         .from('properties')
         .select('*')
         .eq('id', id)
-        .eq('owner_id', user.id) // Security: verify ownership
+        .eq('owner_id', user.id)
+        .maybeSingle();
+      
+      if (owned) return owned as OwnerProperty;
+
+      // Try as assigned manager
+      const { data: assignment } = await supabase
+        .from('property_manager_assignments')
+        .select('property_id')
+        .eq('property_id', id)
+        .eq('manager_user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (!assignment) return null;
+
+      const { data: managed, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
         .single();
       
       if (error) throw error;
-      return data as OwnerProperty;
+      return managed as OwnerProperty;
     },
     enabled: !!id && !!user,
   });
@@ -81,13 +142,10 @@ export function useCreateOwnerProperty() {
         .eq('id', user.id)
         .single();
       
-      // Ensure approval_status is 'pending' for moderation workflow
-      // Insert into unified properties table with owner_id
       const insertData = { 
         ...data, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
-        // Set title_en/title_ru from title for marketplace compatibility
         title_en: data.title || data.address || 'New Property',
         title_ru: data.title_ru || data.title || 'Новый объект',
         listing_type: 'rent',
@@ -125,6 +183,9 @@ export function useCreateOwnerProperty() {
   });
 }
 
+/**
+ * Update property — works for both owners and assigned managers.
+ */
 export function useUpdateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -133,29 +194,43 @@ export function useUpdateOwnerProperty() {
     mutationFn: async ({ id, ...data }: Partial<OwnerProperty> & { id: string }) => {
       if (!user) throw new Error('Not authenticated');
       
-      // Update in unified properties table
+      // Try update as owner first
       const { data: result, error } = await supabase
         .from('properties')
         .update(data)
         .eq('id', id)
-        .eq('owner_id', user.id) // Security: verify ownership
+        .eq('owner_id', user.id)
+        .select()
+        .maybeSingle();
+      
+      if (result) return result;
+
+      // If not owner, check if assigned manager
+      const hasAccess = await canAccessProperty(user.id, id);
+      if (!hasAccess) throw new Error('Property not found or access denied');
+
+      // Update without owner_id filter (manager has access via assignment)
+      const { data: managedResult, error: managedError } = await supabase
+        .from('properties')
+        .update(data)
+        .eq('id', id)
         .select()
         .single();
       
-      if (error) throw error;
-      if (!result) throw new Error('Property not found or access denied');
-      return result;
+      if (managedError) throw managedError;
+      return managedResult;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
       toast.success('Объект обновлён!');
     },
   });
 }
 
-// Publish owner property to marketplace (now just updates listing status)
+// Publish owner property to marketplace
 export function usePublishToMarketplace() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -170,23 +245,24 @@ export function usePublishToMarketplace() {
     }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // With unified table, we just update the property to be active/approved
+      // Verify access (owner or manager)
+      const hasAccess = await canAccessProperty(user.id, data.ownerPropertyId);
+      if (!hasAccess) throw new Error('Property not found or access denied');
+
+      const { data: currentProperty, error: fetchError } = await supabase
+        .from('properties')
+        .select('listing_modes')
+        .eq('id', data.ownerPropertyId)
+        .single();
+        
+      if (fetchError) throw new Error('Property not found');
+
       const updateData: Record<string, unknown> = {
         is_active: true,
         listing_type: data.listingType,
         price: data.price,
         price_period: data.listingType === 'rent' ? data.pricePeriod : 'total',
       };
-      
-      // Add to listing_modes array if not already there
-      const { data: currentProperty, error: fetchError } = await supabase
-        .from('properties')
-        .select('listing_modes')
-        .eq('id', data.ownerPropertyId)
-        .eq('owner_id', user.id)
-        .single();
-        
-      if (fetchError) throw new Error('Property not found or access denied');
       
       const currentModes = (currentProperty?.listing_modes as string[]) || [];
       if (!currentModes.includes(data.listingType)) {
@@ -202,18 +278,17 @@ export function usePublishToMarketplace() {
         .from('properties')
         .update(updateData)
         .eq('id', data.ownerPropertyId)
-        .eq('owner_id', user.id)
         .select()
         .single();
 
       if (updateError) throw updateError;
-
       return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
       toast.success('Объект опубликован на маркетплейсе!');
     },
     onError: (error) => {
@@ -222,7 +297,7 @@ export function usePublishToMarketplace() {
   });
 }
 
-// Inspections
+// Inspections — includes managed properties
 export function usePropertyInspections(propertyId?: string) {
   const { user } = useAuth();
 
@@ -231,23 +306,34 @@ export function usePropertyInspections(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
-      // Note: property_inspections still references owner_properties FK until DB migration updates it
-      let query = supabase
+      if (propertyId) {
+        // Specific property — verify access
+        const hasAccess = await canAccessProperty(user.id, propertyId);
+        if (!hasAccess) return [];
+        
+        const { data, error } = await supabase
+          .from('property_inspections')
+          .select('*')
+          .eq('property_id', propertyId)
+          .order('scheduled_at', { ascending: false });
+        if (error) throw error;
+        return (data || []) as unknown as PropertyInspection[];
+      }
+
+      // All properties — owned + managed
+      const { allIds } = await getUserPropertyIds(user.id);
+      if (allIds.length === 0) return [];
+
+      const { data, error } = await supabase
         .from('property_inspections')
         .select('*')
-        .eq('owner_id', user.id)
+        .in('property_id', allIds)
         .order('scheduled_at', { ascending: false });
-      
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
       return (data || []) as unknown as PropertyInspection[];
     },
     enabled: !!user,
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 }
 
@@ -275,7 +361,7 @@ export function useCreateInspection() {
   });
 }
 
-// Service Requests
+// Service Requests — includes managed properties
 export function useServiceRequests(propertyId?: string) {
   const { user } = useAuth();
 
@@ -284,23 +370,32 @@ export function useServiceRequests(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
-      // Note: property_service_requests still references owner_properties FK until DB migration updates it
-      let query = supabase
+      if (propertyId) {
+        const hasAccess = await canAccessProperty(user.id, propertyId);
+        if (!hasAccess) return [];
+        
+        const { data, error } = await supabase
+          .from('property_service_requests')
+          .select('*')
+          .eq('property_id', propertyId)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data as PropertyServiceRequest[];
+      }
+
+      const { allIds } = await getUserPropertyIds(user.id);
+      if (allIds.length === 0) return [];
+
+      const { data, error } = await supabase
         .from('property_service_requests')
         .select('*')
-        .eq('owner_id', user.id)
+        .in('property_id', allIds)
         .order('created_at', { ascending: false });
-      
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
       return data as PropertyServiceRequest[];
     },
     enabled: !!user,
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 }
 
@@ -328,7 +423,7 @@ export function useCreateServiceRequest() {
   });
 }
 
-// Financials
+// Financials — includes managed properties
 export function usePropertyFinancials(propertyId?: string) {
   const { user } = useAuth();
 
@@ -337,18 +432,27 @@ export function usePropertyFinancials(propertyId?: string) {
     queryFn: async () => {
       if (!user) return [];
       
-      // Note: property_financials still references owner_properties FK until DB migration updates it
-      let query = supabase
+      if (propertyId) {
+        const hasAccess = await canAccessProperty(user.id, propertyId);
+        if (!hasAccess) return [];
+        
+        const { data, error } = await supabase
+          .from('property_financials')
+          .select('*')
+          .eq('property_id', propertyId)
+          .order('transaction_date', { ascending: false });
+        if (error) throw error;
+        return data as PropertyFinancial[];
+      }
+
+      const { allIds } = await getUserPropertyIds(user.id);
+      if (allIds.length === 0) return [];
+
+      const { data, error } = await supabase
         .from('property_financials')
         .select('*')
-        .eq('owner_id', user.id)
+        .in('property_id', allIds)
         .order('transaction_date', { ascending: false });
-      
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      }
-      
-      const { data, error } = await query;
       if (error) throw error;
       return data as PropertyFinancial[];
     },
@@ -356,7 +460,7 @@ export function usePropertyFinancials(propertyId?: string) {
   });
 }
 
-// Stats - optimized with staleTime to reduce redundant calls
+// Stats — includes managed properties
 export function usePropertyCareStats() {
   const { user } = useAuth();
 
@@ -365,11 +469,20 @@ export function usePropertyCareStats() {
     queryFn: async () => {
       if (!user) return null;
 
+      const { allIds } = await getUserPropertyIds(user.id);
+      if (allIds.length === 0) {
+        return {
+          totalProperties: 0, activeProperties: 0,
+          pendingInspections: 0, completedInspections: 0,
+          pendingRequests: 0, totalIncome: 0, totalExpenses: 0, netIncome: 0,
+        };
+      }
+
       const [properties, inspections, requests, financials] = await Promise.all([
-        supabase.from('properties').select('id, status').eq('owner_id', user.id),
-        supabase.from('property_inspections').select('id, status').eq('owner_id', user.id),
-        supabase.from('property_service_requests').select('id, status').eq('owner_id', user.id),
-        supabase.from('property_financials').select('amount, transaction_type').eq('owner_id', user.id),
+        supabase.from('properties').select('id, status').in('id', allIds),
+        supabase.from('property_inspections').select('id, status').in('property_id', allIds),
+        supabase.from('property_service_requests').select('id, status').in('property_id', allIds),
+        supabase.from('property_financials').select('amount, transaction_type').in('property_id', allIds),
       ]);
 
       const income = (financials.data || [])
@@ -392,6 +505,6 @@ export function usePropertyCareStats() {
       };
     },
     enabled: !!user,
-    staleTime: 60000, // Cache stats for 1 minute
+    staleTime: 60000,
   });
 }
