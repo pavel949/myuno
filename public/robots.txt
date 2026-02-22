@@ -15,11 +15,14 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /owner/
+Disallow: /vendor/
+Disallow: /staff/
+Disallow: /api/
+Disallow: /account/
+Disallow: /cart
+Disallow: /wallet
 
 # Sitemap
 Sitemap: https://myuno.app/sitemap.xml
-
-# Disallow admin and private areas
-Disallow: /admin/
-Disallow: /api/
-Disallow: /owner/

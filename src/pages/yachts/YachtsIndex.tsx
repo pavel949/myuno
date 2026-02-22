@@ -5,6 +5,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship, Zap, Clock } from 'lucide-react';
+import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
@@ -172,6 +173,12 @@ export default function YachtsIndex() {
 
   return (
     <AppLayout showHeader={false} showBottomNav>
+      <SEOHead
+        title={isRu ? 'Чартер яхт на Пхукете' : 'Yacht Charters in Phuket'}
+        description={isRu
+          ? 'Аренда яхт, катамаранов и спидботов на Пхукете. Лучшие цены и мгновенное бронирование.'
+          : 'Rent yachts, catamarans, and speedboats in Phuket. Best prices and instant booking.'}
+      />
       <div className="min-h-screen bg-background">
         <CatalogHeader
           title={isRu ? 'Чартер яхт' : 'Boat Charters'}

@@ -31,6 +31,7 @@ import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
+import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { HostProfileSection } from '@/components/property/HostProfileSection';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
@@ -160,8 +161,29 @@ export default function PropertyDetail() {
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   const viewLabel = property.view_type ? viewTypeLabels[property.view_type] : null;
 
+  const propertyTitle = isRu ? (property.title_ru || property.title_en) : (property.title_en || property.title_ru);
+  const propertyDesc = isRu ? (property.description_ru || property.description_en || '') : (property.description_en || property.description_ru || '');
+
   return (
     <AppLayout>
+      <SEOHead
+        title={propertyTitle || undefined}
+        description={propertyDesc.slice(0, 160)}
+        image={property.cover_image || undefined}
+        type="product"
+        jsonLd={createRealEstateListingSchema({
+          name: propertyTitle || '',
+          description: propertyDesc.slice(0, 300),
+          price: pricePerNight || undefined,
+          currency: 'THB',
+          image: property.cover_image || undefined,
+          url: `https://myuno.app/property/${id}`,
+          bedrooms: property.bedrooms || undefined,
+          bathrooms: property.bathrooms || undefined,
+          area: property.area_sqm || undefined,
+          address: property.district || undefined,
+        })}
+      />
       <div className="pb-28">
         {/* Sticky Header */}
         <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-background/95 backdrop-blur-md border-b border-border/30">

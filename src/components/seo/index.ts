@@ -1,1 +1,9 @@
-export { SEOHead, createOrganizationSchema, createServiceSchema, createBreadcrumbSchema } from './SEOHead';
+export { 
+  SEOHead, 
+  createOrganizationSchema, 
+  createServiceSchema, 
+  createBreadcrumbSchema,
+  createRealEstateListingSchema,
+  createTouristAttractionSchema,
+  createProductSchema,
+} from './SEOHead';

@@ -5,6 +5,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Heart, Star, ArrowRight, MapPin, Loader2, SlidersHorizontal, Map } from 'lucide-react';
+import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
@@ -158,6 +159,12 @@ export default function PropertyIndex() {
 
   return (
     <AppLayout showHeader={false} showBottomNav showFooter>
+      <SEOHead
+        title={isRu ? 'Аренда и покупка недвижимости на Пхукете' : 'Property Rentals & Sales in Phuket'}
+        description={isRu
+          ? 'Найдите виллы, кондо и апартаменты на Пхукете. Аренда посуточно и долгосрочно, покупка недвижимости.'
+          : 'Find villas, condos, and apartments in Phuket. Daily and long-term rentals, property for sale.'}
+      />
       <div className="min-h-screen bg-background pb-24">
         {/* Sticky header: search + categories */}
         <div className="sticky top-0 z-40 bg-background">

@@ -14,6 +14,7 @@ import { useExperiencePricing } from '@/hooks/useExperiencePricing';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection, RelatedServicesSection } from '@/components/crosssell';
 import { getContextualCrossSell } from '@/lib/crossSellConfig';
+import { SEOHead, createTouristAttractionSchema } from '@/components/seo';
 import { cn } from '@/lib/utils';
 
 export default function ExperienceDetail() {
@@ -58,14 +59,33 @@ export default function ExperienceDetail() {
     ? [experience.cover_image, ...(experience.images || [])]
     : experience.images || [];
 
+  const expTitle = isRu ? experience.title_ru : experience.title_en;
+  const expDesc = isRu ? (experience.description_ru || '') : (experience.description_en || '');
+
   return (
     <MiniAppLayout
-      title={isRu ? experience.title_ru : experience.title_en}
+      title={expTitle}
       fallbackPath="/experiences"
       showHero={false}
       showFilter={false}
       showCategories={false}
     >
+      <SEOHead
+        title={expTitle}
+        description={expDesc.slice(0, 160)}
+        image={experience.cover_image || undefined}
+        type="product"
+        jsonLd={createTouristAttractionSchema({
+          name: expTitle || '',
+          description: expDesc.slice(0, 300),
+          price: experience.price || undefined,
+          currency: 'THB',
+          image: experience.cover_image || undefined,
+          url: `https://myuno.app/experiences/${id}`,
+          rating: experience.rating || undefined,
+          reviewCount: experience.review_count || undefined,
+        })}
+      />
       <div className="space-y-4 pb-32">
         {/* Image Gallery */}
         <div className="relative -mx-4 -mt-4">

@@ -40,6 +40,14 @@ export function SEOHead({
   
   const finalDescription = description || defaultMeta[lang].description;
   const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : 'https://myuno.app');
+  
+  // Build hreflang alternate URLs
+  const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const hreflangUrls = {
+    en: `https://myuno.app${basePath}?lang=en`,
+    ru: `https://myuno.app${basePath}?lang=ru`,
+    th: `https://myuno.app${basePath}?lang=th`,
+  };
 
   return (
     <Helmet>
@@ -58,6 +66,8 @@ export function SEOHead({
       <meta property="og:description" content={finalDescription} />
       <meta property="og:image" content={image} />
       <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
+      <meta property="og:locale:alternate" content={lang === 'ru' ? 'en_US' : 'ru_RU'} />
+      <meta property="og:locale:alternate" content="th_TH" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -68,6 +78,12 @@ export function SEOHead({
       
       {/* Canonical URL */}
       <link rel="canonical" href={currentUrl} />
+      
+      {/* Hreflang alternate links */}
+      <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
+      <link rel="alternate" hrefLang="ru" href={hreflangUrls.ru} />
+      <link rel="alternate" hrefLang="th" href={hreflangUrls.th} />
+      <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
       
       {/* JSON-LD Structured Data */}
       {jsonLd && (
@@ -139,4 +155,102 @@ export const createBreadcrumbSchema = (items: { name: string; url: string }[]) =
     name: item.name,
     item: item.url,
   })),
+});
+
+export const createRealEstateListingSchema = (listing: {
+  name: string;
+  description: string;
+  price?: number;
+  currency?: string;
+  image?: string;
+  url?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  address?: string;
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateListing',
+  name: listing.name,
+  description: listing.description,
+  ...(listing.url && { url: listing.url }),
+  ...(listing.image && { image: listing.image }),
+  ...(listing.price && {
+    offers: {
+      '@type': 'Offer',
+      price: listing.price,
+      priceCurrency: listing.currency || 'THB',
+    },
+  }),
+  ...(listing.address && {
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: listing.address,
+      addressRegion: 'Phuket',
+      addressCountry: 'TH',
+    },
+  }),
+  ...(listing.bedrooms && { numberOfBedrooms: listing.bedrooms }),
+  ...(listing.bathrooms && { numberOfBathroomsTotal: listing.bathrooms }),
+  ...(listing.area && { floorSize: { '@type': 'QuantitativeValue', value: listing.area, unitCode: 'MTK' } }),
+});
+
+export const createTouristAttractionSchema = (attraction: {
+  name: string;
+  description: string;
+  price?: number;
+  currency?: string;
+  image?: string;
+  url?: string;
+  rating?: number;
+  reviewCount?: number;
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'TouristAttraction',
+  name: attraction.name,
+  description: attraction.description,
+  ...(attraction.url && { url: attraction.url }),
+  ...(attraction.image && { image: attraction.image }),
+  ...(attraction.price && {
+    offers: {
+      '@type': 'Offer',
+      price: attraction.price,
+      priceCurrency: attraction.currency || 'THB',
+    },
+  }),
+  ...(attraction.rating && {
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: attraction.rating,
+      reviewCount: attraction.reviewCount || 0,
+    },
+  }),
+  isAccessibleForFree: false,
+  touristType: 'Adventure',
+});
+
+export const createProductSchema = (product: {
+  name: string;
+  description: string;
+  price?: number;
+  currency?: string;
+  image?: string;
+  url?: string;
+  brand?: string;
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.description,
+  ...(product.image && { image: product.image }),
+  ...(product.url && { url: product.url }),
+  ...(product.brand && { brand: { '@type': 'Brand', name: product.brand } }),
+  ...(product.price && {
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: product.currency || 'THB',
+      availability: 'https://schema.org/InStock',
+    },
+  }),
 });
