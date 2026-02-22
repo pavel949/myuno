@@ -68,7 +68,7 @@ export function OffplanProjectCard({
   const StatusIcon = status.icon;
 
   const handleClick = () => {
-    navigate(`/offplan/${project.id}`);
+    navigate(`/property/offplan/${project.id}`);
   };
 
   // Format completion date
