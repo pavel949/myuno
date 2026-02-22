@@ -19436,13 +19436,16 @@ export type Database = {
       vehicles: {
         Row: {
           approval_status: string | null
+          brand: string | null
           capacity: number | null
+          class_label: string | null
           color: string | null
           commission_rate: number | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
           currency: string | null
+          delivery_available: boolean | null
           deposit_amount: number | null
           description_en: string | null
           description_ru: string | null
@@ -19483,17 +19486,21 @@ export type Database = {
           uno_team_creator_id: string | null
           updated_at: string | null
           vehicle_type: string | null
+          with_driver_available: boolean | null
           year_built: number | null
         }
         Insert: {
           approval_status?: string | null
+          brand?: string | null
           capacity?: number | null
+          class_label?: string | null
           color?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
           currency?: string | null
+          delivery_available?: boolean | null
           deposit_amount?: number | null
           description_en?: string | null
           description_ru?: string | null
@@ -19534,17 +19541,21 @@ export type Database = {
           uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
+          with_driver_available?: boolean | null
           year_built?: number | null
         }
         Update: {
           approval_status?: string | null
+          brand?: string | null
           capacity?: number | null
+          class_label?: string | null
           color?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
           currency?: string | null
+          delivery_available?: boolean | null
           deposit_amount?: number | null
           description_en?: string | null
           description_ru?: string | null
@@ -19585,6 +19596,7 @@ export type Database = {
           uno_team_creator_id?: string | null
           updated_at?: string | null
           vehicle_type?: string | null
+          with_driver_available?: boolean | null
           year_built?: number | null
         }
         Relationships: [

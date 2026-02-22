@@ -44,6 +44,11 @@ export interface Vehicle {
   insurance_note: string | null;
   mileage_policy: string | null;
   helmet_included: boolean;
+  // New premium fields
+  brand: string | null;
+  delivery_available: boolean;
+  with_driver_available: boolean;
+  class_label: string | null;
 }
 
 async function fetchVehicles(vehicleType?: string): Promise<Vehicle[]> {
