@@ -128,6 +128,17 @@ export const VEHICLE_FEATURES: VehicleFeatureConfig[] = [
   { id: 'off_road', labelEn: 'Off-Road', labelRu: 'Внедорожный', icon: '🏜️' },
   { id: 'sport', labelEn: 'Sport', labelRu: 'Спорт', icon: '🏁' },
   { id: 'adventure', labelEn: 'Adventure', labelRu: 'Adventure', icon: '🌍' },
+  // Additional DB features
+  { id: 'apple_carplay', labelEn: 'Apple CarPlay', labelRu: 'Apple CarPlay', icon: '📱' },
+  { id: 'child_seat_available', labelEn: 'Child Seat', labelRu: 'Детское кресло', icon: '👶' },
+  { id: 'convertible', labelEn: 'Convertible', labelRu: 'Кабриолет', icon: '🏎️' },
+  { id: 'free_delivery', labelEn: 'Free Delivery', labelRu: 'Бесплатная доставка', icon: '🚚' },
+  { id: 'insurance_casco', labelEn: 'CASCO Insurance', labelRu: 'Страховка КАСКО', icon: '🛡️' },
+  { id: 'insurance_included', labelEn: 'Insurance Included', labelRu: 'Страховка включена', icon: '✅' },
+  { id: 'leather_seats', labelEn: 'Leather Seats', labelRu: 'Кожаный салон', icon: '💺' },
+  { id: 'no_passport_deposit', labelEn: 'No Passport Deposit', labelRu: 'Без залога паспорта', icon: '📄' },
+  { id: 'rear_camera', labelEn: 'Rear Camera', labelRu: 'Камера заднего вида', icon: '📷' },
+  { id: 'unlimited_mileage', labelEn: 'Unlimited Mileage', labelRu: 'Без лимита км', icon: '∞' },
 ];
 
 // ====== MAPS FOR QUICK LOOKUP ======

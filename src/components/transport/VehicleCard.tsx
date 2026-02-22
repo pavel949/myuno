@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
 import type { Vehicle } from '@/hooks/useVehicles';
-import { getTransmissionLabel, getFuelLabel } from '@/lib/taxonomies';
+import { getTransmissionLabel, getFuelLabel, getCategoryConfig } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
 interface VehicleCardProps {
@@ -25,6 +25,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, isRu ? 'ru' : 'en');
   const fuelLabel = getFuelLabel(vehicle.fuel_type, isRu ? 'ru' : 'en');
+  const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
   const image = vehicle.cover_image || vehicle.images?.[0] || '';
 
   return (
@@ -89,8 +90,8 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           <h3 className="font-semibold text-sm leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-1">
             {name}
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-            {vehicle.vehicle_type?.replace(/_/g, ' ')}
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {isRu ? categoryConfig.labelRu : categoryConfig.labelEn}
           </p>
         </div>
 
