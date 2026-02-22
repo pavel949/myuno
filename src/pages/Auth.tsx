@@ -40,6 +40,7 @@ export default function Auth() {
   const [signupStep, setSignupStep] = useState<SignupStep>('info');
   // Track failed login attempts to show "Forgot password?" hint
   const [loginAttempts, setLoginAttempts] = useState(0);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const SHOW_FORGOT_AFTER = 3;
 
   const { user, signIn, signUp } = useAuth();
@@ -53,6 +54,7 @@ export default function Auth() {
   const redirectPath = (location.state as { from?: string })?.from || 
     searchParams.get('redirect') || 
     '/';
+
 
 
   // Determine initial view based on PIN availability - single source of truth
@@ -175,7 +177,14 @@ export default function Auth() {
 
   const handleSignup = async () => {
     if (!validateStep('password')) return;
-    
+    if (!termsAccepted) {
+      toast({
+        title: isRu ? 'Примите условия' : 'Accept terms',
+        description: isRu ? 'Необходимо принять Условия использования' : 'You must accept the Terms of Service',
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsLoading(true);
     
     try {
@@ -212,6 +221,14 @@ export default function Auth() {
           } catch (refError) {
             console.error('Error applying referral code:', refError);
           }
+        }
+
+        // Log terms acceptance (fire & forget)
+        if (data?.user) {
+          supabase.from('terms_acceptances').insert([
+            { user_id: data.user.id, document_type: 'terms', document_version: '1.0' },
+            { user_id: data.user.id, document_type: 'privacy', document_version: '1.0' },
+          ]).then(({ error }) => { if (error) console.error('Terms acceptance log error:', error); });
         }
 
         // Notify admin about new registration (fire & forget)
@@ -748,15 +765,22 @@ export default function Auth() {
                             </div>
                           )}
 
-                          {/* Trust badge */}
-                          <div className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
-                            <ShieldCheck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                          {/* Terms acceptance */}
+                          <label className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={termsAccepted}
+                              onChange={(e) => setTermsAccepted(e.target.checked)}
+                              className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
+                            />
                             <p className="text-xs text-muted-foreground">
-                              {isRu 
-                                ? 'Ваши данные защищены и используются только для верификации личности и обеспечения безопасности бронирований.' 
-                                : 'Your data is protected and used only for identity verification and booking security.'}
+                              {isRu ? (
+                                <>Я принимаю <Link to="/terms" target="_blank" className="text-primary hover:underline">Условия использования</Link> и <Link to="/privacy" target="_blank" className="text-primary hover:underline">Политику конфиденциальности</Link></>
+                              ) : (
+                                <>I agree to the <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link></>
+                              )}
                             </p>
-                          </div>
+                          </label>
                         </div>
 
                         <div className="flex gap-3">

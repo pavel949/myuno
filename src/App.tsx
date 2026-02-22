@@ -28,6 +28,7 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
@@ -60,6 +61,7 @@ function AppContent() {
         <AnimatedRoutes />
         <UnifiedChatFAB />
       </BrowserRouter>
+      <CookieConsentBanner />
     </>
   );
 }
