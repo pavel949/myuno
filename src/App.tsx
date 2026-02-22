@@ -60,8 +60,8 @@ function AppContent() {
       <BrowserRouter>
         <AnimatedRoutes />
         <UnifiedChatFAB />
+        <CookieConsentBanner />
       </BrowserRouter>
-      <CookieConsentBanner />
     </>
   );
 }
