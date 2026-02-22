@@ -1,12 +1,13 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { Home, Plus, Download, Building2, Users } from 'lucide-react';
 
@@ -23,7 +24,7 @@ export default function OwnerProperties() {
     ? (isRu ? 'Управляющая компания' : 'Property Manager')
     : (isRu ? 'Собственник' : 'Owner');
   
-  const { data: properties, isLoading } = useOwnerProperties();
+  const { allProperties, isLoading } = useMyProperties();
 
   const handleView = (id: string) => {
     navigate(`/owner/properties/${id}`);
@@ -76,7 +77,7 @@ export default function OwnerProperties() {
             <PropertyCardSkeleton key={i} variant="list" />
           ))}
         </div>
-      ) : !properties?.length ? (
+      ) : !allProperties?.length ? (
         <Card>
           <CardContent className="p-8 text-center">
             <Home className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -96,19 +97,25 @@ export default function OwnerProperties() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {properties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              variant="list"
-              mode="owner"
-              onView={handleView}
-              onEdit={handleEdit}
-              onDuplicate={handleDuplicate}
-              showApprovalStatus
-              showProtectionBadge
-              showMarketplaceBadge
-            />
+          {allProperties.map((property) => (
+            <div key={property.id} className="relative">
+              {property.source === 'managed' && (
+                <Badge variant="secondary" className="absolute top-2 right-2 z-10 text-[10px]">
+                  {isRu ? 'В управлении' : 'Managed'}
+                </Badge>
+              )}
+              <PropertyCard
+                property={property as any}
+                variant="list"
+                mode="owner"
+                onView={() => handleView(property.property_id)}
+                onEdit={() => handleEdit(property.property_id)}
+                onDuplicate={() => handleDuplicate(property.property_id)}
+                showApprovalStatus
+                showProtectionBadge
+                showMarketplaceBadge
+              />
+            </div>
           ))}
         </div>
       )}

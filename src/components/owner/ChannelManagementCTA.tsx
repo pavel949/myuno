@@ -15,7 +15,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -140,7 +140,7 @@ export function ChannelManagementCTA() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { requestChannelManagement } = useConsultationRequests();
-  const { data: properties } = useOwnerProperties();
+  const { allProperties: properties } = useMyProperties();
   const t = locale[language as keyof typeof locale] || locale.en;
   
   const [dialogOpen, setDialogOpen] = useState(false);

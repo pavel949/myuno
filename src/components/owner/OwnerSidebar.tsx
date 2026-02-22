@@ -11,6 +11,10 @@ import {
   Home,
   ChevronDown,
   TrendingUp,
+  Wrench,
+  ClipboardList,
+  PackageOpen,
+  FileText,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -64,6 +68,18 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
       { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
+    ],
+  },
+  {
+    label: 'Operations',
+    labelRu: 'Операции',
+    defaultOpen: false,
+    items: [
+      { title: 'Operations', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
+      { title: 'Staff', titleRu: 'Персонал', path: '/owner/staff', icon: Users },
+      { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
+      { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: FileText },
+      { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: ClipboardList },
     ],
   },
   {

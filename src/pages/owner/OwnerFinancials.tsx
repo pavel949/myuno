@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { 
   usePropertyFinancialsPaginated, 
@@ -54,18 +54,18 @@ export default function OwnerFinancials() {
     from: undefined, to: undefined,
   });
 
-  const { data: ownedProperties } = useOwnerProperties();
+  const { allProperties: myProperties, isLoading: myPropsLoading } = useMyProperties();
   const { data: delegations } = useMyDelegations();
 
-  // Merge owned + delegated properties for the selector
+  // Merge useMyProperties + delegated (with financials permission) for the selector
   const delegatedProperties = (delegations || [])
     .filter(d => d.status === 'active' && (d.permissions as any)?.financials)
     .map(d => d.property)
     .filter(Boolean);
 
   const allProperties = [
-    ...(ownedProperties || []),
-    ...delegatedProperties.filter(dp => !(ownedProperties || []).some(op => op.id === dp.id)),
+    ...myProperties.map(p => ({ id: p.property_id, title: p.title, title_ru: p.title_ru })),
+    ...delegatedProperties.filter(dp => !myProperties.some(op => op.property_id === dp.id)),
   ];
 
   const { data: financialsData, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = usePropertyFinancialsPaginated(

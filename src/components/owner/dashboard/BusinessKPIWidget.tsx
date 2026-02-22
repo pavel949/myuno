@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -50,9 +51,11 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
   const [loading, setLoading] = useState(true);
   const { data: company } = useMyCompanyId();
   const companyId = company?.company_id;
+  const { allProperties } = useMyProperties();
+  const allPropertyIds = allProperties.map(p => p.property_id);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || allPropertyIds.length === 0) return;
 
     async function fetchKPI() {
       const now = new Date();
@@ -62,40 +65,40 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10);
       const today = now.toISOString().slice(0, 10);
 
-      // Financial queries (existing)
+      // Financial queries using property_id array (covers both owned + managed)
       const [incomeRes, expenseRes, incomePrevRes, expensePrevRes, bookingsRes] = await Promise.all([
         supabase
           .from('property_financials')
           .select('amount')
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .eq('transaction_type', 'income')
           .gte('transaction_date', startOfMonth)
           .lte('transaction_date', endOfMonth),
         supabase
           .from('property_financials')
           .select('amount')
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .eq('transaction_type', 'expense')
           .gte('transaction_date', startOfMonth)
           .lte('transaction_date', endOfMonth),
         supabase
           .from('property_financials')
           .select('amount')
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .eq('transaction_type', 'income')
           .gte('transaction_date', startOfPrevMonth)
           .lte('transaction_date', endOfPrevMonth),
         supabase
           .from('property_financials')
           .select('amount')
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .eq('transaction_type', 'expense')
           .gte('transaction_date', startOfPrevMonth)
           .lte('transaction_date', endOfPrevMonth),
         supabase
           .from('property_bookings')
           .select('check_in, check_out')
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .in('status', ['confirmed', 'checked_in', 'completed'])
           .lte('check_in', endOfMonth)
           .gte('check_out', startOfMonth),
@@ -119,12 +122,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
         bookedNights += nights;
       }
 
-      const { count: propCount } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_id', user!.id);
-
-      const totalNights = (propCount || 1) * daysInMonth;
+      const totalNights = Math.max(1, allPropertyIds.length) * daysInMonth;
       const occupancyRate = Math.min(100, Math.round((bookedNights / totalNights) * 100));
 
       setData({ revenue, expenses, margin, occupancyRate, revenuePrev, expensesPrev });
@@ -139,11 +137,11 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
         companyId
           ? supabase.from('agent_deals').select('id, deal_value', { count: 'exact' }).eq('company_id', companyId).not('stage', 'in', '("won","lost")')
           : Promise.resolve({ count: 0, data: [], error: null }),
-        // 2: upcoming bookings
+        // 2: upcoming bookings (owned + managed)
         supabase
           .from('property_bookings')
           .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user!.id)
+          .in('property_id', allPropertyIds)
           .in('status', ['confirmed', 'checked_in'])
           .gte('check_out', today),
         // 3: staff count
@@ -183,7 +181,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
     }
 
     fetchKPI();
-  }, [user, companyId]);
+  }, [user, companyId, allPropertyIds.join(',')]);
 
   const pctChange = (curr: number, prev: number) => {
     if (prev === 0) return curr > 0 ? 100 : 0;

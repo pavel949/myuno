@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
 import { OperationalTaskCard } from '@/components/owner/OperationalTaskCard';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,7 +38,8 @@ export default function OwnerOperations() {
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(searchParams.get('task'));
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
   
   const { 
     tasks, 

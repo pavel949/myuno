@@ -4,7 +4,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import {
   usePropertyReports,
   useGenerateReport,
@@ -92,7 +92,7 @@ export default function ReportsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const { data: ownedProperties } = useOwnerProperties();
+  const { allProperties: ownedProperties } = useMyProperties();
   const { data: managedProperties } = useManagedProperties();
   const { data: reports, isLoading } = usePropertyReports();
   const generateReport = useGenerateReport();
