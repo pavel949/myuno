@@ -50,7 +50,10 @@ export interface Yacht {
 
 export function useYachts(yachtType?: string) {
   const filters = useMemo((): QueryFilter[] => {
-    const result: QueryFilter[] = [{ column: 'is_active', value: true }];
+    const result: QueryFilter[] = [
+      { column: 'is_active', value: true },
+      { column: 'approval_status', value: 'approved' },
+    ];
     if (yachtType && yachtType !== 'all') {
       result.push({ column: 'yacht_type', value: yachtType });
     }
