@@ -21,7 +21,7 @@ import { useVehicle } from '@/hooks/useVehicles';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { TrustBadges } from '@/components/uno/TrustBadges';
 import { OptimizedImage } from '@/components/ui/optimized-image';
-import { getTransmissionLabel, getFuelLabel } from '@/lib/taxonomies';
+import { getTransmissionLabel, getFuelLabel, getLocalizedFeatures, getCategoryConfig } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export default function VehicleDetail() {
@@ -86,6 +86,8 @@ export default function VehicleDetail() {
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, lang);
   const fuelLabel = getFuelLabel(vehicle.fuel_type, lang);
+  const localizedFeatures = getLocalizedFeatures(vehicle.features, lang);
+  const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
 
   return (
     <AppLayout showBottomNav={false}>
@@ -149,8 +151,8 @@ export default function VehicleDetail() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">{name}</h1>
-                  <p className="text-sm text-muted-foreground mt-0.5 capitalize">
-                    {vehicle.vehicle_type?.replace(/_/g, ' ')}
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {isRu ? categoryConfig.labelRu : categoryConfig.labelEn}
                     {vehicle.year_built && ` • ${vehicle.year_built}`}
                   </p>
                 </div>
@@ -275,11 +277,11 @@ export default function VehicleDetail() {
             )}
 
             {/* Features */}
-            {vehicle.features && vehicle.features.length > 0 && (
+            {localizedFeatures.length > 0 && (
               <div>
                 <h2 className="text-base font-semibold mb-3">{isRu ? 'Включено' : 'Included'}</h2>
                 <div className="grid grid-cols-2 gap-2">
-                  {vehicle.features.map((feature, i) => (
+                  {localizedFeatures.map((feature, i) => (
                     <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-card border border-border/50">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
                       <span className="text-sm">{feature}</span>
