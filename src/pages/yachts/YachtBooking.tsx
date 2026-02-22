@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useBooking } from '@/hooks/useBooking';
+import { useOrders } from '@/hooks/useOrders';
 import { useYacht } from '@/hooks/useYachts';
 import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
 import { useSystemSettings } from '@/hooks/useSystemSettings';
@@ -54,7 +54,7 @@ export default function YachtBooking() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { createBooking, isSubmitting } = useBooking();
+  const { createOrder, isCreating } = useOrders();
   const { yacht, isLoading } = useYacht(id || '');
   const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
   const { data: yachtExperiences = [] } = useYachtExperiences();
@@ -190,7 +190,6 @@ export default function YachtBooking() {
     }
     
     setAvailabilityError(null);
-    scheduledAt.setHours(hours, minutes);
 
     // Build experiences list for notes
     const experienceNames = selectedExperiences.map(expId => {
@@ -200,44 +199,44 @@ export default function YachtBooking() {
 
     const bookingCharterType = charterType;
 
-    const result = await createBooking({
-      booking_type: 'transport', // Maps to 'yacht' order_type via metadata
-      scheduled_at: scheduledAt.toISOString(),
+    const result = await createOrder({
+      order_type: 'yacht',
+      start_at: scheduledAt.toISOString(),
+      end_at: endAt.toISOString(),
       total_amount: total,
       currency: yacht.currency || 'THB',
-      provider_id: undefined, // yacht.provider_id is from legacy providers table, not orgs
       notes: `Yacht: ${yacht.name_en}. ${charterLabel.en} charter. ${guests} guests.${experienceNames ? ` Experiences: ${experienceNames}.` : ''} ${contactData.notes || ''}`,
       items: [
         {
-          item_type: 'yacht-rental',
           item_name: yachtName,
-          quantity: 1,
+          item_type: 'yacht-rental',
+          qty: 1,
           unit_price: basePrice,
-          subtotal: basePrice,
+          amount: basePrice,
+          metadata: { source_id: yacht.id },
         },
         ...selectedExperiences.map(expId => {
           const exp = yachtExperiences.find(e => e.id === expId)!;
           return {
-            item_type: 'yacht-experience',
             item_name: language === 'ru' ? exp.labelRu : exp.labelEn,
-            quantity: 1,
+            item_type: 'yacht-experience',
+            qty: 1,
             unit_price: exp.price,
-            subtotal: exp.price,
+            amount: exp.price,
+            metadata: { source_id: expId },
           };
         }),
       ],
       participants: [{
+        role: 'primary' as const,
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
       }],
       payment: {
         amount: isInstant ? depositAmount : total,
-        payment_method: isInstant ? paymentMethod : 'cash',
-        status: 'pending',
+        method: isInstant ? (paymentMethod === 'online' ? 'stripe' : paymentMethod === 'wallet' ? 'wallet' : 'cash') : 'cash',
       },
-      addresses: [],
       metadata: {
         yacht_id: yacht.id,
         charter_type: bookingCharterType,
@@ -253,15 +252,15 @@ export default function YachtBooking() {
       },
       serviceName: yachtName,
       providerName: yacht.provider_id ? undefined : 'UNO Yachts',
-      openWhatsAppOnCash: !isInstant, // Open WhatsApp for request flow
+      openWhatsAppOnCash: !isInstant,
     });
 
-    if (result.booking_id) {
+    if (result.success && result.order_id) {
       // Save yacht-specific details to order_item_yacht_details
       const { data: orderItems } = await supabase
         .from('order_items')
         .select('id')
-        .eq('order_id', result.booking_id)
+        .eq('order_id', result.order_id)
         .eq('item_type', 'yacht-rental')
         .limit(1);
 
@@ -277,7 +276,7 @@ export default function YachtBooking() {
           });
       }
 
-      setBookingResult({ bookingId: result.booking_id });
+      setBookingResult({ bookingId: result.order_id });
     }
   };
 
@@ -447,79 +446,63 @@ export default function YachtBooking() {
           <BookingSummary
             title={yachtName}
             subtitle={language === 'ru' ? charterLabel.ru : charterLabel.en}
-            image={yacht.cover_image || '/placeholder.svg'}
-            date={date}
-            time={time}
-            participants={guests}
             price={total}
+            sourceCurrency={yacht.currency || 'THB'}
+            image={yacht.cover_image || undefined}
             items={[
               {
-                name: language === 'ru' 
-                  ? `Аренда (${charterLabel.ru.toLowerCase()})` 
-                  : `Charter (${charterLabel.en.toLowerCase()})`,
+                name: language === 'ru' ? 'Чартер' : 'Charter',
                 quantity: 1,
                 price: basePrice,
               },
               ...selectedExperiences.map(expId => {
-                const exp = yachtExperiences.find(e => e.id === expId)!;
+                const exp = yachtExperiences.find(e => e.id === expId);
                 return {
-                  name: language === 'ru' ? exp.labelRu : exp.labelEn,
+                  name: language === 'ru' ? (exp?.labelRu || '') : (exp?.labelEn || ''),
                   quantity: 1,
-                  price: exp.price,
+                  price: exp?.price || 0,
                 };
               }),
-              {
-                name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
-                quantity: 1,
-                price: serviceFee,
-              },
             ]}
-            sourceCurrency={yacht.currency || 'THB'}
+            serviceFee={serviceFee > 0 ? serviceFee : undefined}
           />
 
-          {/* Deposit block in summary */}
-          <div className="bg-card rounded-2xl border overflow-hidden">
-            <div className="p-4 border-b bg-muted/30 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{language === 'ru' ? 'Полная стоимость' : 'Total charter'}</span>
-                <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{total.toLocaleString()}</span>
+          {/* Deposit Info for Instant Booking */}
+          {isInstant && (
+            <div className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+              <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-primary">
+                  {language === 'ru'
+                    ? `Депозит ${depositPercent}%: ฿${depositAmount.toLocaleString()}`
+                    : `${depositPercent}% Deposit: ฿${depositAmount.toLocaleString()}`}
+                </p>
+                <p className="text-muted-foreground mt-0.5">
+                  {language === 'ru'
+                    ? `Остаток ฿${balanceAmount.toLocaleString()} оплачивается за ${yacht.balance_due_hours ?? 48}ч до чартера`
+                    : `Balance ฿${balanceAmount.toLocaleString()} is due ${yacht.balance_due_hours ?? 48}h before charter`}
+                </p>
               </div>
-              {isInstant ? (
-                <>
-                  <div className="flex justify-between text-sm font-medium text-primary">
-                    <span>{language === 'ru' ? `Депозит сейчас (${depositPercent}%)` : `Deposit now (${depositPercent}%)`}</span>
-                    <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{depositAmount.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{language === 'ru' ? 'Остаток при посадке' : 'Balance at boarding'}</span>
-                    <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{balanceAmount.toLocaleString()}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                  <span>{language === 'ru' ? `Депозит (${depositPercent}%) — после подтверждения` : `Deposit (${depositPercent}%) — after confirmation`}</span>
-                  <span>{yacht.currency === 'THB' ? '฿' : yacht.currency}{depositAmount.toLocaleString()}</span>
-                </div>
-              )}
             </div>
-          </div>
+          )}
         </div>
       </PageContainer>
 
+      {/* Bottom Submit Bar */}
       <BookingBottomBar
         total={isInstant ? depositAmount : total}
         onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
+        isSubmitting={isCreating || isChecking}
         disabled={!canSubmit}
         submitLabel={
           isInstant
             ? (language === 'ru' ? `Оплатить депозит ฿${depositAmount.toLocaleString()}` : `Pay Deposit ฿${depositAmount.toLocaleString()}`)
-            : (language === 'ru' ? 'Отправить заявку' : 'Send Request')
+            : (language === 'ru' ? 'Отправить заявку' : 'Submit Request')
         }
         hint={
           isInstant
-            ? (language === 'ru' ? '🔒 Оплата депозита — остаток при посадке' : '🔒 Deposit payment — balance at boarding')
-            : (language === 'ru' ? '📋 Заявка бесплатна — депозит после подтверждения' : '📋 Free request — deposit after confirmation')
+            ? (language === 'ru' ? '⚡ Мгновенное подтверждение' : '⚡ Instant confirmation')
+            : (language === 'ru' ? '📋 Менеджер myUNO свяжется с вами' : '📋 A myUNO manager will contact you')
         }
       />
     </AppLayout>

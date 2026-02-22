@@ -19,6 +19,7 @@ export type AvailabilityVertical =
   | 'tour' 
   | 'property' 
   | 'service' 
+  | 'transport'
   | 'beauty' 
   | 'cleaning' 
   | 'medical' 

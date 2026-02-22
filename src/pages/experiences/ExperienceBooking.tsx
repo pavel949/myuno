@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Users, Clock, CreditCard, AlertTriangle } from 'lucide-react';
+import { Calendar, Users, Clock, CreditCard, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useExperience, formatDuration } from '@/hooks/useExperiences';
-import { useBooking } from '@/hooks/useBooking';
+import { useOrders } from '@/hooks/useOrders';
+import { useAvailabilityCheck } from '@/hooks/useAvailabilityCheck';
 import { 
   BookingStepProgress, 
   BookingContactForm, 
@@ -23,12 +26,15 @@ import {
 } from '@/components/booking';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
   const { experience, isLoading } = useExperience(id);
-  const { createBooking, isSubmitting } = useBooking();
+  const { createOrder, isCreating } = useOrders();
+  const { checkTourAvailability, isChecking } = useAvailabilityCheck();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   
@@ -48,8 +54,16 @@ export default function ExperienceBooking() {
     success: boolean;
     bookingId?: string;
   } | null>(null);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
-  if (isLoading) {
+  // Auth redirect
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { state: { from: `/experiences/${id}/book` } });
+    }
+  }, [authLoading, user, navigate, id]);
+
+  if (isLoading || authLoading) {
     return (
       <MiniAppLayout title="" fallbackPath={`/experiences/${id}`} showHero={false} showFilter={false} showCategories={false}>
         <div className="space-y-4 animate-pulse">
@@ -58,6 +72,10 @@ export default function ExperienceBooking() {
         </div>
       </MiniAppLayout>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   if (!experience) {
@@ -135,32 +153,54 @@ export default function ExperienceBooking() {
     const [hours, minutes] = selectedTime.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
-    const experienceTitle = isRu ? experience.title_ru : experience.title_en;
+    // Check availability before booking
+    const availability = await checkTourAvailability(
+      experience.id,
+      scheduledAt,
+      participants,
+    );
 
-    const result = await createBooking({
-      booking_type: 'tour',
-      scheduled_at: scheduledAt,
+    if (!availability.available) {
+      setAvailabilityError(
+        isRu
+          ? `Недостаточно мест на выбранную дату.${availability.spots_remaining !== undefined ? ` Доступно: ${availability.spots_remaining}` : ''}`
+          : `Not enough spots for the selected date.${availability.spots_remaining !== undefined ? ` Available: ${availability.spots_remaining}` : ''}`
+      );
+      return;
+    }
+
+    setAvailabilityError(null);
+
+    const expTitle = isRu ? experience.title_ru : experience.title_en;
+
+    const endAt = new Date(scheduledAt);
+    endAt.setMinutes(endAt.getMinutes() + (experience.duration_minutes || 60));
+
+    const result = await createOrder({
+      order_type: 'tour',
+      start_at: scheduledAt.toISOString(),
+      end_at: endAt.toISOString(),
       total_amount: totalPrice,
       currency: experience.currency || 'THB',
-      notes: `Experience: ${experienceTitle}. Participants: ${participants}`,
-      serviceName: experienceTitle,
+      notes: `Experience: ${expTitle}. Participants: ${participants}`,
+      serviceName: expTitle,
       items: [{
+        item_name: expTitle,
         item_type: 'experience',
-        item_id: experience.id,
-        item_name: experienceTitle,
-        quantity: participants,
+        qty: participants,
         unit_price: experience.price || 0,
-        subtotal: totalPrice,
+        amount: totalPrice,
+        metadata: { source_id: experience.id },
       }],
       participants: [{
+        role: 'primary' as const,
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
       }],
       payment: {
         amount: totalPrice,
-        payment_method: paymentMethod === 'online' ? 'card' : paymentMethod,
+        method: paymentMethod === 'online' ? 'stripe' : paymentMethod === 'wallet' ? 'wallet' : 'cash',
       },
       metadata: {
         experience_id: experience.id,
@@ -169,10 +209,10 @@ export default function ExperienceBooking() {
       },
     });
 
-    if (result.success && result.booking_id) {
+    if (result.success && result.order_id) {
       setBookingResult({
         success: true,
-        bookingId: result.booking_id,
+        bookingId: result.order_id,
       });
     }
   };
@@ -208,6 +248,14 @@ export default function ExperienceBooking() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Availability Error */}
+        {availabilityError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{availabilityError}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Step Progress */}
         <BookingStepProgress steps={defaultBookingSteps} currentStep={currentStep} />
@@ -385,7 +433,7 @@ export default function ExperienceBooking() {
       <BookingBottomBar
         total={totalPrice}
         onSubmit={currentStep === 2 ? handleSubmit : handleNext}
-        isSubmitting={isSubmitting}
+        isSubmitting={isCreating || isChecking}
         disabled={currentStep === 0 && (!selectedDate || !selectedTime)}
         step={currentStep}
         totalSteps={3}

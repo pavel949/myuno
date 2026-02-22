@@ -28,7 +28,7 @@ import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type VerticalType = 
-  | 'yacht' | 'tour' | 'property' | 'service' 
+  | 'yacht' | 'tour' | 'property' | 'service' | 'transport'
   | 'beauty' | 'cleaning' | 'medical' | 'education' 
   | 'legal' | 'fitness' | 'babysitter' | 'pet_service'
   | 'restaurant';
