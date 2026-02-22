@@ -5,17 +5,20 @@ import {
   Anchor, Plane, Flower2, Home, Utensils, Compass,
   Stethoscope, ShoppingBag, MoreHorizontal, Scale, Shield,
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
-  Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp
+  Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
+  Users, BarChart3, ClipboardList, Lock
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
+import { useOwnerAccess } from '@/hooks/useOwnerAccess';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { prefetchRoute } from '@/lib/routePrefetch';
+import { toast } from 'sonner';
 
 
 interface QuickAction {
@@ -27,6 +30,8 @@ interface QuickAction {
   isUrgent?: boolean;
   /** Semantic tint color for icon background */
   tint?: string;
+  /** Requires verified MC with at least 1 property */
+  requiresFullAccess?: boolean;
 }
 
 const TOURIST_ACTIONS: QuickAction[] = [
@@ -52,11 +57,12 @@ const RESIDENT_ACTIONS: QuickAction[] = [
 
 const OWNER_ACTIONS: QuickAction[] = [
   { id: 'my-properties', icon: Key, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-emerald-500/15' },
-  { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar', tint: 'bg-blue-500/15' },
-  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', tint: 'bg-amber-500/15' },
-  { id: 'rental', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-violet-500/15' },
-  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-slate-500/15' },
+  { id: 'owner-crm', icon: Users, label: 'CRM', labelRu: 'CRM', path: '/owner/crm', tint: 'bg-indigo-500/15', requiresFullAccess: true },
+  { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar', tint: 'bg-blue-500/15', requiresFullAccess: true },
+  { id: 'owner-finance', icon: BarChart3, label: 'Finance', labelRu: 'Финансы', path: '/owner/finance', tint: 'bg-green-500/15', requiresFullAccess: true },
+  { id: 'owner-tasks', icon: ClipboardList, label: 'Tasks', labelRu: 'Задачи', path: '/owner/tasks', tint: 'bg-amber-500/15', requiresFullAccess: true },
   { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-cyan-500/15' },
+  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', tint: 'bg-orange-500/15' },
 ];
 
 const INVESTOR_ACTIONS: QuickAction[] = [
@@ -160,10 +166,16 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 }: QuickActionsGridProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const isRu = language === 'ru';
   
   const { personas } = useUserPersonas();
   const { activeRole, isLoading: roleLoading } = useUserContext();
+  const { hasFullAccess } = useOwnerAccess();
   const queryClient = useQueryClient();
+
+  const isOwnerPersona = useMemo(() => {
+    return personas.includes('property_owner') || activeRole === 'owner';
+  }, [personas, activeRole]);
 
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
@@ -186,8 +198,20 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
     const settings = getFeedbackSettings();
     if (settings.hapticEnabled) triggerHaptic(action.isUrgent ? 'medium' : 'light');
     if (settings.soundEnabled) playSound('click');
+
+    // Gate restricted actions behind verification
+    if (action.requiresFullAccess && !hasFullAccess) {
+      toast.error(
+        isRu 
+          ? 'Доступно после верификации УК и добавления объекта' 
+          : 'Available after MC verification and adding a property',
+        { duration: 4000 }
+      );
+      return;
+    }
+
     navigate(action.path);
-  }, [navigate]);
+  }, [navigate, hasFullAccess, isRu]);
 
   const handlePrefetch = useCallback((path: string) => {
     prefetchRoute(path, queryClient);
@@ -204,6 +228,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         const isMore = action.id === 'more';
         const tint = action.tint || 'bg-primary/[0.07]';
         const iconColor = ICON_TINT_COLORS[tint] || 'text-primary';
+        const isLocked = action.requiresFullAccess && !hasFullAccess;
         
         return (
           <button
@@ -215,11 +240,12 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               "relative flex flex-col items-center gap-1.5 p-1 rounded-2xl",
               "transition-all group active:scale-[0.95]",
               "lg:px-5 lg:py-3 lg:hover:bg-muted/40",
+              isLocked && "opacity-60",
             )}
           >
             {/* Icon container — saturated tint background */}
             <div className={cn(
-              "w-14 h-14 rounded-2xl flex items-center justify-center",
+              "relative w-14 h-14 rounded-2xl flex items-center justify-center",
               "transition-transform duration-200 group-hover:scale-105",
               "shadow-sm",
               tint,
@@ -233,6 +259,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
                 style={{ width: 26, height: 26 }}
                 strokeWidth={2}
               />
+              {isLocked && (
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center">
+                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                </div>
+              )}
             </div>
             
             <span className={cn(
