@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
 
 interface MaintenanceContextType {
   isMaintenanceMode: boolean;
@@ -26,7 +25,7 @@ const isSimulationMode = () => {
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
     const stored = localStorage.getItem(MAINTENANCE_KEY);
-    return stored === null ? false : stored === 'true';
+    return stored === null ? true : stored === 'true';
   });
 
   const [canBypass, setCanBypass] = useState(() => {
