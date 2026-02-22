@@ -315,6 +315,11 @@ export function useOrders() {
           scheduled_at: startAt,
           notes: input.notes,
           provider_name: input.providerName,
+          payment_method: input.payment?.method || 'cash',
+          addresses: input.addresses?.map(a => ({
+            type: a.address_type,
+            address: a.address_text,
+          })),
         },
       }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
