@@ -87,7 +87,7 @@ export default function PropertyManage() {
         bedrooms: property.bedrooms || 1,
         bathrooms: property.bathrooms || 1,
         area_sqm: property.area_sqm,
-        description: property.description || '',
+        description: property.description_en || '',
         description_ru: property.description_ru || '',
         highlights: property.highlights || [],
         address: property.address || '',

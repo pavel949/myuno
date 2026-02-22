@@ -43,7 +43,7 @@ export interface OwnerProperty extends BaseProperty {
   provider_id?: string;
   title_en?: string;
   title_ru?: string;
-  description?: string;
+  description_en?: string;
   description_ru?: string;
   management_type: string;
   is_rented?: boolean;
