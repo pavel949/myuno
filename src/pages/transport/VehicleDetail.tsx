@@ -316,9 +316,9 @@ export default function VehicleDetail() {
             <div className="p-4 rounded-2xl bg-muted/50 border border-border/50">
               <h3 className="font-semibold text-sm mb-2">{isRu ? 'Часто задаваемые вопросы' : 'FAQ'}</h3>
               <div className="space-y-2">
-                <FaqItem q={isRu ? 'Нужны ли международные права?' : 'Do I need an international license?'} />
-                <FaqItem q={isRu ? 'Что включено в страховку?' : 'What does the insurance cover?'} />
-                <FaqItem q={isRu ? 'Как происходит доставка?' : 'How does delivery work?'} />
+                <FaqItem q={isRu ? 'Нужны ли международные права?' : 'Do I need an international license?'} a={isRu ? 'Для аренды автомобиля или скутера на Пхукете рекомендуется иметь международное водительское удостоверение (МВУ). Полиция может проверить документы.' : 'An International Driving Permit (IDP) is recommended for renting cars or scooters in Phuket. Police may check your documents.'} />
+                <FaqItem q={isRu ? 'Что включено в страховку?' : 'What does the insurance cover?'} a={isRu ? 'Базовая страховка покрывает ущерб третьим лицам. Полная страховка (CDW) доступна за дополнительную плату и покрывает повреждения арендованного транспорта.' : 'Basic insurance covers third-party damage. Full coverage (CDW) is available for an extra fee and covers damage to the rented vehicle.'} />
+                <FaqItem q={isRu ? 'Как происходит доставка?' : 'How does delivery work?'} a={isRu ? 'Мы доставим транспорт к вашему отелю или вилле бесплатно в пределах основных районов Пхукета. Доставка занимает 30–60 минут.' : 'We deliver the vehicle to your hotel or villa for free within main Phuket areas. Delivery takes 30–60 minutes.'} />
               </div>
             </div>
           </div>
@@ -407,11 +407,20 @@ function TermRow({ icon: Icon, text }: { icon: typeof Check; text: string }) {
   );
 }
 
-function FaqItem({ q }: { q: string }) {
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors text-left">
-      <span className="text-sm">{q}</span>
-      <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+    <button
+      className="w-full flex flex-col p-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+      onClick={() => setOpen(!open)}
+    >
+      <div className="flex items-center justify-between w-full">
+        <span className="text-sm font-medium">{q}</span>
+        <ChevronRight className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
+      </div>
+      {open && (
+        <span className="text-xs text-muted-foreground mt-2 leading-relaxed">{a}</span>
+      )}
     </button>
   );
 }
