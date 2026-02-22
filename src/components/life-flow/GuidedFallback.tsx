@@ -37,8 +37,8 @@ export const GuidedFallback = memo(function GuidedFallback({
 
         <h3 className="text-lg font-semibold mb-2">
           {isRussian 
-            ? 'Подбираем лучшие варианты' 
-            : 'Curating the Best Options'}
+            ? 'Подбираем подходящие варианты' 
+            : 'Curating Great Options'}
         </h3>
         <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
           {isRussian
@@ -65,7 +65,7 @@ export const GuidedFallback = memo(function GuidedFallback({
               {isRussian ? 'Написать консьержу' : 'Chat with Concierge'}
             </p>
             <p className="text-xs opacity-80">
-              {isRussian ? 'Отвечаем в течение 5 минут' : 'We respond within 5 minutes'}
+              {isRussian ? 'Отвечаем в течение 15 минут' : 'We respond within 15 minutes'}
             </p>
           </div>
         </button>

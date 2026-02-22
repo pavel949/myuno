@@ -54,8 +54,8 @@ const contextContent: Record<InsuranceContext, {
   },
   arrival: {
     icon: Shield,
-    title_ru: 'Ещё не оформили страховку?',
-    title_en: 'Still uninsured?',
+    title_ru: 'Оформите страховку на месте',
+    title_en: 'Secure your stay with insurance',
     body_ru: 'Вы уже на месте — но страховку ещё можно оформить. Через myUNO — быстро, и мы поможем разобраться на месте.',
     body_en: 'You\'re already here — but you can still get covered. Through myUNO — fast, and we\'ll help you navigate locally.',
     cta_ru: 'Оформить сейчас',

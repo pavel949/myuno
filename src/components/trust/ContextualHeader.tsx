@@ -61,8 +61,26 @@ const CONTEXTUAL_MESSAGES: Record<string, Record<string, { en: string; ru: strin
   },
   leisure: {
     default: {
-      en: 'Good choices if you value experience and comfort',
-      ru: 'Хороший выбор, если цените впечатления и комфорт',
+      en: 'Tested by active residents — reliable for leisure',
+      ru: 'Проверено активными жителями — надёжно для отдыха',
+    },
+  },
+  digital_nomad: {
+    default: {
+      en: 'Popular among remote workers on the island',
+      ru: 'Популярно среди удалёнщиков на острове',
+    },
+  },
+  education: {
+    default: {
+      en: 'Reviewed by families with school-age children',
+      ru: 'Проверено семьями со школьниками',
+    },
+  },
+  retirement: {
+    default: {
+      en: 'Comfortable options for long-term residents',
+      ru: 'Комфортные варианты для постоянных жителей',
     },
   },
   property: {

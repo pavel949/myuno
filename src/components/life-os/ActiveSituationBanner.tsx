@@ -42,7 +42,7 @@ export const ActiveSituationBanner = memo(function ActiveSituationBanner() {
 
       {/* Change */}
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/discover')}
         className="text-muted-foreground hover:text-foreground text-[11px] shrink-0 flex items-center gap-0.5"
       >
         {isRu ? 'Сменить' : 'Change'}
