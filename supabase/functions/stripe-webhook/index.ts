@@ -632,6 +632,190 @@ Deno.serve(async (req) => {
       }
     }
 
+    // =====================================================
+    // HANDLE: charge.refunded
+    // =====================================================
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object as Stripe.Charge;
+      logStep("Processing charge.refunded", { chargeId: redactId(charge.id) });
+
+      const orderId = charge.metadata?.order_id;
+      const bookingId = charge.metadata?.booking_id;
+      const refundedAmount = (charge.amount_refunded || 0) / 100;
+      const currency = (charge.currency || 'thb').toUpperCase();
+      const isFullRefund = charge.refunded === true;
+
+      if (orderId) {
+        // Idempotency: check if already refunded
+        const { data: order } = await supabaseAdmin
+          .from('orders')
+          .select('status, customer_user_id, total_amount, currency')
+          .eq('id', orderId)
+          .single();
+
+        if (order && order.status !== 'refunded') {
+          const newStatus = isFullRefund ? 'refunded' : order.status;
+          await supabaseAdmin.from('orders').update({ status: newStatus }).eq('id', orderId);
+
+          await supabaseAdmin.from('order_status_history').insert({
+            order_id: orderId,
+            from_status: order.status,
+            to_status: newStatus,
+            reason: `Stripe refund: ${refundedAmount} ${currency}${isFullRefund ? ' (full)' : ' (partial)'}`,
+          });
+
+          // Update payment_intent
+          await supabaseAdmin
+            .from('payment_intents')
+            .update({ status: isFullRefund ? 'refunded' : 'partially_refunded' })
+            .eq('order_id', orderId)
+            .eq('method', 'stripe');
+
+          // Notification
+          if (order.customer_user_id) {
+            await supabaseAdmin.from('notifications').insert({
+              user_id: order.customer_user_id,
+              title: isFullRefund ? 'Refund Processed' : 'Partial Refund Processed',
+              body: `A refund of ${refundedAmount} ${currency} has been processed for your order.`,
+              type: 'payment',
+              data: { order_id: orderId, refund_amount: refundedAmount, is_full: isFullRefund },
+            });
+
+            // Send refund email
+            try {
+              await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                },
+                body: JSON.stringify({
+                  template: 'refund-processed',
+                  to: null, // will be resolved by user_id
+                  user_id: order.customer_user_id,
+                  data: { orderNumber: orderId.slice(0, 8), amount: refundedAmount, currency },
+                }),
+              });
+            } catch (e) {
+              logStep("WARN", `Refund email failed: ${e}`);
+            }
+          }
+          logStep("Refund processed", { orderId, isFullRefund });
+        }
+      }
+
+      if (bookingId) {
+        const { data: booking } = await supabaseAdmin
+          .from('bookings')
+          .select('status, user_id')
+          .eq('id', bookingId)
+          .single();
+
+        if (booking && booking.status !== 'refunded') {
+          await supabaseAdmin.from('bookings').update({ status: isFullRefund ? 'refunded' : booking.status }).eq('id', bookingId);
+          await supabaseAdmin.from('booking_payments').update({ status: 'refunded' }).eq('booking_id', bookingId);
+
+          if (booking.user_id) {
+            await supabaseAdmin.from('notifications').insert({
+              user_id: booking.user_id,
+              title: 'Refund Processed',
+              body: `A refund of ${refundedAmount} ${currency} has been processed.`,
+              type: 'payment',
+              data: { booking_id: bookingId, refund_amount: refundedAmount },
+            });
+          }
+          logStep("Booking refund processed", { bookingId, isFullRefund });
+        }
+      }
+    }
+
+    // =====================================================
+    // HANDLE: charge.dispute.created
+    // =====================================================
+    if (event.type === "charge.dispute.created") {
+      const dispute = event.data.object as Stripe.Dispute;
+      logStep("Processing charge.dispute.created", { disputeId: redactId(dispute.id) });
+
+      const charge = dispute.charge as string;
+      const amount = (dispute.amount || 0) / 100;
+      const reason = dispute.reason || 'unknown';
+
+      // Try to find the order via payment_intent
+      const paymentIntentId = typeof dispute.payment_intent === 'string' ? dispute.payment_intent : null;
+      if (paymentIntentId) {
+        const { data: pi } = await supabaseAdmin
+          .from('payment_intents')
+          .select('order_id')
+          .eq('provider_ref', paymentIntentId)
+          .maybeSingle();
+
+        if (pi?.order_id) {
+          await supabaseAdmin.from('orders').update({ status: 'disputed' }).eq('id', pi.order_id);
+          await supabaseAdmin.from('order_status_history').insert({
+            order_id: pi.order_id,
+            from_status: 'confirmed',
+            to_status: 'disputed',
+            reason: `Stripe dispute: ${reason}. Amount: ${amount}. Charge: ${charge}`,
+          });
+
+          // Notify admins via admin_audit_logs
+          await supabaseAdmin.from('admin_audit_logs').insert({
+            admin_id: '00000000-0000-0000-0000-000000000000',
+            action: 'stripe_dispute_created',
+            entity_type: 'order',
+            entity_id: pi.order_id,
+            new_data: { dispute_id: dispute.id, amount, reason, charge },
+          });
+
+          logStep("Dispute recorded for order", { orderId: pi.order_id, reason });
+        }
+      }
+    }
+
+    // =====================================================
+    // HANDLE: checkout.session.expired
+    // =====================================================
+    if (event.type === "checkout.session.expired") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      logStep("Processing checkout.session.expired", { sessionId: redactId(session.id) });
+
+      const orderId = session.metadata?.order_id;
+      if (orderId) {
+        const { data: order } = await supabaseAdmin
+          .from('orders')
+          .select('status, customer_user_id')
+          .eq('id', orderId)
+          .single();
+
+        if (order && order.status === 'pending') {
+          await supabaseAdmin.from('orders').update({ status: 'expired' }).eq('id', orderId);
+
+          await supabaseAdmin.from('order_status_history').insert({
+            order_id: orderId,
+            from_status: 'pending',
+            to_status: 'expired',
+            reason: 'Checkout session expired without payment',
+          });
+
+          await supabaseAdmin.from('payment_intents')
+            .update({ status: 'expired' })
+            .eq('order_id', orderId)
+            .eq('method', 'stripe');
+
+          if (order.customer_user_id) {
+            await supabaseAdmin.from('notifications').insert({
+              user_id: order.customer_user_id,
+              title: 'Payment Session Expired',
+              body: 'Your checkout session has expired. Please try again.',
+              type: 'payment',
+              data: { order_id: orderId },
+            });
+          }
+          logStep("Order expired", { orderId });
+        }
+      }
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
