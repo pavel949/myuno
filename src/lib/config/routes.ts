@@ -113,8 +113,8 @@ export const APP_ROUTES = {
   // ── Events ──
   EVENTS: '/events',
   EVENT_DETAIL: (id: string) => `/events/${id}`,
-  EVENT_BOOKING: (id: string) => `/events/${id}/book`,
-  VENUE_DETAIL: (id: string) => `/events/venue/${id}`,
+  EVENT_BOOKING: (id: string) => `/events/booking/${id}`,
+  VENUE_DETAIL: (id: string) => `/venues/${id}`,
 
   // ── Education ──
   EDUCATION: '/education',
@@ -134,20 +134,20 @@ export const APP_ROUTES = {
   SERVICE_PROVIDER: (id: string) => `/services/provider/${id}`,
   SERVICE_BOOKING: (providerId: string) => `/services/booking/${providerId}`,
   SERVICES_MAP: '/services/map',
-  SERVICE_FUNCTION_ORDER: '/services/function-order',
-  SERVICE_ORDER_SUCCESS: '/services/order-success',
+  SERVICE_FUNCTION_ORDER: (functionId: string) => `/services/order/${functionId}`,
+  SERVICE_ORDER_SUCCESS: '/services/order/success',
 
   // ── Legal ──
   LEGAL: '/legal',
   LEGAL_PROVIDER: (id: string) => `/legal/provider/${id}`,
   LEGAL_BOOKING: (id: string) => `/legal/booking/${id}`,
   VISA_SERVICE: (id: string) => `/legal/visa/${id}`,
-  VISA_IMMIGRATION: '/legal/visa-immigration',
+  VISA_IMMIGRATION: '/visa',
 
   // ── Insurance ──
   INSURANCE: '/insurance',
   INSURANCE_DETAIL: (id: string) => `/insurance/${id}`,
-  INSURANCE_QUOTE: '/insurance/quote',
+  INSURANCE_QUOTE: (id: string) => `/insurance/${id}/quote`,
   INSURANCE_PLAN: (id: string) => `/insurance/plan/${id}`,
   INSURANCE_TRAVEL: '/insurance/travel',
 
