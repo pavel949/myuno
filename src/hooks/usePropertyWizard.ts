@@ -208,7 +208,7 @@ export function usePropertyWizard() {
         bedrooms: sourceProperty.bedrooms || 1,
         bathrooms: sourceProperty.bathrooms || 1,
         area_sqm: sourceProperty.area_sqm?.toString() || '',
-        description: sourceProperty.description || '',
+        description: sourceProperty.description_en || '',
         description_ru: sourceProperty.description_ru || '',
         cover_image: sourceProperty.cover_image || '',
         images: sourceProperty.images || [],

@@ -206,7 +206,7 @@ export function calculateListingHealthScore(property: OwnerProperty | null): Pro
   }
   
   // Description score (0-100)
-  const descLen = (property.description || '').length;
+  const descLen = (property.description_en || '').length;
   const descRuLen = (property.description_ru || '').length;
   
   if (descLen >= 500 && descRuLen >= 500) {

@@ -92,7 +92,7 @@ interface EditorFormData {
   area_sqm: string;
   management_type: string;
   is_rented: boolean;
-  description: string;
+  description_en: string;
   description_ru: string;
   highlights: string[];
   // Rooms
@@ -160,7 +160,7 @@ const DEFAULT_FORM_DATA: EditorFormData = {
   area_sqm: '',
   management_type: 'full',
   is_rented: false,
-  description: '',
+  description_en: '',
   description_ru: '',
   highlights: [],
   rooms: [],
@@ -238,7 +238,7 @@ export default function PropertyEditor() {
         area_sqm: property.area_sqm?.toString() || '',
         management_type: property.management_type || 'full',
         is_rented: property.is_rented || false,
-        description: property.description || '',
+        description_en: property.description_en || '',
         description_ru: property.description_ru || '',
         highlights: property.highlights || [],
         rooms: (property.rooms as unknown as Room[]) || [],
@@ -323,7 +323,7 @@ export default function PropertyEditor() {
         area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
         management_type: formData.management_type,
         is_rented: formData.is_rented,
-        description: formData.description,
+        description_en: formData.description_en,
         description_ru: formData.description_ru,
         highlights: formData.highlights,
         rooms: formData.rooms,
@@ -537,8 +537,8 @@ export default function PropertyEditor() {
                 <div className="space-y-2">
                   <Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
                   <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    value={formData.description_en}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                     placeholder="Describe your property..."
                     rows={4}
                   />
