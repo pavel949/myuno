@@ -404,7 +404,7 @@ export default function OffplanDetail() {
                 <Button 
                   variant="outline" 
                   className="w-full gap-2"
-                  onClick={() => navigate(`/developers/${developer.id}`)}
+                  onClick={() => navigate(`/property/developers/${developer.id}`)}
                 >
                   {isRu ? 'Все проекты застройщика' : 'All Developer Projects'}
                   <ExternalLink className="w-4 h-4" />

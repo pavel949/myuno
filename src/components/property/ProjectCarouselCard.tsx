@@ -32,7 +32,7 @@ export function ProjectCarouselCard({ project, className, onSelect, isSelected }
     if (onSelect) {
       onSelect(project.id);
     } else {
-      navigate(`/complexes?highlight=${project.id}`);
+      navigate(`/property/projects?highlight=${project.id}`);
     }
   };
 

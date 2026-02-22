@@ -34,7 +34,7 @@ export function InvestmentCard({
   const categoryIcon = category?.icon || '💼';
 
   const handleClick = () => {
-    navigate(`/invest/${project.id}`);
+    navigate(`/property/invest/${project.id}`);
   };
 
   if (variant === 'compact') {

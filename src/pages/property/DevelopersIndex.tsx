@@ -55,7 +55,7 @@ export default function DevelopersIndex() {
             {developers.map(dev => (
               <div
                 key={dev.id}
-                onClick={() => navigate(`/developers/${dev.id}`)}
+                onClick={() => navigate(`/property/developers/${dev.id}`)}
                 className={cn(
                   "rounded-xl border bg-card p-4 cursor-pointer",
                   "hover:border-primary/50 hover:shadow-md transition-all"
