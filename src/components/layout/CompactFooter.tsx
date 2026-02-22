@@ -50,6 +50,8 @@ export function CompactFooter() {
     { to: '/support', label: isRu ? 'Помощь' : 'Help' },
     { to: '/terms', label: isRu ? 'Условия' : 'Terms' },
     { to: '/privacy', label: isRu ? 'Конфиденциальность' : 'Privacy' },
+    { to: '/cookies', label: 'Cookie' },
+    { to: '/refund-policy', label: isRu ? 'Возвраты' : 'Refunds' },
   ];
 
   const socialLinks = [
