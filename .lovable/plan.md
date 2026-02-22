@@ -1,89 +1,88 @@
 
 
-# Аудит UX для управляющей компании (УК) в /owner
+# Audit: Booking Paths Across All Verticals
 
-## Обнаруженные проблемы
+## Summary of All Booking Flows
 
-### 1. Страница "Объекты" (/owner/properties) не показывает управляемые объекты
-**Критичность: Высокая**
-
-`OwnerProperties.tsx` использует `useOwnerProperties()`, который фильтрует только `owner_id = user.id`. УК не является владельцем объектов -- она управляет чужой недвижимостью. Значит, менеджер УК видит **пустой список**, хотя у него есть назначенные объекты.
-
-**Решение:** Заменить на `useMyProperties()` (уже существует и объединяет owned + managed) с визуальной индикацией источника (бейдж "Своё" / "В управлении").
-
----
-
-### 2. Финансы (/owner/financials) фильтруют только по owner_id
-**Критичность: Высокая**
-
-`OwnerFinancials.tsx` использует `useOwnerProperties()` для списка объектов и `owner_id` для запроса финансовых данных. УК не видит транзакции по управляемым объектам.
-
-**Решение:** Добавить в фильтр объекты из `useMyProperties()` (managed properties) и подтягивать финансовые данные по property_id для управляемых объектов.
+| Vertical | Route | Booking Engine | Status |
+|----------|-------|---------------|--------|
+| **Yachts** | `/yachts/:id/booking` | `useBooking` (deprecated) | Issues found |
+| **Experiences** | `/experiences/:id/book` | `useBooking` (deprecated) | Issues found |
+| **Transport (Rental)** | `/transport/booking/:id` | `useBooking` (deprecated) | Issues found |
+| **Transport (Transfer)** | `/transport/airport-transfer` | `useOrders` (correct) | OK |
+| **Property** | `/property/:id/inquiry` | `useOrders` (correct) | OK |
 
 ---
 
-### 3. KPI-виджет дашборда считает данные только по owner_id
-**Критичность: Высокая**
+## Issues Found
 
-`BusinessKPIWidget.tsx` запрашивает `property_financials`, `property_bookings`, `properties` только с `owner_id = user.id`. Менеджер УК видит нулевые Revenue, Expenses, Occupancy.
+### 1. Yacht and Experience bookings use deprecated `useBooking` hook
 
-**Решение:** Добавить параллельный запрос по управляемым объектам (через `property_manager_assignments`) и суммировать с данными owner.
+Both `YachtBooking.tsx` and `ExperienceBooking.tsx` still use the **deprecated** `useBooking()` hook (line 129: `@deprecated Use useOrders() instead`). `PropertyInquiry` and `AirportTransferBooking` already use the canonical `useOrders()`.
+
+**Impact:** Deprecated hook may diverge from canonical order lifecycle, missing fields like `start_at`/`end_at`, proper `order_type`, and atomic RPC.
+
+**Fix:** Migrate `YachtBooking` and `ExperienceBooking` from `useBooking().createBooking()` to `useOrders().createOrder()`, aligning the payload structure with the canonical `create_order_atomic` RPC.
+
+### 2. Yacht booking uses `booking_type: 'transport'` instead of `'yacht'`
+
+In `YachtBooking.tsx` line 204: `booking_type: 'transport'` with a comment "Maps to 'yacht' via metadata." This is fragile -- the order type should be explicit.
+
+**Fix:** Change to `order_type: 'yacht'` when migrating to `useOrders`.
+
+### 3. Transport rental availability check uses wrong vertical
+
+In `TransportBooking.tsx` line 89: `vertical: 'service'` with comment "Transport uses service-type availability check." The `AvailabilityVertical` type does not include `'transport'`, but using `'service'` is semantically incorrect and will not match transport-specific availability rules.
+
+**Fix:** Either add `'transport'` to `AvailabilityVertical` type and handle it in the RPC, or document that `'service'` is intentional for vehicle rentals.
+
+### 4. Experience booking lacks availability check
+
+`ExperienceBooking.tsx` does NOT call `useAvailabilityCheck` before submitting. A user could book a fully-booked tour slot.
+
+**Fix:** Add `checkAvailability()` call with `vertical: 'tour'` before submission in `handleSubmit`.
+
+### 5. Experience booking has no auth redirect
+
+Unlike Yacht and Transport bookings (which redirect unauthenticated users to `/auth`), `ExperienceBooking.tsx` has no auth guard. An unauthenticated user could reach the booking page and fail silently on submit.
+
+**Fix:** Add `useEffect` auth redirect matching Yacht/Transport pattern.
+
+### 6. Transport rental booking lacks `scheduled_at` ISO string conversion
+
+In `TransportBooking.tsx` line 185: `const scheduledAt = pickupDate;` -- passes a raw `Date` object. The `useBooking` hook expects `Date | string`, but `useOrders` expects ISO string. This should be normalized during migration.
 
 ---
 
-### 4. Bottom Nav не содержит ключевых разделов для УК
-**Критичность: Средняя**
+## What Works Well
 
-Мобильная навигация: Dashboard, Объекты, Календарь, Финансы, Команда. Для УК критичны: Воронка продаж (CRM), Операции, Контакты -- но они доступны только через длинное "Меню" в самом низу дашборда.
-
-**Решение:** Сделать bottom nav адаптивным к роли:
-- `property_manager`: Dashboard, Объекты, Календарь, Операции, Ещё (...)
-- `sales_agent`: Dashboard, Сделки, Контакты, Задачи, Ещё (...)
+- **Property** (`/property/:id/inquiry`): Full Airbnb-style flow with date range, guest count, price breakdown with weekly/monthly discounts, cancellation policy, Instant vs Request-to-Book, 10% deposit, uses canonical `useOrders()`.
+- **Airport Transfer** (`/transport/airport-transfer`): 3-step wizard, dynamic pricing, Stripe/cash/concierge advance, uses canonical `useOrders()`.
+- **Yacht Booking UI**: Good UX with charter type selection, experience add-ons, deposit logic, availability check.
 
 ---
 
-### 5. Sidebar не отражает полный функционал УК
-**Критичность: Средняя**
+## Proposed Fixes (in priority order)
 
-`OwnerSidebar.tsx` содержит только: Dashboard, Properties, Calendar, Sales Pipeline, Contacts, Financials, Team. Многие важные разделы (Operations, Staff, Inventory, Invoices, Reports, Management Terms) доступны только через меню дашборда.
+### Step 1: Migrate YachtBooking to useOrders
+- Replace `useBooking` with `useOrders`
+- Change `booking_type: 'transport'` to `order_type: 'yacht'`
+- Align payload with `createOrder` signature (items, participants, metadata)
+- Keep existing availability check logic
 
-**Решение:** Добавить в sidebar группу "Operations" с ключевыми пунктами: Operations, Staff, Inventory, Invoices, Reports.
+### Step 2: Migrate ExperienceBooking to useOrders
+- Replace `useBooking` with `useOrders`
+- Add auth redirect guard
+- Add availability check before submission
+- Align payload with `createOrder` signature
 
----
+### Step 3: Migrate TransportBooking to useOrders
+- Replace `useBooking` with `useOrders`
+- Fix availability vertical or document the `'service'` usage
+- Normalize date formats
 
-### 6. Нет "property_manager_assignments" при создании сервисных заявок и расходов
-**Критичность: Средняя**
+### Step 4: Add `'transport'` to AvailabilityVertical type
+- Update `src/types/availability.ts` to include `'transport'`
+- Update availability RPC if needed
 
-`ServiceRequest.tsx`, `QuickExpense.tsx` используют `useOwnerProperties()` для выбора объекта. Менеджер УК не видит управляемые объекты при создании уборки/расхода/заявки.
-
-**Решение:** Заменить на `useMyProperties()` во всех формах создания.
-
----
-
-## Технический план исправлений
-
-### Шаг 1: Обновить OwnerProperties для УК
-- Заменить `useOwnerProperties()` на `useMyProperties()`
-- Добавить бейдж "В управлении" / "Своё" на карточках
-- Показывать имя владельца для управляемых объектов
-
-### Шаг 2: Обновить BusinessKPIWidget
-- Получать список property_id из `useMyProperties()` или `useAssignedProperties()`
-- Фильтровать финансовые данные по массиву property_id (owned + managed)
-- Корректно считать occupancy по всему портфелю
-
-### Шаг 3: Обновить OwnerFinancials
-- Добавить управляемые объекты в фильтр по свойствам
-- Запрашивать финансовые данные по property_id (не только owner_id)
-
-### Шаг 4: Обновить формы создания (ServiceRequest, QuickExpense, QuickIncome, InspectionRequest)
-- Заменить `useOwnerProperties()` на `useMyProperties()` для выбора объекта
-
-### Шаг 5: Адаптивная мобильная навигация
-- Добавить в `OwnerMobileNav` зависимость от `useBusinessRole()`
-- Показывать role-specific вкладки (для PM: Operations вместо Team; для Sales: Deals вместо Calendar)
-
-### Шаг 6: Расширить Sidebar
-- Добавить группу "Operations" с пунктами: Operations, Invoices, Staff, Inventory, Reports
-- Перенести Management Terms в группу Operations
-
+These changes ensure all verticals use the same canonical order creation path (`create_order_atomic` RPC), consistent status lifecycle, and proper availability validation.
