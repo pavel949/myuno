@@ -4,7 +4,7 @@
  * Features:
  * - DateRangePickerCard with blocked dates
  * - Real vehicle data from DB (no demo fallback)
- * - Availability checking
+ * - Availability checking via 'transport' vertical
  * - Consistent UX with Property booking
  */
 
@@ -12,7 +12,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBooking } from "@/hooks/useBooking";
+import { useOrders } from "@/hooks/useOrders";
 import { useVehicle } from "@/hooks/useVehicles";
 import { useAvailabilityCheck } from "@/hooks/useAvailabilityCheck";
 import { useConciergeAdvance } from "@/hooks/useConciergeAdvance";
@@ -44,7 +44,7 @@ export default function TransportBooking() {
   const location = useLocation();
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
-  const { createBooking, isSubmitting } = useBooking();
+  const { createOrder, isCreating } = useOrders();
   const { checkAvailability, isChecking: checkingAvailability } = useAvailabilityCheck();
   const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: advanceProcessing, feePercent } = useConciergeAdvance();
   const { createCheckout, isProcessing: stripeProcessing } = useStripeUnifiedCheckout();
@@ -86,7 +86,7 @@ export default function TransportBooking() {
       
       setAvailabilityError(null);
       const result = await checkAvailability({
-        vertical: 'service', // Transport uses service-type availability check
+        vertical: 'transport',
         entityId: id,
         startDatetime: pickupDate,
         endDatetime: returnDate,
@@ -182,38 +182,40 @@ export default function TransportBooking() {
     if (!contactData.name || !contactData.phone) return;
     if (availabilityError) return;
 
-    const scheduledAt = pickupDate;
-    const endAt = returnDate || addDays(pickupDate, 1);
+    const scheduledAt = pickupDate.toISOString();
+    const endAt = (returnDate || addDays(pickupDate, 1)).toISOString();
 
-    const effectivePayment = paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod;
+    const effectivePaymentMethod = paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod;
+    const mappedPayment = effectivePaymentMethod === 'online' ? 'stripe' : effectivePaymentMethod === 'wallet' ? 'wallet' : 'cash';
 
-    const result = await createBooking({
-      booking_type: 'transport',
-      scheduled_at: scheduledAt,
+    const result = await createOrder({
+      order_type: 'vehicle',
+      start_at: scheduledAt,
+      end_at: endAt,
       total_amount: totalAmount,
       currency: 'THB',
       notes: `Rental: ${days} days. Return: ${returnDate ? format(returnDate, 'yyyy-MM-dd') : 'N/A'}`,
       items: [{
-        item_type: 'vehicle_rental',
-        item_id: id || 'vehicle',
         item_name: vehicleName,
-        quantity: days,
+        item_type: 'vehicle_rental',
+        qty: days,
         unit_price: pricePerDay,
-        subtotal: totalAmount,
+        amount: totalAmount,
+        metadata: { source_id: id },
       }],
       participants: [{
+        role: 'primary' as const,
         name: contactData.name,
         phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
       }],
       addresses: [{
-        address_type: 'pickup',
-        address: pickupLocation,
+        address_type: 'pickup' as const,
+        address_text: pickupLocation,
       }],
       payment: {
         amount: totalAmount,
-        payment_method: effectivePayment,
+        method: mappedPayment as 'cash' | 'wallet' | 'stripe' | 'bank_transfer',
       },
       metadata: {
         vehicle_id: id,
@@ -227,12 +229,12 @@ export default function TransportBooking() {
       openWhatsAppOnCash: paymentMethod === 'cash',
     });
 
-    if (result.success && result.booking_id) {
+    if (result.success && result.order_id) {
       // Save transport-specific details
       const { data: orderItems } = await supabase
         .from('order_items')
         .select('id')
-        .eq('order_id', result.booking_id)
+        .eq('order_id', result.order_id)
         .eq('item_type', 'vehicle_rental')
         .limit(1);
 
@@ -256,7 +258,7 @@ export default function TransportBooking() {
       // Handle payment method routing
       if (paymentMethod === 'online') {
         await createCheckout('create-checkout', {
-          order_id: result.booking_id,
+          order_id: result.order_id,
           order_type: 'transport',
           amount: totalAmount,
           currency: 'THB',
@@ -267,8 +269,8 @@ export default function TransportBooking() {
 
       if (paymentMethod === 'concierge_advance') {
         await createAdvanceRequest({
-          orderId: result.booking_id,
-          orderNumber: result.booking_id.slice(0, 8).toUpperCase(),
+          orderId: result.order_id,
+          orderNumber: result.order_id.slice(0, 8).toUpperCase(),
           orderType: 'transport',
           baseAmount: totalAmount,
           currency: 'THB',
@@ -281,14 +283,14 @@ export default function TransportBooking() {
           },
         });
         navigateToAdvanceRequested(
-          result.booking_id.slice(0, 8).toUpperCase(),
+          result.order_id.slice(0, 8).toUpperCase(),
           totalAmount,
           'transport'
         );
         return;
       }
 
-      setBookingResult({ success: true, bookingId: result.booking_id });
+      setBookingResult({ success: true, bookingId: result.order_id });
     }
   };
 
@@ -396,7 +398,7 @@ export default function TransportBooking() {
         <BookingBottomBar
           total={paymentMethod === 'concierge_advance' ? calculateFee(totalAmount).totalWithFee : totalAmount}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting || checkingAvailability || advanceProcessing || stripeProcessing}
+          isSubmitting={isCreating || checkingAvailability || advanceProcessing || stripeProcessing}
           disabled={!isFormValid}
           submitLabel={
             paymentMethod === 'online'
