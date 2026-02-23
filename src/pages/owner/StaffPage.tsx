@@ -51,6 +51,9 @@ import {
   useCreateStaffMember,
   useUpdateStaffMember,
   useDeactivateStaffMember,
+  useStaffPropertyAssignments,
+  useAssignStaffToProperty,
+  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -58,6 +61,7 @@ import {
   StaffRole,
   PayType,
 } from '@/hooks/useStaffMembers';
+import { useMyProperties } from '@/hooks/useMyProperties';
 
 const ROLE_ICONS: Record<StaffRole, React.ReactNode> = {
   cleaner: <Sparkles className="h-4 w-4" />,
@@ -124,6 +128,9 @@ export default function StaffPage() {
   const createMutation = useCreateStaffMember();
   const updateMutation = useUpdateStaffMember();
   const deactivateMutation = useDeactivateStaffMember();
+  const { allProperties } = useMyProperties();
+  const assignStaff = useAssignStaffToProperty();
+  const removeAssignment = useRemoveStaffAssignment();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
@@ -426,6 +433,17 @@ export default function StaffPage() {
               />
             </div>
 
+            {/* Property Assignments (only in edit mode) */}
+            {editing && allProperties.length > 0 && (
+              <StaffPropertyAssignments
+                staffId={editing.id}
+                properties={allProperties}
+                isRu={isRu}
+                onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
+                onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
+              />
+            )}
+
             <Button className="w-full" onClick={handleSave} disabled={isBusy || !form.name.trim()}>
               {isBusy
                 ? t('Saving...', 'Сохранение...')
@@ -466,5 +484,71 @@ export default function StaffPage() {
         </AlertDialogContent>
       </AlertDialog>
     </PageContainer>
+  );
+}
+
+/** Inline component for property assignments */
+function StaffPropertyAssignments({
+  staffId,
+  properties,
+  isRu,
+  onAssign,
+  onRemove,
+}: {
+  staffId: string;
+  properties: { property_id: string; title: string; title_ru: string }[];
+  isRu: boolean;
+  onAssign: (propertyId: string) => void;
+  onRemove: (assignmentId: string) => void;
+}) {
+  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
+  const assignedIds = new Set((assignments || []).map(a => a.property_id));
+  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
+
+  return (
+    <div className="space-y-2">
+      <Label>{isRu ? 'Назначен на объекты' : 'Assigned Properties'}</Label>
+      
+      {isLoading ? (
+        <Skeleton className="h-8 w-full" />
+      ) : (
+        <>
+          {(assignments || []).length > 0 && (
+            <div className="space-y-1.5">
+              {(assignments || []).map(a => {
+                const prop = properties.find(p => p.property_id === a.property_id);
+                return (
+                  <div key={a.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50">
+                    <span className="text-sm">{prop ? (isRu ? prop.title_ru : prop.title) : a.property_id.slice(0, 8)}</span>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => onRemove(a.id)}>
+                      {isRu ? 'Убрать' : 'Remove'}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {unassigned.length > 0 && (
+            <Select onValueChange={onAssign}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
+              </SelectTrigger>
+              <SelectContent>
+                {unassigned.map(p => (
+                  <SelectItem key={p.property_id} value={p.property_id}>
+                    {isRu ? p.title_ru : p.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {(assignments || []).length === 0 && unassigned.length === 0 && (
+            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
+          )}
+        </>
+      )}
+    </div>
   );
 }

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startOfDay, endOfDay, addDays, format, isToday } from 'date-fns';
@@ -63,6 +64,8 @@ export function useOperationalTasks(options?: {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const { allProperties, isLoading: propsLoading } = useMyProperties();
+  const allPropertyIds = useMemo(() => allProperties.map(p => p.property_id), [allProperties]);
   
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
@@ -73,19 +76,20 @@ export function useOperationalTasks(options?: {
     : undefined;
   const statusArr = options?.status ? (Array.isArray(options.status) ? options.status : [options.status]).sort().join(',') : undefined;
   const typeArr = options?.taskType ? (Array.isArray(options.taskType) ? options.taskType : [options.taskType]).sort().join(',') : undefined;
+  const propertyIdsKey = allPropertyIds.join(',');
 
-  const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr];
+  const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr, propertyIdsKey];
   
-  const { data: tasks = [], isLoading, refetch } = useQuery({
+  const { data: tasks = [], isLoading: tasksLoading, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id || allPropertyIds.length === 0) return [];
 
       let query = supabase
         .from('property_operational_tasks')
         .select(`
           *,
-          property:owner_properties!inner (
+          property:owner_properties (
             id,
             title,
             title_ru,
@@ -99,7 +103,7 @@ export function useOperationalTasks(options?: {
             check_out
           )
         `)
-        .eq('property.owner_id', user.id)
+        .in('property_id', allPropertyIds)
         .order('scheduled_date', { ascending: true })
         .order('priority', { ascending: false });
 
@@ -235,7 +239,7 @@ export function useOperationalTasks(options?: {
     tasks,
     todayTasks,
     tasksByType,
-    isLoading,
+    isLoading: tasksLoading || propsLoading,
     refetch,
     createTask,
     updateTaskStatus,

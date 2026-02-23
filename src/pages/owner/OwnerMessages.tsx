@@ -241,8 +241,8 @@ const ChatCard: React.FC<ChatCardProps> = ({ chat, isRu, onClick }) => {
               <AvatarImage src={chat.coverImage} />
             ) : null}
             <AvatarFallback className={cn(
-              chat.type === 'booking' ? 'bg-blue-500' : 'bg-primary',
-              'text-white'
+              chat.type === 'booking' ? 'bg-primary/80' : 'bg-primary',
+              'text-primary-foreground'
             )}>
               {chat.type === 'booking' ? (
                 <User className="h-5 w-5" />

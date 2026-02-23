@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMyCompanyId } from '@/hooks/useAgentDeals';
+import { useMyCompanyId, useCompanyMembers } from '@/hooks/useAgentDeals';
 import { useCrmTasks, useCreateCrmTask, useUpdateCrmTask, useDeleteCrmTask, CrmTask } from '@/hooks/useCrmTasks';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,8 @@ export default function CrmTasksPage() {
   const { data: company } = useMyCompanyId();
   const companyId = company?.company_id;
   const { data: tasks, isLoading } = useCrmTasks({ status: statusFilter === 'all' ? undefined : statusFilter });
+  const { data: members } = useCompanyMembers(companyId);
+  const { allProperties } = useMyProperties();
   const createTask = useCreateCrmTask();
   const updateTask = useUpdateCrmTask();
   const deleteTask = useDeleteCrmTask();
@@ -46,6 +49,8 @@ export default function CrmTasksPage() {
   const [taskType, setTaskType] = useState('follow_up');
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate] = useState('');
+  const [assignedTo, setAssignedTo] = useState<string>('self');
+  const [propertyId, setPropertyId] = useState<string>('none');
 
   const handleCreate = async () => {
     if (!companyId || !user) return;
@@ -61,12 +66,15 @@ export default function CrmTasksPage() {
         priority,
         due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
         created_by: user.id,
-        assigned_to: user.id,
+        assigned_to: assignedTo === 'self' ? user.id : assignedTo,
+        property_id: propertyId !== 'none' ? propertyId : undefined,
       });
       toast.success(isRu ? 'Задача создана' : 'Task created');
       setSheetOpen(false);
       setTitle('');
       setDueDate('');
+      setAssignedTo('self');
+      setPropertyId('none');
     } catch (e: any) {
       toast.error(e.message);
     }
@@ -171,6 +179,38 @@ export default function CrmTasksPage() {
                   <Input type="datetime-local" value={dueDate} onChange={e => setDueDate(e.target.value)} />
                 </div>
               </div>
+
+              {/* Assign to team member */}
+              {members && members.length > 1 && (
+                <div>
+                  <Label>{isRu ? 'Назначить' : 'Assign to'}</Label>
+                  <Select value={assignedTo} onValueChange={setAssignedTo}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="self">{isRu ? 'Себе' : 'Myself'}</SelectItem>
+                      {members.filter(m => m.user_id !== user?.id).map(m => (
+                        <SelectItem key={m.user_id} value={m.user_id}>{m.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Link to property */}
+              {allProperties.length > 0 && (
+                <div>
+                  <Label>{isRu ? 'Объект' : 'Property'}</Label>
+                  <Select value={propertyId} onValueChange={setPropertyId}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{isRu ? 'Без объекта' : 'No property'}</SelectItem>
+                      {allProperties.map(p => (
+                        <SelectItem key={p.property_id} value={p.property_id}>{isRu ? p.title_ru : p.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <Button className="w-full" onClick={handleCreate} disabled={createTask.isPending}>
                 {isRu ? 'Создать задачу' : 'Create Task'}

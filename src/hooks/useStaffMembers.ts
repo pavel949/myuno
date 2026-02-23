@@ -48,6 +48,7 @@ export function useStaffMembers() {
       const { data, error } = await db
         .from('staff_members')
         .select('*')
+        .eq('owner_id', user!.id)
         .eq('is_active', true)
         .order('name');
       if (error) throw error;
@@ -66,6 +67,7 @@ export function useAllStaffMembers() {
       const { data, error } = await db
         .from('staff_members')
         .select('*')
+        .eq('owner_id', user!.id)
         .order('name');
       if (error) throw error;
       return (data || []) as StaffMember[];
