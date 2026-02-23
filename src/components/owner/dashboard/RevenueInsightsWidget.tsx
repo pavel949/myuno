@@ -34,12 +34,22 @@ export function RevenueInsightsWidget() {
   const qc = useQueryClient();
   const isRu = language === 'ru';
 
+  // First get user's property IDs, then fetch recommendations for those
   const { data: recommendations, isLoading } = useQuery({
     queryKey: ['pricing-recommendations', user?.id],
     queryFn: async () => {
+      // Get properties owned by this user
+      const { data: props } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user!.id);
+      const propIds = (props || []).map((p: any) => p.id);
+      if (propIds.length === 0) return [];
+
       const { data, error } = await supabase
         .from('pricing_recommendations')
         .select('*')
+        .in('property_id', propIds)
         .eq('status', 'pending')
         .order('confidence', { ascending: false })
         .limit(3);

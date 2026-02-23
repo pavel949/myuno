@@ -151,6 +151,6 @@ async function insertStaticOffers(supabase: any, bookingId: string, stayDays: nu
   await supabase.from("booking_cross_sell_offers").insert(offers);
 
   return new Response(JSON.stringify({ offers }), {
-    headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
