@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCrmTasks } from '@/hooks/useCrmTasks';
 import { useUpdateCrmTask } from '@/hooks/useCrmTasks';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ListTodo, ChevronRight } from 'lucide-react';
 import { isPast, isToday } from 'date-fns';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { getCrmTaskConfig } from '@/config/crmTaskTypes';
 
 export function CrmTasksWidget() {
   const { language } = useLanguage();
@@ -28,7 +29,7 @@ export function CrmTasksWidget() {
   const handleComplete = (id: string) => {
     updateTask.mutate(
       { id, status: 'completed', completed_at: new Date().toISOString() },
-      { onSuccess: () => toast.success(isRu ? '✓' : '✓') }
+      { onSuccess: () => toast.success('✓') }
     );
   };
 
@@ -52,9 +53,17 @@ export function CrmTasksWidget() {
       <div className="space-y-1.5">
         {urgentTasks.map(task => {
           const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
+          const config = getCrmTaskConfig(task.task_type);
+          const TypeIcon = config.icon;
           return (
-            <div key={task.id} className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg ${isOverdue ? 'bg-red-50 dark:bg-red-950/20' : 'bg-muted/50'}`}>
+            <div key={task.id} className={cn(
+              "flex items-center gap-2.5 py-1.5 px-2 rounded-lg",
+              isOverdue ? 'bg-destructive/5' : 'bg-muted/50'
+            )}>
               <Checkbox onCheckedChange={() => handleComplete(task.id)} className="flex-shrink-0" />
+              <div className={cn("w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0", config.bgColor)}>
+                <TypeIcon className={cn("h-3.5 w-3.5", config.color)} />
+              </div>
               <span className="text-sm flex-1 truncate">{task.title}</span>
               {isOverdue && (
                 <Badge variant="destructive" className="text-[10px] px-1 py-0">!</Badge>
