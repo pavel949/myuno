@@ -18,6 +18,7 @@ export interface CrmContact {
   source: string | null;
   contact_type: string | null;
   company_name: string | null;
+  job_title: string | null;
   budget_min: number | null;
   budget_max: number | null;
   currency: string | null;
@@ -29,11 +30,21 @@ export interface CrmContact {
   avatar_url: string | null;
   is_archived: boolean;
   created_by: string | null;
+  birthday: string | null;
+  family_info: string | null;
+  interests: string[] | null;
+  scoring: number | null;
   created_at: string;
   updated_at: string;
 }
 
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at'>;
+export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring'> & {
+  job_title?: string | null;
+  birthday?: string | null;
+  family_info?: string | null;
+  interests?: string[] | null;
+  scoring?: number | null;
+};
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
 export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent'] as const;

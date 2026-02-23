@@ -3423,6 +3423,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bedrooms_min: number | null
+          birthday: string | null
           budget_max: number | null
           budget_min: number | null
           company_id: string
@@ -3432,9 +3433,12 @@ export type Database = {
           created_by: string | null
           currency: string | null
           email: string | null
+          family_info: string | null
           first_name: string
           id: string
+          interests: string[] | null
           is_archived: boolean
+          job_title: string | null
           language: string | null
           last_name: string
           line_id: string | null
@@ -3444,6 +3448,7 @@ export type Database = {
           phone2: string | null
           preferred_districts: string[] | null
           preferred_types: string[] | null
+          scoring: number | null
           source: string | null
           tags: string[] | null
           telegram: string | null
@@ -3453,6 +3458,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bedrooms_min?: number | null
+          birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
           company_id: string
@@ -3462,9 +3468,12 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           email?: string | null
+          family_info?: string | null
           first_name?: string
           id?: string
+          interests?: string[] | null
           is_archived?: boolean
+          job_title?: string | null
           language?: string | null
           last_name?: string
           line_id?: string | null
@@ -3474,6 +3483,7 @@ export type Database = {
           phone2?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          scoring?: number | null
           source?: string | null
           tags?: string[] | null
           telegram?: string | null
@@ -3483,6 +3493,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bedrooms_min?: number | null
+          birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
           company_id?: string
@@ -3492,9 +3503,12 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           email?: string | null
+          family_info?: string | null
           first_name?: string
           id?: string
+          interests?: string[] | null
           is_archived?: boolean
+          job_title?: string | null
           language?: string | null
           last_name?: string
           line_id?: string | null
@@ -3504,6 +3518,7 @@ export type Database = {
           phone2?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
+          scoring?: number | null
           source?: string | null
           tags?: string[] | null
           telegram?: string | null

@@ -13,9 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon, Clock, Pencil, Trash2, ChevronRight, Plus } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon, Clock, Pencil, Trash2, ChevronRight, Plus, Cake, Users, Heart, Briefcase, Globe, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, differenceInYears, isSameMonth, isSameDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { EditContactSheet } from '@/components/owner/contacts/EditContactSheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -24,6 +24,16 @@ import { cn } from '@/lib/utils';
 const noteTypeIcons: Record<string, string> = {
   note: '📝', call: '📞', meeting: '🤝', email: '📧', whatsapp: '💬',
 };
+
+/** Check if birthday is within next 30 days */
+function isBirthdaySoon(birthday: string): boolean {
+  const today = new Date();
+  const bd = new Date(birthday);
+  const thisYearBd = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+  if (thisYearBd < today) thisYearBd.setFullYear(thisYearBd.getFullYear() + 1);
+  const diff = thisYearBd.getTime() - today.getTime();
+  return diff >= 0 && diff <= 30 * 24 * 60 * 60 * 1000;
+}
 
 export default function ContactDetail() {
   const { id } = useParams<{ id: string }>();
@@ -70,6 +80,9 @@ export default function ContactDetail() {
     ? `https://wa.me/${(contact.whatsapp || contact.phone)!.replace(/[^0-9]/g, '')}`
     : null;
 
+  const birthdaySoon = contact.birthday ? isBirthdaySoon(contact.birthday) : false;
+  const age = contact.birthday ? differenceInYears(new Date(), new Date(contact.birthday)) : null;
+
   const handleAddNote = async () => {
     if (!noteText.trim() || !user) return;
     try {
@@ -102,6 +115,9 @@ export default function ContactDetail() {
       : [...contact.tags, tag];
     await updateContact.mutateAsync({ id: contact.id, tags: newTags });
   };
+
+  // Scoring display
+  const scoringColor = (contact.scoring ?? 0) >= 70 ? 'text-green-600' : (contact.scoring ?? 0) >= 40 ? 'text-amber-500' : 'text-muted-foreground';
 
   return (
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-6">
@@ -141,17 +157,33 @@ export default function ContactDetail() {
       {/* Profile card */}
       <div className="border rounded-xl p-4 bg-card space-y-3">
         <div className="flex items-center gap-3">
-          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-lg font-bold text-primary">
-              {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
-            </span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">{contact.first_name} {contact.last_name}</h1>
-            <div className="flex items-center gap-2 mt-0.5">
+          {contact.avatar_url ? (
+            <img src={contact.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+          ) : (
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-lg font-bold text-primary">
+                {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
+              </span>
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold truncate">{contact.first_name} {contact.last_name}</h1>
+              {(contact.scoring ?? 0) > 0 && (
+                <span className={cn('text-sm font-semibold', scoringColor)}>
+                  <Star className="h-3.5 w-3.5 inline mr-0.5" />{contact.scoring}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               {contact.contact_type && <Badge variant="secondary" className="text-[10px]">{contact.contact_type}</Badge>}
               {contact.source && <Badge variant="outline" className="text-[10px]">{contact.source}</Badge>}
               {contact.nationality && <span className="text-xs text-muted-foreground">{contact.nationality}</span>}
+              {contact.language && (
+                <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <Globe className="h-3 w-3" />{contact.language}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -179,12 +211,62 @@ export default function ContactDetail() {
             </a>
           )}
         </div>
-
-        {/* Company */}
-        {contact.company_name && (
-          <p className="text-sm text-muted-foreground">{isRu ? 'Компания' : 'Company'}: {contact.company_name}</p>
-        )}
       </div>
+
+      {/* Personal & Professional section */}
+      {(contact.birthday || contact.job_title || contact.company_name || contact.family_info || contact.interests?.length) && (
+        <div className="border rounded-xl p-4 bg-card space-y-3">
+          <p className="text-sm font-medium">{isRu ? 'Персональное' : 'Personal'}</p>
+          
+          {/* Birthday */}
+          {contact.birthday && (
+            <div className="flex items-center gap-2 text-sm">
+              <Cake className={cn('h-4 w-4', birthdaySoon ? 'text-amber-500' : 'text-muted-foreground')} />
+              <span>
+                {format(new Date(contact.birthday), 'd MMMM', { locale })}
+                {age !== null && <span className="text-muted-foreground ml-1">({age} {isRu ? 'лет' : 'y.o.'})</span>}
+              </span>
+              {birthdaySoon && (
+                <Badge variant="secondary" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-200">
+                  🎂 {isRu ? 'Скоро ДР!' : 'Birthday soon!'}
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Job & Company */}
+          {(contact.job_title || contact.company_name) && (
+            <div className="flex items-center gap-2 text-sm">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <span>
+                {contact.job_title && <span className="font-medium">{contact.job_title}</span>}
+                {contact.job_title && contact.company_name && <span className="text-muted-foreground"> · </span>}
+                {contact.company_name && <span className="text-muted-foreground">{contact.company_name}</span>}
+              </span>
+            </div>
+          )}
+
+          {/* Family */}
+          {contact.family_info && (
+            <div className="flex items-start gap-2 text-sm">
+              <Users className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <span className="text-muted-foreground">{contact.family_info}</span>
+            </div>
+          )}
+
+          {/* Interests */}
+          {contact.interests && contact.interests.length > 0 && (
+            <div className="flex items-start gap-2">
+              <Heart className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="flex flex-wrap gap-1">
+                {contact.interests.map(interest => (
+                  <Badge key={interest} variant="outline" className="text-[10px]">{interest}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tags */}
       <div>
