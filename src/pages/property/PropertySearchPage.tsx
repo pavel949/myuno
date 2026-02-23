@@ -2,9 +2,9 @@
  * PropertySearchPage — Full catalog grid with filters
  * All primary filters live inside AirbnbSearchBar; this page reads them from URL.
  */
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown, Map as MapIcon, List } from 'lucide-react';
 import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
+import { PropertyCategoryIcons } from '@/components/property/PropertyCategoryIcons';
 import { PropertyMode } from '@/components/property/PropertyCategoryRibbon';
 import { matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
@@ -27,6 +28,9 @@ import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { differenceInDays } from 'date-fns';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
@@ -64,9 +68,19 @@ export default function PropertySearchPage() {
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
+  const [showMap, setShowMap] = useState(false);
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
     searchParamsUrl.get('company') || null
   );
+
+  // Calculate nights from selected dates
+  const nights = useMemo(() => {
+    if (searchParams.checkIn && searchParams.checkOut) {
+      return differenceInDays(searchParams.checkOut, searchParams.checkIn);
+    }
+    return 0;
+  }, [searchParams.checkIn, searchParams.checkOut]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -116,6 +130,11 @@ export default function PropertySearchPage() {
     const allItems = infiniteData?.pages.flatMap(p => p.properties) || [];
 
     const filtered = allItems.filter(prop => {
+      // Category icons filter (Airbnb-style ribbon)
+      if (categoryFilters.length > 0) {
+        if (!categoryFilters.every(cat => matchesCategory(prop, cat))) return false;
+      }
+
       // Amenities from search bar (category-style AND-logic)
       if (searchParams.amenities.length > 0) {
         if (!searchParams.amenities.every(cat => matchesCategory(prop, cat))) return false;
@@ -186,7 +205,7 @@ export default function PropertySearchPage() {
     }
 
     return sorted;
-  }, [infiniteData, searchParams, filterValues, quickFilters, sortKey]);
+  }, [infiniteData, searchParams, filterValues, quickFilters, sortKey, categoryFilters]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -222,6 +241,7 @@ export default function PropertySearchPage() {
   const clearAllFilters = () => {
     setFilterValues({});
     setQuickFilters([]);
+    setCategoryFilters([]);
     setSelectedCompanyId(null);
     setSearchParams({
       locations: [],
@@ -319,6 +339,14 @@ export default function PropertySearchPage() {
           </div>
         </header>
 
+        {/* Airbnb-style Category Ribbon */}
+        <div className="border-b">
+          <PropertyCategoryIcons
+            selected={categoryFilters}
+            onSelect={setCategoryFilters}
+          />
+        </div>
+
         <div className="px-4 py-2">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
@@ -326,6 +354,16 @@ export default function PropertySearchPage() {
             </p>
             <div className="flex items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
+              {/* Map toggle */}
+              <Button
+                variant={showMap ? 'default' : 'outline'}
+                size="sm"
+                className="gap-1.5 h-8 rounded-full text-xs"
+                onClick={() => setShowMap(!showMap)}
+              >
+                {showMap ? <List className="w-3.5 h-3.5" /> : <MapIcon className="w-3.5 h-3.5" />}
+                {showMap ? (isRu ? 'Список' : 'List') : (isRu ? 'Карта' : 'Map')}
+              </Button>
               {activeFilterCount > 0 && (
                 <Button variant="ghost" size="sm" className="text-xs h-7" onClick={clearAllFilters}>
                   {isRu ? 'Сбросить' : 'Clear'}
@@ -334,6 +372,19 @@ export default function PropertySearchPage() {
             </div>
           </div>
         </div>
+
+        {/* Map View */}
+        {showMap && (
+          <div className="px-4 mb-4">
+            <PropertyMapView
+              properties={properties}
+              hoveredProperty={hoveredProperty}
+              onHover={setHoveredProperty}
+              mode={propertyMode}
+              nights={nights > 0 ? nights : undefined}
+            />
+          </div>
+        )}
 
         <main className="px-4 pb-24">
           {isLoading && (
@@ -369,6 +420,7 @@ export default function PropertySearchPage() {
                       onHover={setHoveredProperty}
                       companyName={mc?.name}
                       companySlug={mc?.slug}
+                      nights={nights > 0 ? nights : undefined}
                     />
                   );
                 })}
