@@ -15,21 +15,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, CheckCircle2, Clock, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, isToday, isPast, isTomorrow } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { CRM_TASK_TYPE_ORDER, getCrmTaskConfig } from '@/config/crmTaskTypes';
 
 const PRIORITY_ICONS: Record<string, React.ReactNode> = {
-  high: <AlertTriangle className="h-3 w-3 text-red-500" />,
-  medium: <Clock className="h-3 w-3 text-amber-500" />,
+  high: <AlertTriangle className="h-3 w-3 text-destructive" />,
+  medium: <Clock className="h-3 w-3 text-warning" />,
   low: <CheckCircle2 className="h-3 w-3 text-muted-foreground" />,
 };
-
-const TASK_TYPES = [
-  { value: 'follow_up', labelEn: 'Follow-up', labelRu: 'Напомнить' },
-  { value: 'call', labelEn: 'Call', labelRu: 'Звонок' },
-  { value: 'meeting', labelEn: 'Meeting', labelRu: 'Встреча' },
-  { value: 'document', labelEn: 'Send Document', labelRu: 'Отправить документ' },
-  { value: 'viewing', labelEn: 'Property Viewing', labelRu: 'Показ' },
-  { value: 'other', labelEn: 'Other', labelRu: 'Прочее' },
-];
 
 export default function CrmTasksPage() {
   const { language } = useLanguage();
@@ -107,7 +100,7 @@ export default function CrmTasksPage() {
               {isRu ? 'Новая' : 'New'}
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[60vh] overflow-y-auto">
+          <SheetContent side="bottom" className="h-[70vh] overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{isRu ? 'Новая задача' : 'New Task'}</SheetTitle>
             </SheetHeader>
@@ -117,40 +110,58 @@ export default function CrmTasksPage() {
                 <Input value={title} onChange={e => setTitle(e.target.value)} placeholder={isRu ? 'Позвонить клиенту...' : 'Call client...'} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>{isRu ? 'Тип' : 'Type'}</Label>
-                  <Select value={taskType} onValueChange={setTaskType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {TASK_TYPES.map(t => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {isRu ? t.labelRu : t.labelEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {/* Task Type Grid with icons */}
+              <div>
+                <Label>{isRu ? 'Тип задачи' : 'Task Type'}</Label>
+                <div className="grid grid-cols-4 gap-1.5 mt-1.5">
+                  {CRM_TASK_TYPE_ORDER.map(type => {
+                    const config = getCrmTaskConfig(type);
+                    const Icon = config.icon;
+                    const isSelected = taskType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setTaskType(type)}
+                        className={cn(
+                          "flex flex-col items-center gap-1 rounded-lg p-2 text-xs transition-all border",
+                          isSelected
+                            ? "border-primary bg-primary/10 font-medium"
+                            : "border-transparent hover:bg-muted/60"
+                        )}
+                      >
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", config.bgColor)}>
+                          <Icon className={cn("h-4 w-4", config.color)} />
+                        </div>
+                        <span className="truncate w-full text-center">
+                          {isRu ? config.labelRu : config.labelEn}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>{isRu ? 'Приоритет' : 'Priority'}</Label>
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">{isRu ? 'Высокий' : 'High'}</SelectItem>
-                      <SelectItem value="medium">{isRu ? 'Средний' : 'Medium'}</SelectItem>
-                      <SelectItem value="low">{isRu ? 'Низкий' : 'Low'}</SelectItem>
+                      <SelectItem value="high">{isRu ? '🔴 Высокий' : '🔴 High'}</SelectItem>
+                      <SelectItem value="medium">{isRu ? '🟡 Средний' : '🟡 Medium'}</SelectItem>
+                      <SelectItem value="low">{isRu ? '🟢 Низкий' : '🟢 Low'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div>
-                <Label>{isRu ? 'Срок' : 'Due Date'}</Label>
-                <Input type="datetime-local" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                <div>
+                  <Label>{isRu ? 'Срок' : 'Due Date'}</Label>
+                  <Input type="datetime-local" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                </div>
               </div>
 
               <Button className="w-full" onClick={handleCreate} disabled={createTask.isPending}>
-                {isRu ? 'Создать' : 'Create Task'}
+                {isRu ? 'Создать задачу' : 'Create Task'}
               </Button>
             </div>
           </SheetContent>
@@ -188,22 +199,31 @@ export default function CrmTasksPage() {
           {tasks.map(task => {
             const dueLabel = getDueDateLabel(task.due_date);
             const isOverdue = task.due_date && isPast(new Date(task.due_date)) && task.status === 'pending';
+            const config = getCrmTaskConfig(task.task_type);
+            const TypeIcon = config.icon;
 
             return (
-              <Card key={task.id} className={`p-3 flex items-start gap-3 ${isOverdue ? 'border-red-300 dark:border-red-800' : ''}`}>
+              <Card key={task.id} className={cn(
+                "p-3 flex items-center gap-3",
+                isOverdue && "border-destructive/40",
+                task.status === 'completed' && "opacity-60"
+              )}>
                 <Checkbox
                   checked={task.status === 'completed'}
                   onCheckedChange={() => task.status === 'pending' && handleComplete(task)}
-                  className="mt-1"
+                  className="flex-shrink-0"
                 />
+                <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0", config.bgColor)}>
+                  <TypeIcon className={cn("h-4 w-4", config.color)} />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                  <p className={cn("text-sm font-medium truncate", task.status === 'completed' && "line-through text-muted-foreground")}>
                     {task.title}
                   </p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1.5 mt-0.5">
                     {PRIORITY_ICONS[task.priority]}
-                    <span className="text-xs text-muted-foreground capitalize">
-                      {TASK_TYPES.find(t => t.value === task.task_type)?.[isRu ? 'labelRu' : 'labelEn'] || task.task_type}
+                    <span className="text-xs text-muted-foreground">
+                      {isRu ? config.labelRu : config.labelEn}
                     </span>
                     {dueLabel && (
                       <Badge variant={isOverdue ? 'destructive' : 'secondary'} className="text-[10px] px-1.5 py-0">
