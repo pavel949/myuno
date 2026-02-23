@@ -93,7 +93,7 @@ export function ActiveStaysWidget() {
   return (
     <section className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <h3 className="font-semibold flex items-center gap-2">
+        <h3 className="font-semibold text-[15px] flex items-center gap-2">
           <Home className="h-4 w-4 text-primary" />
           {isRu ? 'Сейчас проживают' : 'Currently Staying'}
           <Badge variant="secondary" className="text-xs font-medium">

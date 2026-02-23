@@ -55,7 +55,11 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
   const allPropertyIds = allProperties.map(p => p.property_id);
 
   useEffect(() => {
-    if (!user || allPropertyIds.length === 0) return;
+    if (!user) return;
+    if (allPropertyIds.length === 0) {
+      setLoading(false);
+      return;
+    }
 
     async function fetchKPI() {
       const now = new Date();

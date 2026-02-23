@@ -27,7 +27,7 @@ export function OwnerOperationsFlat() {
   if (pendingTasks.length === 0) {
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-3">{isRu ? 'Сегодня' : 'Today'}</h2>
+        <h3 className="font-semibold text-[15px]">{isRu ? 'Сегодня' : 'Today'}</h3>
         <div className="flex items-center gap-3 py-3">
           <CheckCircle2 className="h-5 w-5 text-success" />
           <p className="text-[15px] text-muted-foreground">
@@ -41,14 +41,14 @@ export function OwnerOperationsFlat() {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <h2 className="text-xl font-semibold">
+        <h3 className="font-semibold text-[15px]">
           {isRu ? 'Сегодня' : 'Today'}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
             {pendingTasks.length} {isRu 
               ? (pendingTasks.length === 1 ? 'задача' : pendingTasks.length < 5 ? 'задачи' : 'задач')
               : (pendingTasks.length === 1 ? 'task' : 'tasks')}
           </span>
-        </h2>
+        </h3>
         <button
           onClick={() => navigate('/owner/operations')}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
