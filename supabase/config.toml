@@ -126,3 +126,12 @@ verify_jwt = false
 [functions.send-email]
 verify_jwt = false
 
+[functions.ai-cross-sell]
+verify_jwt = false
+
+[functions.ai-pricing-optimizer]
+verify_jwt = false
+
+[functions.document-reminder-check]
+verify_jwt = false
+

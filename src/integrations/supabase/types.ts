@@ -1170,6 +1170,59 @@ export type Database = {
           },
         ]
       }
+      booking_cross_sell_offers: {
+        Row: {
+          booking_id: string
+          created_at: string
+          currency: string | null
+          discount_percent: number | null
+          id: string
+          reasoning: string | null
+          service_id: string | null
+          service_name: string
+          service_type: string
+          status: string
+          suggested_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          currency?: string | null
+          discount_percent?: number | null
+          id?: string
+          reasoning?: string | null
+          service_id?: string | null
+          service_name: string
+          service_type: string
+          status?: string
+          suggested_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          currency?: string | null
+          discount_percent?: number | null
+          id?: string
+          reasoning?: string | null
+          service_id?: string | null
+          service_name?: string
+          service_type?: string
+          status?: string
+          suggested_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_cross_sell_offers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_inventory_reports: {
         Row: {
           booking_id: string
@@ -4206,6 +4259,70 @@ export type Database = {
             columns: ["clinic_id"]
             isOneToOne: false
             referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_reminders: {
+        Row: {
+          created_at: string
+          document_name: string
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          last_notified_at: string | null
+          owner_id: string
+          property_id: string | null
+          reminder_days_before: number[] | null
+          updated_at: string
+          vault_file_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          owner_id: string
+          property_id?: string | null
+          reminder_days_before?: number[] | null
+          updated_at?: string
+          vault_file_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          owner_id?: string
+          property_id?: string | null
+          reminder_days_before?: number[] | null
+          updated_at?: string
+          vault_file_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_reminders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_reminders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_reminders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -11893,6 +12010,76 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_recommendations: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          currency: string | null
+          current_price: number | null
+          date_from: string
+          date_to: string
+          factors: Json | null
+          id: string
+          property_id: string
+          reasoning: string | null
+          recommended_price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          currency?: string | null
+          current_price?: number | null
+          date_from: string
+          date_to: string
+          factors?: Json | null
+          id?: string
+          property_id: string
+          reasoning?: string | null
+          recommended_price: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          currency?: string | null
+          current_price?: number | null
+          date_from?: string
+          date_to?: string
+          factors?: Json | null
+          id?: string
+          property_id?: string
+          reasoning?: string | null
+          recommended_price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_recommendations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_recommendations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_recommendations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_availability: {
         Row: {
           block_reason: string | null
@@ -14479,6 +14666,67 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_passport_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          document_ids: string[] | null
+          event_date: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          property_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_ids?: string[] | null
+          event_date: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          property_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_ids?: string[] | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          property_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_passport_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_passport_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_passport_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
