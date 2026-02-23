@@ -12,6 +12,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { getDistrictLabel } from '@/lib/propertyTaxonomy';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 
@@ -23,6 +24,8 @@ interface PropertyListingCardProps {
   companyName?: string;
   companySlug?: string;
   className?: string;
+  /** Number of nights selected (to show total price) */
+  nights?: number;
 }
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600';
@@ -46,6 +49,7 @@ export function PropertyListingCard({
   companyName,
   companySlug,
   className,
+  nights,
 }: PropertyListingCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -54,6 +58,17 @@ export function PropertyListingCard({
 
   const title = isRu ? property.title_ru : property.title_en;
   const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
+
+  // Format district using taxonomy for proper capitalization & localization
+  const districtDisplay = property.district
+    ? getDistrictLabel(property.district, isRu ? 'ru' : 'en')
+    : 'Phuket';
+
+  // Calculate total price when nights are provided
+  const unitPrice = property.price || 0;
+  const totalPrice = nights && nights > 0 && (property.price_period === 'night' || !property.price_period)
+    ? unitPrice * nights
+    : null;
 
   return (
     <div
@@ -109,7 +124,7 @@ export function PropertyListingCard({
         {/* District + Rating */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm line-clamp-1">
-            {property.district || 'Phuket'}
+            {districtDisplay}
           </h3>
           {property.rating != null && property.rating > 0 && (
             <div className="flex items-center gap-1 shrink-0">
@@ -123,18 +138,26 @@ export function PropertyListingCard({
         <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
 
         {/* Price */}
-        <p className="text-sm font-semibold pt-1">
-          {mode === 'buy' ? (
-            formatPrice((property as any).sale_price || property.price || 0)
-          ) : (
-            <>
-              {formatPrice(property.price || 0)}
-              <span className="font-normal text-muted-foreground">
-                {formatPriceLabel(property.price_period || 'night', language)}
-              </span>
-            </>
+        <div className="pt-1">
+          <p className="text-sm font-semibold">
+            {mode === 'buy' ? (
+              formatPrice((property as any).sale_price || property.price || 0)
+            ) : (
+              <>
+                {formatPrice(unitPrice)}
+                <span className="font-normal text-muted-foreground">
+                  {formatPriceLabel(property.price_period || 'night', language)}
+                </span>
+              </>
+            )}
+          </p>
+          {/* Total price for selected dates */}
+          {totalPrice && nights && mode !== 'buy' && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'} · {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
+            </p>
           )}
-        </p>
+        </div>
       </div>
     </div>
   );
