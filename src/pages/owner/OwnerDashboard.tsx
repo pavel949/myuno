@@ -18,6 +18,7 @@ import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidge
 import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
 import { BusinessKPIWidget } from '@/components/owner/dashboard/BusinessKPIWidget';
+import { RevenueInsightsWidget } from '@/components/owner/dashboard/RevenueInsightsWidget';
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
@@ -39,6 +40,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={<SectionSkeleton />}>
           <BusinessKPIWidget role={role} />
+        </Suspense>
+      );
+    case 'revenue_insights':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <RevenueInsightsWidget />
         </Suspense>
       );
     case 'invites':

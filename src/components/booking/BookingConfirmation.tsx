@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Calendar, Clock, MapPin, Download, Share2, Mail, Smartphone, MessageCircle, Anchor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 import { AftercareBanner } from '@/components/trust/AftercareBanner';
+import { BookingCrossSellSheet } from '@/components/crosssell/BookingCrossSellSheet';
 
 interface BookingConfirmationProps {
   bookingId: string;
@@ -49,6 +51,15 @@ export function BookingConfirmation({
 }: BookingConfirmationProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const [crossSellOpen, setCrossSellOpen] = useState(false);
+
+  // Auto-open cross-sell sheet after a short delay
+  useEffect(() => {
+    if (actionType === 'booking' && bookingId) {
+      const timer = setTimeout(() => setCrossSellOpen(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [bookingId, actionType]);
 
   const currencySymbol = getCurrencySymbol(currency || 'THB');
   const isCash = paymentMethod === 'cash';
@@ -286,6 +297,13 @@ export function BookingConfirmation({
           </Button>
         </div>
       </motion.div>
+
+      {/* Cross-sell offers */}
+      <BookingCrossSellSheet
+        bookingId={bookingId}
+        open={crossSellOpen}
+        onOpenChange={setCrossSellOpen}
+      />
     </div>
   );
 }

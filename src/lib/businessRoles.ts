@@ -20,6 +20,7 @@ export interface BusinessRoleConfig {
 
 export type DashboardWidgetKey =
   | 'kpi'
+  | 'revenue_insights'
   | 'invites'
   | 'active_stays'
   | 'properties'
@@ -37,6 +38,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '🏠',
     widgets: [
       'kpi',
+      'revenue_insights',
       'invites',
       'active_stays',
       'properties',
@@ -81,6 +83,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '⚡',
     widgets: [
       'kpi',
+      'revenue_insights',
       'invites',
       'active_stays',
       'properties',
