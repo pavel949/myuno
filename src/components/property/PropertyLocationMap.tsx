@@ -32,7 +32,7 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
         await import('mapbox-gl/dist/mapbox-gl.css');
 
         // Use env variable or fallback public token
-        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibXl1bm9hcHAiLCJhIjoiY200a3Rib3AwMDFndjJrcjF2MDRhZG1rZiJ9.hEx6JOnSqJr1EfZzfVPjPg';
+        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZWRldiIsImEiOiJjbTlsMXlrNzIwMDhrMmpzZGVtbXhwYTdoIn0.aekxNRmnsXK-BBNQ-Cn6Xg';
 
         if (cancelled || !mapContainer.current) return;
 

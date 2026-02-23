@@ -1,4 +1,4 @@
-import { useState, forwardRef } from "react";
+import { useState } from "react";
 import { Star, Camera, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,14 +24,14 @@ interface WriteReviewModalProps {
   onSuccess?: () => void;
 }
 
-export const WriteReviewModal = forwardRef<HTMLDivElement, WriteReviewModalProps>(({
+export function WriteReviewModal({
   isOpen,
   onClose,
   itemType,
   itemId,
   itemName,
   onSuccess,
-}, _ref) => {
+}: WriteReviewModalProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { createReview, isSubmitting } = useCreateReview();
@@ -243,6 +243,4 @@ export const WriteReviewModal = forwardRef<HTMLDivElement, WriteReviewModalProps
       </DialogContent>
     </Dialog>
   );
-});
-
-WriteReviewModal.displayName = 'WriteReviewModal';
+}
