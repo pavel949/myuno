@@ -18,7 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -35,10 +36,10 @@ const activityIcons: Record<string, React.ElementType> = {
 };
 
 const activityColors: Record<string, string> = {
-  call: 'bg-blue-500/10 text-blue-600',
-  meeting: 'bg-purple-500/10 text-purple-600',
-  showing: 'bg-amber-500/10 text-amber-600',
-  message: 'bg-green-500/10 text-green-600',
+  call: 'bg-info/10 text-info',
+  meeting: 'bg-primary/10 text-primary',
+  showing: 'bg-warning/10 text-warning',
+  message: 'bg-success/10 text-success',
   note: 'bg-muted text-muted-foreground',
   stage_change: 'bg-primary/10 text-primary',
 };
@@ -84,7 +85,6 @@ export default function SalesDealDetail() {
   }
 
   const dealAge = daysSince(deal.created_at);
-  // Calculate stage age from the last stage_change activity, falling back to created_at
   const lastStageChange = activities.find(a => a.activity_type === 'stage_change');
   const stageAge = daysSince(lastStageChange?.created_at || deal.created_at);
 
@@ -206,7 +206,6 @@ export default function SalesDealDetail() {
           </span>
         </div>
 
-        {/* Link to contact dossier */}
         {deal.contact_id && (
           <button
             onClick={() => navigate(`/owner/contacts/${deal.contact_id}`)}
@@ -224,7 +223,7 @@ export default function SalesDealDetail() {
             </a>
           )}
           {whatsappUrl && (
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-600 hover:text-green-500">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-success hover:text-success/80">
               <MessageCircle className="h-3.5 w-3.5" />WhatsApp
             </a>
           )}
@@ -260,7 +259,7 @@ export default function SalesDealDetail() {
           </div>
         )}
         {deal.deal_value && (
-          <div className="mt-2 p-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-sm">
+          <div className="mt-2 p-2 rounded-lg bg-success/10 text-success text-sm">
             {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
             {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
           </div>
@@ -276,10 +275,10 @@ export default function SalesDealDetail() {
         )}
       </div>
 
-      {/* Close / Status buttons */}
+      {/* Close / Status buttons — Won/Lost prominent, Pause/Archive in dropdown */}
       {!isClosed && (
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1 text-green-600 border-green-600/30 hover:bg-green-500/10" onClick={() => setCloseMode('won')}>
+          <Button variant="outline" size="sm" className="flex-1 text-success border-success/30 hover:bg-success/10" onClick={() => setCloseMode('won')}>
             <Trophy className="h-4 w-4 mr-1" />
             {isRu ? 'Успех' : 'Won'}
           </Button>
@@ -287,24 +286,29 @@ export default function SalesDealDetail() {
             <X className="h-4 w-4 mr-1" />
             {isRu ? 'Проигрыш' : 'Lost'}
           </Button>
-          {dealStatus === 'active' ? (
-            <>
-              <Button variant="outline" size="sm" onClick={() => handleStatusChange('on_hold')} title={isRu ? 'На паузу' : 'Put on hold'}>
-                <Pause className="h-4 w-4" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleStatusChange('archived')} title={isRu ? 'В архив' : 'Archive'}>
-                <Archive className="h-4 w-4" />
-              </Button>
-            </>
-          ) : dealStatus === 'on_hold' ? (
-            <Button variant="outline" size="sm" onClick={() => handleStatusChange('active')} title={isRu ? 'Активировать' : 'Activate'}>
-              <Play className="h-4 w-4" />
-            </Button>
-          ) : dealStatus === 'archived' ? (
-            <Button variant="outline" size="sm" onClick={() => handleStatusChange('active')} title={isRu ? 'Вернуть' : 'Restore'}>
-              <Play className="h-4 w-4" />
-            </Button>
-          ) : null}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {dealStatus === 'active' ? (
+                <>
+                  <DropdownMenuItem onClick={() => handleStatusChange('on_hold')}>
+                    <Pause className="h-4 w-4 mr-2" />{isRu ? 'На паузу' : 'Put on hold'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange('archived')}>
+                    <Archive className="h-4 w-4 mr-2" />{isRu ? 'В архив' : 'Archive'}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem onClick={() => handleStatusChange('active')}>
+                  <Play className="h-4 w-4 mr-2" />{isRu ? 'Активировать' : 'Activate'}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
 
@@ -337,7 +341,9 @@ export default function SalesDealDetail() {
             onChange={e => setActivityText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddActivity()}
           />
-          <Button size="sm" onClick={handleAddActivity} disabled={addActivity.isPending || !activityText.trim()}>+</Button>
+          <Button size="sm" onClick={handleAddActivity} disabled={addActivity.isPending || !activityText.trim()}>
+            <SendHorizonal className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 

@@ -3,9 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, daysSince } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Phone, Mail, ChevronRight, Calendar, AlertCircle, MessageCircle, Clock, ContactRound } from 'lucide-react';
+import { ChevronRight, Calendar, AlertCircle, Clock } from 'lucide-react';
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
-import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -43,8 +42,8 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         'w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3',
         isOverdue && 'border-destructive/50 bg-destructive/5',
         isDueToday && 'border-primary/50 bg-primary/5',
-        age > 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-red-500',
-        age > 14 && age <= 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-amber-500',
+        age > 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-destructive',
+        age > 14 && age <= 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-warning',
       )}
     >
       {selectable && (
@@ -60,19 +59,10 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
+            {/* Row 1: Name + Stage */}
             <div className="flex items-center gap-2 mb-1">
               {deal.priority > 0 && <DealPriorityStars priority={deal.priority} size="sm" />}
               <span className="font-semibold text-[15px] truncate">{deal.client_name}</span>
-              {deal.contact_id && (
-                <a
-                  href={`/owner/contacts/${deal.contact_id}`}
-                  onClick={e => { e.stopPropagation(); navigate(`/owner/contacts/${deal.contact_id}`); e.preventDefault(); }}
-                  className="text-primary/60 hover:text-primary shrink-0"
-                  title={isRu ? 'Досье' : 'Dossier'}
-                >
-                  <ContactRound className="h-3.5 w-3.5" />
-                </a>
-              )}
               <Badge variant={stageBadgeVariant[deal.stage]} className="text-[10px] shrink-0">
                 {stageLabel}
               </Badge>
@@ -81,56 +71,21 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
                   {isRu ? DEAL_TYPE_LABELS[deal.deal_type]?.ru : DEAL_TYPE_LABELS[deal.deal_type]?.en}
                 </Badge>
               )}
-              {deal.deal_status === 'on_hold' && (
-                <Badge variant="secondary" className="text-[10px] shrink-0">{isRu ? 'Пауза' : 'Hold'}</Badge>
-              )}
-              {deal.deal_status === 'archived' && (
-                <Badge variant="outline" className="text-[10px] shrink-0 opacity-60">{isRu ? 'Архив' : 'Archived'}</Badge>
-              )}
               {age > 14 && (
-                <span className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-red-500' : 'text-amber-500')}>
+                <span className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-destructive' : 'text-warning')}>
                   <Clock className="h-2.5 w-2.5" />{age}d
                 </span>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              {deal.client_phone && (
-                <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{deal.client_phone}</span>
-              )}
-              {deal.client_phone && (
-                <a
-                  href={`https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="text-green-600 hover:text-green-500"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                </a>
-              )}
-              {deal.client_phone && (
-                <a
-                  href={`tel:${deal.client_phone}`}
-                  onClick={e => e.stopPropagation()}
-                  className="text-primary hover:text-primary/80"
-                >
-                  <Phone className="h-3.5 w-3.5" />
-                </a>
-              )}
-              {deal.client_email && (
-                <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{deal.client_email}</span>
-              )}
-            </div>
-            {deal.tags?.length > 0 && (
-              <div className="mt-1">
-                <DealTagsDisplay tags={deal.tags} />
-              </div>
-            )}
+
+            {/* Row 2: Budget */}
             {deal.budget_max && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
+              <p className="text-xs text-muted-foreground">
+                {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
               </p>
             )}
+
+            {/* Row 3: Next action */}
             {nextDate && (
               <p className={cn(
                 'flex items-center gap-1 text-xs mt-1',

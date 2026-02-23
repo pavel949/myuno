@@ -13,9 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon, Clock, Pencil, Trash2, ChevronRight, Plus, Cake, Users, Heart, Briefcase, Globe, Star } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon, Clock, Pencil, Trash2, ChevronRight, Plus, Cake, Users, Heart, Briefcase, Globe, Star, SendHorizonal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { formatDistanceToNow, format, differenceInYears, isSameMonth, isSameDay } from 'date-fns';
+import { formatDistanceToNow, format, differenceInYears } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { EditContactSheet } from '@/components/owner/contacts/EditContactSheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -34,6 +34,17 @@ function isBirthdaySoon(birthday: string): boolean {
   const diff = thisYearBd.getTime() - today.getTime();
   return diff >= 0 && diff <= 30 * 24 * 60 * 60 * 1000;
 }
+
+// Stage dot colors
+const stageDotColors: Record<DealStage, string> = {
+  new: 'bg-info',
+  contacted: 'bg-info/70',
+  showing: 'bg-warning',
+  negotiation: 'bg-warning/70',
+  contract: 'bg-primary',
+  closed_won: 'bg-success',
+  closed_lost: 'bg-destructive',
+};
 
 export default function ContactDetail() {
   const { id } = useParams<{ id: string }>();
@@ -83,6 +94,12 @@ export default function ContactDetail() {
   const birthdaySoon = contact.birthday ? isBirthdaySoon(contact.birthday) : false;
   const age = contact.birthday ? differenceInYears(new Date(), new Date(contact.birthday)) : null;
 
+  // Last contacted from notes
+  const lastContactedAt = notes.length > 0 ? notes[0].created_at : null;
+
+  // Scoring display
+  const scoringColor = (contact.scoring ?? 0) >= 70 ? 'text-success' : (contact.scoring ?? 0) >= 40 ? 'text-warning' : 'text-muted-foreground';
+
   const handleAddNote = async () => {
     if (!noteText.trim() || !user) return;
     try {
@@ -115,9 +132,6 @@ export default function ContactDetail() {
       : [...contact.tags, tag];
     await updateContact.mutateAsync({ id: contact.id, tags: newTags });
   };
-
-  // Scoring display
-  const scoringColor = (contact.scoring ?? 0) >= 70 ? 'text-green-600' : (contact.scoring ?? 0) >= 40 ? 'text-amber-500' : 'text-muted-foreground';
 
   return (
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-6">
@@ -185,6 +199,13 @@ export default function ContactDetail() {
                 </span>
               )}
             </div>
+            {/* Last contacted */}
+            {lastContactedAt && (
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {isRu ? 'Последний контакт' : 'Last contact'}: {formatDistanceToNow(new Date(lastContactedAt), { addSuffix: true, locale })}
+              </p>
+            )}
           </div>
         </div>
 
@@ -196,7 +217,7 @@ export default function ContactDetail() {
             </a>
           )}
           {whatsappUrl && (
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full bg-success/10 text-success hover:bg-success/20 transition-colors">
               <MessageCircle className="h-3 w-3" />WhatsApp
             </a>
           )}
@@ -206,55 +227,37 @@ export default function ContactDetail() {
             </a>
           )}
           {contact.telegram && (
-            <a href={`https://t.me/${contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors">
+            <a href={`https://t.me/${contact.telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full bg-info/10 text-info hover:bg-info/20 transition-colors">
               <TelegramIcon className="h-3 w-3" />{contact.telegram}
             </a>
           )}
         </div>
       </div>
 
-      {/* Personal & Professional section */}
-      {(contact.birthday || contact.job_title || contact.company_name || contact.family_info || contact.interests?.length) && (
+      {/* Personal section */}
+      {(contact.birthday || contact.family_info || contact.interests?.length) && (
         <div className="border rounded-xl p-4 bg-card space-y-3">
           <p className="text-sm font-medium">{isRu ? 'Персональное' : 'Personal'}</p>
-          
-          {/* Birthday */}
           {contact.birthday && (
             <div className="flex items-center gap-2 text-sm">
-              <Cake className={cn('h-4 w-4', birthdaySoon ? 'text-amber-500' : 'text-muted-foreground')} />
+              <Cake className={cn('h-4 w-4', birthdaySoon ? 'text-warning' : 'text-muted-foreground')} />
               <span>
                 {format(new Date(contact.birthday), 'd MMMM', { locale })}
                 {age !== null && <span className="text-muted-foreground ml-1">({age} {isRu ? 'лет' : 'y.o.'})</span>}
               </span>
               {birthdaySoon && (
-                <Badge variant="secondary" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-200">
+                <Badge variant="secondary" className="text-[10px] bg-warning/10 text-warning border-warning/20">
                   🎂 {isRu ? 'Скоро ДР!' : 'Birthday soon!'}
                 </Badge>
               )}
             </div>
           )}
-
-          {/* Job & Company */}
-          {(contact.job_title || contact.company_name) && (
-            <div className="flex items-center gap-2 text-sm">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              <span>
-                {contact.job_title && <span className="font-medium">{contact.job_title}</span>}
-                {contact.job_title && contact.company_name && <span className="text-muted-foreground"> · </span>}
-                {contact.company_name && <span className="text-muted-foreground">{contact.company_name}</span>}
-              </span>
-            </div>
-          )}
-
-          {/* Family */}
           {contact.family_info && (
             <div className="flex items-start gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground mt-0.5" />
               <span className="text-muted-foreground">{contact.family_info}</span>
             </div>
           )}
-
-          {/* Interests */}
           {contact.interests && contact.interests.length > 0 && (
             <div className="flex items-start gap-2">
               <Heart className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -265,6 +268,21 @@ export default function ContactDetail() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Professional section */}
+      {(contact.job_title || contact.company_name) && (
+        <div className="border rounded-xl p-4 bg-card space-y-3">
+          <p className="text-sm font-medium">{isRu ? 'Профессиональное' : 'Professional'}</p>
+          <div className="flex items-center gap-2 text-sm">
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+            <span>
+              {contact.job_title && <span className="font-medium">{contact.job_title}</span>}
+              {contact.job_title && contact.company_name && <span className="text-muted-foreground"> · </span>}
+              {contact.company_name && <span className="text-muted-foreground">{contact.company_name}</span>}
+            </span>
+          </div>
         </div>
       )}
 
@@ -340,6 +358,7 @@ export default function ContactDetail() {
                   onClick={() => navigate(`/owner/sales/${d.id}`)}
                   className="w-full text-left p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
                 >
+                  <div className={cn('h-2.5 w-2.5 rounded-full shrink-0', stageDotColors[stage] || 'bg-muted')} />
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium">{d.client_name}</span>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -379,7 +398,9 @@ export default function ContactDetail() {
             onChange={e => setNoteText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddNote()}
           />
-          <Button size="sm" onClick={handleAddNote} disabled={addNote.isPending || !noteText.trim()}>+</Button>
+          <Button size="sm" onClick={handleAddNote} disabled={addNote.isPending || !noteText.trim()}>
+            <SendHorizonal className="h-4 w-4" />
+          </Button>
         </div>
 
         {notes.length === 0 ? (

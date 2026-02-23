@@ -10,13 +10,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock } from 'lucide-react';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { ContactImportSheet } from '@/components/owner/contacts/ContactImportSheet';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
+
+// Avatar color palette based on name hash
+const AVATAR_COLORS = [
+  'bg-primary/15 text-primary',
+  'bg-info/15 text-info',
+  'bg-success/15 text-success',
+  'bg-warning/15 text-warning',
+  'bg-destructive/15 text-destructive',
+  'bg-accent text-accent-foreground',
+];
+
+function getAvatarColor(name: string): string {
+  const code = (name.charCodeAt(0) || 0) + (name.charCodeAt(1) || 0);
+  return AVATAR_COLORS[code % AVATAR_COLORS.length];
+}
 
 export default function ContactsList() {
   const navigate = useNavigate();
@@ -62,7 +77,12 @@ export default function ContactsList() {
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{isRu ? 'Контакты' : 'Contacts'}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold">{isRu ? 'Контакты' : 'Contacts'}</h1>
+          {totalCount > 0 && (
+            <Badge variant="secondary" className="text-[10px]">{totalCount}</Badge>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <ContactExportButton contacts={contacts} />
           <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
@@ -95,34 +115,42 @@ export default function ContactsList() {
       </Button>
 
       {showFilters && (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-1">
-            <button
-              onClick={() => handleTypeChange(null)}
-              className={cn('px-2 py-0.5 text-xs rounded-full border', !typeFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
-            >
-              {isRu ? 'Все' : 'All'}
-            </button>
-            {CONTACT_TYPES.map(t => (
+        <div className="space-y-3">
+          {/* Type section */}
+          <div>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Тип' : 'Type'}</p>
+            <div className="flex flex-wrap gap-1">
               <button
-                key={t}
-                onClick={() => handleTypeChange(typeFilter === t ? null : t)}
-                className={cn('px-2 py-0.5 text-xs rounded-full border', typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                onClick={() => handleTypeChange(null)}
+                className={cn('px-2 py-0.5 text-xs rounded-full border', !typeFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
               >
-                {t}
+                {isRu ? 'Все' : 'All'}
               </button>
-            ))}
+              {CONTACT_TYPES.map(t => (
+                <button
+                  key={t}
+                  onClick={() => handleTypeChange(typeFilter === t ? null : t)}
+                  className={cn('px-2 py-0.5 text-xs rounded-full border', typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {CONTACT_TAGS.map(t => (
-              <button
-                key={t}
-                onClick={() => handleTagChange(tagFilter === t ? null : t)}
-                className={cn('px-2 py-0.5 text-xs rounded-full border', tagFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
-              >
-                {t}
-              </button>
-            ))}
+          {/* Tags section */}
+          <div>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Теги' : 'Tags'}</p>
+            <div className="flex flex-wrap gap-1">
+              {CONTACT_TAGS.map(t => (
+                <button
+                  key={t}
+                  onClick={() => handleTagChange(tagFilter === t ? null : t)}
+                  className={cn('px-2 py-0.5 text-xs rounded-full border', tagFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -144,35 +172,48 @@ export default function ContactsList() {
         </div>
       ) : (
         <div className="space-y-2">
-          {contacts.map(contact => (
-            <button
-              key={contact.id}
-              onClick={() => navigate(`/owner/contacts/${contact.id}`)}
-              className="w-full text-left p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
-            >
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="text-sm font-semibold text-primary">
-                  {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm truncate">{contact.first_name} {contact.last_name}</span>
-                  {contact.contact_type && (
-                    <Badge variant="secondary" className="text-[10px] shrink-0">{contact.contact_type}</Badge>
-                  )}
-                  {contact.tags?.includes('VIP') && (
-                    <Badge variant="default" className="text-[10px] shrink-0">VIP</Badge>
-                  )}
+          {contacts.map(contact => {
+            const avatarColor = getAvatarColor(contact.first_name + contact.last_name);
+            return (
+              <button
+                key={contact.id}
+                onClick={() => navigate(`/owner/contacts/${contact.id}`)}
+                className="w-full text-left p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
+              >
+                <div className={cn("h-10 w-10 rounded-full flex items-center justify-center shrink-0", avatarColor)}>
+                  <span className="text-sm font-semibold">
+                    {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                  {contact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{isOwnerOrAdmin ? contact.phone : maskPhone(contact.phone)}</span>}
-                  {contact.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" />{contact.email}</span>}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm truncate">{contact.first_name} {contact.last_name}</span>
+                    {contact.contact_type && (
+                      <Badge variant="secondary" className="text-[10px] shrink-0">{contact.contact_type}</Badge>
+                    )}
+                    {contact.tags?.includes('VIP') && (
+                      <Badge variant="default" className="text-[10px] shrink-0">VIP</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                    {contact.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {isOwnerOrAdmin ? contact.phone : (
+                          <span className="flex items-center gap-0.5">
+                            {maskPhone(contact.phone)}
+                            <Lock className="h-2.5 w-2.5 text-muted-foreground/50" />
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {contact.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" />{contact.email}</span>}
+                  </div>
                 </div>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-            </button>
-          ))}
+                <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+              </button>
+            );
+          })}
         </div>
       )}
 
