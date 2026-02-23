@@ -24,9 +24,9 @@ export function OwnerPropertiesList() {
   if (allProperties.length === 0) {
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">
-          {isRu ? 'Ваши объявления' : 'Your listings'}
-        </h2>
+          <h3 className="font-semibold text-[15px] mb-4">
+            {isRu ? 'Ваши объявления' : 'Your listings'}
+          </h3>
         <button
           onClick={() => navigate('/owner/properties/new')}
           className="w-full flex items-center gap-4 py-4 hover:opacity-70 transition-opacity"
@@ -89,12 +89,12 @@ export function OwnerPropertiesList() {
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold">
+              <h3 className="font-semibold text-[15px]">
                 {showSections 
                   ? (isRu ? 'Мои объекты' : 'My Properties')
                   : (isRu ? 'Опубликовано' : 'Published')
                 }
-              </h2>
+              </h3>
               {showSections && (
                 <Badge variant="secondary" className="gap-1 text-xs">
                   <Building2 className="h-3 w-3" />
@@ -119,12 +119,12 @@ export function OwnerPropertiesList() {
       {managedProperties.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-semibold">
+            <h3 className="font-semibold text-[15px]">
               {showSections 
                 ? (isRu ? 'Под управлением' : 'Managed')
                 : (isRu ? 'Объекты' : 'Properties')
               }
-            </h2>
+            </h3>
             {showSections && (
               <Badge variant="outline" className="gap-1 text-xs">
                 <Users className="h-3 w-3" />

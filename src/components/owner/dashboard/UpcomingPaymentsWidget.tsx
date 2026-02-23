@@ -16,10 +16,38 @@ export function UpcomingPaymentsWidget() {
   const { data: payments } = useQuery({
     queryKey: ['upcoming-payments', user?.id],
     queryFn: async () => {
-      // Get properties owned by user
+      if (!user) return [];
+      // First get user's property IDs to scope the query
+      const { data: owned } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user.id);
+      const { data: managed } = await supabase
+        .from('management_company_members')
+        .select('company:management_companies(id)')
+        .eq('user_id', user.id)
+        .limit(1);
+      
+      const propertyIds = (owned || []).map(p => p.id);
+      
+      // If user is in a management company, also get managed properties
+      const companyId = (managed?.[0] as any)?.company?.id;
+      if (companyId) {
+        const { data: managedProps } = await supabase
+          .from('properties')
+          .select('id')
+          .eq('management_company_id', companyId);
+        for (const p of (managedProps || [])) {
+          if (!propertyIds.includes(p.id)) propertyIds.push(p.id);
+        }
+      }
+      
+      if (propertyIds.length === 0) return [];
+
       const { data, error } = await supabase
         .from('property_financials')
         .select('id, category, amount, currency, due_date, status, property_id, description')
+        .in('property_id', propertyIds)
         .eq('status', 'pending')
         .not('due_date', 'is', null)
         .lte('due_date', new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0])
@@ -56,8 +84,8 @@ export function UpcomingPaymentsWidget() {
           const days = p.due_date ? differenceInDays(new Date(p.due_date), new Date()) : 0;
 
           return (
-            <Card key={p.id} className={`p-3 flex items-center gap-3 ${isOverdue ? 'border-red-300 dark:border-red-800' : ''}`}>
-              {isOverdue && <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />}
+            <Card key={p.id} className={`p-3 flex items-center gap-3 ${isOverdue ? 'border-destructive/50' : ''}`}>
+              {isOverdue && <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {p.description || p.category}
