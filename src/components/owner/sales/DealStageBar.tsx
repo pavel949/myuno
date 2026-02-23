@@ -8,13 +8,13 @@ interface Props {
 }
 
 const stageColors: Record<DealStage, string> = {
-  new: 'bg-blue-500',
-  contacted: 'bg-cyan-500',
-  showing: 'bg-amber-500',
-  negotiation: 'bg-orange-500',
-  contract: 'bg-purple-500',
-  closed_won: 'bg-green-500',
-  closed_lost: 'bg-red-500',
+  new: 'bg-info',
+  contacted: 'bg-info/80',
+  showing: 'bg-warning',
+  negotiation: 'bg-warning/80',
+  contract: 'bg-primary',
+  closed_won: 'bg-success',
+  closed_lost: 'bg-destructive',
 };
 
 export function DealStageBar({ currentStage, onStageClick }: Props) {
@@ -34,7 +34,7 @@ export function DealStageBar({ currentStage, onStageClick }: Props) {
             onClick={() => onStageClick?.(stage)}
             disabled={!onStageClick}
             className={cn(
-              'flex-1 py-1.5 text-[11px] font-medium rounded-md transition-all',
+              'flex-1 py-2.5 text-[11px] font-medium rounded-lg transition-all min-h-[44px] flex items-center justify-center',
               isActive ? `${stageColors[stage]} text-white` : 'bg-muted text-muted-foreground',
               onStageClick && 'cursor-pointer hover:opacity-80',
             )}

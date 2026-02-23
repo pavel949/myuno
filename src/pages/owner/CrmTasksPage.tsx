@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, CheckCircle2, Clock, AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, isToday, isPast, isTomorrow } from 'date-fns';
@@ -29,7 +30,9 @@ export default function CrmTasksPage() {
   const { user } = useAuth();
   const isRu = language === 'ru';
   const [statusFilter, setStatusFilter] = useState('pending');
+  const [priorityFilter, setPriorityFilter] = useState('all');
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
 
   const { data: company } = useMyCompanyId();
   const companyId = company?.company_id;
@@ -76,8 +79,14 @@ export default function CrmTasksPage() {
     );
   };
 
-  const handleDelete = (id: string) => {
-    deleteTask.mutate(id);
+  const handleConfirmDelete = () => {
+    if (!deleteTaskId) return;
+    deleteTask.mutate(deleteTaskId, {
+      onSuccess: () => {
+        toast.success(isRu ? 'Задача удалена' : 'Task deleted');
+        setDeleteTaskId(null);
+      },
+    });
   };
 
   const getDueDateLabel = (date: string | null) => {
@@ -88,6 +97,9 @@ export default function CrmTasksPage() {
     if (isPast(d)) return isRu ? 'Просрочено' : 'Overdue';
     return format(d, 'dd.MM');
   };
+
+  // Apply priority filter
+  const filteredTasks = (tasks || []).filter(t => priorityFilter === 'all' || t.priority === priorityFilter);
 
   return (
     <div className="px-4 pt-6 pb-24 max-w-lg mx-auto space-y-6">
@@ -100,7 +112,7 @@ export default function CrmTasksPage() {
               {isRu ? 'Новая' : 'New'}
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[70vh] overflow-y-auto">
+          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{isRu ? 'Новая задача' : 'New Task'}</SheetTitle>
             </SheetHeader>
@@ -168,15 +180,34 @@ export default function CrmTasksPage() {
         </Sheet>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2">
-        {['pending', 'completed', 'all'].map(s => (
-          <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)}>
-            {s === 'pending' ? (isRu ? 'Активные' : 'Active') :
-             s === 'completed' ? (isRu ? 'Выполненные' : 'Done') :
-             isRu ? 'Все' : 'All'}
-          </Button>
-        ))}
+      {/* Status + Priority Filters */}
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          {['pending', 'completed', 'all'].map(s => (
+            <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)}>
+              {s === 'pending' ? (isRu ? 'Активные' : 'Active') :
+               s === 'completed' ? (isRu ? 'Выполненные' : 'Done') :
+               isRu ? 'Все' : 'All'}
+            </Button>
+          ))}
+        </div>
+        <div className="flex gap-1.5">
+          {['all', 'high', 'medium', 'low'].map(p => (
+            <button
+              key={p}
+              onClick={() => setPriorityFilter(p)}
+              className={cn(
+                'px-2 py-0.5 text-xs rounded-full border transition-colors',
+                priorityFilter === p ? 'bg-primary text-primary-foreground border-primary' : 'text-muted-foreground border-border',
+              )}
+            >
+              {p === 'all' ? (isRu ? 'Все' : 'All') :
+               p === 'high' ? (isRu ? '🔴 Высокий' : '🔴 High') :
+               p === 'medium' ? (isRu ? '🟡 Средний' : '🟡 Medium') :
+               isRu ? '🟢 Низкий' : '🟢 Low'}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Task List */}
@@ -185,7 +216,7 @@ export default function CrmTasksPage() {
           <Skeleton className="h-16 w-full rounded-xl" />
           <Skeleton className="h-16 w-full rounded-xl" />
         </div>
-      ) : !tasks?.length ? (
+      ) : !filteredTasks.length ? (
         <Card className="p-8 text-center">
           <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
           <p className="text-muted-foreground">
@@ -196,7 +227,7 @@ export default function CrmTasksPage() {
         </Card>
       ) : (
         <div className="space-y-2">
-          {tasks.map(task => {
+          {filteredTasks.map(task => {
             const dueLabel = getDueDateLabel(task.due_date);
             const isOverdue = task.due_date && isPast(new Date(task.due_date)) && task.status === 'pending';
             const config = getCrmTaskConfig(task.task_type);
@@ -232,7 +263,7 @@ export default function CrmTasksPage() {
                     )}
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDelete(task.id)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => setDeleteTaskId(task.id)}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </Card>
@@ -240,6 +271,22 @@ export default function CrmTasksPage() {
           })}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTaskId} onOpenChange={open => !open && setDeleteTaskId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isRu ? 'Удалить задачу?' : 'Delete task?'}</AlertDialogTitle>
+            <AlertDialogDescription>{isRu ? 'Это действие нельзя отменить' : 'This action cannot be undone'}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isRu ? 'Удалить' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
