@@ -25,7 +25,8 @@ export default function SalesAnalytics() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership, isLoading: ml } = useMyCompanyId();
-  const { data: deals = [], isLoading } = useAgentDeals(membership?.company_id);
+  const { data: dealsResult, isLoading } = useAgentDeals(membership?.company_id);
+  const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(membership?.company_id);
 
   // Funnel data

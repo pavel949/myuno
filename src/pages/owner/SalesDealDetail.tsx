@@ -84,7 +84,9 @@ export default function SalesDealDetail() {
   }
 
   const dealAge = daysSince(deal.created_at);
-  const stageAge = daysSince(deal.updated_at);
+  // Calculate stage age from the last stage_change activity, falling back to created_at
+  const lastStageChange = activities.find(a => a.activity_type === 'stage_change');
+  const stageAge = daysSince(lastStageChange?.created_at || deal.created_at);
 
   const handleStageChange = async (newStage: DealStage) => {
     if (newStage === deal.stage) return;

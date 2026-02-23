@@ -37,8 +37,12 @@ export function useCrmTasks(filters?: { status?: string; assigned_to?: string; d
 
       if (filters?.status) q = q.eq('status', filters.status);
       if (filters?.assigned_to) q = q.eq('assigned_to', filters.assigned_to);
-      if (filters?.due_today) {
-        const today = new Date().toISOString().split('T')[0];
+    if (filters?.due_today) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const today = `${yyyy}-${mm}-${dd}`;
         q = q.gte('due_date', today + 'T00:00:00')
              .lte('due_date', today + 'T23:59:59');
       }
@@ -58,7 +62,11 @@ export function useTodayTasksCount() {
   return useQuery({
     queryKey: ['crm-tasks-today-count', companyId],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const today = `${yyyy}-${mm}-${dd}`;
       const { count, error } = await supabase
         .from('crm_tasks')
         .select('id', { count: 'exact', head: true })

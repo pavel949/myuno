@@ -178,18 +178,26 @@ export function useDuplicateCheck(companyId: string | undefined, phone: string, 
   });
 }
 
-/** Fetch all deals for the user's company */
-export function useAgentDeals(companyId: string | undefined) {
+/** Fetch all deals for the user's company with optional server-side pagination */
+export function useAgentDeals(companyId: string | undefined, page?: number, pageSize = 50) {
   return useQuery({
-    queryKey: ['agent-deals', companyId],
-    queryFn: async (): Promise<AgentDeal[]> => {
-      const { data, error } = await supabase
+    queryKey: ['agent-deals', companyId, page, pageSize],
+    queryFn: async (): Promise<{ data: AgentDeal[]; count: number }> => {
+      let q = supabase
         .from('agent_deals')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
+
+      if (page !== undefined) {
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+        q = q.range(from, to);
+      }
+
+      const { data, error, count } = await q;
       if (error) throw error;
-      return (data || []) as unknown as AgentDeal[];
+      return { data: (data || []) as unknown as AgentDeal[], count: count || 0 };
     },
     enabled: !!companyId,
   });

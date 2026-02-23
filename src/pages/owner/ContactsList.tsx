@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,11 +29,6 @@ export default function ContactsList() {
   const companyId = membership?.company_id;
 
   const [page, setPage] = useState(0);
-  const { data: result, isLoading } = useCrmContacts(companyId, page, PAGE_SIZE);
-  const contacts = result?.data || [];
-  const totalCount = result?.count || 0;
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -41,20 +36,19 @@ export default function ContactsList() {
   const [showImport, setShowImport] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const filtered = useMemo(() => {
-    let list = contacts.filter(c => !c.is_archived);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(c =>
-        `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) ||
-        c.phone?.toLowerCase().includes(q) ||
-        c.email?.toLowerCase().includes(q)
-      );
-    }
-    if (typeFilter) list = list.filter(c => c.contact_type === typeFilter);
-    if (tagFilter) list = list.filter(c => c.tags?.includes(tagFilter));
-    return list;
-  }, [contacts, search, typeFilter, tagFilter]);
+  // Reset page when filters change
+  const handleSearchChange = (v: string) => { setSearch(v); setPage(0); };
+  const handleTypeChange = (v: string | null) => { setTypeFilter(v); setPage(0); };
+  const handleTagChange = (v: string | null) => { setTagFilter(v); setPage(0); };
+
+  const { data: result, isLoading } = useCrmContacts(companyId, page, PAGE_SIZE, {
+    search: search.trim(),
+    contactType: typeFilter || undefined,
+    tag: tagFilter || undefined,
+  });
+  const contacts = result?.data || [];
+  const totalCount = result?.count || 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   if (!companyId) {
     return (
@@ -88,7 +82,7 @@ export default function ContactsList() {
         <Input
           placeholder={isRu ? 'Поиск по имени, телефону, email...' : 'Search by name, phone, email...'}
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => handleSearchChange(e.target.value)}
           className="pl-9"
         />
       </div>
@@ -104,7 +98,7 @@ export default function ContactsList() {
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
             <button
-              onClick={() => setTypeFilter(null)}
+              onClick={() => handleTypeChange(null)}
               className={cn('px-2 py-0.5 text-xs rounded-full border', !typeFilter ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
             >
               {isRu ? 'Все' : 'All'}
@@ -112,7 +106,7 @@ export default function ContactsList() {
             {CONTACT_TYPES.map(t => (
               <button
                 key={t}
-                onClick={() => setTypeFilter(typeFilter === t ? null : t)}
+                onClick={() => handleTypeChange(typeFilter === t ? null : t)}
                 className={cn('px-2 py-0.5 text-xs rounded-full border', typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
               >
                 {t}
@@ -123,7 +117,7 @@ export default function ContactsList() {
             {CONTACT_TAGS.map(t => (
               <button
                 key={t}
-                onClick={() => setTagFilter(tagFilter === t ? null : t)}
+                onClick={() => handleTagChange(tagFilter === t ? null : t)}
                 className={cn('px-2 py-0.5 text-xs rounded-full border', tagFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
               >
                 {t}
@@ -143,14 +137,14 @@ export default function ContactsList() {
         <div className="space-y-3">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : contacts.length === 0 ? (
         <div className="text-center py-12">
           <UserCircle className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-muted-foreground text-sm">{isRu ? 'Контакты не найдены' : 'No contacts found'}</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(contact => (
+          {contacts.map(contact => (
             <button
               key={contact.id}
               onClick={() => navigate(`/owner/contacts/${contact.id}`)}
