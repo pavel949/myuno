@@ -182,8 +182,11 @@ export default function ContactImportPage() {
     setImporting(true);
     let success = 0;
     let failed = 0;
-    for (const c of valid) {
-      const { error } = await supabase.from('crm_contacts').insert({
+
+    // Batch insert in chunks of 50
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < valid.length; i += BATCH_SIZE) {
+      const batch = valid.slice(i, i + BATCH_SIZE).map(c => ({
         company_id: companyId,
         first_name: c.first_name.slice(0, 100),
         last_name: c.last_name.slice(0, 100) || '-',
@@ -194,10 +197,16 @@ export default function ContactImportPage() {
         source: c.source || 'import',
         notes: c.notes?.slice(0, 500) || null,
         created_by: user.id,
-      } as any);
-      if (error) failed++;
-      else success++;
+      }));
+      const { data, error } = await supabase.from('crm_contacts').insert(batch as any).select('id');
+      if (error) {
+        failed += batch.length;
+      } else {
+        success += data?.length || 0;
+        failed += batch.length - (data?.length || 0);
+      }
     }
+
     setImportResult({ success, failed });
     setImporting(false);
     toast.success(isRu ? `Импортировано: ${success}` : `Imported: ${success}`);

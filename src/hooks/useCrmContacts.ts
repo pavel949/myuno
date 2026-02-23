@@ -40,18 +40,46 @@ export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord
 export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
-export function useCrmContacts(companyId: string | undefined, page = 0, pageSize = 20) {
+export function useCrmContacts(
+  companyId: string | undefined,
+  page = 0,
+  pageSize = 20,
+  filters?: { search?: string; contactType?: string; tag?: string; showArchived?: boolean }
+) {
   return useQuery({
-    queryKey: ['crm-contacts', companyId, page, pageSize],
+    queryKey: ['crm-contacts', companyId, page, pageSize, filters],
     queryFn: async (): Promise<{ data: CrmContact[]; count: number }> => {
       const from = page * pageSize;
       const to = from + pageSize - 1;
-      const { data, error, count } = await supabase
+      let q = supabase
         .from('crm_contacts')
         .select('*', { count: 'exact' })
         .eq('company_id', companyId!)
         .order('updated_at', { ascending: false })
         .range(from, to);
+
+      // Server-side archived filter (default: hide archived)
+      if (!filters?.showArchived) {
+        q = q.eq('is_archived', false);
+      }
+
+      // Server-side search
+      if (filters?.search && filters.search.trim().length >= 2) {
+        const s = filters.search.trim().toLowerCase();
+        q = q.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
+      }
+
+      // Server-side type filter
+      if (filters?.contactType) {
+        q = q.eq('contact_type', filters.contactType);
+      }
+
+      // Server-side tag filter
+      if (filters?.tag) {
+        q = q.contains('tags', [filters.tag]);
+      }
+
+      const { data, error, count } = await q;
       if (error) throw error;
       return { data: (data || []) as unknown as CrmContact[], count: count || 0 };
     },

@@ -8,7 +8,8 @@ export function ActiveDealsWidget() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership } = useMyCompanyId();
-  const { data: deals = [] } = useAgentDeals(membership?.company_id);
+  const { data: dealsResult } = useAgentDeals(membership?.company_id);
+  const deals = dealsResult?.data || [];
 
   // Don't render if user is not a company member or has no deals
   if (!membership) return null;

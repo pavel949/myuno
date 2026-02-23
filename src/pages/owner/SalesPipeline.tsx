@@ -19,7 +19,8 @@ export default function SalesPipeline() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
-  const { data: deals = [], isLoading } = useAgentDeals(membership?.company_id);
+  const { data: dealsResult, isLoading } = useAgentDeals(membership?.company_id);
+  const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(membership?.company_id);
   const [showCreate, setShowCreate] = useState(false);
   const [filterStage, setFilterStage] = useState<DealStage | 'all' | 'follow_up'>('all');
