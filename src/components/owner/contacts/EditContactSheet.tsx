@@ -5,11 +5,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateContact, CrmContact, CONTACT_TYPES, CONTACT_SOURCES } from '@/hooks/useCrmContacts';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+
+const COMMON_INTERESTS = [
+  'golf', 'diving', 'yoga', 'fitness', 'sailing', 'travel', 'wine', 'cooking',
+  'art', 'photography', 'crypto', 'business', 'kids activities', 'spa',
+];
 
 interface Props {
   open: boolean;
@@ -33,7 +41,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     contact_type: contact.contact_type || 'buyer',
     source: contact.source || 'website',
     nationality: contact.nationality || '',
+    language: contact.language || '',
     company_name: contact.company_name || '',
+    job_title: contact.job_title || '',
     notes: contact.notes || '',
     budget_min: contact.budget_min?.toString() || '',
     budget_max: contact.budget_max?.toString() || '',
@@ -41,7 +51,13 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     bedrooms_min: contact.bedrooms_min?.toString() || '',
     preferred_types: contact.preferred_types || [],
     preferred_districts: contact.preferred_districts || [],
+    birthday: contact.birthday || '',
+    family_info: contact.family_info || '',
+    interests: contact.interests || [],
+    scoring: contact.scoring?.toString() || '0',
   });
+
+  const [customInterest, setCustomInterest] = useState('');
 
   useEffect(() => {
     setForm({
@@ -54,7 +70,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       contact_type: contact.contact_type || 'buyer',
       source: contact.source || 'website',
       nationality: contact.nationality || '',
+      language: contact.language || '',
       company_name: contact.company_name || '',
+      job_title: contact.job_title || '',
       notes: contact.notes || '',
       budget_min: contact.budget_min?.toString() || '',
       budget_max: contact.budget_max?.toString() || '',
@@ -62,6 +80,10 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       bedrooms_min: contact.bedrooms_min?.toString() || '',
       preferred_types: contact.preferred_types || [],
       preferred_districts: contact.preferred_districts || [],
+      birthday: contact.birthday || '',
+      family_info: contact.family_info || '',
+      interests: contact.interests || [],
+      scoring: contact.scoring?.toString() || '0',
     });
   }, [contact]);
 
@@ -82,7 +104,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         contact_type: form.contact_type,
         source: form.source,
         nationality: form.nationality || null,
+        language: form.language || null,
         company_name: form.company_name || null,
+        job_title: form.job_title || null,
         notes: form.notes || null,
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null,
@@ -90,7 +114,11 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         preferred_types: form.preferred_types.length ? form.preferred_types : null,
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
-      });
+        birthday: form.birthday || null,
+        family_info: form.family_info || null,
+        interests: form.interests.length ? form.interests : null,
+        scoring: form.scoring ? Number(form.scoring) : 0,
+      } as any);
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
     } catch {
@@ -98,11 +126,19 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     }
   };
 
-  const toggleArray = (key: 'preferred_types' | 'preferred_districts', val: string) => {
+  const toggleArray = (key: 'preferred_types' | 'preferred_districts' | 'interests', val: string) => {
     setForm(f => ({
       ...f,
-      [key]: f[key].includes(val) ? f[key].filter(x => x !== val) : [...f[key], val],
+      [key]: f[key].includes(val) ? f[key].filter((x: string) => x !== val) : [...f[key], val],
     }));
+  };
+
+  const addCustomInterest = () => {
+    const val = customInterest.trim().toLowerCase();
+    if (val && !form.interests.includes(val)) {
+      setForm(f => ({ ...f, interests: [...f.interests, val] }));
+    }
+    setCustomInterest('');
   };
 
   return (
@@ -112,6 +148,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           <SheetTitle>{isRu ? 'Редактировать контакт' : 'Edit Contact'}</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-4">
+          {/* Basic info */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
@@ -147,7 +184,92 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
             </div>
             <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
           </div>
-          <div><Label>{isRu ? 'Компания клиента' : 'Client company'}</Label><Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} /></div>
+
+          <Separator />
+
+          {/* Personal section */}
+          <p className="text-sm font-medium text-muted-foreground">{isRu ? '👤 Персональное' : '👤 Personal'}</p>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{isRu ? 'День рождения' : 'Birthday'}</Label>
+              <Input type="date" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
+            </div>
+            <div>
+              <Label>{isRu ? 'Язык' : 'Language'}</Label>
+              <Input placeholder={isRu ? 'RU, EN, TH...' : 'EN, RU, TH...'} value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} />
+            </div>
+          </div>
+
+          <div>
+            <Label>{isRu ? 'Семья' : 'Family'}</Label>
+            <Textarea
+              placeholder={isRu ? 'Жена Анна, дочь 5 лет, сын 3 года...' : 'Wife Anna, daughter 5 y.o., son 3 y.o...'}
+              value={form.family_info}
+              onChange={e => setForm(f => ({ ...f, family_info: e.target.value }))}
+              rows={2}
+            />
+          </div>
+
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Интересы' : 'Interests'}</Label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {COMMON_INTERESTS.map(i => (
+                <button key={i} onClick={() => toggleArray('interests', i)}
+                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                    form.interests.includes(i) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+                  )}>{i}</button>
+              ))}
+            </div>
+            {/* Custom interests */}
+            {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).map(i => (
+                  <Badge key={i} variant="secondary" className="gap-1 text-xs">
+                    {i}
+                    <button onClick={() => toggleArray('interests', i)}><X className="h-3 w-3" /></button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder={isRu ? 'Добавить свой...' : 'Add custom...'}
+                value={customInterest}
+                onChange={e => setCustomInterest(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomInterest())}
+                className="flex-1"
+              />
+              <Button variant="outline" size="sm" onClick={addCustomInterest} disabled={!customInterest.trim()}>+</Button>
+            </div>
+          </div>
+
+          <div>
+            <Label>{isRu ? 'Скоринг (0-100)' : 'Scoring (0-100)'}</Label>
+            <Input type="number" min={0} max={100} value={form.scoring} onChange={e => setForm(f => ({ ...f, scoring: e.target.value }))} />
+          </div>
+
+          <Separator />
+
+          {/* Professional section */}
+          <p className="text-sm font-medium text-muted-foreground">{isRu ? '💼 Профессиональное' : '💼 Professional'}</p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>{isRu ? 'Должность' : 'Job Title'}</Label>
+              <Input placeholder="CEO, Manager..." value={form.job_title} onChange={e => setForm(f => ({ ...f, job_title: e.target.value }))} />
+            </div>
+            <div>
+              <Label>{isRu ? 'Компания' : 'Company'}</Label>
+              <Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Preferences */}
+          <p className="text-sm font-medium text-muted-foreground">{isRu ? '🏠 Предпочтения' : '🏠 Preferences'}</p>
+
           <div className="grid grid-cols-3 gap-3">
             <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
             <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
