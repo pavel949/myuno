@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import {
   Sheet,
   SheetContent,
@@ -45,7 +47,21 @@ import {
   ShieldCheck,
   User,
   Wallet,
+  Building2,
+  CalendarDays,
+  MapPin,
+  MessageCircle,
+  MoreVertical,
+  UserCheck,
+  Search,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   useAllStaffMembers,
   useCreateStaffMember,
@@ -62,6 +78,8 @@ import {
   PayType,
 } from '@/hooks/useStaffMembers';
 import { useMyProperties } from '@/hooks/useMyProperties';
+import { format } from 'date-fns';
+import { ru as ruLocale } from 'date-fns/locale';
 
 const ROLE_ICONS: Record<StaffRole, React.ReactNode> = {
   cleaner: <Sparkles className="h-4 w-4" />,
@@ -78,6 +96,25 @@ const ROLE_COLORS: Record<StaffRole, string> = {
   admin: 'text-primary bg-primary/10',
   staff: 'text-muted-foreground bg-muted',
 };
+
+const AVATAR_COLORS = [
+  'bg-primary/20 text-primary',
+  'bg-info/20 text-info',
+  'bg-warning/20 text-warning',
+  'bg-success/20 text-success',
+  'bg-destructive/20 text-destructive',
+  'bg-accent text-accent-foreground',
+];
+
+function getAvatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+}
 
 interface StaffFormState {
   name: string;
@@ -120,6 +157,185 @@ function staffToForm(s: StaffMember): StaffFormState {
   };
 }
 
+/** Rich staff card component */
+function StaffCard({
+  staff,
+  isRu,
+  onEdit,
+  onDeactivate,
+  onReactivate,
+  properties,
+}: {
+  staff: StaffMember;
+  isRu: boolean;
+  onEdit: () => void;
+  onDeactivate: () => void;
+  onReactivate: () => void;
+  properties: { property_id: string; title: string; title_ru: string }[];
+}) {
+  const t = (en: string, ru: string) => isRu ? ru : en;
+  const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
+  const colorClass = ROLE_COLORS[staff.role] ?? 'text-muted-foreground bg-muted';
+  const { data: assignments } = useStaffPropertyAssignments(staff.id);
+  
+  const payLabel = (() => {
+    if (staff.monthly_salary) return `฿${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
+    if (staff.daily_rate) return `฿${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
+    if (staff.hourly_rate) return `฿${staff.hourly_rate.toLocaleString()}/${t('hr', 'ч')}`;
+    return null;
+  })();
+
+  const hireDate = format(new Date(staff.created_at), isRu ? 'd MMM yyyy' : 'MMM d, yyyy', {
+    locale: isRu ? ruLocale : undefined,
+  });
+
+  const assignedProperties = (assignments || [])
+    .map(a => properties.find(p => p.property_id === a.property_id))
+    .filter(Boolean);
+
+  return (
+    <Card className={!staff.is_active ? 'opacity-60' : undefined}>
+      <CardContent className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Avatar */}
+          <Avatar className="h-14 w-14 shrink-0">
+            <AvatarFallback className={`text-lg font-bold ${getAvatarColor(staff.name)}`}>
+              {getInitials(staff.name)}
+            </AvatarFallback>
+          </Avatar>
+
+          {/* Main info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h3 className="font-semibold text-base leading-tight">{staff.name}</h3>
+              {!staff.is_active && (
+                <Badge variant="secondary" className="text-xs">{t('Inactive', 'Неактивен')}</Badge>
+              )}
+            </div>
+
+            {/* Role badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline" className={`text-xs gap-1 ${colorClass} border-transparent`}>
+                {ROLE_ICONS[staff.role]}
+                {roleLabel}
+              </Badge>
+              {payLabel && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <Wallet className="h-3 w-3" />
+                  {payLabel}
+                </Badge>
+              )}
+            </div>
+
+            {/* Contact info */}
+            <div className="space-y-1.5">
+              {staff.phone && (
+                <a href={`tel:${staff.phone}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Phone className="h-3.5 w-3.5 shrink-0" />
+                  <span>{staff.phone}</span>
+                </a>
+              )}
+              {staff.email && (
+                <a href={`mailto:${staff.email}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Mail className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{staff.email}</span>
+                </a>
+              )}
+            </div>
+
+            {/* Assigned properties */}
+            {assignedProperties.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/40">
+                <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {t('Assigned to', 'Назначен на')}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {assignedProperties.map(p => (
+                    <Badge key={p!.property_id} variant="secondary" className="text-xs font-normal">
+                      <Building2 className="h-3 w-3 mr-1" />
+                      {isRu ? p!.title_ru || p!.title : p!.title}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes preview */}
+            {staff.notes && (
+              <p className="text-xs text-muted-foreground mt-2 line-clamp-2 italic">
+                {staff.notes}
+              </p>
+            )}
+
+            {/* Footer: hire date */}
+            <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <CalendarDays className="h-3 w-3" />
+                {t('Since', 'С')} {hireDate}
+              </span>
+              {staff.phone && (
+                <a 
+                  href={`https://wa.me/${staff.phone.replace(/[^\d+]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-success hover:underline flex items-center gap-1"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                  WhatsApp
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Actions dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onEdit}>
+                <Pencil className="h-4 w-4 mr-2" />
+                {t('Edit', 'Редактировать')}
+              </DropdownMenuItem>
+              {staff.phone && (
+                <DropdownMenuItem asChild>
+                  <a href={`tel:${staff.phone}`}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    {t('Call', 'Позвонить')}
+                  </a>
+                </DropdownMenuItem>
+              )}
+              {staff.email && (
+                <DropdownMenuItem asChild>
+                  <a href={`mailto:${staff.email}`}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    {t('Email', 'Написать')}
+                  </a>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              {staff.is_active ? (
+                <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
+                  <UserX className="h-4 w-4 mr-2" />
+                  {t('Deactivate', 'Деактивировать')}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={onReactivate} className="text-success">
+                  <UserCheck className="h-4 w-4 mr-2" />
+                  {t('Reactivate', 'Активировать')}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function StaffPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -137,10 +353,19 @@ export default function StaffPage() {
   const [form, setForm] = useState<StaffFormState>(DEFAULT_FORM);
   const [tab, setTab] = useState<'active' | 'all'>('active');
   const [deactivateTarget, setDeactivateTarget] = useState<StaffMember | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
 
-  const shown = (staff ?? []).filter(s =>
-    tab === 'active' ? s.is_active : true
-  );
+  const t = (en: string, ru: string) => isRu ? ru : en;
+
+  const shown = (staff ?? [])
+    .filter(s => tab === 'active' ? s.is_active : true)
+    .filter(s => roleFilter === 'all' || s.role === roleFilter)
+    .filter(s => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return s.name.toLowerCase().includes(q) || s.phone?.toLowerCase().includes(q) || s.email?.toLowerCase().includes(q);
+    });
 
   const openCreate = () => {
     setEditing(null);
@@ -176,279 +401,289 @@ export default function StaffPage() {
       }
       setSheetOpen(false);
     } catch {
-      // errors are handled by mutation onError callbacks
+      // errors handled by mutation
     }
+  };
+
+  const handleReactivate = async (s: StaffMember) => {
+    await updateMutation.mutateAsync({ id: s.id, is_active: true });
   };
 
   const isBusy = createMutation.isPending || updateMutation.isPending;
 
-  const t = (en: string, ru: string) => isRu ? ru : en;
+  const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
 
   return (
     <PageContainer>
       <PageHeader
         title={t('Staff Directory', 'Реестр сотрудников')}
-        subtitle={t('Manage in-house staff for your properties', 'Штатные сотрудники УК и назначения')}
+        subtitle={t('Manage your team, assign roles and track assignments', 'Управляйте командой, назначайте роли и отслеживайте задачи')}
         showBack
         fallbackPath="/owner"
       />
 
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      {/* Summary KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
-          { label: t('Total', 'Всего'), value: staff?.length ?? 0, color: 'text-foreground' },
-          { label: t('Active', 'Активных'), value: staff?.filter(s => s.is_active).length ?? 0, color: 'text-primary' },
-          { label: t('Inactive', 'Неактивных'), value: staff?.filter(s => !s.is_active).length ?? 0, color: 'text-muted-foreground' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl border bg-card p-3 text-center">
-            <p className={`text-2xl font-bold ${color}`}>{isLoading ? '–' : value}</p>
-            <p className="text-xs text-muted-foreground">{label}</p>
-          </div>
+          { label: t('Total', 'Всего'), value: staff?.length ?? 0, icon: Users, color: 'text-foreground' },
+          { label: t('Active', 'Активных'), value: staff?.filter(s => s.is_active).length ?? 0, icon: UserCheck, color: 'text-success' },
+          { label: t('Managers', 'Управляющих'), value: staff?.filter(s => s.role === 'manager' || s.role === 'admin').length ?? 0, icon: ShieldCheck, color: 'text-primary' },
+          { label: t('On tasks', 'На объектах'), value: staff?.filter(s => s.role === 'cleaner' || s.role === 'maintenance').length ?? 0, icon: Wrench, color: 'text-warning' },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <Card key={label}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-muted">
+                <Icon className={`h-5 w-5 ${color}`} />
+              </div>
+              <div>
+                <p className={`text-2xl font-bold ${color}`}>{isLoading ? '–' : value}</p>
+                <p className="text-xs text-muted-foreground">{label}</p>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <Tabs value={tab} onValueChange={v => setTab(v as 'active' | 'all')}>
-          <TabsList>
-            <TabsTrigger value="active">{t('Active', 'Активные')}</TabsTrigger>
-            <TabsTrigger value="all">{t('All', 'Все')}</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <Button onClick={openCreate}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          {t('Add Staff', 'Добавить')}
-        </Button>
+      {/* Toolbar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-2 flex-1">
+          <Tabs value={tab} onValueChange={v => setTab(v as 'active' | 'all')}>
+            <TabsList>
+              <TabsTrigger value="active">{t('Active', 'Активные')}</TabsTrigger>
+              <TabsTrigger value="all">{t('All', 'Все')}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Select value={roleFilter} onValueChange={v => setRoleFilter(v as StaffRole | 'all')}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder={t('All roles', 'Все роли')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All roles', 'Все роли')}</SelectItem>
+              {STAFF_ROLES.map(r => (
+                <SelectItem key={r.value} value={r.value}>
+                  {isRu ? r.labelRu : r.labelEn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t('Search staff...', 'Поиск сотрудника...')}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button onClick={openCreate}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            {t('Add', 'Добавить')}
+          </Button>
+        </div>
       </div>
 
+      {/* Staff grid */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-2xl" />)}
         </div>
       ) : shown.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-            <p className="font-medium">{t('No staff yet', 'Нет сотрудников')}</p>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">
-              {t('Add your in-house cleaners, maintenance staff and managers', 'Добавьте штатных уборщиц, мастеров и управляющих')}
+          <CardContent className="py-16 text-center">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="font-semibold text-lg mb-1">{t('No staff yet', 'Нет сотрудников')}</p>
+            <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
+              {t(
+                'Add your cleaners, maintenance staff, managers and other team members to manage assignments and contacts',
+                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
+              )}
             </p>
-            <Button variant="outline" onClick={openCreate}>
+            <Button onClick={openCreate}>
               <UserPlus className="h-4 w-4 mr-2" />
-              {t('Add first staff member', 'Добавить первого')}
+              {t('Add first staff member', 'Добавить первого сотрудника')}
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
-          {shown.map(s => {
-            const roleLabel = STAFF_ROLES.find(r => r.value === s.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? s.role;
-            const colorClass = ROLE_COLORS[s.role] ?? 'text-muted-foreground bg-muted';
-
-            return (
-              <Card key={s.id} className={!s.is_active ? 'opacity-60' : undefined}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-xl ${colorClass}`}>
-                      {ROLE_ICONS[s.role] ?? <User className="h-4 w-4" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">{s.name}</span>
-                        <Badge variant="outline" className="text-xs">{roleLabel}</Badge>
-                        {!s.is_active && (
-                          <Badge variant="secondary" className="text-xs">
-                            {t('Inactive', 'Неактивен')}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
-                        {s.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" />{s.phone}
-                          </span>
-                        )}
-                        {s.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />{s.email}
-                          </span>
-                        )}
-                        {(s.monthly_salary || s.hourly_rate || s.daily_rate) && (
-                          <span className="flex items-center gap-1">
-                            <Wallet className="h-3 w-3" />
-                            {s.monthly_salary
-                              ? `฿${s.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`
-                              : s.daily_rate
-                                ? `฿${s.daily_rate}/${t('day', 'день')}`
-                                : `฿${s.hourly_rate}/${t('hr', 'ч')}`}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(s)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      {s.is_active && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeactivateTarget(s)}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <UserX className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className="grid md:grid-cols-2 gap-4">
+          {shown.map(s => (
+            <StaffCard
+              key={s.id}
+              staff={s}
+              isRu={isRu}
+              onEdit={() => openEdit(s)}
+              onDeactivate={() => setDeactivateTarget(s)}
+              onReactivate={() => handleReactivate(s)}
+              properties={allProperties}
+            />
+          ))}
         </div>
       )}
 
       {/* Edit / Create Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="flex items-center gap-2">
+              {editing ? <Pencil className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
               {editing ? t('Edit Staff Member', 'Редактировать сотрудника') : t('New Staff Member', 'Новый сотрудник')}
             </SheetTitle>
           </SheetHeader>
 
-          <div className="space-y-4">
-            <div>
-              <Label>{t('Full Name', 'Имя')}</Label>
-              <Input
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder={t('e.g. Nong Yui', 'например, Юлия')}
-              />
+          <div className="space-y-5">
+            {/* Basic info */}
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-1.5 block">{t('Full Name', 'ФИО')}</Label>
+                <Input
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder={t('e.g. Nong Yui', 'например, Юлия Петрова')}
+                />
+              </div>
+
+              <div>
+                <Label className="mb-1.5 block">{t('Role', 'Роль')}</Label>
+                <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v as StaffRole }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STAFF_ROLES.map(r => (
+                      <SelectItem key={r.value} value={r.value}>
+                        <div className="flex items-center gap-2">
+                          {ROLE_ICONS[r.value]}
+                          {isRu ? r.labelRu : r.labelEn}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Active toggle for editing */}
+              {editing && (
+                <div className="flex items-center justify-between p-3 rounded-xl border">
+                  <div>
+                    <p className="text-sm font-medium">{t('Active Status', 'Статус активности')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {form.is_active ? t('Employee is active', 'Сотрудник активен') : t('Employee is deactivated', 'Сотрудник деактивирован')}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={form.is_active}
+                    onCheckedChange={checked => setForm(f => ({ ...f, is_active: checked }))}
+                  />
+                </div>
+              )}
             </div>
 
-            <div>
-              <Label>{t('Role', 'Роль')}</Label>
-              <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v as StaffRole }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STAFF_ROLES.map(r => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {isRu ? r.labelRu : r.labelEn}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>{t('Phone', 'Телефон')}</Label>
-                <Input
-                  value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                  placeholder="+66 8x xxx xxxx"
-                />
-              </div>
-              <div>
-                <Label>{t('Email', 'Email')}</Label>
-                <Input
-                  value={form.email}
-                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="staff@"
-                />
+            {/* Contacts */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                {t('Contact Info', 'Контакты')}
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="mb-1.5 block">{t('Phone', 'Телефон')}</Label>
+                  <Input
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="+66 8x xxx xxxx"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1.5 block">{t('Email', 'Email')}</Label>
+                  <Input
+                    value={form.email}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="staff@company.com"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Pay type */}
-            <div>
-              <Label>{t('Pay Type', 'Тип оплаты')}</Label>
-              <Select value={form.pay_type} onValueChange={v => setForm(f => ({ ...f, pay_type: v as PayType }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAY_TYPES.map(p => (
-                    <SelectItem key={p.value} value={p.value}>
-                      {isRu ? p.labelRu : p.labelEn}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Pay */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                {t('Compensation', 'Оплата')}
+              </h4>
+              <div>
+                <Label className="mb-1.5 block">{t('Pay Type', 'Тип оплаты')}</Label>
+                <Select value={form.pay_type} onValueChange={v => setForm(f => ({ ...f, pay_type: v as PayType }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAY_TYPES.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {isRu ? p.labelRu : p.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {form.pay_type === 'salary' && (
+                <div>
+                  <Label className="mb-1.5 block">{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
+                  <Input type="number" value={form.monthly_salary} onChange={e => setForm(f => ({ ...f, monthly_salary: e.target.value }))} placeholder="15000" />
+                </div>
+              )}
+              {form.pay_type === 'hourly' && (
+                <div>
+                  <Label className="mb-1.5 block">{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
+                  <Input type="number" value={form.hourly_rate} onChange={e => setForm(f => ({ ...f, hourly_rate: e.target.value }))} placeholder="200" />
+                </div>
+              )}
+              {form.pay_type === 'daily' && (
+                <div>
+                  <Label className="mb-1.5 block">{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
+                  <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="1000" />
+                </div>
+              )}
+              {form.pay_type === 'per_task' && (
+                <div>
+                  <Label className="mb-1.5 block">{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
+                  <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="500" />
+                </div>
+              )}
             </div>
 
-            {form.pay_type === 'salary' && (
-              <div>
-                <Label>{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
-                <Input
-                  type="number"
-                  value={form.monthly_salary}
-                  onChange={e => setForm(f => ({ ...f, monthly_salary: e.target.value }))}
-                  placeholder="15000"
-                />
-              </div>
-            )}
-            {form.pay_type === 'hourly' && (
-              <div>
-                <Label>{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
-                <Input
-                  type="number"
-                  value={form.hourly_rate}
-                  onChange={e => setForm(f => ({ ...f, hourly_rate: e.target.value }))}
-                  placeholder="200"
-                />
-              </div>
-            )}
-            {form.pay_type === 'daily' && (
-              <div>
-                <Label>{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
-                <Input
-                  type="number"
-                  value={form.daily_rate}
-                  onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))}
-                  placeholder="1000"
-                />
-              </div>
-            )}
-            {form.pay_type === 'per_task' && (
-              <div>
-                <Label>{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
-                <Input
-                  type="number"
-                  value={form.daily_rate}
-                  onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))}
-                  placeholder="500"
-                />
-              </div>
-            )}
-
+            {/* Notes */}
             <div>
-              <Label>{t('Notes', 'Примечания')}</Label>
+              <Label className="mb-1.5 block">{t('Notes', 'Примечания')}</Label>
               <Textarea
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                placeholder={t('Special skills, schedule notes...', 'Особые навыки, график...')}
+                placeholder={t('Special skills, schedule, preferences...', 'Особые навыки, график работы, предпочтения...')}
                 rows={3}
               />
             </div>
 
-            {/* Property Assignments (only in edit mode) */}
+            {/* Property Assignments (edit mode only) */}
             {editing && allProperties.length > 0 && (
-              <StaffPropertyAssignments
-                staffId={editing.id}
-                properties={allProperties}
-                isRu={isRu}
-                onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-              />
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  {t('Property Assignments', 'Назначения на объекты')}
+                </h4>
+                <StaffPropertyAssignments
+                  staffId={editing.id}
+                  properties={allProperties}
+                  isRu={isRu}
+                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
+                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
+                />
+              </div>
             )}
 
             <Button className="w-full" onClick={handleSave} disabled={isBusy || !form.name.trim()}>
               {isBusy
                 ? t('Saving...', 'Сохранение...')
                 : editing
-                  ? t('Save Changes', 'Сохранить')
+                  ? t('Save Changes', 'Сохранить изменения')
                   : t('Add Staff Member', 'Добавить сотрудника')}
             </Button>
           </div>
@@ -487,7 +722,7 @@ export default function StaffPage() {
   );
 }
 
-/** Inline component for property assignments */
+/** Inline component for property assignments in the edit form */
 function StaffPropertyAssignments({
   staffId,
   properties,
@@ -507,8 +742,6 @@ function StaffPropertyAssignments({
 
   return (
     <div className="space-y-2">
-      <Label>{isRu ? 'Назначен на объекты' : 'Assigned Properties'}</Label>
-      
       {isLoading ? (
         <Skeleton className="h-8 w-full" />
       ) : (
@@ -518,9 +751,12 @@ function StaffPropertyAssignments({
               {(assignments || []).map(a => {
                 const prop = properties.find(p => p.property_id === a.property_id);
                 return (
-                  <div key={a.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50">
-                    <span className="text-sm">{prop ? (isRu ? prop.title_ru : prop.title) : a.property_id.slice(0, 8)}</span>
-                    <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive" onClick={() => onRemove(a.id)}>
+                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/50">
+                    <span className="text-sm flex items-center gap-2">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
+                    </span>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
                       {isRu ? 'Убрать' : 'Remove'}
                     </Button>
                   </div>
@@ -537,7 +773,7 @@ function StaffPropertyAssignments({
               <SelectContent>
                 {unassigned.map(p => (
                   <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru : p.title}
+                    {isRu ? p.title_ru || p.title : p.title}
                   </SelectItem>
                 ))}
               </SelectContent>
