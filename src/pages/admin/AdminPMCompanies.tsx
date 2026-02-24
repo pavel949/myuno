@@ -125,7 +125,7 @@ export default function AdminPMCompanies() {
       website: company.website || '',
       address: company.address || '',
       license_number: company.license_number || '',
-      director_name: (company as any).director_name || '',
+      director_name: company.director_name || '',
       service_districts: company.service_districts || [],
       service_types: company.service_types || [],
       languages: company.languages || ['en'],
