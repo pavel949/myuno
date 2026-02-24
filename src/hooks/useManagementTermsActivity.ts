@@ -2,8 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
 
 export interface TermsActivity {
   id: string;
@@ -24,7 +22,7 @@ export function useTermsActivity(termsId?: string) {
     queryKey: ['terms-activity', termsId],
     enabled: !!user && !!termsId,
     queryFn: async () => {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('management_terms_activity')
         .select('*')
         .eq('terms_id', termsId!)
@@ -50,7 +48,7 @@ export function useLogTermsActivity() {
       note?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await db
+      const { error } = await supabase
         .from('management_terms_activity')
         .insert({
           terms_id: entry.terms_id,
