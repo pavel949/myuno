@@ -1,17 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, Sparkles, Loader2 } from 'lucide-react';
+import { Building2, Plus, Loader2, Check, ChevronsUpDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,8 +13,22 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { BusinessCardScanButton, ScannedProviderData } from './BusinessCardScanButton';
 
 interface ProviderSelectorProps {
@@ -43,11 +50,17 @@ export function ProviderSelector({
   const { providers, isLoading, refetch } = useAdminProviders();
   const isRussian = language === 'ru';
 
+  const [open, setOpen] = useState(false);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
   const [quickName, setQuickName] = useState('');
   const [quickPhone, setQuickPhone] = useState('');
   const [quickEmail, setQuickEmail] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  const selectedProvider = useMemo(
+    () => providers.find(p => p.id === value),
+    [providers, value]
+  );
 
   const handleQuickCreate = async () => {
     if (!quickName.trim()) return;
@@ -135,26 +148,67 @@ export function ProviderSelector({
         </Label>
       )}
       <div className="flex gap-2">
-        <Select value={value} onValueChange={onChange} disabled={disabled || isCreating}>
-          <SelectTrigger className="flex-1">
-            <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
-          </SelectTrigger>
-          <SelectContent>
-            {providers.map(provider => (
-              <SelectItem key={provider.id} value={provider.id}>
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span>{provider.name}</span>
-                  {!provider.is_verified && (
-                    <span className="text-xs text-amber-500">
-                      ({isRussian ? 'не верифицирован' : 'unverified'})
-                    </span>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled || isCreating}
+              className="flex-1 justify-between font-normal"
+            >
+              {selectedProvider ? (
+                <span className="flex items-center gap-2 truncate">
+                  <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  {selectedProvider.name}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">
+                  {isRussian ? 'Выберите провайдера...' : 'Select provider...'}
+                </span>
+              )}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50" align="start">
+            <Command>
+              <CommandInput
+                placeholder={isRussian ? 'Начните вводить название...' : 'Type provider name...'}
+              />
+              <CommandList>
+                <CommandEmpty>
+                  {isRussian ? 'Не найдено' : 'No provider found'}
+                </CommandEmpty>
+                <CommandGroup>
+                  {providers.map(provider => (
+                    <CommandItem
+                      key={provider.id}
+                      value={provider.name}
+                      onSelect={() => {
+                        onChange(provider.id);
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === provider.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span className="truncate">{provider.name}</span>
+                      {!provider.is_verified && (
+                        <span className="ml-auto text-xs text-amber-500">
+                          {isRussian ? 'не верифицирован' : 'unverified'}
+                        </span>
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
 
         {/* Quick Create Button */}
         <Button
