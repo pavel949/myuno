@@ -41,17 +41,17 @@
            .eq('is_active', true)
            .order('name_en');
  
-         // Fetch PM companies
-         const { data: pmCompanies } = await supabase
-           .from('property_management_companies')
-           .select('id, name, name_ru')
-           .eq('is_active', true)
-           .order('name');
+          // Fetch PM companies (now unified in management_companies)
+          const { data: pmCompanies } = await supabase
+            .from('management_companies')
+            .select('id, name_en, name_ru')
+            .eq('is_active', true)
+            .order('name_en');
  
          setEntities({
            providers: (providers || []).map(p => ({ id: p.id, name: p.name })),
            vendors: (vendors || []).map(v => ({ id: v.id, name: v.name_en, name_ru: v.name_ru })),
-           pm_companies: (pmCompanies || []).map(c => ({ id: c.id, name: c.name, name_ru: c.name_ru })),
+           pm_companies: (pmCompanies || []).map(c => ({ id: c.id, name: c.name_en, name_ru: c.name_ru })),
            projects: [], // No projects table yet
          });
        } catch (error) {
