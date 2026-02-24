@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ChevronDown,
   Bot,
+  Brain,
   Inbox,
   Megaphone,
   Building2,
@@ -98,6 +99,7 @@ const navigationGroups: NavGroup[] = [
     title: 'Operations',
     titleRu: 'Операции',
     items: [
+      { title: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain },
       { title: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot },
       { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
       { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },

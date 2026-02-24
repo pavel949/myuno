@@ -135,3 +135,18 @@ verify_jwt = false
 [functions.document-reminder-check]
 verify_jwt = false
 
+[functions.publish-telegram-post]
+verify_jwt = false
+
+[functions.ai-content-planner]
+verify_jwt = false
+
+[functions.auto-social-publish]
+verify_jwt = false
+
+[functions.ai-owner-nurture]
+verify_jwt = false
+
+[functions.ai-platform-intelligence]
+verify_jwt = false
+

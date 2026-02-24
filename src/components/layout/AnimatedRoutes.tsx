@@ -449,8 +449,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketplace/subcategories" element={<Navigate to="/admin/catalog" replace />} />
           <Route path="/admin/marketplace/vendors" element={<Navigate to="/admin/catalog" replace />} />
           <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
-          <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
-          <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
+           <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
+           <Route path="/admin/ai-ops" element={<Pages.AdminAIOps />} />
+           <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
           <Route path="/admin/intake" element={<Pages.AdminIntake />} />
           <Route path="/admin/intake-configs" element={<Pages.AdminIntakeConfigs />} />
           <Route path="/admin/lead-configs" element={<Pages.AdminLeadConfigs />} />
