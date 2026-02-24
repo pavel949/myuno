@@ -27,45 +27,33 @@ export default function UserAccountDashboard() {
 
   return (
     <AppLayout title={isRu ? 'Мой аккаунт' : 'My Account'}>
-      <div className="px-4 pt-6 pb-24 space-y-8 max-w-lg mx-auto">
-        {/* Profile */}
-        <AccountProfileCard />
+      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-lg md:max-w-5xl mx-auto">
+        <div className="md:grid md:grid-cols-[320px_1fr] md:gap-8">
+          {/* Left column — Profile & identity */}
+          <div className="space-y-6 mb-8 md:mb-0">
+            <AccountProfileCard />
+            <ActivityPulse />
+            <AchievementShowcase />
+            <DownloadAppButton />
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 py-3 text-destructive hover:opacity-70 transition-opacity"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-base font-medium">{isRu ? 'Выйти' : 'Log out'}</span>
+            </button>
+          </div>
 
-        {/* Activity Stats */}
-        <ActivityPulse />
-
-        {/* Achievements & Loyalty */}
-        <AchievementShowcase />
-
-        {/* Active Stay */}
-        <AccountActiveStay />
-
-        {/* Activity */}
-        <AccountActivitySection />
-
-        <Separator className="bg-border/50" />
-
-        {/* Menu */}
-        <AccountFlatMenu />
-
-        <Separator className="bg-border/50" />
-
-        {/* Category Subscriptions */}
-        <VerticalSubscriptions />
-
-        <Separator className="bg-border/50" />
-
-        {/* PWA Install */}
-        <DownloadAppButton />
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 py-3 text-destructive hover:opacity-70 transition-opacity"
-        >
-          <LogOut className="h-5 w-5" />
-          <span className="text-base font-medium">{isRu ? 'Выйти' : 'Log out'}</span>
-        </button>
+          {/* Right column — Content */}
+          <div className="space-y-8">
+            <AccountActiveStay />
+            <AccountActivitySection />
+            <Separator className="bg-border/50" />
+            <AccountFlatMenu />
+            <Separator className="bg-border/50" />
+            <VerticalSubscriptions />
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
