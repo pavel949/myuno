@@ -97,7 +97,7 @@ export default function SalesPipeline() {
 
   if (membershipLoading || isLoading) {
     return (
-      <div className="p-4 space-y-4 max-w-lg mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-20 w-full rounded-xl" />
         <Skeleton className="h-20 w-full rounded-xl" />
@@ -107,7 +107,7 @@ export default function SalesPipeline() {
 
   if (!membership) {
     return (
-      <div className="p-4 text-center text-muted-foreground pt-20 max-w-lg mx-auto">
+      <div className="p-4 md:p-6 text-center text-muted-foreground pt-20 max-w-[1536px] mx-auto">
         <p className="text-lg font-medium mb-2">{isRu ? 'Нет доступа' : 'No Access'}</p>
         <p className="text-sm">{isRu ? 'Вы не являетесь членом управляющей компании' : "You're not a member of any management company"}</p>
       </div>
@@ -117,7 +117,7 @@ export default function SalesPipeline() {
   const activeStages = DEAL_STAGES.filter(s => s !== 'closed_won' && s !== 'closed_lost');
 
   return (
-    <div className={cn('pt-6 pb-24 space-y-4', view === 'kanban' ? 'px-4' : 'px-4 max-w-lg mx-auto')}>
+    <div className={cn('pt-6 pb-24 md:pb-8 space-y-4 px-4 md:px-6 lg:px-8 max-w-[1536px] mx-auto w-full')}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{isRu ? 'Воронка продаж' : 'Sales Pipeline'}</h1>
@@ -257,7 +257,7 @@ export default function SalesPipeline() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {filtered.map(deal => (
                 <DealCard
                   key={deal.id}
