@@ -70,7 +70,7 @@ export function CompactFooter() {
   if (isDesktop) {
     return (
       <footer className="border-t-2 border-border bg-muted/20 mt-auto">
-        <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="max-w-[1536px] mx-auto px-8 py-12">
           {/* Main grid */}
           <div className="grid grid-cols-4 gap-8 mb-8">
             {/* Brand column */}
@@ -164,7 +164,7 @@ export function CompactFooter() {
   // Mobile: compact footer (unchanged)
   return (
     <footer className="border-t border-border/50 bg-muted/30 mt-auto pb-20 md:pb-0">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+      <div className="max-w-[1536px] mx-auto px-4 py-6 space-y-4">
         {!isInstalled && (
           <div className="flex justify-center">
             <button

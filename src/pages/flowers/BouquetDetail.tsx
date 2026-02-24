@@ -420,7 +420,7 @@ const BouquetDetail = () => {
 
         {/* Sticky Bottom Bar */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50">
-          <div className="flex items-center gap-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 max-w-[1536px] mx-auto">
             {quantity === 0 ? (
               <>
                 <Button

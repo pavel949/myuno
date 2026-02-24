@@ -303,7 +303,7 @@ const Cart = () => {
 
       {/* Bottom Checkout Bar - positioned above BottomNav */}
       <div className="fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border p-4 z-40">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1536px] mx-auto">
           <div className="flex items-center justify-between mb-3">
             <span className="text-muted-foreground">
               {language === 'ru' ? 'Итого' : 'Total'}

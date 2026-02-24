@@ -121,7 +121,7 @@ export const FlashDealsSection: React.FC<FlashDealsSectionProps> = ({
 
   return (
     <section className={cn("py-3 bg-gradient-to-r from-destructive/5 to-warning/5", className)}>
-      <div className="px-4 max-w-7xl mx-auto">
+      <div className="px-4 max-w-[1536px] mx-auto">
         {/* Header with Countdown */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">

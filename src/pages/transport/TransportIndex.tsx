@@ -114,7 +114,7 @@ export default function TransportIndex() {
         <TransportHeroSearch />
 
         {/* Quick Links */}
-        <div className="max-w-7xl mx-auto px-4 py-3 flex gap-2">
+        <div className="max-w-[1536px] mx-auto px-4 py-3 flex gap-2">
           {QUICK_LINKS.map(link => (
             <button
               key={link.id}
@@ -135,7 +135,7 @@ export default function TransportIndex() {
         />
 
         {/* Results bar */}
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-[1536px] mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p className="text-sm text-muted-foreground">
@@ -178,7 +178,7 @@ export default function TransportIndex() {
         </div>
 
         {/* Main content with optional sidebar */}
-        <div className="max-w-7xl mx-auto px-4 pb-24">
+        <div className="max-w-[1536px] mx-auto px-4 pb-24">
           <div className={cn("flex gap-6", filtersOpen && "lg:flex")}>
             {/* Filter Sidebar */}
             <TransportFilterSidebar

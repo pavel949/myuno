@@ -88,7 +88,7 @@ export default memo(function PlatformCatalog() {
         title={isRu ? 'Каталог платформы' : 'Platform Catalog'}
       />
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
+      <div className="max-w-[1536px] mx-auto px-4 lg:px-8 py-6">
         {/* Page intro */}
         <div className="mb-8">
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">

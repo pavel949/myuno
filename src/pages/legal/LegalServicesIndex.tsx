@@ -82,7 +82,7 @@ export default function LegalServicesIndex() {
           onCategoryChange={setSelectedCategory}
         />
 
-        <main className="container max-w-7xl mx-auto px-4 py-4 pb-24">
+        <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
           {isLoading ? (
             <div className="grid gap-4">
               {[1,2,3].map(i => (

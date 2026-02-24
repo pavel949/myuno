@@ -50,7 +50,7 @@ export default function PetsIndex() {
       />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+      <div className="max-w-[1536px] mx-auto px-4 py-4 pb-24">
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (

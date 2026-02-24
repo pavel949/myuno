@@ -491,7 +491,7 @@ const MarketIndex = () => {
         </section>
 
         {/* 10. Cross-sell to other services */}
-        <section className="py-6 max-w-7xl mx-auto">
+        <section className="py-6 max-w-[1536px] mx-auto">
           <CrossSellSection currentVertical="marketplace" maxItems={4} />
         </section>
 

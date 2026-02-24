@@ -29,7 +29,7 @@ export function RecentlyViewedServices() {
 
   return (
     <section className="py-3">
-      <div className="px-4 max-w-7xl mx-auto flex items-center justify-between mb-2">
+      <div className="px-4 max-w-[1536px] mx-auto flex items-center justify-between mb-2">
         <UnifiedSectionHeader
           icon={Eye}
           iconColor="text-muted-foreground"

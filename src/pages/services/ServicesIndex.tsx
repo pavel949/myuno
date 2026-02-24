@@ -81,7 +81,7 @@ export default function ServicesIndex() {
           onCategoryChange={handleCategoryChange}
         />
 
-        <main className="container max-w-7xl mx-auto px-4 py-4 pb-24">
+        <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
           {/* Popular Section */}
           {selectedCategory === 'all' && !searchQuery && (
             <div className="mb-6">

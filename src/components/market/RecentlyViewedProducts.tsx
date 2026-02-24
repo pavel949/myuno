@@ -34,7 +34,7 @@ export const RecentlyViewedProducts: React.FC<RecentlyViewedProductsProps> = ({
 
   return (
     <section className={cn("py-3", className)}>
-      <div className="px-4 max-w-7xl mx-auto flex items-center justify-between mb-2">
+      <div className="px-4 max-w-[1536px] mx-auto flex items-center justify-between mb-2">
         <UnifiedSectionHeader
           icon={Eye}
           iconColor="text-muted-foreground"

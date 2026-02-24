@@ -90,7 +90,7 @@ export function CategoryRibbon() {
 
   return (
     <div className="bg-card border-b border-border/50">
-      <div className="px-3 py-2.5 max-w-7xl mx-auto space-y-2">
+      <div className="px-3 py-2.5 max-w-[1536px] mx-auto space-y-2">
         {/* Row 1: Quick Actions */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-proximity">
           {/* Catalog Button with Drawer */}

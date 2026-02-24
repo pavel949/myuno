@@ -182,7 +182,7 @@ export default function ExperiencesIndex() {
           }
         >
           {/* Type toggle */}
-          <div className="max-w-7xl mx-auto px-4 pb-2">
+          <div className="max-w-[1536px] mx-auto px-4 pb-2">
             <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
               {([
                 { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -208,7 +208,7 @@ export default function ExperiencesIndex() {
 
           {/* Category ribbon */}
           {dbCategories.length > 0 && (
-            <div className="max-w-7xl mx-auto px-4 pb-2.5">
+            <div className="max-w-[1536px] mx-auto px-4 pb-2.5">
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                 <button
                   onClick={() => handleCategoryChange('all')}
@@ -241,7 +241,7 @@ export default function ExperiencesIndex() {
         </CatalogHeader>
 
         {/* Results count + sort */}
-        <div className="container max-w-7xl mx-auto px-4 py-3">
+        <div className="container max-w-[1536px] mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {sorted.length} {isRu ? 'впечатлений' : 'experiences'}
@@ -272,7 +272,7 @@ export default function ExperiencesIndex() {
         </div>
 
         {/* Grid */}
-        <main className="container max-w-7xl mx-auto px-4 pb-24">
+        <main className="container max-w-[1536px] mx-auto px-4 pb-24">
           {isLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
               {[1,2,3,4,5,6].map(i => (
