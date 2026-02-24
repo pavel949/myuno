@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 export default function AdminAIOps() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const queryClient = useQueryClient();
 
   // AI Agents status
   const { data: agents } = useQuery({
@@ -222,9 +223,9 @@ export default function AdminAIOps() {
               <CardContent>
                 <div className="space-y-2">
                   {[
-                    { label: isRu ? 'Новые' : 'New', value: ownerPipeline?.new || 0, color: 'bg-blue-500' },
-                    { label: isRu ? 'Nurturing' : 'Nurturing', value: ownerPipeline?.nurturing || 0, color: 'bg-amber-500' },
-                    { label: isRu ? 'Конвертированы' : 'Converted', value: ownerPipeline?.converted || 0, color: 'bg-emerald-500' },
+                    { label: isRu ? 'Новые' : 'New', value: ownerPipeline?.new || 0, color: 'bg-primary' },
+                    { label: isRu ? 'Nurturing' : 'Nurturing', value: ownerPipeline?.nurturing || 0, color: 'bg-accent-foreground' },
+                    { label: isRu ? 'Конвертированы' : 'Converted', value: ownerPipeline?.converted || 0, color: 'bg-chart-2' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -262,9 +263,9 @@ export default function AdminAIOps() {
               <CardContent>
                 <div className="space-y-2">
                   {[
-                    { label: isRu ? 'Новые' : 'New', value: vendorPipeline?.new || 0, color: 'bg-blue-500' },
-                    { label: isRu ? 'Contacted' : 'Contacted', value: vendorPipeline?.contacted || 0, color: 'bg-amber-500' },
-                    { label: isRu ? 'Onboarded' : 'Onboarded', value: vendorPipeline?.onboarded || 0, color: 'bg-emerald-500' },
+                    { label: isRu ? 'Новые' : 'New', value: vendorPipeline?.new || 0, color: 'bg-primary' },
+                    { label: isRu ? 'Contacted' : 'Contacted', value: vendorPipeline?.contacted || 0, color: 'bg-accent-foreground' },
+                    { label: isRu ? 'Onboarded' : 'Onboarded', value: vendorPipeline?.onboarded || 0, color: 'bg-chart-2' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -331,11 +332,17 @@ export default function AdminAIOps() {
                               variant="ghost"
                               size="sm"
                               onClick={async () => {
-                                await (supabase as any)
-                                  .from('social_content_calendar')
-                                  .update({ status: 'approved' })
-                                  .eq('id', item.id);
-                                toast.success(isRu ? 'Одобрено' : 'Approved');
+                                try {
+                                  const { error } = await (supabase as any)
+                                    .from('social_content_calendar')
+                                    .update({ status: 'approved' })
+                                    .eq('id', item.id);
+                                  if (error) throw error;
+                                  queryClient.invalidateQueries({ queryKey: ['content-calendar'] });
+                                  toast.success(isRu ? 'Одобрено' : 'Approved');
+                                } catch (e: any) {
+                                  toast.error(isRu ? 'Ошибка' : 'Error', { description: e.message });
+                                }
                               }}
                             >
                               ✅
