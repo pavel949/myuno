@@ -55,23 +55,68 @@ const searchTables: TableConfig[] = [
   { table: 'marketplace_categories', type: 'marketCategory', titleEn: 'name_en', titleRu: 'name_ru', image: 'image_url', price: null, locationEn: null, locationRu: null, rating: null, pathPrefix: '/market/category/', idField: 'slug', hasApprovalStatus: false },
 ];
 
-// Keyword synonyms for common searches
-const SEARCH_SYNONYMS: Record<string, SearchResult> = {
-  'rent': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
-  'rental': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
-  'villa': { id: 'cat-villa', type: 'category', titleEn: 'Villas', titleRu: 'Виллы', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=villa', isCategory: true },
-  'condo': { id: 'cat-condo', type: 'category', titleEn: 'Condos', titleRu: 'Кондо', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=condo', isCategory: true },
-  'apartment': { id: 'cat-apt', type: 'category', titleEn: 'Apartments', titleRu: 'Квартиры', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=apartment', isCategory: true },
-  'house': { id: 'cat-house', type: 'category', titleEn: 'Houses', titleRu: 'Дома', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=house', isCategory: true },
-  'аренда': { id: 'cat-rent', type: 'category', titleEn: 'Property Rentals', titleRu: 'Аренда жилья', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?mode=rent', isCategory: true },
-  'вилла': { id: 'cat-villa', type: 'category', titleEn: 'Villas', titleRu: 'Виллы', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=villa', isCategory: true },
-  'квартира': { id: 'cat-apt', type: 'category', titleEn: 'Apartments', titleRu: 'Квартиры', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=apartment', isCategory: true },
-  'кондо': { id: 'cat-condo', type: 'category', titleEn: 'Condos', titleRu: 'Кондо', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/property?type=condo', isCategory: true },
-  'transfer': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
-  'airport': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
-  'трансфер': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
-  'аэропорт': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
-};
+// Keyword synonyms: each entry has keywords (all must match) and priority (higher = preferred)
+interface SynonymEntry {
+  keywords: string[];
+  priority: number;
+  result: SearchResult;
+}
+
+const mkCat = (id: string, en: string, ru: string, path: string): SearchResult => ({
+  id, type: 'category', titleEn: en, titleRu: ru, image: null, price: null,
+  locationEn: null, locationRu: null, rating: null, path, isCategory: true,
+});
+
+const SEARCH_SYNONYM_ENTRIES: SynonymEntry[] = [
+  // Transport - specific (higher priority)
+  { keywords: ['scooter'], priority: 10, result: mkCat('cat-scooter', 'Scooter Rental', 'Аренда скутера', '/transport?type=scooter') },
+  { keywords: ['скутер'], priority: 10, result: mkCat('cat-scooter', 'Scooter Rental', 'Аренда скутера', '/transport?type=scooter') },
+  { keywords: ['мотобайк'], priority: 10, result: mkCat('cat-scooter', 'Scooter Rental', 'Аренда мотобайка', '/transport?type=scooter') },
+  { keywords: ['bike'], priority: 10, result: mkCat('cat-bike', 'Motorbike Rental', 'Аренда мотобайка', '/transport?type=scooter') },
+  { keywords: ['car', 'rent'], priority: 10, result: mkCat('cat-car', 'Car Rental', 'Аренда авто', '/transport') },
+  { keywords: ['авто'], priority: 10, result: mkCat('cat-car', 'Car Rental', 'Аренда авто', '/transport') },
+  { keywords: ['машин'], priority: 10, result: mkCat('cat-car', 'Car Rental', 'Аренда авто', '/transport') },
+  { keywords: ['аренда', 'скутер'], priority: 20, result: mkCat('cat-scooter', 'Scooter Rental', 'Аренда скутера', '/transport?type=scooter') },
+  { keywords: ['аренда', 'авто'], priority: 20, result: mkCat('cat-car', 'Car Rental', 'Аренда авто', '/transport') },
+  { keywords: ['аренда', 'машин'], priority: 20, result: mkCat('cat-car', 'Car Rental', 'Аренда авто', '/transport') },
+  { keywords: ['аренда', 'мото'], priority: 20, result: mkCat('cat-scooter', 'Motorbike Rental', 'Аренда мотобайка', '/transport?type=scooter') },
+  { keywords: ['аренда', 'байк'], priority: 20, result: mkCat('cat-scooter', 'Motorbike Rental', 'Аренда мотобайка', '/transport?type=scooter') },
+  // Property - generic (lower priority)
+  { keywords: ['rent'], priority: 5, result: mkCat('cat-rent', 'Property Rentals', 'Аренда жилья', '/property?mode=rent') },
+  { keywords: ['rental'], priority: 5, result: mkCat('cat-rent', 'Property Rentals', 'Аренда жилья', '/property?mode=rent') },
+  { keywords: ['аренда'], priority: 1, result: mkCat('cat-rent', 'Property Rentals', 'Аренда жилья', '/property?mode=rent') },
+  { keywords: ['villa'], priority: 5, result: mkCat('cat-villa', 'Villas', 'Виллы', '/property?type=villa') },
+  { keywords: ['вилла'], priority: 5, result: mkCat('cat-villa', 'Villas', 'Виллы', '/property?type=villa') },
+  { keywords: ['condo'], priority: 5, result: mkCat('cat-condo', 'Condos', 'Кондо', '/property?type=condo') },
+  { keywords: ['кондо'], priority: 5, result: mkCat('cat-condo', 'Condos', 'Кондо', '/property?type=condo') },
+  { keywords: ['apartment'], priority: 5, result: mkCat('cat-apt', 'Apartments', 'Квартиры', '/property?type=apartment') },
+  { keywords: ['квартира'], priority: 5, result: mkCat('cat-apt', 'Apartments', 'Квартиры', '/property?type=apartment') },
+  { keywords: ['house'], priority: 5, result: mkCat('cat-house', 'Houses', 'Дома', '/property?type=house') },
+  // Medical
+  { keywords: ['dentist'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
+  { keywords: ['стоматолог'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
+  { keywords: ['стоматолог'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
+  { keywords: ['зубн'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
+  { keywords: ['dental'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
+  { keywords: ['doctor'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['врач'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['клиник'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['больниц'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  { keywords: ['hospital'], priority: 5, result: mkCat('cat-medical', 'Medical Clinics', 'Клиники', '/medical') },
+  // Transport
+  { keywords: ['transfer'], priority: 5, result: mkCat('cat-transfer', 'Airport Transfer', 'Трансфер из аэропорта', '/transport/airport-transfer') },
+  { keywords: ['airport'], priority: 5, result: mkCat('cat-transfer', 'Airport Transfer', 'Трансфер из аэропорта', '/transport/airport-transfer') },
+  { keywords: ['трансфер'], priority: 5, result: mkCat('cat-transfer', 'Airport Transfer', 'Трансфер из аэропорта', '/transport/airport-transfer') },
+  { keywords: ['аэропорт'], priority: 5, result: mkCat('cat-transfer', 'Airport Transfer', 'Трансфер из аэропорта', '/transport/airport-transfer') },
+  // Yacht
+  { keywords: ['yacht'], priority: 5, result: mkCat('cat-yacht', 'Yachts', 'Яхты', '/yachts') },
+  { keywords: ['яхт'], priority: 5, result: mkCat('cat-yacht', 'Yachts', 'Яхты', '/yachts') },
+  // Beauty
+  { keywords: ['массаж'], priority: 5, result: mkCat('cat-massage', 'Massage & Spa', 'Массаж и спа', '/beauty') },
+  { keywords: ['massage'], priority: 5, result: mkCat('cat-massage', 'Massage & Spa', 'Массаж и спа', '/beauty') },
+  { keywords: ['spa'], priority: 5, result: mkCat('cat-spa', 'Spa', 'Спа', '/beauty') },
+  { keywords: ['спа'], priority: 5, result: mkCat('cat-spa', 'Spa', 'Спа', '/beauty') },
+];
 
 const CACHE_TTL_MS = 5000;
 
@@ -91,14 +136,23 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     const searchTermLower = searchTerm.toLowerCase();
     const allResults: SearchResult[] = [];
 
-    // 1. Synonym matches (instant)
-    Object.entries(SEARCH_SYNONYMS).forEach(([keyword, result]) => {
-      if (searchTermLower.includes(keyword) || keyword.includes(searchTermLower)) {
-        if (!allResults.find(r => r.id === result.id)) {
-          allResults.push(result);
-        }
+    // 1. Synonym matches — pick highest-priority entries where ALL keywords match
+    const matchedSynonyms: SynonymEntry[] = [];
+    for (const entry of SEARCH_SYNONYM_ENTRIES) {
+      const allMatch = entry.keywords.every(kw => searchTermLower.includes(kw));
+      if (allMatch) {
+        matchedSynonyms.push(entry);
       }
-    });
+    }
+    // Sort by priority desc, deduplicate by result id
+    matchedSynonyms.sort((a, b) => b.priority - a.priority);
+    const seenIds = new Set<string>();
+    for (const entry of matchedSynonyms) {
+      if (!seenIds.has(entry.result.id)) {
+        seenIds.add(entry.result.id);
+        allResults.push(entry.result);
+      }
+    }
 
     try {
       // 2. Category matches
@@ -168,11 +222,27 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           const uniqueFields = [...new Set(selectFields)];
 
+          // Build OR filter — always search title fields, plus extra fields for some tables
+          const orParts = [`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`];
+          // For clinics, also search specialty array and clinic_type
+          if (config.table === 'clinics') {
+            orParts.push(`specialty.cs.{${searchTerm}}`);
+            orParts.push(`clinic_type.ilike.%${searchTerm}%`);
+          }
+          // For vehicles, also search vehicle_type
+          if (config.table === 'vehicles') {
+            orParts.push(`vehicle_type.ilike.%${searchTerm}%`);
+          }
+          // For experiences, also search category
+          if (config.table === 'experiences') {
+            orParts.push(`category.ilike.%${searchTerm}%`);
+          }
+
           let queryBuilder = supabase
             .from(config.table as any)
             .select(uniqueFields.join(','))
             .eq('is_active', true)
-            .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
+            .or(orParts.join(','))
             .limit(3);
 
           if (config.hasApprovalStatus) {
