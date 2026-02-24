@@ -30,6 +30,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/admin/operations': { en: 'Operations', ru: 'Операции' },
   '/admin/intake': { en: 'Intake', ru: 'Приём' },
   '/admin/ai-agents': { en: 'AI Agents', ru: 'AI Агенты' },
+  '/admin/ai-ops': { en: 'AI Command Center', ru: 'AI Центр управления' },
   '/admin/providers': { en: 'Providers', ru: 'Провайдеры' },
   '/admin/services': { en: 'Services', ru: 'Услуги' },
   '/admin/yachts': { en: 'Boat Charters', ru: 'Чартер' },

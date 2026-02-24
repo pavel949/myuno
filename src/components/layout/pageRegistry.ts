@@ -290,6 +290,7 @@ export const AdminUnifiedCatalog = lazy(() => import('@/pages/admin/AdminUnified
 export const AdminControlCenter = lazy(() => import('@/pages/admin/AdminControlCenter'));
 export const AdminVendorContentCreator = lazy(() => import('@/pages/admin/AdminVendorContentCreator'));
 export const AdminAIAgents = lazy(() => import('@/pages/admin/AdminAIAgents'));
+export const AdminAIOps = lazy(() => import('@/pages/admin/AdminAIOps'));
 export const AdminAIAgentEditor = lazy(() => import('@/pages/admin/AdminAIAgentEditor'));
 export const AdminIntake = lazy(() => import('@/pages/admin/AdminIntake'));
 export const AdminIntakeConfigs = lazy(() => import('@/pages/admin/AdminIntakeConfigs'));
