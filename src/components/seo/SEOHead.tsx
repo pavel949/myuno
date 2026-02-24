@@ -39,14 +39,17 @@ export function SEOHead({
     : defaultMeta[lang].title;
   
   const finalDescription = description || defaultMeta[lang].description;
-  const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : 'https://myuno.app');
+  
+  // Always use production domain for canonical/OG URLs
+  const BASE = 'https://myuno.app';
+  const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const canonicalUrl = url || `${BASE}${basePath}`;
   
   // Build hreflang alternate URLs
-  const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const hreflangUrls = {
-    en: `https://myuno.app${basePath}?lang=en`,
-    ru: `https://myuno.app${basePath}?lang=ru`,
-    th: `https://myuno.app${basePath}?lang=th`,
+    en: `${BASE}${basePath}?lang=en`,
+    ru: `${BASE}${basePath}?lang=ru`,
+    th: `${BASE}${basePath}?lang=th`,
   };
 
   return (
@@ -61,23 +64,27 @@ export function SEOHead({
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={currentUrl} />
+      <meta property="og:url" content={canonicalUrl} />
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
       <meta property="og:image" content={image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:site_name" content="myUNO" />
       <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
       <meta property="og:locale:alternate" content={lang === 'ru' ? 'en_US' : 'ru_RU'} />
       <meta property="og:locale:alternate" content="th_TH" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={currentUrl} />
+      <meta name="twitter:site" content="@myUNOapp" />
+      <meta name="twitter:url" content={canonicalUrl} />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={finalDescription} />
       <meta name="twitter:image" content={image} />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={currentUrl} />
+      <link rel="canonical" href={canonicalUrl} />
       
       {/* Hreflang alternate links */}
       <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />

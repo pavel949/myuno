@@ -23,6 +23,7 @@ Disallow: /api/
 Disallow: /account/
 Disallow: /cart
 Disallow: /wallet
+Disallow: /checkout
 
 # Sitemap
 Sitemap: https://myuno.app/sitemap.xml
