@@ -149,7 +149,8 @@ export function useAdminActivities(filterProviderId?: string) {
 }
 
 // Admin hook for properties
-export function useAdminProperties(filterProviderId?: string) {
+// Supports filtering by provider_id OR management_company_id (for УК)
+export function useAdminProperties(filterProviderId?: string, filterType?: 'provider' | 'mc') {
   const { user } = useAuth();
   const [properties, setProperties] = useState<VendorProperty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,14 +163,23 @@ export function useAdminProperties(filterProviderId?: string) {
     let query = supabase.from('properties').select('*');
     
     if (filterProviderId) {
-      query = query.eq('provider_id', filterProviderId);
+      if (filterType === 'mc') {
+        // Filter by management company
+        query = query.eq('management_company_id', filterProviderId);
+      } else if (filterType === 'provider') {
+        // Filter by provider only
+        query = query.eq('provider_id', filterProviderId);
+      } else {
+        // Auto-detect: search in both provider_id and management_company_id
+        query = query.or(`provider_id.eq.${filterProviderId},management_company_id.eq.${filterProviderId}`);
+      }
     }
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
     if (!error && data && checkMounted()) setProperties(data as VendorProperty[]);
     if (checkMounted()) setIsLoading(false);
-  }, [user, filterProviderId]);
+  }, [user, filterProviderId, filterType]);
 
   useEffect(() => {
     let isMounted = true;
@@ -177,7 +187,7 @@ export function useAdminProperties(filterProviderId?: string) {
     return () => { isMounted = false; };
   }, [fetchProperties]);
 
-  const createProperty = async (propertyData: Partial<VendorProperty> & { provider_id: string }) => {
+  const createProperty = async (propertyData: Partial<VendorProperty> & { provider_id?: string; management_company_id?: string }) => {
     if (!user) return { error: new Error('Not authenticated') };
     
     const { data, error } = await supabase

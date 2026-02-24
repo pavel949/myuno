@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminProperties } from '@/hooks/useAdminContent';
+import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { VendorProperty } from '@/hooks/useVendorProperties';
 
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -30,6 +31,12 @@ import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/p
 
 const errorLog = createErrorHandler('AdminProperties');
 
+// Helper to check if an ID belongs to a management company
+function useIsManagementCompanyId(id: string) {
+  const { data: mcs } = useManagementCompanies();
+  return (mcs || []).some(mc => mc.id === id);
+}
+
 export default function AdminProperties() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -40,6 +47,8 @@ export default function AdminProperties() {
   const [filterProviderId, setFilterProviderId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  
+  // Auto-detect if filter ID is an MC to search both provider_id and management_company_id
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
   
   // Redirect to unified property creation wizard instead of opening dialog
@@ -54,6 +63,7 @@ export default function AdminProperties() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
+  const isSelectedMC = useIsManagementCompanyId(selectedProviderId);
 
   const isRussian = language === 'ru';
 
@@ -82,7 +92,9 @@ export default function AdminProperties() {
 
   const openEditSheet = useCallback((property: VendorProperty) => {
     setEditingProperty(property);
-    setSelectedProviderId(property.provider_id || '');
+    // Prefer management_company_id if set, then provider_id
+    const entityId = (property as any).management_company_id || property.provider_id || '';
+    setSelectedProviderId(entityId);
     setIsSheetOpen(true);
   }, []);
 
@@ -112,7 +124,7 @@ export default function AdminProperties() {
       : [editingProperty.listing_type || 'rent'];
 
     return {
-      provider_id: editingProperty.provider_id || '',
+      provider_id: (editingProperty as any).management_company_id || editingProperty.provider_id || '',
       internal_name: editingProperty.internal_name || '',
       title_en: editingProperty.title_en,
       title_ru: editingProperty.title_ru || '',
@@ -150,9 +162,9 @@ export default function AdminProperties() {
       return;
     }
     
-    const providerId = data.provider_id || selectedProviderId;
-    if (!providerId) {
-      toast.error(isRussian ? 'Выберите провайдера' : 'Select provider');
+    const entityId = data.provider_id || selectedProviderId;
+    if (!entityId) {
+      toast.error(isRussian ? 'Выберите провайдера или УК' : 'Select provider or PM company');
       return;
     }
 
@@ -169,8 +181,15 @@ export default function AdminProperties() {
         ? 'sale' 
         : 'rent';
 
+      // Determine if selected entity is MC or provider
+      const isMC = isSelectedMC;
+
       const propertyData: any = {
-        provider_id: providerId,
+        // Correctly assign to either provider_id or management_company_id
+        ...(isMC 
+          ? { management_company_id: entityId, provider_id: null }
+          : { provider_id: entityId }
+        ),
         internal_name: data.internal_name || undefined,
         title_en: data.title_en || data.title || '',
         title_ru: data.title_ru || data.title_en || data.title || '',
