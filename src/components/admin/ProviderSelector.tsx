@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
+import { usePMCompanies } from '@/hooks/usePMCompanies';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -63,6 +64,7 @@ export function ProviderSelector({
   const { language } = useLanguage();
   const { providers, isLoading, refetch } = useAdminProviders();
   const { data: managementCompanies, isLoading: mcLoading } = useManagementCompanies();
+  const { companies: pmCompanies, isLoading: pmcLoading } = usePMCompanies();
   const isRussian = language === 'ru';
 
   const [open, setOpen] = useState(false);
@@ -74,18 +76,34 @@ export function ProviderSelector({
   const [quickEmail, setQuickEmail] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
+  // Merge management_companies and property_management_companies into one list
+  const allMCs = useMemo(() => {
+    const mcList = (managementCompanies || []).map(c => ({
+      id: c.id,
+      name: isRussian ? c.name_ru : c.name_en,
+      source: 'mc' as const,
+    }));
+    const pmcList = pmCompanies
+      .filter(c => !mcList.some(mc => mc.id === c.id)) // dedupe
+      .map(c => ({
+        id: c.id,
+        name: (isRussian && c.name_ru) ? c.name_ru : c.name,
+        source: 'pmc' as const,
+      }));
+    return [...mcList, ...pmcList];
+  }, [managementCompanies, pmCompanies, isRussian]);
+
   const selectedProvider = useMemo(
     () => providers.find(p => p.id === value),
     [providers, value]
   );
 
   const selectedMC = useMemo(
-    () => !selectedProvider ? (managementCompanies || []).find(c => c.id === value) : null,
-    [managementCompanies, value, selectedProvider]
+    () => !selectedProvider ? allMCs.find(c => c.id === value) : null,
+    [allMCs, value, selectedProvider]
   );
 
-  const selectedLabel = selectedProvider?.name 
-    || (selectedMC ? (isRussian ? selectedMC.name_ru : selectedMC.name_en) : null);
+  const selectedLabel = selectedProvider?.name || selectedMC?.name || null;
 
   const filteredProviders = useMemo(
     () => providers.filter(p => matchesSearch(p.name, search)),
@@ -93,10 +111,8 @@ export function ProviderSelector({
   );
 
   const filteredMCs = useMemo(
-    () => (managementCompanies || []).filter(c => 
-      matchesSearch(c.name_en, search) || matchesSearch(c.name_ru, search)
-    ),
-    [managementCompanies, search]
+    () => allMCs.filter(c => matchesSearch(c.name, search)),
+    [allMCs, search]
   );
 
   // Auto-focus search input when popover opens
@@ -176,7 +192,7 @@ export function ProviderSelector({
     }
   };
 
-  if (isLoading || mcLoading) {
+  if (isLoading || mcLoading || pmcLoading) {
     return (
       <div className="space-y-2">
         {label && <Label>{label}</Label>}
@@ -270,7 +286,7 @@ export function ProviderSelector({
                           />
                           <Home className="mr-2 h-4 w-4 shrink-0 text-primary" />
                           <span className="truncate">
-                            {isRussian ? mc.name_ru : mc.name_en}
+                            {mc.name}
                           </span>
                           <span className="ml-auto text-xs text-muted-foreground">УК</span>
                         </button>
