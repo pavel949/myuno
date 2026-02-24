@@ -208,7 +208,7 @@ export default function SalesPipeline() {
       )}
 
       {view === 'kanban' ? (
-        <KanbanBoard deals={filtered} />
+        <KanbanBoard deals={filtered} members={members} />
       ) : (
         <>
           {/* Stage filter */}
