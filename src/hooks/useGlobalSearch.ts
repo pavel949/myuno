@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -50,7 +50,7 @@ const searchTables: TableConfig[] = [
   { table: 'babysitters', type: 'babysitter', titleEn: 'name_en', titleRu: 'name_ru', image: 'photo', price: 'price_per_hour', locationEn: null, locationRu: null, rating: 'rating', pathPrefix: '/babysitter/', idField: 'id', hasApprovalStatus: true },
   { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true },
   { table: 'stores', type: 'market', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/market/store/', idField: 'id', hasApprovalStatus: true },
-  { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: false },
+  { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: true },
   { table: 'marketplace_products', type: 'product', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price', locationEn: 'vendor_name', locationRu: 'vendor_name_ru', rating: 'rating', pathPrefix: '/market/product/', idField: 'id', hasApprovalStatus: false },
   { table: 'marketplace_categories', type: 'marketCategory', titleEn: 'name_en', titleRu: 'name_ru', image: 'image_url', price: null, locationEn: null, locationRu: null, rating: null, pathPrefix: '/market/category/', idField: 'slug', hasApprovalStatus: false },
 ];
@@ -73,176 +73,198 @@ const SEARCH_SYNONYMS: Record<string, SearchResult> = {
   'аэропорт': { id: 'cat-transfer', type: 'category', titleEn: 'Airport Transfer', titleRu: 'Трансфер из аэропорта', image: null, price: null, locationEn: null, locationRu: null, rating: null, path: '/transport/airport-transfer', isCategory: true },
 };
 
-// Cache structure
-interface SearchCache {
-  query: string;
-  results: SearchResult[];
-  timestamp: number;
-}
-
-const CACHE_TTL_MS = 5000; // 5 second cache
+const CACHE_TTL_MS = 5000;
 
 export function useGlobalSearch(query: string, enabled: boolean = true) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { language } = useLanguage();
-  const cacheRef = useRef<SearchCache | null>(null);
-  const lastQueryRef = useRef<string>('');
+  const cacheRef = useRef<Map<string, { results: SearchResult[]; timestamp: number }>>(new Map());
+  const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const trimmed = query.trim();
-    
-    if (!trimmed || trimmed.length < 2 || !enabled) {
-      setResults([]);
-      lastQueryRef.current = '';
-      return;
-    }
+  const performSearch = useCallback(async (searchTerm: string) => {
+    // Cancel any in-flight search
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    // Skip duplicate fetches
-    if (trimmed === lastQueryRef.current) {
-      return;
-    }
+    const searchTermLower = searchTerm.toLowerCase();
+    const allResults: SearchResult[] = [];
 
-    // Check cache
-    if (cacheRef.current && 
-        cacheRef.current.query === trimmed && 
-        Date.now() - cacheRef.current.timestamp < CACHE_TTL_MS) {
-      setResults(cacheRef.current.results);
-      lastQueryRef.current = trimmed;
-      return;
-    }
+    // 1. Synonym matches (instant)
+    Object.entries(SEARCH_SYNONYMS).forEach(([keyword, result]) => {
+      if (searchTermLower.includes(keyword) || keyword.includes(searchTermLower)) {
+        if (!allResults.find(r => r.id === result.id)) {
+          allResults.push(result);
+        }
+      }
+    });
 
-    const searchTimeout = setTimeout(async () => {
-      if (!isMounted) return;
-      setIsLoading(true);
-      lastQueryRef.current = trimmed;
-      
-      const searchTerm = trimmed;
-      const searchTermLower = searchTerm.toLowerCase();
-      const allResults: SearchResult[] = [];
+    try {
+      // 2. Category matches
+      const { data: categoryData } = await supabase
+        .from('categories')
+        .select('id, slug, name_en, name_ru, icon, color, mini_app_type')
+        .eq('is_active', true)
+        .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%`)
+        .limit(4);
 
-      // 1. Synonym matches (instant)
-      Object.entries(SEARCH_SYNONYMS).forEach(([keyword, result]) => {
-        if (searchTermLower.includes(keyword) || keyword.includes(searchTermLower)) {
-          if (!allResults.find(r => r.id === result.id)) {
-            allResults.push(result);
+      if (controller.signal.aborted) return;
+
+      if (categoryData) {
+        categoryData.forEach((cat: any) => {
+          let path = `/${cat.slug}`;
+          if (cat.mini_app_type) {
+            const typePathMap: Record<string, string> = {
+              'real-estate': '/property',
+              'property': '/property',
+              'beauty-spa': '/beauty',
+              'beauty': '/beauty',
+              'medical': '/medical',
+              'transport': '/transport',
+              'tours': '/tours',
+              'restaurants': '/restaurants',
+              'food': '/restaurants',
+              'fitness': '/fitness',
+              'yachts': '/yachts',
+              'services': '/services',
+              'education': '/education',
+              'legal': '/legal',
+              'pets': '/pets',
+              'pharmacy': '/pharmacy',
+              'flowers': '/flowers',
+              'transfers': '/transport/airport-transfer',
+              'events': '/events',
+              'marketplace': '/market',
+              'food-delivery': '/food-delivery',
+              'visa': '/visa',
+            };
+            path = typePathMap[cat.mini_app_type] || `/${cat.slug}`;
           }
+          allResults.push({
+            id: `cat-${cat.id}`,
+            type: 'category',
+            titleEn: cat.name_en,
+            titleRu: cat.name_ru,
+            image: null,
+            price: null,
+            locationEn: null,
+            locationRu: null,
+            rating: null,
+            path,
+            isCategory: true,
+          });
+        });
+      }
+
+      // 3. Entity tables in parallel
+      const searchPromises = searchTables.map(async (config) => {
+        try {
+          const selectFields = [
+            config.idField, config.titleEn, config.titleRu,
+            config.image, config.price, config.locationEn,
+            config.locationRu, config.rating,
+          ].filter((f): f is string => f !== null);
+
+          const uniqueFields = [...new Set(selectFields)];
+
+          let queryBuilder = supabase
+            .from(config.table as any)
+            .select(uniqueFields.join(','))
+            .eq('is_active', true)
+            .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
+            .limit(3);
+
+          if (config.hasApprovalStatus) {
+            queryBuilder = queryBuilder.eq('approval_status', 'approved');
+          }
+
+          const { data, error } = await queryBuilder;
+          
+          if (error) {
+            console.warn(`Search: ${config.table} query failed:`, error.message);
+            return [];
+          }
+          if (!data) return [];
+
+          return data.map((item: any) => ({
+            id: item[config.idField],
+            type: config.type,
+            titleEn: item[config.titleEn] || '',
+            titleRu: item[config.titleRu] || '',
+            image: config.image ? item[config.image] : null,
+            price: config.price ? item[config.price] : null,
+            locationEn: config.locationEn ? item[config.locationEn] : null,
+            locationRu: config.locationRu ? item[config.locationRu] : null,
+            rating: config.rating ? item[config.rating] : null,
+            path: `${config.pathPrefix}${item[config.idField]}`,
+          }));
+        } catch (err) {
+          console.warn(`Search: ${config.table} error:`, err);
+          return [];
         }
       });
 
-      try {
-        // 2. Category matches (fast)
-        const { data: categoryData } = await supabase
-          .from('categories')
-          .select('id, slug, name_en, name_ru, icon, color, mini_app_type')
-          .eq('is_active', true)
-          .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%`)
-          .limit(4);
+      const tableResults = await Promise.all(searchPromises);
+      
+      if (controller.signal.aborted) return;
+      
+      tableResults.forEach(items => allResults.push(...items));
 
-        if (categoryData) {
-          categoryData.forEach((cat: any) => {
-            let path = `/${cat.slug}`;
-            if (cat.mini_app_type) {
-              const typePathMap: Record<string, string> = {
-                'real-estate': '/property',
-                'beauty-spa': '/beauty',
-                'medical': '/medical',
-                'transport': '/transport',
-                'tours': '/tours',
-                'restaurants': '/restaurants',
-              };
-              path = typePathMap[cat.mini_app_type] || `/${cat.slug}`;
-            }
-            allResults.push({
-              id: `cat-${cat.id}`,
-              type: 'category',
-              titleEn: cat.name_en,
-              titleRu: cat.name_ru,
-              image: null,
-              price: null,
-              locationEn: null,
-              locationRu: null,
-              rating: null,
-              path,
-              isCategory: true
-            });
-          });
-        }
+      // Sort: categories first, then by rating
+      allResults.sort((a, b) => {
+        if (a.isCategory && !b.isCategory) return -1;
+        if (!a.isCategory && b.isCategory) return 1;
+        return (b.rating || 0) - (a.rating || 0);
+      });
 
-        // 3. Entity tables in parallel
-        const searchPromises = searchTables.map(async (config) => {
-          try {
-            const selectFields = [
-              config.idField, config.titleEn, config.titleRu,
-              config.image, config.price, config.locationEn,
-              config.locationRu, config.rating
-            ].filter((f): f is string => f !== null);
+      const finalResults = allResults.slice(0, 15);
 
-            const uniqueFields = [...new Set(selectFields)];
+      // Cache results
+      cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });
 
-            let queryBuilder = supabase
-              .from(config.table as any)
-              .select(uniqueFields.join(','))
-              .eq('is_active', true)
-              .or(`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`)
-              .limit(3);
-
-            if (config.hasApprovalStatus) {
-              queryBuilder = queryBuilder.eq('approval_status', 'approved');
-            }
-
-            const { data, error } = await queryBuilder;
-            if (error || !data) return [];
-
-            return data.map((item: any) => ({
-              id: item[config.idField],
-              type: config.type,
-              titleEn: item[config.titleEn] || '',
-              titleRu: item[config.titleRu] || '',
-              image: item[config.image] || null,
-              price: config.price ? item[config.price] : null,
-              locationEn: config.locationEn ? item[config.locationEn] : null,
-              locationRu: config.locationRu ? item[config.locationRu] : null,
-              rating: item[config.rating] || null,
-              path: `${config.pathPrefix}${item[config.idField]}`
-            }));
-          } catch {
-            return [];
-          }
-        });
-
-        const tableResults = await Promise.all(searchPromises);
-        tableResults.forEach(items => allResults.push(...items));
-
-        // Sort: synonyms first, categories second, then by rating
-        allResults.sort((a, b) => {
-          if (a.isCategory && !b.isCategory) return -1;
-          if (!a.isCategory && b.isCategory) return 1;
-          return (b.rating || 0) - (a.rating || 0);
-        });
-        
-        const finalResults = allResults.slice(0, 15);
-        
-        if (isMounted) {
-          setResults(finalResults);
-          // Cache results
-          cacheRef.current = { query: trimmed, results: finalResults, timestamp: Date.now() };
-        }
-      } catch (error) {
-        console.error('Search error:', error);
-        if (isMounted) setResults([]);
-      } finally {
-        if (isMounted) setIsLoading(false);
+      if (!controller.signal.aborted) {
+        setResults(finalResults);
+        setIsLoading(false);
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      if (!controller.signal.aborted) {
+        setResults([]);
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const trimmed = query.trim();
+
+    if (!trimmed || trimmed.length < 2 || !enabled) {
+      setResults([]);
+      setIsLoading(false);
+      abortRef.current?.abort();
+      return;
+    }
+
+    // Check cache first
+    const cached = cacheRef.current.get(trimmed);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      setResults(cached.results);
+      setIsLoading(false);
+      return;
+    }
+
+    // Set loading IMMEDIATELY (not inside timeout) to prevent "no results" flash
+    setIsLoading(true);
+
+    const timeout = setTimeout(() => {
+      performSearch(trimmed);
     }, 300);
 
     return () => {
-      isMounted = false;
-      clearTimeout(searchTimeout);
+      clearTimeout(timeout);
     };
-  }, [query, enabled]);
+  }, [query, enabled, performSearch]);
 
   return { results, isLoading };
 }
