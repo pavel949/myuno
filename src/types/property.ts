@@ -64,6 +64,7 @@ export interface OwnerProperty extends BaseProperty {
   rating?: number;
   review_count?: number;
   project_id?: string;
+  complex_id?: string | null;
   floor?: number;
   unit_number?: string;
   view_type?: string;

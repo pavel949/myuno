@@ -24,6 +24,7 @@ export interface UnifiedProperty {
   price_per_night: number | null;
   currency: string;
   source: 'owned' | 'managed';
+  complex_id: string | null;
 }
 
 export function useMyProperties() {
@@ -50,6 +51,7 @@ export function useMyProperties() {
       price_per_night: p.price_per_night ?? null,
       currency: p.deposit_currency || 'THB',
       source: 'owned' as const,
+      complex_id: p.complex_id || null,
     }));
   }, [ownedRaw]);
 
@@ -68,6 +70,7 @@ export function useMyProperties() {
       price_per_night: p.price_per_night,
       currency: p.currency,
       source: 'managed' as const,
+      complex_id: null,
     }));
   }, [managedRaw]);
 

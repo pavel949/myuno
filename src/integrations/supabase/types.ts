@@ -12380,6 +12380,7 @@ export type Database = {
           cleaning_included: boolean | null
           commercial_terms_redacted: boolean | null
           commission_rate: number | null
+          complex_id: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -12560,6 +12561,7 @@ export type Database = {
           cleaning_included?: boolean | null
           commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
+          complex_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -12740,6 +12742,7 @@ export type Database = {
           cleaning_included?: boolean | null
           commercial_terms_redacted?: boolean | null
           commission_rate?: number | null
+          complex_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -12897,6 +12900,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_complex_id_fkey"
+            columns: ["complex_id"]
+            isOneToOne: false
+            referencedRelation: "property_complexes"
             referencedColumns: ["id"]
           },
           {

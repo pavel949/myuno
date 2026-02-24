@@ -7,6 +7,7 @@ import { BookingDetailSheet } from './BookingDetailSheet';
 import { TaskDetailSheet } from './TaskDetailSheet';
 import { type PropertyBooking } from '@/hooks/usePropertyBookings';
 import { type OperationalTask } from '@/hooks/useOperationalTasks';
+import { type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,17 +20,47 @@ import type { UnifiedProperty } from '@/hooks/useMyProperties';
 interface MultiPropertyTimelineProps {
   properties: UnifiedProperty[];
   isLoading?: boolean;
+  complexes?: PropertyComplex[];
 }
 
 const DAYS_TO_SHOW = 30;
 const CELL_WIDTH = 44;
 const LABEL_WIDTH = 180;
 
-export function MultiPropertyTimeline({ properties, isLoading: propsLoading }: MultiPropertyTimelineProps) {
+export function MultiPropertyTimeline({ properties, isLoading: propsLoading, complexes = [] }: MultiPropertyTimelineProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Sort properties: grouped by complex (alphabetically), then no-complex at the end, then by title within group
+  const sortedProperties = useMemo(() => {
+    const complexMap = new Map(complexes.map(c => [c.id, isRu ? (c.name_ru || c.name) : c.name]));
+    return [...properties].sort((a, b) => {
+      const aComplex = a.complex_id ? complexMap.get(a.complex_id) || '' : 'zzz';
+      const bComplex = b.complex_id ? complexMap.get(b.complex_id) || '' : 'zzz';
+      if (aComplex !== bComplex) return aComplex.localeCompare(bComplex);
+      const aTitle = isRu ? a.title_ru : a.title;
+      const bTitle = isRu ? b.title_ru : b.title;
+      return aTitle.localeCompare(bTitle);
+    });
+  }, [properties, complexes, isRu]);
+
+  // Build complex group headers for rendering
+  const complexGroups = useMemo(() => {
+    const groups: { complexId: string | null; complexName: string; startIndex: number }[] = [];
+    let lastComplexId: string | null | undefined = undefined;
+    sortedProperties.forEach((p, idx) => {
+      if (p.complex_id !== lastComplexId) {
+        const complexName = p.complex_id
+          ? complexes.find(c => c.id === p.complex_id)?.[isRu ? 'name_ru' : 'name'] || complexes.find(c => c.id === p.complex_id)?.name || ''
+          : '';
+        groups.push({ complexId: p.complex_id, complexName, startIndex: idx });
+        lastComplexId = p.complex_id;
+      }
+    });
+    return groups;
+  }, [sortedProperties, complexes, isRu]);
 
   const [startDate, setStartDate] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
 
@@ -151,19 +182,31 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading }: M
                   {isRu ? 'Объект' : 'Property'}
                 </span>
               </div>
-              {properties.map(property => (
-                <div key={property.property_id} className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2">
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage src={property.cover_image || undefined} alt={isRu ? property.title_ru : property.title} />
-                    <AvatarFallback className="text-[10px] bg-muted">
-                      {(isRu ? property.title_ru : property.title).slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs font-medium truncate leading-tight">
-                    {isRu ? property.title_ru : property.title}
-                  </span>
-                </div>
-              ))}
+              {sortedProperties.map((property, idx) => {
+                const group = complexGroups.find(g => g.startIndex === idx);
+                return (
+                  <div key={property.property_id}>
+                    {group && group.complexName && (
+                      <div className="h-7 border-b flex items-center px-2 bg-muted/50">
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide truncate">
+                          {group.complexName}
+                        </span>
+                      </div>
+                    )}
+                    <div className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2">
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={property.cover_image || undefined} alt={isRu ? property.title_ru : property.title} />
+                        <AvatarFallback className="text-[10px] bg-muted">
+                          {(isRu ? property.title_ru : property.title).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs font-medium truncate leading-tight">
+                        {isRu ? property.title_ru : property.title}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Scrollable days area */}
@@ -202,11 +245,16 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading }: M
                 </div>
 
                 {/* Property rows */}
-                {properties.map(property => {
+                {sortedProperties.map((property, idx) => {
                   const propertyBookings = bookingsByProperty.get(property.property_id) || [];
+                  const group = complexGroups.find(g => g.startIndex === idx);
 
                   return (
-                    <div key={property.property_id} className="h-14 border-b last:border-b-0 flex relative">
+                    <div key={property.property_id}>
+                      {group && group.complexName && (
+                        <div className="h-7 border-b bg-muted/50" />
+                      )}
+                      <div className="h-14 border-b last:border-b-0 flex relative">
                       {/* Day cells */}
                       {days.map((day, dayIdx) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
@@ -301,6 +349,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading }: M
                           style={{ left: todayIndex * CELL_WIDTH + CELL_WIDTH / 2 }}
                         />
                       )}
+                      </div>
                     </div>
                   );
                 })}
