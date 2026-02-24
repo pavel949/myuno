@@ -349,7 +349,7 @@ export const AddProperty = lazy(() => import('@/pages/owner/AddProperty'));
 export const ServiceRequest = lazy(() => import('@/pages/owner/ServiceRequest'));
 export const InspectionRequest = lazy(() => import('@/pages/owner/InspectionRequest'));
 export const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerms'));
-export const EditProperty = lazy(() => import('@/pages/owner/EditProperty'));
+// EditProperty removed — use PropertyEditor instead
 export const PropertyEditor = lazy(() => import('@/pages/owner/PropertyEditor'));
 export const PropertyManage = lazy(() => import('@/pages/owner/PropertyManage'));
 export const FullManagement = lazy(() => import('@/pages/owner/FullManagement'));
