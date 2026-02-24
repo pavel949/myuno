@@ -63,6 +63,7 @@ export default function AdminProperties() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
+  const lastUsedProviderRef = React.useRef<string>('');
   const isSelectedMC = useIsManagementCompanyId(selectedProviderId);
 
   const isRussian = language === 'ru';
@@ -100,18 +101,24 @@ export default function AdminProperties() {
 
   const openNewSheet = useCallback(() => {
     setEditingProperty(null);
-    setSelectedProviderId('');
+    // Use filter provider, or last used provider, or empty
+    const defaultProvider = filterProviderId || lastUsedProviderRef.current || '';
+    setSelectedProviderId(defaultProvider);
     setIsSheetOpen(true);
-  }, []);
+  }, [filterProviderId]);
 
   const closeSheet = useCallback(() => {
+    // Remember last used provider for next creation
+    if (selectedProviderId) {
+      lastUsedProviderRef.current = selectedProviderId;
+    }
     setIsSheetOpen(false);
     setEditingProperty(null);
-    setSelectedProviderId('');
+    // Don't reset selectedProviderId — it'll be set fresh on next open
     if (searchParams.has('edit')) {
       navigate('/admin/properties', { replace: true });
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, selectedProviderId]);
 
   // Convert VendorProperty to CanonicalPropertyFormData for editing
   const getInitialFormData = useCallback((): CanonicalPropertyFormData => {
