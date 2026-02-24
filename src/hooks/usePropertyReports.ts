@@ -447,7 +447,7 @@ export function useCanAccessReportFinancials(propertyId: string) {
         .select('role, permissions')
         .eq('property_id', propertyId)
         .eq('user_id', user.id)
-        .eq('status', 'accepted')
+        .eq('status', 'active')
         .single();
       
       if (delegate) {
