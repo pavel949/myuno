@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { AirbnbCalendarGrid } from '@/components/owner/AirbnbCalendarGrid';
+import { MultiPropertyTimeline } from '@/components/owner/MultiPropertyTimeline';
 import { CalendarTodayTasks } from '@/components/owner/CalendarTodayTasks';
 import { CalendarSyncManager } from '@/components/owner/CalendarSyncManager';
 import { PropertyThumbnailSelector } from '@/components/owner/PropertyThumbnailSelector';
@@ -11,7 +12,10 @@ import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromC
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useMyProperties } from '@/hooks/useMyProperties';
-import { CalendarDays, CalendarPlus, Plus, RefreshCw } from 'lucide-react';
+import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type ViewMode = 'single' | 'multi';
 
 export default function OwnerCalendar() {
   const { language } = useLanguage();
@@ -22,6 +26,10 @@ export default function OwnerCalendar() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
+  // Default to multi on desktop (checked via initial window width)
+  const [viewMode, setViewMode] = useState<ViewMode>(() => 
+    typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
+  );
   
   const { allProperties, isLoading: propertiesLoading } = useMyProperties();
 
@@ -58,70 +66,114 @@ export default function OwnerCalendar() {
     );
   }
 
+  const isMulti = viewMode === 'multi';
+
   return (
     <div className="p-4 pb-24 space-y-4">
-      {/* Property Selector */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">
-          {isRu ? 'Выберите объект' : 'Select Property'}
-        </p>
-        <PropertyThumbnailSelector
-          properties={propertyRefs}
-          selectedId={selectedPropertyId}
-          onSelect={setSelectedPropertyId}
-          isLoading={propertiesLoading}
-        />
-      </div>
-      
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-2">
-        <Button 
-          onClick={() => setShowAddBookingDialog(true)}
-          variant="default"
-          className="gap-2"
-          disabled={!selectedPropertyId}
-        >
-          <CalendarPlus className="h-4 w-4" />
-          {isRu ? 'Бронирование' : 'Add Booking'}
-        </Button>
-        <Button 
-          onClick={() => setShowCreateTaskDialog(true)}
-          variant="outline"
-          className="gap-2"
-          disabled={!selectedPropertyId}
-        >
-          <Plus className="h-4 w-4" />
-          {isRu ? 'Задача' : 'Add Task'}
-        </Button>
-      </div>
-
-      {/* Airbnb-style Calendar Grid */}
-      <AirbnbCalendarGrid
-        propertyId={selectedPropertyId || undefined}
-        properties={propertyRefs}
-      />
-
-      {/* Today's Tasks */}
-      <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
-
-      {/* iCal Sync - Collapsible */}
-      {selectedPropertyId && (
-        <Accordion type="single" collapsible>
-          <AccordionItem value="sync" className="border rounded-lg">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline">
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <RefreshCw className="h-4 w-4" />
-                {isRu ? 'Синхронизация iCal' : 'iCal Sync'}
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              <CalendarSyncManager propertyId={selectedPropertyId} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+      {/* View Mode Toggle */}
+      {allProperties.length > 1 && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            {isRu ? 'Календарь' : 'Calendar'}
+          </h2>
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+            <button
+              onClick={() => setViewMode('multi')}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              {isRu ? 'Все' : 'All'}
+            </button>
+            <button
+              onClick={() => setViewMode('single')}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                !isMulti ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <List className="h-3.5 w-3.5" />
+              {isRu ? 'Один' : 'Single'}
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Dialogs */}
+      {isMulti ? (
+        /* Multi-property timeline view */
+        <MultiPropertyTimeline
+          properties={allProperties}
+          isLoading={propertiesLoading}
+        />
+      ) : (
+        /* Single property view */
+        <>
+          {/* Property Selector */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">
+              {isRu ? 'Выберите объект' : 'Select Property'}
+            </p>
+            <PropertyThumbnailSelector
+              properties={propertyRefs}
+              selectedId={selectedPropertyId}
+              onSelect={setSelectedPropertyId}
+              isLoading={propertiesLoading}
+            />
+          </div>
+          
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button 
+              onClick={() => setShowAddBookingDialog(true)}
+              variant="default"
+              className="gap-2"
+              disabled={!selectedPropertyId}
+            >
+              <CalendarPlus className="h-4 w-4" />
+              {isRu ? 'Бронирование' : 'Add Booking'}
+            </Button>
+            <Button 
+              onClick={() => setShowCreateTaskDialog(true)}
+              variant="outline"
+              className="gap-2"
+              disabled={!selectedPropertyId}
+            >
+              <Plus className="h-4 w-4" />
+              {isRu ? 'Задача' : 'Add Task'}
+            </Button>
+          </div>
+
+          {/* Airbnb-style Calendar Grid */}
+          <AirbnbCalendarGrid
+            propertyId={selectedPropertyId || undefined}
+            properties={propertyRefs}
+          />
+
+          {/* Today's Tasks */}
+          <CalendarTodayTasks propertyId={selectedPropertyId || undefined} />
+
+          {/* iCal Sync - Collapsible */}
+          {selectedPropertyId && (
+            <Accordion type="single" collapsible>
+              <AccordionItem value="sync" className="border rounded-lg">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    <RefreshCw className="h-4 w-4" />
+                    {isRu ? 'Синхронизация iCal' : 'iCal Sync'}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <CalendarSyncManager propertyId={selectedPropertyId} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+        </>
+      )}
+
+      {/* Dialogs (always available) */}
       <CreateServiceTaskDialog
         open={showCreateTaskDialog}
         onOpenChange={setShowCreateTaskDialog}
