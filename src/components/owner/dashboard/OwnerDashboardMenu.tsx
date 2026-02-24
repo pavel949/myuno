@@ -2,24 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
-  Download,
-  Sparkles,
-  BarChart3,
-  MessageCircle,
   ChevronRight,
-  HelpCircle,
-  BookOpen,
-  FileText,
-  Users,
   TrendingUp,
   ContactRound,
   Receipt,
-  ListTodo,
+  BarChart3,
+  Users,
+  UserCog,
   Building2,
   Package,
-  Megaphone,
-  FolderOpen,
-  Import,
+  Wrench,
+  DollarSign,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -35,6 +28,9 @@ interface MenuSection {
   items: MenuItem[];
 }
 
+/**
+ * Mobile-only dashboard menu — mirrors sidebar groups (minus "Main" which is already visible).
+ */
 const MENU_SECTIONS: MenuSection[] = [
   {
     titleEn: 'CRM & Sales',
@@ -42,40 +38,32 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
       { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
-      { path: '/owner/contacts/import', icon: Import, labelEn: 'Import Contacts', labelRu: 'Импорт контактов' },
-      { path: '/owner/tasks', icon: ListTodo, labelEn: 'CRM Tasks', labelRu: 'Задачи CRM' },
     ],
   },
   {
-    titleEn: 'Finance & Operations',
-    titleRu: 'Финансы и операции',
+    titleEn: 'Operations',
+    titleRu: 'Операции',
     items: [
-      { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы' },
-      { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
-      { path: '/owner/management-terms', icon: FileText, labelEn: 'Management Terms', labelRu: 'Условия управления' },
-      { path: '/owner/staff', icon: Users, labelEn: 'Staff Directory', labelRu: 'Реестр сотрудников' },
-      { path: '/owner/vendors', icon: Building2, labelEn: 'Vendor Directory', labelRu: 'Поставщики' },
+      { path: '/owner/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи' },
       { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
+      { path: '/owner/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики' },
     ],
   },
   {
-    titleEn: 'Property Tools',
-    titleRu: 'Инструменты',
+    titleEn: 'Finance',
+    titleRu: 'Финансы',
     items: [
-      { path: '/owner/channels', icon: Download, labelEn: 'Channel Manager', labelRu: 'Менеджер каналов' },
-      { path: '/owner/service-request?type=cleaning', icon: Sparkles, labelEn: 'Request Cleaning', labelRu: 'Заказать уборку' },
-      { path: '/owner/vault', icon: FolderOpen, labelEn: 'File Vault', labelRu: 'Хранилище файлов' },
-      { path: '/owner/documents', icon: FileText, labelEn: 'Document Templates', labelRu: 'Шаблоны документов' },
-      { path: '/owner/marketing', icon: Megaphone, labelEn: 'Marketing', labelRu: 'Маркетинг' },
+      { path: '/owner/financials', icon: DollarSign, labelEn: 'Income & Expenses', labelRu: 'Доходы и расходы' },
+      { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Счета' },
+      { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
     ],
   },
   {
-    titleEn: 'Support',
-    titleRu: 'Поддержка',
+    titleEn: 'Team',
+    titleRu: 'Команда',
     items: [
-      { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Сообщения' },
-      { path: '/owner/guide', icon: BookOpen, labelEn: 'Management Guide', labelRu: 'Руководство' },
-      { path: '/support', icon: HelpCircle, labelEn: 'Help', labelRu: 'Помощь' },
+      { path: '/owner/staff', icon: Users, labelEn: 'Staff Directory', labelRu: 'Сотрудники' },
+      { path: '/owner/team', icon: UserCog, labelEn: 'Members & Access', labelRu: 'Участники и доступ' },
     ],
   },
 ];
