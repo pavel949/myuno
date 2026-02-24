@@ -540,7 +540,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="properties/:id" element={<LazyPage><Pages.OwnerPropertyDetail /></LazyPage>} />
           <Route path="properties/:id/terms" element={<LazyPage><Pages.OwnerRentalTerms /></LazyPage>} />
           <Route path="properties/:id/setup" element={<LazyPage><Pages.PropertyQuickSetup /></LazyPage>} />
-          <Route path="properties/:id/edit" element={<LazyPage><Pages.EditProperty /></LazyPage>} />
+          {/* EditProperty removed — use PropertyEditor at /editor */}
           <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
           <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
           <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />

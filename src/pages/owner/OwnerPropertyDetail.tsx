@@ -232,7 +232,7 @@ export default function OwnerPropertyDetail() {
         </TabsContent>
       </Tabs>
 
-      <Button variant="ghost" className="w-full mt-6" onClick={() => navigate(`/owner/properties/${id}/edit`)}>
+      <Button variant="ghost" className="w-full mt-6" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
         <Settings className="h-4 w-4 mr-2" />{isRu ? 'Редактировать объект' : 'Edit Property'}
       </Button>
     </PageContainer>

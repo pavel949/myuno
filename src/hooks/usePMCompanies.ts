@@ -111,7 +111,7 @@ export function usePMCompanies() {
   const queryClient = useQueryClient();
 
   const { data: companies, isLoading, refetch } = useQuery({
-    queryKey: ['management-companies'],
+    queryKey: ['admin-management-companies'],
     queryFn: async (): Promise<PMCompany[]> => {
       const { data, error } = await supabase
         .from('management_companies')
@@ -138,6 +138,7 @@ export function usePMCompanies() {
       return data;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-management-companies'] });
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК создана');
     },
@@ -161,6 +162,7 @@ export function usePMCompanies() {
       return result;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-management-companies'] });
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК обновлена');
     },
@@ -180,6 +182,7 @@ export function usePMCompanies() {
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-management-companies'] });
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК удалена');
     },
