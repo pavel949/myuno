@@ -11,10 +11,13 @@ import {
   useDeleteReport,
   useGeneratePdf,
   useSendReportEmail,
+  useMarkReportViewed,
   ReportType,
   PropertyReport
 } from '@/hooks/usePropertyReports';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -99,6 +102,7 @@ export default function ReportsPage() {
   const deleteReport = useDeleteReport();
   const generatePdf = useGeneratePdf();
   const sendReportEmail = useSendReportEmail();
+  const markViewed = useMarkReportViewed();
 
   const [activeTab, setActiveTab] = useState<'all' | 'portfolio'>('all');
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
@@ -288,7 +292,12 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex md:flex-col gap-2 p-4 bg-muted/30 justify-center">
-            <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={() => setViewReport(report)}>
+            <Button variant="outline" size="sm" className="flex-1 md:flex-none" onClick={() => {
+              setViewReport(report);
+              if (report.status === 'ready' || report.status === 'sent') {
+                markViewed.mutate(report.id);
+              }
+            }}>
               <Eye className="h-4 w-4 mr-2" />
               {isRu ? 'Просмотр' : 'View'}
             </Button>
@@ -322,7 +331,8 @@ export default function ReportsPage() {
   );
 
   return (
-    <div className="p-4 space-y-6">
+    <PageContainer>
+      <BackButton fallbackPath="/owner" />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -667,6 +677,6 @@ export default function ReportsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

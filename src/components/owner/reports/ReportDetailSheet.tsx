@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { ru as ruLocale, enUS } from 'date-fns/locale';
 import { PropertyReport } from '@/hooks/usePropertyReports';
 import { ManagementReportDetail } from './ManagementReportDetail';
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
 
 interface ReportDetailSheetProps {
   report: PropertyReport | null;
@@ -27,6 +28,13 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
 
   const formatCurrency = (amount: number) => {
     return `฿${Number(amount || 0).toLocaleString()}`;
+  };
+
+  const localizeCat = (key: string) => {
+    const all = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];
+    const found = all.find(c => c.value === key);
+    if (found) return isRu ? found.labelRu : found.labelEn;
+    return key.replace(/_/g, ' ');
   };
 
   const data = (report.data || {}) as Record<string, any>;
@@ -122,7 +130,7 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
                 <div className="space-y-1.5">
                   {expenseCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
                     <div key={cat} className="flex justify-between text-sm py-1 border-b border-border/30 last:border-0">
-                      <span className="capitalize">{cat.replace(/_/g, ' ')}</span>
+                      <span>{localizeCat(cat)}</span>
                       <span className="text-destructive">{formatCurrency(amount)}</span>
                     </div>
                   ))}
@@ -147,7 +155,7 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
               <Separator />
               {expenseCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
                 <div key={cat} className="flex justify-between text-sm">
-                  <span className="capitalize text-muted-foreground">{cat.replace(/_/g, ' ')}</span>
+                  <span className="text-muted-foreground">{localizeCat(cat)}</span>
                   <span className="text-destructive">-{formatCurrency(amount)}</span>
                 </div>
               ))}
@@ -210,7 +218,7 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
                 <div className="space-y-2">
                   {incomeCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
                     <div key={cat} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
-                      <span className="text-sm capitalize">{cat.replace(/_/g, ' ')}</span>
+                      <span className="text-sm">{localizeCat(cat)}</span>
                       <span className="text-sm font-medium text-success">{formatCurrency(amount)}</span>
                     </div>
                   ))}
@@ -228,7 +236,7 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
                 <div className="space-y-2">
                   {expenseCategories.sort(([, a], [, b]) => b - a).map(([cat, amount]) => (
                     <div key={cat} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
-                      <span className="text-sm capitalize">{cat.replace(/_/g, ' ')}</span>
+                      <span className="text-sm">{localizeCat(cat)}</span>
                       <span className="text-sm font-medium text-destructive">{formatCurrency(amount)}</span>
                     </div>
                   ))}
