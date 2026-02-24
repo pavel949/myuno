@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Anchor, SlidersHorizontal, Star, Users, MapPin, Ship, Zap, Clock } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ const SORT_OPTIONS: { id: SortKey; labelEn: string; labelRu: string }[] = [
 
 function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
   const card = mapYachtToCardProps(yacht, language);
   const isRu = language === 'ru';
 
@@ -113,7 +115,7 @@ function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
         )}
 
         <p className="text-sm font-semibold text-foreground">
-          {card.currency}{card.price?.toLocaleString()}
+          {card.price ? formatPrice(card.price) : ''}
           <span className="text-xs font-normal text-muted-foreground ml-1">{card.priceLabel}</span>
         </p>
       </div>

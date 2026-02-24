@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -43,6 +44,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
 
 export default function MapView() {
   const { t, language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const { getCityConfig } = useLocationContext();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -181,7 +183,7 @@ export default function MapView() {
       `;
 
       const displayName = language === 'ru' ? marker.nameRu : marker.name;
-      const priceText = marker.priceFrom > 0 ? `฿${marker.priceFrom.toLocaleString()}+` : '';
+      const priceText = marker.priceFrom > 0 ? `${formatPrice(marker.priceFrom)}+` : '';
 
       const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '240px' }).setHTML(
         createMapPopupHtml({

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ type ViewMode = 'grid' | 'list';
 
 export default function Favorites() {
   const { language } = useLanguage();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const { favorites, loading, toggleFavorite, refetch } = useUserCollections();
   const [filter, setFilter] = useState<FilterType>('all');
@@ -309,7 +311,7 @@ export default function Favorites() {
                           <h3 className="font-medium text-sm line-clamp-2">{title}</h3>
                           {data.price && (
                             <p className="text-sm font-bold text-primary mt-1">
-                              ฿{data.price.toLocaleString()}
+                              {formatPrice(data.price)}
                             </p>
                           )}
                         </div>
