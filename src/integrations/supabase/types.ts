@@ -14209,6 +14209,7 @@ export type Database = {
           default_commission_rate: number | null
           description: string | null
           description_ru: string | null
+          director_name: string | null
           email: string | null
           established_year: number | null
           has_24_7_support: boolean | null
@@ -14242,6 +14243,7 @@ export type Database = {
           default_commission_rate?: number | null
           description?: string | null
           description_ru?: string | null
+          director_name?: string | null
           email?: string | null
           established_year?: number | null
           has_24_7_support?: boolean | null
@@ -14275,6 +14277,7 @@ export type Database = {
           default_commission_rate?: number | null
           description?: string | null
           description_ru?: string | null
+          director_name?: string | null
           email?: string | null
           established_year?: number | null
           has_24_7_support?: boolean | null
