@@ -20,6 +20,7 @@ export interface BusinessRoleConfig {
 
 export type DashboardWidgetKey =
   | 'kpi'
+  | 'today_briefing'
   | 'revenue_insights'
   | 'invites'
   | 'active_stays'
@@ -38,14 +39,14 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '🏠',
     widgets: [
       'kpi',
-      'revenue_insights',
-      'invites',
+      'today_briefing',
       'active_stays',
       'properties',
-      'operations',
+      'revenue_insights',
       'upcoming_payments',
-      'crm_tasks',
       'active_deals',
+      'crm_tasks',
+      'operations',
       'menu',
     ],
   },
@@ -56,6 +57,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '💼',
     widgets: [
       'kpi',
+      'today_briefing',
       'active_deals',
       'crm_tasks',
       'properties',
@@ -70,6 +72,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '🔧',
     widgets: [
       'kpi',
+      'today_briefing',
       'operations',
       'upcoming_payments',
       'crm_tasks',
@@ -83,14 +86,14 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '⚡',
     widgets: [
       'kpi',
-      'revenue_insights',
-      'invites',
+      'today_briefing',
       'active_stays',
       'properties',
-      'operations',
-      'crm_tasks',
+      'revenue_insights',
       'upcoming_payments',
       'active_deals',
+      'crm_tasks',
+      'operations',
       'menu',
     ],
   },

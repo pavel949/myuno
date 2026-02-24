@@ -20,6 +20,7 @@ import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPay
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
 import { BusinessKPIWidget } from '@/components/owner/dashboard/BusinessKPIWidget';
 import { RevenueInsightsWidget } from '@/components/owner/dashboard/RevenueInsightsWidget';
+import { TodayBriefingWidget } from '@/components/owner/dashboard/TodayBriefingWidget';
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
@@ -41,6 +42,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={<SectionSkeleton />}>
           <BusinessKPIWidget role={role} />
+        </Suspense>
+      );
+    case 'today_briefing':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <TodayBriefingWidget />
         </Suspense>
       );
     case 'revenue_insights':
@@ -106,11 +113,13 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
   }
 }
 
-/** Widgets that should have a separator before them */
-const SEPARATOR_BEFORE: Set<DashboardWidgetKey> = new Set([
-  'operations',
-  'active_deals',
-  'menu',
+/**
+ * Widgets that should render side-by-side in 2-column grid on desktop.
+ * Pairs: revenue_insights + upcoming_payments, active_deals + crm_tasks
+ */
+const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
+  'revenue_insights', 'upcoming_payments',
+  'active_deals', 'crm_tasks',
 ]);
 
 export default function OwnerDashboard() {
@@ -175,9 +184,7 @@ export default function OwnerDashboard() {
       {/* Composed Widgets — 2-column grid on desktop */}
       <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
         {visibleWidgets.map((widgetKey, idx) => {
-          // Only crm_tasks and upcoming_payments pair side-by-side; rest are full-width
-          const halfWidthWidgets: DashboardWidgetKey[] = ['crm_tasks', 'upcoming_payments'];
-          const isFullWidth = !halfWidthWidgets.includes(widgetKey);
+          const isFullWidth = !HALF_WIDTH_WIDGETS.has(widgetKey);
           return (
             <motion.div
               key={widgetKey}
@@ -186,7 +193,6 @@ export default function OwnerDashboard() {
               transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
               className={isFullWidth ? 'md:col-span-2' : ''}
             >
-              {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && !isDesktop && <Separator className="mb-6" />}
               <DashboardWidget widgetKey={widgetKey} role={role} />
             </motion.div>
           );
