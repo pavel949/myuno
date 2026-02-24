@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, Loader2, Check, ChevronsUpDown } from 'lucide-react';
+import { Building2, Plus, Loader2, Check, ChevronsUpDown, Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,18 +18,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { BusinessCardScanButton, ScannedProviderData } from './BusinessCardScanButton';
+
+// Russian keyboard → Latin layout map
+const RU_TO_EN: Record<string, string> = {
+  'й':'q','ц':'w','у':'e','к':'r','е':'t','н':'y','г':'u','ш':'i','щ':'o','з':'p',
+  'ф':'a','ы':'s','в':'d','а':'f','п':'g','р':'h','о':'j','л':'k','д':'l',
+  'я':'z','ч':'x','с':'c','м':'v','и':'b','т':'n','ь':'m','б':',','ю':'.',
+};
+
+function convertLayout(input: string) {
+  return input.toLowerCase().split('').map(c => RU_TO_EN[c] || c).join('');
+}
+
+function matchesSearch(name: string, search: string): boolean {
+  if (!search) return true;
+  const s = search.toLowerCase();
+  const n = name.toLowerCase();
+  if (n.includes(s)) return true;
+  if (n.includes(convertLayout(s))) return true;
+  return false;
+}
 
 interface ProviderSelectorProps {
   value: string;
@@ -51,6 +64,8 @@ export function ProviderSelector({
   const isRussian = language === 'ru';
 
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
   const [quickName, setQuickName] = useState('');
   const [quickPhone, setQuickPhone] = useState('');
@@ -62,27 +77,18 @@ export function ProviderSelector({
     [providers, value]
   );
 
-  // Keyboard layout mapping: Russian keys → Latin equivalents
-  const ruToEnMap: Record<string, string> = {
-    'й':'q','ц':'w','у':'e','к':'r','е':'t','н':'y','г':'u','ш':'i','щ':'o','з':'p',
-    'ф':'a','ы':'s','в':'d','а':'f','п':'g','р':'h','о':'j','л':'k','д':'l',
-    'я':'z','ч':'x','с':'c','м':'v','и':'b','т':'n','ь':'m','б':',','ю':'.',
-  };
+  const filteredProviders = useMemo(
+    () => providers.filter(p => matchesSearch(p.name, search)),
+    [providers, search]
+  );
 
-  const convertLayout = useCallback((input: string) => {
-    return input.toLowerCase().split('').map(c => ruToEnMap[c] || c).join('');
-  }, []);
-
-  const commandFilter = useCallback((value: string, search: string) => {
-    const s = search.toLowerCase();
-    const v = value.toLowerCase();
-    // Direct match
-    if (v.includes(s)) return 1;
-    // Try converting search from Russian keyboard layout to English
-    const converted = convertLayout(s);
-    if (v.includes(converted)) return 1;
-    return 0;
-  }, [convertLayout]);
+  // Auto-focus search input when popover opens
+  useEffect(() => {
+    if (open) {
+      setSearch('');
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open]);
 
   const handleQuickCreate = async () => {
     if (!quickName.trim()) return;
@@ -170,7 +176,7 @@ export function ProviderSelector({
         </Label>
       )}
       <div className="flex gap-2">
-        <Popover open={open} onOpenChange={setOpen} modal={true}>
+        <Popover open={open} onOpenChange={setOpen} modal>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -192,43 +198,62 @@ export function ProviderSelector({
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50" align="start">
-            <Command filter={commandFilter}>
-              <CommandInput
+          <PopoverContent
+            className="w-[--radix-popover-trigger-width] p-0 z-[100]"
+            align="start"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            {/* Search input */}
+            <div className="flex items-center border-b px-3 bg-popover">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <input
+                ref={inputRef}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder={isRussian ? 'Начните вводить название...' : 'Type provider name...'}
+                className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
-              <CommandList>
-                <CommandEmpty>
+            </div>
+            {/* Provider list */}
+            <ScrollArea className="max-h-[250px]">
+              {filteredProviders.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
                   {isRussian ? 'Не найдено' : 'No provider found'}
-                </CommandEmpty>
-                <CommandGroup>
-                  {providers.map(provider => (
-                    <CommandItem
+                </p>
+              ) : (
+                <div className="p-1">
+                  {filteredProviders.map(provider => (
+                    <button
                       key={provider.id}
-                      value={provider.name}
-                      onSelect={() => {
+                      type="button"
+                      onClick={() => {
                         onChange(provider.id);
                         setOpen(false);
                       }}
+                      className={cn(
+                        "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                        "hover:bg-accent hover:text-accent-foreground",
+                        value === provider.id && "bg-accent"
+                      )}
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
+                          "mr-2 h-4 w-4 shrink-0",
                           value === provider.id ? "opacity-100" : "opacity-0"
                         )}
                       />
-                      <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
                       <span className="truncate">{provider.name}</span>
                       {!provider.is_verified && (
                         <span className="ml-auto text-xs text-amber-500">
                           {isRussian ? 'не верифицирован' : 'unverified'}
                         </span>
                       )}
-                    </CommandItem>
+                    </button>
                   ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
+                </div>
+              )}
+            </ScrollArea>
           </PopoverContent>
         </Popover>
 
