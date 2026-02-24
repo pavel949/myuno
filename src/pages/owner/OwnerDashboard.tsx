@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Home } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useIsDesktop } from '@/hooks/use-desktop';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidget';
 import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
@@ -117,7 +118,13 @@ export default function OwnerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isDesktop = useIsDesktop();
   const { role, setRole, config } = useBusinessRole();
+
+  // On desktop, filter out 'menu' widget since sidebar already provides navigation
+  const visibleWidgets = isDesktop
+    ? config.widgets.filter((w) => w !== 'menu')
+    : config.widgets;
 
   if (!user) {
     return (
@@ -142,7 +149,7 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg mx-auto">
+    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg md:max-w-[1536px] mx-auto">
       {/* Header: Greeting + Role Switcher */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -165,18 +172,25 @@ export default function OwnerDashboard() {
 
       <Separator />
 
-      {/* Composed Widgets */}
-      {config.widgets.map((widgetKey, idx) => (
-        <motion.div
-          key={widgetKey}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
-        >
-          {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && <Separator className="mb-6" />}
-          <DashboardWidget widgetKey={widgetKey} role={role} />
-        </motion.div>
-      ))}
+      {/* Composed Widgets — 2-column grid on desktop */}
+      <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
+        {visibleWidgets.map((widgetKey, idx) => {
+          // Full-width widgets on desktop
+          const isFullWidth = widgetKey === 'kpi' || widgetKey === 'revenue_insights' || widgetKey === 'properties';
+          return (
+            <motion.div
+              key={widgetKey}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
+              className={isFullWidth ? 'md:col-span-2' : ''}
+            >
+              {idx > 0 && SEPARATOR_BEFORE.has(widgetKey) && !isDesktop && <Separator className="mb-6" />}
+              <DashboardWidget widgetKey={widgetKey} role={role} />
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 }
