@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ const SORT_OPTIONS: { id: SortKey; labelEn: string; labelRu: string }[] = [
 
 function ExperienceCard({ experience, language }: { experience: Experience; language: string }) {
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   const isTour = experience.experience_type === 'tour';
 
@@ -92,7 +94,7 @@ function ExperienceCard({ experience, language }: { experience: Experience; lang
         )}
 
         <p className="text-sm font-semibold text-foreground">
-          ฿{experience.price?.toLocaleString()}
+          {experience.price ? formatPrice(experience.price) : ''}
           {experience.price_per && (
             <span className="text-xs font-normal text-muted-foreground ml-1">
               /{isRu ? 'чел' : 'person'}
