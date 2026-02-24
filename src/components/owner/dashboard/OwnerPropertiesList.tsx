@@ -51,9 +51,9 @@ export function OwnerPropertiesList() {
       <button
         key={`${property.source}-${property.property_id}`}
         onClick={() => navigate(`/owner/properties/${property.property_id}/manage`)}
-        className="w-full flex items-center gap-4 py-4 text-left hover:opacity-70 transition-opacity"
+        className="w-full flex items-center gap-4 py-4 md:py-3 text-left hover:opacity-70 transition-opacity md:rounded-xl md:border md:border-border md:p-3 md:hover:shadow-sm"
       >
-        <div className="relative w-[72px] h-[72px] rounded-xl overflow-hidden flex-shrink-0 bg-muted">
+        <div className="relative w-[72px] h-[72px] md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
           {property.cover_image ? (
             <img src={property.cover_image} alt={title} className="w-full h-full object-cover" />
           ) : (
@@ -109,7 +109,8 @@ export function OwnerPropertiesList() {
               {isRu ? 'Все' : 'View all'}
             </button>
           </div>
-          <div className="divide-y">
+          {/* Grid on desktop, list on mobile */}
+          <div className="divide-y md:divide-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3">
             {ownedProperties.map(renderProperty)}
           </div>
         </div>
@@ -132,7 +133,7 @@ export function OwnerPropertiesList() {
               </Badge>
             )}
           </div>
-          <div className="divide-y">
+          <div className="divide-y md:divide-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3">
             {managedProperties.map(renderProperty)}
           </div>
         </div>

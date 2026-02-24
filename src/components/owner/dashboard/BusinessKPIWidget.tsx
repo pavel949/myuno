@@ -304,8 +304,8 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
         />
       </div>
 
-      {/* Tier 2: Operational Metrics - horizontal scroll */}
-      <ScrollArea className="w-full">
+      {/* Tier 2: Operational Metrics - scroll on mobile, grid on desktop */}
+      <ScrollArea className="w-full md:hidden">
         <div className="flex gap-2 pb-2">
           {visibleOpsCards.map((key) => {
             const card = opsCards[key];
@@ -326,6 +326,24 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+      <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+        {visibleOpsCards.map((key) => {
+          const card = opsCards[key];
+          return (
+            <OwnerKPICard
+              key={key}
+              compact
+              title={card.title}
+              value={card.value}
+              icon={card.icon}
+              iconColor={card.iconColor}
+              href={card.href}
+              badge={card.badge}
+              loading={loading}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -175,8 +175,9 @@ export default function OwnerDashboard() {
       {/* Composed Widgets — 2-column grid on desktop */}
       <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
         {visibleWidgets.map((widgetKey, idx) => {
-          // Full-width widgets on desktop
-          const isFullWidth = widgetKey === 'kpi' || widgetKey === 'revenue_insights' || widgetKey === 'properties';
+          // Only crm_tasks and upcoming_payments pair side-by-side; rest are full-width
+          const halfWidthWidgets: DashboardWidgetKey[] = ['crm_tasks', 'upcoming_payments'];
+          const isFullWidth = !halfWidthWidgets.includes(widgetKey);
           return (
             <motion.div
               key={widgetKey}
