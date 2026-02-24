@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { usePMCompanies, PMCompany, PMCompanyInsert } from '@/hooks/usePMCompanies';
+import { usePMCompanies, PMCompany, PMCompanyInsert, PMCompanyUpdate } from '@/hooks/usePMCompanies';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,7 +66,7 @@ export default function AdminPMCompanies() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState<Partial<PMCompanyInsert>>({
+  const [formData, setFormData] = useState<Partial<PMCompanyInsert> & { director_name?: string }>({
     name: '',
     name_ru: '',
     description: '',
@@ -76,6 +76,7 @@ export default function AdminPMCompanies() {
     website: '',
     address: '',
     license_number: '',
+    director_name: '',
     service_districts: [],
     service_types: [],
     languages: ['en'],
@@ -98,6 +99,7 @@ export default function AdminPMCompanies() {
       website: '',
       address: '',
       license_number: '',
+      director_name: '',
       service_districts: [],
       service_types: [],
       languages: ['en'],
@@ -123,6 +125,7 @@ export default function AdminPMCompanies() {
       website: company.website || '',
       address: company.address || '',
       license_number: company.license_number || '',
+      director_name: (company as any).director_name || '',
       service_districts: company.service_districts || [],
       service_types: company.service_types || [],
       languages: company.languages || ['en'],
@@ -333,14 +336,24 @@ export default function AdminPMCompanies() {
               onTranslatedChange={(v) => setFormData(prev => ({ ...prev, name_ru: v }))}
             />
 
-            {/* Description */}
+            {/* Description — always source=RU, target=EN for this domain */}
             <TranslatableTextarea
               label={isRu ? 'Описание' : 'Description'}
-              value={formData.description || ''}
-              translatedValue={formData.description_ru || ''}
-              onChange={(v) => setFormData(prev => ({ ...prev, description: v }))}
-              onTranslatedChange={(v) => setFormData(prev => ({ ...prev, description_ru: v }))}
+              value={formData.description_ru || ''}
+              translatedValue={formData.description || ''}
+              onChange={(v) => setFormData(prev => ({ ...prev, description_ru: v }))}
+              onTranslatedChange={(v) => setFormData(prev => ({ ...prev, description: v }))}
             />
+
+            {/* Director Name */}
+            <div>
+              <Label>{isRu ? 'Имя руководителя' : 'Director Name'}</Label>
+              <Input
+                value={formData.director_name || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, director_name: e.target.value }))}
+                placeholder={isRu ? 'ФИО руководителя' : 'Director full name'}
+              />
+            </div>
 
             {/* Contacts */}
             <div className="grid grid-cols-2 gap-4">
