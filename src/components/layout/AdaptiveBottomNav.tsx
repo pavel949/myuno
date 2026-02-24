@@ -38,7 +38,7 @@ const guestNavItems: NavItem[] = [
   { path: '/', icon: Home, labelEn: 'Home', labelRu: 'Главная' },
   { path: '/discover', icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
   { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
-  { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Мой' },
+  { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
 
 // Owner/Host navigation — 4 tabs (Profile accessible via header)

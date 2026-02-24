@@ -8,7 +8,7 @@ const navItems = [
   { path: '/', labelEn: 'Home', labelRu: 'Главная', exact: true },
   { path: '/discover', labelEn: 'Discover', labelRu: 'Навигатор' },
   { path: '/market', labelEn: 'Market', labelRu: 'Маркет' },
-  { path: '/account', labelEn: 'Me', labelRu: 'Мой' },
+  { path: '/account', labelEn: 'Me', labelRu: 'Профиль' },
 ];
 
 export const DesktopNavTabs = React.memo(function DesktopNavTabs() {
