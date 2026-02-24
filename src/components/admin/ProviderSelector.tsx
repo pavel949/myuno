@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
+import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Building2, Plus, Loader2, Check, ChevronsUpDown, Search } from 'lucide-react';
+import { Building2, Plus, Loader2, Check, ChevronsUpDown, Search, Home } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -61,6 +62,7 @@ export function ProviderSelector({
 }: ProviderSelectorProps) {
   const { language } = useLanguage();
   const { providers, isLoading, refetch } = useAdminProviders();
+  const { data: managementCompanies, isLoading: mcLoading } = useManagementCompanies();
   const isRussian = language === 'ru';
 
   const [open, setOpen] = useState(false);
@@ -77,9 +79,24 @@ export function ProviderSelector({
     [providers, value]
   );
 
+  const selectedMC = useMemo(
+    () => !selectedProvider ? (managementCompanies || []).find(c => c.id === value) : null,
+    [managementCompanies, value, selectedProvider]
+  );
+
+  const selectedLabel = selectedProvider?.name 
+    || (selectedMC ? (isRussian ? selectedMC.name_ru : selectedMC.name_en) : null);
+
   const filteredProviders = useMemo(
     () => providers.filter(p => matchesSearch(p.name, search)),
     [providers, search]
+  );
+
+  const filteredMCs = useMemo(
+    () => (managementCompanies || []).filter(c => 
+      matchesSearch(c.name_en, search) || matchesSearch(c.name_ru, search)
+    ),
+    [managementCompanies, search]
   );
 
   // Auto-focus search input when popover opens
@@ -159,7 +176,7 @@ export function ProviderSelector({
     }
   };
 
-  if (isLoading) {
+  if (isLoading || mcLoading) {
     return (
       <div className="space-y-2">
         {label && <Label>{label}</Label>}
@@ -185,14 +202,17 @@ export function ProviderSelector({
               disabled={disabled || isCreating}
               className="flex-1 justify-between font-normal"
             >
-              {selectedProvider ? (
+              {selectedLabel ? (
                 <span className="flex items-center gap-2 truncate">
                   <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  {selectedProvider.name}
+                  {selectedLabel}
+                  {selectedMC && (
+                    <span className="text-xs text-muted-foreground">(УК)</span>
+                  )}
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  {isRussian ? 'Выберите провайдера...' : 'Select provider...'}
+                  {isRussian ? 'Выберите провайдера / УК...' : 'Select provider / PM...'}
                 </span>
               )}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -215,42 +235,85 @@ export function ProviderSelector({
               />
             </div>
             {/* Provider list */}
-            <ScrollArea className="max-h-[250px]">
-              {filteredProviders.length === 0 ? (
+            <ScrollArea className="max-h-[300px]">
+              {filteredMCs.length === 0 && filteredProviders.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  {isRussian ? 'Не найдено' : 'No provider found'}
+                  {isRussian ? 'Не найдено' : 'No results found'}
                 </p>
               ) : (
                 <div className="p-1">
-                  {filteredProviders.map(provider => (
-                    <button
-                      key={provider.id}
-                      type="button"
-                      onClick={() => {
-                        onChange(provider.id);
-                        setOpen(false);
-                      }}
-                      className={cn(
-                        "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
-                        "hover:bg-accent hover:text-accent-foreground",
-                        value === provider.id && "bg-accent"
-                      )}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4 shrink-0",
-                          value === provider.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{provider.name}</span>
-                      {!provider.is_verified && (
-                        <span className="ml-auto text-xs text-amber-500">
-                          {isRussian ? 'не верифицирован' : 'unverified'}
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                  {/* Management Companies section */}
+                  {filteredMCs.length > 0 && (
+                    <>
+                      <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                        {isRussian ? 'Управляющие компании' : 'Management Companies'}
+                      </p>
+                      {filteredMCs.map(mc => (
+                        <button
+                          key={`mc-${mc.id}`}
+                          type="button"
+                          onClick={() => {
+                            onChange(mc.id);
+                            setOpen(false);
+                          }}
+                          className={cn(
+                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                            "hover:bg-accent hover:text-accent-foreground",
+                            value === mc.id && "bg-accent"
+                          )}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4 shrink-0",
+                              value === mc.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <Home className="mr-2 h-4 w-4 shrink-0 text-primary" />
+                          <span className="truncate">
+                            {isRussian ? mc.name_ru : mc.name_en}
+                          </span>
+                          <span className="ml-auto text-xs text-muted-foreground">УК</span>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                  {/* Providers section */}
+                  {filteredProviders.length > 0 && (
+                    <>
+                      <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                        {isRussian ? 'Провайдеры' : 'Providers'}
+                      </p>
+                      {filteredProviders.map(provider => (
+                        <button
+                          key={provider.id}
+                          type="button"
+                          onClick={() => {
+                            onChange(provider.id);
+                            setOpen(false);
+                          }}
+                          className={cn(
+                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                            "hover:bg-accent hover:text-accent-foreground",
+                            value === provider.id && "bg-accent"
+                          )}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4 shrink-0",
+                              value === provider.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                          <span className="truncate">{provider.name}</span>
+                          {!provider.is_verified && (
+                            <span className="ml-auto text-xs text-warning">
+                              {isRussian ? 'не верифицирован' : 'unverified'}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </ScrollArea>
