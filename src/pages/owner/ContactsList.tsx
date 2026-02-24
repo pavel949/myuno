@@ -3,20 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useCrmContacts, CONTACT_TYPES, CONTACT_TAGS } from '@/hooks/useCrmContacts';
+import { useCrmContacts, CrmContact, CONTACT_TYPES, CONTACT_TAGS } from '@/hooks/useCrmContacts';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { maskPhone } from '@/lib/contactProtection';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, MapPin, Briefcase, Clock } from 'lucide-react';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { ContactImportSheet } from '@/components/owner/contacts/ContactImportSheet';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 
 // Avatar color palette based on name hash
 const AVATAR_COLORS = [
@@ -31,6 +33,126 @@ const AVATAR_COLORS = [
 function getAvatarColor(name: string): string {
   const code = (name.charCodeAt(0) || 0) + (name.charCodeAt(1) || 0);
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
+}
+
+const tagBadgeColors: Record<string, string> = {
+  VIP: 'bg-warning/15 text-warning border-warning/30',
+  hot: 'bg-destructive/15 text-destructive border-destructive/30',
+  warm: 'bg-warning/15 text-warning border-warning/30',
+  cold: 'bg-info/15 text-info border-info/30',
+  'follow-up': 'bg-primary/15 text-primary border-primary/30',
+  priority: 'bg-success/15 text-success border-success/30',
+};
+
+const typeBadgeColors: Record<string, string> = {
+  buyer: 'bg-primary/15 text-primary border-primary/30',
+  seller: 'bg-success/15 text-success border-success/30',
+  investor: 'bg-warning/15 text-warning border-warning/30',
+  tenant: 'bg-info/15 text-info border-info/30',
+  landlord: 'bg-accent text-accent-foreground border-accent/30',
+  agent: 'bg-muted text-muted-foreground border-border',
+};
+
+function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact; isOwnerOrAdmin: boolean; onClick: () => void }) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const avatarColor = getAvatarColor(contact.first_name + contact.last_name);
+  const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+  const scoring = contact.scoring;
+
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left rounded-xl border bg-card hover:bg-accent/30 transition-all hover:shadow-md group"
+    >
+      <div className="p-4">
+        {/* Top: Avatar + Name */}
+        <div className="flex items-start gap-3">
+          <div className={cn("h-12 w-12 rounded-full flex items-center justify-center shrink-0 text-base font-semibold", avatarColor)}>
+            {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm leading-tight line-clamp-2">{fullName}</p>
+            {contact.company_name && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
+                <Briefcase className="h-3 w-3 shrink-0" />
+                {contact.company_name}
+              </p>
+            )}
+            {contact.job_title && !contact.company_name && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">{contact.job_title}</p>
+            )}
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
+        </div>
+
+        {/* Tags row */}
+        <div className="flex flex-wrap gap-1 mt-2.5">
+          {contact.contact_type && (
+            <Badge variant="outline" className={cn('text-[9px] h-4 px-1.5 border font-semibold uppercase', typeBadgeColors[contact.contact_type] || '')}>
+              {contact.contact_type}
+            </Badge>
+          )}
+          {contact.tags?.map(tag => (
+            <Badge key={tag} variant="outline" className={cn('text-[9px] h-4 px-1.5 border', tagBadgeColors[tag] || '')}>
+              {tag}
+            </Badge>
+          ))}
+        </div>
+
+        {/* Contact info */}
+        <div className="mt-2.5 space-y-1">
+          {contact.nationality && (
+            <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+              <MapPin className="h-3 w-3 shrink-0" />
+              {contact.nationality}
+            </p>
+          )}
+          {contact.email && (
+            <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+              <Mail className="h-3 w-3 shrink-0" />
+              {contact.email}
+            </p>
+          )}
+          {contact.phone && (
+            <p className="text-xs text-muted-foreground truncate flex items-center gap-1.5">
+              <Phone className="h-3 w-3 shrink-0" />
+              {isOwnerOrAdmin ? contact.phone : (
+                <span className="flex items-center gap-0.5">
+                  {maskPhone(contact.phone)}
+                  <Lock className="h-2.5 w-2.5 text-muted-foreground/50" />
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom stats bar — Odoo style */}
+      <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/20 rounded-b-xl">
+        <div className="flex items-center gap-3">
+          {/* Scoring stars */}
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3].map(i => (
+              <Star
+                key={i}
+                className={cn('h-3 w-3', scoring !== null && scoring >= i * 33 ? 'fill-warning text-warning' : 'text-muted-foreground/30')}
+              />
+            ))}
+          </div>
+          {/* Deals count indicator */}
+          <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+            <MessageSquare className="h-3 w-3" /> 0
+          </span>
+          {/* Budget */}
+          <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+            <DollarSign className="h-3 w-3" /> {contact.budget_max ? `${(contact.budget_max / 1e6).toFixed(1)}M` : '0'}
+          </span>
+        </div>
+        <Clock className="h-3.5 w-3.5 text-muted-foreground/40" />
+      </div>
+    </button>
+  );
 }
 
 export default function ContactsList() {
@@ -51,7 +173,6 @@ export default function ContactsList() {
   const [showImport, setShowImport] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Reset page when filters change
   const handleSearchChange = (v: string) => { setSearch(v); setPage(0); };
   const handleTypeChange = (v: string | null) => { setTypeFilter(v); setPage(0); };
   const handleTagChange = (v: string | null) => { setTagFilter(v); setPage(0); };
@@ -107,16 +228,20 @@ export default function ContactsList() {
         />
       </div>
 
-      {/* Filter toggle */}
-      <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)} className="text-xs">
-        <Filter className="h-3 w-3 mr-1" />
-        {isRu ? 'Фильтры' : 'Filters'}
-        {(typeFilter || tagFilter) && <Badge variant="secondary" className="ml-1 text-[10px]">!</Badge>}
-      </Button>
+      {/* Filter toggle + pagination info */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)} className="text-xs">
+          <Filter className="h-3 w-3 mr-1" />
+          {isRu ? 'Фильтры' : 'Filters'}
+          {(typeFilter || tagFilter) && <Badge variant="secondary" className="ml-1 text-[10px]">!</Badge>}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          {totalCount > 0 ? `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, totalCount)} ${isRu ? 'из' : 'of'} ${totalCount}` : '0'}
+        </p>
+      </div>
 
       {showFilters && (
         <div className="space-y-3">
-          {/* Type section */}
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Тип' : 'Type'}</p>
             <div className="flex flex-wrap gap-1">
@@ -137,7 +262,6 @@ export default function ContactsList() {
               ))}
             </div>
           </div>
-          {/* Tags section */}
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Теги' : 'Tags'}</p>
             <div className="flex flex-wrap gap-1">
@@ -155,65 +279,30 @@ export default function ContactsList() {
         </div>
       )}
 
-      {/* Count */}
-      <p className="text-xs text-muted-foreground">
-        {totalCount > 0 ? `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, totalCount)} ${isRu ? 'из' : 'of'} ${totalCount}` : '0'} {isRu ? 'контактов' : 'contacts'}
-      </p>
-
-      {/* List */}
+      {/* Grid */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
         </div>
       ) : contacts.length === 0 ? (
         <div className="text-center py-12">
           <UserCircle className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-muted-foreground text-sm">{isRu ? 'Контакты не найдены' : 'No contacts found'}</p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            {isRu ? 'Добавить контакт' : 'Add contact'}
+          </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-          {contacts.map(contact => {
-            const avatarColor = getAvatarColor(contact.first_name + contact.last_name);
-            return (
-              <button
-                key={contact.id}
-                onClick={() => navigate(`/owner/contacts/${contact.id}`)}
-                className="w-full text-left p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
-              >
-                <div className={cn("h-10 w-10 rounded-full flex items-center justify-center shrink-0", avatarColor)}>
-                  <span className="text-sm font-semibold">
-                    {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">{contact.first_name} {contact.last_name}</span>
-                    {contact.contact_type && (
-                      <Badge variant="secondary" className="text-[10px] shrink-0">{contact.contact_type}</Badge>
-                    )}
-                    {contact.tags?.includes('VIP') && (
-                      <Badge variant="default" className="text-[10px] shrink-0">VIP</Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                    {contact.phone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {isOwnerOrAdmin ? contact.phone : (
-                          <span className="flex items-center gap-0.5">
-                            {maskPhone(contact.phone)}
-                            <Lock className="h-2.5 w-2.5 text-muted-foreground/50" />
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {contact.email && <span className="flex items-center gap-1 truncate"><Mail className="h-3 w-3" />{contact.email}</span>}
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+          {contacts.map(contact => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              isOwnerOrAdmin={isOwnerOrAdmin}
+              onClick={() => navigate(`/owner/contacts/${contact.id}`)}
+            />
+          ))}
         </div>
       )}
 
