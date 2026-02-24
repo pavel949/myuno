@@ -67,14 +67,14 @@ export default function ContactsList() {
 
   if (!companyId) {
     return (
-      <div className="p-4 text-center pt-20 max-w-lg mx-auto">
+      <div className="p-4 md:p-6 text-center pt-20 max-w-[1536px] mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Вы не состоите в управляющей компании' : 'You are not a member of a management company'}</p>
       </div>
     );
   }
 
   return (
-    <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
+    <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto w-full space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default function ContactsList() {
           <p className="text-muted-foreground text-sm">{isRu ? 'Контакты не найдены' : 'No contacts found'}</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
           {contacts.map(contact => {
             const avatarColor = getAvatarColor(contact.first_name + contact.last_name);
             return (
