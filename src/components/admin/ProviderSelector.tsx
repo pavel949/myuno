@@ -179,7 +179,7 @@ export function ProviderSelector({
 
       {/* Quick Create Dialog */}
       <Dialog open={isQuickCreateOpen} onOpenChange={setIsQuickCreateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" hideOverlay>
           <DialogHeader>
             <DialogTitle>
               {isRussian ? 'Быстрое создание провайдера' : 'Quick Create Provider'}
