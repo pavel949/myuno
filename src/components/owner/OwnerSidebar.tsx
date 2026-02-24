@@ -15,6 +15,8 @@ import {
   ClipboardList,
   PackageOpen,
   FileText,
+  UserCog,
+  Receipt,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -50,6 +52,14 @@ interface NavGroup {
   defaultOpen?: boolean;
 }
 
+/**
+ * 5 logical groups, no duplicates:
+ * 1. Main — Dashboard, Properties, Calendar (daily operational core)
+ * 2. CRM — Sales Pipeline, Contacts (revenue generation)
+ * 3. Operations — Tasks, Inventory, Vendors (field work)
+ * 4. Finance — Income/Expenses, Invoices, Reports (money tracking)
+ * 5. Team — Staff directory + MC members/delegation (people management)
+ */
 const navigationGroups: NavGroup[] = [
   {
     label: 'Main',
@@ -62,8 +72,8 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    label: 'Sales',
-    labelRu: 'Продажи',
+    label: 'CRM & Sales',
+    labelRu: 'CRM и продажи',
     defaultOpen: false,
     items: [
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
@@ -75,19 +85,19 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Операции',
     defaultOpen: false,
     items: [
-      { title: 'Operations', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
-      { title: 'Staff', titleRu: 'Персонал', path: '/owner/staff', icon: Users },
+      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
-      { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: FileText },
-      { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: ClipboardList },
+      { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
     ],
   },
   {
-    label: 'Money',
+    label: 'Finance',
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Financials', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
+      { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
+      { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
+      { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: ClipboardList },
     ],
   },
   {
@@ -95,7 +105,8 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Команда',
     defaultOpen: false,
     items: [
-      { title: 'My Team', titleRu: 'Моя команда', path: '/owner/team', icon: Users },
+      { title: 'Staff Directory', titleRu: 'Сотрудники', path: '/owner/staff', icon: Users },
+      { title: 'Members & Access', titleRu: 'Участники и доступ', path: '/owner/team', icon: UserCog },
     ],
   },
 ];
