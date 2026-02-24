@@ -11,7 +11,9 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   Dialog,
@@ -22,7 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
-import { Building2, Plus, Loader2 } from 'lucide-react';
+import { Building2, Plus, Loader2, Search } from 'lucide-react';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
 
@@ -36,6 +38,8 @@ export default function AdminProperties() {
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
   const [filterProviderId, setFilterProviderId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
   
   // Redirect to unified property creation wizard instead of opening dialog
@@ -92,7 +96,6 @@ export default function AdminProperties() {
     setIsSheetOpen(false);
     setEditingProperty(null);
     setSelectedProviderId('');
-    // Clear edit param from URL
     if (searchParams.has('edit')) {
       navigate('/admin/properties', { replace: true });
     }
@@ -155,7 +158,6 @@ export default function AdminProperties() {
 
     setIsSubmitting(true);
     try {
-      // Build listing modes
       const listingModes = data.listing_modes || [];
       if (listingModes.length === 0) {
         if (data.is_for_sale) listingModes.push('sale');
@@ -196,7 +198,6 @@ export default function AdminProperties() {
         highlights: data.highlights?.length ? data.highlights : undefined,
         instant_booking: data.instant_booking,
         is_active: data.is_active ?? true,
-        // House rules from canonical form
         pets_allowed: data.pets_allowed,
         smoking_allowed: data.smoking_allowed,
         parties_allowed: data.parties_allowed,
@@ -243,6 +244,20 @@ export default function AdminProperties() {
     }
   };
 
+  // Filter properties by search query and status
+  const filteredProperties = properties.filter(p => {
+    const matchesSearch = !searchQuery || 
+      p.title_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.title_ru?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.internal_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.district?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.address?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filter === 'active') return p.is_active;
+    if (filter === 'inactive') return !p.is_active;
+    return true;
+  });
+
   if (authLoading || adminLoading) {
     return (
       <>
@@ -268,35 +283,85 @@ export default function AdminProperties() {
           showBack
         />
 
-        <Button 
-          className="w-full mb-4" 
-          onClick={openNewSheet}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {isRussian ? 'Добавить объект' : 'Add Property'}
-        </Button>
+        {/* Search & Add */}
+        <div className="flex gap-2 mb-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={isRussian ? 'Поиск по названию, району...' : 'Search by title, district...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button onClick={openNewSheet}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
 
+        {/* Provider Filter */}
+        <div className="mb-3">
+          <ProviderSelector
+            value={filterProviderId}
+            onChange={setFilterProviderId}
+            label={isRussian ? 'Фильтр по провайдеру / УК' : 'Filter by provider / PM'}
+          />
+        </div>
+
+        {/* Status Filter Chips */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {([
+            { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
+            { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
+            { key: 'inactive' as const, labelEn: 'Inactive', labelRu: 'Неактивные' },
+          ]).map(f => (
+            <Button
+              key={f.key}
+              variant={filter === f.key ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter(f.key)}
+            >
+              {isRussian ? f.labelRu : f.labelEn}
+              {f.key !== 'all' && (
+                <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
+                  {f.key === 'active' 
+                    ? properties.filter(p => p.is_active).length 
+                    : properties.filter(p => !p.is_active).length}
+                </Badge>
+              )}
+            </Button>
+          ))}
+          <Badge variant="outline" className="ml-auto self-center">
+            {filteredProperties.length} / {properties.length}
+          </Badge>
+        </div>
+
+        {/* Properties List */}
         {propertiesLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-32" />
             ))}
           </div>
-        ) : properties.length === 0 ? (
+        ) : filteredProperties.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="font-medium mb-1">
                 {isRussian ? 'Нет объектов' : 'No properties'}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-4">
                 {isRussian ? 'Добавьте недвижимость' : 'Add properties'}
               </p>
+              <Button onClick={openNewSheet}>
+                <Plus className="h-4 w-4 mr-2" />
+                {isRussian ? 'Добавить' : 'Add Property'}
+              </Button>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-3">
-            {properties.map((property) => (
+            {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
                 property={property}
