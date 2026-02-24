@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
-import { usePMCompanies } from '@/hooks/usePMCompanies';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,7 +63,6 @@ export function ProviderSelector({
   const { language } = useLanguage();
   const { providers, isLoading, refetch } = useAdminProviders();
   const { data: managementCompanies, isLoading: mcLoading } = useManagementCompanies();
-  const { companies: pmCompanies, isLoading: pmcLoading } = usePMCompanies();
   const isRussian = language === 'ru';
 
   const [open, setOpen] = useState(false);
@@ -76,22 +74,13 @@ export function ProviderSelector({
   const [quickEmail, setQuickEmail] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  // Merge management_companies and property_management_companies into one list
+  // Management companies list (now unified single table)
   const allMCs = useMemo(() => {
-    const mcList = (managementCompanies || []).map(c => ({
+    return (managementCompanies || []).map(c => ({
       id: c.id,
       name: isRussian ? c.name_ru : c.name_en,
-      source: 'mc' as const,
     }));
-    const pmcList = pmCompanies
-      .filter(c => !mcList.some(mc => mc.id === c.id)) // dedupe
-      .map(c => ({
-        id: c.id,
-        name: (isRussian && c.name_ru) ? c.name_ru : c.name,
-        source: 'pmc' as const,
-      }));
-    return [...mcList, ...pmcList];
-  }, [managementCompanies, pmCompanies, isRussian]);
+  }, [managementCompanies, isRussian]);
 
   const selectedProvider = useMemo(
     () => providers.find(p => p.id === value),
@@ -192,7 +181,7 @@ export function ProviderSelector({
     }
   };
 
-  if (isLoading || mcLoading || pmcLoading) {
+  if (isLoading || mcLoading) {
     return (
       <div className="space-y-2">
         {label && <Label>{label}</Label>}

@@ -7383,27 +7383,40 @@ export type Database = {
           address: string | null
           cover_image: string | null
           created_at: string
+          created_by: string | null
+          default_commission_rate: number | null
           description_en: string | null
           description_ru: string | null
+          director_name: string | null
           district: string | null
           email: string | null
           founded_year: number | null
+          has_24_7_support: boolean | null
+          has_emergency_service: boolean | null
           id: string
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
           languages: string[] | null
+          license_number: string | null
           logo: string | null
+          min_contract_months: number | null
           name_en: string
           name_ru: string
           phone: string | null
           properties_count: number | null
+          properties_managed: number | null
           provider_id: string | null
           rating: number | null
           review_count: number | null
+          service_districts: string[] | null
+          service_types: string[] | null
           services: string[] | null
           slug: string
+          tax_id: string | null
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
           website: string | null
           whatsapp: string | null
         }
@@ -7411,27 +7424,40 @@ export type Database = {
           address?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by?: string | null
+          default_commission_rate?: number | null
           description_en?: string | null
           description_ru?: string | null
+          director_name?: string | null
           district?: string | null
           email?: string | null
           founded_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          license_number?: string | null
           logo?: string | null
+          min_contract_months?: number | null
           name_en: string
           name_ru: string
           phone?: string | null
           properties_count?: number | null
+          properties_managed?: number | null
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
           services?: string[] | null
           slug: string
+          tax_id?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           website?: string | null
           whatsapp?: string | null
         }
@@ -7439,27 +7465,40 @@ export type Database = {
           address?: string | null
           cover_image?: string | null
           created_at?: string
+          created_by?: string | null
+          default_commission_rate?: number | null
           description_en?: string | null
           description_ru?: string | null
+          director_name?: string | null
           district?: string | null
           email?: string | null
           founded_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          license_number?: string | null
           logo?: string | null
+          min_contract_months?: number | null
           name_en?: string
           name_ru?: string
           phone?: string | null
           properties_count?: number | null
+          properties_managed?: number | null
           provider_id?: string | null
           rating?: number | null
           review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
           services?: string[] | null
           slug?: string
+          tax_id?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           website?: string | null
           whatsapp?: string | null
         }
@@ -11083,13 +11122,6 @@ export type Database = {
             referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "owner_properties_pm_company_id_fkey"
-            columns: ["pm_company_id"]
-            isOneToOne: false
-            referencedRelation: "property_management_companies"
-            referencedColumns: ["id"]
-          },
         ]
       }
       owner_vault_files: {
@@ -14199,111 +14231,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      property_management_companies: {
-        Row: {
-          address: string | null
-          cover_image: string | null
-          created_at: string
-          created_by: string | null
-          default_commission_rate: number | null
-          description: string | null
-          description_ru: string | null
-          director_name: string | null
-          email: string | null
-          established_year: number | null
-          has_24_7_support: boolean | null
-          has_emergency_service: boolean | null
-          id: string
-          is_active: boolean | null
-          is_verified: boolean | null
-          languages: string[] | null
-          license_number: string | null
-          logo_url: string | null
-          min_contract_months: number | null
-          name: string
-          name_ru: string | null
-          phone: string | null
-          properties_managed: number | null
-          rating: number | null
-          review_count: number | null
-          service_districts: string[] | null
-          service_types: string[] | null
-          tax_id: string | null
-          updated_at: string
-          verified_at: string | null
-          verified_by: string | null
-          website: string | null
-        }
-        Insert: {
-          address?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_by?: string | null
-          default_commission_rate?: number | null
-          description?: string | null
-          description_ru?: string | null
-          director_name?: string | null
-          email?: string | null
-          established_year?: number | null
-          has_24_7_support?: boolean | null
-          has_emergency_service?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          license_number?: string | null
-          logo_url?: string | null
-          min_contract_months?: number | null
-          name: string
-          name_ru?: string | null
-          phone?: string | null
-          properties_managed?: number | null
-          rating?: number | null
-          review_count?: number | null
-          service_districts?: string[] | null
-          service_types?: string[] | null
-          tax_id?: string | null
-          updated_at?: string
-          verified_at?: string | null
-          verified_by?: string | null
-          website?: string | null
-        }
-        Update: {
-          address?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_by?: string | null
-          default_commission_rate?: number | null
-          description?: string | null
-          description_ru?: string | null
-          director_name?: string | null
-          email?: string | null
-          established_year?: number | null
-          has_24_7_support?: boolean | null
-          has_emergency_service?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          license_number?: string | null
-          logo_url?: string | null
-          min_contract_months?: number | null
-          name?: string
-          name_ru?: string | null
-          phone?: string | null
-          properties_managed?: number | null
-          rating?: number | null
-          review_count?: number | null
-          service_districts?: string[] | null
-          service_types?: string[] | null
-          tax_id?: string | null
-          updated_at?: string
-          verified_at?: string | null
-          verified_by?: string | null
-          website?: string | null
-        }
-        Relationships: []
       }
       property_management_requests: {
         Row: {
