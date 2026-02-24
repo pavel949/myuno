@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
@@ -61,6 +61,28 @@ export function ProviderSelector({
     () => providers.find(p => p.id === value),
     [providers, value]
   );
+
+  // Keyboard layout mapping: Russian keys → Latin equivalents
+  const ruToEnMap: Record<string, string> = {
+    'й':'q','ц':'w','у':'e','к':'r','е':'t','н':'y','г':'u','ш':'i','щ':'o','з':'p',
+    'ф':'a','ы':'s','в':'d','а':'f','п':'g','р':'h','о':'j','л':'k','д':'l',
+    'я':'z','ч':'x','с':'c','м':'v','и':'b','т':'n','ь':'m','б':',','ю':'.',
+  };
+
+  const convertLayout = useCallback((input: string) => {
+    return input.toLowerCase().split('').map(c => ruToEnMap[c] || c).join('');
+  }, []);
+
+  const commandFilter = useCallback((value: string, search: string) => {
+    const s = search.toLowerCase();
+    const v = value.toLowerCase();
+    // Direct match
+    if (v.includes(s)) return 1;
+    // Try converting search from Russian keyboard layout to English
+    const converted = convertLayout(s);
+    if (v.includes(converted)) return 1;
+    return 0;
+  }, [convertLayout]);
 
   const handleQuickCreate = async () => {
     if (!quickName.trim()) return;
@@ -171,7 +193,7 @@ export function ProviderSelector({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[--radix-popover-trigger-width] p-0 z-50" align="start">
-            <Command>
+            <Command filter={commandFilter}>
               <CommandInput
                 placeholder={isRussian ? 'Начните вводить название...' : 'Type provider name...'}
               />
