@@ -53,7 +53,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
             contentClassName
           )}
         >
-          <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-[1536px] mx-auto w-full">
             {children}
           </div>
         </main>

@@ -664,7 +664,7 @@ export default function PropertyDetail() {
 
         {/* Fixed Bottom CTA - Mobile Only */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-border shadow-lg lg:hidden">
-          <div className="max-w-7xl mx-auto flex items-center gap-3">
+          <div className="max-w-[1536px] mx-auto flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-1">
                 <span className="text-xl font-bold text-foreground">

@@ -37,7 +37,7 @@ export const UnifiedFilterRibbon = memo(function UnifiedFilterRibbon({
 
   return (
     <div className={cn("bg-card border-b border-border/50", className)}>
-      <div className="px-3 py-2.5 max-w-7xl mx-auto">
+      <div className="px-3 py-2.5 max-w-[1536px] mx-auto">
         <div className={containerClass}>
           {leadingAction}
           

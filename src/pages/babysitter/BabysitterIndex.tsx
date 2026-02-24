@@ -131,7 +131,7 @@ export default function BabysitterIndex() {
       />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+      <div className="max-w-[1536px] mx-auto px-4 py-4 pb-24">
         {filteredBabysitters.length === 0 ? (
           <EmptyState
             icon={Baby}

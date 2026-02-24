@@ -51,7 +51,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
 
   return (
     <div className={cn("bg-background/95 backdrop-blur-md border-b border-border/50", className)}>
-      <div className="px-4 py-2.5 max-w-7xl mx-auto">
+      <div className="px-4 py-2.5 max-w-[1536px] mx-auto">
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-2">
           {showBack && (

@@ -48,7 +48,7 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
       
       {/* Content */}
-      <div className="relative px-4 py-6 max-w-7xl mx-auto">
+      <div className="relative px-4 py-6 max-w-[1536px] mx-auto">
         {/* Header with badge */}
         <div className="flex items-center gap-2 mb-3">
           <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">

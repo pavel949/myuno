@@ -55,7 +55,7 @@ export default function InsuranceIndex() {
           onCategoryChange={setSelectedCategory}
         />
 
-        <main className="container max-w-7xl mx-auto px-4 py-4 pb-24">
+        <main className="container max-w-[1536px] mx-auto px-4 py-4 pb-24">
           {/* Travel Insurance Promo Banner */}
           <div
             onClick={() => navigate('/insurance/travel')}

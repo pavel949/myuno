@@ -168,7 +168,7 @@ export default function FlowersIndex() {
 
         {/* Trust bar */}
         <div className="bg-muted/50 border-b px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-center gap-4 text-xs text-muted-foreground">
+          <div className="max-w-[1536px] mx-auto flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Shield className="w-3 h-3 text-primary" />
               {isRu ? 'Гарантия свежести 5 дней' : '5-day freshness guarantee'}
@@ -182,7 +182,7 @@ export default function FlowersIndex() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-4 pb-24">
+        <div className="max-w-[1536px] mx-auto px-4 py-4 pb-24">
           {/* Active filters */}
           {activeFilterCount > 0 && (
             <ActiveFilters

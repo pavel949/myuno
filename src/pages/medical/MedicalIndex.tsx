@@ -67,7 +67,7 @@ export default function MedicalIndex() {
       />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-4 pb-24 space-y-4">
+      <div className="max-w-[1536px] mx-auto px-4 py-4 pb-24 space-y-4">
         {/* Emergency banner */}
         <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30">
           <div className="flex items-center gap-2 mb-1">

@@ -39,7 +39,7 @@ export function VehicleClassNav({ selected, onChange, counts }: VehicleClassNavP
 
   return (
     <div className="sticky top-0 z-30 bg-background border-b border-border/50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1536px] mx-auto">
         <div
           ref={scrollRef}
           className="flex gap-1 px-4 py-3 overflow-x-auto scrollbar-hide"

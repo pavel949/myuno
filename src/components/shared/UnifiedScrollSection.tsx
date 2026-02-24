@@ -58,7 +58,7 @@ export const UnifiedScrollSection = memo(function UnifiedScrollSection({
           "flex gap-3 pb-2 overflow-x-auto scrollbar-hide snap-x snap-proximity",
           "overscroll-x-contain",
           !noPadding && "px-4",
-          "max-w-7xl mx-auto"
+          "max-w-[1536px] mx-auto"
         )}
         style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
       >
@@ -126,7 +126,7 @@ export const UnifiedGridSection = memo(function UnifiedGridSection({
   return (
     <section className={cn("py-6 px-4", bgClass, className)}>
       <div className={cn(
-        "grid gap-3 max-w-7xl mx-auto",
+        "grid gap-3 max-w-[1536px] mx-auto",
         gridCols
       )}>
         {children}

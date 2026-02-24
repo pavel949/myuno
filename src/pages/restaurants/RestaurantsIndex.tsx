@@ -78,7 +78,7 @@ export default function RestaurantsIndex() {
           }
         >
           {/* Area filters */}
-          <div className="max-w-7xl mx-auto px-4 pb-2.5">
+          <div className="max-w-[1536px] mx-auto px-4 pb-2.5">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {AREAS.map(a => (
                 <button
@@ -100,14 +100,14 @@ export default function RestaurantsIndex() {
         </CatalogHeader>
 
         {/* Results count */}
-        <div className="container max-w-7xl mx-auto px-4 py-3">
+        <div className="container max-w-[1536px] mx-auto px-4 py-3">
           <p className="text-sm text-muted-foreground">
             {filtered.length} {isRu ? 'ресторанов' : 'restaurants'}
           </p>
         </div>
 
         {/* Grid */}
-        <main className="container max-w-7xl mx-auto px-4 pb-24">
+        <main className="container max-w-[1536px] mx-auto px-4 pb-24">
           {isLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
               {[1,2,3,4,5,6].map(i => (

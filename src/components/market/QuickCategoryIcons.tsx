@@ -31,7 +31,7 @@ export const QuickCategoryIcons: React.FC<QuickCategoryIconsProps> = ({
   return (
     <div className={cn("py-3", className)}>
       {/* Horizontal scrollable on mobile */}
-      <div className="flex gap-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-proximity touch-pan-y max-w-7xl mx-auto pb-2">
+      <div className="flex gap-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-proximity touch-pan-y max-w-[1536px] mx-auto pb-2">
         {displayCategories.map((category) => {
           const count = productCounts[category.slug] || 0;
           

@@ -53,7 +53,7 @@ export const CatalogHeader = memo(function CatalogHeader({
       className
     )}>
       {/* Title row */}
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-3">
+      <div className="max-w-[1536px] mx-auto px-4 py-2.5 flex items-center gap-3">
         {!isDesktop && <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />}
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-bold truncate text-white">{title}</h1>
@@ -68,7 +68,7 @@ export const CatalogHeader = memo(function CatalogHeader({
 
       {/* Category ribbon */}
       {categories && categories.length > 0 && onCategoryChange && (
-        <div className="max-w-7xl mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="max-w-[1536px] mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
           {categories.map(cat => (
             <button
               key={cat.id}
