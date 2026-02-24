@@ -38,7 +38,7 @@ export const DiscoverHero = memo(function DiscoverHero() {
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
         <h1 className="text-lg md:text-2xl font-extrabold text-white leading-tight tracking-tight">
-          {isRu ? 'Ваша жизнь, упрощённая' : 'Your life, simplified'}
+          {isRu ? 'Теперь всё просто' : 'Everything made simple'}
         </h1>
         <p className="text-[11px] md:text-sm text-white/70 mt-0.5">
           {isRu ? 'Всё для жизни на Пхукете в одном месте' : 'Everything for life in Phuket, in one place'}
