@@ -23,13 +23,13 @@ import {
 import { useDraggable } from '@dnd-kit/core';
 
 const stageColors: Record<DealStage, string> = {
-  new: 'border-t-blue-500',
-  contacted: 'border-t-cyan-500',
-  showing: 'border-t-amber-500',
-  negotiation: 'border-t-orange-500',
-  contract: 'border-t-purple-500',
-  closed_won: 'border-t-green-500',
-  closed_lost: 'border-t-red-500',
+  new: 'border-t-primary',
+  contacted: 'border-t-info',
+  showing: 'border-t-warning',
+  negotiation: 'border-t-warning/70',
+  contract: 'border-t-accent-foreground',
+  closed_won: 'border-t-success',
+  closed_lost: 'border-t-destructive',
 };
 
 function KanbanCard({ deal }: { deal: AgentDeal }) {
@@ -53,8 +53,8 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
       className={cn(
         'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none',
         isDragging && 'opacity-50 shadow-lg z-50',
-        age > 30 && 'border-l-2 border-l-red-500',
-        age > 14 && age <= 30 && 'border-l-2 border-l-amber-500',
+        age > 30 && 'border-l-2 border-l-destructive',
+        age > 14 && age <= 30 && 'border-l-2 border-l-warning',
       )}
       onPointerDown={() => { dragRef.current = false; }}
       onPointerMove={() => { dragRef.current = true; }}
@@ -85,7 +85,7 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
-            className="text-green-600 hover:text-green-500"
+            className="text-success hover:text-success/80"
           >
             <MessageCircle className="h-3 w-3" />
           </a>
@@ -111,7 +111,7 @@ function KanbanCard({ deal }: { deal: AgentDeal }) {
           </p>
         )}
         {age > 7 && (
-          <p className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-red-500' : age > 14 ? 'text-amber-500' : 'text-muted-foreground')}>
+          <p className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-destructive' : age > 14 ? 'text-warning' : 'text-muted-foreground')}>
             <Clock className="h-2.5 w-2.5" />{age}d
           </p>
         )}
