@@ -11,8 +11,10 @@ import { CreateServiceTaskDialog } from '@/components/owner/CreateServiceTaskDia
 import { AddBookingFromCalendarDialog } from '@/components/owner/AddBookingFromCalendarDialog';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMyProperties } from '@/hooks/useMyProperties';
-import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List } from 'lucide-react';
+import { usePropertyComplexes } from '@/hooks/usePropertyComplexes';
+import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type ViewMode = 'single' | 'multi';
@@ -26,12 +28,28 @@ export default function OwnerCalendar() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
+  const [selectedComplexId, setSelectedComplexId] = useState<string>('all');
   // Default to multi on desktop (checked via initial window width)
   const [viewMode, setViewMode] = useState<ViewMode>(() => 
     typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
   );
   
   const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const { data: complexes } = usePropertyComplexes();
+
+  // Complexes that actually have properties assigned
+  const activeComplexes = useMemo(() => {
+    if (!complexes) return [];
+    const usedComplexIds = new Set(allProperties.filter(p => p.complex_id).map(p => p.complex_id));
+    return complexes.filter(c => usedComplexIds.has(c.id));
+  }, [complexes, allProperties]);
+
+  // Filter properties by selected complex
+  const filteredProperties = useMemo(() => {
+    if (selectedComplexId === 'all') return allProperties;
+    if (selectedComplexId === 'no-complex') return allProperties.filter(p => !p.complex_id);
+    return allProperties.filter(p => p.complex_id === selectedComplexId);
+  }, [allProperties, selectedComplexId]);
 
   // Map to format expected by PropertyThumbnailSelector
   const propertyRefs = useMemo(() =>
@@ -103,10 +121,33 @@ export default function OwnerCalendar() {
 
       {isMulti ? (
         /* Multi-property timeline view */
-        <MultiPropertyTimeline
-          properties={allProperties}
-          isLoading={propertiesLoading}
-        />
+        <div className="space-y-3">
+          {/* Complex filter */}
+          {activeComplexes.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
+                <SelectTrigger className="h-8 text-xs w-auto min-w-[160px]">
+                  <SelectValue placeholder={isRu ? 'Все комплексы' : 'All complexes'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{isRu ? 'Все объекты' : 'All properties'}</SelectItem>
+                  {activeComplexes.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {isRu ? (c.name_ru || c.name) : c.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="no-complex">{isRu ? 'Без комплекса' : 'No complex'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <MultiPropertyTimeline
+            properties={filteredProperties}
+            isLoading={propertiesLoading}
+            complexes={complexes || []}
+          />
+        </div>
       ) : (
         /* Single property view */
         <>
