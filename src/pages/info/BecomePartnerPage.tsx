@@ -125,8 +125,8 @@ export default function BecomePartnerPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center max-w-md"
           >
-            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-10 h-10 text-green-500" />
+            <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-10 h-10 text-success" />
             </div>
             <h1 className="text-2xl font-bold mb-4">
               {language === 'ru' ? 'Заявка принята!' : 'Application Received!'}

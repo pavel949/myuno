@@ -153,10 +153,10 @@ export default function TaxonomyBulkActions({ typeKey }: Props) {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleActivateAll}>
-            <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+            <CheckCircle className="h-4 w-4 mr-2 text-success" />
             {t('Activate All', 'Активировать все')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDeactivateAll} className="text-orange-500">
+          <DropdownMenuItem onClick={handleDeactivateAll} className="text-accent-amber">
             <ToggleLeft className="h-4 w-4 mr-2" />
             {t('Deactivate All', 'Деактивировать все')}
           </DropdownMenuItem>

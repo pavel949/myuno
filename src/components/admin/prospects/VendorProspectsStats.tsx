@@ -43,7 +43,7 @@ export function VendorProspectsStats() {
       title: isRussian ? 'В работе' : 'In Progress',
       value: (stats?.byStatus?.contacted || 0) + (stats?.byStatus?.negotiating || 0) + (stats?.byStatus?.meeting || 0),
       icon: TrendingUp,
-      color: 'text-blue-500'
+      color: 'text-info'
     },
   ];
 

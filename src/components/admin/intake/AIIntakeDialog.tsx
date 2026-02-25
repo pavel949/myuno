@@ -200,7 +200,7 @@ export function AIIntakeDialog({
             <Card className="border-primary/50 bg-primary/5">
               <CardContent className="p-4">
                 <h4 className="font-medium mb-3 flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
+                  <Check className="h-4 w-4 text-success" />
                   {isRu ? 'Извлечённые данные' : 'Extracted Data'}
                 </h4>
                 <div className="space-y-2 text-sm">

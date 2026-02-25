@@ -43,10 +43,10 @@ const ENTITY_TYPE_OPTIONS = Object.values(ENTITY_TYPES).map((def: EntityTypeDefi
 }));
 
 const ROLE_SCOPES: { value: LifeOSRole; label: string; color: string }[] = [
-  { value: 'guest', label: 'Guest', color: 'bg-blue-500/10 text-blue-700 border-blue-200' },
-  { value: 'resident', label: 'Resident', color: 'bg-green-500/10 text-green-700 border-green-200' },
-  { value: 'owner', label: 'Owner', color: 'bg-purple-500/10 text-purple-700 border-purple-200' },
-  { value: 'investor', label: 'Investor', color: 'bg-amber-500/10 text-amber-700 border-amber-200' },
+  { value: 'guest', label: 'Guest', color: 'bg-info/10 text-info border-info/30' },
+  { value: 'resident', label: 'Resident', color: 'bg-success/10 text-success border-success/30' },
+  { value: 'owner', label: 'Owner', color: 'bg-accent-purple/10 text-accent-purple border-accent-purple/30' },
+  { value: 'investor', label: 'Investor', color: 'bg-warning/10 text-warning border-warning/30' },
 ];
 
 interface MappingWithMeta {

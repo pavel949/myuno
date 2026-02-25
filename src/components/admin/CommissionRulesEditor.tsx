@@ -206,7 +206,7 @@ export function CommissionRulesEditor() {
                   >
                     <div className="flex items-center justify-between w-full pr-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${rule.is_active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                        <div className={`w-2 h-2 rounded-full ${rule.is_active ? 'bg-success' : 'bg-muted-foreground'}`} />
                         <span className="font-medium">{getVerticalLabel(rule.vertical)}</span>
                         <span className="text-muted-foreground text-sm">({rule.vertical})</span>
                       </div>
@@ -215,7 +215,7 @@ export function CommissionRulesEditor() {
                           {rule.base_commission}%
                         </span>
                         {rule.tiered_rates?.tiers && rule.tiered_rates.tiers.length > 0 && (
-                          <span className="px-2 py-1 bg-blue-500/10 text-blue-600 rounded-md text-xs">
+                          <span className="px-2 py-1 bg-info/10 text-info rounded-md text-xs">
                             {rule.tiered_rates.tiers.length} тиеров
                           </span>
                         )}

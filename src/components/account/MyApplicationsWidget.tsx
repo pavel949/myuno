@@ -14,10 +14,10 @@ import { cn } from '@/lib/utils';
 const STATUS_CONFIG = {
   draft: { icon: Clock, color: 'bg-muted text-muted-foreground', labelEn: 'Draft', labelRu: 'Черновик' },
   pending: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Under Review', labelRu: 'На проверке' },
-  under_review: { icon: Clock, color: 'bg-blue-500/20 text-blue-600', labelEn: 'Reviewing', labelRu: 'Проверяется' },
-  approved: { icon: CheckCircle2, color: 'bg-green-500/20 text-green-600', labelEn: 'Approved', labelRu: 'Одобрено' },
+  under_review: { icon: Clock, color: 'bg-info/20 text-info', labelEn: 'Reviewing', labelRu: 'Проверяется' },
+  approved: { icon: CheckCircle2, color: 'bg-success/20 text-success', labelEn: 'Approved', labelRu: 'Одобрено' },
   rejected: { icon: XCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Rejected', labelRu: 'Отклонено' },
-  revision_requested: { icon: Clock, color: 'bg-orange-500/20 text-orange-600', labelEn: 'Needs Changes', labelRu: 'Требуются правки' },
+  revision_requested: { icon: Clock, color: 'bg-accent-amber/20 text-accent-amber', labelEn: 'Needs Changes', labelRu: 'Требуются правки' },
 };
 
 const TYPE_ICONS = {

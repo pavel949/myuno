@@ -26,7 +26,7 @@ export function ManualModeBadge({ className }: ManualModeBadgeProps) {
   const modeConfig = {
     MANUAL: {
       icon: Lock,
-      color: 'bg-amber-500/10 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-400',
+      color: 'bg-warning/10 text-warning border-warning/30',
       label: isRussian ? 'Ручной режим' : 'Manual Mode',
       tooltip: isRussian 
         ? 'AI и авто-маппинг отключены. Все изменения вносятся вручную.'
@@ -34,7 +34,7 @@ export function ManualModeBadge({ className }: ManualModeBadgeProps) {
     },
     AUTO: {
       icon: Zap,
-      color: 'bg-blue-500/10 text-blue-700 border-blue-200',
+      color: 'bg-info/10 text-info border-info/30',
       label: isRussian ? 'Авто режим' : 'Auto Mode',
       tooltip: isRussian 
         ? 'Авто-маппинг включён.'
@@ -42,7 +42,7 @@ export function ManualModeBadge({ className }: ManualModeBadgeProps) {
     },
     AI: {
       icon: Bot,
-      color: 'bg-purple-500/10 text-purple-700 border-purple-200',
+      color: 'bg-accent-purple/10 text-accent-purple border-accent-purple/30',
       label: isRussian ? 'AI режим' : 'AI Mode',
       tooltip: isRussian 
         ? 'AI-оркестрация включена.'
@@ -74,11 +74,11 @@ export function ManualModeBadge({ className }: ManualModeBadgeProps) {
           <div className="mt-2 pt-2 border-t border-border/50 text-xs space-y-1">
             <div className="flex justify-between">
               <span className="text-muted-foreground">AI:</span>
-              <span className={aiMode === 'OFF' ? 'text-muted-foreground' : 'text-green-600'}>{aiMode}</span>
+              <span className={aiMode === 'OFF' ? 'text-muted-foreground' : 'text-success'}>{aiMode}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Auto-mapping:</span>
-              <span className={autoMapping === 'OFF' ? 'text-muted-foreground' : 'text-green-600'}>{autoMapping}</span>
+              <span className={autoMapping === 'OFF' ? 'text-muted-foreground' : 'text-success'}>{autoMapping}</span>
             </div>
           </div>
         </TooltipContent>
