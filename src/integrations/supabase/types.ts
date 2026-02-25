@@ -12390,6 +12390,8 @@ export type Database = {
           actual_owner_name: string | null
           actual_owner_phone: string | null
           address: string | null
+          ai_autoreply_enabled: boolean
+          ai_autoreply_instructions: string | null
           amenities: string[] | null
           approval_status: string | null
           area_sqm: number | null
@@ -12571,6 +12573,8 @@ export type Database = {
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address?: string | null
+          ai_autoreply_enabled?: boolean
+          ai_autoreply_instructions?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
@@ -12752,6 +12756,8 @@ export type Database = {
           actual_owner_name?: string | null
           actual_owner_phone?: string | null
           address?: string | null
+          ai_autoreply_enabled?: boolean
+          ai_autoreply_instructions?: string | null
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null

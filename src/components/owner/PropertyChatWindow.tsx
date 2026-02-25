@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Building2, Check, CheckCheck, ShieldAlert } from 'lucide-react';
+import { Send, User, Building2, Check, CheckCheck, ShieldAlert, Bot } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -229,7 +229,10 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) => {
+  const isAiGenerated = (message.attachments as Record<string, unknown> | null)?.ai_generated === true;
+
   const getSenderLabel = (senderType: string) => {
+    if (isAiGenerated) return isRu ? 'AI Ассистент' : 'AI Assistant';
     switch (senderType) {
       case 'owner':
         return isRu ? 'Вы' : 'You';
@@ -273,12 +276,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
       {!isOwn && (
         <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarFallback className={cn(
+            isAiGenerated ? 'bg-gradient-to-br from-violet-500 to-indigo-500' :
             message.sender_type === 'guest' ? 'bg-blue-500' :
             message.sender_type === 'manager' ? 'bg-purple-500' :
             'bg-green-500',
             'text-white text-xs'
           )}>
-            {message.sender_name?.charAt(0).toUpperCase() || 'U'}
+            {isAiGenerated ? <Bot className="h-4 w-4" /> : (message.sender_name?.charAt(0).toUpperCase() || 'U')}
           </AvatarFallback>
         </Avatar>
       )}

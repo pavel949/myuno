@@ -131,6 +131,8 @@ export default function PropertyManage() {
         quiet_hours_end: property.quiet_hours_end || '08:00',
         parties_allowed: property.parties_allowed || false,
         smoking_penalty: property.smoking_penalty,
+        ai_autoreply_enabled: (property as any).ai_autoreply_enabled || false,
+        ai_autoreply_instructions: (property as any).ai_autoreply_instructions || '',
       });
       setFormInitialized(true);
     }
