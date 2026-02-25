@@ -222,7 +222,7 @@ export default function AdminCities() {
 
   const getStatusBadge = (city: City) => {
     if (city.is_active && !city.is_coming_soon) {
-      return <Badge className="bg-emerald-500">{isRu ? 'Активен' : 'Active'}</Badge>;
+      return <Badge className="bg-success">{isRu ? 'Активен' : 'Active'}</Badge>;
     }
     if (city.is_coming_soon) {
       return <Badge variant="secondary">{isRu ? 'Скоро' : 'Coming Soon'}</Badge>;

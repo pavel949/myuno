@@ -42,9 +42,9 @@ const OTA_CHANNELS = [
     id: 'airbnb',
     name: 'Airbnb',
     icon: '🏠',
-    color: 'from-rose-500 to-pink-600',
-    bgColor: 'bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40',
-    borderColor: 'border-rose-200 dark:border-rose-800',
+    color: 'from-destructive to-destructive/80',
+    bgColor: 'bg-destructive/5 hover:bg-destructive/10',
+    borderColor: 'border-destructive/20',
     instructions: {
       en: [
         'Go to your Airbnb listing',
@@ -65,9 +65,9 @@ const OTA_CHANNELS = [
     id: 'booking',
     name: 'Booking.com',
     icon: '🅱️',
-    color: 'from-blue-600 to-indigo-700',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40',
-    borderColor: 'border-blue-200 dark:border-blue-800',
+    color: 'from-info to-primary',
+    bgColor: 'bg-info/5 hover:bg-info/10',
+    borderColor: 'border-info/20',
     instructions: {
       en: [
         'Log in to Booking.com Extranet',
@@ -88,9 +88,9 @@ const OTA_CHANNELS = [
     id: 'vrbo',
     name: 'VRBO / HomeAway',
     icon: '🏡',
-    color: 'from-cyan-500 to-teal-600',
-    bgColor: 'bg-cyan-50 dark:bg-cyan-950/30 hover:bg-cyan-100 dark:hover:bg-cyan-900/40',
-    borderColor: 'border-cyan-200 dark:border-cyan-800',
+    color: 'from-accent-cyan to-teal',
+    bgColor: 'bg-accent-cyan/5 hover:bg-accent-cyan/10',
+    borderColor: 'border-accent-cyan/20',
     instructions: {
       en: [
         'Go to your VRBO dashboard',
@@ -111,9 +111,9 @@ const OTA_CHANNELS = [
     id: 'google',
     name: 'Google Calendar',
     icon: '📅',
-    color: 'from-emerald-500 to-green-600',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40',
-    borderColor: 'border-emerald-200 dark:border-emerald-800',
+    color: 'from-success to-success/80',
+    bgColor: 'bg-success/5 hover:bg-success/10',
+    borderColor: 'border-success/20',
     instructions: {
       en: [
         'Open Google Calendar settings',

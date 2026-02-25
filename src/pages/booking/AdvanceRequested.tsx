@@ -136,7 +136,7 @@ const AdvanceRequested = () => {
                   <div className="relative">
                     <div className={cn(
                       "w-10 h-10 rounded-full flex items-center justify-center",
-                      index === 0 ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground"
+                      index === 0 ? "bg-warning/20 text-warning" : "bg-muted text-muted-foreground"
                     )}>
                       <step.icon className="w-5 h-5" />
                     </div>
