@@ -179,7 +179,7 @@ export function LifeOSResolverPreviewTab() {
               key={i}
               className={cn(
                 "flex items-center gap-2 p-3 rounded-lg",
-                w.type === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-amber-500/10 text-amber-600'
+                w.type === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning'
               )}
             >
               {w.type === 'error' ? <XCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
@@ -201,7 +201,7 @@ export function LifeOSResolverPreviewTab() {
               {Object.keys(groupedItems || {}).length} {isRussian ? 'блоков' : 'blocks'}
             </Badge>
             {warnings.length === 0 && displayItems && displayItems.length > 0 && (
-              <Badge className="bg-green-500/10 text-green-600 border-green-200">
+              <Badge className="bg-success/10 text-success border-success/30">
                 <CheckCircle2 className="w-4 h-4 mr-1" />
                 {isRussian ? 'Валидно' : 'Valid'}
               </Badge>
@@ -272,9 +272,9 @@ export function LifeOSResolverPreviewTab() {
 
           {/* Empty State with Fallback */}
           {displayItems?.length === 0 && includeFallback && (
-            <Card className="border-amber-500/50 bg-amber-500/5">
+            <Card className="border-warning/50 bg-warning/5">
               <CardContent className="py-8 text-center">
-                <AlertTriangle className="w-12 h-12 mx-auto text-amber-500 mb-4" />
+                <AlertTriangle className="w-12 h-12 mx-auto text-warning mb-4" />
                 <h3 className="font-semibold mb-2">
                   {isRussian ? 'Нет результатов для этой комбинации' : 'No results for this combination'}
                 </h3>

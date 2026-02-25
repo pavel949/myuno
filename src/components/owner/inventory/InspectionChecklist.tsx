@@ -27,7 +27,7 @@ interface InspectionItem {
 }
 
 const STATUS_CONFIG: Record<InspectionStatus, { label: { en: string; ru: string }; icon: typeof Check; color: string }> = {
-  ok: { label: { en: 'OK', ru: 'ОК' }, icon: Check, color: 'text-green-600' },
+  ok: { label: { en: 'OK', ru: 'ОК' }, icon: Check, color: 'text-success' },
   damaged: { label: { en: 'Damaged', ru: 'Повреждено' }, icon: AlertTriangle, color: 'text-amber-600' },
   missing: { label: { en: 'Missing', ru: 'Отсутствует' }, icon: X, color: 'text-destructive' },
 };
@@ -172,7 +172,7 @@ export default function InspectionChecklist() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="text-green-600 font-medium">{insItems.length - dmg - miss} ✓</span>
+                      <span className="text-success font-medium">{insItems.length - dmg - miss} ✓</span>
                       {dmg > 0 && <span className="text-amber-600 font-medium">{dmg} ⚠</span>}
                       {miss > 0 && <span className="text-destructive font-medium">{miss} ✗</span>}
                     </div>

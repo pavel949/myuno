@@ -83,7 +83,7 @@ export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
             )}
             {prospect.ai_score !== null && (
               <Badge variant="secondary" className="text-[10px] h-5 gap-0.5">
-                <Star className="h-2.5 w-2.5 text-yellow-500" />
+                <Star className="h-2.5 w-2.5 text-warning" />
                 {prospect.ai_score}
               </Badge>
             )}

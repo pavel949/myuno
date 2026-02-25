@@ -127,7 +127,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
                 )}
                 {prospect.ai_score !== null && (
                   <Badge variant="secondary" className="text-xs gap-1">
-                    <Star className="h-3 w-3 text-yellow-500" />
+                    <Star className="h-3 w-3 text-warning" />
                     {prospect.ai_score}
                   </Badge>
                 )}

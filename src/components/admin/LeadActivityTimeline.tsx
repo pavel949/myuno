@@ -25,11 +25,11 @@ const ACTIVITY_ICONS: Record<ActivityType, typeof Phone> = {
 };
 
 const CALL_RESULT_CONFIG: Record<CallResult, { icon: typeof CheckCircle2; color: string; labelRu: string; labelEn: string }> = {
-  answered: { icon: CheckCircle2, color: 'text-green-600', labelRu: 'Ответил', labelEn: 'Answered' },
-  no_answer: { icon: PhoneOff, color: 'text-orange-600', labelRu: 'Не ответил', labelEn: 'No Answer' },
-  busy: { icon: Clock, color: 'text-yellow-600', labelRu: 'Занято', labelEn: 'Busy' },
-  callback_requested: { icon: PhoneForwarded, color: 'text-blue-600', labelRu: 'Перезвонить', labelEn: 'Callback' },
-  wrong_number: { icon: XCircle, color: 'text-red-600', labelRu: 'Неверный номер', labelEn: 'Wrong Number' },
+  answered: { icon: CheckCircle2, color: 'text-success', labelRu: 'Ответил', labelEn: 'Answered' },
+  no_answer: { icon: PhoneOff, color: 'text-warning', labelRu: 'Не ответил', labelEn: 'No Answer' },
+  busy: { icon: Clock, color: 'text-warning', labelRu: 'Занято', labelEn: 'Busy' },
+  callback_requested: { icon: PhoneForwarded, color: 'text-info', labelRu: 'Перезвонить', labelEn: 'Callback' },
+  wrong_number: { icon: XCircle, color: 'text-destructive', labelRu: 'Неверный номер', labelEn: 'Wrong Number' },
 };
 
 interface LeadActivityTimelineProps {

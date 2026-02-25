@@ -186,12 +186,12 @@ export function ProviderFinanceTable({ providers, isLoading, onRefresh }: Provid
                     <td className="text-right py-3 px-4 font-medium">
                       {formatCurrency(provider.gmv)}
                     </td>
-                    <td className="text-right py-3 px-4 text-emerald-600 font-medium">
+                    <td className="text-right py-3 px-4 text-success font-medium">
                       {formatCurrency(provider.platformRevenue)}
                     </td>
                     <td className="text-right py-3 px-4">
                       {provider.pendingPayout > 0 ? (
-                        <span className="text-amber-600 font-medium">
+                        <span className="text-warning font-medium">
                           {formatCurrency(provider.pendingPayout)}
                         </span>
                       ) : (
@@ -222,7 +222,7 @@ export function ProviderFinanceTable({ providers, isLoading, onRefresh }: Provid
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7 text-emerald-600"
+                            className="h-7 w-7 text-success"
                             onClick={() => handleSaveCommission(provider.providerId)}
                             disabled={saving}
                           >
@@ -241,7 +241,7 @@ export function ProviderFinanceTable({ providers, isLoading, onRefresh }: Provid
                       ) : (
                         <button
                           onClick={() => handleEditClick(provider.providerId, provider.commissionRate)}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 text-blue-600 rounded-md text-sm hover:bg-blue-500/20 transition-colors group"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-info/10 text-info rounded-md text-sm hover:bg-info/20 transition-colors group"
                         >
                           {provider.commissionRate}%
                           <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -263,7 +263,7 @@ export function ProviderFinanceTable({ providers, isLoading, onRefresh }: Provid
                 Суммарный GMV: <strong className="text-foreground">{formatCurrency(sortedProviders.reduce((sum, p) => sum + p.gmv, 0))}</strong>
               </span>
               <span>
-                Суммарный доход: <strong className="text-emerald-600">{formatCurrency(sortedProviders.reduce((sum, p) => sum + p.platformRevenue, 0))}</strong>
+                Суммарный доход: <strong className="text-success">{formatCurrency(sortedProviders.reduce((sum, p) => sum + p.platformRevenue, 0))}</strong>
               </span>
             </div>
           </div>

@@ -12,11 +12,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-500/20 text-blue-700',
-  contacted: 'bg-yellow-500/20 text-yellow-700',
-  qualified: 'bg-green-500/20 text-green-700',
-  converted: 'bg-purple-500/20 text-purple-700',
-  lost: 'bg-red-500/20 text-red-700',
+  new: 'bg-info/20 text-info',
+  contacted: 'bg-warning/20 text-warning',
+  qualified: 'bg-success/20 text-success',
+  converted: 'bg-accent-purple/20 text-accent-purple',
+  lost: 'bg-destructive/20 text-destructive',
 };
 
 export function OperationsLeadsTab() {
@@ -78,7 +78,7 @@ export function OperationsLeadsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Phone className="h-8 w-8 text-yellow-500" />
+            <Phone className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.contacted}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Связались' : 'Contacted'}</p>

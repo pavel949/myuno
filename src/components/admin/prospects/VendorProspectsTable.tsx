@@ -139,7 +139,7 @@ export function VendorProspectsTable() {
                     <TableCell>
                       {prospect.ai_score !== null ? (
                         <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 text-yellow-500" />
+                          <Star className="h-3 w-3 text-warning" />
                           <span>{prospect.ai_score}</span>
                         </div>
                       ) : (

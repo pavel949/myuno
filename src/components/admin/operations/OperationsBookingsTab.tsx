@@ -98,7 +98,7 @@ export function OperationsBookingsTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <AlertCircle className="h-8 w-8 text-yellow-500" />
+            <AlertCircle className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
               <p className="text-sm text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
