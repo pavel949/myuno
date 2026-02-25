@@ -13661,6 +13661,7 @@ export type Database = {
           id: string
           marketplace_booking_id: string | null
           notes: string | null
+          order_id: string | null
           owner_id: string
           platform_commission: number | null
           property_id: string
@@ -13702,6 +13703,7 @@ export type Database = {
           id?: string
           marketplace_booking_id?: string | null
           notes?: string | null
+          order_id?: string | null
           owner_id: string
           platform_commission?: number | null
           property_id: string
@@ -13743,6 +13745,7 @@ export type Database = {
           id?: string
           marketplace_booking_id?: string | null
           notes?: string | null
+          order_id?: string | null
           owner_id?: string
           platform_commission?: number | null
           property_id?: string
@@ -13763,6 +13766,13 @@ export type Database = {
             columns: ["marketplace_booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_bookings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
