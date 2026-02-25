@@ -25,6 +25,49 @@ function parseICalDate(dateStr: string): string | null {
   return null;
 }
 
+// Extract guest name from iCal SUMMARY field (Airbnb, Booking.com, Vrbo patterns)
+function parseGuestName(summary: string): string {
+  if (!summary) return 'External Booking';
+  
+  // Airbnb: "Reserved - John Smith" or "Not available - Airbnb (Imported)"
+  const airbnbMatch = summary.match(/^Reserved\s*[-–]\s*(.+)$/i);
+  if (airbnbMatch) return airbnbMatch[1].trim();
+  
+  // Booking.com: "CLOSED - John Smith" or just guest name
+  const bookingMatch = summary.match(/^CLOSED\s*[-–]\s*(.+)$/i);
+  if (bookingMatch) return bookingMatch[1].trim();
+  
+  // Vrbo: "Reserved: John Smith" 
+  const vrboMatch = summary.match(/^Reserved:\s*(.+)$/i);
+  if (vrboMatch) return vrboMatch[1].trim();
+  
+  // Generic: "Booking - John Smith"
+  const genericMatch = summary.match(/^(?:Booking|Reservation|Booked)\s*[-–:]\s*(.+)$/i);
+  if (genericMatch) return genericMatch[1].trim();
+  
+  // If it starts with "Not available" or "Blocked", it's a block, not a guest
+  if (/^(not available|blocked|unavailable)/i.test(summary)) return 'Blocked';
+  
+  // Otherwise, the summary itself might be the guest name
+  return summary.trim();
+}
+
+// Parse phone/email from DESCRIPTION field
+function parseContactInfo(description?: string): { phone?: string; email?: string } {
+  if (!description) return {};
+  const result: { phone?: string; email?: string } = {};
+  
+  // Email patterns
+  const emailMatch = description.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+  if (emailMatch) result.email = emailMatch[0];
+  
+  // Phone patterns
+  const phoneMatch = description.match(/(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{2,4}/);
+  if (phoneMatch) result.phone = phoneMatch[0];
+  
+  return result;
+}
+
 // Parse iCal content into events with extended metadata
 function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
   uid: string;
@@ -36,6 +79,9 @@ function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
   price?: number;
   guestCount?: number;
   organizer?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
 }> {
   const events: Array<{
     uid: string;
@@ -47,6 +93,9 @@ function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
     price?: number;
     guestCount?: number;
     organizer?: string;
+    guestName?: string;
+    guestEmail?: string;
+    guestPhone?: string;
   }> = [];
   
   // Unfold long lines (lines starting with space/tab are continuations)
@@ -60,6 +109,9 @@ function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
       currentEvent = {};
     } else if (line === 'END:VEVENT' && currentEvent) {
       if (currentEvent.UID && currentEvent.DTSTART) {
+        const guestName = parseGuestName(currentEvent.SUMMARY || '');
+        const contactInfo = parseContactInfo(currentEvent.DESCRIPTION);
+        
         const event: any = {
           uid: currentEvent.UID,
           summary: currentEvent.SUMMARY || 'Blocked',
@@ -68,6 +120,9 @@ function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
           description: currentEvent.DESCRIPTION,
           location: currentEvent.LOCATION,
           organizer: currentEvent.ORGANIZER,
+          guestName,
+          guestEmail: contactInfo.email,
+          guestPhone: contactInfo.phone,
         };
         
         // Parse extended Airbnb fields
@@ -119,18 +174,23 @@ function detectChannelType(url: string, name: string): string {
 // Create or update an order for an external calendar event (unified orders table)
 async function upsertOrderForEvent(
   supabase: any,
-  event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string; price?: number; guestCount?: number; location?: string; organizer?: string },
+  event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string; price?: number; guestCount?: number; location?: string; organizer?: string; guestName?: string; guestEmail?: string; guestPhone?: string },
   calendar: any,
   existingOrderId?: string
 ): Promise<string> {
   const startAt = `${event.dtstart}T14:00:00Z`;
   const endAt = `${event.dtend}T12:00:00Z`;
 
+  // Use parsed guest name instead of raw summary
+  const guestName = event.guestName || event.summary || 'External Booking';
+
   // Build notes from available info
   const notesParts = [];
   if (event.description) notesParts.push(event.description);
   if (event.location) notesParts.push(`Location: ${event.location}`);
   if (event.organizer) notesParts.push(`Contact: ${event.organizer}`);
+  if (event.guestEmail) notesParts.push(`Email: ${event.guestEmail}`);
+  if (event.guestPhone) notesParts.push(`Phone: ${event.guestPhone}`);
   notesParts.push(`Synced from ${calendar.name}`);
 
   // Generate order number for new orders
@@ -156,16 +216,17 @@ async function upsertOrderForEvent(
       source_calendar_id: calendar.id,
       source_calendar_name: calendar.name,
       external_id: event.uid,
-      guest_name: event.summary || 'External Booking',
+      guest_name: guestName,
+      guest_email: event.guestEmail || null,
+      guest_phone: event.guestPhone || null,
       channel_type: detectChannelType(calendar.ical_url, calendar.name),
       sync_priority: calendar.priority || 0,
     },
   };
 
   // customer_user_id is NULL for external OTA bookings
-  // owner_id from calendar can be set if needed for reference
   if (calendar.owner_id) {
-    orderData.provider_org_id = null; // no org, just owner
+    orderData.provider_org_id = null;
   }
 
   if (existingOrderId) {
@@ -189,7 +250,7 @@ async function upsertOrderForEvent(
       .insert({
         order_id: order.id,
         item_type: 'property',
-        item_name: event.summary || 'External Booking',
+        item_name: guestName,
         qty: 1,
         unit_price: event.price || 0,
         amount: event.price || 0,
@@ -201,13 +262,15 @@ async function upsertOrderForEvent(
         },
       });
 
-    // Create guest participant
+    // Create guest participant with contact info
     await supabase
       .from('order_participants')
       .insert({
         order_id: order.id,
         role: 'guest',
-        name: event.summary || 'External Booking',
+        name: guestName,
+        email: event.guestEmail || null,
+        phone: event.guestPhone || null,
       });
 
     return order.id;

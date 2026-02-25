@@ -24,7 +24,7 @@ import { TodayBriefingWidget } from '@/components/owner/dashboard/TodayBriefingW
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
-
+import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 function SectionSkeleton() {
   return (
     <div className="space-y-3">
@@ -54,6 +54,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={<SectionSkeleton />}>
           <RevenueInsightsWidget />
+        </Suspense>
+      );
+    case 'channel_sync':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <ChannelSyncWidget />
         </Suspense>
       );
     case 'invites':

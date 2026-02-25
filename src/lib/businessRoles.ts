@@ -21,6 +21,7 @@ export interface BusinessRoleConfig {
 export type DashboardWidgetKey =
   | 'kpi'
   | 'today_briefing'
+  | 'channel_sync'
   | 'revenue_insights'
   | 'invites'
   | 'active_stays'
@@ -40,6 +41,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     widgets: [
       'kpi',
       'today_briefing',
+      'channel_sync',
       'active_stays',
       'properties',
       'revenue_insights',
@@ -87,6 +89,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     widgets: [
       'kpi',
       'today_briefing',
+      'channel_sync',
       'active_stays',
       'properties',
       'revenue_insights',
