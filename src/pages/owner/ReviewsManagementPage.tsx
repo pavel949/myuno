@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -265,7 +265,7 @@ function AddReviewSheet({ open, onOpenChange, properties, ownerId }: {
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
-    property_id: properties[0]?.property_id || '',
+    property_id: '',
     platform: 'airbnb',
     guest_name: '',
     rating: '5',
@@ -273,6 +273,18 @@ function AddReviewSheet({ open, onOpenChange, properties, ownerId }: {
     review_date: new Date().toISOString().slice(0, 10),
     sentiment: 'positive',
   });
+
+  useEffect(() => {
+    setForm({
+      property_id: properties[0]?.property_id || '',
+      platform: 'airbnb',
+      guest_name: '',
+      rating: '5',
+      review_text: '',
+      review_date: new Date().toISOString().slice(0, 10),
+      sentiment: 'positive',
+    });
+  }, [open]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -209,18 +209,42 @@ function DocSheet({ open, onOpenChange, editingDoc, properties, userId }: {
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
-    property_id: editingDoc?.property_id || properties[0]?.property_id || '',
-    doc_type: editingDoc?.doc_type || 'insurance',
-    document_type: editingDoc?.document_type || 'insurance',
-    title: editingDoc?.title || '',
-    description: editingDoc?.description || '',
-    issue_date: editingDoc?.issue_date || '',
-    expiry_date: editingDoc?.expiry_date || '',
-    coverage_amount: editingDoc?.coverage_amount ? String(editingDoc.coverage_amount) : '',
-    provider_name: editingDoc?.provider_name || '',
-    policy_number: editingDoc?.policy_number || '',
-    reminder_days: String(editingDoc?.reminder_days || 30),
+    property_id: '',
+    doc_type: 'insurance',
+    document_type: 'insurance',
+    title: '',
+    description: '',
+    issue_date: '',
+    expiry_date: '',
+    coverage_amount: '',
+    provider_name: '',
+    policy_number: '',
+    reminder_days: '30',
   });
+
+  useEffect(() => {
+    if (editingDoc) {
+      setForm({
+        property_id: editingDoc.property_id || properties[0]?.property_id || '',
+        doc_type: editingDoc.doc_type || 'insurance',
+        document_type: editingDoc.document_type || 'insurance',
+        title: editingDoc.title || '',
+        description: editingDoc.description || '',
+        issue_date: editingDoc.issue_date || '',
+        expiry_date: editingDoc.expiry_date || '',
+        coverage_amount: editingDoc.coverage_amount ? String(editingDoc.coverage_amount) : '',
+        provider_name: editingDoc.provider_name || '',
+        policy_number: editingDoc.policy_number || '',
+        reminder_days: String(editingDoc.reminder_days || 30),
+      });
+    } else {
+      setForm({
+        property_id: properties[0]?.property_id || '',
+        doc_type: 'insurance', document_type: 'insurance', title: '', description: '',
+        issue_date: '', expiry_date: '', coverage_amount: '', provider_name: '', policy_number: '', reminder_days: '30',
+      });
+    }
+  }, [editingDoc, open]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {

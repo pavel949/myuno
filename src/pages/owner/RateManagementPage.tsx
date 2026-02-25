@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -233,7 +233,7 @@ function RateSeasonSheet({
     min_stay_nights: '1',
   });
 
-  useState(() => {
+  useEffect(() => {
     if (editingRate) {
       setForm({
         property_id: editingRate.property_id,
@@ -253,7 +253,7 @@ function RateSeasonSheet({
         nightly_rate: '', weekly_rate: '', monthly_rate: '', min_stay_nights: '1',
       });
     }
-  });
+  }, [editingRate, open]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
