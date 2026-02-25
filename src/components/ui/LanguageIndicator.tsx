@@ -147,17 +147,17 @@ interface LanguageBadgeProps {
 const LanguageBadge = memo(function LanguageBadge({ flag, code, color, title }: LanguageBadgeProps) {
   // Map color to semantic background classes
   const colorClasses: Record<string, string> = {
-    blue: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-    red: 'bg-red-500/10 text-red-700 dark:text-red-300',
-    purple: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
-    amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
-    emerald: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-    pink: 'bg-pink-500/10 text-pink-700 dark:text-pink-300',
-    yellow: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
-    indigo: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
-    orange: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
-    green: 'bg-green-500/10 text-green-700 dark:text-green-300',
-    rose: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
+    blue: 'bg-info/10 text-info',
+    red: 'bg-destructive/10 text-destructive',
+    purple: 'bg-accent-purple/10 text-accent-purple',
+    amber: 'bg-warning/10 text-warning',
+    emerald: 'bg-success/10 text-success',
+    pink: 'bg-accent-coral/10 text-accent-coral',
+    yellow: 'bg-warning/10 text-warning',
+    indigo: 'bg-primary/10 text-primary',
+    orange: 'bg-accent-amber/10 text-accent-amber',
+    green: 'bg-success/10 text-success',
+    rose: 'bg-accent-coral/10 text-accent-coral',
     gray: 'bg-muted text-muted-foreground',
   };
   

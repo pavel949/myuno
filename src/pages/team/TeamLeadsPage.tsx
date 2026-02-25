@@ -19,20 +19,20 @@ import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const REQUEST_TYPE_CONFIG: Record<LeadRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
-  vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отдых', labelEn: 'Vacation Rental', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200' },
-  property_consultation: { icon: Building, labelRu: 'Консультация', labelEn: 'Consultation', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  property_tour: { icon: Eye, labelRu: 'Тур по объектам', labelEn: 'Property Tour', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  full_management: { icon: TrendingUp, labelRu: 'Полное управление', labelEn: 'Full Management', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
-  investment_advice: { icon: Banknote, labelRu: 'Инвестиции', labelEn: 'Investment', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отдых', labelEn: 'Vacation Rental', color: 'bg-accent-cyan/10 text-accent-cyan' },
+  property_consultation: { icon: Building, labelRu: 'Консультация', labelEn: 'Consultation', color: 'bg-info/10 text-info' },
+  property_tour: { icon: Eye, labelRu: 'Тур по объектам', labelEn: 'Property Tour', color: 'bg-accent-purple/10 text-accent-purple' },
+  full_management: { icon: TrendingUp, labelRu: 'Полное управление', labelEn: 'Full Management', color: 'bg-accent-amber/10 text-accent-amber' },
+  investment_advice: { icon: Banknote, labelRu: 'Инвестиции', labelEn: 'Investment', color: 'bg-success/10 text-success' },
 };
 
 const STATUS_CONFIG: Record<LeadStatus, { labelRu: string; labelEn: string; color: string }> = {
-  pending: { labelRu: 'Новый', labelEn: 'New', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-  contacted: { labelRu: 'Связались', labelEn: 'Contacted', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  scheduled: { labelRu: 'Назначено', labelEn: 'Scheduled', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-  in_progress: { labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200' },
-  completed: { labelRu: 'Завершён', labelEn: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  cancelled: { labelRu: 'Отменён', labelEn: 'Cancelled', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  pending: { labelRu: 'Новый', labelEn: 'New', color: 'bg-warning/10 text-warning' },
+  contacted: { labelRu: 'Связались', labelEn: 'Contacted', color: 'bg-info/10 text-info' },
+  scheduled: { labelRu: 'Назначено', labelEn: 'Scheduled', color: 'bg-accent-purple/10 text-accent-purple' },
+  in_progress: { labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-primary/10 text-primary' },
+  completed: { labelRu: 'Завершён', labelEn: 'Completed', color: 'bg-success/10 text-success' },
+  cancelled: { labelRu: 'Отменён', labelEn: 'Cancelled', color: 'bg-muted text-muted-foreground' },
 };
 
 export default function TeamLeadsPage() {
@@ -202,7 +202,7 @@ export default function TeamLeadsPage() {
                               <Button 
                                 size="sm" 
                                 variant="outline" 
-                                className="h-7 text-xs gap-1 text-green-600"
+                                className="h-7 text-xs gap-1 text-success"
                                 onClick={() => lead.phone && handleWhatsApp(lead.phone, lead.name)}
                               >
                                 <MessageCircle className="h-3 w-3" />

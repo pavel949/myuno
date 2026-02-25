@@ -232,7 +232,7 @@ export function ReceiptUploadWithOCR({
 
             {/* Error State */}
             {error && !isProcessing && (
-              <div className="flex items-center gap-2 text-amber-600 p-3 bg-amber-500/10 rounded-lg">
+              <div className="flex items-center gap-2 text-warning p-3 bg-warning/10 rounded-lg">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">{error}</p>

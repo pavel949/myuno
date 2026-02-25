@@ -217,15 +217,15 @@ const AdminPharmacies = () => {
                   <p className="text-sm text-muted-foreground truncate">{pharmacy.address}</p>
                   <div className="flex items-center gap-2 mt-2">
                     {pharmacy.is_24h && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">24/7</span>
+                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">24/7</span>
                     )}
                     {pharmacy.delivery_available && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-info/10 text-info px-2 py-0.5 rounded">
                         {language === 'en' ? 'Delivery' : 'Доставка'}
                       </span>
                     )}
                     {!pharmacy.is_active && (
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
                         {language === 'en' ? 'Inactive' : 'Неактивно'}
                       </span>
                     )}

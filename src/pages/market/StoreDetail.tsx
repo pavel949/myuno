@@ -148,7 +148,7 @@ const StoreDetail = () => {
             </Button>
             <div className="flex gap-2">
               <Button variant="secondary" size="icon" className="rounded-full bg-white/90 backdrop-blur" onClick={() => setIsFavorite(!isFavorite)}>
-                <Heart className={cn("h-5 w-5", isFavorite && "fill-red-500 text-red-500")} />
+                <Heart className={cn("h-5 w-5", isFavorite && "fill-destructive text-destructive")} />
               </Button>
             </div>
           </div>
@@ -157,7 +157,7 @@ const StoreDetail = () => {
             <h1 className="text-2xl font-bold">{language === 'ru' ? store.name_ru : store.name_en}</h1>
             <div className="flex items-center gap-3 mt-1 text-sm">
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <Star className="w-4 h-4 fill-warning text-warning" />
                 <span>{store.rating}</span>
               </div>
               <div className="flex items-center gap-1">

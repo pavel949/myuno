@@ -240,8 +240,8 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
     <div className="space-y-6">
       {/* Save Banner */}
       {hasChanges && (
-        <div className="flex items-center justify-between p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-          <div className="flex items-center gap-2 text-amber-600">
+        <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/20 rounded-lg">
+          <div className="flex items-center gap-2 text-warning">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm font-medium">
               {t('You have unsaved changes', 'Есть несохранённые изменения')}
@@ -332,7 +332,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         <AccordionItem value="pricing" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-500" />
+              <DollarSign className="h-4 w-4 text-success" />
               <span className="font-medium">{t('Pricing Models', 'Модели ценообразования')}</span>
               <Badge variant="secondary" className="ml-2">{schema.pricingModels.length}</Badge>
             </div>
@@ -366,7 +366,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         <AccordionItem value="availability" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-500" />
+              <Clock className="h-4 w-4 text-info" />
               <span className="font-medium">{t('Availability Types', 'Типы доступности')}</span>
               <Badge variant="secondary" className="ml-2">{schema.availabilityTypes.length}</Badge>
             </div>
@@ -400,7 +400,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
         <AccordionItem value="media" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
-              <Image className="h-4 w-4 text-purple-500" />
+              <Image className="h-4 w-4 text-accent-purple" />
               <span className="font-medium">{t('Media Requirements', 'Требования к медиа')}</span>
             </div>
           </AccordionTrigger>

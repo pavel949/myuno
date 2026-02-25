@@ -171,8 +171,8 @@ export default function CleaningBooking() {
 
         {/* Service Info */}
         <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mb-6">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-emerald-500" />
+          <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-success" />
           </div>
           <div>
             <h3 className="font-semibold">

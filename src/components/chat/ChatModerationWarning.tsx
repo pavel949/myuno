@@ -40,22 +40,22 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
         'rounded-lg border p-3 animate-in slide-in-from-top-2 duration-300',
         isCritical 
           ? 'bg-destructive/10 border-destructive/30' 
-          : 'bg-amber-500/10 border-amber-500/30',
+          : 'bg-warning/10 border-warning/30',
         className
       )}
     >
       <div className="flex items-start gap-3">
         <div className={cn(
           'p-1.5 rounded-full flex-shrink-0',
-          isCritical ? 'bg-destructive/20' : 'bg-amber-500/20'
+          isCritical ? 'bg-destructive/20' : 'bg-warning/20'
         )}>
           {isCritical ? (
             <ShieldAlert className={cn(
               'w-4 h-4',
-              isCritical ? 'text-destructive' : 'text-amber-500'
+              isCritical ? 'text-destructive' : 'text-warning'
             )} />
           ) : (
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <AlertTriangle className="w-4 h-4 text-warning" />
           )}
         </div>
         

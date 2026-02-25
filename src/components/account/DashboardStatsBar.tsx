@@ -60,29 +60,29 @@ export function DashboardStatsBar() {
     <Card className="p-2">
       <div className="flex items-center justify-around">
         <StatItem
-          icon={<Calendar className="h-4 w-4 text-blue-600" />}
+          icon={<Calendar className="h-4 w-4 text-info" />}
           label={isRu ? 'Заказы' : 'Bookings'}
           value={activeBookingsCount}
           onClick={() => navigate('/bookings')}
-          color="bg-blue-100 dark:bg-blue-900/30"
+          color="bg-info/10"
           isLoading={ordersLoading}
         />
         <div className="w-px h-10 bg-border" />
         <StatItem
-          icon={<Wallet className="h-4 w-4 text-green-600" />}
+          icon={<Wallet className="h-4 w-4 text-success" />}
           label={isRu ? 'Кошелёк' : 'Wallet'}
           value={formattedBalance}
           onClick={() => navigate('/wallet')}
-          color="bg-green-100 dark:bg-green-900/30"
+          color="bg-success/10"
           isLoading={walletLoading}
         />
         <div className="w-px h-10 bg-border" />
         <StatItem
-          icon={<Heart className="h-4 w-4 text-pink-600" />}
+          icon={<Heart className="h-4 w-4 text-accent-coral" />}
           label={isRu ? 'Избранное' : 'Favorites'}
           value={favorites.length}
           onClick={() => navigate('/favorites')}
-          color="bg-pink-100 dark:bg-pink-900/30"
+          color="bg-accent-coral/10"
           isLoading={favoritesLoading}
         />
       </div>

@@ -190,8 +190,8 @@ export function ImageQualityTips({
             className={cn(
               "flex items-start gap-3 p-3 rounded-lg text-sm",
               tip.type === 'error' && "bg-destructive/10 text-destructive",
-              tip.type === 'warning' && "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-              tip.type === 'success' && "bg-green-500/10 text-green-700 dark:text-green-400",
+              tip.type === 'warning' && "bg-warning/10 text-warning",
+              tip.type === 'success' && "bg-success/10 text-success",
               tip.type === 'tip' && "bg-primary/10 text-primary"
             )}
           >
