@@ -12166,6 +12166,63 @@ export type Database = {
           },
         ]
       }
+      platform_events: {
+        Row: {
+          category: string
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          description_en: string | null
+          description_ru: string | null
+          end_date: string | null
+          event_date: string
+          event_time: string | null
+          event_url: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          location: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          end_date?: string | null
+          event_date: string
+          event_time?: string | null
+          event_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          end_date?: string | null
+          event_date?: string
+          event_time?: string | null
+          event_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
+      }
       platform_fees: {
         Row: {
           applies_to: string[] | null
@@ -12342,6 +12399,114 @@ export type Database = {
           updated_at?: string
           yachts_count?: number | null
           yachts_gmv?: number | null
+        }
+        Relationships: []
+      }
+      platform_news: {
+        Row: {
+          category: string
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          is_pinned: boolean | null
+          published_at: string
+          source_name: string | null
+          source_url: string | null
+          summary_en: string | null
+          summary_ru: string | null
+          title_en: string
+          title_ru: string
+        }
+        Insert: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          published_at?: string
+          source_name?: string | null
+          source_url?: string | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en: string
+          title_ru: string
+        }
+        Update: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_pinned?: boolean | null
+          published_at?: string
+          source_name?: string | null
+          source_url?: string | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          title_en?: string
+          title_ru?: string
+        }
+        Relationships: []
+      }
+      platform_recommendations: {
+        Row: {
+          action_label_en: string | null
+          action_label_ru: string | null
+          action_url: string | null
+          category: string
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          target_roles: string[] | null
+          title_en: string
+          title_ru: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          action_label_en?: string | null
+          action_label_ru?: string | null
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          target_roles?: string[] | null
+          title_en: string
+          title_ru: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          action_label_en?: string | null
+          action_label_ru?: string | null
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          target_roles?: string[] | null
+          title_en?: string
+          title_ru?: string
+          valid_from?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }

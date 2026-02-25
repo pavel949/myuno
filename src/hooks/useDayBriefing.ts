@@ -24,7 +24,10 @@ export type DayItemType =
   | 'crm_task'
   | 'personal_reminder'
   | 'document_expiry'
-  | 'deadline';
+  | 'deadline'
+  | 'recommendation'
+  | 'news'
+  | 'event';
 
 export interface DayItem {
   id: string;
@@ -56,6 +59,9 @@ const ORDER = {
   reminders: 4,
   deadlines: 5,
   tomorrow: 6,
+  recommendations: 7,
+  news: 8,
+  events: 9,
 } as const;
 
 export function useDayBriefing() {
@@ -99,6 +105,9 @@ export function useDayBriefing() {
         crmTasksRes,
         remindersRes,
         documentsRes,
+        recommendationsRes,
+        newsRes,
+        eventsRes,
       ] = await Promise.all([
         // 1) CRM contacts with birthdays this week
         companyId
@@ -136,7 +145,7 @@ export function useDayBriefing() {
               .limit(20)
           : Promise.resolve({ data: [] }),
 
-        // 6) Personal reminders upcoming (within remind_days_before)
+        // 6) Personal reminders upcoming
         supabase.from('personal_reminders').select('id, title, reminder_type, due_date, remind_days_before, description')
           .eq('user_id', user.id).eq('status', 'active')
           .lte('due_date', format(new Date(now.getTime() + 30 * 86400000), 'yyyy-MM-dd'))
@@ -148,6 +157,26 @@ export function useDayBriefing() {
           .gte('expiry_date', todayStr)
           .lte('expiry_date', format(new Date(now.getTime() + 30 * 86400000), 'yyyy-MM-dd'))
           .order('expiry_date'),
+
+        // 8) Platform recommendations
+        supabase.from('platform_recommendations').select('*')
+          .eq('is_active', true)
+          .order('priority', { ascending: false })
+          .limit(3),
+
+        // 9) Platform news (recent 5)
+        supabase.from('platform_news').select('*')
+          .eq('is_active', true)
+          .order('is_pinned', { ascending: false })
+          .order('published_at', { ascending: false })
+          .limit(5),
+
+        // 10) Platform events (upcoming 5)
+        supabase.from('platform_events').select('*')
+          .eq('is_active', true)
+          .gte('event_date', todayStr)
+          .order('event_date')
+          .limit(5),
       ]);
 
       const items: DayItem[] = [];
@@ -289,10 +318,54 @@ export function useDayBriefing() {
         });
       }
 
+      // ─── Platform recommendations ───
+      for (const r of (recommendationsRes.data || []) as any[]) {
+        items.push({
+          id: `rec-${r.id}`,
+          type: 'recommendation',
+          sectionOrder: ORDER.recommendations,
+          title: r.title_ru || r.title_en,
+          subtitle: r.description_ru || r.description_en || undefined,
+          href: r.action_url || undefined,
+          meta: { reminderType: r.category, avatarUrl: r.icon },
+        });
+      }
+
+      // ─── Platform news ───
+      for (const n of (newsRes.data || []) as any[]) {
+        items.push({
+          id: `news-${n.id}`,
+          type: 'news',
+          sectionOrder: ORDER.news,
+          title: n.title_ru || n.title_en,
+          subtitle: n.summary_ru || n.summary_en || n.source_name || undefined,
+          href: n.source_url || undefined,
+          meta: { reminderType: n.category, avatarUrl: n.cover_image },
+        });
+      }
+
+      // ─── Platform events ───
+      for (const e of (eventsRes.data || []) as any[]) {
+        const days = differenceInCalendarDays(new Date(e.event_date), now);
+        items.push({
+          id: `evt-${e.id}`,
+          type: 'event',
+          sectionOrder: ORDER.events,
+          title: e.title_ru || e.title_en,
+          subtitle: e.location || (e.description_ru || e.description_en) || undefined,
+          href: e.event_url || undefined,
+          meta: {
+            daysUntil: days,
+            dueTime: e.event_time || undefined,
+            avatarUrl: e.cover_image,
+            reminderType: e.category,
+          },
+        });
+      }
+
       // Sort by section, then within section
       return items.sort((a, b) => {
         if (a.sectionOrder !== b.sectionOrder) return a.sectionOrder - b.sectionOrder;
-        // Within birthdays, today first
         if (a.type === 'birthday' && b.type === 'birthday') {
           return (a.meta?.daysUntil || 0) - (b.meta?.daysUntil || 0);
         }
