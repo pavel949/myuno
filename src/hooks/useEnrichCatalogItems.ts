@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { LifeOSCatalogItem } from '@/hooks/useLifeOS';
 
 export interface EnrichedCatalogItem extends LifeOSCatalogItem {
+  nameEn: string | null;
+  nameRu: string | null;
   coverImage: string | null;
   rating: number | null;
   reviewCount: number | null;
@@ -118,8 +120,8 @@ async function fetchEntityData(entityType: string, entityIds: string[]): Promise
   const config = TABLE_CONFIG[entityType];
   if (!config || entityIds.length === 0) return {};
 
-  // Build select columns
-  const selectCols = ['id', config.coverImage];
+  // Build select columns — always include name columns for title fallback
+  const selectCols = ['id', config.nameEn, config.nameRu, config.coverImage];
   if (config.rating) selectCols.push(config.rating);
   if (config.reviewCount) selectCols.push(config.reviewCount);
   if (config.isVerified) selectCols.push(config.isVerified);
@@ -136,6 +138,8 @@ async function fetchEntityData(entityType: string, entityIds: string[]): Promise
   const result: Record<string, Partial<EnrichedCatalogItem>> = {};
   for (const row of data as any[]) {
     result[row.id] = {
+      nameEn: row[config.nameEn] || null,
+      nameRu: row[config.nameRu] || null,
       coverImage: row[config.coverImage] || null,
       rating: config.rating ? row[config.rating] : null,
       reviewCount: config.reviewCount ? row[config.reviewCount] : null,
@@ -173,16 +177,23 @@ export function useEnrichCatalogItems(catalogItems: LifeOSCatalogItem[] | undefi
         Object.assign(enrichmentMap, data);
       }
 
-      // Merge
-      return catalogItems.map(item => ({
-        ...item,
-        coverImage: enrichmentMap[item.entity_id]?.coverImage ?? null,
-        rating: enrichmentMap[item.entity_id]?.rating ?? null,
-        reviewCount: enrichmentMap[item.entity_id]?.reviewCount ?? null,
-        isVerified: enrichmentMap[item.entity_id]?.isVerified ?? false,
-        is24h: enrichmentMap[item.entity_id]?.is24h ?? false,
-        district: enrichmentMap[item.entity_id]?.district ?? null,
-      }));
+      // Merge — use enriched names as fallback when RPC returns NULL titles
+      return catalogItems.map(item => {
+        const enriched = enrichmentMap[item.entity_id];
+        return {
+          ...item,
+          title: item.title || enriched?.nameEn || item.entity_type,
+          title_localized: item.title_localized || enriched?.nameRu || enriched?.nameEn || item.entity_type,
+          nameEn: enriched?.nameEn ?? null,
+          nameRu: enriched?.nameRu ?? null,
+          coverImage: enriched?.coverImage ?? null,
+          rating: enriched?.rating ?? null,
+          reviewCount: enriched?.reviewCount ?? null,
+          isVerified: enriched?.isVerified ?? false,
+          is24h: enriched?.is24h ?? false,
+          district: enriched?.district ?? null,
+        };
+      });
     },
     enabled: !!catalogItems?.length,
     staleTime: 3 * 60 * 1000,
