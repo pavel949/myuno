@@ -5,10 +5,11 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, TrendingUp, LogIn, ArrowRight, Home } from 'lucide-react';
+import { Building2, TrendingUp, LogIn, ArrowRight, Home, Eye } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
+import { useMyDelegations } from '@/hooks/usePropertyDelegates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,12 @@ function AuthenticatedMySection() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { allProperties, isLoading, isOwner, isManager, hasProperties } = useMyProperties();
+  const { data: delegations = [], isLoading: delegLoading } = useMyDelegations();
+
+  // Filter active delegations with property data
+  const activeDelegations = delegations.filter(
+    (d: any) => d.status === 'active' && d.property
+  );
 
   const sections = [
     {
@@ -120,6 +127,52 @@ function AuthenticatedMySection() {
             );
           })}
         </div>
+      )}
+
+      {/* Delegated properties — Transparency Portal access */}
+      {activeDelegations.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Eye className="w-4 h-4 text-muted-foreground" />
+            {isRu ? 'Управляемые объекты' : 'Managed Properties'}
+          </h2>
+          <p className="text-xs text-muted-foreground -mt-1">
+            {isRu 
+              ? 'Объекты, переданные вам в управление. Нажмите для просмотра отчётности.'
+              : 'Properties delegated to you. Tap to view reports.'}
+          </p>
+          {activeDelegations.map((d: any) => {
+            const prop = d.property;
+            return (
+              <Card
+                key={d.id}
+                variant="interactive"
+                onClick={() => navigate(`/owner/transparency/${prop.id}`)}
+              >
+                <CardContent className="flex items-center gap-4 p-4">
+                  {prop.cover_image ? (
+                    <img src={prop.cover_image} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                      <Eye className="w-6 h-6 text-white" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">
+                      {isRu ? (prop.title_ru || prop.title) : prop.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">{prop.address}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {delegLoading && activeDelegations.length === 0 && (
+        <div className="h-16 rounded-xl bg-muted animate-pulse" />
       )}
     </div>
   );

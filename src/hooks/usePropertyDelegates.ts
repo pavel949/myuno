@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export type DelegateRole = 'trustee' | 'agent' | 'manager' | 'management_company';
+export type DelegateRole = 'trustee' | 'agent' | 'manager' | 'management_company' | 'owner_readonly';
 export type DelegateStatus = 'pending' | 'active' | 'revoked' | 'expired';
 
 export interface DelegatePermissions {
@@ -59,6 +59,7 @@ export const ROLE_LABELS = {
   agent: { en: 'Agent', ru: 'Агент' },
   manager: { en: 'Manager', ru: 'Управляющий' },
   management_company: { en: 'Management Company', ru: 'Управляющая компания' },
+  owner_readonly: { en: 'Owner (Read-Only)', ru: 'Собственник (просмотр)' },
 } as const;
 
 export const ROLE_DESCRIPTIONS = {
@@ -78,6 +79,10 @@ export const ROLE_DESCRIPTIONS = {
     en: 'Full property management', 
     ru: 'Полное управление недвижимостью' 
   },
+  owner_readonly: {
+    en: 'View-only access to property data and reports',
+    ru: 'Просмотр данных и отчётов по объекту'
+  },
 } as const;
 
 export const DEFAULT_PERMISSIONS: Record<DelegateRole, DelegatePermissions> = {
@@ -85,6 +90,7 @@ export const DEFAULT_PERMISSIONS: Record<DelegateRole, DelegatePermissions> = {
   agent: { view: true, edit: false, financials: false, bookings: true, maintenance: false },
   manager: { view: true, edit: true, financials: true, bookings: true, maintenance: true },
   management_company: { view: true, edit: true, financials: true, bookings: true, maintenance: true },
+  owner_readonly: { view: true, edit: false, financials: true, bookings: true, maintenance: false },
 };
 
 export function usePropertyDelegates(propertyId?: string) {
