@@ -107,6 +107,19 @@ export default {
         "icon-dark": {
           DEFAULT: "hsl(var(--icon-dark))",
         },
+        navy: {
+          DEFAULT: "hsl(var(--navy))",
+          light: "hsl(var(--navy-light))",
+        },
+        "accent-blue": {
+          DEFAULT: "hsl(var(--accent-blue))",
+        },
+        "trust-gold": {
+          DEFAULT: "hsl(var(--trust-gold))",
+        },
+        "primary-light": {
+          DEFAULT: "hsl(var(--primary-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
