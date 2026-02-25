@@ -220,8 +220,8 @@ export default function VendorSubscription() {
                 <CardHeader className={isCurrentPlan ? 'pt-10' : ''}>
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${
-                      plan.slug === 'business' ? 'bg-orange-500/10 text-orange-500' :
-                      plan.slug === 'pro' ? 'bg-purple-500/10 text-purple-500' :
+                      plan.slug === 'business' ? 'bg-accent-amber/10 text-accent-amber' :
+                      plan.slug === 'pro' ? 'bg-accent-purple/10 text-accent-purple' :
                       'bg-muted text-muted-foreground'
                     }`}>
                       <Icon className="h-5 w-5" />
@@ -246,7 +246,7 @@ export default function VendorSubscription() {
                   <ul className="space-y-2">
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-green-500 shrink-0" />
+                        <Check className="h-4 w-4 text-success shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}

@@ -179,7 +179,7 @@ const VendorBabysitters = () => {
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-medium">{isRussian ? item.name_ru : item.name_en}</h3>
                             {item.background_checked && (
-                              <Badge variant="outline" className="text-xs text-green-600"><ShieldCheck className="h-3 w-3 mr-1" />Verified</Badge>
+                              <Badge variant="outline" className="text-xs text-success"><ShieldCheck className="h-3 w-3 mr-1" />Verified</Badge>
                             )}
                             {item.first_aid_certified && (
                               <Badge variant="secondary" className="text-xs">First Aid</Badge>
@@ -191,14 +191,14 @@ const VendorBabysitters = () => {
                           <div className="flex items-center gap-3 text-sm mt-1 flex-wrap">
                             {item.experience_years && <span className="text-muted-foreground">{item.experience_years} {isRussian ? 'лет опыта' : 'years exp.'}</span>}
                             {item.price_per_hour && <span className="font-bold text-primary">฿{item.price_per_hour}/hr</span>}
-                            {item.rating && <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{item.rating.toFixed(1)}</span>}
+                            {item.rating && <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" />{item.rating.toFixed(1)}</span>}
                           </div>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}><Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

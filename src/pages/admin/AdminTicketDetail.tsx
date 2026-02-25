@@ -266,14 +266,14 @@ export default function AdminTicketDetail() {
                 </div>
 
                 {ticket.sla_deadline && (
-                  <div className={`p-3 rounded-lg ${isOverdue ? 'bg-red-50 border border-red-200' : 'bg-muted'}`}>
+                  <div className={`p-3 rounded-lg ${isOverdue ? 'bg-destructive/5 border border-destructive/20' : 'bg-muted'}`}>
                     <div className="flex items-center gap-2">
                       {isOverdue ? (
-                        <AlertTriangle className="w-4 h-4 text-red-600" />
+                        <AlertTriangle className="w-4 h-4 text-destructive" />
                       ) : (
                         <Clock className="w-4 h-4 text-muted-foreground" />
                       )}
-                      <span className={`text-sm ${isOverdue ? 'text-red-600 font-medium' : ''}`}>
+                      <span className={`text-sm ${isOverdue ? 'text-destructive font-medium' : ''}`}>
                         SLA: {isOverdue ? 'Просрочено' : formatDistanceToNow(new Date(ticket.sla_deadline), { locale: ru })}
                       </span>
                     </div>
@@ -348,19 +348,19 @@ export default function AdminTicketDetail() {
 
             {/* Resolution */}
             {ticket.resolution && (
-              <Card className="border-green-200 bg-green-50">
+              <Card className="border-success/20 bg-success/5">
                 <CardHeader>
-                  <CardTitle className="text-base text-green-800">Решение</CardTitle>
+                  <CardTitle className="text-base text-success">Решение</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <p className="text-sm text-green-700">{ticket.resolution}</p>
+                  <p className="text-sm text-success">{ticket.resolution}</p>
                   {ticket.refund_amount && (
-                    <p className="text-sm font-medium text-green-800">
+                    <p className="text-sm font-medium text-success">
                       Возврат: ฿{ticket.refund_amount.toLocaleString()}
                     </p>
                   )}
                   {ticket.resolved_at && (
-                    <p className="text-xs text-green-600">
+                    <p className="text-xs text-success/80">
                       {format(new Date(ticket.resolved_at), 'dd MMM yyyy, HH:mm', { locale: ru })}
                     </p>
                   )}

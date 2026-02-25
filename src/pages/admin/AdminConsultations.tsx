@@ -28,21 +28,21 @@ import {
 import { LEAD_VERTICALS } from '@/lib/leadVerticalConfig';
 
 const REQUEST_TYPE_CONFIG: Record<ConsultationRequestType, { icon: typeof Palmtree; labelRu: string; labelEn: string; color: string }> = {
-  vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отпуск', labelEn: 'Vacation Rental', color: 'bg-green-500' },
-  property_consultation: { icon: Home, labelRu: 'Покупка', labelEn: 'Purchase', color: 'bg-blue-500' },
-  property_tour: { icon: MapPin, labelRu: 'Тур', labelEn: 'Tour', color: 'bg-purple-500' },
-  investment_advice: { icon: TrendingUp, labelRu: 'Инвестиции', labelEn: 'Investment', color: 'bg-amber-500' },
-  full_management: { icon: Home, labelRu: 'Управление', labelEn: 'Management', color: 'bg-slate-500' },
-  channel_management: { icon: TrendingUp, labelRu: 'Каналы OTA', labelEn: 'Channel Management', color: 'bg-indigo-500' },
+  vacation_rental: { icon: Palmtree, labelRu: 'Аренда на отпуск', labelEn: 'Vacation Rental', color: 'bg-success' },
+  property_consultation: { icon: Home, labelRu: 'Покупка', labelEn: 'Purchase', color: 'bg-info' },
+  property_tour: { icon: MapPin, labelRu: 'Тур', labelEn: 'Tour', color: 'bg-accent-purple' },
+  investment_advice: { icon: TrendingUp, labelRu: 'Инвестиции', labelEn: 'Investment', color: 'bg-warning' },
+  full_management: { icon: Home, labelRu: 'Управление', labelEn: 'Management', color: 'bg-muted-foreground' },
+  channel_management: { icon: TrendingUp, labelRu: 'Каналы OTA', labelEn: 'Channel Management', color: 'bg-primary' },
 };
 
 const STATUS_CONFIG: Record<ConsultationStatus, { labelRu: string; labelEn: string; color: string; icon: typeof Clock }> = {
-  pending: { labelRu: 'Новая', labelEn: 'New', color: 'bg-yellow-500', icon: AlertCircle },
-  contacted: { labelRu: 'Связались', labelEn: 'Contacted', color: 'bg-blue-500', icon: Phone },
-  scheduled: { labelRu: 'Назначена', labelEn: 'Scheduled', color: 'bg-purple-500', icon: Calendar },
-  in_progress: { labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-orange-500', icon: Clock },
-  completed: { labelRu: 'Завершена', labelEn: 'Completed', color: 'bg-green-500', icon: CheckCircle },
-  cancelled: { labelRu: 'Отменена', labelEn: 'Cancelled', color: 'bg-red-500', icon: XCircle },
+  pending: { labelRu: 'Новая', labelEn: 'New', color: 'bg-warning', icon: AlertCircle },
+  contacted: { labelRu: 'Связались', labelEn: 'Contacted', color: 'bg-info', icon: Phone },
+  scheduled: { labelRu: 'Назначена', labelEn: 'Scheduled', color: 'bg-accent-purple', icon: Calendar },
+  in_progress: { labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-accent-amber', icon: Clock },
+  completed: { labelRu: 'Завершена', labelEn: 'Completed', color: 'bg-success', icon: CheckCircle },
+  cancelled: { labelRu: 'Отменена', labelEn: 'Cancelled', color: 'bg-destructive', icon: XCircle },
 };
 
 // Extended type to include AI fields

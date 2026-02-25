@@ -240,7 +240,7 @@ export default function AdminPMCompanies() {
                         {isRu ? (company.name_ru || company.name) : company.name}
                       </h3>
                       {company.is_verified && (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-success" />
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1 mb-2">

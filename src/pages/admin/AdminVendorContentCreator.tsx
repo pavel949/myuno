@@ -81,7 +81,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Spa, salon, clinic, education, etc.',
     descRu: 'Спа, салон, клиника, обучение и др.',
     route: '/admin/services',
-    color: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+    color: 'bg-info/10 text-info border-info/30',
   },
   {
     id: 'product',
@@ -91,7 +91,7 @@ const CONTENT_TYPES: ContentType[] = [
     descEn: 'Marketplace products',
     descRu: 'Товары маркетплейса',
     route: '/admin/catalog',
-    color: 'bg-green-500/10 text-green-600 border-green-500/30',
+    color: 'bg-success/10 text-success border-success/30',
   },
   {
     id: 'bouquet',

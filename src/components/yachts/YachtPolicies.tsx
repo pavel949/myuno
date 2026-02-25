@@ -50,24 +50,24 @@ export function YachtPolicies({
 
       <div className="space-y-2">
         <PolicyItem
-          icon={<FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+          icon={<FileText className="w-4 h-4 text-info" />}
           label={t ? 'Отмена' : 'Cancellation'}
           value={t ? cancelLabel.ru : cancelLabel.en}
         />
         <PolicyItem
-          icon={<Fuel className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
+          icon={<Fuel className="w-4 h-4 text-warning" />}
           label={t ? 'Топливо' : 'Fuel'}
           value={t ? fuelLabel.ru : fuelLabel.en}
         />
         <PolicyItem
-          icon={<Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+          icon={<Shield className="w-4 h-4 text-success" />}
           label={t ? 'Страховка' : 'Insurance'}
           value={insuranceLabel}
           note={insuranceNotes || undefined}
         />
         {depositPercent != null && depositPercent > 0 && (
           <PolicyItem
-            icon={<Banknote className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
+            icon={<Banknote className="w-4 h-4 text-accent-purple" />}
             label={t ? 'Депозит' : 'Deposit'}
             value={`${depositPercent}% ${t ? 'при бронировании' : 'at booking'}`}
           />

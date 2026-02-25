@@ -71,31 +71,31 @@ interface PartnerApplication {
 const statusConfig = {
   pending: { 
     icon: Clock, 
-    color: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30',
+    color: 'bg-warning/20 text-warning border-warning/30',
     labelRu: 'Ожидает', 
     labelEn: 'Pending' 
   },
   reviewing: { 
     icon: Eye, 
-    color: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+    color: 'bg-info/20 text-info border-info/30',
     labelRu: 'На рассмотрении', 
     labelEn: 'Reviewing' 
   },
   approved: { 
     icon: CheckCircle2, 
-    color: 'bg-green-500/20 text-green-500 border-green-500/30',
+    color: 'bg-success/20 text-success border-success/30',
     labelRu: 'Одобрено', 
     labelEn: 'Approved' 
   },
   rejected: { 
     icon: XCircle, 
-    color: 'bg-red-500/20 text-red-500 border-red-500/30',
+    color: 'bg-destructive/20 text-destructive border-destructive/30',
     labelRu: 'Отклонено', 
     labelEn: 'Rejected' 
   },
   suspended: { 
     icon: AlertCircle, 
-    color: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+    color: 'bg-accent-amber/20 text-accent-amber border-accent-amber/30',
     labelRu: 'Приостановлено', 
     labelEn: 'Suspended' 
   },
@@ -620,7 +620,7 @@ export default function PartnerApplicationsAdmin() {
                     <Button 
                       onClick={() => openActionDialog('approve')}
                       disabled={isProcessing}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-success hover:bg-success/90"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
                       {language === 'ru' ? 'Одобрить' : 'Approve'}

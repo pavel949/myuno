@@ -113,8 +113,8 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-amber-500" />
+              <div className="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">К выплате</p>
@@ -139,8 +139,8 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Send className="w-6 h-6 text-purple-500" />
+              <div className="w-12 h-12 rounded-lg bg-accent-purple/10 flex items-center justify-center">
+                <Send className="w-6 h-6 text-accent-purple" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Ожидают обработки</p>
@@ -259,8 +259,8 @@ export function PayoutManager() {
                       className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                          <Clock className="w-5 h-5 text-amber-500" />
+                        <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                          <Clock className="w-5 h-5 text-warning" />
                         </div>
                         <div>
                           <p className="font-medium">{payout.provider?.name || 'Неизвестный провайдер'}</p>

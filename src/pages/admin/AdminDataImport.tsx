@@ -138,7 +138,7 @@ export default function AdminDataImport() {
                 <div className="flex flex-col items-center gap-1">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                     isComplete 
-                      ? 'bg-green-500 text-white' 
+                      ? 'bg-success text-success-foreground' 
                       : isActive 
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-muted text-muted-foreground'
@@ -151,7 +151,7 @@ export default function AdminDataImport() {
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`flex-1 h-0.5 mx-2 ${
-                    currentStepIndex > index ? 'bg-green-500' : 'bg-muted'
+                    currentStepIndex > index ? 'bg-success' : 'bg-muted'
                   }`} />
                 )}
               </React.Fragment>
@@ -164,8 +164,8 @@ export default function AdminDataImport() {
       {step === 'done' && importResult && (
         <Card className="max-w-lg mx-auto">
           <CardContent className="pt-6 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-green-500" />
+            <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-success" />
             </div>
             <h3 className="text-xl font-semibold mb-2">
               {language === 'ru' ? 'Импорт завершён!' : 'Import Complete!'}

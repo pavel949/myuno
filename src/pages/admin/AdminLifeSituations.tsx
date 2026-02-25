@@ -38,10 +38,10 @@ const ENTITY_TYPES = [
 ];
 
 const ROLE_SCOPES: { value: LifeOSRole; label: string; color: string }[] = [
-  { value: 'guest', label: 'Guest', color: 'bg-blue-100 text-blue-800' },
-  { value: 'resident', label: 'Resident', color: 'bg-green-100 text-green-800' },
-  { value: 'owner', label: 'Owner', color: 'bg-purple-100 text-purple-800' },
-  { value: 'investor', label: 'Investor', color: 'bg-amber-100 text-amber-800' },
+  { value: 'guest', label: 'Guest', color: 'bg-info/10 text-info' },
+  { value: 'resident', label: 'Resident', color: 'bg-success/10 text-success' },
+  { value: 'owner', label: 'Owner', color: 'bg-accent-purple/10 text-accent-purple' },
+  { value: 'investor', label: 'Investor', color: 'bg-warning/10 text-warning' },
 ];
 
 export default function AdminLifeSituations() {

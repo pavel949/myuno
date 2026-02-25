@@ -95,7 +95,7 @@ export function ReferralCard() {
             onClick={handleCopyCode}
           >
             {copied === 'code' ? (
-              <Check className="w-5 h-5 text-green-500" />
+              <Check className="w-5 h-5 text-success" />
             ) : (
               <Copy className="w-5 h-5" />
             )}

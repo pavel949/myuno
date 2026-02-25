@@ -217,8 +217,8 @@ export default function AdminDevelopers() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <Star className="h-5 w-5 text-amber-500" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <Star className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <div className="text-2xl font-bold">{stats.featured}</div>
@@ -460,7 +460,7 @@ export default function AdminDevelopers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-amber-500" />
+                    <Star className="h-4 w-4 text-warning" />
                     Featured
                   </Label>
                   <Switch
