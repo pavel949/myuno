@@ -34,6 +34,7 @@ export type DashboardWidgetKey =
   | 'active_deals'
   | 'unified_inbox'
   | 'maintenance_health'
+  | 'myuno_services'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -50,6 +51,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'active_stays',
       'properties',
       'maintenance_health',
+      'myuno_services',
       'revenue_insights',
       'upcoming_payments',
       'active_deals',
@@ -100,6 +102,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'active_stays',
       'properties',
       'maintenance_health',
+      'myuno_services',
       'revenue_insights',
       'upcoming_payments',
       'active_deals',

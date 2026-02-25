@@ -5,7 +5,7 @@
 
 import { INTAKE_VERTICALS, VerticalConfig } from './intakeVerticals';
 
-export type LeadSource = 'fab' | 'cta' | 'chat' | 'external' | 'organic' | 'risk_assessment';
+export type LeadSource = 'fab' | 'cta' | 'chat' | 'external' | 'organic' | 'risk_assessment' | 'dashboard_recommendation';
 
 export interface LeadFormField {
   key: string;

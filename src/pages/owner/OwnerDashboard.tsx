@@ -33,6 +33,7 @@ import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWid
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
+import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerServiceRecommendations';
 
 function SectionSkeleton() {
   return (
@@ -140,6 +141,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
             <ActiveDealsWidget />
           </Suspense>
         </div>
+      );
+    case 'myuno_services':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <OwnerServiceRecommendations />
+        </Suspense>
       );
     case 'menu':
       return (
