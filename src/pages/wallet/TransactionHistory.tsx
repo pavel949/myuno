@@ -42,8 +42,8 @@ export default function TransactionHistory() {
 
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="p-3 rounded-lg bg-green-500/10 text-center">
-            <p className="text-lg font-bold text-green-600">
+          <div className="p-3 rounded-lg bg-success/10 text-center">
+            <p className="text-lg font-bold text-success">
               +{stats.totalIncome.toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground">

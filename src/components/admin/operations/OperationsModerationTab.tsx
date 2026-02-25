@@ -177,7 +177,7 @@ export function OperationsModerationTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
                       onClick={() => approveMutation.mutate({ id: item.id, type: item.type })}
                       disabled={approveMutation.isPending}
                     >
@@ -186,7 +186,7 @@ export function OperationsModerationTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={() => rejectMutation.mutate({ id: item.id, type: item.type })}
                       disabled={rejectMutation.isPending}
                     >
@@ -227,7 +227,7 @@ export function OperationsModerationTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{approvedItems.length}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Одобрено' : 'Approved'}</p>
@@ -236,7 +236,7 @@ export function OperationsModerationTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <ShieldCheck className="h-8 w-8 text-blue-500" />
+            <ShieldCheck className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{moderationItems?.length || 0}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Всего' : 'Total'}</p>

@@ -64,22 +64,22 @@ function getApprovalConfig(status: string | undefined, isRu: boolean): ApprovalC
       return {
         icon: Clock,
         label: isRu ? 'На рассмотрении' : 'Under Review',
-        color: 'text-yellow-600',
-        bgColor: 'bg-yellow-100 border-yellow-300',
+        color: 'text-warning',
+        bgColor: 'bg-warning/10 border-warning/30',
       };
     case 'approved':
       return {
         icon: CheckCircle,
         label: isRu ? 'Активен' : 'Active',
-        color: 'text-green-600',
-        bgColor: 'bg-green-100 border-green-300',
+        color: 'text-success',
+        bgColor: 'bg-success/10 border-success/30',
       };
     case 'rejected':
       return {
         icon: XCircle,
         label: isRu ? 'Требует доработки' : 'Needs Revision',
-        color: 'text-red-600',
-        bgColor: 'bg-red-100 border-red-300',
+        color: 'text-destructive',
+        bgColor: 'bg-destructive/10 border-destructive/30',
       };
     default:
       return {
@@ -181,12 +181,12 @@ export function PropertyListItem({
                 </h3>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {showInstantBadge && cardProps.instantBooking && (
-                    <Badge className="bg-amber-500 text-white text-xs h-5 px-1">
+                    <Badge className="bg-accent-amber text-white text-xs h-5 px-1">
                       <Zap className="h-3 w-3" />
                     </Badge>
                   )}
                   {showProtectionBadge && (property as any).instant_booking_enabled_at && (
-                    <Badge variant="outline" className="text-xs h-5 px-1 border-blue-300 text-blue-700">
+                    <Badge variant="outline" className="text-xs h-5 px-1 border-info/30 text-info">
                       <Shield className="h-3 w-3" />
                     </Badge>
                   )}
@@ -298,7 +298,7 @@ export function PropertyListItem({
                   )}
                   {onDelete && mode === 'admin' && (
                     <DropdownMenuItem 
-                      className="text-red-500"
+                      className="text-destructive"
                       onClick={() => onDelete(property.id)}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />

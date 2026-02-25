@@ -251,7 +251,7 @@ const Install = () => {
             transition={{ type: "spring", duration: 0.6, delay: 0.1 }}
             className="relative mb-6"
           >
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-success to-success/80 flex items-center justify-center shadow-lg shadow-success/30">
               <CheckCircle2 className="w-12 h-12 text-white" />
             </div>
             <motion.div
@@ -497,8 +497,8 @@ const Install = () => {
                   
                   {/* Safari warning for iOS */}
                   {isIOS && (
-                    <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                      <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
+                     <div className="mt-4 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                      <p className="text-xs text-warning flex items-start gap-2">
                         <ExternalLink className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>{(t as any).iosNote || "⚠️ Important: Use Safari. This option is not available in Chrome/Firefox."}</span>
                       </p>

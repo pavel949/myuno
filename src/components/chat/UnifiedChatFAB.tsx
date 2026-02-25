@@ -398,7 +398,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
         aria-label={isRu ? 'Открыть чат' : 'Open chat'}
       >
         <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background" />
       </button>
     </>
   );

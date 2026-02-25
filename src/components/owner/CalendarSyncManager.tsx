@@ -169,7 +169,7 @@ export function CalendarSyncManager({ propertyId }: CalendarSyncManagerProps) {
             </Button>
           </div>
           {isExpiringSoon && expiresAt && (
-            <div className="flex items-center gap-2 mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-2 mt-2 p-2 bg-warning/10 border border-warning/20 rounded text-warning">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <p className="text-xs">
                 {isRu 

@@ -712,7 +712,7 @@ export default function PropertyDetail() {
               size="lg"
               className={cn(
                 "flex-shrink-0 px-6",
-                rentalTerms?.instant_booking && !dateRange?.from && "bg-amber-500 hover:bg-amber-600"
+                rentalTerms?.instant_booking && !dateRange?.from && "bg-accent-amber hover:bg-accent-amber/90"
               )}
               onClick={() => {
                 if (dateRange?.from && dateRange?.to) {

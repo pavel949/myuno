@@ -156,7 +156,7 @@ export function PropertyPaymentBreakdown({
                     </Badge>
                   )}
                   {stage.type === 'security_deposit' && (
-                    <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600">
+                    <Badge variant="outline" className="text-xs border-warning/50 text-warning">
                       <Shield className="w-3 h-3 mr-1" />
                       {isRu ? 'Залог' : 'Deposit'}
                     </Badge>

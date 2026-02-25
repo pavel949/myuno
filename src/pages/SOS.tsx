@@ -36,10 +36,10 @@ import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 // Quick action buttons for most critical services
 const quickActions = [
-  { id: 'police', icon: Shield, phone: '1155', label: 'Police', labelRu: 'Полиция', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { id: 'ambulance', icon: Heart, phone: '1669', label: 'Ambulance', labelRu: 'Скорая', color: 'text-rose-500', bg: 'bg-rose-500/10' },
-  { id: 'fire', icon: Flame, phone: '199', label: 'Fire', labelRu: 'Пожарные', color: 'text-orange-500', bg: 'bg-orange-500/10' },
-  { id: 'emergency', icon: AlertTriangle, phone: '191', label: 'Emergency', labelRu: 'SOS', color: 'text-red-500', bg: 'bg-red-500/10' },
+  { id: 'police', icon: Shield, phone: '1155', label: 'Police', labelRu: 'Полиция', color: 'text-info', bg: 'bg-info/10' },
+  { id: 'ambulance', icon: Heart, phone: '1669', label: 'Ambulance', labelRu: 'Скорая', color: 'text-destructive', bg: 'bg-destructive/10' },
+  { id: 'fire', icon: Flame, phone: '199', label: 'Fire', labelRu: 'Пожарные', color: 'text-warning', bg: 'bg-warning/10' },
+  { id: 'emergency', icon: AlertTriangle, phone: '191', label: 'Emergency', labelRu: 'SOS', color: 'text-destructive', bg: 'bg-destructive/10' },
 ];
 
 // Organized by category
@@ -49,7 +49,7 @@ const emergencyCategories = [
     icon: Stethoscope,
     title: 'Medical',
     titleRu: 'Медицина',
-    color: 'text-rose-500',
+    color: 'text-destructive',
     contacts: [
       { name: 'Ambulance', nameRu: 'Скорая помощь', phone: '1669', desc: 'Medical emergencies', descRu: 'Медицинские экстренные случаи' },
       { name: 'Phuket International Hospital', nameRu: 'Пхукет Интернешнл', phone: '076-249-400' },
@@ -62,7 +62,7 @@ const emergencyCategories = [
     icon: Shield,
     title: 'Police & Safety',
     titleRu: 'Полиция и безопасность',
-    color: 'text-blue-500',
+    color: 'text-info',
     contacts: [
       { name: 'Tourist Police', nameRu: 'Туристическая полиция', phone: '1155', desc: '24/7 English-speaking', descRu: 'Круглосуточно, на английском' },
       { name: 'Emergency Services', nameRu: 'Экстренные службы', phone: '191', desc: 'Fire, ambulance, rescue', descRu: 'Пожарные, скорая, спасатели' },
@@ -74,7 +74,7 @@ const emergencyCategories = [
     icon: FileQuestion,
     title: 'Documents & Money',
     titleRu: 'Документы и деньги',
-    color: 'text-purple-500',
+    color: 'text-accent-purple',
     contacts: [
       { name: 'Immigration Phuket', nameRu: 'Иммиграция Пхукет', phone: '076-221-905' },
       { name: 'Immigration Hotline', nameRu: 'Горячая линия иммиграции', phone: '1178' },
@@ -87,7 +87,7 @@ const emergencyCategories = [
     icon: Car,
     title: 'Transport',
     titleRu: 'Транспорт',
-    color: 'text-amber-500',
+    color: 'text-warning',
     contacts: [
       { name: 'Taxi Call Center', nameRu: 'Такси', phone: '1681' },
       { name: 'Phuket Airport', nameRu: 'Аэропорт Пхукета', phone: '076-351-122' },
