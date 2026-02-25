@@ -300,17 +300,17 @@ const AdminWaterActivities = () => {
                       </span>
                     )}
                     {activity.equipment_included && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded">
                         {language === 'en' ? 'Equipment' : 'Оборудование'}
                       </span>
                     )}
                     {activity.is_featured && (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">
                         {language === 'en' ? 'Featured' : 'Рекомендуемый'}
                       </span>
                     )}
                     {!activity.is_active && (
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
+                      <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
                         {language === 'en' ? 'Inactive' : 'Неактивно'}
                       </span>
                     )}

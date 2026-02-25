@@ -62,12 +62,12 @@ export function FileImporter({ onFileSelect, parsedData, isLoading, onClear }: F
 
   if (parsedData) {
     return (
-      <Card className="border-2 border-dashed border-green-500/50 bg-green-500/5">
+      <Card className="border-2 border-dashed border-success/50 bg-success/5">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-500" />
+              <div className="p-2 bg-success/20 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-success" />
               </div>
               <div>
                 <p className="font-medium">{parsedData.fileName}</p>

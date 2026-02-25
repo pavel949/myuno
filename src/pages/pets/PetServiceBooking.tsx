@@ -132,8 +132,8 @@ export default function PetServiceBooking() {
 
         {/* Service Info */}
         <div className="flex items-center gap-3 p-4 bg-card rounded-xl border mt-4 mb-6">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
-            <PawPrint className="w-6 h-6 text-amber-500" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-amber/20 to-warning/20 flex items-center justify-center">
+            <PawPrint className="w-6 h-6 text-accent-amber" />
           </div>
           <div>
             <h3 className="font-semibold">{language === 'ru' ? service.nameRu : service.name}</h3>

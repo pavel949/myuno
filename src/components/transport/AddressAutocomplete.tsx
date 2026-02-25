@@ -220,8 +220,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             onClick={handleUseLocation}
             disabled={geolocating}
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-              {geolocating ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : <Navigation className="w-4 h-4 text-blue-500" />}
+            <div className="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center shrink-0">
+              {geolocating ? <Loader2 className="w-4 h-4 animate-spin text-info" /> : <Navigation className="w-4 h-4 text-info" />}
             </div>
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
           </button>
@@ -245,7 +245,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 {isRu ? 'Жилые комплексы' : 'Residences'}
               </div>
               {projectSuggestions.map(s => (
-                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<Building2 className="w-4 h-4 text-amber-600" />} iconBg="bg-amber-500/10" />
+                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<Building2 className="w-4 h-4 text-accent-amber" />} iconBg="bg-accent-amber/10" />
               ))}
             </>
           )}

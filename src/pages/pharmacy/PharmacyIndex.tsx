@@ -96,7 +96,7 @@ export default function PharmacyIndex() {
                   location={pharmacy.address ?? undefined}
                   isVerified={pharmacy.is_verified ?? undefined}
                   badge={pharmacy.is_24h 
-                    ? { text: '24/7', className: 'bg-green-500 text-white' }
+                    ? { text: '24/7', className: 'bg-success text-white' }
                     : undefined
                   }
                   tags={[

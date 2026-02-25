@@ -111,7 +111,7 @@ export function PropertyListingCard({
             </Badge>
           )}
           {property.instant_booking && (
-            <Badge className="bg-amber-500 text-white border-0 text-xs gap-1">
+            <Badge className="bg-accent-amber text-white border-0 text-xs gap-1">
               <Zap className="w-3 h-3" />
               {isRu ? 'Мгновенное' : 'Instant'}
             </Badge>

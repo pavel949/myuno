@@ -276,7 +276,7 @@ function CatalogItemButton({
         {item.label}
       </span>
       {item.isNew && (
-        <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-emerald-500/90">
+        <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-success/90">
           NEW
         </Badge>
       )}
