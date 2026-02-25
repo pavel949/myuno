@@ -10160,6 +10160,7 @@ export type Database = {
           order_number: string | null
           order_type: string
           original_order_id: string | null
+          paid_at: string | null
           platform_fee_amount: number | null
           provider_org_id: string | null
           start_at: string | null
@@ -10188,6 +10189,7 @@ export type Database = {
           order_number?: string | null
           order_type: string
           original_order_id?: string | null
+          paid_at?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
@@ -10216,6 +10218,7 @@ export type Database = {
           order_number?: string | null
           order_type?: string
           original_order_id?: string | null
+          paid_at?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
           start_at?: string | null
@@ -23924,6 +23927,10 @@ export type Database = {
         Returns: undefined
       }
       recalculate_user_tier: { Args: { p_user_id: string }; Returns: Json }
+      record_ledger_entries: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
       refund_wallet_booking: {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean

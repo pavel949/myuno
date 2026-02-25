@@ -119,10 +119,10 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Update order status to confirmed
+        // Update order status to confirmed + set paid_at
         const { error: orderUpdateError } = await supabaseAdmin
           .from('orders')
-          .update({ status: 'confirmed' })
+          .update({ status: 'confirmed', paid_at: new Date().toISOString() })
           .eq('id', orderId);
 
         if (orderUpdateError) {
@@ -166,135 +166,13 @@ Deno.serve(async (req) => {
           logStep("IDEMPOTENCY: Order status history already exists, skipping", { orderId });
         }
 
-        // ===== IDEMPOTENCY CHECK: Ledger entries =====
-        const { data: existingLedgerEntries } = await supabaseAdmin
-          .from('ledger_entries')
-          .select('id')
-          .eq('order_id', orderId)
-          .limit(1);
-
-        if (existingLedgerEntries && existingLedgerEntries.length > 0) {
-          logStep("IDEMPOTENCY: Ledger entries already exist, skipping", { orderId });
-        } else {
-          // ===== CREATE LEDGER ENTRIES =====
-          logStep("Creating ledger entries", { orderId: redactId(orderId) });
-
-          // Get or create platform revenue account
-          let platformAccountId: string | null = null;
-          const { data: platformAccount } = await supabaseAdmin
-            .from('ledger_accounts')
-            .select('id')
-            .eq('account_type', 'platform_revenue')
-            .maybeSingle();
-
-          if (platformAccount) {
-            platformAccountId = platformAccount.id;
-          } else {
-            const { data: newPlatformAccount } = await supabaseAdmin
-              .from('ledger_accounts')
-              .insert({ account_type: 'platform_revenue', currency: order.currency || 'THB' })
-              .select('id')
-              .maybeSingle();
-            platformAccountId = newPlatformAccount?.id || null;
-          }
-
-          // Get or create customer account
-          let customerAccountId: string | null = null;
-          const { data: existingCustomerAccount } = await supabaseAdmin
-            .from('ledger_accounts')
-            .select('id')
-            .eq('owner_user_id', order.customer_user_id)
-            .eq('account_type', 'customer')
-            .maybeSingle();
-
-          if (existingCustomerAccount) {
-            customerAccountId = existingCustomerAccount.id;
-          } else {
-            const { data: newCustomerAccount } = await supabaseAdmin
-              .from('ledger_accounts')
-              .insert({
-                owner_user_id: order.customer_user_id,
-                account_type: 'customer',
-                currency: order.currency || 'THB',
-              })
-              .select('id')
-              .maybeSingle();
-            customerAccountId = newCustomerAccount?.id || null;
-          }
-
-          // Get or create vendor balance account (if order has provider_org_id)
-          let vendorAccountId: string | null = null;
-          if (order.provider_org_id) {
-            const { data: existingVendorAccount } = await supabaseAdmin
-              .from('ledger_accounts')
-              .select('id')
-              .eq('owner_org_id', order.provider_org_id)
-              .eq('account_type', 'vendor_balance')
-              .maybeSingle();
-
-            if (existingVendorAccount) {
-              vendorAccountId = existingVendorAccount.id;
-            } else {
-              const { data: newVendorAccount } = await supabaseAdmin
-                .from('ledger_accounts')
-                .insert({
-                  owner_org_id: order.provider_org_id,
-                  account_type: 'vendor_balance',
-                  currency: order.currency || 'THB',
-                })
-                .select('id')
-                .maybeSingle();
-              vendorAccountId = newVendorAccount?.id || null;
-            }
-          }
-
-          // Calculate platform fee from system settings (get_platform_fee_percent returns decimal)
-          const { data: feeData } = await supabaseAdmin.rpc('get_platform_fee_percent');
-          const platformFeeRate = feeData ?? 0.10; // Fallback to 10% if function fails
-          const totalAmount = order.total_amount || 0;
-          const platformFee = Math.round(totalAmount * platformFeeRate * 100) / 100;
-          const vendorAmount = totalAmount - platformFee;
-
-          // Create ledger entries
-          const ledgerEntries = [];
-
-          // Entry 1: Customer payment (debit customer / credit escrow or platform)
-          if (customerAccountId && platformAccountId) {
-            ledgerEntries.push({
-              debit_account_id: customerAccountId,
-              credit_account_id: platformAccountId,
-              amount: platformFee,
-              currency: order.currency || 'THB',
-              order_id: orderId,
-              entry_type: 'platform_fee',
-              description: `Platform fee for order ${orderId}`,
-            });
-          }
-
-          // Entry 2: Vendor credit (if vendor exists)
-          if (customerAccountId && vendorAccountId) {
-            ledgerEntries.push({
-              debit_account_id: customerAccountId,
-              credit_account_id: vendorAccountId,
-              amount: vendorAmount,
-              currency: order.currency || 'THB',
-              order_id: orderId,
-              entry_type: 'vendor_payment',
-              description: `Vendor payment for order ${orderId}`,
-            });
-          }
-
-          if (ledgerEntries.length > 0) {
-            const { error: ledgerError } = await supabaseAdmin
-              .from('ledger_entries')
-              .insert(ledgerEntries);
-
-            if (ledgerError) {
-              logStep("ERROR", `Failed to create ledger entries: ${ledgerError.message}`);
-            } else {
-              logStep("Ledger entries created", { count: ledgerEntries.length });
-            }
-          }
+        // ===== LEDGER ENTRIES via RPC (idempotent — skips if already exist) =====
+        try {
+          await supabaseAdmin.rpc('record_ledger_entries', { p_order_id: orderId });
+          logStep("Ledger entries recorded via RPC", { orderId: redactId(orderId) });
+        } catch (ledgerError: unknown) {
+          const ledgerMsg = ledgerError instanceof Error ? ledgerError.message : String(ledgerError);
+          logStep("WARN", `Ledger entries failed (non-fatal): ${ledgerMsg}`);
         }
 
         // ===== IDEMPOTENCY CHECK: Notification =====
