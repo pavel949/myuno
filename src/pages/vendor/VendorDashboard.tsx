@@ -159,7 +159,7 @@ const VendorDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-4 md:p-6 lg:p-8 space-y-4 max-w-[1536px] mx-auto w-full">
         <Skeleton className="h-16 w-full" />
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
@@ -172,7 +172,7 @@ const VendorDashboard = () => {
   const currentOrg = activeOrg || vendorOrgs[0]?.org;
 
   return (
-    <div className="p-4 pb-24 space-y-4">
+    <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 space-y-4 max-w-[1536px] mx-auto w-full">
       {/* Onboarding Checklist */}
       {showOnboarding && (
         <VendorOnboardingChecklist 
