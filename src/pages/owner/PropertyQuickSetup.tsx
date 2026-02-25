@@ -204,7 +204,7 @@ export default function PropertyQuickSetup() {
               <p className="font-medium truncate">{property.title}</p>
               <p className="text-xs text-muted-foreground truncate">{property.address}</p>
             </div>
-            <Badge className="bg-green-500 gap-1">
+            <Badge className="bg-success gap-1">
               <CheckCircle className="h-3 w-3" />
               {isRu ? 'Одобрен' : 'Approved'}
             </Badge>
@@ -213,14 +213,14 @@ export default function PropertyQuickSetup() {
 
         {/* Protection period notice */}
         {isInProtectionPeriod && (
-          <Card className="mt-3 border-blue-200 bg-blue-50">
+          <Card className="mt-3 border-info/20 bg-info/5">
             <CardContent className="p-3 flex items-start gap-3">
-              <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <Shield className="h-5 w-5 text-info flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-900">
+                <p className="text-sm font-medium text-info">
                   {isRu ? 'Защитный период' : 'Protection Period'}
                 </p>
-                <p className="text-xs text-blue-700">
+                <p className="text-xs text-info/80">
                   {isRu 
                     ? `Ещё ${hoursRemaining}ч все бронирования требуют вашего подтверждения` 
                     : `${hoursRemaining}h remaining - all bookings require your approval`}

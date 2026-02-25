@@ -832,7 +832,7 @@ export default function PropertyEditor() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-yellow-500" />
+                    <Zap className="h-4 w-4 text-warning" />
                     <span>{isRu ? 'Электричество включено' : 'Electricity included'}</span>
                   </div>
                   <Switch
@@ -853,7 +853,7 @@ export default function PropertyEditor() {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Droplets className="h-4 w-4 text-blue-500" />
+                    <Droplets className="h-4 w-4 text-info" />
                     <span>{isRu ? 'Вода включена' : 'Water included'}</span>
                   </div>
                   <Switch
@@ -864,7 +864,7 @@ export default function PropertyEditor() {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <Sparkles className="h-4 w-4 text-accent-purple" />
                     <span>{isRu ? 'Уборка включена' : 'Cleaning included'}</span>
                   </div>
                   <Switch
@@ -875,7 +875,7 @@ export default function PropertyEditor() {
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Car className="h-4 w-4 text-green-500" />
+                    <Car className="h-4 w-4 text-success" />
                     <span>{isRu ? 'Парковка включена' : 'Parking included'}</span>
                   </div>
                   <Switch

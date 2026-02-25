@@ -35,14 +35,14 @@ export function PipelineSummary({ deals }: Props) {
         </div>
       </div>
       <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-card">
-        <Target className="h-4 w-4 text-amber-500 shrink-0" />
+        <Target className="h-4 w-4 text-accent-amber shrink-0" />
         <div>
           <p className="text-xs text-muted-foreground">{isRu ? 'Прогноз' : 'Forecast'}</p>
           <p className="text-sm font-bold">{formatValue(stats.weighted)}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 p-2.5 rounded-lg border bg-card">
-        <TrendingUp className="h-4 w-4 text-green-500 shrink-0" />
+        <TrendingUp className="h-4 w-4 text-success shrink-0" />
         <div>
           <p className="text-xs text-muted-foreground">{isRu ? 'Закрыто' : 'Won'}</p>
           <p className="text-sm font-bold">{formatValue(stats.wonTotal)}</p>

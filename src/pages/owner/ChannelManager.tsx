@@ -96,9 +96,9 @@ export default function ChannelManager() {
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <ChannelStatsCard icon={<Link2 className="h-5 w-5" />} label={isRu ? 'Подключено' : 'Connected'} value={totalChannels} color="bg-primary/10 text-primary" />
-          <ChannelStatsCard icon={<CheckCircle2 className="h-5 w-5" />} label={isRu ? 'Активных' : 'Active'} value={activeChannels} color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" />
-          <ChannelStatsCard icon={<Calendar className="h-5 w-5" />} label={isRu ? 'OTA-брони' : 'OTA Bookings'} value={totalOtaBookings} color="bg-blue-100 dark:bg-blue-900/30 text-blue-600" />
-          <ChannelStatsCard icon={<AlertCircle className="h-5 w-5" />} label={isRu ? 'Ошибки' : 'Errors'} value={errorChannels} color={errorChannels > 0 ? "bg-red-100 dark:bg-red-900/30 text-red-600" : "bg-muted text-muted-foreground"} />
+          <ChannelStatsCard icon={<CheckCircle2 className="h-5 w-5" />} label={isRu ? 'Активных' : 'Active'} value={activeChannels} color="bg-success/10 text-success" />
+          <ChannelStatsCard icon={<Calendar className="h-5 w-5" />} label={isRu ? 'OTA-брони' : 'OTA Bookings'} value={totalOtaBookings} color="bg-info/10 text-info" />
+          <ChannelStatsCard icon={<AlertCircle className="h-5 w-5" />} label={isRu ? 'Ошибки' : 'Errors'} value={errorChannels} color={errorChannels > 0 ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"} />
         </div>
 
         {/* Actions */}

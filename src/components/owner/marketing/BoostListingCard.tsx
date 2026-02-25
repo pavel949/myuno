@@ -62,26 +62,26 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
       ...PROMOTION_TIERS.boost,
       key: 'boost' as const,
       icon: Rocket,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-      borderColor: 'border-blue-200 dark:border-blue-800',
+      color: 'text-info',
+      bgColor: 'bg-info/10',
+      borderColor: 'border-info/20',
     },
     {
       ...PROMOTION_TIERS.featured,
       key: 'featured' as const,
       icon: Star,
-      color: 'text-amber-500',
-      bgColor: 'bg-amber-50 dark:bg-amber-950/30',
-      borderColor: 'border-amber-200 dark:border-amber-800',
+      color: 'text-accent-amber',
+      bgColor: 'bg-accent-amber/10',
+      borderColor: 'border-accent-amber/20',
       popular: true,
     },
     {
       ...PROMOTION_TIERS.top_search,
       key: 'top_search' as const,
       icon: TrendingUp,
-      color: 'text-green-500',
-      bgColor: 'bg-green-50 dark:bg-green-950/30',
-      borderColor: 'border-green-200 dark:border-green-800',
+      color: 'text-success',
+      bgColor: 'bg-success/10',
+      borderColor: 'border-success/20',
     },
   ];
   
@@ -134,10 +134,10 @@ export function BoostListingCard({ propertyId, className }: BoostListingCardProp
         <CardContent className="space-y-3">
           {/* Active Promotion */}
           {activePromotion && (
-            <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+            <div className="p-3 rounded-xl bg-success/10 border border-success/20">
               <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                <span className="text-sm font-medium text-success">
                   {isRu ? 'Активное продвижение' : 'Active Promotion'}
                 </span>
               </div>

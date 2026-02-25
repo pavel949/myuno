@@ -71,14 +71,14 @@ export default function OwnerSuperhost() {
       <Card className={cn(
         'overflow-hidden mb-4',
         isSuperhost 
-          ? 'border-amber-500/30 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30'
+          ? 'border-accent-amber/30 bg-gradient-to-br from-accent-amber/5 to-warning/5'
           : ''
       )}>
         <CardContent className="pt-6 pb-4">
           <div className="text-center">
             {isSuperhost ? (
               <>
-                <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 shadow-xl shadow-amber-500/30 mb-4">
+                <div className="inline-flex p-4 rounded-full bg-gradient-to-br from-accent-amber to-warning shadow-xl shadow-accent-amber/30 mb-4">
                   <Award className="h-12 w-12 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold mb-1">
@@ -97,7 +97,7 @@ export default function OwnerSuperhost() {
             ) : (
               <>
                 <div className="inline-flex p-4 rounded-full bg-muted mb-4">
-                  <Target className="h-12 w-12 text-amber-500" />
+                  <Target className="h-12 w-12 text-accent-amber" />
                 </div>
                 <h2 className="text-2xl font-bold mb-1">
                   {isRu ? 'Станьте Суперхозяином' : 'Become a Superhost'}
@@ -125,28 +125,28 @@ export default function OwnerSuperhost() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <MetricCard
-              icon={<Star className="h-5 w-5 text-amber-500" />}
+              icon={<Star className="h-5 w-5 text-accent-amber" />}
               value={(Number(metrics?.avg_rating) || 0).toFixed(2)}
               label={isRu ? 'Средний рейтинг' : 'Average Rating'}
               target={`≥ ${SUPERHOST_REQUIREMENTS.minRating}`}
               met={progress?.rating.met}
             />
             <MetricCard
-              icon={<CalendarCheck className="h-5 w-5 text-emerald-500" />}
+              icon={<CalendarCheck className="h-5 w-5 text-success" />}
               value={String(metrics?.completed_bookings || 0)}
               label={isRu ? 'Завершённых броней' : 'Completed Bookings'}
               target={`≥ ${SUPERHOST_REQUIREMENTS.minBookings}`}
               met={progress?.bookings.met}
             />
             <MetricCard
-              icon={<MessageSquare className="h-5 w-5 text-blue-500" />}
+              icon={<MessageSquare className="h-5 w-5 text-info" />}
               value={`${(Number(metrics?.response_rate) || 0).toFixed(0)}%`}
               label={isRu ? 'Скорость ответа' : 'Response Rate'}
               target={`≥ ${SUPERHOST_REQUIREMENTS.minResponseRate}%`}
               met={progress?.responseRate.met}
             />
             <MetricCard
-              icon={<XCircle className="h-5 w-5 text-red-400" />}
+              icon={<XCircle className="h-5 w-5 text-destructive" />}
               value={`${(Number(metrics?.cancellation_rate) || 0).toFixed(1)}%`}
               label={isRu ? 'Процент отмен' : 'Cancellation Rate'}
               target={`≤ ${SUPERHOST_REQUIREMENTS.maxCancellationRate}%`}
@@ -211,7 +211,7 @@ export default function OwnerSuperhost() {
       <Card className="mb-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500" />
+            <Sparkles className="h-4 w-4 text-accent-amber" />
             {isSuperhost 
               ? (isRu ? 'Ваши преимущества' : 'Your Benefits')
               : (isRu ? 'Преимущества Суперхозяина' : 'Superhost Benefits')}
@@ -225,14 +225,14 @@ export default function OwnerSuperhost() {
                 className={cn(
                   'flex items-start gap-3 p-3 rounded-xl',
                   isSuperhost 
-                    ? 'bg-amber-500/10 border border-amber-500/20' 
+                    ? 'bg-accent-amber/10 border border-accent-amber/20' 
                     : 'bg-muted/50'
                 )}
               >
                 <div className={cn(
                   'p-2 rounded-full',
                   isSuperhost 
-                    ? 'bg-amber-500/20 text-amber-600' 
+                    ? 'bg-accent-amber/20 text-accent-amber' 
                     : 'bg-muted text-muted-foreground'
                 )}>
                   {benefitIcons[benefit.icon]}
@@ -242,7 +242,7 @@ export default function OwnerSuperhost() {
                   <p className="text-xs text-muted-foreground">{benefit.description}</p>
                 </div>
                 {isSuperhost && (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500 ml-auto flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-success ml-auto flex-shrink-0" />
                 )}
               </div>
             ))}
@@ -320,13 +320,13 @@ function MetricCard({ icon, value, label, target, met }: MetricCardProps) {
   return (
     <div className={cn(
       'p-3 rounded-xl border',
-      met ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-muted/30'
+      met ? 'bg-success/5 border-success/20' : 'bg-muted/30'
     )}>
       <div className="flex items-center gap-2 mb-2">
         {icon}
         {met !== undefined && (
           met 
-            ? <CheckCircle2 className="h-4 w-4 text-emerald-500 ml-auto" />
+            ? <CheckCircle2 className="h-4 w-4 text-success ml-auto" />
             : <Circle className="h-4 w-4 text-muted-foreground ml-auto" />
         )}
       </div>
@@ -352,7 +352,7 @@ function ProgressRow({ label, current, required, percent, met, inverse }: Progre
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           {met ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
           ) : (
             <Circle className="h-4 w-4 text-muted-foreground" />
           )}
@@ -360,14 +360,14 @@ function ProgressRow({ label, current, required, percent, met, inverse }: Progre
         </div>
         <span className={cn(
           'text-xs',
-          met ? 'text-emerald-600 font-medium' : 'text-muted-foreground'
+          met ? 'text-success font-medium' : 'text-muted-foreground'
         )}>
           {current} / {required}
         </span>
       </div>
       <Progress 
         value={percent} 
-        className={cn('h-2', met ? '[&>div]:bg-emerald-500' : '')} 
+        className={cn('h-2', met ? '[&>div]:bg-success' : '')} 
       />
     </div>
   );

@@ -40,10 +40,10 @@ export function ConflictResolver({ propertyId, propertyName }: ConflictResolverP
 
   if (!conflicts || conflicts.length === 0) {
     return (
-      <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800">
+      <Card className="bg-success/5 border-success/20">
         <CardContent className="py-6 text-center">
-          <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-emerald-600" />
-          <p className="font-medium text-emerald-700 dark:text-emerald-400">
+          <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-success" />
+          <p className="font-medium text-success">
             {isRu ? 'Нет конфликтов бронирований' : 'No booking conflicts'}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
@@ -58,7 +58,7 @@ export function ConflictResolver({ propertyId, propertyName }: ConflictResolverP
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-amber-600">
+      <div className="flex items-center gap-2 text-warning">
         <AlertTriangle className="h-5 w-5" />
         <h3 className="font-semibold">
           {isRu 
@@ -92,7 +92,7 @@ function ConflictCard({
   onNavigate: (bookingId: string) => void;
 }) {
   return (
-    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+    <Card className="border-warning/20 bg-warning/5">
       <CardContent className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <Badge variant="destructive" className="text-xs">
@@ -114,8 +114,8 @@ function ConflictCard({
 
           {/* Arrow */}
           <div className="hidden md:flex items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="w-8 h-8 rounded-full bg-amber-200 dark:bg-amber-800 flex items-center justify-center">
-              <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center">
+              <AlertTriangle className="h-4 w-4 text-warning" />
             </div>
           </div>
 
@@ -131,7 +131,7 @@ function ConflictCard({
           />
         </div>
 
-        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800">
+        <div className="mt-3 pt-3 border-t border-warning/20">
           <p className="text-xs text-muted-foreground">
             {isRu 
               ? 'Рекомендация: Отмените одно из бронирований или свяжитесь с гостями для переноса дат.'
@@ -213,12 +213,12 @@ export function ConflictAlert({
   }
 
   return (
-    <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20">
+    <Card className="border-destructive/20 bg-destructive/5">
       <CardContent className="p-3">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-red-600" />
+          <AlertTriangle className="h-5 w-5 text-destructive" />
           <div className="flex-1">
-            <p className="font-medium text-sm text-red-700 dark:text-red-400">
+            <p className="font-medium text-sm text-destructive">
               {conflicts.length} {isRu ? 'конфликт' : 'conflict'}{conflicts.length > 1 ? (isRu ? 'а' : 's') : ''}
             </p>
             <p className="text-xs text-muted-foreground">
