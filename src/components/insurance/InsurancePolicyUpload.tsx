@@ -76,18 +76,18 @@ export function InsurancePolicyUpload() {
   // Has existing policy and not editing
   if (existingPolicy && !isEditing) {
     return (
-      <Card variant="surface" className="border-emerald-500/30">
+      <Card variant="surface" className="border-success/30">
         <CardContent className="p-5 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <FileCheck className="w-5 h-5 text-emerald-500" />
+            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+              <FileCheck className="w-5 h-5 text-success" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-sm">
                   {isRu ? 'Полис загружен' : 'Policy Uploaded'}
                 </p>
-                <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-600">
+                <Badge variant="secondary" className="text-[10px] bg-success/10 text-success">
                   ✓ {isRu ? 'Сохранён' : 'Saved'}
                 </Badge>
               </div>

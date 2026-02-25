@@ -154,7 +154,7 @@ export const ReviewsSection = ({
           </h2>
           {stats.total > 0 && (
             <Badge variant="secondary" className="gap-1">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              <Star className="w-3 h-3 fill-warning text-warning" />
               {stats.average.toFixed(1)} ({stats.total})
             </Badge>
           )}

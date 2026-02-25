@@ -36,12 +36,12 @@ const comparisonData: ComparisonRow[] = [
 
 function StatusIcon({ status }: { status: 'yes' | 'no' | 'partial' }) {
   if (status === 'yes') {
-    return <Check className="w-5 h-5 text-green-500" />;
+    return <Check className="w-5 h-5 text-success" />;
   }
   if (status === 'partial') {
-    return <Minus className="w-5 h-5 text-yellow-500" />;
+    return <Minus className="w-5 h-5 text-warning" />;
   }
-  return <X className="w-5 h-5 text-red-500" />;
+  return <X className="w-5 h-5 text-destructive" />;
 }
 
 export function GuideComparison() {
@@ -124,15 +124,15 @@ export function GuideComparison() {
         {/* Legend */}
         <div className="mt-6 flex flex-wrap gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-500" />
+            <Check className="w-4 h-4 text-success" />
             <span>{isRu ? 'Полная поддержка' : 'Full support'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Minus className="w-4 h-4 text-yellow-500" />
+            <Minus className="w-4 h-4 text-warning" />
             <span>{isRu ? 'Частичная поддержка' : 'Partial support'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <X className="w-4 h-4 text-red-500" />
+            <X className="w-4 h-4 text-destructive" />
             <span>{isRu ? 'Не поддерживается' : 'Not supported'}</span>
           </div>
         </div>

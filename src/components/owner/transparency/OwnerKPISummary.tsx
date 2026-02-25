@@ -67,25 +67,25 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
       icon: DollarSign,
       label: isRu ? 'Доход' : 'Revenue',
       value: `฿${totalIncome.toLocaleString()}`,
-      color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30',
+      color: 'text-success bg-success/15',
     },
     {
       icon: TrendingDown,
       label: isRu ? 'Расходы' : 'Expenses',
       value: `฿${totalExpenses.toLocaleString()}`,
-      color: 'text-red-500 bg-red-100 dark:bg-red-900/30',
+      color: 'text-destructive bg-destructive/15',
     },
     {
       icon: CalendarCheck,
       label: isRu ? 'Загрузка' : 'Occupancy',
       value: `${occupancy}%`,
-      color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+      color: 'text-info bg-info/15',
     },
     {
       icon: Star,
       label: isRu ? 'Рейтинг' : 'Rating',
       value: '—',
-      color: 'text-amber-500 bg-amber-100 dark:bg-amber-900/30',
+      color: 'text-warning bg-warning/15',
     },
   ];
 

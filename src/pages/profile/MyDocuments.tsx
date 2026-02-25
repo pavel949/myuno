@@ -143,7 +143,7 @@ export default function MyDocuments() {
                           {isRu ? docType.labelRu : docType.labelEn}
                         </h3>
                         {doc?.is_verified && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-600 text-xs">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/20 text-success text-xs">
                             <Check className="w-3 h-3" />
                             {isRu ? 'Верифицирован' : 'Verified'}
                           </span>
@@ -155,7 +155,7 @@ export default function MyDocuments() {
                           </span>
                         )}
                         {expiringSoon && !expired && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 text-xs">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/20 text-warning text-xs">
                             <AlertCircle className="w-3 h-3" />
                             {isRu ? 'Истекает' : 'Expiring'}
                           </span>

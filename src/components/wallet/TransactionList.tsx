@@ -32,35 +32,35 @@ const typeConfig: Record<TransactionType, {
     icon: ArrowDownLeft,
     labelRu: 'Пополнение',
     labelEn: 'Top-up',
-    colorClass: 'text-green-500 bg-green-500/10',
+    colorClass: 'text-success bg-success/10',
     isPositive: true,
   },
   payment: {
     icon: ArrowUpRight,
     labelRu: 'Оплата',
     labelEn: 'Payment',
-    colorClass: 'text-red-500 bg-red-500/10',
+    colorClass: 'text-destructive bg-destructive/10',
     isPositive: false,
   },
   refund: {
     icon: RotateCcw,
     labelRu: 'Возврат',
     labelEn: 'Refund',
-    colorClass: 'text-blue-500 bg-blue-500/10',
+    colorClass: 'text-info bg-info/10',
     isPositive: true,
   },
   bonus: {
     icon: Gift,
     labelRu: 'Бонус',
     labelEn: 'Bonus',
-    colorClass: 'text-purple-500 bg-purple-500/10',
+    colorClass: 'text-accent-purple bg-accent-purple/10',
     isPositive: true,
   },
   cashback: {
     icon: Percent,
     labelRu: 'Кэшбэк',
     labelEn: 'Cashback',
-    colorClass: 'text-amber-500 bg-amber-500/10',
+    colorClass: 'text-warning bg-warning/10',
     isPositive: true,
   },
 };
@@ -157,7 +157,7 @@ export function TransactionList({ transactions, showStatus = false }: Transactio
 
                   <div className={cn(
                     'text-sm font-semibold tabular-nums',
-                    config.isPositive ? 'text-green-600' : 'text-foreground'
+                    config.isPositive ? 'text-success' : 'text-foreground'
                   )}>
                     {config.isPositive ? '+' : '-'}{Math.abs(transaction.amount).toLocaleString()} {transaction.currency}
                   </div>

@@ -102,15 +102,15 @@ export default function AdminRestaurantDataQuality() {
             <div className="text-xs text-muted-foreground">Total</div>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{verifiedCount}</div>
+            <div className="text-2xl font-bold text-success">{verifiedCount}</div>
             <div className="text-xs text-muted-foreground">Verified</div>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-orange-600">{needsVerCount}</div>
+            <div className="text-2xl font-bold text-warning">{needsVerCount}</div>
             <div className="text-xs text-muted-foreground">Need Verification</div>
           </CardContent></Card>
           <Card><CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{missingImages}</div>
+            <div className="text-2xl font-bold text-destructive">{missingImages}</div>
             <div className="text-xs text-muted-foreground">Missing Images</div>
           </CardContent></Card>
         </div>

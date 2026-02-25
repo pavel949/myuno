@@ -187,7 +187,7 @@ export function SyncedListingPreview({ connectionId, propertyId, onApplied }: Sy
           <div className="flex items-center gap-2">
             {listing.rating && (
               <Badge variant="secondary" className="gap-1">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <Star className="h-3 w-3 fill-warning text-warning" />
                 {listing.rating}
               </Badge>
             )}

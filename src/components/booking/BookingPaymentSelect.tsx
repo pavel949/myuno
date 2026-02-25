@@ -205,7 +205,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
               <span className={cn(
                 "text-sm font-medium px-2 py-1 rounded-full",
                 canUseWallet && option.id === 'wallet' 
-                  ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                  ? "bg-success/15 text-success"
                   : "bg-muted text-muted-foreground"
               )}>
                 {option.badge}
@@ -276,7 +276,7 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
                   </div>
                   <div className="flex items-center gap-2">
                     {card.is_default && (
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-warning text-warning" />
                     )}
                     {selectedCardId === card.id && (
                       <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">

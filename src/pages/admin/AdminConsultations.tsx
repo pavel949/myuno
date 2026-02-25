@@ -406,21 +406,21 @@ export default function AdminConsultations() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <Card className="bg-yellow-500/10 border-yellow-500/30">
+        <Card className="bg-warning/10 border-warning/30">
           <CardContent className="p-3 text-center">
-            <div className="text-2xl font-bold text-yellow-500">{pendingCount}</div>
+            <div className="text-2xl font-bold text-warning">{pendingCount}</div>
             <div className="text-xs text-muted-foreground">{isRu ? 'Новые' : 'New'}</div>
           </CardContent>
         </Card>
-        <Card className="bg-blue-500/10 border-blue-500/30">
+        <Card className="bg-info/10 border-info/30">
           <CardContent className="p-3 text-center">
-            <div className="text-2xl font-bold text-blue-500">{inProgressCount}</div>
+            <div className="text-2xl font-bold text-info">{inProgressCount}</div>
             <div className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</div>
           </CardContent>
         </Card>
-        <Card className="bg-green-500/10 border-green-500/30">
+        <Card className="bg-success/10 border-success/30">
           <CardContent className="p-3 text-center">
-            <div className="text-2xl font-bold text-green-500">{completedCount}</div>
+            <div className="text-2xl font-bold text-success">{completedCount}</div>
             <div className="text-xs text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</div>
           </CardContent>
         </Card>

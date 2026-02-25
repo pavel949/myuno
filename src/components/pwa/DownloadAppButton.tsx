@@ -39,14 +39,14 @@ export function DownloadAppButton() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/30"
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-success/10 border border-success/30"
       >
-        <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center shrink-0">
-          <Check className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 rounded-xl bg-success flex items-center justify-center shrink-0">
+          <Check className="w-5 h-5 text-success-foreground" />
         </div>
         
         <div className="flex-1 text-left min-w-0">
-          <h3 className="font-medium text-green-600 dark:text-green-400 text-sm">
+          <h3 className="font-medium text-success text-sm">
             {t.installed}
           </h3>
           <p className="text-xs text-muted-foreground truncate">

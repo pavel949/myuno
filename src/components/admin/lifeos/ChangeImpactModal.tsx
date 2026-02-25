@@ -41,9 +41,9 @@ export function ChangeImpactModal({
   };
 
   const riskColors = {
-    LOW: 'bg-green-500/10 text-green-700 border-green-200',
-    MEDIUM: 'bg-amber-500/10 text-amber-700 border-amber-200',
-    HIGH: 'bg-red-500/10 text-red-700 border-red-200',
+    LOW: 'bg-success/10 text-success border-success/30',
+    MEDIUM: 'bg-warning/10 text-warning border-warning/30',
+    HIGH: 'bg-destructive/10 text-destructive border-destructive/30',
   };
 
   const isBlocked = validation?.blocked || false;
@@ -57,9 +57,9 @@ export function ChangeImpactModal({
             {isBlocked ? (
               <XCircle className="w-5 h-5 text-destructive" />
             ) : hasWarnings ? (
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              <AlertTriangle className="w-5 h-5 text-warning" />
             ) : (
-              <CheckCircle className="w-5 h-5 text-green-500" />
+              <CheckCircle className="w-5 h-5 text-success" />
             )}
             {isRussian ? 'Предпросмотр изменений' : 'Change Preview'}
           </DialogTitle>
@@ -109,12 +109,12 @@ export function ChangeImpactModal({
                       value={impact.healthDelta.after} 
                       className={cn(
                         "w-16 h-2",
-                        impact.healthDelta.after < impact.healthDelta.before && "[&>div]:bg-amber-500"
+                        impact.healthDelta.after < impact.healthDelta.before && "[&>div]:bg-warning"
                       )} 
                     />
                     <span className={cn(
                       "text-xs",
-                      impact.healthDelta.after < impact.healthDelta.before && "text-amber-600"
+                      impact.healthDelta.after < impact.healthDelta.before && "text-warning"
                     )}>
                       {impact.healthDelta.after}%
                     </span>
@@ -123,7 +123,7 @@ export function ChangeImpactModal({
               </div>
 
               {impact.requiresPlatformAdmin && (
-                <div className="flex items-center gap-2 pt-2 text-sm text-amber-600">
+                <div className="flex items-center gap-2 pt-2 text-sm text-warning">
                   <ShieldAlert className="w-4 h-4" />
                   <span>{isRussian ? 'Требуется права администратора' : 'Requires platform admin'}</span>
                 </div>
@@ -152,11 +152,11 @@ export function ChangeImpactModal({
 
           {/* Warnings */}
           {validation?.warnings.map((warning, idx) => (
-            <div key={idx} className="rounded-lg border border-amber-500/50 bg-amber-500/5 p-3">
+            <div key={idx} className="rounded-lg border border-warning/50 bg-warning/5 p-3">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm text-amber-700">
+                  <p className="text-sm text-warning">
                     {isRussian ? warning.messageRu : warning.message}
                   </p>
                   {warning.suggestedFix && (

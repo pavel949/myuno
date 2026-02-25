@@ -37,7 +37,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
     return Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}
+        className={`w-4 h-4 ${i < rating ? 'fill-warning text-warning' : 'text-muted-foreground'}`}
       />
     ));
   };
@@ -47,7 +47,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
       {/* Featured Badge */}
       {review.is_featured && (
         <div className="mb-3">
-          <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0">
+          <Badge className="bg-gradient-to-r from-warning to-accent-amber text-white border-0">
             <Star className="w-3 h-3 mr-1 fill-current" />
             {language === 'ru' ? 'Лучший отзыв' : 'Featured Review'}
           </Badge>
@@ -68,7 +68,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
                 {review.profile?.full_name || (language === 'ru' ? 'Пользователь' : 'User')}
               </span>
               {review.is_verified_purchase && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 bg-green-500/10 text-green-600 border-green-500/20">
+                <Badge variant="secondary" className="text-[10px] px-1.5 bg-success/10 text-success border-success/20">
                   <CheckCircle className="w-3 h-3 mr-0.5" />
                   {language === 'ru' ? 'Проверено' : 'Verified'}
                 </Badge>
@@ -98,13 +98,13 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
         <div className="space-y-2 mb-3">
           {review.pros && (
             <div className="flex gap-2 text-sm">
-              <span className="text-green-500 font-medium shrink-0">+</span>
+              <span className="text-success font-medium shrink-0">+</span>
               <span>{review.pros}</span>
             </div>
           )}
           {review.cons && (
             <div className="flex gap-2 text-sm">
-              <span className="text-red-500 font-medium shrink-0">−</span>
+              <span className="text-destructive font-medium shrink-0">−</span>
               <span>{review.cons}</span>
             </div>
           )}

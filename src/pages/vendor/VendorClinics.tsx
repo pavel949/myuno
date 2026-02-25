@@ -319,7 +319,7 @@ const VendorClinics = () => {
                               {clinicTypes.find(t => t.value === clinic.clinic_type)?.[isRussian ? 'labelRu' : 'label'] || clinic.clinic_type}
                             </Badge>
                             {clinic.is_24h && (
-                              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                              <Badge variant="secondary" className="bg-success/15 text-success">
                                 24/7
                               </Badge>
                             )}
@@ -366,7 +366,7 @@ const VendorClinics = () => {
                         )}
                         {clinic.rating > 0 && (
                           <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-warning text-warning" />
                             {clinic.rating.toFixed(1)} ({clinic.review_count})
                           </div>
                         )}

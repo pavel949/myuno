@@ -196,7 +196,7 @@ export default function PropertyDetail() {
               className="gap-2 text-sm"
               onClick={handleShare}
             >
-              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
               <span className="hidden sm:inline">
                 {copied ? (isRu ? 'Скопировано' : 'Copied') : (isRu ? 'Поделиться' : 'Share')}
               </span>

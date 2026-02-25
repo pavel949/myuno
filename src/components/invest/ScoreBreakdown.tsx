@@ -51,10 +51,10 @@ export function ScoreBreakdown({
   const categories = isRealEstate ? REAL_ESTATE_CATEGORIES : BUSINESS_CATEGORIES;
 
   const getScoreColor = (score: number) => {
-    if (score >= 85) return 'text-emerald-600';
-    if (score >= 70) return 'text-amber-600';
-    if (score >= 50) return 'text-orange-600';
-    return 'text-red-600';
+    if (score >= 85) return 'text-success';
+    if (score >= 70) return 'text-warning';
+    if (score >= 50) return 'text-accent-amber';
+    return 'text-destructive';
   };
 
   const getProgressColor = (score: number) => {

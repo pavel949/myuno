@@ -57,9 +57,9 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
       <AvatarImage src={item.image} className="object-cover" />
       <AvatarFallback className={cn(
         "rounded-lg",
-        item.type === 'service' && "bg-blue-50 dark:bg-blue-950",
-        item.type === 'product' && "bg-green-50 dark:bg-green-950",
-        item.type === 'property' && "bg-orange-50 dark:bg-orange-950"
+        item.type === 'service' && "bg-info/10",
+        item.type === 'product' && "bg-success/10",
+        item.type === 'property' && "bg-accent-amber/10"
       )}>
         <ItemIcon className={cn("h-5 w-5", color)} />
       </AvatarFallback>
@@ -307,7 +307,7 @@ export function UnifiedCatalogTable() {
                         {isRussian ? item.name_ru : item.name_en}
                       </span>
                       {item.is_featured && (
-                        <span className="flex items-center gap-1 text-xs text-amber-600">
+                        <span className="flex items-center gap-1 text-xs text-accent-amber">
                           <Star className="h-3 w-3 fill-current" />
                           {isRussian ? 'Избранное' : 'Featured'}
                         </span>

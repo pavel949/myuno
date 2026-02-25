@@ -179,7 +179,7 @@ const VendorLegal = () => {
                           )}
                           <div className="flex items-center gap-3 text-sm mt-1">
                             {item.price_consultation && <span className="font-bold text-primary">฿{item.price_consultation} {isRussian ? 'консультация' : 'consultation'}</span>}
-                            {item.rating && <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />{item.rating.toFixed(1)}</span>}
+                            {item.rating && <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" />{item.rating.toFixed(1)}</span>}
                           </div>
                         </div>
                         <DropdownMenu>

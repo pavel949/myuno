@@ -22,7 +22,7 @@ const RatingStars = forwardRef<HTMLDivElement, { rating: number }>(
             key={star}
             className={`w-4 h-4 ${
               star <= rating 
-                ? 'fill-amber-400 text-amber-400' 
+                ? 'fill-warning text-warning' 
                 : 'text-muted-foreground/30'
             }`}
           />
@@ -151,7 +151,7 @@ export function ReviewList({ productId, onWriteReview }: ReviewListProps) {
                 return (
                   <div key={rating} className="flex items-center gap-2">
                     <span className="text-sm w-3">{rating}</span>
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <Star className="w-3 h-3 fill-warning text-warning" />
                     <Progress value={percentage} className="flex-1 h-2" />
                     <span className="text-xs text-muted-foreground w-8">
                       {count}

@@ -31,7 +31,7 @@ function TrendIndicator({ direction, value, goodDirection = 'up' }: TrendIndicat
   return (
     <div className={cn(
       "flex items-center gap-1 text-xs font-medium",
-      isGood ? "text-emerald-600" : "text-amber-600"
+      isGood ? "text-success" : "text-warning"
     )}>
       <Icon className="w-3 h-3" />
       {value !== undefined && <span>{value > 0 ? '+' : ''}{value}%</span>}
@@ -251,14 +251,14 @@ export function AIInsightsOverview() {
         {(metrics.falsePositives > 0 || metrics.missedIssues > 0) && (
           <div className="flex gap-4 pt-2 border-t">
             <div className="flex items-center gap-2 text-sm">
-              <ThumbsDown className="w-4 h-4 text-amber-500" />
+              <ThumbsDown className="w-4 h-4 text-warning" />
               <span className="text-muted-foreground">
                 {isRussian ? 'Ложные срабатывания:' : 'False positives:'}
               </span>
               <span className="font-medium">{metrics.falsePositives}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <ThumbsUp className="w-4 h-4 text-red-500" />
+              <ThumbsUp className="w-4 h-4 text-destructive" />
               <span className="text-muted-foreground">
                 {isRussian ? 'Пропущенные:' : 'Missed issues:'}
               </span>
