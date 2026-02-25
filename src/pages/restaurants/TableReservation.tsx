@@ -294,13 +294,13 @@ export default function TableReservation() {
 
           {/* Reservation Notice */}
           {depositRequired ? (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
-              <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-warning/10 border border-warning/30">
+              <CreditCard className="w-5 h-5 text-warning flex-shrink-0" />
               <div>
-                <p className="font-medium text-amber-700 dark:text-amber-400">
+                <p className="font-medium text-warning">
                   {language === 'ru' ? `Депозит: ${depositAmount}฿` : `Deposit: ${depositAmount}฿`}
                 </p>
-                <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
+                <p className="text-sm text-warning/80 mt-1">
                   {language === 'ru' 
                     ? 'Оплата депозита онлайн через Stripe. Будет зачтён в счёт заказа.'
                     : 'Pay deposit online via Stripe. Will be applied to your bill.'}
@@ -308,13 +308,13 @@ export default function TableReservation() {
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
-              <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</div>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-success/10 border border-success/30">
+              <div className="w-5 h-5 rounded-full bg-success text-success-foreground flex items-center justify-center text-xs flex-shrink-0">✓</div>
               <div>
-                <p className="font-medium text-green-700 dark:text-green-400">
+                <p className="font-medium text-success">
                   {language === 'ru' ? 'Бесплатное бронирование' : 'Free Reservation'}
                 </p>
-                <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                <p className="text-sm text-success/80 mt-1">
                   {language === 'ru' 
                     ? 'Оплата не требуется. Просто приходите в назначенное время.'
                     : 'No payment required. Just show up at your reserved time.'}

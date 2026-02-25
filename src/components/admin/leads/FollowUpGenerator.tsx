@@ -136,7 +136,7 @@ export function FollowUpGenerator({
               <Button
                 onClick={handleOpenWhatsApp}
                 disabled={!whatsappMessage}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-success hover:bg-success/90"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Открыть в WhatsApp

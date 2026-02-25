@@ -98,7 +98,7 @@ export default function PharmacyDetail() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           {pharmacy.is_24h && (
-            <Badge className="absolute top-4 right-4 bg-green-500 text-white">{t('pharmacy.24h')}</Badge>
+            <Badge className="absolute top-4 right-4 bg-success text-success-foreground">{t('pharmacy.24h')}</Badge>
           )}
         </div>
 
@@ -110,7 +110,7 @@ export default function PharmacyDetail() {
                 {language === 'ru' ? pharmacy.name_ru : pharmacy.name_en}
               </h1>
               <div className="flex items-center gap-2 text-sm mt-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <Star className="w-4 h-4 fill-warning text-warning" />
                 <span>{pharmacy.rating}</span>
                 <span className="text-muted-foreground">({pharmacy.review_count})</span>
               </div>
@@ -190,7 +190,7 @@ export default function PharmacyDetail() {
                       className="w-full h-28 object-cover"
                     />
                     {product.requires_prescription && (
-                      <Badge className="absolute top-2 left-2 bg-red-500 text-white text-[10px]">
+                      <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px]">
                         <FileText className="w-3 h-3 mr-0.5" />
                         Rx
                       </Badge>

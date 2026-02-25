@@ -131,11 +131,11 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
         </div>
         <div className="flex gap-1">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <div className="w-2 h-2 rounded-full bg-info" />
             <span>{isRu ? 'Гость' : 'Guest'}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
-            <div className="w-2 h-2 rounded-full bg-purple-500" />
+            <div className="w-2 h-2 rounded-full bg-accent-purple" />
             <span>{isRu ? 'Менеджер' : 'Manager'}</span>
           </div>
         </div>
@@ -251,11 +251,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
     if (isOwn) return 'bg-primary text-primary-foreground';
     switch (senderType) {
       case 'guest':
-        return 'bg-blue-100 dark:bg-blue-900/30';
+        return 'bg-info/10';
       case 'manager':
-        return 'bg-purple-100 dark:bg-purple-900/30';
+        return 'bg-accent-purple/10';
       case 'support':
-        return 'bg-green-100 dark:bg-green-900/30';
+        return 'bg-success/10';
       default:
         return 'bg-muted';
     }
@@ -276,10 +276,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
       {!isOwn && (
         <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarFallback className={cn(
-            isAiGenerated ? 'bg-gradient-to-br from-violet-500 to-indigo-500' :
-            message.sender_type === 'guest' ? 'bg-blue-500' :
-            message.sender_type === 'manager' ? 'bg-purple-500' :
-            'bg-green-500',
+            isAiGenerated ? 'bg-gradient-to-br from-accent-purple to-primary' :
+            message.sender_type === 'guest' ? 'bg-info' :
+            message.sender_type === 'manager' ? 'bg-accent-purple' :
+            'bg-success',
             'text-white text-xs'
           )}>
             {isAiGenerated ? <Bot className="h-4 w-4" /> : (message.sender_name?.charAt(0).toUpperCase() || 'U')}
@@ -291,9 +291,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, isRu }) =
         {!isOwn && (
           <p className={cn(
             'text-xs font-medium mb-1',
-            message.sender_type === 'guest' ? 'text-blue-600 dark:text-blue-400' :
-            message.sender_type === 'manager' ? 'text-purple-600 dark:text-purple-400' :
-            'text-green-600 dark:text-green-400'
+            message.sender_type === 'guest' ? 'text-info' :
+            message.sender_type === 'manager' ? 'text-accent-purple' :
+            'text-success'
           )}>
             {getSenderLabel(message.sender_type)}
           </p>

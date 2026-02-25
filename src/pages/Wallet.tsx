@@ -167,15 +167,15 @@ const Wallet = () => {
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
       case 'topup':
-        return <ArrowDownLeft className="w-5 h-5 text-green-500" />;
+        return <ArrowDownLeft className="w-5 h-5 text-success" />;
       case 'payment':
-        return <ArrowUpRight className="w-5 h-5 text-red-500" />;
+        return <ArrowUpRight className="w-5 h-5 text-destructive" />;
       case 'refund':
-        return <RotateCcw className="w-5 h-5 text-blue-500" />;
+        return <RotateCcw className="w-5 h-5 text-info" />;
       case 'bonus':
-        return <Gift className="w-5 h-5 text-purple-500" />;
+        return <Gift className="w-5 h-5 text-accent-purple" />;
       case 'cashback':
-        return <TrendingUp className="w-5 h-5 text-emerald-500" />;
+        return <TrendingUp className="w-5 h-5 text-success" />;
       default:
         return <ShoppingBag className="w-5 h-5 text-muted-foreground" />;
     }
@@ -212,19 +212,19 @@ const Wallet = () => {
     { 
       icon: Plus, 
       label: language === 'ru' ? 'Пополнить' : 'Top Up',
-      color: 'bg-green-500',
+      color: 'bg-success',
       onClick: () => setIsTopUpOpen(true)
     },
     { 
       icon: CreditCard, 
       label: language === 'ru' ? 'Карты' : 'Cards',
-      color: 'bg-blue-500',
+      color: 'bg-info',
       onClick: () => navigate('/wallet/cards')
     },
     { 
       icon: Clock, 
       label: language === 'ru' ? 'История' : 'History',
-      color: 'bg-purple-500',
+      color: 'bg-accent-purple',
       onClick: () => navigate('/wallet/history')
     },
   ];
@@ -376,13 +376,13 @@ const Wallet = () => {
         <CashbackRatesCard />
 
         {/* Promo Banner */}
-        <Card className="bg-amber-500/5 border-amber-500/20">
+        <Card className="bg-warning/5 border-warning/20">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <Gift className="w-6 h-6 text-amber-500" />
+            <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center">
+              <Gift className="w-6 h-6 text-warning" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-amber-700 dark:text-amber-400">
+              <h3 className="font-semibold text-warning">
                 {language === 'ru' ? 'Получайте кэшбэк' : 'Earn Cashback'}
               </h3>
               <p className="text-sm text-muted-foreground">

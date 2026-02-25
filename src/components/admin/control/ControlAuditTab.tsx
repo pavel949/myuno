@@ -254,10 +254,10 @@ export function ControlAuditTab() {
                 {/* Old Data */}
                 {selectedLog.old_data && (
                   <div>
-                    <h4 className="font-medium mb-2 text-orange-600">
+                    <h4 className="font-medium mb-2 text-accent-amber">
                       {isRu ? 'Старые данные:' : 'Old Data:'}
                     </h4>
-                    <pre className="bg-orange-50 p-3 rounded-lg text-xs overflow-auto max-h-48">
+                    <pre className="bg-accent-amber/5 p-3 rounded-lg text-xs overflow-auto max-h-48">
                       {JSON.stringify(selectedLog.old_data, null, 2)}
                     </pre>
                   </div>
@@ -266,10 +266,10 @@ export function ControlAuditTab() {
                 {/* New Data */}
                 {selectedLog.new_data && (
                   <div>
-                    <h4 className="font-medium mb-2 text-green-600">
+                    <h4 className="font-medium mb-2 text-success">
                       {isRu ? 'Новые данные:' : 'New Data:'}
                     </h4>
-                    <pre className="bg-green-50 p-3 rounded-lg text-xs overflow-auto max-h-48">
+                    <pre className="bg-success/5 p-3 rounded-lg text-xs overflow-auto max-h-48">
                       {JSON.stringify(selectedLog.new_data, null, 2)}
                     </pre>
                   </div>
