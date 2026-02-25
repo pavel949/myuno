@@ -42,21 +42,21 @@ import { cn } from '@/lib/utils';
 
 // All available verticals for vendor selection
 const availableVerticals = [
-  { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа', icon: Sparkles, color: 'text-pink-500' },
-  { value: 'fitness', labelEn: 'Fitness & Sports', labelRu: 'Фитнес и спорт', icon: Dumbbell, color: 'text-orange-500' },
-  { value: 'restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: Utensils, color: 'text-amber-500' },
-  { value: 'tours', labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии', icon: Calendar, color: 'text-blue-500' },
-  { value: 'yachts', labelEn: 'Yachts & Water', labelRu: 'Яхты и водные', icon: Ship, color: 'text-cyan-500' },
-  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт', icon: Car, color: 'text-indigo-500' },
-  { value: 'health', labelEn: 'Medical & Health', labelRu: 'Медицина и здоровье', icon: Stethoscope, color: 'text-green-500' },
-  { value: 'education', labelEn: 'Education', labelRu: 'Образование', icon: GraduationCap, color: 'text-purple-500' },
-  { value: 'properties', labelEn: 'Properties', labelRu: 'Недвижимость', icon: Home, color: 'text-emerald-500' },
-  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг', icon: Brush, color: 'text-teal-500' },
-  { value: 'childcare', labelEn: 'Childcare', labelRu: 'Няни и уход', icon: Baby, color: 'text-rose-500' },
-  { value: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: Flower2, color: 'text-fuchsia-500' },
-  { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия', icon: Calendar, color: 'text-violet-500' },
-  { value: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги', icon: Scale, color: 'text-slate-500' },
-  { value: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев', icon: PawPrint, color: 'text-yellow-600' },
+  { value: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и спа', icon: Sparkles, color: 'text-accent-coral' },
+  { value: 'fitness', labelEn: 'Fitness & Sports', labelRu: 'Фитнес и спорт', icon: Dumbbell, color: 'text-accent-amber' },
+  { value: 'restaurants', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: Utensils, color: 'text-warning' },
+  { value: 'tours', labelEn: 'Tours & Excursions', labelRu: 'Туры и экскурсии', icon: Calendar, color: 'text-info' },
+  { value: 'yachts', labelEn: 'Yachts & Water', labelRu: 'Яхты и водные', icon: Ship, color: 'text-accent-cyan' },
+  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт', icon: Car, color: 'text-primary' },
+  { value: 'health', labelEn: 'Medical & Health', labelRu: 'Медицина и здоровье', icon: Stethoscope, color: 'text-success' },
+  { value: 'education', labelEn: 'Education', labelRu: 'Образование', icon: GraduationCap, color: 'text-accent-purple' },
+  { value: 'properties', labelEn: 'Properties', labelRu: 'Недвижимость', icon: Home, color: 'text-success' },
+  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг', icon: Brush, color: 'text-accent-teal' },
+  { value: 'childcare', labelEn: 'Childcare', labelRu: 'Няни и уход', icon: Baby, color: 'text-accent-coral' },
+  { value: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: Flower2, color: 'text-accent-coral' },
+  { value: 'events', labelEn: 'Events', labelRu: 'Мероприятия', icon: Calendar, color: 'text-accent-purple' },
+  { value: 'legal', labelEn: 'Legal Services', labelRu: 'Юридические услуги', icon: Scale, color: 'text-muted-foreground' },
+  { value: 'pets', labelEn: 'Pet Services', labelRu: 'Услуги для питомцев', icon: PawPrint, color: 'text-warning' },
 ];
 
 const VendorOnboarding = () => {

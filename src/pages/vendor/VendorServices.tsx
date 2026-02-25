@@ -368,7 +368,7 @@ const VendorServices = () => {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
+                              className="text-destructive"
                               onClick={() => setDeleteConfirmId(service.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

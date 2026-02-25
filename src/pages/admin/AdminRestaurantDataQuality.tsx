@@ -127,18 +127,18 @@ export default function AdminRestaurantDataQuality() {
         ) : (
           <div className="space-y-3">
             {restaurants.map((r) => (
-              <Card key={r.id} className={r.needs_manual_verification ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/10' : ''}>
+              <Card key={r.id} className={r.needs_manual_verification ? 'border-warning/30 bg-warning/5' : ''}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold truncate">{r.name_en}</h3>
                         {r.needs_manual_verification ? (
-                          <Badge variant="outline" className="text-orange-600 border-orange-300 shrink-0">
+                          <Badge variant="outline" className="text-warning border-warning/30 shrink-0">
                             <AlertTriangle className="h-3 w-3 mr-1" /> Needs Verification
                           </Badge>
                         ) : r.last_verified_at ? (
-                          <Badge variant="outline" className="text-green-600 border-green-300 shrink-0">
+                          <Badge variant="outline" className="text-success border-success/30 shrink-0">
                             <CheckCircle className="h-3 w-3 mr-1" /> Verified
                           </Badge>
                         ) : null}

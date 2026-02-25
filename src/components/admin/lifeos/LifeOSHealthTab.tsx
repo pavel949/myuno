@@ -42,17 +42,17 @@ export function LifeOSHealthTab() {
   } : null;
 
   const getHealthBadge = (score: number) => {
-    if (score >= 80) return { color: 'bg-green-500/10 text-green-700 border-green-200', label: isRussian ? 'Отлично' : 'Excellent' };
-    if (score >= 60) return { color: 'bg-blue-500/10 text-blue-700 border-blue-200', label: isRussian ? 'Хорошо' : 'Good' };
-    if (score >= 40) return { color: 'bg-amber-500/10 text-amber-700 border-amber-200', label: isRussian ? 'Внимание' : 'Warning' };
-    return { color: 'bg-red-500/10 text-red-700 border-red-200', label: isRussian ? 'Критично' : 'Critical' };
+    if (score >= 80) return { color: 'bg-success/10 text-success border-success/20', label: isRussian ? 'Отлично' : 'Excellent' };
+    if (score >= 60) return { color: 'bg-info/10 text-info border-info/20', label: isRussian ? 'Хорошо' : 'Good' };
+    if (score >= 40) return { color: 'bg-warning/10 text-warning border-warning/20', label: isRussian ? 'Внимание' : 'Warning' };
+    return { color: 'bg-destructive/10 text-destructive border-destructive/20', label: isRussian ? 'Критично' : 'Critical' };
   };
 
   const getFlagIcon = (metrics: HealthMetrics) => {
     const flags = [];
-    if (metrics.flag_no_scenarios) flags.push({ icon: AlertOctagon, color: 'text-red-500', tip: isRussian ? 'Нет сценариев' : 'No scenarios' });
-    if (metrics.flag_no_tasks) flags.push({ icon: TrendingDown, color: 'text-amber-500', tip: isRussian ? 'Нет задач' : 'No tasks' });
-    if (metrics.flag_no_entities) flags.push({ icon: AlertTriangle, color: 'text-amber-500', tip: isRussian ? 'Нет привязок' : 'No entity bindings' });
+    if (metrics.flag_no_scenarios) flags.push({ icon: AlertOctagon, color: 'text-destructive', tip: isRussian ? 'Нет сценариев' : 'No scenarios' });
+    if (metrics.flag_no_tasks) flags.push({ icon: TrendingDown, color: 'text-warning', tip: isRussian ? 'Нет задач' : 'No tasks' });
+    if (metrics.flag_no_entities) flags.push({ icon: AlertTriangle, color: 'text-warning', tip: isRussian ? 'Нет привязок' : 'No entity bindings' });
     return flags;
   };
 
@@ -76,7 +76,7 @@ export function LifeOSHealthTab() {
           <Card>
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-green-600" />
+                <ShieldCheck className="w-5 h-5 text-success" />
                 <div>
                   <p className="text-xl font-bold">{overallStats?.healthySituations || 0}</p>
                   <p className="text-xs text-muted-foreground">{isRussian ? 'Здоровых' : 'Healthy'}</p>
@@ -88,7 +88,7 @@ export function LifeOSHealthTab() {
           <Card>
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2">
-                <AlertTriangle className={cn("w-5 h-5", (overallStats?.criticalSituations || 0) > 0 ? "text-red-500" : "text-muted-foreground")} />
+                <AlertTriangle className={cn("w-5 h-5", (overallStats?.criticalSituations || 0) > 0 ? "text-destructive" : "text-muted-foreground")} />
                 <div>
                   <p className="text-xl font-bold">{overallStats?.criticalSituations || 0}</p>
                   <p className="text-xs text-muted-foreground">{isRussian ? 'Критичных' : 'Critical'}</p>
@@ -112,7 +112,7 @@ export function LifeOSHealthTab() {
           <Card>
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2">
-                <Layers className={cn("w-5 h-5", (overallStats?.entityOveruse || 0) > 0 ? "text-amber-500" : "text-muted-foreground")} />
+                <Layers className={cn("w-5 h-5", (overallStats?.entityOveruse || 0) > 0 ? "text-warning" : "text-muted-foreground")} />
                 <div>
                   <p className="text-xl font-bold">{overallStats?.entityOveruse || 0}</p>
                   <p className="text-xs text-muted-foreground">{isRussian ? 'Перегрузка' : 'Overuse'}</p>
@@ -207,7 +207,7 @@ export function LifeOSHealthTab() {
                         <TableCell>
                           <div className="flex items-center gap-1">
                             {flags.length === 0 ? (
-                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                              <CheckCircle2 className="w-4 h-4 text-success" />
                             ) : (
                               flags.map((flag, idx) => (
                                 <Tooltip key={idx}>

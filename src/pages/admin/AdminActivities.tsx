@@ -326,7 +326,7 @@ export default function AdminActivities() {
                               {isRussian ? activity.title_ru : activity.title_en}
                             </h3>
                             {activity.is_certified && (
-                              <Shield className="h-4 w-4 text-green-500" />
+                              <Shield className="h-4 w-4 text-success" />
                             )}
                             {!activity.is_active && (
                               <Badge variant="outline" className="text-xs">
@@ -367,7 +367,7 @@ export default function AdminActivities() {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
+                              className="text-destructive"
                               onClick={() => setDeleteConfirmId(activity.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

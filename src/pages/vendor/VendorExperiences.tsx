@@ -326,8 +326,8 @@ export default function VendorExperiences() {
                               className={cn(
                                 "text-xs",
                                 item.experience_type === 'tour' 
-                                  ? "bg-amber-500 text-white" 
-                                  : "bg-cyan-500 text-white"
+                                  ? "bg-warning text-warning-foreground" 
+                                  : "bg-accent-cyan text-white"
                               )}
                             >
                               {item.experience_type === 'tour' ? (isRu ? 'Тур' : 'Tour') : (isRu ? 'Активность' : 'Activity')}

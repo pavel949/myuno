@@ -416,7 +416,7 @@ function PermissionMatrix({
               </TableHead>
               <TableHead className="text-center w-20">
                 <div className="flex flex-col items-center gap-1">
-                  <Send className="h-4 w-4 text-purple-600" />
+                  <Send className="h-4 w-4 text-accent-purple" />
                   <span className="text-xs">{isRu ? 'Модерация' : 'Submit'}</span>
                 </div>
               </TableHead>

@@ -210,7 +210,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-green-500" />
+                    <MapPin className="w-4 h-4 text-success" />
                     {isRu ? 'Откуда' : 'From'} *
                   </Label>
                   <Input

@@ -139,28 +139,28 @@ const VendorLocations = () => {
     switch (status) {
       case 'approved':
         return (
-          <Badge className="bg-green-500/20 text-green-500 border-green-500/30">
+          <Badge className="bg-success/20 text-success border-success/30">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             {isRu ? 'Одобрено' : 'Approved'}
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-500/20 text-red-500 border-red-500/30">
+          <Badge className="bg-destructive/20 text-destructive border-destructive/30">
             <XCircle className="h-3 w-3 mr-1" />
             {isRu ? 'Отклонено' : 'Rejected'}
           </Badge>
         );
       case 'info_requested':
         return (
-          <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30">
+          <Badge className="bg-warning/20 text-warning border-warning/30">
             <AlertCircle className="h-3 w-3 mr-1" />
             {isRu ? 'Запрос информации' : 'Info Requested'}
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30">
+          <Badge className="bg-info/20 text-info border-info/30">
             <Clock className="h-3 w-3 mr-1" />
             {isRu ? 'На модерации' : 'Pending'}
           </Badge>
@@ -334,8 +334,8 @@ const VendorLocations = () => {
           {locations.map((location) => (
             <Card key={location.id} className={cn(
               "transition-all",
-              location.approval_status === 'rejected' && "border-red-500/30",
-              location.approval_status === 'info_requested' && "border-yellow-500/30"
+              location.approval_status === 'rejected' && "border-destructive/30",
+              location.approval_status === 'info_requested' && "border-warning/30"
             )}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">

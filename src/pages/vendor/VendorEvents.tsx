@@ -216,7 +216,7 @@ const VendorEvents = () => {
                               status={(item as any).approval_status} 
                               rejectionReason={(item as any).rejection_reason}
                             />
-                            {item.is_hot && <Badge className="text-xs bg-red-500">🔥 Hot</Badge>}
+                            {item.is_hot && <Badge className="text-xs bg-destructive">🔥 Hot</Badge>}
                           </div>
                           <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             {item.event_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{item.event_date}</span>}
@@ -229,7 +229,7 @@ const VendorEvents = () => {
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}><Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

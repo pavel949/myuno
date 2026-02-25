@@ -380,7 +380,7 @@ export default function AdminProviders() {
                             {provider.name}
                           </h3>
                           {provider.is_verified && (
-                            <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                            <CheckCircle className="h-4 w-4 text-success shrink-0" />
                           )}
                           {!provider.is_active && (
                             <Badge variant="secondary" className="text-xs shrink-0">
@@ -434,7 +434,7 @@ export default function AdminProviders() {
                               {isRussian ? 'Услуги' : 'Services'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
+                              className="text-destructive"
                               onClick={() => setDeleteConfirmId(provider.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

@@ -170,7 +170,7 @@ export default function AdminEvents() {
                           <h3 className="font-medium">{isRussian ? item.title_ru : item.title_en}</h3>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                             <Badge variant="secondary">{eventCategories.find(t => t.value === item.category)?.[isRussian ? 'labelRu' : 'label']}</Badge>
-                            {item.is_hot && <Badge className="bg-red-500">HOT</Badge>}
+                            {item.is_hot && <Badge className="bg-destructive">HOT</Badge>}
                             {item.event_date && <span>{item.event_date}</span>}
                           </div>
                           {item.price && <p className="text-sm mt-1 text-primary font-medium">฿{item.price.toLocaleString()}</p>}
@@ -179,7 +179,7 @@ export default function AdminEvents() {
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openEditDialog(item)}><Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}><Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

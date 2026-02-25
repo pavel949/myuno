@@ -92,13 +92,13 @@ const VendorBookings = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">{isRussian ? 'Ожидает' : 'Pending'}</Badge>;
+        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">{isRussian ? 'Ожидает' : 'Pending'}</Badge>;
       case 'confirmed':
-        return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">{isRussian ? 'Подтверждено' : 'Confirmed'}</Badge>;
+        return <Badge variant="outline" className="bg-info/10 text-info border-info/20">{isRussian ? 'Подтверждено' : 'Confirmed'}</Badge>;
       case 'completed':
-        return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">{isRussian ? 'Завершено' : 'Completed'}</Badge>;
+        return <Badge variant="outline" className="bg-success/10 text-success border-success/20">{isRussian ? 'Завершено' : 'Completed'}</Badge>;
       case 'cancelled':
-        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">{isRussian ? 'Отменено' : 'Cancelled'}</Badge>;
+        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">{isRussian ? 'Отменено' : 'Cancelled'}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -207,7 +207,7 @@ const VendorBookings = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-500 border-red-200 hover:bg-red-50"
+                          className="text-destructive border-destructive/20 hover:bg-destructive/5"
                           onClick={() => {
                             setSelectedBooking(booking.id);
                             setActionType('cancel');
@@ -217,7 +217,7 @@ const VendorBookings = () => {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-green-500 hover:bg-green-600"
+                          className="bg-success hover:bg-success/90"
                           onClick={() => {
                             setSelectedBooking(booking.id);
                             setActionType('confirm');

@@ -455,7 +455,7 @@ const VendorYachts = () => {
         ) : (
           <div className="space-y-3">
             {yachts.map((yacht) => (
-              <Card key={yacht.id} className={!yacht.is_verified ? 'border-amber-500/50' : ''}>
+              <Card key={yacht.id} className={!yacht.is_verified ? 'border-warning/50' : ''}>
                 <CardContent className="p-4">
                   <div className="flex gap-3">
                     {yacht.cover_image ? (

@@ -310,7 +310,7 @@ const VendorTransport = () => {
         ) : (
           <div className="space-y-3">
             {vehicles.map((vehicle) => (
-              <Card key={vehicle.id} className={!vehicle.is_verified ? 'border-amber-500/50' : ''}>
+              <Card key={vehicle.id} className={!vehicle.is_verified ? 'border-warning/50' : ''}>
                 <CardContent className="p-4">
                   <div className="flex gap-3">
                     {vehicle.cover_image ? (
@@ -335,7 +335,7 @@ const VendorTransport = () => {
                               {vehicleTypes.find(t => t.value === vehicle.vehicle_type)?.[isRussian ? 'labelRu' : 'label'] || vehicle.vehicle_type}
                             </Badge>
                             {!vehicle.is_verified && (
-                              <Badge variant="outline" className="text-xs text-amber-600">
+                              <Badge variant="outline" className="text-xs text-warning">
                                 {isRussian ? 'На модерации' : 'Pending'}
                               </Badge>
                             )}
@@ -385,7 +385,7 @@ const VendorTransport = () => {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
+                              className="text-destructive"
                               onClick={() => setDeleteConfirmId(vehicle.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

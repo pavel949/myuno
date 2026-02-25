@@ -58,12 +58,12 @@ const CONTRACT_TYPE_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'draft', labelEn: 'Draft', labelRu: 'Черновик', icon: FileText, color: 'bg-gray-100 text-gray-800' },
-  { value: 'pending_approval', labelEn: 'Pending', labelRu: 'На согласовании', icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'active', labelEn: 'Active', labelRu: 'Активен', icon: CheckCircle, color: 'bg-green-100 text-green-800' },
-  { value: 'suspended', labelEn: 'Suspended', labelRu: 'Приостановлен', icon: Pause, color: 'bg-orange-100 text-orange-800' },
-  { value: 'terminated', labelEn: 'Terminated', labelRu: 'Расторгнут', icon: XCircle, color: 'bg-red-100 text-red-800' },
-  { value: 'expired', labelEn: 'Expired', labelRu: 'Истёк', icon: AlertCircle, color: 'bg-gray-100 text-gray-600' },
+  { value: 'draft', labelEn: 'Draft', labelRu: 'Черновик', icon: FileText, color: 'bg-muted text-muted-foreground' },
+  { value: 'pending_approval', labelEn: 'Pending', labelRu: 'На согласовании', icon: Clock, color: 'bg-warning/10 text-warning' },
+  { value: 'active', labelEn: 'Active', labelRu: 'Активен', icon: CheckCircle, color: 'bg-success/10 text-success' },
+  { value: 'suspended', labelEn: 'Suspended', labelRu: 'Приостановлен', icon: Pause, color: 'bg-accent-amber/10 text-accent-amber' },
+  { value: 'terminated', labelEn: 'Terminated', labelRu: 'Расторгнут', icon: XCircle, color: 'bg-destructive/10 text-destructive' },
+  { value: 'expired', labelEn: 'Expired', labelRu: 'Истёк', icon: AlertCircle, color: 'bg-muted text-muted-foreground' },
 ];
 
 const PAYMENT_TERMS_OPTIONS = [

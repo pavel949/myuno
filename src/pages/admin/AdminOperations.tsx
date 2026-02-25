@@ -97,7 +97,7 @@ export default function AdminOperations() {
       label: isRu ? 'Услуга' : 'Service', 
       icon: Package, 
       path: '/admin/services?action=new',
-      color: 'text-amber-600',
+      color: 'text-warning',
     },
     { 
       label: isRu ? 'Контракт' : 'Contract', 

@@ -60,8 +60,8 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Ticket className="w-5 h-5 text-blue-600" />
+                <div className="p-2 bg-info/10 rounded-lg">
+                  <Ticket className="w-5 h-5 text-info" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.open}</p>
@@ -74,8 +74,8 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <Clock className="w-5 h-5 text-yellow-600" />
+                <div className="p-2 bg-warning/10 rounded-lg">
+                  <Clock className="w-5 h-5 text-warning" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.inProgress}</p>
@@ -85,11 +85,11 @@ export default function AdminTickets() {
             </CardContent>
           </Card>
 
-          <Card className={stats.overdueSla > 0 ? 'border-red-300 bg-red-50' : ''}>
+          <Card className={stats.overdueSla > 0 ? 'border-destructive/30 bg-destructive/5' : ''}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${stats.overdueSla > 0 ? 'bg-red-100' : 'bg-gray-100'}`}>
-                  <AlertTriangle className={`w-5 h-5 ${stats.overdueSla > 0 ? 'text-red-600' : 'text-gray-600'}`} />
+                <div className={`p-2 rounded-lg ${stats.overdueSla > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
+                  <AlertTriangle className={`w-5 h-5 ${stats.overdueSla > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.overdueSla}</p>
@@ -102,8 +102,8 @@ export default function AdminTickets() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                <div className="p-2 bg-success/10 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-success" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{stats.resolved}</p>
