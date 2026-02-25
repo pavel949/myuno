@@ -31,25 +31,25 @@ export function ControlFinanceTab() {
       label: isRussian ? 'Общий доход' : 'Total Revenue', 
       value: `$${(financeStats?.revenue || 0).toLocaleString()}`, 
       icon: DollarSign, 
-      color: 'text-green-500' 
+      color: 'text-success' 
     },
     { 
       label: isRussian ? 'Транзакции' : 'Transactions', 
       value: financeStats?.transactions || 0, 
       icon: CreditCard, 
-      color: 'text-blue-500' 
+      color: 'text-info' 
     },
     { 
       label: isRussian ? 'Комиссия' : 'Commission', 
       value: `$${Math.round((financeStats?.revenue || 0) * 0.1).toLocaleString()}`, 
       icon: TrendingUp, 
-      color: 'text-purple-500' 
+      color: 'text-accent-purple' 
     },
     { 
       label: isRussian ? 'Выплаты' : 'Payouts', 
       value: `$${Math.round((financeStats?.revenue || 0) * 0.9).toLocaleString()}`, 
       icon: Wallet, 
-      color: 'text-orange-500' 
+      color: 'text-accent-amber' 
     },
   ];
 

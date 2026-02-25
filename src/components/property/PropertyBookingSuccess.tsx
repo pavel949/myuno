@@ -153,8 +153,8 @@ export function PropertyBookingSuccess({
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh]">
       {/* Success Icon */}
-      <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6 animate-in zoom-in duration-300">
-        <Check className="w-10 h-10 text-green-500" />
+      <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mb-6 animate-in zoom-in duration-300">
+        <Check className="w-10 h-10 text-success" />
       </div>
 
       {/* Title */}
@@ -239,7 +239,7 @@ export function PropertyBookingSuccess({
                   "flex items-center gap-1.5",
                   stage.type === 'deposit' ? "text-foreground" : "text-muted-foreground"
                 )}>
-                  {stage.type === 'deposit' && <Check className="w-3.5 h-3.5 text-green-500" />}
+                  {stage.type === 'deposit' && <Check className="w-3.5 h-3.5 text-success" />}
                   {stage.type === 'balance' && <Clock className="w-3.5 h-3.5" />}
                   {stage.type === 'security_deposit' && <Shield className="w-3.5 h-3.5" />}
                   {stage.type === 'deposit' && (isRu ? 'Оплачено' : 'Paid')}
@@ -248,7 +248,7 @@ export function PropertyBookingSuccess({
                 </span>
                 <span className={cn(
                   "font-medium",
-                  stage.type === 'deposit' && "text-green-600"
+                  stage.type === 'deposit' && "text-success"
                 )}>
                   {currencySymbol}{stage.amount.toLocaleString()}
                 </span>

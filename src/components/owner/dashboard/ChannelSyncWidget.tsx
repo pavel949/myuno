@@ -15,9 +15,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 const STATUS_CONFIG = {
-  healthy: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-  warning: { icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-  error: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30' },
+  healthy: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
+  warning: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10' },
+  error: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10' },
   unknown: { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted' },
 } as const;
 
@@ -79,7 +79,7 @@ export function ChannelSyncWidget() {
   const hasIssues = (stats?.error || 0) + (stats?.warning || 0) > 0;
 
   return (
-    <Card className={cn(hasIssues && "border-amber-300 dark:border-amber-800")}>
+    <Card className={cn(hasIssues && "border-warning/50")}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
@@ -115,18 +115,18 @@ export function ChannelSyncWidget() {
       <CardContent className="pt-0">
         {/* Summary row */}
         <div className="flex items-center gap-4 mb-3 text-xs">
-          <span className="flex items-center gap-1 text-emerald-600">
+          <span className="flex items-center gap-1 text-success">
             <CheckCircle2 className="h-3 w-3" />
             {stats?.healthy || 0} OK
           </span>
           {(stats?.warning || 0) > 0 && (
-            <span className="flex items-center gap-1 text-amber-600">
+            <span className="flex items-center gap-1 text-warning">
               <AlertTriangle className="h-3 w-3" />
               {stats?.warning}
             </span>
           )}
           {(stats?.error || 0) > 0 && (
-            <span className="flex items-center gap-1 text-red-600">
+            <span className="flex items-center gap-1 text-destructive">
               <XCircle className="h-3 w-3" />
               {stats?.error}
             </span>

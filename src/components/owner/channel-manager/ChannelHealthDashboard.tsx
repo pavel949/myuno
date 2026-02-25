@@ -32,12 +32,12 @@ const CHANNEL_ICONS: Record<string, string> = {
 };
 
 const CHANNEL_COLORS: Record<string, string> = {
-  airbnb: 'bg-rose-100 dark:bg-rose-900/30',
-  booking: 'bg-blue-100 dark:bg-blue-900/30',
-  vrbo: 'bg-cyan-100 dark:bg-cyan-900/30',
-  expedia: 'bg-yellow-100 dark:bg-yellow-900/30',
-  google: 'bg-emerald-100 dark:bg-emerald-900/30',
-  other: 'bg-slate-100 dark:bg-slate-900/30',
+  airbnb: 'bg-accent-coral/10',
+  booking: 'bg-info/10',
+  vrbo: 'bg-accent-cyan/10',
+  expedia: 'bg-warning/10',
+  google: 'bg-success/10',
+  other: 'bg-muted',
 };
 
 export function ChannelHealthDashboard() {
@@ -93,25 +93,25 @@ export function ChannelHealthDashboard() {
           icon={<CheckCircle2 className="h-5 w-5" />}
           label={isRu ? 'Здоровые' : 'Healthy'}
           value={stats?.healthy || 0}
-          color="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+          color="bg-success/10 text-success"
         />
         <SummaryCard
           icon={<AlertTriangle className="h-5 w-5" />}
           label={isRu ? 'Внимание' : 'Warning'}
           value={stats?.warning || 0}
-          color={stats?.warning ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600" : "bg-muted text-muted-foreground"}
+          color={stats?.warning ? "bg-warning/10 text-warning" : "bg-muted text-muted-foreground"}
         />
         <SummaryCard
           icon={<XCircle className="h-5 w-5" />}
           label={isRu ? 'Ошибки' : 'Errors'}
           value={stats?.error || 0}
-          color={stats?.error ? "bg-red-100 dark:bg-red-900/30 text-red-600" : "bg-muted text-muted-foreground"}
+          color={stats?.error ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}
         />
         <SummaryCard
           icon={<AlertCircle className="h-5 w-5" />}
           label={isRu ? 'Конфликты' : 'Conflicts'}
           value={conflictCount}
-          color={conflictCount > 0 ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600" : "bg-muted text-muted-foreground"}
+          color={conflictCount > 0 ? "bg-accent-amber/10 text-accent-amber" : "bg-muted text-muted-foreground"}
         />
       </div>
 
@@ -131,11 +131,11 @@ export function ChannelHealthDashboard() {
                 <div className="text-xs text-muted-foreground">{isRu ? 'Синхр.' : 'Syncs'}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-emerald-600">{syncStats.totalEventsAdded}</div>
+                <div className="text-2xl font-bold text-success">{syncStats.totalEventsAdded}</div>
                 <div className="text-xs text-muted-foreground">{isRu ? 'Добавлено' : 'Added'}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-blue-600">{syncStats.totalEventsUpdated}</div>
+                <div className="text-2xl font-bold text-info">{syncStats.totalEventsUpdated}</div>
                 <div className="text-xs text-muted-foreground">{isRu ? 'Обновлено' : 'Updated'}</div>
               </div>
             </div>
@@ -148,8 +148,8 @@ export function ChannelHealthDashboard() {
         {channels?.map(channel => (
           <Card key={channel.id} className={cn(
             "transition-all",
-            channel.status === 'error' && "border-red-300 dark:border-red-800",
-            channel.status === 'warning' && "border-amber-300 dark:border-amber-800"
+            channel.status === 'error' && "border-destructive/50",
+            channel.status === 'warning' && "border-warning/50"
           )}>
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
@@ -188,7 +188,7 @@ export function ChannelHealthDashboard() {
                   </div>
 
                   {channel.syncError && (
-                    <p className="text-xs text-red-500 mt-1 truncate">
+                    <p className="text-xs text-destructive mt-1 truncate">
                       {channel.syncError}
                     </p>
                   )}
@@ -261,7 +261,7 @@ function SummaryCard({
 function StatusBadge({ status, isRu }: { status: string; isRu: boolean }) {
   if (status === 'healthy') {
     return (
-      <Badge variant="secondary" className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-1.5">
+      <Badge variant="secondary" className="text-xs bg-success/10 text-success px-1.5">
         <CheckCircle2 className="h-3 w-3 mr-0.5" />
         {isRu ? 'OK' : 'OK'}
       </Badge>
@@ -269,7 +269,7 @@ function StatusBadge({ status, isRu }: { status: string; isRu: boolean }) {
   }
   if (status === 'warning') {
     return (
-      <Badge variant="secondary" className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-1.5">
+      <Badge variant="secondary" className="text-xs bg-warning/10 text-warning px-1.5">
         <AlertTriangle className="h-3 w-3 mr-0.5" />
         {isRu ? 'Внимание' : 'Warning'}
       </Badge>

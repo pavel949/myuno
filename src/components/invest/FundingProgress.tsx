@@ -64,7 +64,7 @@ export function FundingProgress({
       <div className="flex items-baseline justify-between">
         <span className={cn(
           styles.percentage,
-          isFunded ? 'text-emerald-600' : 'text-primary'
+          isFunded ? 'text-success' : 'text-primary'
         )}>
           {percentage}%
           {isFunded && (
