@@ -62,7 +62,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({
               </div>
               {vendor.rating && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                  <Star className="w-3 h-3 fill-warning text-warning" />
                   <span>{vendor.rating}</span>
                 </div>
               )}
@@ -118,9 +118,9 @@ export const VendorCard: React.FC<VendorCardProps> = ({
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-semibold text-foreground line-clamp-1">{name}</h3>
           {vendor.rating && (
-            <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded-full shrink-0">
-              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-              <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-1 bg-warning/15 px-2 py-0.5 rounded-full shrink-0">
+              <Star className="w-3.5 h-3.5 fill-warning text-warning" />
+              <span className="text-xs font-semibold text-warning">
                 {vendor.rating}
               </span>
             </div>

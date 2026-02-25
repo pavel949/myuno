@@ -174,7 +174,7 @@ export default function AccountTypeSelection() {
 
         {/* Info about representative */}
         {selectedType === 'representative' && (
-          <Card className="border-amber-500/30 bg-amber-500/5">
+          <Card className="border-accent-amber/30 bg-accent-amber/5">
             <CardContent className="p-6">
               <p className="text-sm">
                 {isRu 

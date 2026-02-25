@@ -266,9 +266,9 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           
           {product.rating && (
             <div className="flex items-center gap-1">
-              <div className="flex items-center gap-0.5 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
-                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-0.5 bg-warning/15 px-1.5 py-0.5 rounded-full">
+                <Star className="w-3 h-3 fill-warning text-warning" />
+                <span className="text-xs font-medium text-warning">
                   {product.rating}
                 </span>
               </div>
@@ -419,9 +419,9 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         {/* Rating - simplified in compact mode */}
         {product.rating && !compact && (
           <div className="flex items-center gap-1 mt-1.5">
-            <div className="flex items-center gap-0.5 bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full">
-              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-              <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-0.5 bg-warning/15 px-1.5 py-0.5 rounded-full">
+              <Star className="w-2.5 h-2.5 fill-warning text-warning" />
+              <span className="text-[10px] font-semibold text-warning">
                 {product.rating}
               </span>
             </div>

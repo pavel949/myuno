@@ -90,18 +90,18 @@ export function OwnershipInviteBanner() {
 
   const getInviteIcon = (type: string) => {
     if (type === 'ownership_transfer') {
-      return <KeyRound className="h-5 w-5 text-amber-500" />;
+      return <KeyRound className="h-5 w-5 text-accent-amber" />;
     }
     return <UserPlus className="h-5 w-5 text-primary" />;
   };
 
   return (
     <>
-      <Card className="mb-4 border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent">
+      <Card className="mb-4 border-accent-amber/30 bg-gradient-to-r from-accent-amber/10 via-warning/5 to-transparent">
         <CardContent className="p-4">
           <div className="flex items-start gap-3 mb-3">
-            <div className="p-2 rounded-full bg-amber-500/20">
-              <Gift className="h-5 w-5 text-amber-500" />
+            <div className="p-2 rounded-full bg-accent-amber/20">
+              <Gift className="h-5 w-5 text-accent-amber" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-sm">
@@ -143,7 +143,7 @@ export function OwnershipInviteBanner() {
                     <Badge 
                       variant="outline" 
                       className={invite.invite_type === 'ownership_transfer' 
-                        ? 'border-amber-500/50 text-amber-600 text-[10px]' 
+                        ? 'border-accent-amber/50 text-accent-amber text-[10px]' 
                         : 'text-[10px]'}
                     >
                       {getInviteIcon(invite.invite_type)}

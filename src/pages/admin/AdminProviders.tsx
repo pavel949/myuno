@@ -400,7 +400,7 @@ export default function AdminProviders() {
                           )}
                           {provider.rating != null && provider.rating > 0 && (
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              <Star className="h-3 w-3 fill-warning text-warning" />
                               {provider.rating.toFixed(1)}
                               {provider.review_count ? ` (${provider.review_count})` : ''}
                             </span>

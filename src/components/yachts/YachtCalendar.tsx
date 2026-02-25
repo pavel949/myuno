@@ -192,10 +192,10 @@ export function YachtCalendar({
   };
 
   const statusColors: Record<YachtAvailabilityEntry['status'], string> = {
-    available: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
-    blocked: 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-    booked: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
-    maintenance: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200',
+    available: 'bg-success/15 text-success',
+    blocked: 'bg-muted text-muted-foreground',
+    booked: 'bg-destructive/15 text-destructive',
+    maintenance: 'bg-warning/15 text-warning',
   };
 
   const statusIcons: Record<YachtAvailabilityEntry['status'], React.ReactNode> = {
@@ -342,7 +342,7 @@ export function YachtCalendar({
                   {/* Note indicator */}
                   {entry?.note && (
                     <div className="absolute bottom-1 right-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title={entry.note} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-info" title={entry.note} />
                     </div>
                   )}
                 </div>
@@ -419,7 +419,7 @@ export function YachtCalendar({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="col-span-2 border-amber-500 text-amber-700 hover:bg-amber-50"
+                    className="col-span-2 border-warning text-warning hover:bg-warning/10"
                     onClick={() => applyToSelection('maintenance')}
                   >
                     <Wrench className="h-3 w-3 mr-1" />

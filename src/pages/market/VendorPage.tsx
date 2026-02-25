@@ -154,9 +154,9 @@ const VendorPage = () => {
           <div className="flex items-center gap-3 mb-4">
             {vendor.rating && (
               <div className="flex items-center gap-1.5">
-                <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2.5 py-1 rounded-full">
-                  <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                  <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                <div className="flex items-center gap-1 bg-warning/15 px-2.5 py-1 rounded-full">
+                  <Star className="w-4 h-4 fill-warning text-warning" />
+                  <span className="text-sm font-semibold text-warning">
                     {vendor.rating}
                   </span>
                 </div>

@@ -25,7 +25,7 @@ export const ReviewStats = ({ average, total, distribution }: ReviewStatsProps) 
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className={`w-4 h-4 ${i < Math.round(average) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}
+                className={`w-4 h-4 ${i < Math.round(average) ? 'fill-warning text-warning' : 'text-muted-foreground'}`}
               />
             ))}
           </div>
@@ -39,7 +39,7 @@ export const ReviewStats = ({ average, total, distribution }: ReviewStatsProps) 
           {[5, 4, 3, 2, 1].map((stars, index) => (
             <div key={stars} className="flex items-center gap-2">
               <span className="text-xs w-3">{stars}</span>
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              <Star className="w-3 h-3 fill-warning text-warning" />
               <Progress 
                 value={getPercentage(distribution[stars - 1])} 
                 className="flex-1 h-2"

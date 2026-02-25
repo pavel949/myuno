@@ -21,10 +21,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const colorMap: Record<string, string> = {
   'primary': 'bg-primary/10 text-primary border-primary/20',
-  'warning': 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-  'success': 'bg-green-500/10 text-green-600 border-green-500/20',
-  'accent': 'bg-purple-500/10 text-purple-600 border-purple-500/20',
-  'info': 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  'warning': 'bg-warning/10 text-warning border-warning/20',
+  'success': 'bg-success/10 text-success border-success/20',
+  'accent': 'bg-accent-purple/10 text-accent-purple border-accent-purple/20',
+  'info': 'bg-info/10 text-info border-info/20',
 };
 
 export const TrustBadges = ({ providerId, compact = false }: TrustBadgesProps) => {

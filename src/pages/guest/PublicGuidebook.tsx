@@ -78,7 +78,7 @@ export default function PublicGuidebook() {
 
   const CopyBtn = ({ text, field }: { text: string; field: string }) => (
     <Button variant="ghost" size="icon" onClick={() => copyToClipboard(text, field)}>
-      {copiedField === field ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+      {copiedField === field ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
     </Button>
   );
 

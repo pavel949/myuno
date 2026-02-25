@@ -62,10 +62,10 @@ export function OperationsInquiriesTab() {
   });
 
   const priorityColors: Record<string, string> = {
-    low: 'bg-gray-500/20 text-gray-700',
-    medium: 'bg-blue-500/20 text-blue-700',
-    high: 'bg-orange-500/20 text-orange-700',
-    urgent: 'bg-red-500/20 text-red-700',
+    low: 'bg-muted text-muted-foreground',
+    medium: 'bg-info/20 text-info',
+    high: 'bg-warning/20 text-warning',
+    urgent: 'bg-destructive/20 text-destructive',
   };
 
   return (
@@ -74,7 +74,7 @@ export function OperationsInquiriesTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-blue-500" />
+            <MessageSquare className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.open}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Открытые' : 'Open'}</p>
@@ -92,7 +92,7 @@ export function OperationsInquiriesTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.resolved}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Решено' : 'Resolved'}</p>
@@ -101,7 +101,7 @@ export function OperationsInquiriesTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-purple-500" />
+            <MessageSquare className="h-8 w-8 text-accent-purple" />
             <div>
               <p className="text-2xl font-bold">{stats.total}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Всего' : 'Total'}</p>

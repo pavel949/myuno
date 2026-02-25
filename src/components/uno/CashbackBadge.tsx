@@ -38,7 +38,7 @@ export function CashbackBadge({
   if (variant === 'inline') {
     return (
       <span className={cn(
-        "inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400",
+        "inline-flex items-center gap-1 text-xs font-medium text-success",
         className
       )}>
         <TrendingUp className="w-3 h-3" />
@@ -54,14 +54,14 @@ export function CashbackBadge({
   if (variant === 'card') {
     return (
       <div className={cn(
-        "flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20",
+        "flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20",
         className
       )}>
-        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-          <Percent className="w-4 h-4 text-emerald-500" />
+        <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center">
+          <Percent className="w-4 h-4 text-success" />
         </div>
         <div className="flex-1">
-          <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          <div className="text-sm font-medium text-success">
             {language === 'ru' ? `Кэшбэк ${percentage}%` : `${percentage}% Cashback`}
           </div>
           {showAmount && cashbackAmount > 0 && (
@@ -77,16 +77,16 @@ export function CashbackBadge({
   if (variant === 'banner') {
     return (
       <div className={cn(
-        "relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 border border-emerald-500/20",
+        "relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r from-success/10 via-success/10 to-accent-teal/10 border border-success/20",
         className
       )}>
-        <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
+        <div className="absolute top-0 right-0 w-20 h-20 bg-success/10 rounded-full blur-2xl" />
         <div className="relative flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <Gift className="w-6 h-6 text-emerald-500" />
+          <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
+            <Gift className="w-6 h-6 text-success" />
           </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">
+            <h4 className="font-semibold text-success">
               {language === 'ru' ? `Кэшбэк ${percentage}%` : `${percentage}% Cashback`}
             </h4>
             <p className="text-sm text-muted-foreground">
@@ -97,7 +97,7 @@ export function CashbackBadge({
           </div>
           {showAmount && cashbackAmount > 0 && (
             <div className="text-right">
-              <div className="text-xl font-bold text-emerald-500">
+              <div className="text-xl font-bold text-success">
                 +{cashbackAmount.toLocaleString()} ₽
               </div>
             </div>
@@ -132,11 +132,11 @@ export function CashbackRatesCard({ className }: { className?: string }) {
 
   return (
     <div className={cn(
-      "p-4 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-green-500/5 to-teal-500/5 border border-emerald-500/10",
+      "p-4 rounded-2xl bg-gradient-to-r from-success/5 via-success/5 to-accent-teal/5 border border-success/10",
       className
     )}>
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-5 h-5 text-emerald-500" />
+        <TrendingUp className="w-5 h-5 text-success" />
         <h3 className="font-semibold">
           {language === 'ru' ? 'Ставки кэшбэка' : 'Cashback Rates'}
         </h3>
@@ -147,7 +147,7 @@ export function CashbackRatesCard({ className }: { className?: string }) {
             <span className="text-muted-foreground">
               {categoryLabels[setting.category]?.[language] || setting.category}
             </span>
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="font-medium text-success">
               {setting.percentage}%
               {setting.min_order_amount > 0 && (
                 <span className="text-xs text-muted-foreground ml-1">

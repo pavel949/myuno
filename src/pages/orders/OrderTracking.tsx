@@ -33,13 +33,13 @@ const statusConfig: Record<OrderStatus, {
   labelRu: string 
 }> = {
   draft: { icon: Clock, color: 'bg-muted text-muted-foreground', labelEn: 'Draft', labelRu: 'Черновик' },
-  pending: { icon: Clock, color: 'bg-yellow-500/20 text-yellow-600', labelEn: 'Pending', labelRu: 'Ожидание' },
-  confirmed: { icon: CheckCircle2, color: 'bg-blue-500/20 text-blue-600', labelEn: 'Confirmed', labelRu: 'Подтверждён' },
-  in_progress: { icon: Truck, color: 'bg-purple-500/20 text-purple-600', labelEn: 'In Progress', labelRu: 'В процессе' },
-  completed: { icon: Package, color: 'bg-green-500/20 text-green-600', labelEn: 'Completed', labelRu: 'Завершён' },
-  cancelled: { icon: AlertCircle, color: 'bg-red-500/20 text-red-600', labelEn: 'Cancelled', labelRu: 'Отменён' },
-  refunded: { icon: RefreshCw, color: 'bg-orange-500/20 text-orange-600', labelEn: 'Refunded', labelRu: 'Возврат' },
-  disputed: { icon: AlertCircle, color: 'bg-red-500/20 text-red-600', labelEn: 'Disputed', labelRu: 'Спор' },
+  pending: { icon: Clock, color: 'bg-warning/20 text-warning', labelEn: 'Pending', labelRu: 'Ожидание' },
+  confirmed: { icon: CheckCircle2, color: 'bg-info/20 text-info', labelEn: 'Confirmed', labelRu: 'Подтверждён' },
+  in_progress: { icon: Truck, color: 'bg-accent-purple/20 text-accent-purple', labelEn: 'In Progress', labelRu: 'В процессе' },
+  completed: { icon: Package, color: 'bg-success/20 text-success', labelEn: 'Completed', labelRu: 'Завершён' },
+  cancelled: { icon: AlertCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Cancelled', labelRu: 'Отменён' },
+  refunded: { icon: RefreshCw, color: 'bg-warning/20 text-warning', labelEn: 'Refunded', labelRu: 'Возврат' },
+  disputed: { icon: AlertCircle, color: 'bg-destructive/20 text-destructive', labelEn: 'Disputed', labelRu: 'Спор' },
 };
 
 export default function OrderTracking() {

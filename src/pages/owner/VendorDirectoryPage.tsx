@@ -233,7 +233,7 @@ function VendorCard({ vendor, isRu, onClick, onFavorite }: { vendor: OwnerVendor
             </div>
             {(vendor.avg_rating ?? 0) > 0 && (
               <div className="flex items-center gap-1 mt-1 text-sm">
-                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <Star className="h-3.5 w-3.5 text-warning fill-warning" />
                 <span className="font-medium">{Number(vendor.avg_rating).toFixed(1)}</span>
                 {(vendor.total_jobs ?? 0) > 0 && (
                   <span className="text-muted-foreground text-xs">({vendor.total_jobs} {isRu ? 'работ' : 'jobs'})</span>

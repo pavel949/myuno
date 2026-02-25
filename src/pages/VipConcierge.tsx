@@ -164,17 +164,17 @@ export default function VipConcierge() {
 
         {/* Hero Section */}
         <FadeInUp>
-          <div className="mb-6 p-6 rounded-3xl bg-gradient-to-br from-violet-500/20 via-purple-500/15 to-fuchsia-500/20 border-2 border-purple-500/40 shadow-lg">
+          <div className="mb-6 p-6 rounded-3xl bg-gradient-to-br from-accent-purple/20 via-accent-purple/15 to-accent-purple/20 border-2 border-accent-purple/40 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg">
+              <div className="p-3 rounded-full bg-gradient-to-r from-accent-purple to-accent-purple/80 shadow-lg">
                 <Crown className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-2xl bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="font-bold text-2xl bg-gradient-to-r from-accent-purple to-accent-purple/80 bg-clip-text text-transparent">
                   UNO VIP
                 </h2>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Sparkles className="w-4 h-4 text-purple-500" />
+                  <Sparkles className="w-4 h-4 text-accent-purple" />
                   {t('vip.subtitle')}
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function VipConcierge() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 size="lg"
-                className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold shadow-lg"
+                className="flex-1 bg-gradient-to-r from-accent-purple to-accent-purple/80 hover:from-accent-purple/90 hover:to-accent-purple/70 text-white font-semibold shadow-lg"
                 onClick={() => window.location.href = getTelLink()}
               >
                 <Phone className="w-5 h-5 mr-2" />
@@ -196,7 +196,7 @@ export default function VipConcierge() {
               <Button
                 size="lg"
                 variant="outline"
-                className="flex-1 border-purple-500/50 text-purple-600 hover:bg-purple-500/10"
+                className="flex-1 border-accent-purple/50 text-accent-purple hover:bg-accent-purple/10"
                 onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
@@ -208,10 +208,10 @@ export default function VipConcierge() {
 
         {/* Features */}
         <FadeInUp delay={0.05}>
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-accent-amber/10 to-warning/10 border border-accent-amber/20">
             <div className="flex items-center gap-2 mb-2">
-              <Star className="w-5 h-5 text-amber-500" fill="currentColor" />
-              <span className="font-semibold text-amber-600">
+              <Star className="w-5 h-5 text-accent-amber" fill="currentColor" />
+              <span className="font-semibold text-accent-amber">
                 {t('vip.whyVip')}
               </span>
             </div>

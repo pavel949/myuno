@@ -148,7 +148,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
                               </Badge>
                               {item.rating && (
                                 <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                  <Star className="w-3 h-3 fill-warning text-warning" />
                                   {item.rating}
                                 </span>
                               )}
