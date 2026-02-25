@@ -21,6 +21,7 @@ import { OwnerDashboardMenu } from '@/components/owner/dashboard/OwnerDashboardM
 import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
 import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
+import { YourDayFeed } from '@/components/owner/dashboard/YourDayFeed';
 import { BusinessKPIWidget } from '@/components/owner/dashboard/BusinessKPIWidget';
 import { RevenueInsightsWidget } from '@/components/owner/dashboard/RevenueInsightsWidget';
 import { TodayBriefingWidget } from '@/components/owner/dashboard/TodayBriefingWidget';
@@ -46,6 +47,12 @@ function SectionSkeleton() {
 /** Maps widget keys to their React components */
 function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; role?: import('@/lib/businessRoles').BusinessRole }) {
   switch (widgetKey) {
+    case 'your_day':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <YourDayFeed />
+        </Suspense>
+      );
     case 'kpi':
       return (
         <Suspense fallback={<SectionSkeleton />}>
