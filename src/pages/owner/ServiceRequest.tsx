@@ -48,12 +48,12 @@ export default function ServiceRequest() {
   });
 
   const serviceTypes = [
-    { value: 'check_in', labelEn: 'Check-in', labelRu: 'Check-in', icon: Key, color: 'text-green-500' },
-    { value: 'check_out', labelEn: 'Check-out', labelRu: 'Check-out', icon: Key, color: 'text-orange-500' },
-    { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг', icon: Sparkles, color: 'text-blue-500' },
-    { value: 'maintenance', labelEn: 'Maintenance', labelRu: 'Ремонт', icon: Wrench, color: 'text-purple-500' },
-    { value: 'key_handover', labelEn: 'Key Handover', labelRu: 'Передача ключей', icon: Key, color: 'text-amber-500' },
-    { value: 'bill_payment', labelEn: 'Bill Payment', labelRu: 'Оплата счетов', icon: FileText, color: 'text-cyan-500' },
+    { value: 'check_in', labelEn: 'Check-in', labelRu: 'Check-in', icon: Key, color: 'text-success' },
+    { value: 'check_out', labelEn: 'Check-out', labelRu: 'Check-out', icon: Key, color: 'text-warning' },
+    { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Клининг', icon: Sparkles, color: 'text-info' },
+    { value: 'maintenance', labelEn: 'Maintenance', labelRu: 'Ремонт', icon: Wrench, color: 'text-accent-purple' },
+    { value: 'key_handover', labelEn: 'Key Handover', labelRu: 'Передача ключей', icon: Key, color: 'text-accent-amber' },
+    { value: 'bill_payment', labelEn: 'Bill Payment', labelRu: 'Оплата счетов', icon: FileText, color: 'text-accent-cyan' },
   ];
 
   const timeSlots = [

@@ -60,7 +60,7 @@ interface OrderItemProps {
 }
 
 const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) => (
-  <div className={`flex items-center gap-3 py-3 ${showShippingWarning ? 'bg-amber-50 dark:bg-amber-900/10 -mx-2 px-2 rounded-lg' : ''}`}>
+  <div className={`flex items-center gap-3 py-3 ${showShippingWarning ? 'bg-warning/5 -mx-2 px-2 rounded-lg' : ''}`}>
     <div className="w-14 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 relative">
       {item.image ? (
         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -70,8 +70,8 @@ const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) 
         </div>
       )}
       {item.isShippableInternational && (
-        <div className="absolute -top-1 -right-1 bg-sky-500 rounded-full p-0.5">
-          <Plane className="w-2.5 h-2.5 text-white" />
+        <div className="absolute -top-1 -right-1 bg-info rounded-full p-0.5">
+          <Plane className="w-2.5 h-2.5 text-info-foreground" />
         </div>
       )}
     </div>
@@ -83,7 +83,7 @@ const OrderItemCard = ({ item, language, showShippingWarning }: OrderItemProps) 
         {getCurrencySymbol('THB')}{item.price.toLocaleString()} × {item.quantity}
       </p>
       {showShippingWarning && (
-        <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
+        <p className="text-xs text-warning flex items-center gap-1 mt-0.5">
           <AlertTriangle className="w-3 h-3" />
           {language === 'ru' ? 'Не для отправки' : 'Not shippable'}
         </p>

@@ -261,14 +261,14 @@ export const ReferralList: React.FC<{ className?: string }> = ({ className }) =>
             <div className="flex items-center gap-2">
               {referral.status === 'completed' ? (
                 <>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-sm font-medium text-green-600">
+                  <CheckCircle className="w-4 h-4 text-success" />
+                  <span className="text-sm font-medium text-success">
                     +{referral.referrer_bonus} ₽
                   </span>
                 </>
               ) : (
                 <>
-                  <Clock className="w-4 h-4 text-amber-500" />
+                  <Clock className="w-4 h-4 text-warning" />
                   <span className="text-xs text-muted-foreground">
                     {language === 'ru' ? 'Ожидание' : 'Pending'}
                   </span>

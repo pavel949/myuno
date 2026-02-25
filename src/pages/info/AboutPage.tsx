@@ -121,8 +121,8 @@ export default function AboutPage() {
         : isTh 
         ? ['ที่พักวันหยุด', 'ทัวร์และทริป', 'รับส่งสนามบิน', 'ร้านอาหารและความบันเทิง']
         : ['Vacation rental', 'Tours & excursions', 'Airport transfer', 'Restaurants & entertainment'],
-      color: 'bg-blue-500/10 border-blue-500/20',
-      iconColor: 'text-blue-600'
+      color: 'bg-info/10 border-info/20',
+      iconColor: 'text-info'
     },
     {
       icon: Home,
@@ -137,8 +137,8 @@ export default function AboutPage() {
         : isTh 
         ? ['การแพทย์และคลินิก', 'บริการวีซ่า', 'การศึกษาสำหรับเด็ก', 'บริการบ้าน']
         : ['Medical care', 'Visa services', 'Kids education', 'Home services'],
-      color: 'bg-green-500/10 border-green-500/20',
-      iconColor: 'text-green-600'
+      color: 'bg-success/10 border-success/20',
+      iconColor: 'text-success'
     },
     {
       icon: Building2,
@@ -153,8 +153,8 @@ export default function AboutPage() {
         : isTh 
         ? ['การจัดการเช่า', 'ทำความสะอาดและซ่อมแซม', 'การควบคุมค่าใช้จ่าย', 'การสนับสนุนทางกฎหมาย']
         : ['Rental management', 'Cleaning & repairs', 'Expense control', 'Legal support'],
-      color: 'bg-purple-500/10 border-purple-500/20',
-      iconColor: 'text-purple-600'
+      color: 'bg-accent-purple/10 border-accent-purple/20',
+      iconColor: 'text-accent-purple'
     },
     {
       icon: Laptop,
@@ -169,8 +169,8 @@ export default function AboutPage() {
         : isTh 
         ? ['พื้นที่ทำงานร่วม', 'การเชื่อมต่อ', 'ธนาคาร', 'เครือข่าย']
         : ['Coworking spaces', 'Connectivity', 'Banking', 'Networking'],
-      color: 'bg-amber-500/10 border-amber-500/20',
-      iconColor: 'text-amber-600'
+      color: 'bg-accent-amber/10 border-accent-amber/20',
+      iconColor: 'text-accent-amber'
     },
   ];
 
@@ -239,21 +239,21 @@ export default function AboutPage() {
 
   // Ecosystem verticals
   const verticals = [
-    { icon: Home, name: isRu ? 'Недвижимость' : isTh ? 'อสังหาริมทรัพย์' : 'Real Estate', color: 'from-teal-500 to-emerald-500' },
-    { icon: Ship, name: isRu ? 'Яхты' : isTh ? 'เรือยอร์ช' : 'Yachts', color: 'from-cyan-500 to-blue-500' },
-    { icon: Car, name: isRu ? 'Транспорт' : isTh ? 'ขนส่ง' : 'Transport', color: 'from-indigo-500 to-blue-500' },
-    { icon: Compass, name: isRu ? 'Туры' : isTh ? 'ทัวร์' : 'Tours', color: 'from-amber-500 to-orange-500' },
-    { icon: Waves, name: isRu ? 'Водный спорт' : isTh ? 'กีฬาทางน้ำ' : 'Water Sports', color: 'from-blue-500 to-cyan-500' },
-    { icon: UtensilsCrossed, name: isRu ? 'Рестораны' : isTh ? 'ร้านอาหาร' : 'Restaurants', color: 'from-orange-500 to-red-500' },
-    { icon: Sparkles, name: isRu ? 'Красота и СПА' : isTh ? 'ความงามและสปา' : 'Beauty & Spa', color: 'from-pink-500 to-purple-500' },
-    { icon: Stethoscope, name: isRu ? 'Медицина' : isTh ? 'การแพทย์' : 'Medical', color: 'from-emerald-500 to-green-500' },
-    { icon: Dumbbell, name: isRu ? 'Фитнес' : isTh ? 'ฟิตเนส' : 'Fitness', color: 'from-blue-500 to-cyan-500' },
-    { icon: GraduationCap, name: isRu ? 'Образование' : isTh ? 'การศึกษา' : 'Education', color: 'from-yellow-500 to-orange-500' },
-    { icon: Scale, name: isRu ? 'Бизнес-услуги' : isTh ? 'บริการธุรกิจ' : 'Business Services', color: 'from-indigo-500 to-blue-600' },
-    { icon: Wrench, name: isRu ? 'Домашние услуги' : isTh ? 'บริการบ้าน' : 'Home Services', color: 'from-slate-500 to-zinc-600' },
-    { icon: Flower2, name: isRu ? 'Цветы' : isTh ? 'ดอกไม้' : 'Flowers', color: 'from-rose-500 to-pink-500' },
-    { icon: ShoppingBag, name: isRu ? 'Маркетплейс' : isTh ? 'มาร์เก็ตเพลส' : 'Marketplace', color: 'from-amber-500 to-yellow-500' },
-    { icon: Ticket, name: isRu ? 'События' : isTh ? 'กิจกรรม' : 'Events', color: 'from-purple-500 to-pink-500' },
+    { icon: Home, name: isRu ? 'Недвижимость' : isTh ? 'อสังหาริมทรัพย์' : 'Real Estate', color: 'from-accent-teal to-success' },
+    { icon: Ship, name: isRu ? 'Яхты' : isTh ? 'เรือยอร์ช' : 'Yachts', color: 'from-accent-cyan to-info' },
+    { icon: Car, name: isRu ? 'Транспорт' : isTh ? 'ขนส่ง' : 'Transport', color: 'from-primary to-info' },
+    { icon: Compass, name: isRu ? 'Туры' : isTh ? 'ทัวร์' : 'Tours', color: 'from-accent-amber to-warning' },
+    { icon: Waves, name: isRu ? 'Водный спорт' : isTh ? 'กีฬาทางน้ำ' : 'Water Sports', color: 'from-info to-accent-cyan' },
+    { icon: UtensilsCrossed, name: isRu ? 'Рестораны' : isTh ? 'ร้านอาหาร' : 'Restaurants', color: 'from-warning to-destructive' },
+    { icon: Sparkles, name: isRu ? 'Красота и СПА' : isTh ? 'ความงามและสปา' : 'Beauty & Spa', color: 'from-accent-purple to-primary' },
+    { icon: Stethoscope, name: isRu ? 'Медицина' : isTh ? 'การแพทย์' : 'Medical', color: 'from-success to-accent-teal' },
+    { icon: Dumbbell, name: isRu ? 'Фитнес' : isTh ? 'ฟิตเนส' : 'Fitness', color: 'from-info to-accent-cyan' },
+    { icon: GraduationCap, name: isRu ? 'Образование' : isTh ? 'การศึกษา' : 'Education', color: 'from-warning to-accent-amber' },
+    { icon: Scale, name: isRu ? 'Бизнес-услуги' : isTh ? 'บริการธุรกิจ' : 'Business Services', color: 'from-primary to-info' },
+    { icon: Wrench, name: isRu ? 'Домашние услуги' : isTh ? 'บริการบ้าน' : 'Home Services', color: 'from-muted-foreground to-secondary-foreground' },
+    { icon: Flower2, name: isRu ? 'Цветы' : isTh ? 'ดอกไม้' : 'Flowers', color: 'from-destructive to-accent-purple' },
+    { icon: ShoppingBag, name: isRu ? 'Маркетплейс' : isTh ? 'มาร์เก็ตเพลส' : 'Marketplace', color: 'from-accent-amber to-warning' },
+    { icon: Ticket, name: isRu ? 'События' : isTh ? 'กิจกรรม' : 'Events', color: 'from-accent-purple to-primary' },
   ];
 
   // Verification system
@@ -414,7 +414,7 @@ export default function AboutPage() {
                     <ul className="space-y-1">
                       {pillar.features.map((feature, i) => (
                         <li key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
+                          <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
                           {feature}
                         </li>
                       ))}
@@ -487,7 +487,7 @@ export default function AboutPage() {
                 <span>{isRu ? 'ПРОСТЫЕ' : isTh ? 'ง่าย' : 'SIMPLE'}</span>
                 <span>{isRu ? 'СЛОЖНЫЕ' : isTh ? 'ซับซ้อน' : 'COMPLEX'}</span>
               </div>
-              <div className="h-1.5 rounded-full bg-gradient-to-r from-green-500 via-amber-500 to-purple-500" />
+              <div className="h-1.5 rounded-full bg-gradient-to-r from-success via-warning to-accent-purple" />
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -518,10 +518,10 @@ export default function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <SectionCard className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
+          <SectionCard className="bg-gradient-to-br from-accent-purple/5 to-accent-purple/10 border-accent-purple/20">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 rounded-xl bg-accent-purple/20 flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-accent-purple" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold">
@@ -535,15 +535,15 @@ export default function AboutPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               {/* Pain points */}
-              <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+              <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
                 <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
                   {isRu ? 'Знакомые проблемы?' : isTh ? 'ปัญหาที่คุ้นเคย?' : 'Familiar problems?'}
                 </h3>
                 <ul className="space-y-2">
                   {propertyOwnerPains.map((pain, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <span className="text-red-500 mt-0.5">✗</span>
+                      <span className="text-destructive mt-0.5">✗</span>
                       {pain.text}
                     </li>
                   ))}
@@ -551,15 +551,15 @@ export default function AboutPage() {
               </div>
 
               {/* Solutions */}
-              <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+              <div className="p-4 rounded-xl bg-success/5 border border-success/20">
                 <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <CheckCircle2 className="w-4 h-4 text-success" />
                   {isRu ? 'myUNO решает эти задачи' : isTh ? 'myUNO แก้ปัญหาเหล่านี้' : 'myUNO solves these'}
                 </h3>
                 <ul className="space-y-2">
                   {propertyOwnerSolutions.map((solution, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-success mt-0.5">✓</span>
                       {solution.text}
                     </li>
                   ))}
@@ -569,7 +569,7 @@ export default function AboutPage() {
 
             <Button 
               variant="outline" 
-              className="w-full mt-4 gap-2 border-purple-500/30 hover:bg-purple-500/10"
+              className="w-full mt-4 gap-2 border-accent-purple/30 hover:bg-accent-purple/10"
               onClick={() => navigate('/owner')}
             >
               <Home className="w-4 h-4" />
@@ -701,7 +701,7 @@ export default function AboutPage() {
                     phase.status === 'current' 
                       ? 'border-primary bg-primary/5' 
                       : phase.status === 'completed'
-                      ? 'border-green-500/30 bg-green-500/5'
+                      ? 'border-success/30 bg-success/5'
                       : 'border-border bg-muted/30'
                   }`}
                 >
@@ -710,14 +710,14 @@ export default function AboutPage() {
                       phase.status === 'current' 
                         ? 'bg-primary text-primary-foreground' 
                         : phase.status === 'completed'
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-success text-success-foreground'
                         : 'bg-muted text-muted-foreground'
                     }`}>
                       {phase.phase}
                     </span>
                     <h3 className="font-semibold text-sm">{phase.title}</h3>
                     {phase.status === 'completed' && (
-                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
+                      <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
                     )}
                     {phase.status === 'current' && (
                       <Clock className="w-4 h-4 text-primary ml-auto" />
@@ -727,7 +727,7 @@ export default function AboutPage() {
                     {phase.items.map((item, i) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-center gap-2">
                         <span className={`w-1.5 h-1.5 rounded-full ${
-                          phase.status === 'completed' ? 'bg-green-500' : 'bg-muted-foreground/50'
+                          phase.status === 'completed' ? 'bg-success' : 'bg-muted-foreground/50'
                         }`} />
                         {item}
                       </li>

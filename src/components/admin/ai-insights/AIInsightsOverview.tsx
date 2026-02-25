@@ -187,7 +187,7 @@ export function AIInsightsOverview() {
           <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
             {metrics.scoreDistribution.excellent > 0 && (
               <div 
-                className="bg-emerald-500 flex items-center justify-center text-white text-xs font-medium"
+                className="bg-success flex items-center justify-center text-success-foreground text-xs font-medium"
                 style={{ width: `${(metrics.scoreDistribution.excellent / metrics.totalArtifacts) * 100}%` }}
                 title={isRussian ? 'Отлично (80-100)' : 'Excellent (80-100)'}
               >
@@ -196,7 +196,7 @@ export function AIInsightsOverview() {
             )}
             {metrics.scoreDistribution.good > 0 && (
               <div 
-                className="bg-blue-500 flex items-center justify-center text-white text-xs font-medium"
+                className="bg-info flex items-center justify-center text-info-foreground text-xs font-medium"
                 style={{ width: `${(metrics.scoreDistribution.good / metrics.totalArtifacts) * 100}%` }}
                 title={isRussian ? 'Хорошо (60-79)' : 'Good (60-79)'}
               >
@@ -205,7 +205,7 @@ export function AIInsightsOverview() {
             )}
             {metrics.scoreDistribution.fair > 0 && (
               <div 
-                className="bg-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                className="bg-warning flex items-center justify-center text-warning-foreground text-xs font-medium"
                 style={{ width: `${(metrics.scoreDistribution.fair / metrics.totalArtifacts) * 100}%` }}
                 title={isRussian ? 'Средне (40-59)' : 'Fair (40-59)'}
               >
@@ -214,7 +214,7 @@ export function AIInsightsOverview() {
             )}
             {metrics.scoreDistribution.poor > 0 && (
               <div 
-                className="bg-red-500 flex items-center justify-center text-white text-xs font-medium"
+                className="bg-destructive flex items-center justify-center text-destructive-foreground text-xs font-medium"
                 style={{ width: `${(metrics.scoreDistribution.poor / metrics.totalArtifacts) * 100}%` }}
                 title={isRussian ? 'Плохо (0-39)' : 'Poor (0-39)'}
               >
@@ -229,19 +229,19 @@ export function AIInsightsOverview() {
           </div>
           <div className="flex gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-success" />
               {isRussian ? 'Отлично' : 'Excellent'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="w-2 h-2 rounded-full bg-info" />
               {isRussian ? 'Хорошо' : 'Good'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="w-2 h-2 rounded-full bg-warning" />
               {isRussian ? 'Средне' : 'Fair'}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="w-2 h-2 rounded-full bg-destructive" />
               {isRussian ? 'Плохо' : 'Poor'}
             </span>
           </div>
