@@ -74,19 +74,33 @@ export function useLifeSituations() {
 }
 
 /**
- * Get current user's LIFE OS role based on their profile/roles
+ * Get current user's LIFE OS role based on their actual roles
+ * Maps AppRole -> LifeOSRole for catalog filtering
  */
 export function useLifeOSRole(): LifeOSRole {
   const { user } = useAuth();
-  
-  // TODO: In production, this should check user_roles table
-  // For now, return 'guest' for non-authenticated, 'resident' for authenticated
+  const { data: roles } = useQuery({
+    queryKey: ['user-roles-lifeos', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      if (error) return [];
+      return data?.map(r => r.role) || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   if (!user) return 'guest';
-  
-  // This can be extended to check:
-  // - provider_id (owner)
-  // - investment records (investor)
-  // - residency status (resident)
+  if (!roles?.length) return 'resident'; // default for authenticated users
+
+  // Priority: investor > owner > resident > guest
+  const roleStrings = roles as string[];
+  if (roleStrings.includes('investor')) return 'investor';
+  if (roleStrings.includes('owner') || roleStrings.includes('property_owner') || roleStrings.includes('property_manager')) return 'owner';
   return 'resident';
 }
 

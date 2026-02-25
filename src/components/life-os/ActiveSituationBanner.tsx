@@ -34,7 +34,7 @@ export const ActiveSituationBanner = memo(function ActiveSituationBanner() {
 
       {/* Title */}
       <button
-        onClick={() => navigate(`/life-flow/${activeCode}`)}
+        onClick={() => navigate(`/life/${activeCode}`)}
         className="flex-1 text-left truncate text-[13px] font-medium text-foreground hover:underline"
       >
         {activeTitle}
