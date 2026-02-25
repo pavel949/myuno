@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCrmContact, useUpdateContact, useDeleteContact, CONTACT_TAGS } from '@/hooks/useCrmContacts';
+import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage, AgentDeal } from '@/hooks/useAgentDeals';
@@ -20,6 +20,7 @@ import { ru, enUS } from 'date-fns/locale';
 import { EditContactSheet } from '@/components/owner/contacts/EditContactSheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 
 const noteTypeIcons: Record<string, string> = {
   note: '📝', call: '📞', meeting: '🤝', email: '📧', whatsapp: '💬',
@@ -292,22 +293,11 @@ export default function ContactDetail() {
           {/* Tags */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Теги' : 'Tags'}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {CONTACT_TAGS.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    contact.tags.includes(tag)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                  )}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
+            <ContactTagPicker
+              companyId={contact.company_id}
+              selectedTags={contact.tags || []}
+              onToggle={toggleTag}
+            />
           </div>
 
           {/* Preferences */}

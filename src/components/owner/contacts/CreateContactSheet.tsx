@@ -12,6 +12,7 @@ import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDe
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 
 interface Props {
   open: boolean;
@@ -43,6 +44,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
     bedrooms_min: '',
     preferred_types: [] as string[],
     preferred_districts: [] as string[],
+    tags: [] as string[],
   });
 
   const handleSubmit = async () => {
@@ -73,14 +75,14 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         preferred_types: form.preferred_types.length ? form.preferred_types : null,
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         notes: form.notes || null,
-        tags: [],
+        tags: form.tags,
         avatar_url: null,
         is_archived: false,
         created_by: user?.id || null,
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
-      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [] });
+      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
@@ -199,6 +201,19 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
                   )}>{d}</button>
               ))}
             </div>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
+            <ContactTagPicker
+              companyId={companyId}
+              selectedTags={form.tags}
+              onToggle={(tag) => setForm(f => ({
+                ...f,
+                tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag],
+              }))}
+            />
           </div>
 
           <div>

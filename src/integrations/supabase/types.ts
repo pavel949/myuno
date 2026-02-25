@@ -3396,6 +3396,44 @@ export type Database = {
           },
         ]
       }
+      contact_tags: {
+        Row: {
+          color: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_tags_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_access_log: {
         Row: {
           action: string
