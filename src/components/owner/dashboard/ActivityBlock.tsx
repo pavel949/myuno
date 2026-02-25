@@ -15,7 +15,7 @@ const ACTIVITY_ICONS = {
   check_in: { icon: LogIn, color: 'text-success', bg: 'bg-success/10' },
   check_out: { icon: LogOut, color: 'text-warning', bg: 'bg-warning/10' },
   cleaning: { icon: Sparkles, color: 'text-info', bg: 'bg-info/10' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  maintenance: { icon: Wrench, color: 'text-accent-amber', bg: 'bg-accent-amber/10' },
 };
 
 export function ActivityBlock() {

@@ -136,7 +136,7 @@ export function PropertyPaymentBreakdown({
                   "flex items-center justify-between p-2 rounded-lg",
                   stage.type === 'deposit' && "bg-primary/10",
                   stage.type === 'balance' && "bg-muted/50",
-                  stage.type === 'security_deposit' && "bg-amber-500/10"
+                  stage.type === 'security_deposit' && "bg-warning/10"
                 )}
               >
                 <div className="flex items-center gap-2">

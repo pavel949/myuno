@@ -98,7 +98,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
             <Card 
               className={cn(
                 "overflow-hidden transition-all cursor-pointer hover:shadow-md",
-                connection.sync_error && "border-red-300 dark:border-red-800"
+                connection.sync_error && "border-destructive/30"
               )}
               onClick={() => onSelectConnection?.(connection)}
             >

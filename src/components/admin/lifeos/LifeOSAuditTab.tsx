@@ -33,10 +33,10 @@ interface AuditLogEntry {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  create: 'bg-green-500/10 text-green-700 border-green-200',
-  update: 'bg-blue-500/10 text-blue-700 border-blue-200',
-  delete: 'bg-red-500/10 text-red-700 border-red-200',
-  toggle: 'bg-amber-500/10 text-amber-700 border-amber-200',
+  create: 'bg-success/10 text-success border-success/20',
+  update: 'bg-info/10 text-info border-info/20',
+  delete: 'bg-destructive/10 text-destructive border-destructive/20',
+  toggle: 'bg-warning/10 text-warning border-warning/20',
 };
 
 export function LifeOSAuditTab() {

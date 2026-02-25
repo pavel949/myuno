@@ -68,13 +68,13 @@ function ReviewCard({ review }: { review: MarketplaceReview }) {
           <div className="space-y-2 text-sm">
             {review.pros && (
               <div className="flex gap-2">
-                <span className="text-green-500 font-medium">+</span>
+                <span className="text-success font-medium">+</span>
                 <span>{review.pros}</span>
               </div>
             )}
             {review.cons && (
               <div className="flex gap-2">
-                <span className="text-red-500 font-medium">−</span>
+                <span className="text-destructive font-medium">−</span>
                 <span>{review.cons}</span>
               </div>
             )}
@@ -100,7 +100,7 @@ function ReviewCard({ review }: { review: MarketplaceReview }) {
             {language === 'ru' ? 'Полезно' : 'Helpful'} ({review.helpful_count})
           </Button>
           {review.is_verified_purchase && (
-            <span className="text-xs text-green-600 font-medium">
+            <span className="text-xs text-success font-medium">
               ✓ {language === 'ru' ? 'Проверенная покупка' : 'Verified Purchase'}
             </span>
           )}

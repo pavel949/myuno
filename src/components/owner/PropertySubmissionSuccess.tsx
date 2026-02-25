@@ -69,9 +69,9 @@ export function PropertySubmissionSuccess({
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.3, 1] }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="absolute inset-0 bg-green-500/20 rounded-full blur-xl"
+              className="absolute inset-0 bg-success/20 rounded-full blur-xl"
             />
-            <CheckCircle className="h-24 w-24 text-green-500 relative z-10" />
+            <CheckCircle className="h-24 w-24 text-success relative z-10" />
           </div>
         </motion.div>
 

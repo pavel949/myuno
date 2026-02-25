@@ -69,7 +69,7 @@ export function OperationsLeadsTab() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Users className="h-8 w-8 text-blue-500" />
+            <Users className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.new}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Новые' : 'New'}</p>
@@ -87,7 +87,7 @@ export function OperationsLeadsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <TrendingUp className="h-8 w-8 text-green-500" />
+            <TrendingUp className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.qualified}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Квалифицированы' : 'Qualified'}</p>
@@ -96,7 +96,7 @@ export function OperationsLeadsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-purple-500" />
+            <Calendar className="h-8 w-8 text-accent-purple" />
             <div>
               <p className="text-2xl font-bold">{stats.converted}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'Конвертировано' : 'Converted'}</p>

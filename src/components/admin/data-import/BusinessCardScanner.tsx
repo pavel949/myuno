@@ -354,7 +354,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-500" />
+                <Sparkles className="h-5 w-5 text-warning" />
                 {isRu ? 'Распознанные данные' : 'Extracted Data'}
               </CardTitle>
               <Badge variant={extractedData?.confidence && extractedData.confidence > 80 ? 'default' : 'secondary'}>

@@ -87,9 +87,9 @@ export function UtilityAgentCard({ agent, onUpdate, isUpdating }: UtilityAgentCa
   }[(agent as any).agent_type || 'utility'];
 
   const typeColor = {
-    conversational: 'bg-blue-500/10 text-blue-600',
-    utility: 'bg-orange-500/10 text-orange-600',
-    analyzer: 'bg-purple-500/10 text-purple-600',
+    conversational: 'bg-info/10 text-info',
+    utility: 'bg-accent-amber/10 text-accent-amber',
+    analyzer: 'bg-accent-purple/10 text-accent-purple',
   }[(agent as any).agent_type || 'utility'];
 
   return (
