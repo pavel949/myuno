@@ -57,10 +57,10 @@ export default function OwnerPropertyDetail() {
 
   const getServiceStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in_progress': return <Clock className="h-4 w-4 text-blue-500" />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-success" />;
+      case 'in_progress': return <Clock className="h-4 w-4 text-info" />;
       case 'pending':
-      case 'confirmed': return <Clock className="h-4 w-4 text-amber-500" />;
+      case 'confirmed': return <Clock className="h-4 w-4 text-warning" />;
       default: return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
     }
   };
@@ -95,17 +95,17 @@ export default function OwnerPropertyDetail() {
 
       {/* Recently approved alert */}
       {isRecentlyApproved && (
-        <Card className="mb-6 border-green-200 bg-green-50">
+        <Card className="mb-6 border-success/30 bg-success/5">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Sparkles className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <Sparkles className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium text-green-900">{isRu ? 'Объект одобрен! 🎉' : 'Property Approved! 🎉'}</p>
-                <p className="text-sm text-green-700 mt-1">
+                <p className="font-medium text-success">{isRu ? 'Объект одобрен' : 'Property Approved'}</p>
+                <p className="text-sm text-success/80 mt-1">
                   {isRu ? 'Настройте календарь и цены, чтобы начать принимать бронирования' : 'Set up calendar and pricing to start accepting bookings'}
                 </p>
                 <div className="flex items-center gap-2 mt-3">
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => navigate(`/owner/properties/${id}/setup`)}>
+                  <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => navigate(`/owner/properties/${id}/setup`)}>
                     <Sparkles className="h-4 w-4 mr-1" />{isRu ? 'Настроить' : 'Set Up Now'}
                   </Button>
                   {isInProtectionPeriod && (
@@ -127,7 +127,7 @@ export default function OwnerPropertyDetail() {
             <span className="text-muted-foreground">{getPropertyTypeLabel(property.property_type)}</span>
             {property.bedrooms && <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms}</span>}
             {property.bathrooms && <span className="flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms}</span>}
-            {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}м²</span>}
+            {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}{isRu ? 'м²' : ' sqm'}</span>}
           </div>
         </CardContent>
       </Card>
