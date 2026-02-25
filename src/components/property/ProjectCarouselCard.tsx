@@ -65,7 +65,7 @@ export function ProjectCarouselCard({ project, className, onSelect, isSelected }
 
         {/* Featured badge */}
         {project.isFeatured && (
-          <Badge className="absolute top-2 left-2 bg-amber-500 text-white border-0 text-xs gap-1">
+          <Badge className="absolute top-2 left-2 bg-accent-amber text-white border-0 text-xs gap-1">
             <Star className="w-3 h-3 fill-current" />
             {isRu ? 'Топ' : 'Featured'}
           </Badge>

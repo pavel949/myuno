@@ -52,14 +52,14 @@ export function AchievementCard({
     <div className={cn(
       "relative p-4 rounded-xl border transition-all",
       isUnlocked 
-        ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800" 
+        ? "bg-gradient-to-br from-accent-amber/10 to-warning/10 border-accent-amber/30" 
         : "bg-muted/30 border-muted opacity-60",
       className
     )}>
       {/* Unlocked badge */}
       {isUnlocked && (
         <Badge 
-          className="absolute -top-2 -right-2 bg-amber-500 text-white shadow-lg"
+          className="absolute -top-2 -right-2 bg-accent-amber text-white shadow-lg"
         >
           <Check className="h-3 w-3 mr-0.5" />
           {isRu ? 'Получено' : 'Unlocked'}
@@ -71,7 +71,7 @@ export function AchievementCard({
         <div className={cn(
           "p-3 rounded-xl",
           isUnlocked 
-            ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg" 
+            ? "bg-gradient-to-br from-accent-amber to-warning text-white shadow-lg" 
             : "bg-muted text-muted-foreground"
         )}>
           {isSecret ? (
@@ -136,7 +136,7 @@ export function AchievementsGrid({ className, showAll = false }: AchievementsGri
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-accent-amber" />
             {isRu ? 'Достижения' : 'Achievements'}
           </CardTitle>
         </CardHeader>
@@ -169,7 +169,7 @@ export function AchievementsGrid({ className, showAll = false }: AchievementsGri
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
+            <Trophy className="h-5 w-5 text-accent-amber" />
             {isRu ? 'Достижения' : 'Achievements'}
           </CardTitle>
           <Badge variant="secondary">

@@ -33,7 +33,7 @@ function TicketCardInner({ ticket, onClick, showSlaWarning = true }: TicketCardP
     <Card 
       className={cn(
         'cursor-pointer hover:shadow-md transition-shadow',
-        isOverdue && 'border-red-300 bg-red-50/50'
+        isOverdue && 'border-destructive/30 bg-destructive/5'
       )}
       onClick={onClick}
     >
@@ -46,7 +46,7 @@ function TicketCardInner({ ticket, onClick, showSlaWarning = true }: TicketCardP
               </span>
               <TicketStatusBadge status={ticket.status} />
               {isOverdue && showSlaWarning && (
-                <span className="flex items-center gap-1 text-xs text-red-600">
+                <span className="flex items-center gap-1 text-xs text-destructive">
                   <AlertTriangle className="w-3 h-3" />
                   SLA
                 </span>

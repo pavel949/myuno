@@ -19,16 +19,16 @@ const ACTION_CONFIG: Record<string, {
   labelEn: string; 
   labelRu: string 
 }> = {
-  booking_created: { icon: CalendarCheck, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30', labelEn: 'Booking confirmed', labelRu: 'Бронирование подтверждено' },
-  booking_status_changed: { icon: ArrowRightLeft, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', labelEn: 'Booking status changed', labelRu: 'Статус бронирования изменён' },
-  income_recorded: { icon: DollarSign, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30', labelEn: 'Income recorded', labelRu: 'Доход записан' },
-  expense_recorded: { icon: DollarSign, color: 'text-red-500 bg-red-100 dark:bg-red-900/30', labelEn: 'Expense recorded', labelRu: 'Расход записан' },
-  task_created: { icon: ClipboardList, color: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30', labelEn: 'Task created', labelRu: 'Задача создана' },
-  task_status_changed: { icon: Wrench, color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', labelEn: 'Task updated', labelRu: 'Задача обновлена' },
-  service_request_created: { icon: AlertCircle, color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', labelEn: 'Service request', labelRu: 'Запрос на обслуживание' },
-  service_request_updated: { icon: Wrench, color: 'text-teal-600 bg-teal-100 dark:bg-teal-900/30', labelEn: 'Service request updated', labelRu: 'Запрос обновлён' },
-  inspection_completed: { icon: Camera, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', labelEn: 'Inspection completed', labelRu: 'Осмотр проведён' },
-  delegate_invited: { icon: UserCheck, color: 'text-sky-600 bg-sky-100 dark:bg-sky-900/30', labelEn: 'Team member invited', labelRu: 'Приглашён участник' },
+  booking_created: { icon: CalendarCheck, color: 'text-success bg-success/10', labelEn: 'Booking confirmed', labelRu: 'Бронирование подтверждено' },
+  booking_status_changed: { icon: ArrowRightLeft, color: 'text-info bg-info/10', labelEn: 'Booking status changed', labelRu: 'Статус бронирования изменён' },
+  income_recorded: { icon: DollarSign, color: 'text-success bg-success/10', labelEn: 'Income recorded', labelRu: 'Доход записан' },
+  expense_recorded: { icon: DollarSign, color: 'text-destructive bg-destructive/10', labelEn: 'Expense recorded', labelRu: 'Расход записан' },
+  task_created: { icon: ClipboardList, color: 'text-warning bg-warning/10', labelEn: 'Task created', labelRu: 'Задача создана' },
+  task_status_changed: { icon: Wrench, color: 'text-accent-purple bg-accent-purple/10', labelEn: 'Task updated', labelRu: 'Задача обновлена' },
+  service_request_created: { icon: AlertCircle, color: 'text-warning bg-warning/10', labelEn: 'Service request', labelRu: 'Запрос на обслуживание' },
+  service_request_updated: { icon: Wrench, color: 'text-accent-teal bg-accent-teal/10', labelEn: 'Service request updated', labelRu: 'Запрос обновлён' },
+  inspection_completed: { icon: Camera, color: 'text-info bg-info/10', labelEn: 'Inspection completed', labelRu: 'Осмотр проведён' },
+  delegate_invited: { icon: UserCheck, color: 'text-info bg-info/10', labelEn: 'Team member invited', labelRu: 'Приглашён участник' },
 };
 
 function getActionConfig(action: string) {

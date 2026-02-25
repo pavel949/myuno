@@ -18,7 +18,7 @@ export const ShippableBadge = forwardRef<HTMLDivElement, ShippableBadgeProps>(
         <Badge 
           ref={ref}
           className={cn(
-            "bg-sky-500 text-white text-[10px] font-semibold px-1.5 py-0.5 shadow-md gap-0.5",
+            "bg-info text-info-foreground text-[10px] font-semibold px-1.5 py-0.5 shadow-md gap-0.5",
             className
           )}
         >
@@ -31,7 +31,7 @@ export const ShippableBadge = forwardRef<HTMLDivElement, ShippableBadgeProps>(
       <Badge 
         ref={ref}
         className={cn(
-          "bg-gradient-to-r from-sky-500 to-blue-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md gap-1",
+          "bg-gradient-to-r from-info to-primary text-info-foreground text-[10px] font-semibold px-2 py-0.5 shadow-md gap-1",
           className
         )}
       >
