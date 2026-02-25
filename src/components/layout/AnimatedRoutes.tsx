@@ -16,6 +16,7 @@ import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
+import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 
 // Core pages - eagerly loaded for fast initial navigation
@@ -463,7 +464,9 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
         
         {/* ── Staff ── */}
-        <Route path="/staff" element={<LazyPage><AdminGuard><Pages.StaffDashboard /></AdminGuard></LazyPage>} />
+        <Route path="/staff" element={<AdminGuard><StaffLayout /></AdminGuard>}>
+          <Route index element={<LazyPage><Pages.StaffDashboard /></LazyPage>} />
+        </Route>
         
         {/* ── Team ── */}
         <Route path="/team" element={<LazyPage><TeamGuard><Pages.TeamDashboard /></TeamGuard></LazyPage>} />

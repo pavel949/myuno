@@ -4,8 +4,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStaffServiceOrders } from '@/hooks/useServiceOrders';
 import { useStaffProfile } from '@/hooks/useStaffProfile';
-import { PageContainer } from '@/components/uno/PageContainer';
-import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +51,7 @@ export default function StaffDashboard() {
 
   if (!user) {
     return (
-      <PageContainer>
+      <div className="p-4 md:p-6 lg:p-8 max-w-[1536px] mx-auto w-full">
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <User className="w-16 h-16 text-muted-foreground" />
           <p className="text-muted-foreground">
@@ -63,7 +61,7 @@ export default function StaffDashboard() {
             {language === 'ru' ? 'Войти' : 'Login'}
           </Button>
         </div>
-      </PageContainer>
+      </div>
     );
   }
 
@@ -80,13 +78,7 @@ export default function StaffDashboard() {
   };
 
   return (
-    <PageContainer>
-      <PageHeader 
-        title={language === 'ru' ? 'Панель исполнителя' : 'Staff Dashboard'} 
-        showBack 
-      />
-
-      {/* Profile Status Card */}
+    <div className="p-4 md:p-6 lg:p-8 pb-24 md:pb-8 space-y-6 max-w-[1536px] mx-auto w-full">
       <Card className="mb-6">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -297,6 +289,6 @@ export default function StaffDashboard() {
           />
         </TabsContent>
       </Tabs>
-    </PageContainer>
+    </div>
   );
 }
