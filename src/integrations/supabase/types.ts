@@ -14238,6 +14238,77 @@ export type Database = {
           },
         ]
       }
+      property_maintenance_schedules: {
+        Row: {
+          assigned_provider_id: string | null
+          category: string
+          created_at: string
+          created_by: string
+          currency: string | null
+          description: string | null
+          estimated_cost: number | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          last_completed_at: string | null
+          next_due_date: string
+          notes: string | null
+          priority: string | null
+          property_id: string
+          title: string
+          title_ru: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_provider_id?: string | null
+          category: string
+          created_at?: string
+          created_by: string
+          currency?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          last_completed_at?: string | null
+          next_due_date: string
+          notes?: string | null
+          priority?: string | null
+          property_id: string
+          title: string
+          title_ru?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_provider_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          currency?: string | null
+          description?: string | null
+          estimated_cost?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          last_completed_at?: string | null
+          next_due_date?: string
+          notes?: string | null
+          priority?: string | null
+          property_id?: string
+          title?: string
+          title_ru?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_maintenance_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_management_requests: {
         Row: {
           created_at: string

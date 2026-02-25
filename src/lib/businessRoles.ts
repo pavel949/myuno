@@ -31,6 +31,7 @@ export type DashboardWidgetKey =
   | 'upcoming_payments'
   | 'active_deals'
   | 'unified_inbox'
+  | 'maintenance_health'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -46,6 +47,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'unified_inbox',
       'active_stays',
       'properties',
+      'maintenance_health',
       'revenue_insights',
       'upcoming_payments',
       'active_deals',
@@ -95,6 +97,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'unified_inbox',
       'active_stays',
       'properties',
+      'maintenance_health',
       'revenue_insights',
       'upcoming_payments',
       'active_deals',
