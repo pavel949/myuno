@@ -65,7 +65,7 @@ export function VendorSection({ onNavigate }: VendorSectionProps) {
         iconBg="bg-blue-100 dark:bg-blue-900/30"
         label={language === 'ru' ? 'Панель продавца' : 'Vendor Dashboard'}
         description={language === 'ru' ? 'Управление товарами' : 'Manage your products'}
-        onClick={() => handleNav('/vendor/dashboard')}
+        onClick={() => handleNav('/vendor')}
       />
     </div>
   );
