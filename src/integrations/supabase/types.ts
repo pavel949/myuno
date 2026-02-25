@@ -23623,7 +23623,6 @@ export type Database = {
             }
             Returns: boolean
           }
-      cleanup_old_sync_logs: { Args: never; Returns: undefined }
       create_booking_with_wallet_payment: {
         Args: {
           p_booking_type: string

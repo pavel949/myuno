@@ -1,1 +1,0 @@
-ALTER FUNCTION public.cleanup_old_sync_logs() SET search_path = public

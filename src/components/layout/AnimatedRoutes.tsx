@@ -20,7 +20,7 @@ import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 
 // Core pages - eagerly loaded for fast initial navigation
-import VitrineHome from '@/pages/VitrineHome';
+import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
 
@@ -114,7 +114,7 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path="/" element={<PageTransition><VitrineHome /></PageTransition>} />
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/auth/account-type" element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path="/auth/forgot-password" element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />

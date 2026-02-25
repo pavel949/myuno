@@ -461,11 +461,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Cleanup logs older than 30 days on each scheduled run
-    await supabase.rpc('cleanup_old_sync_logs').catch((e: Error) =>
-      console.warn('[SYNC] Log cleanup failed (non-fatal):', e.message)
-    );
-
     let ownerId: string | null = null;
     let propertyId: string | null = null;
     let syncType = 'scheduled';

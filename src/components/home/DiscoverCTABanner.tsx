@@ -1,10 +1,10 @@
 /**
- * DiscoverCTABanner — Focused CTA for property management services
- * Directs users to discover core services.
+ * DiscoverCTABanner — Replaces HomeExploreSections with a single CTA
+ * directing users to the full /discover catalog.
  */
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowRight } from 'lucide-react';
+import { Compass, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -26,14 +26,14 @@ export const DiscoverCTABanner = memo(function DiscoverCTABanner() {
       )}
     >
       <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-        <Home className="w-6 h-6 text-primary" />
+        <Compass className="w-6 h-6 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-bold text-foreground">
-          {isRu ? 'Управление недвижимостью' : 'Property Management'}
+          {isRu ? 'Все сервисы и ситуации' : 'All services & situations'}
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {isRu ? 'Клининг • Трансферы • Аренда авто' : 'Cleaning • Transfers • Car Rental'}
+          {isRu ? '30+ мини-приложений • 17 жизненных ситуаций' : '30+ mini-apps • 17 life situations'}
         </p>
       </div>
       <ArrowRight className="w-5 h-5 text-primary/60 shrink-0 group-hover:translate-x-1 group-hover:text-primary transition-all" />
