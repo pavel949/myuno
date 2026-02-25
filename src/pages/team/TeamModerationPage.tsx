@@ -25,10 +25,10 @@ const MOCK_ITEMS = [
 ];
 
 const TYPE_CONFIG = {
-  review: { icon: Star, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', labelEn: 'Review', labelRu: 'Отзыв' },
-  photo: { icon: Image, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', labelEn: 'Photos', labelRu: 'Фото' },
-  listing: { icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', labelEn: 'Listing', labelRu: 'Листинг' },
-  comment: { icon: MessageSquare, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', labelEn: 'Comment', labelRu: 'Комментарий' },
+  review: { icon: Star, color: 'bg-warning/10 text-warning', labelEn: 'Review', labelRu: 'Отзыв' },
+  photo: { icon: Image, color: 'bg-info/10 text-info', labelEn: 'Photos', labelRu: 'Фото' },
+  listing: { icon: FileText, color: 'bg-success/10 text-success', labelEn: 'Listing', labelRu: 'Листинг' },
+  comment: { icon: MessageSquare, color: 'bg-accent-purple/10 text-accent-purple', labelEn: 'Comment', labelRu: 'Комментарий' },
 };
 
 export default function TeamModerationPage() {
@@ -59,23 +59,23 @@ export default function TeamModerationPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3">
-          <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200">
-            <Clock className="h-5 w-5 mx-auto mb-1 text-yellow-600" />
+          <Card className="p-3 text-center bg-warning/10 border-warning/30">
+            <Clock className="h-5 w-5 mx-auto mb-1 text-warning" />
             <p className="text-xl font-bold">{pendingCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
           </Card>
-          <Card className="p-3 text-center bg-green-50 dark:bg-green-950/30 border-green-200">
-            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-green-600" />
+          <Card className="p-3 text-center bg-success/10 border-success/30">
+            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-success" />
             <p className="text-xl font-bold">24</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Одобрено' : 'Approved'}</p>
           </Card>
-          <Card className="p-3 text-center bg-red-50 dark:bg-red-950/30 border-red-200">
-            <XCircle className="h-5 w-5 mx-auto mb-1 text-red-600" />
+          <Card className="p-3 text-center bg-destructive/10 border-destructive/30">
+            <XCircle className="h-5 w-5 mx-auto mb-1 text-destructive" />
             <p className="text-xl font-bold">3</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Отклонено' : 'Rejected'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <Eye className="h-5 w-5 mx-auto mb-1 text-purple-500" />
+            <Eye className="h-5 w-5 mx-auto mb-1 text-accent-purple" />
             <p className="text-xl font-bold">~5m</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Ср. время' : 'Avg Time'}</p>
           </Card>
@@ -144,11 +144,11 @@ export default function TeamModerationPage() {
 
                                 {/* Actions */}
                                 <div className="flex items-center gap-2">
-                                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-green-600 hover:bg-green-50">
+                                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-success hover:bg-success/10">
                                     <ThumbsUp className="h-3 w-3" />
                                     {isRu ? 'Одобрить' : 'Approve'}
                                   </Button>
-                                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-red-600 hover:bg-red-50">
+                                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-destructive hover:bg-destructive/10">
                                     <ThumbsDown className="h-3 w-3" />
                                     {isRu ? 'Отклонить' : 'Reject'}
                                   </Button>

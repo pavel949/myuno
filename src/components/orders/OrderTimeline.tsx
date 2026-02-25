@@ -55,43 +55,43 @@ const STATUS_CONFIG: Record<string, {
     icon: Clock, 
     labelEn: 'Order Placed', 
     labelRu: 'Заказ оформлен',
-    color: 'text-yellow-500'
+    color: 'text-warning'
   },
   confirmed: { 
     icon: CheckCircle2, 
     labelEn: 'Confirmed', 
     labelRu: 'Подтверждён',
-    color: 'text-blue-500'
+    color: 'text-info'
   },
   preparing: { 
     icon: ChefHat, 
     labelEn: 'Preparing', 
     labelRu: 'Готовится',
-    color: 'text-orange-500'
+    color: 'text-accent-amber'
   },
   in_progress: { 
     icon: Truck, 
     labelEn: 'On the way', 
     labelRu: 'В пути',
-    color: 'text-purple-500'
+    color: 'text-accent-purple'
   },
   completed: { 
     icon: PartyPopper, 
     labelEn: 'Delivered', 
     labelRu: 'Доставлен',
-    color: 'text-green-500'
+    color: 'text-success'
   },
   cancelled: { 
     icon: XCircle, 
     labelEn: 'Cancelled', 
     labelRu: 'Отменён',
-    color: 'text-red-500'
+    color: 'text-destructive'
   },
   refunded: { 
     icon: RefreshCw, 
     labelEn: 'Refunded', 
     labelRu: 'Возврат',
-    color: 'text-orange-500'
+    color: 'text-accent-amber'
   },
 };
 

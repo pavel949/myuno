@@ -164,7 +164,7 @@ function SortableImageItem({
             e.stopPropagation();
             onRemove();
           }}
-          className="p-1.5 bg-black/60 hover:bg-red-500 rounded-md transition-colors"
+          className="p-1.5 bg-black/60 hover:bg-destructive rounded-md transition-colors"
         >
           <X className="h-4 w-4 text-white" />
         </button>
@@ -228,14 +228,14 @@ function UploadingImageItem({ image }: { image: UploadingImage }) {
           </div>
         )}
         {image.status === 'done' && (
-          <div className="bg-green-500 rounded-full p-2">
-            <Check className="h-6 w-6 text-white" />
+          <div className="bg-success rounded-full p-2">
+            <Check className="h-6 w-6 text-success-foreground" />
           </div>
         )}
         {image.status === 'error' && (
           <>
-            <AlertCircle className="h-8 w-8 text-red-400 mb-2" />
-            <span className="text-red-400 text-xs text-center px-2">{image.error}</span>
+            <AlertCircle className="h-8 w-8 text-destructive mb-2" />
+            <span className="text-destructive text-xs text-center px-2">{image.error}</span>
           </>
         )}
       </div>

@@ -326,10 +326,10 @@ function ChannelsStep({ isRu, hasChannels, count, onConnect }: {
   isRu: boolean; hasChannels: boolean; count: number; onConnect: () => void;
 }) {
   const channels = [
-    { name: 'Airbnb', emoji: '🏡', color: 'bg-rose-100 dark:bg-rose-900/30' },
-    { name: 'Booking.com', emoji: '🅱️', color: 'bg-blue-100 dark:bg-blue-900/30' },
-    { name: 'Agoda', emoji: '🔴', color: 'bg-red-100 dark:bg-red-900/30' },
-    { name: 'VRBO', emoji: '🏠', color: 'bg-indigo-100 dark:bg-indigo-900/30' },
+    { name: 'Airbnb', emoji: '🏡', color: 'bg-accent-coral/10' },
+    { name: 'Booking.com', emoji: '🅱️', color: 'bg-info/10' },
+    { name: 'Agoda', emoji: '🔴', color: 'bg-destructive/10' },
+    { name: 'VRBO', emoji: '🏠', color: 'bg-accent-purple/10' },
   ];
 
   return (

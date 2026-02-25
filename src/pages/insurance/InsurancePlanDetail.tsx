@@ -79,7 +79,7 @@ export default function InsurancePlanDetail() {
                 {insuranceTypeIcons[plan.insurance_type]}
               </div>
               {plan.is_popular && (
-                <Badge className="bg-amber-500 text-white text-xs">
+                <Badge className="bg-warning text-warning-foreground text-xs">
                   ⭐ {language === 'ru' ? 'Популярно' : 'Popular'}
                 </Badge>
               )}
@@ -140,7 +140,7 @@ export default function InsurancePlanDetail() {
               <ul className="space-y-3">
                 {(language === 'ru' ? features.ru : features.en)?.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -184,7 +184,7 @@ export default function InsurancePlanDetail() {
                     {language === 'ru' ? 'Требуется' : 'Required'}
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-green-600">
+                  <Badge variant="outline" className="text-success">
                     {language === 'ru' ? 'Не требуется' : 'Not required'}
                   </Badge>
                 )}
@@ -197,7 +197,7 @@ export default function InsurancePlanDetail() {
               <ul className="space-y-3">
                 {(language === 'ru' ? exclusions.ru : exclusions.en)?.map((exclusion, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">
-                    <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                     <span>{exclusion}</span>
                   </li>
                 ))}

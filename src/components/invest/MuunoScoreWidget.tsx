@@ -33,37 +33,37 @@ export function MuunoScoreWidget({
     switch (level) {
       case 'low':
         return {
-          color: 'text-emerald-600',
-          bg: 'bg-emerald-500',
-          bgLight: 'bg-emerald-50',
-          border: 'border-emerald-200',
+          color: 'text-success',
+          bg: 'bg-success',
+          bgLight: 'bg-success/10',
+          border: 'border-success/30',
           label: { en: 'Low Risk', ru: 'Низкий риск' },
           icon: CheckCircle2,
         };
       case 'medium':
         return {
-          color: 'text-amber-600',
-          bg: 'bg-amber-500',
-          bgLight: 'bg-amber-50',
-          border: 'border-amber-200',
+          color: 'text-warning',
+          bg: 'bg-warning',
+          bgLight: 'bg-warning/10',
+          border: 'border-warning/30',
           label: { en: 'Medium Risk', ru: 'Средний риск' },
           icon: TrendingUp,
         };
       case 'elevated':
         return {
-          color: 'text-orange-600',
-          bg: 'bg-orange-500',
-          bgLight: 'bg-orange-50',
-          border: 'border-orange-200',
+          color: 'text-accent-amber',
+          bg: 'bg-accent-amber',
+          bgLight: 'bg-accent-amber/10',
+          border: 'border-accent-amber/30',
           label: { en: 'Elevated Risk', ru: 'Повышенный риск' },
           icon: AlertTriangle,
         };
       case 'high':
         return {
-          color: 'text-red-600',
-          bg: 'bg-red-500',
-          bgLight: 'bg-red-50',
-          border: 'border-red-200',
+          color: 'text-destructive',
+          bg: 'bg-destructive',
+          bgLight: 'bg-destructive/10',
+          border: 'border-destructive/30',
           label: { en: 'High Risk', ru: 'Высокий риск' },
           icon: AlertTriangle,
         };

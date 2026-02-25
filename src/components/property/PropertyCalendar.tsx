@@ -169,9 +169,9 @@ export function PropertyCalendar({
   };
 
   const statusColors = {
-    available: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
-    blocked: 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-    booked: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+    available: 'bg-success/10 text-success',
+    blocked: 'bg-muted text-muted-foreground',
+    booked: 'bg-destructive/10 text-destructive',
   };
 
   const weekDays = isRu 
