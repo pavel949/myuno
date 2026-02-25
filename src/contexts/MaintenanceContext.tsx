@@ -23,10 +23,7 @@ const isSimulationMode = () => {
 };
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
-    const stored = localStorage.getItem(MAINTENANCE_KEY);
-    return stored === null ? false : stored === 'true';
-  });
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
   const [canBypass, setCanBypass] = useState(() => {
     // Check localStorage OR query param for bypass
