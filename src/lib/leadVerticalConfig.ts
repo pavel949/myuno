@@ -674,6 +674,32 @@ LEAD_VERTICALS.push({
   ],
 });
 
+// Property Services vertical for owner dashboard recommendations
+LEAD_VERTICALS.push({
+  id: 'property_services',
+  icon: '🏗️',
+  nameEn: 'Property Services',
+  nameRu: 'Услуги для недвижимости',
+  shortDescEn: 'Professional property services',
+  shortDescRu: 'Профессиональные услуги для объектов',
+  ctaTextEn: 'Request Service',
+  ctaTextRu: 'Заказать услугу',
+  popularityScore: 30,
+  requestTypes: [
+    { value: 'inventory_audit', labelEn: 'Inventory Audit', labelRu: 'Инвентаризация' },
+    { value: 'photo_shoot', labelEn: 'Photo Shoot', labelRu: 'Фотосессия' },
+    { value: 'property_inspection', labelEn: 'Property Inspection', labelRu: 'Инспекция объекта' },
+    { value: 'management_audit', labelEn: 'Management Audit', labelRu: 'Аудит управления' },
+    { value: 'virtual_tour_3d', labelEn: '3D Virtual Tour', labelRu: '3D-тур' },
+    { value: 'smart_home', labelEn: 'Smart Home Sensors', labelRu: 'Датчики умного дома' },
+    { value: 'insurance', labelEn: 'Insurance Consultation', labelRu: 'Консультация по страхованию' },
+    { value: 'property_sale', labelEn: 'Property Sale', labelRu: 'Продажа объекта' },
+  ],
+  fields: [
+    COMMON_FIELDS.notes,
+  ],
+});
+
 // Helper functions
 export function getLeadVerticalById(id: string): LeadVerticalConfig | undefined {
   return LEAD_VERTICALS.find(v => v.id === id);
