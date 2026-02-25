@@ -1,95 +1,149 @@
 
+# LifeOS Usefulness Audit: Honest Assessment by Audience
 
-# myUNO Professional Services in Owner Recommendations
+## Executive Summary
 
-## What We're Building
+LifeOS is architecturally sophisticated but **delivers uneven real-world value** depending on audience. The core "situation -> mapped services" pipeline works, but several situations lead to thin or confusing content. The system is most useful for **Arrival** and **Health** audiences, and weakest for niche audiences like Shopping, Pets, and Wedding.
 
-Instead of a separate "Services Hub" page, we embed myUNO professional services (inventory audit, photo shoot, inspection, management audit, etc.) directly into the **"Your Day"** feed as smart recommendation cards for property owners. Clicking a card opens WhatsApp with a pre-filled message AND creates an internal lead (`consultation_requests`) for tracking.
+---
 
-## How It Works
+## Assessment by Audience Segment
 
-```text
-Owner Dashboard -> "Your Day" Feed -> "myUNO Recommendations" section
-                                          |
-                                          v
-                              [Inventory Audit] [Photo Shoot] [Inspection] ...
-                                          |
-                                    Click card
-                                          |
-                       +------------------+------------------+
-                       |                                     |
-              Creates consultation_request           Opens WhatsApp with
-              (lead tracking, admin notified)        pre-filled service message
-```
+### 1. TOURIST (first-time visitor, 3-14 days)
+**Current usefulness: 7/10 -- Good**
 
-## Services to Recommend
+What works:
+- "Arrival" flow is the strongest -- 29 mapped items, empathetic copy ("You just landed. You're tired."), clear transfer/vehicle cards with images
+- "Leisure" has 72 mapped items (most of any situation) -- yachts, experiences, water activities
+- Quick Actions grid is well-tuned: Housing, Transfer, Flowers, Transport, Experiences, Food
+- WhatsApp concierge fallback at bottom of every flow page -- good safety net
 
-| Service | Icon | WhatsApp Message |
-|---------|------|------------------|
-| Property Inventory | ClipboardList | "I'd like to order a property inventory audit" |
-| Professional Photo Shoot | Camera | "I'd like to order a professional photo session" |
-| Property Inspection | Search | "I'd like to order a property inspection" |
-| Management Audit | BarChart3 | "I'd like to order a management audit" |
-| 3D Tour / Virtual Tour | Box | "I'd like to order a 3D virtual tour" |
-| Smart Home Sensors | Wifi | "I'd like to discuss smart home sensors installation" |
-| Insurance Consultation | ShieldCheck | "I'd like to consult about property insurance" |
-| Property Sale Assistance | DollarSign | "I'd like to discuss selling my property" |
+What's weak:
+- The RPC `resolve_life_os_context` returns `title = NULL` and `title_localized = NULL` for many items (transfers, vehicles in Arrival). The enrichment hook fetches cover images from source tables but **does not re-fetch titles** -- cards render without names when the RPC doesn't join titles
+- "Planning" (pre-trip) has only 13 items and the content isn't obviously differentiated from Arrival
 
-## Implementation Steps
+**P0 Fix needed**: The `resolve_life_os_context` RPC often returns NULL titles. The enrichment hook needs to also fetch name columns from source tables, not just images.
 
-### 1. New Component: `OwnerServiceRecommendations`
-**File**: `src/components/owner/dashboard/OwnerServiceRecommendations.tsx`
+---
 
-A horizontal scroll carousel of service cards, styled consistently with the "Your Day" feed. Each card:
-- Shows icon + title (bilingual) + short description + price indicator (e.g. "from 3,000 THB")
-- On click: (1) fires `useUniversalLead` to create a `consultation_request` with `vertical_id: 'property_services'` and `request_type` matching the service; (2) opens WhatsApp via `getWhatsAppUrl()` with a pre-filled message including the service name
+### 2. RESIDENT (expat, 1+ months)
+**Current usefulness: 6/10 -- Decent**
 
-### 2. Integrate into `useDayBriefing.ts`
-Add a new item type `myuno_service` to `DayItemType`. For owner roles, inject 2-3 rotating service recommendations into `sectionOrder: ORDER.recommendations` alongside existing platform recommendations. These are hardcoded service definitions (not from DB) -- rotated based on day-of-week or random seed so owners see different services each day.
+What works:
+- "Daily Life" (33 items) covers practical needs well -- cleaning, salons, restaurants, gyms
+- "Relocation" flow has insurance, legal, visa -- the right categories
+- Persona switcher on Home gives relevant quick actions (Visa, Education, Medical, Legal, Insurance)
 
-### 3. Update `YourDayFeed.tsx`
-- Add `myuno_service` to the icon mapping (use `Sparkles` or service-specific icons)
-- Add a special rendering path for `myuno_service` items: instead of standard `DayItemCard`, render as compact service cards with a "Request" CTA button
-- The click handler calls `useUniversalLead.submitLead()` + `window.open(whatsappUrl)`
+What's weak:
+- "Visa & Travel" has only 10 items, all seem generic
+- No behavioral adaptation -- a 6-month resident sees the same content as a 1-day resident
+- `useLifeOSRole()` is hardcoded: returns 'guest' or 'resident' with a TODO comment -- no actual role differentiation in catalog results
 
-### 4. Alternative: Standalone Section Below "Your Day"
-If embedding into the feed feels crowded, add `OwnerServiceRecommendations` as a **standalone widget** in the Owner Dashboard (new `DashboardWidgetKey: 'myuno_services'`), rendered right after the "Your Day" feed. This keeps the feed clean and gives services their own visual space.
+**P1 Fix**: `useLifeOSRole` should at minimum check `user_active_context` or `user_roles` table rather than always returning 'resident' for any authenticated user.
 
-## Technical Details
+---
 
-### New/Modified Files:
+### 3. PROPERTY OWNER / MANAGER
+**Current usefulness: 5/10 -- Mixed**
 
-1. **`src/components/owner/dashboard/OwnerServiceRecommendations.tsx`** (NEW)
-   - Static service catalog array with bilingual titles, icons, descriptions, price ranges
-   - Daily rotation logic (show 3-4 of 8 services per day)
-   - `useUniversalLead` integration for lead creation on click
-   - `getWhatsAppUrl` for WhatsApp deep link
-   - Horizontal scroll layout matching existing UI patterns
+What works:
+- Owner Dashboard (/owner) is functional -- KPIs, properties, calendar, finance
+- "Property" situation (16 items) shows investment properties, legal services
+- Quick Actions correctly route to /owner, CRM, Calendar, Finance, Tasks
 
-2. **`src/hooks/useDayBriefing.ts`** (EDIT)
-   - Add `myuno_service` to `DayItemType`
-   - For owner roles: inject 2-3 service recommendation `DayItem`s with `sectionOrder: ORDER.recommendations`
+What's weak:
+- LifeOS situations aren't really designed for owners -- the "Property" flow shows buy/invest content, not management content
+- No situation exists for "I own property and need maintenance/guest management" -- the owner journey bypasses LifeOS entirely through the /owner route
+- This is correct behavior -- owners don't need LifeOS situational routing. Their dashboard IS their OS.
 
-3. **`src/components/shared/YourDayFeed.tsx`** (EDIT)
-   - Add `myuno_service` to icon mapping and style mapping
-   - Add special card rendering for service items (with "Request" badge and WhatsApp icon)
+**No fix needed** -- owners are correctly served by the dedicated dashboard, not LifeOS flows.
 
-4. **`src/pages/owner/OwnerDashboard.tsx`** (EDIT)
-   - Add `myuno_services` widget key
-   - Render `OwnerServiceRecommendations` as fallback/standalone section
+---
 
-5. **`src/lib/businessRoles.ts`** (EDIT)
-   - Add `myuno_services` to `DashboardWidgetKey` type and owner widget list
+### 4. INVESTOR
+**Current usefulness: 4/10 -- Weak**
 
-### Lead Flow:
-- `vertical_id`: `'property_services'`
-- `request_type`: specific service (e.g., `'inventory_audit'`, `'photo_shoot'`)
-- `lead_source`: `'dashboard_recommendation'`
-- `entry_point`: `'owner_dashboard_your_day'`
-- Triggers existing `notify-admin-order` edge function for admin WhatsApp/email alerts
+What works:
+- "Property" situation links to investment properties with ROI data
+- Quick Actions include Investment, Off-Plan, Buy Property, Legal, Banking
 
-### No Database Changes Required
-- Uses existing `consultation_requests` table
-- Uses existing `useUniversalLead` hook
-- Service catalog is hardcoded (not a new table) -- this keeps it simple and allows fine-tuning without migrations
+What's weak:
+- "Property" situation only has 16 items and mixes rental listings with investment
+- No dedicated "Investment" life situation exists
+- The emotional recognition text ("You're considering buying property in Thailand") is generic
+- "Retirement Living" (12 items) overlaps with investor needs but isn't connected
 
+**P2 Improvement**: Consider whether investors need a dedicated situation or if the existing property + investor persona quick actions are sufficient. Currently sufficient for MVP.
+
+---
+
+### 5. NICHE AUDIENCES (Shopping, Pets, Wedding, Education, Nightlife)
+**Current usefulness: 3/10 -- Thin**
+
+Data reality:
+- Shopping: 8 items (4 flower shops + 2 experiences + 2 restaurants) -- not really "shopping"
+- Pets: 9 items -- only pet_service type
+- Wedding: 10 items (events + flower shops + restaurants + 1 yacht) -- minimal
+- Education: 11 items -- education entities + flower shops (why?)
+- Nightlife: 11 items (events + restaurants) -- adequate for the scope
+
+Problems:
+- Flower shops appear in almost every situation (Shopping, Wedding, Education, Business) with high weights -- over-mapped
+- Some situations feel like padding rather than genuine curated content
+- Education has flower shops mapped to it with weight 80 -- this is nonsensical
+
+**P1 Fix**: Clean up `catalog_life_map` data -- remove flower_shop from Education, Business, and other irrelevant situations. This is a data quality issue, not a code issue.
+
+---
+
+## Critical Technical Issues Found
+
+### Issue 1: NULL Titles in Catalog Cards (P0)
+The `resolve_life_os_context` RPC returns NULL for `title` and `title_localized` on many entities. The `useEnrichCatalogItems` hook fetches cover images, ratings, districts but **does not fetch entity names**. Cards display without titles when the RPC doesn't provide them.
+
+**Fix**: Add name column fetching to `useEnrichCatalogItems` so every card has a title regardless of RPC output.
+
+### Issue 2: ActiveSituationBanner Uses Wrong Route (P0)
+`ActiveSituationBanner.tsx` line 37 navigates to `/life-flow/${activeCode}` but the canonical route is `/life/${activeCode}`. While both routes are registered, this creates inconsistency.
+
+**Fix**: Change to `/life/${activeCode}`.
+
+### Issue 3: useLifeOSRole is a Stub (P1)
+Always returns 'guest' or 'resident'. The `role_scope` filtering in catalog resolution doesn't actually work because the role is never correctly determined.
+
+**Fix**: Connect to `user_roles` or `user_active_context` table.
+
+### Issue 4: Flower Shop Over-Mapping (P1 -- Data)
+`flower_shop` entities appear in 7+ situations with high weights. This dilutes the relevance of situational content.
+
+**Fix**: SQL update to remove/reduce flower_shop weights from irrelevant situations (education, business, retirement_living).
+
+### Issue 5: "browsing" Bypass Context (P2)
+When users click "I know what I need" in LifeSituationGate, it sets a fake 'browsing' context. The ActiveSituationBanner correctly hides for `browsing`, but the LifeOSStatusBlock doesn't have CONTEXT_ACTIONS for it, which is fine. This is harmless.
+
+---
+
+## Prioritized Fix Plan
+
+| Priority | Issue | Type | Effort |
+|----------|-------|------|--------|
+| P0 | Enrich hook should fetch entity titles, not just images | Code | 2 pts |
+| P0 | ActiveSituationBanner uses /life-flow/ instead of /life/ | Code | 1 pt |
+| P1 | useLifeOSRole stub -- connect to real user role data | Code | 3 pts |
+| P1 | Clean flower_shop over-mapping in catalog_life_map | Data | 2 pts |
+| P2 | Deduplicate "planning" vs "arrival" content overlap | Data | 2 pts |
+| P2 | Add title fallback text for unmapped entity types | Code | 1 pt |
+
+---
+
+## Honest Verdict
+
+LifeOS is **genuinely useful for the 3 core audiences** (Tourist, Resident arriving, Health emergency). The architecture is sound -- situation -> mapped services -> enriched cards -> WhatsApp fallback is a good pipeline.
+
+**What to do for launch:**
+1. Fix P0 (NULL titles, wrong route) -- users see blank cards, which destroys trust
+2. Clean flower shop data pollution -- makes several situations look like spam
+3. Accept that niche situations (pets, wedding, nightlife) are thin -- that's OK for launch if the fallback (WhatsApp concierge) works well, which it does
+4. Don't add more situations -- 17 is already a lot. Quality over quantity.
+
+The system doesn't need new features. It needs data quality and the two code fixes.
