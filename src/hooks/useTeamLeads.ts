@@ -238,27 +238,27 @@ export function getSlaStatus(slaDeadline: string | null): {
   if (diffMins < 0) {
     const overdueMins = Math.abs(diffMins);
     if (overdueMins < 60) {
-      return { label: `Просрочено ${overdueMins} мин`, color: 'text-red-600', isOverdue: true, minutesRemaining: diffMins };
+      return { label: `Просрочено ${overdueMins} мин`, color: 'text-destructive', isOverdue: true, minutesRemaining: diffMins };
     }
     const overdueHours = Math.floor(overdueMins / 60);
-    return { label: `Просрочено ${overdueHours} ч`, color: 'text-red-600', isOverdue: true, minutesRemaining: diffMins };
+    return { label: `Просрочено ${overdueHours} ч`, color: 'text-destructive', isOverdue: true, minutesRemaining: diffMins };
   }
 
   if (diffMins < 30) {
-    return { label: `${diffMins} мин`, color: 'text-orange-600', isOverdue: false, minutesRemaining: diffMins };
+    return { label: `${diffMins} мин`, color: 'text-accent-amber', isOverdue: false, minutesRemaining: diffMins };
   }
 
   if (diffMins < 60) {
-    return { label: `${diffMins} мин`, color: 'text-yellow-600', isOverdue: false, minutesRemaining: diffMins };
+    return { label: `${diffMins} мин`, color: 'text-warning', isOverdue: false, minutesRemaining: diffMins };
   }
 
   const hours = Math.floor(diffMins / 60);
   const mins = diffMins % 60;
 
   if (hours < 24) {
-    return { label: `${hours}ч ${mins}м`, color: 'text-green-600', isOverdue: false, minutesRemaining: diffMins };
+    return { label: `${hours}ч ${mins}м`, color: 'text-success', isOverdue: false, minutesRemaining: diffMins };
   }
 
   const days = Math.floor(hours / 24);
-  return { label: `${days} дн`, color: 'text-green-600', isOverdue: false, minutesRemaining: diffMins };
+  return { label: `${days} дн`, color: 'text-success', isOverdue: false, minutesRemaining: diffMins };
 }

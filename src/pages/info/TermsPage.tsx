@@ -49,7 +49,7 @@ export default function TermsPage() {
   const serviceClassifications = [
     {
       type: isRu ? 'ПОЛНЫЙ ESCROW' : 'FULL ESCROW',
-      color: 'bg-green-500',
+      color: 'bg-success',
       description: isRu ? 'Оплата полностью через myUNO' : 'Full payment through myUNO',
       examples: isRu 
         ? ['Аренда яхт и катеров', 'Туры и экскурсии', 'Аренда транспорта', 'Маркетплейс товаров', 'Доставка еды']
@@ -58,7 +58,7 @@ export default function TermsPage() {
     },
     {
       type: isRu ? 'ЧАСТИЧНЫЙ ESCROW' : 'PARTIAL ESCROW',
-      color: 'bg-yellow-500',
+      color: 'bg-warning',
       description: isRu ? 'Депозит через myUNO + остаток на месте' : 'Deposit via myUNO + balance on-site',
       examples: isRu 
         ? ['Краткосрочная аренда недвижимости', 'Рестораны (депозит)', 'Красота и СПА', 'Медицинские услуги']
@@ -67,7 +67,7 @@ export default function TermsPage() {
     },
     {
       type: isRu ? 'ЛИДОГЕНЕРАЦИЯ' : 'LEAD GENERATION',
-      color: 'bg-orange-500',
+      color: 'bg-accent-amber',
       description: isRu ? 'Платная заявка + оплата партнёру напрямую' : 'Paid request + direct payment to partner',
       examples: isRu 
         ? ['Долгосрочная аренда (1+ год)', 'Визовые услуги', 'Юридические услуги', 'Образование']
@@ -407,8 +407,8 @@ export default function TermsPage() {
                 </div>
               ))}
             </div>
-            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <p className="text-sm text-amber-700 dark:text-amber-400">
+            <div className="p-3 bg-warning/10 border border-warning/30 rounded-lg">
+              <p className="text-sm text-warning">
                 ⚠️ {isRu 
                   ? 'При оплате вне Платформы вы теряете ВСЕ эти гарантии и не можете рассчитывать на помощь myUNO.'
                   : 'When paying outside the Platform, you lose ALL these guarantees and cannot expect myUNO assistance.'}
@@ -502,8 +502,8 @@ export default function TermsPage() {
                   : 'All disputes not resolved through mediation are subject to mandatory arbitration at Thailand Arbitration Center (THAC) or Hong Kong International Arbitration Centre (HKIAC). The arbitration decision is final.'}
               </p>
             </div>
-            <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <p className="text-xs text-amber-700 dark:text-amber-400">
+            <div className="mt-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+              <p className="text-xs text-warning">
                 <strong>{isRu ? 'ОТКАЗ ОТ КОЛЛЕКТИВНЫХ ИСКОВ:' : 'CLASS ACTION WAIVER:'}</strong> {isRu 
                   ? 'Вы соглашаетесь разрешать споры только индивидуально и отказываетесь от участия в коллективных исках против myUNO.'
                   : 'You agree to resolve disputes only individually and waive participation in class actions against myUNO.'}

@@ -188,7 +188,7 @@ export default function PetTransport() {
             
             <Select value={destination} onValueChange={setDestination}>
               <SelectTrigger className="pl-10">
-                <MapPin className="absolute left-3 w-5 h-5 text-red-500" />
+                <MapPin className="absolute left-3 w-5 h-5 text-destructive" />
                 <SelectValue placeholder={language === 'ru' ? 'Выберите направление' : 'Select destination'} />
               </SelectTrigger>
               <SelectContent>

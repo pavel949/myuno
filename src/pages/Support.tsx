@@ -169,9 +169,9 @@ export default function Support() {
         />
 
         {/* Main WhatsApp CTA */}
-        <SectionCard className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+        <SectionCard className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-success flex items-center justify-center">
               <WhatsAppIcon className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
@@ -185,7 +185,7 @@ export default function Support() {
           </div>
           
           <PremiumButton 
-            className="w-full bg-green-500 hover:bg-green-600 text-white"
+            className="w-full bg-success hover:bg-success/90 text-white"
             onClick={() => startSupportChat()}
           >
             <WhatsAppIcon className="w-5 h-5 mr-2" />

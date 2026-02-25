@@ -56,7 +56,7 @@ function AddNoteForm({ onSubmit, isSubmitting }: AddNoteFormProps) {
             htmlFor="important" 
             className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1"
           >
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+            <AlertTriangle className="h-3.5 w-3.5 text-warning" />
             {isRu ? 'Важное' : 'Important'}
           </label>
         </div>
@@ -116,7 +116,7 @@ function NoteCard({ note, isOwn, onDelete }: NoteCardProps) {
               {note.author?.display_name || 'Team Member'}
             </span>
             {note.is_important && (
-              <Badge variant="outline" className="text-amber-600 border-amber-300 text-[10px] px-1.5 py-0">
+              <Badge variant="outline" className="text-warning border-warning/30 text-[10px] px-1.5 py-0">
                 <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
                 !
               </Badge>
@@ -232,7 +232,7 @@ export function EntityNotesPanel({
         {/* Important Notes First */}
         {importantNotes.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-amber-600 flex items-center gap-1">
+            <p className="text-xs font-medium text-warning flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
               {isRu ? 'Важные заметки' : 'Important Notes'}
             </p>

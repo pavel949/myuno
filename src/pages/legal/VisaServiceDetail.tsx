@@ -67,9 +67,9 @@ export default function VisaServiceDetail() {
               <Badge 
                 className={`text-xs ${
                   visa.visa_type === 'elite' 
-                    ? 'bg-amber-500 text-white' 
+                    ? 'bg-warning text-white' 
                     : visa.visa_type === 'retirement'
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-success text-white'
                     : 'bg-white/20 text-white'
                 }`}
               >

@@ -71,8 +71,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'Platform management',
     descRu: 'Управление платформой',
     icon: Shield,
-    color: 'text-red-600',
-    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/10',
     path: '/admin',
   },
   {

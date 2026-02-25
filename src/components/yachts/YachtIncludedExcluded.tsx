@@ -63,15 +63,15 @@ export function YachtIncludedExcluded({ features, exclusions, addons, currency =
           )}
 
           {exclusions && exclusions.length > 0 && (
-            <div className="p-4 bg-red-50/50 dark:bg-red-950/20 rounded-xl border border-red-200/50 dark:border-red-800/30">
-              <h4 className="font-semibold text-sm mb-3 text-red-700 dark:text-red-400 flex items-center gap-2">
+            <div className="p-4 bg-destructive/5 rounded-xl border border-destructive/20">
+              <h4 className="font-semibold text-sm mb-3 text-destructive flex items-center gap-2">
                 <X className="w-4 h-4" />
                 {t ? 'Не включено' : 'Not included'}
               </h4>
               <div className="space-y-2">
                 {exclusions.map((e, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <X className="w-3.5 h-3.5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                    <X className="w-3.5 h-3.5 text-destructive flex-shrink-0 mt-0.5" />
                     <span>{e}</span>
                   </div>
                 ))}

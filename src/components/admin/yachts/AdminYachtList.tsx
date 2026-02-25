@@ -106,7 +106,7 @@ export function AdminYachtList({ yachts, isLoading, onEdit, onDelete }: AdminYac
                       <DropdownMenuItem onClick={() => onEdit(yacht)}>
                         <Edit className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-500" onClick={() => onDelete(yacht.id)}>
+                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(yacht.id)}>
                         <Trash2 className="h-4 w-4 mr-2" />{isRu ? 'Удалить' : 'Delete'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
