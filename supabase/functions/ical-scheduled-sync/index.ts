@@ -171,6 +171,25 @@ function detectChannelType(url: string, name: string): string {
   return 'other';
 }
 
+// Look up property pricing from owner_properties
+async function getPropertyPricing(supabase: any, propertyId: string): Promise<number> {
+  const { data } = await supabase
+    .from('owner_properties')
+    .select('price_per_night')
+    .eq('id', propertyId)
+    .single();
+  return data?.price_per_night || 0;
+}
+
+// Calculate nights between two date strings
+function calculateNights(dtstart: string, dtend: string): number {
+  const start = new Date(dtstart);
+  const end = new Date(dtend);
+  const diffMs = end.getTime() - start.getTime();
+  const nights = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+  return nights;
+}
+
 // Create or update an order for an external calendar event (unified orders table)
 async function upsertOrderForEvent(
   supabase: any,
@@ -183,6 +202,27 @@ async function upsertOrderForEvent(
 
   // Use parsed guest name instead of raw summary
   const guestName = event.guestName || event.summary || 'External Booking';
+
+  // Calculate pricing: prefer iCal price (Airbnb), fallback to property pricing
+  const nights = calculateNights(event.dtstart!, event.dtend!);
+  let totalAmount = event.price || 0;
+  let pricePerNight = 0;
+
+  if (totalAmount === 0) {
+    // Lookup from property data
+    pricePerNight = await getPropertyPricing(supabase, calendar.property_id);
+    totalAmount = pricePerNight * nights;
+  } else {
+    pricePerNight = Math.round(totalAmount / nights);
+  }
+
+  const platformFeeAmount = Math.round(totalAmount * 0.10 * 100) / 100;
+
+  // Skip creating orders with zero amount
+  if (totalAmount === 0 && !existingOrderId) {
+    console.log(`Skipping order creation: zero total for property ${calendar.property_id}`);
+    return '';
+  }
 
   // Build notes from available info
   const notesParts = [];
@@ -199,8 +239,6 @@ async function upsertOrderForEvent(
   const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
   const orderNumber = `UNO-${dateStr}-${rand}`;
 
-  const totalAmount = event.price || 0;
-
   const orderData: Record<string, any> = {
     order_type: 'property',
     vertical: 'property',
@@ -209,6 +247,8 @@ async function upsertOrderForEvent(
     status: 'confirmed',
     total_amount: totalAmount,
     subtotal: totalAmount,
+    platform_fee_amount: platformFeeAmount,
+    commission_rate_applied: 10,
     order_number: orderNumber,
     notes: notesParts.join('\n'),
     metadata: {
@@ -221,6 +261,8 @@ async function upsertOrderForEvent(
       guest_phone: event.guestPhone || null,
       channel_type: detectChannelType(calendar.ical_url, calendar.name),
       sync_priority: calendar.priority || 0,
+      nights: nights,
+      price_per_night: pricePerNight,
     },
   };
 
@@ -251,9 +293,9 @@ async function upsertOrderForEvent(
         order_id: order.id,
         item_type: 'property',
         item_name: guestName,
-        qty: 1,
-        unit_price: event.price || 0,
-        amount: event.price || 0,
+        qty: nights,
+        unit_price: pricePerNight,
+        amount: totalAmount,
         start_at: startAt,
         end_at: endAt,
         metadata: {
