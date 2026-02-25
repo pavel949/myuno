@@ -361,6 +361,7 @@ export const QuickExpense = lazy(() => import('@/pages/owner/QuickExpense'));
 export const QuickIncome = lazy(() => import('@/pages/owner/QuickIncome'));
 export const OwnerReviews = lazy(() => import('@/pages/owner/OwnerReviews'));
 export const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuickSetup'));
+export const OwnerSetupWizard = lazy(() => import('@/pages/owner/OwnerSetupWizard'));
 export const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 export const OwnerRevenueDashboard = lazy(() => import('@/pages/owner/OwnerRevenueDashboard'));
 export const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
