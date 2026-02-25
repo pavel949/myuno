@@ -101,8 +101,8 @@ ${description}
         showSearch={false}
       >
         <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-            <CheckCircle className="h-8 w-8 text-emerald-600" />
+          <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center">
+            <CheckCircle className="h-8 w-8 text-success" />
           </div>
           <h2 className="text-xl font-bold">
             {isRu ? 'Спасибо за заявку!' : 'Thank You!'}
@@ -180,7 +180,7 @@ ${description}
                 )}>
                   <RadioGroupItem value="business" id="business" />
                   <Label htmlFor="business" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <Briefcase className="h-6 w-6 text-amber-600" />
+                    <Briefcase className="h-6 w-6 text-accent-amber" />
                     <div>
                       <div className="font-semibold">
                         {isRu ? 'Бизнес' : 'Business'}

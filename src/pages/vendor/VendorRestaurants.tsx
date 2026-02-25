@@ -237,7 +237,7 @@ const VendorRestaurants = () => {
         ) : (
           <div className="space-y-3">
             {restaurants.map((item) => (
-              <Card key={item.id} className={!item.is_verified ? 'border-amber-500/50' : ''}>
+              <Card key={item.id} className={!item.is_verified ? 'border-warning/50' : ''}>
                 <CardContent className="p-4">
                   <div className="flex gap-3">
                     {item.cover_image ? (

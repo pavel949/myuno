@@ -193,7 +193,7 @@ export default function InvestmentIndex() {
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-orange-500" />
+                  <Flame className="h-5 w-5 text-accent-amber" />
                   <h2 className="font-bold text-lg">
                     {isRu ? 'Горячие предложения' : 'Hot Deals'}
                   </h2>
@@ -235,7 +235,7 @@ export default function InvestmentIndex() {
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-amber-600" />
+                  <Briefcase className="h-5 w-5 text-accent-amber" />
                   <h2 className="font-bold text-lg">
                     {isRu ? 'Бизнесы' : 'Business Opportunities'}
                   </h2>

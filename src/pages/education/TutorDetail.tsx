@@ -126,8 +126,8 @@ export default function TutorDetail() {
             <Users className="h-5 w-5" />{language === "ru" ? "Возраст учеников" : "Student Ages"}
           </h2>
           <div className="flex gap-2">
-            {tutor.age_groups.includes("kids") && <Badge className="bg-pink-100 text-pink-600 hover:bg-pink-100">{language === "ru" ? "Дети" : "Kids"}</Badge>}
-            {tutor.age_groups.includes("adults") && <Badge className="bg-blue-100 text-blue-600 hover:bg-blue-100">{language === "ru" ? "Взрослые" : "Adults"}</Badge>}
+            {tutor.age_groups.includes("kids") && <Badge className="bg-accent-coral/10 text-accent-coral hover:bg-accent-coral/10">{language === "ru" ? "Дети" : "Kids"}</Badge>}
+            {tutor.age_groups.includes("adults") && <Badge className="bg-info/10 text-info hover:bg-info/10">{language === "ru" ? "Взрослые" : "Adults"}</Badge>}
           </div>
         </div>
       )}

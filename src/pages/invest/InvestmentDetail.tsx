@@ -119,7 +119,7 @@ export default function InvestmentDetail() {
           {/* Badges */}
           <div className="absolute top-4 left-4 flex gap-2">
             {project.is_hot && (
-              <Badge className="bg-orange-500 text-white">
+              <Badge className="bg-accent-amber text-white">
                 <Flame className="h-3.5 w-3.5 mr-1" />
                 HOT DEAL
               </Badge>
@@ -169,10 +169,10 @@ export default function InvestmentDetail() {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-card rounded-xl p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <TrendingUp className="h-4 w-4 text-emerald-600" />
+                <TrendingUp className="h-4 w-4 text-success" />
                 <span>{isRu ? 'Прогноз ROI' : 'Projected ROI'}</span>
               </div>
-              <div className="text-2xl font-bold text-emerald-600 mt-1">
+              <div className="text-2xl font-bold text-success mt-1">
                 {project.roi_projected ? `${project.roi_projected}%` : '—'}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -296,7 +296,7 @@ export default function InvestmentDetail() {
             <TabsContent value="risks" className="mt-4">
               <div className="bg-card rounded-xl p-4 border border-border/50 space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <AlertTriangle className="h-4 w-4 text-warning" />
                   {isRu ? 'Факторы риска' : 'Risk Factors'}
                 </h3>
                 
@@ -304,7 +304,7 @@ export default function InvestmentDetail() {
                   <ul className="space-y-2">
                     {project.risk_factors.map((risk, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm">
-                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span className="text-warning mt-0.5">•</span>
                         <span className="text-muted-foreground">{risk}</span>
                       </li>
                     ))}
@@ -312,7 +312,7 @@ export default function InvestmentDetail() {
                 ) : (
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-500">•</span>
+                      <span className="text-warning">•</span>
                       <span>
                         {isRu 
                           ? 'Возможные задержки строительства (типично 6-12 месяцев)'
@@ -321,7 +321,7 @@ export default function InvestmentDetail() {
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-500">•</span>
+                      <span className="text-warning">•</span>
                       <span>
                         {isRu 
                           ? 'Валютные риски (THB/USD)'
@@ -330,7 +330,7 @@ export default function InvestmentDetail() {
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-500">•</span>
+                      <span className="text-warning">•</span>
                       <span>
                         {isRu 
                           ? 'Рыночные колебания спроса на аренду'

@@ -45,7 +45,7 @@ export default function InspectionRequest() {
       labelEn: 'Routine Check', 
       labelRu: 'Плановая проверка', 
       icon: ClipboardCheck, 
-      color: 'text-blue-500',
+      color: 'text-info',
       desc: isRu ? 'Стандартный осмотр состояния' : 'Standard condition check'
     },
     { 
@@ -53,7 +53,7 @@ export default function InspectionRequest() {
       labelEn: 'Check-in Inspection', 
       labelRu: 'Инспекция при заезде', 
       icon: Key, 
-      color: 'text-green-500',
+      color: 'text-success',
       desc: isRu ? 'Фиксация состояния до гостя' : 'Document condition before guest'
     },
     { 
@@ -61,7 +61,7 @@ export default function InspectionRequest() {
       labelEn: 'Check-out Inspection', 
       labelRu: 'Инспекция при выезде', 
       icon: Search, 
-      color: 'text-orange-500',
+      color: 'text-accent-amber',
       desc: isRu ? 'Проверка повреждений' : 'Check for damages'
     },
     { 
@@ -69,7 +69,7 @@ export default function InspectionRequest() {
       labelEn: 'Emergency', 
       labelRu: 'Экстренная', 
       icon: AlertTriangle, 
-      color: 'text-red-500',
+      color: 'text-destructive',
       desc: isRu ? 'Срочный осмотр по запросу' : 'Urgent inspection on request'
     },
   ];

@@ -97,7 +97,7 @@ export default function CourseDetail() {
         <div className="absolute top-4 right-4 flex gap-2">
           <FavoriteButton itemType="course" itemId={course.id} itemData={{ title_en: course.name_en, title_ru: course.name_ru, images, price, currency: course.currency || '฿', category: course.provider_type, rating: course.rating }} />
           {course.age_groups && (
-            <Badge className={isKids ? "bg-pink-500" : "bg-blue-500"}>
+            <Badge className={isKids ? "bg-accent-coral" : "bg-info"}>
               {isKids ? (language === "ru" ? "Для детей" : "For Kids") : (language === "ru" ? "Для взрослых" : "For Adults")}
             </Badge>
           )}
