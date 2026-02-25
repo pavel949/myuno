@@ -192,7 +192,7 @@ function OwnershipTypeStepInner({ data, onChange }: OwnershipTypeStepProps) {
                 placeholder={isRu ? 'Загрузить документ (Chanote, свидетельство и т.д.)' : 'Upload document (Chanote, title deed, etc.)'}
               />
               {data.ownership_document_url && (
-                <p className="text-sm text-green-600">
+                <p className="text-sm text-success">
                   ✓ {isRu ? 'Документ загружен' : 'Document uploaded'}
                 </p>
               )}
@@ -232,7 +232,7 @@ function OwnershipTypeStepInner({ data, onChange }: OwnershipTypeStepProps) {
                 placeholder={isRu ? 'Загрузить документ' : 'Upload document'}
               />
               {data.management_document_url && (
-                <p className="text-sm text-green-600">
+                <p className="text-sm text-success">
                   ✓ {isRu ? 'Документ загружен' : 'Document uploaded'}
                 </p>
               )}

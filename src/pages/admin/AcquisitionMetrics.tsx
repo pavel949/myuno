@@ -399,11 +399,11 @@ export default function AcquisitionMetrics() {
                   <p className="text-4xl font-bold">{verticalSummary.length}</p>
                   <p className="text-sm text-muted-foreground">Active Verticals</p>
                 </div>
-                <div className="p-4 bg-green-500/10 rounded-lg text-center">
+                <div className="p-4 bg-success/10 rounded-lg text-center">
                   <p className="text-4xl font-bold">{formatPercent(summary.crossSellRate)}</p>
                   <p className="text-sm text-muted-foreground">Cross-Sell Rate</p>
                 </div>
-                <div className="p-4 bg-blue-500/10 rounded-lg text-center">
+                <div className="p-4 bg-info/10 rounded-lg text-center">
                   <p className="text-4xl font-bold">{summary.ltvCacRatio.toFixed(1)}x</p>
                   <p className="text-sm text-muted-foreground">LTV/CAC Multiplier</p>
                 </div>

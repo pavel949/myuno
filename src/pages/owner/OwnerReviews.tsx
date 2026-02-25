@@ -123,7 +123,7 @@ export default function OwnerReviews() {
           key={i}
           className={cn(
             'w-4 h-4',
-            i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'
+            i < rating ? 'fill-warning text-warning' : 'text-muted'
           )}
         />
       ))}
@@ -148,7 +148,7 @@ export default function OwnerReviews() {
           <Card>
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <Star className="h-5 w-5 fill-warning text-warning" />
                 <span className="text-2xl font-bold">{stats.averageRating.toFixed(1)}</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -168,7 +168,7 @@ export default function OwnerReviews() {
 
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold mb-1 text-orange-500">{stats.pendingResponses}</div>
+              <div className="text-2xl font-bold mb-1 text-warning">{stats.pendingResponses}</div>
               <p className="text-xs text-muted-foreground">
                 {isRu ? 'Без ответа' : 'Pending'}
               </p>
@@ -178,7 +178,7 @@ export default function OwnerReviews() {
           <Card>
             <CardContent className="p-4 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingUp className="h-4 w-4 text-green-500" />
+                <TrendingUp className="h-4 w-4 text-success" />
                 <span className="text-2xl font-bold">{stats.recentCount}</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -203,7 +203,7 @@ export default function OwnerReviews() {
                     <span className="w-8 text-sm">{star}★</span>
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-yellow-400 rounded-full transition-all"
+                        className="h-full bg-warning rounded-full transition-all"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -295,7 +295,7 @@ export default function OwnerReviews() {
                     </p>
                   </div>
                   {!review.response && (
-                    <Badge variant="outline" className="text-orange-500 border-orange-500">
+                    <Badge variant="outline" className="text-warning border-warning">
                       {isRu ? 'Без ответа' : 'Pending'}
                     </Badge>
                   )}
@@ -337,12 +337,12 @@ export default function OwnerReviews() {
                       <div className="mt-2 space-y-1">
                         {review.pros && (
                           <p className="text-sm">
-                            <span className="text-green-600">+</span> {review.pros}
+                            <span className="text-success">+</span> {review.pros}
                           </p>
                         )}
                         {review.cons && (
                           <p className="text-sm">
-                            <span className="text-red-500">−</span> {review.cons}
+                            <span className="text-destructive">−</span> {review.cons}
                           </p>
                         )}
                       </div>

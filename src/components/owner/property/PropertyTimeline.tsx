@@ -24,12 +24,12 @@ import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 const EVENT_TYPES = [
-  { value: 'purchase', labelEn: 'Purchase', labelRu: 'Покупка', icon: Home, color: 'text-blue-600' },
-  { value: 'renovation', labelEn: 'Renovation', labelRu: 'Ремонт', icon: Wrench, color: 'text-amber-600' },
-  { value: 'insurance', labelEn: 'Insurance', labelRu: 'Страховка', icon: Shield, color: 'text-green-600' },
-  { value: 'manager_change', labelEn: 'Manager Change', labelRu: 'Смена менеджера', icon: UserCheck, color: 'text-purple-600' },
-  { value: 'inspection', labelEn: 'Inspection', labelRu: 'Инспекция', icon: FileText, color: 'text-cyan-600' },
-  { value: 'contract', labelEn: 'Contract', labelRu: 'Договор', icon: FileText, color: 'text-indigo-600' },
+  { value: 'purchase', labelEn: 'Purchase', labelRu: 'Покупка', icon: Home, color: 'text-info' },
+  { value: 'renovation', labelEn: 'Renovation', labelRu: 'Ремонт', icon: Wrench, color: 'text-accent-amber' },
+  { value: 'insurance', labelEn: 'Insurance', labelRu: 'Страховка', icon: Shield, color: 'text-success' },
+  { value: 'manager_change', labelEn: 'Manager Change', labelRu: 'Смена менеджера', icon: UserCheck, color: 'text-accent-purple' },
+  { value: 'inspection', labelEn: 'Inspection', labelRu: 'Инспекция', icon: FileText, color: 'text-accent-cyan' },
+  { value: 'contract', labelEn: 'Contract', labelRu: 'Договор', icon: FileText, color: 'text-primary' },
   { value: 'other', labelEn: 'Other', labelRu: 'Другое', icon: Calendar, color: 'text-muted-foreground' },
 ];
 

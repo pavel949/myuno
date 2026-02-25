@@ -32,7 +32,7 @@ export function ChannelCard({ calendar, channel, propertyName, bookingsCount, is
   return (
     <Card className={cn(
       "overflow-hidden transition-all",
-      hasError && "border-red-300 dark:border-red-800"
+      hasError && "border-destructive/30"
     )}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
@@ -51,7 +51,7 @@ export function ChannelCard({ calendar, channel, propertyName, bookingsCount, is
                   {isRu ? 'Ошибка' : 'Error'}
                 </Badge>
               ) : calendar.is_active ? (
-                <Badge variant="secondary" className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
+                <Badge variant="secondary" className="text-xs bg-success/10 text-success">
                   {isRu ? 'Активен' : 'Active'}
                 </Badge>
               ) : (
@@ -81,7 +81,7 @@ export function ChannelCard({ calendar, channel, propertyName, bookingsCount, is
             </div>
 
             {hasError && (
-              <p className="text-xs text-red-500 mt-2 truncate">{calendar.sync_error}</p>
+              <p className="text-xs text-destructive mt-2 truncate">{calendar.sync_error}</p>
             )}
           </div>
 

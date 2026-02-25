@@ -19,9 +19,9 @@ import { generateInvoicePdf } from '@/lib/invoicePdf';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
-  sent: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  paid: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  overdue: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+  sent: 'bg-info/10 text-info',
+  paid: 'bg-success/10 text-success',
+  overdue: 'bg-destructive/10 text-destructive',
   cancelled: 'bg-muted text-muted-foreground line-through',
 };
 

@@ -61,15 +61,15 @@ export default function JuristicRequestsPage() {
           <div className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</div>
         </Card>
         <Card className="p-3 text-center">
-          <div className="text-2xl font-bold text-yellow-500">{stats.pending}</div>
+          <div className="text-2xl font-bold text-warning">{stats.pending}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</div>
         </Card>
         <Card className="p-3 text-center">
-          <div className="text-2xl font-bold text-blue-500">{stats.inProgress}</div>
+          <div className="text-2xl font-bold text-info">{stats.inProgress}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</div>
         </Card>
         <Card className="p-3 text-center">
-          <div className="text-2xl font-bold text-green-500">{stats.completed}</div>
+          <div className="text-2xl font-bold text-success">{stats.completed}</div>
           <div className="text-xs text-muted-foreground">{isRu ? 'Выполнено' : 'Done'}</div>
         </Card>
       </div>
@@ -97,7 +97,7 @@ export default function JuristicRequestsPage() {
                           {isRu ? statusLabel.ru : statusLabel.en}
                         </Badge>
                         {req.requires_payment && req.total_amount && (
-                          <Badge variant="outline" className="text-xs text-green-600">
+                          <Badge variant="outline" className="text-xs text-success">
                             ฿{req.total_amount.toLocaleString()}
                           </Badge>
                         )}

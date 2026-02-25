@@ -34,9 +34,9 @@ interface CreateServiceTaskDialogProps {
 
 const TASK_TYPES = [
   { value: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Уборка', color: 'text-info' },
-  { value: 'maintenance', icon: Wrench, label: 'Maintenance', labelRu: 'Ремонт', color: 'text-orange-500' },
-  { value: 'inspection', icon: Search, label: 'Inspection', labelRu: 'Осмотр', color: 'text-purple-500' },
-  { value: 'meter_reading', icon: Gauge, label: 'Meter Reading', labelRu: 'Счётчики', color: 'text-cyan-500' },
+  { value: 'maintenance', icon: Wrench, label: 'Maintenance', labelRu: 'Ремонт', color: 'text-accent-amber' },
+  { value: 'inspection', icon: Search, label: 'Inspection', labelRu: 'Осмотр', color: 'text-accent-purple' },
+  { value: 'meter_reading', icon: Gauge, label: 'Meter Reading', labelRu: 'Счётчики', color: 'text-accent-cyan' },
   { value: 'check_in', icon: LogIn, label: 'Check-in', labelRu: 'Заезд', color: 'text-success' },
   { value: 'check_out', icon: LogOut, label: 'Check-out', labelRu: 'Выезд', color: 'text-warning' },
 ] as const;

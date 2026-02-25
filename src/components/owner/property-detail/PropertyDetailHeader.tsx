@@ -19,7 +19,7 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
   const getStatusBadge = (status: string, approvalStatus?: string | null) => {
     if (approvalStatus === 'pending') {
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 gap-1">
+        <Badge variant="secondary" className="bg-warning/10 text-warning gap-1">
           <Clock className="h-3 w-3" />
           {isRu ? 'На рассмотрении' : 'Under Review'}
         </Badge>
@@ -34,7 +34,7 @@ export function PropertyDetailHeader({ property, isRu }: PropertyDetailHeaderPro
     }
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-500">{isRu ? 'Активен' : 'Active'}</Badge>;
+        return <Badge className="bg-success">{isRu ? 'Активен' : 'Active'}</Badge>;
       case 'pending':
         return <Badge variant="secondary">{isRu ? 'На проверке' : 'Pending'}</Badge>;
       default:

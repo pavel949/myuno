@@ -50,7 +50,7 @@ export function PropertyOwnershipBadge({
         ? (isRu ? `Клиент: ${actualOwnerName}` : `Client: ${actualOwnerName}`)
         : (isRu ? 'Объект клиента' : "Client's property"),
       variant: 'secondary' as const,
-      className: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+      className: 'bg-info/10 text-info border-info/30',
     },
     poa: {
       icon: FileSignature,
@@ -110,7 +110,7 @@ export function PropertyDelegationInfo({
     <div className={cn("p-3 rounded-lg bg-muted/50 border text-sm", className)}>
       {type === 'client' && (
         <div className="flex items-start gap-2">
-          <Users className="h-4 w-4 text-blue-500 mt-0.5" />
+          <Users className="h-4 w-4 text-info mt-0.5" />
           <div>
             <p className="font-medium">
               {isRu ? 'Объект клиента' : "Client's property"}
