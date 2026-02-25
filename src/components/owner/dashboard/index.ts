@@ -30,6 +30,7 @@ export { MaintenanceHealthWidget } from './MaintenanceHealthWidget';
 
 // Command Center
 export { TodayActionsWidget } from './TodayActionsWidget';
+export { DashboardPropertyFilter } from './DashboardPropertyFilter';
 
 // Property Wizard Steps
 export * from '../property-wizard';

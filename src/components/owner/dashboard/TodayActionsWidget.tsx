@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useMyProperties } from '@/hooks/useMyProperties';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,132 +22,79 @@ interface ActionItem {
 }
 
 export function TodayActionsWidget() {
-  const { user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { data: company } = useMyCompanyId();
-  const companyId = company?.company_id;
-  const { allProperties } = useMyProperties();
-  const allPropertyIds = allProperties.map(p => p.property_id);
+  const { data: metrics, isLoading } = useDashboardMetrics();
+  const ops = metrics?.ops;
 
-  const { data: actions, isLoading } = useQuery({
-    queryKey: ['today-actions', user?.id, companyId, allPropertyIds.join(',')],
-    queryFn: async () => {
-      if (!user?.id) return [];
-      const today = new Date().toISOString().slice(0, 10);
+  const actions = useMemo<ActionItem[]>(() => {
+    if (!ops) return [];
+    const items: ActionItem[] = [];
 
-      const queries = await Promise.all([
-        // Overdue CRM tasks
-        companyId
-          ? supabase.from('crm_tasks')
-              .select('id', { count: 'exact', head: true })
-              .eq('company_id', companyId)
-              .neq('status', 'done')
-              .lt('due_date', today)
-          : Promise.resolve({ count: 0 }),
-        // Open service requests
-        supabase.from('property_service_requests')
-          .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id)
-          .in('status', ['pending', 'in_progress']),
-        // Low stock items
-        supabase.from('property_inventory_items')
-          .select('id, quantity, min_quantity')
-          .eq('owner_id', user.id)
-          .eq('is_active', true),
-        // Unread booking messages
-        allPropertyIds.length > 0
-          ? supabase.from('booking_notifications_log')
-              .select('id', { count: 'exact', head: true })
-              .is('read_at', null)
-              .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
-          : Promise.resolve({ count: 0 }),
-        // Pending invoices
-        supabase.from('property_financials')
-          .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id)
-          .eq('transaction_type', 'expense')
-          .eq('status', 'pending'),
-      ]);
+    if (ops.overdueTasks > 0) {
+      items.push({
+        id: 'overdue-tasks',
+        icon: ClipboardCheck,
+        title: isRu ? 'Просроченные задачи' : 'Overdue Tasks',
+        subtitle: isRu ? `${ops.overdueTasks} задач требуют внимания` : `${ops.overdueTasks} tasks need attention`,
+        count: ops.overdueTasks,
+        priority: 'urgent',
+        href: '/owner/operations',
+      });
+    }
 
-      const items: ActionItem[] = [];
+    if (ops.openServiceRequests > 0) {
+      items.push({
+        id: 'service-requests',
+        icon: Wrench,
+        title: isRu ? 'Открытые заявки' : 'Open Requests',
+        subtitle: isRu ? `${ops.openServiceRequests} в работе` : `${ops.openServiceRequests} in progress`,
+        count: ops.openServiceRequests,
+        priority: ops.openServiceRequests > 3 ? 'high' : 'normal',
+        href: '/owner/operations',
+      });
+    }
 
-      const overdueTasks = (queries[0] as any).count || 0;
-      if (overdueTasks > 0) {
-        items.push({
-          id: 'overdue-tasks',
-          icon: ClipboardCheck,
-          title: isRu ? 'Просроченные задачи' : 'Overdue Tasks',
-          subtitle: isRu ? `${overdueTasks} задач требуют внимания` : `${overdueTasks} tasks need attention`,
-          count: overdueTasks,
-          priority: 'urgent',
-          href: '/owner/operations',
-        });
-      }
+    if (ops.lowStockItems > 0) {
+      items.push({
+        id: 'low-stock',
+        icon: PackageOpen,
+        title: isRu ? 'Низкий запас' : 'Low Stock',
+        subtitle: isRu ? `${ops.lowStockItems} позиций нужно пополнить` : `${ops.lowStockItems} items need restocking`,
+        count: ops.lowStockItems,
+        priority: 'high',
+        href: '/owner/inventory',
+      });
+    }
 
-      const openRequests = (queries[1] as any).count || 0;
-      if (openRequests > 0) {
-        items.push({
-          id: 'service-requests',
-          icon: Wrench,
-          title: isRu ? 'Открытые заявки' : 'Open Requests',
-          subtitle: isRu ? `${openRequests} в работе` : `${openRequests} in progress`,
-          count: openRequests,
-          priority: openRequests > 3 ? 'high' : 'normal',
-          href: '/owner/operations',
-        });
-      }
+    if (ops.unreadMessages > 0) {
+      items.push({
+        id: 'unread-messages',
+        icon: MessageCircle,
+        title: isRu ? 'Непрочитанные' : 'Unread Messages',
+        subtitle: isRu ? `${ops.unreadMessages} новых сообщений` : `${ops.unreadMessages} new messages`,
+        count: ops.unreadMessages,
+        priority: 'normal',
+        href: '/owner/messages',
+      });
+    }
 
-      const inventoryItems = (queries[2] as any).data || [];
-      const lowStock = inventoryItems.filter((i: any) =>
-        i.min_quantity != null && i.quantity != null && i.quantity < i.min_quantity
-      ).length;
-      if (lowStock > 0) {
-        items.push({
-          id: 'low-stock',
-          icon: PackageOpen,
-          title: isRu ? 'Низкий запас' : 'Low Stock',
-          subtitle: isRu ? `${lowStock} позиций нужно пополнить` : `${lowStock} items need restocking`,
-          count: lowStock,
-          priority: 'high',
-          href: '/owner/inventory',
-        });
-      }
+    if (ops.pendingInvoices > 0) {
+      items.push({
+        id: 'pending-invoices',
+        icon: CreditCard,
+        title: isRu ? 'Ожидают оплаты' : 'Pending Payments',
+        subtitle: isRu ? `${ops.pendingInvoices} неоплаченных` : `${ops.pendingInvoices} unpaid`,
+        count: ops.pendingInvoices,
+        priority: ops.pendingInvoices > 2 ? 'high' : 'normal',
+        href: '/owner/invoices',
+      });
+    }
 
-      const unreadMessages = (queries[3] as any).count || 0;
-      if (unreadMessages > 0) {
-        items.push({
-          id: 'unread-messages',
-          icon: MessageCircle,
-          title: isRu ? 'Непрочитанные' : 'Unread Messages',
-          subtitle: isRu ? `${unreadMessages} новых сообщений` : `${unreadMessages} new messages`,
-          count: unreadMessages,
-          priority: 'normal',
-          href: '/owner/messages',
-        });
-      }
-
-      const pendingInvoices = (queries[4] as any).count || 0;
-      if (pendingInvoices > 0) {
-        items.push({
-          id: 'pending-invoices',
-          icon: CreditCard,
-          title: isRu ? 'Ожидают оплаты' : 'Pending Payments',
-          subtitle: isRu ? `${pendingInvoices} неоплаченных` : `${pendingInvoices} unpaid`,
-          count: pendingInvoices,
-          priority: pendingInvoices > 2 ? 'high' : 'normal',
-          href: '/owner/invoices',
-        });
-      }
-
-      // Sort by priority
-      const priorityOrder = { urgent: 0, high: 1, normal: 2 };
-      return items.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-    },
-    enabled: !!user?.id,
-    staleTime: 2 * 60 * 1000,
-  });
+    const priorityOrder = { urgent: 0, high: 1, normal: 2 };
+    return items.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+  }, [ops, isRu]);
 
   if (isLoading) {
     return (
@@ -163,7 +106,7 @@ export function TodayActionsWidget() {
     );
   }
 
-  if (!actions || actions.length === 0) {
+  if (actions.length === 0) {
     return (
       <section className="space-y-2">
         <h3 className="font-semibold text-[15px] flex items-center gap-2 px-1">

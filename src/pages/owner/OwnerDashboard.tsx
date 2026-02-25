@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
+import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
 import { SetupPromptBanner } from '@/components/owner/dashboard/SetupPromptBanner';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
@@ -30,6 +31,8 @@ import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidge
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
+import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
+
 function SectionSkeleton() {
   return (
     <div className="space-y-3">
@@ -144,7 +147,6 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
 
 /**
  * Widgets that should render side-by-side in 2-column grid on desktop.
- * Pairs: revenue_insights + upcoming_payments, active_deals + crm_tasks
  */
 const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'revenue_insights', 'upcoming_payments',
@@ -160,7 +162,6 @@ export default function OwnerDashboard() {
   const { role, setRole, config } = useBusinessRole();
   const { data: ownerProperties } = useOwnerProperties();
 
-  // On desktop, filter out 'menu' widget since sidebar already provides navigation
   const visibleWidgets = isDesktop
     ? config.widgets.filter((w) => w !== 'menu')
     : config.widgets;
@@ -188,49 +189,60 @@ export default function OwnerDashboard() {
   }
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg md:max-w-[1536px] mx-auto">
-      {/* Header: Greeting + Role Switcher */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-4"
-      >
-        <DashboardGreeting roleConfig={config} />
-        <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
-      </motion.div>
+    <DashboardFilterProvider>
+      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg md:max-w-[1536px] mx-auto">
+        {/* Header: Greeting + Role Switcher */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-4"
+        >
+          <DashboardGreeting roleConfig={config} />
+          <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
+        </motion.div>
 
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-      >
-        <RoleQuickActions role={role} />
-      </motion.div>
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <RoleQuickActions role={role} />
+        </motion.div>
 
-      <Separator />
+        <Separator />
 
-      {/* Setup Wizard CTA for new users */}
-      <SetupPromptBanner propertyCount={ownerProperties?.length || 0} />
+        {/* Global Property Filter */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+        >
+          <DashboardPropertyFilter />
+        </motion.div>
 
-      {/* Composed Widgets — 2-column grid on desktop */}
-      <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
-        {visibleWidgets.map((widgetKey, idx) => {
-          const isFullWidth = !HALF_WIDTH_WIDGETS.has(widgetKey);
-          return (
-            <motion.div
-              key={widgetKey}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
-              className={isFullWidth ? 'md:col-span-2' : ''}
-            >
-              <DashboardWidget widgetKey={widgetKey} role={role} />
-            </motion.div>
-          );
-        })}
+        {/* Setup Wizard CTA for new users */}
+        <SetupPromptBanner propertyCount={ownerProperties?.length || 0} />
+
+        {/* Composed Widgets — 2-column grid on desktop */}
+        <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
+          {visibleWidgets.map((widgetKey, idx) => {
+            const isFullWidth = !HALF_WIDTH_WIDGETS.has(widgetKey);
+            return (
+              <motion.div
+                key={widgetKey}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
+                className={isFullWidth ? 'md:col-span-2' : ''}
+              >
+                <DashboardWidget widgetKey={widgetKey} role={role} />
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </DashboardFilterProvider>
   );
 }
