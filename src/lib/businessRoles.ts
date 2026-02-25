@@ -21,6 +21,7 @@ export interface BusinessRoleConfig {
 export type DashboardWidgetKey =
   | 'kpi'
   | 'today_briefing'
+  | 'today_actions'
   | 'channel_sync'
   | 'revenue_insights'
   | 'invites'
@@ -41,8 +42,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Управление недвижимостью',
     icon: '🏠',
     widgets: [
-      'kpi',
       'today_briefing',
+      'today_actions',
+      'kpi',
       'channel_sync',
       'unified_inbox',
       'active_stays',
@@ -62,8 +64,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Агент по продажам',
     icon: '💼',
     widgets: [
-      'kpi',
       'today_briefing',
+      'today_actions',
+      'kpi',
       'active_deals',
       'crm_tasks',
       'properties',
@@ -77,8 +80,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Поставщик услуг',
     icon: '🔧',
     widgets: [
-      'kpi',
       'today_briefing',
+      'today_actions',
+      'kpi',
       'operations',
       'upcoming_payments',
       'crm_tasks',
@@ -91,8 +95,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Все модули',
     icon: '⚡',
     widgets: [
-      'kpi',
       'today_briefing',
+      'today_actions',
+      'kpi',
       'channel_sync',
       'unified_inbox',
       'active_stays',

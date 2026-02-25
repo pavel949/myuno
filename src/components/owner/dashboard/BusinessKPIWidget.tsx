@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, TrendingDown, Percent, CalendarCheck, ClipboardList, Handshake, BedDouble, Users, Wrench, PackageOpen } from 'lucide-react';
+import { DollarSign, TrendingDown, Percent, CalendarCheck, ClipboardList, Handshake, BedDouble, Users, Wrench, PackageOpen, BarChart3, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,6 +17,10 @@ interface KPIData {
   occupancyRate: number;
   revenuePrev: number;
   expensesPrev: number;
+  adr: number;       // Average Daily Rate
+  revpar: number;    // Revenue Per Available Room-night
+  totalBookings: number;
+  bookedNights: number;
 }
 
 interface OpsData {
@@ -101,7 +105,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           .lte('transaction_date', endOfPrevMonth),
         supabase
           .from('property_bookings')
-          .select('check_in, check_out')
+          .select('check_in, check_out, total_amount')
           .in('property_id', allPropertyIds)
           .in('status', ['confirmed', 'checked_in', 'completed'])
           .lte('check_in', endOfMonth)
@@ -119,17 +123,22 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
 
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
       let bookedNights = 0;
+      let bookingRevenue = 0;
+      const totalBookings = (bookingsRes.data || []).length;
       for (const b of (bookingsRes.data || [])) {
         const ci = new Date(Math.max(new Date(b.check_in).getTime(), new Date(startOfMonth).getTime()));
         const co = new Date(Math.min(new Date(b.check_out).getTime(), new Date(endOfMonth).getTime()));
         const nights = Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24)));
         bookedNights += nights;
+        bookingRevenue += Number((b as any).total_amount || 0);
       }
 
       const totalNights = Math.max(1, allPropertyIds.length) * daysInMonth;
       const occupancyRate = Math.min(100, Math.round((bookedNights / totalNights) * 100));
+      const adr = bookedNights > 0 ? Math.round(bookingRevenue / bookedNights) : 0;
+      const revpar = Math.round((bookingRevenue / totalNights));
 
-      setData({ revenue, expenses, margin, occupancyRate, revenuePrev, expensesPrev });
+      setData({ revenue, expenses, margin, occupancyRate, revenuePrev, expensesPrev, adr, revpar, totalBookings, bookedNights });
 
       // Operational queries
       const opsPromises = await Promise.all([
@@ -261,7 +270,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
   return (
     <div className="space-y-3">
       {/* Tier 1: Financial KPIs */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <OwnerKPICard
           title={isRu ? 'Доход' : 'Revenue'}
           value={`฿${fmt(data?.revenue ?? 0)}`}
@@ -300,6 +309,24 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           iconColor="text-accent-foreground"
           trend={data && data.occupancyRate >= 70 ? 'up' : data && data.occupancyRate >= 40 ? 'neutral' : 'down'}
           href="/owner/calendar"
+          loading={loading}
+        />
+        <OwnerKPICard
+          title="ADR"
+          value={`฿${fmt(data?.adr ?? 0)}`}
+          icon={BarChart3}
+          iconColor="text-primary"
+          trend={data && data.adr > 0 ? 'up' : 'neutral'}
+          href="/owner/revenue"
+          loading={loading}
+        />
+        <OwnerKPICard
+          title="RevPAR"
+          value={`฿${fmt(data?.revpar ?? 0)}`}
+          icon={TrendingUp}
+          iconColor="text-accent-foreground"
+          trend={data && data.revpar > 0 ? 'up' : 'neutral'}
+          href="/owner/revenue"
           loading={loading}
         />
       </div>
