@@ -394,7 +394,8 @@ export const PipelineSettingsPage = lazy(() => import('@/pages/owner/PipelineSet
 export const RateManagementPage = lazy(() => import('@/pages/owner/RateManagementPage'));
 export const ReviewsManagementPage = lazy(() => import('@/pages/owner/ReviewsManagementPage'));
 export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/DocumentsInsurancePage'));
-export const OwnerReportsPage = lazy(() => import('@/pages/owner/OwnerReportsPage'));
+// OwnerReportsPage removed — functionality merged into ReportsPage
+export const AnalyticsPage = lazy(() => import('@/pages/owner/AnalyticsPage'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));

@@ -533,7 +533,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
           <Route path="setup" element={<LazyPage><Pages.OwnerSetupWizard /></LazyPage>} />
           <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
-          <Route path="revenue" element={<LazyPage><Pages.OwnerRevenueDashboard /></LazyPage>} />
+          <Route path="revenue" element={<Navigate to="/owner/analytics" replace />} />
+          <Route path="analytics" element={<LazyPage><Pages.AnalyticsPage /></LazyPage>} />
           <Route path="superhost" element={<LazyPage><Pages.OwnerSuperhost /></LazyPage>} />
           <Route path="properties" element={<LazyPage><Pages.OwnerProperties /></LazyPage>} />
           <Route path="properties/new" element={<LazyPage><Pages.AddProperty /></LazyPage>} />
@@ -565,7 +566,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="inspection" element={<LazyPage><Pages.InspectionRequest /></LazyPage>} />
           <Route path="full-management" element={<LazyPage><Pages.FullManagement /></LazyPage>} />
           <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
-          <Route path="team" element={<LazyPage><Pages.TeamPage /></LazyPage>} />
+          <Route path="team" element={<Navigate to="/owner/staff" replace />} />
           <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
           <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
           <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
@@ -589,7 +590,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="rates" element={<LazyPage><Pages.RateManagementPage /></LazyPage>} />
           <Route path="reviews-management" element={<LazyPage><Pages.ReviewsManagementPage /></LazyPage>} />
           <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
-          <Route path="owner-reports" element={<LazyPage><Pages.OwnerReportsPage /></LazyPage>} />
+          <Route path="owner-reports" element={<Navigate to="/owner/reports" replace />} />
         </Route>
         
         {/* ── Catch-all ── */}

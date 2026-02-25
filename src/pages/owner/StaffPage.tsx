@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
+
+const TeamAccessTab = lazy(() => import('@/pages/owner/TeamPage'));
 import {
   Sheet,
   SheetContent,
@@ -357,7 +359,8 @@ export default function StaffPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
   const [form, setForm] = useState<StaffFormState>(DEFAULT_FORM);
-  const [tab, setTab] = useState<'active' | 'all'>('active');
+  const [staffFilter, setStaffFilter] = useState<'active' | 'all'>('active');
+  const [pageTab, setPageTab] = useState<'staff' | 'access'>('staff');
   const [deactivateTarget, setDeactivateTarget] = useState<StaffMember | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
@@ -365,7 +368,7 @@ export default function StaffPage() {
   const t = (en: string, ru: string) => isRu ? ru : en;
 
   const shown = (staff ?? [])
-    .filter(s => tab === 'active' ? s.is_active : true)
+    .filter(s => staffFilter === 'active' ? s.is_active : true)
     .filter(s => roleFilter === 'all' || s.role === roleFilter)
     .filter(s => {
       if (!searchQuery) return true;
@@ -423,11 +426,26 @@ export default function StaffPage() {
   return (
     <PageContainer>
       <PageHeader
-        title={t('Staff Directory', 'Реестр сотрудников')}
-        subtitle={t('Manage your team, assign roles and track assignments', 'Управляйте командой, назначайте роли и отслеживайте задачи')}
+        title={t('Team', 'Команда')}
+        subtitle={t('Staff directory, access control and delegation', 'Сотрудники, доступ и делегирование')}
         showBack
         fallbackPath="/owner"
       />
+
+      {/* Page-level tabs: Staff | Access & Delegation */}
+      <Tabs value={pageTab} onValueChange={v => setPageTab(v as 'staff' | 'access')} className="mb-5">
+        <TabsList>
+          <TabsTrigger value="staff">{t('Staff', 'Сотрудники')}</TabsTrigger>
+          <TabsTrigger value="access">{t('Access & Delegation', 'Доступ и делегирование')}</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {pageTab === 'access' ? (
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+          <TeamAccessTab />
+        </Suspense>
+      ) : (
+      <>
 
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
@@ -454,7 +472,7 @@ export default function StaffPage() {
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2 flex-1">
-          <Tabs value={tab} onValueChange={v => setTab(v as 'active' | 'all')}>
+          <Tabs value={staffFilter} onValueChange={v => setStaffFilter(v as 'active' | 'all')}>
             <TabsList>
               <TabsTrigger value="active">{t('Active', 'Активные')}</TabsTrigger>
               <TabsTrigger value="all">{t('All', 'Все')}</TabsTrigger>
@@ -746,6 +764,8 @@ export default function StaffPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </>
+      )}
     </PageContainer>
   );
 }

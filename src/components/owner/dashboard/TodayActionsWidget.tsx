@@ -86,7 +86,7 @@ export function TodayActionsWidget() {
           subtitle: isRu ? `${overdueTasks} задач требуют внимания` : `${overdueTasks} tasks need attention`,
           count: overdueTasks,
           priority: 'urgent',
-          href: '/owner/tasks',
+          href: '/owner/operations',
         });
       }
 
@@ -128,7 +128,7 @@ export function TodayActionsWidget() {
           subtitle: isRu ? `${unreadMessages} новых сообщений` : `${unreadMessages} new messages`,
           count: unreadMessages,
           priority: 'normal',
-          href: '/owner/inbox',
+          href: '/owner/messages',
         });
       }
 
