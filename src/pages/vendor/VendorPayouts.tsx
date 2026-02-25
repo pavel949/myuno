@@ -118,28 +118,28 @@ const VendorPayouts = () => {
     switch (status) {
       case 'pending':
         return (
-          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+          <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
             <Clock className="h-3 w-3 mr-1" />
             {isRussian ? 'Ожидает' : 'Pending'}
           </Badge>
         );
       case 'processing':
         return (
-          <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+          <Badge variant="outline" className="bg-info/10 text-info border-info/20">
             <Loader2 className="h-3 w-3 mr-1 animate-spin" />
             {isRussian ? 'Обработка' : 'Processing'}
           </Badge>
         );
       case 'completed':
         return (
-          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
+          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
             <CheckCircle className="h-3 w-3 mr-1" />
             {isRussian ? 'Выполнено' : 'Completed'}
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
             <XCircle className="h-3 w-3 mr-1" />
             {isRussian ? 'Отклонено' : 'Rejected'}
           </Badge>

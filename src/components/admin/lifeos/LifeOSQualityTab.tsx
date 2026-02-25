@@ -156,8 +156,8 @@ export function LifeOSQualityTab() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-green-500/10">
-                <ShieldCheck className="w-6 h-6 text-green-600" />
+              <div className="p-3 rounded-xl bg-success/10">
+                <ShieldCheck className="w-6 h-6 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{overallHealth?.verifiedPercent.toFixed(0) || 0}%</p>
@@ -174,11 +174,11 @@ export function LifeOSQualityTab() {
             <div className="flex items-center gap-3">
               <div className={cn(
                 "p-3 rounded-xl",
-                (overallHealth?.conflictsCount || 0) > 0 ? "bg-amber-500/10" : "bg-green-500/10"
+                (overallHealth?.conflictsCount || 0) > 0 ? "bg-warning/10" : "bg-success/10"
               )}>
                 <AlertTriangle className={cn(
                   "w-6 h-6",
-                  (overallHealth?.conflictsCount || 0) > 0 ? "text-amber-600" : "text-green-600"
+                  (overallHealth?.conflictsCount || 0) > 0 ? "text-warning" : "text-success"
                 )} />
               </div>
               <div>
@@ -196,11 +196,11 @@ export function LifeOSQualityTab() {
             <div className="flex items-center gap-3">
               <div className={cn(
                 "p-3 rounded-xl",
-                (overallHealth?.situationsWithIssues || 0) > 0 ? "bg-destructive/10" : "bg-green-500/10"
+                (overallHealth?.situationsWithIssues || 0) > 0 ? "bg-destructive/10" : "bg-success/10"
               )}>
                 {(overallHealth?.situationsWithIssues || 0) > 0 
                   ? <XCircle className="w-6 h-6 text-destructive" />
-                  : <CheckCircle2 className="w-6 h-6 text-green-600" />
+                  : <CheckCircle2 className="w-6 h-6 text-success" />
                 }
               </div>
               <div>
@@ -269,28 +269,28 @@ export function LifeOSQualityTab() {
                           <div className="flex items-center gap-2">
                             <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden flex">
                               <div 
-                                className="h-full bg-green-500" 
+                                className="h-full bg-success" 
                                 style={{ width: `${(metrics.verified_count / total) * 100}%` }}
                               />
                               <div 
-                                className="h-full bg-blue-500" 
+                                className="h-full bg-info" 
                                 style={{ width: `${(metrics.featured_count / total) * 100}%` }}
                               />
                               <div 
-                                className="h-full bg-amber-500" 
+                                className="h-full bg-warning" 
                                 style={{ width: `${(metrics.pending_count / total) * 100}%` }}
                               />
                               <div 
-                                className="h-full bg-gray-300" 
+                                className="h-full bg-muted-foreground/30"
                                 style={{ width: `${(metrics.unverified_count / total) * 100}%` }}
                               />
                             </div>
                           </div>
                           <div className="flex gap-2 text-[10px]">
-                            <span className="text-green-600">●{metrics.verified_count}</span>
-                            <span className="text-blue-600">●{metrics.featured_count}</span>
-                            <span className="text-amber-600">●{metrics.pending_count}</span>
-                            <span className="text-gray-400">●{metrics.unverified_count}</span>
+                            <span className="text-success">●{metrics.verified_count}</span>
+                            <span className="text-info">●{metrics.featured_count}</span>
+                            <span className="text-warning">●{metrics.pending_count}</span>
+                            <span className="text-muted-foreground">●{metrics.unverified_count}</span>
                           </div>
                         </div>
                       </TableCell>
@@ -298,17 +298,17 @@ export function LifeOSQualityTab() {
                         {metrics.high_weight_low_trust > 0 ? (
                           <Badge variant="destructive">{metrics.high_weight_low_trust}</Badge>
                         ) : (
-                          <Badge variant="outline" className="text-green-600">0</Badge>
+                          <Badge variant="outline" className="text-success">0</Badge>
                         )}
                       </TableCell>
                       <TableCell>
                         {hasIssues ? (
-                          <Badge variant="outline" className="border-amber-500 text-amber-600">
+                          <Badge variant="outline" className="border-warning text-warning">
                             <AlertTriangle className="w-3 h-3 mr-1" />
                             {isRussian ? 'Требует проверки' : 'Needs Review'}
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="border-green-500 text-green-600">
+                          <Badge variant="outline" className="border-success text-success">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
                             {isRussian ? 'В норме' : 'Healthy'}
                           </Badge>

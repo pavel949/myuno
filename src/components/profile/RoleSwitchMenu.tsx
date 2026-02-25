@@ -30,7 +30,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       labelRu: 'Гость',
       path: '/',
       available: true, // Always available
-      color: 'bg-blue-500',
+      color: 'bg-info',
     },
     {
       key: 'owner',
@@ -39,7 +39,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       labelRu: 'Владелец',
       path: '/owner',
       available: hasRole('owner') || hasRole('admin'),
-      color: 'bg-teal-500',
+      color: 'bg-accent-teal',
     },
     {
       key: 'vendor',
@@ -48,7 +48,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       labelRu: 'Продавец',
       path: '/vendor',
       available: hasRole('vendor') || hasRole('admin'),
-      color: 'bg-purple-500',
+      color: 'bg-accent-purple',
     },
     {
       key: 'team',
@@ -57,7 +57,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       labelRu: 'Команда',
       path: '/team',
       available: hasRole('uno_team') || hasRole('admin'),
-      color: 'bg-emerald-500',
+      color: 'bg-success',
     },
     {
       key: 'admin',
@@ -66,7 +66,7 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
       labelRu: 'Админ',
       path: '/admin',
       available: hasRole('admin') || hasRole('staff') || hasRole('uno_team'),
-      color: 'bg-red-500',
+      color: 'bg-destructive',
     },
   ];
 

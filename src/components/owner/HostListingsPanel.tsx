@@ -121,18 +121,18 @@ export function HostListingsPanel() {
               <Clock className="h-3 w-3 sm:mr-1" />
               <span className="hidden sm:inline">{isRu ? 'Ожид.' : 'Review'}</span>
               {counts.pending > 0 && (
-                <Badge className="ml-1 h-4 px-1 text-[10px] bg-yellow-500">{counts.pending}</Badge>
+                <Badge className="ml-1 h-4 px-1 text-[10px] bg-warning">{counts.pending}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="active" className="text-xs px-1">
               <CheckCircle className="h-3 w-3 sm:mr-1" />
               <span className="hidden sm:inline">{isRu ? 'Актив.' : 'Active'}</span>
               {counts.active > 0 && (
-                <Badge className="ml-1 h-4 px-1 text-[10px] bg-green-500">{counts.active}</Badge>
+                <Badge className="ml-1 h-4 px-1 text-[10px] bg-success">{counts.active}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="rejected" className="text-xs px-1">
-              <XCircle className="h-3 w-3 sm:mr-1 text-red-500" />
+              <XCircle className="h-3 w-3 sm:mr-1 text-destructive" />
               {counts.rejected > 0 && (
                 <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">{counts.rejected}</Badge>
               )}
@@ -215,7 +215,7 @@ export function HostListingsPanel() {
               />
             ) : (
               <>
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg text-sm text-yellow-800 dark:text-yellow-200 mb-2">
+                <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-lg text-sm text-warning-foreground mb-2">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   <span>
                     {isRu 
@@ -273,7 +273,7 @@ export function HostListingsPanel() {
               />
             ) : (
               <>
-                <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-sm text-red-800 dark:text-red-200 mb-2">
+                <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive mb-2">
                   <XCircle className="h-4 w-4 flex-shrink-0" />
                   <span>
                     {isRu 

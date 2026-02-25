@@ -75,21 +75,21 @@ export function PropertyPriceBreakdown({
         {(weeklyDiscount || monthlyDiscount) && (
           <div className="grid grid-cols-2 gap-2">
             {weeklyDiscount && weeklyDiscount > 0 && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
                 <div className="flex items-center gap-1 mb-1">
-                  <Percent className="w-4 h-4 text-green-500" />
+                  <Percent className="w-4 h-4 text-success" />
                   <span className="text-xs text-muted-foreground">{isRu ? '7+ ночей' : '7+ nights'}</span>
                 </div>
-                <p className="text-lg font-bold text-green-600">-{weeklyDiscount}%</p>
+                <p className="text-lg font-bold text-success">-{weeklyDiscount}%</p>
               </div>
             )}
             {monthlyDiscount && monthlyDiscount > 0 && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
                 <div className="flex items-center gap-1 mb-1">
-                  <Percent className="w-4 h-4 text-green-500" />
+                  <Percent className="w-4 h-4 text-success" />
                   <span className="text-xs text-muted-foreground">{isRu ? '30+ ночей' : '30+ nights'}</span>
                 </div>
-                <p className="text-lg font-bold text-green-600">-{monthlyDiscount}%</p>
+                <p className="text-lg font-bold text-success">-{monthlyDiscount}%</p>
               </div>
             )}
           </div>

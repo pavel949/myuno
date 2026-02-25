@@ -15,8 +15,8 @@ const SERVICES = [
   { id: 'food', icon: Utensils, label: 'Food', labelRu: 'Еда', href: '/food', color: 'text-warning' },
   { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', href: '/transport', color: 'text-info' },
   
-  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', href: '/beauty', color: 'text-pink-500' },
-  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', href: '/flowers', color: 'text-rose-500' },
+  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', href: '/beauty', color: 'text-accent-purple' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', href: '/flowers', color: 'text-destructive' },
 ];
 
 export function GuestServicesBlock() {

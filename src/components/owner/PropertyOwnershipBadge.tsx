@@ -73,7 +73,7 @@ export function PropertyOwnershipBadge({
       {showLabel && <span className="truncate max-w-[120px]">{label}</span>}
       {createdOnBehalf && type !== 'own' && (
         <span title={isRu ? 'Ожидает подтверждения' : 'Pending confirmation'}>
-          <Clock className="h-3 w-3 ml-1 text-amber-500" />
+          <Clock className="h-3 w-3 ml-1 text-accent-amber" />
         </span>
       )}
     </Badge>
