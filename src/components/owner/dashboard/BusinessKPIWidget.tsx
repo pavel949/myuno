@@ -1,37 +1,10 @@
-import { useEffect, useState } from 'react';
 import { DollarSign, TrendingDown, Percent, CalendarCheck, ClipboardList, Handshake, BedDouble, Users, Wrench, PackageOpen, BarChart3, TrendingUp } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useMyProperties } from '@/hooks/useMyProperties';
+import { useDashboardMetrics } from '@/hooks/useDashboardMetrics';
 import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { type BusinessRole } from '@/lib/businessRoles';
-
-interface KPIData {
-  revenue: number;
-  expenses: number;
-  margin: number;
-  occupancyRate: number;
-  revenuePrev: number;
-  expensesPrev: number;
-  adr: number;       // Average Daily Rate
-  revpar: number;    // Revenue Per Available Room-night
-  totalBookings: number;
-  bookedNights: number;
-}
-
-interface OpsData {
-  openTasks: number;
-  activeDeals: number;
-  dealsPipelineValue: number;
-  upcomingBookings: number;
-  staffCount: number;
-  openServiceRequests: number;
-  lowStockItems: number;
-}
 
 type OpsCardKey = 'tasks' | 'deals' | 'bookings' | 'staff' | 'service' | 'inventory';
 
@@ -47,154 +20,11 @@ interface BusinessKPIWidgetProps {
 }
 
 export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) {
-  const { user } = useAuth();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [data, setData] = useState<KPIData | null>(null);
-  const [ops, setOps] = useState<OpsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { data: company } = useMyCompanyId();
-  const companyId = company?.company_id;
-  const { allProperties } = useMyProperties();
-  const allPropertyIds = allProperties.map(p => p.property_id);
-
-  useEffect(() => {
-    if (!user) return;
-    if (allPropertyIds.length === 0) {
-      setLoading(false);
-      return;
-    }
-
-    async function fetchKPI() {
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
-      const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10);
-      const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10);
-      const today = now.toISOString().slice(0, 10);
-
-      // Financial queries using property_id array (covers both owned + managed)
-      const [incomeRes, expenseRes, incomePrevRes, expensePrevRes, bookingsRes] = await Promise.all([
-        supabase
-          .from('property_financials')
-          .select('amount')
-          .in('property_id', allPropertyIds)
-          .eq('transaction_type', 'income')
-          .gte('transaction_date', startOfMonth)
-          .lte('transaction_date', endOfMonth),
-        supabase
-          .from('property_financials')
-          .select('amount')
-          .in('property_id', allPropertyIds)
-          .eq('transaction_type', 'expense')
-          .gte('transaction_date', startOfMonth)
-          .lte('transaction_date', endOfMonth),
-        supabase
-          .from('property_financials')
-          .select('amount')
-          .in('property_id', allPropertyIds)
-          .eq('transaction_type', 'income')
-          .gte('transaction_date', startOfPrevMonth)
-          .lte('transaction_date', endOfPrevMonth),
-        supabase
-          .from('property_financials')
-          .select('amount')
-          .in('property_id', allPropertyIds)
-          .eq('transaction_type', 'expense')
-          .gte('transaction_date', startOfPrevMonth)
-          .lte('transaction_date', endOfPrevMonth),
-        supabase
-          .from('property_bookings')
-          .select('check_in, check_out, total_amount')
-          .in('property_id', allPropertyIds)
-          .in('status', ['confirmed', 'checked_in', 'completed'])
-          .lte('check_in', endOfMonth)
-          .gte('check_out', startOfMonth),
-      ]);
-
-      const sum = (rows: { amount: number }[] | null) =>
-        (rows || []).reduce((s, r) => s + Number(r.amount || 0), 0);
-
-      const revenue = sum(incomeRes.data as any);
-      const expenses = sum(expenseRes.data as any);
-      const revenuePrev = sum(incomePrevRes.data as any);
-      const expensesPrev = sum(expensePrevRes.data as any);
-      const margin = revenue > 0 ? Math.round(((revenue - expenses) / revenue) * 100) : 0;
-
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      let bookedNights = 0;
-      let bookingRevenue = 0;
-      const totalBookings = (bookingsRes.data || []).length;
-      for (const b of (bookingsRes.data || [])) {
-        const ci = new Date(Math.max(new Date(b.check_in).getTime(), new Date(startOfMonth).getTime()));
-        const co = new Date(Math.min(new Date(b.check_out).getTime(), new Date(endOfMonth).getTime()));
-        const nights = Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24)));
-        bookedNights += nights;
-        bookingRevenue += Number((b as any).total_amount || 0);
-      }
-
-      const totalNights = Math.max(1, allPropertyIds.length) * daysInMonth;
-      const occupancyRate = Math.min(100, Math.round((bookedNights / totalNights) * 100));
-      const adr = bookedNights > 0 ? Math.round(bookingRevenue / bookedNights) : 0;
-      const revpar = Math.round((bookingRevenue / totalNights));
-
-      setData({ revenue, expenses, margin, occupancyRate, revenuePrev, expensesPrev, adr, revpar, totalBookings, bookedNights });
-
-      // Operational queries
-      const opsPromises = await Promise.all([
-        // 0: open CRM tasks
-        companyId
-          ? supabase.from('crm_tasks').select('id', { count: 'exact', head: true }).eq('company_id', companyId).neq('status', 'done')
-          : Promise.resolve({ count: 0, error: null }),
-        // 1: active deals count
-        companyId
-          ? supabase.from('agent_deals').select('id, deal_value', { count: 'exact' }).eq('company_id', companyId).not('stage', 'in', '("won","lost")')
-          : Promise.resolve({ count: 0, data: [], error: null }),
-        // 2: upcoming bookings (owned + managed)
-        supabase
-          .from('property_bookings')
-          .select('id', { count: 'exact', head: true })
-          .in('property_id', allPropertyIds)
-          .in('status', ['confirmed', 'checked_in'])
-          .gte('check_out', today),
-        // 3: staff count
-        supabase
-          .from('staff_members')
-          .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user!.id)
-          .eq('is_active', true),
-        // 4: open service requests
-        supabase
-          .from('property_service_requests')
-          .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user!.id)
-          .in('status', ['pending', 'in_progress']),
-        // 5: low stock items
-        supabase
-          .from('property_inventory_items')
-          .select('id, quantity, min_quantity')
-          .eq('owner_id', user!.id)
-          .eq('is_active', true),
-      ]);
-
-      const openTasks = (opsPromises[0] as any).count || 0;
-      const dealsData = (opsPromises[1] as any).data || [];
-      const activeDeals = (opsPromises[1] as any).count || dealsData.length;
-      const dealsPipelineValue = dealsData.reduce((s: number, d: any) => s + Number(d.deal_value || 0), 0);
-      const upcomingBookings = (opsPromises[2] as any).count || 0;
-      const staffCount = (opsPromises[3] as any).count || 0;
-      const openServiceRequests = (opsPromises[4] as any).count || 0;
-      const inventoryItems = (opsPromises[5] as any).data || [];
-      const lowStockItems = inventoryItems.filter((i: any) =>
-        i.min_quantity != null && i.quantity != null && i.quantity < i.min_quantity
-      ).length;
-
-      setOps({ openTasks, activeDeals, dealsPipelineValue, upcomingBookings, staffCount, openServiceRequests, lowStockItems });
-      setLoading(false);
-    }
-
-    fetchKPI();
-  }, [user, companyId, allPropertyIds.join(',')]);
+  const { data: metrics, isLoading: loading } = useDashboardMetrics();
+  const data = metrics?.kpi ?? null;
+  const ops = metrics?.ops ?? null;
 
   const pctChange = (curr: number, prev: number) => {
     if (prev === 0) return curr > 0 ? 100 : 0;
@@ -225,7 +55,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: String(ops?.openTasks ?? 0),
       icon: ClipboardList,
       iconColor: 'text-primary',
-      href: '/owner/tasks',
+      href: '/owner/operations',
       badge: ops && ops.openTasks > 5 ? alertBadge(ops.openTasks) : undefined,
     },
     deals: {
@@ -317,7 +147,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={BarChart3}
           iconColor="text-primary"
           trend={data && data.adr > 0 ? 'up' : 'neutral'}
-          href="/owner/revenue"
+          href="/owner/analytics"
           loading={loading}
         />
         <OwnerKPICard
@@ -326,12 +156,12 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={TrendingUp}
           iconColor="text-accent-foreground"
           trend={data && data.revpar > 0 ? 'up' : 'neutral'}
-          href="/owner/revenue"
+          href="/owner/analytics"
           loading={loading}
         />
       </div>
 
-      {/* Tier 2: Operational Metrics - scroll on mobile, grid on desktop */}
+      {/* Tier 2: Operational Metrics */}
       <ScrollArea className="w-full md:hidden">
         <div className="flex gap-2 pb-2">
           {visibleOpsCards.map((key) => {

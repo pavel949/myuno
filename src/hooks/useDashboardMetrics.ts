@@ -1,0 +1,184 @@
+/**
+ * @module useDashboardMetrics
+ * Consolidated dashboard metrics hook — one batch of queries 
+ * shared across BusinessKPIWidget, TodayActionsWidget, etc.
+ */
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMyCompanyId } from '@/hooks/useAgentDeals';
+import { useMyProperties } from '@/hooks/useMyProperties';
+import { useDashboardFilter } from '@/contexts/DashboardFilterContext';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
+
+export interface DashboardKPI {
+  revenue: number;
+  expenses: number;
+  margin: number;
+  occupancyRate: number;
+  revenuePrev: number;
+  expensesPrev: number;
+  adr: number;
+  revpar: number;
+  totalBookings: number;
+  bookedNights: number;
+}
+
+export interface DashboardOps {
+  openTasks: number;
+  activeDeals: number;
+  dealsPipelineValue: number;
+  upcomingBookings: number;
+  staffCount: number;
+  openServiceRequests: number;
+  lowStockItems: number;
+  overdueTasks: number;
+  unreadMessages: number;
+  pendingInvoices: number;
+}
+
+export function useDashboardMetrics() {
+  const { user } = useAuth();
+  const { data: company } = useMyCompanyId();
+  const companyId = company?.company_id;
+  const { allProperties } = useMyProperties();
+  const { selectedPropertyId } = useDashboardFilter();
+
+  // Filter property IDs based on global dashboard filter
+  const filteredPropertyIds = selectedPropertyId
+    ? allProperties.filter(p => p.property_id === selectedPropertyId).map(p => p.property_id)
+    : allProperties.map(p => p.property_id);
+
+  const totalPropertyCount = selectedPropertyId ? 1 : allProperties.length;
+
+  return useQuery({
+    queryKey: ['dashboard-metrics', user?.id, companyId, filteredPropertyIds.join(',')],
+    queryFn: async () => {
+      if (!user?.id || filteredPropertyIds.length === 0) {
+        return { kpi: null, ops: null };
+      }
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+      const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 10);
+      const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10);
+      const today = now.toISOString().slice(0, 10);
+
+      // All queries in parallel
+      const [
+        incomeRes, expenseRes, incomePrevRes, expensePrevRes, bookingsRes,
+        crmTasksRes, overdueCrmRes, dealsRes, upcomingBookingsRes,
+        staffRes, serviceReqRes, inventoryRes, unreadRes, pendingInvRes,
+      ] = await Promise.all([
+        // Financial — current month
+        supabase.from('property_financials').select('amount')
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'income')
+          .gte('transaction_date', startOfMonth).lte('transaction_date', endOfMonth),
+        supabase.from('property_financials').select('amount')
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'expense')
+          .gte('transaction_date', startOfMonth).lte('transaction_date', endOfMonth),
+        // Financial — previous month
+        supabase.from('property_financials').select('amount')
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'income')
+          .gte('transaction_date', startOfPrevMonth).lte('transaction_date', endOfPrevMonth),
+        supabase.from('property_financials').select('amount')
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'expense')
+          .gte('transaction_date', startOfPrevMonth).lte('transaction_date', endOfPrevMonth),
+        // Bookings — current month
+        supabase.from('property_bookings').select('check_in, check_out, total_amount')
+          .in('property_id', filteredPropertyIds)
+          .in('status', ['confirmed', 'checked_in', 'completed'])
+          .lte('check_in', endOfMonth).gte('check_out', startOfMonth),
+        // CRM tasks (open)
+        companyId
+          ? supabase.from('crm_tasks').select('id', { count: 'exact', head: true })
+              .eq('company_id', companyId).neq('status', 'done')
+          : Promise.resolve({ count: 0, error: null }),
+        // CRM tasks (overdue)
+        companyId
+          ? supabase.from('crm_tasks').select('id', { count: 'exact', head: true })
+              .eq('company_id', companyId).neq('status', 'done').lt('due_date', today)
+          : Promise.resolve({ count: 0, error: null }),
+        // Deals
+        companyId
+          ? supabase.from('agent_deals').select('id, deal_value', { count: 'exact' })
+              .eq('company_id', companyId).not('stage', 'in', '("won","lost")')
+          : Promise.resolve({ count: 0, data: [], error: null }),
+        // Upcoming bookings
+        supabase.from('property_bookings').select('id', { count: 'exact', head: true })
+          .in('property_id', filteredPropertyIds)
+          .in('status', ['confirmed', 'checked_in']).gte('check_out', today),
+        // Staff
+        supabase.from('staff_members').select('id', { count: 'exact', head: true })
+          .eq('owner_id', user.id).eq('is_active', true),
+        // Service requests
+        supabase.from('property_service_requests').select('id', { count: 'exact', head: true })
+          .eq('owner_id', user.id).in('status', ['pending', 'in_progress']),
+        // Inventory (low stock)
+        supabase.from('property_inventory_items').select('id, quantity, min_quantity')
+          .eq('owner_id', user.id).eq('is_active', true),
+        // Unread messages
+        filteredPropertyIds.length > 0
+          ? supabase.from('booking_notifications_log').select('id', { count: 'exact', head: true })
+              .is('read_at', null)
+              .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
+          : Promise.resolve({ count: 0 }),
+        // Pending invoices
+        supabase.from('property_financials').select('id', { count: 'exact', head: true })
+          .eq('owner_id', user.id).eq('transaction_type', 'expense').eq('status', 'pending'),
+      ]);
+
+      // KPI calculations
+      const sum = (rows: any[] | null) => (rows || []).reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
+      const revenue = sum(incomeRes.data);
+      const expenses = sum(expenseRes.data);
+      const revenuePrev = sum(incomePrevRes.data);
+      const expensesPrev = sum(expensePrevRes.data);
+      const margin = revenue > 0 ? Math.round(((revenue - expenses) / revenue) * 100) : 0;
+
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      let bookedNights = 0;
+      let bookingRevenue = 0;
+      const totalBookings = (bookingsRes.data || []).length;
+      for (const b of (bookingsRes.data || [])) {
+        const ci = new Date(Math.max(new Date(b.check_in).getTime(), new Date(startOfMonth).getTime()));
+        const co = new Date(Math.min(new Date(b.check_out).getTime(), new Date(endOfMonth).getTime()));
+        const nights = Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24)));
+        bookedNights += nights;
+        bookingRevenue += Number((b as any).total_amount || 0);
+      }
+      const totalNights = Math.max(1, totalPropertyCount) * daysInMonth;
+      const occupancyRate = Math.min(100, Math.round((bookedNights / totalNights) * 100));
+      const adr = bookedNights > 0 ? Math.round(bookingRevenue / bookedNights) : 0;
+      const revpar = Math.round(bookingRevenue / totalNights);
+
+      const kpi: DashboardKPI = {
+        revenue, expenses, margin, occupancyRate, revenuePrev, expensesPrev,
+        adr, revpar, totalBookings, bookedNights,
+      };
+
+      // Ops calculations
+      const dealsData = (dealsRes as any).data || [];
+      const inventoryItems = (inventoryRes as any).data || [];
+      const ops: DashboardOps = {
+        openTasks: (crmTasksRes as any).count || 0,
+        overdueTasks: (overdueCrmRes as any).count || 0,
+        activeDeals: (dealsRes as any).count || dealsData.length,
+        dealsPipelineValue: dealsData.reduce((s: number, d: any) => s + Number(d.deal_value || 0), 0),
+        upcomingBookings: (upcomingBookingsRes as any).count || 0,
+        staffCount: (staffRes as any).count || 0,
+        openServiceRequests: (serviceReqRes as any).count || 0,
+        lowStockItems: inventoryItems.filter((i: any) =>
+          i.min_quantity != null && i.quantity != null && i.quantity < i.min_quantity
+        ).length,
+        unreadMessages: (unreadRes as any).count || 0,
+        pendingInvoices: (pendingInvRes as any).count || 0,
+      };
+
+      return { kpi, ops };
+    },
+    enabled: !!user?.id && filteredPropertyIds.length > 0,
+    ...CACHE_PROFILES.DYNAMIC,
+  });
+}

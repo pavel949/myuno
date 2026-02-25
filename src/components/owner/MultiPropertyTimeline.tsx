@@ -1,5 +1,8 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useMultiPropertyBookings } from '@/hooks/useMultiPropertyBookings';
 import { useOperationalTasks } from '@/hooks/useOperationalTasks';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
@@ -13,8 +16,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, addDays, subDays, isToday, startOfWeek } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Sparkles, Wrench } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UnifiedProperty } from '@/hooks/useMyProperties';
 
 interface MultiPropertyTimelineProps {
@@ -32,6 +36,8 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const propertyIds = useMemo(() => properties.map(p => p.property_id), [properties]);
 
   // Sort properties: grouped by complex (alphabetically), then no-complex at the end, then by title within group
   const sortedProperties = useMemo(() => {
@@ -88,6 +94,65 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     });
     return map;
   }, [tasks]);
+
+  // Operational overlay: document deadlines + planned expenses
+  const endDate = addDays(startDate, DAYS_TO_SHOW);
+  const rangeStart = format(startDate, 'yyyy-MM-dd');
+  const rangeEnd = format(endDate, 'yyyy-MM-dd');
+
+  const { data: docDeadlines } = useQuery({
+    queryKey: ['timeline-doc-deadlines', rangeStart, rangeEnd, propertyIds.join(',')],
+    queryFn: async () => {
+      if (propertyIds.length === 0) return [];
+      const { data } = await supabase
+        .from('property_documents')
+        .select('id, property_id, title, expiry_date')
+        .in('property_id', propertyIds)
+        .gte('expiry_date', rangeStart)
+        .lte('expiry_date', rangeEnd);
+      return data || [];
+    },
+    enabled: propertyIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: plannedExpenses } = useQuery({
+    queryKey: ['timeline-expenses', rangeStart, rangeEnd, propertyIds.join(',')],
+    queryFn: async () => {
+      if (!user?.id || propertyIds.length === 0) return [];
+      const { data } = await supabase
+        .from('property_financials')
+        .select('id, property_id, description, transaction_date, amount, status')
+        .in('property_id', propertyIds)
+        .eq('transaction_type', 'expense')
+        .eq('status', 'pending')
+        .gte('transaction_date', rangeStart)
+        .lte('transaction_date', rangeEnd);
+      return data || [];
+    },
+    enabled: !!user?.id && propertyIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const docDeadlineMap = useMemo(() => {
+    const map = new Map<string, any[]>();
+    docDeadlines?.forEach(doc => {
+      const key = `${doc.property_id}_${doc.expiry_date}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(doc);
+    });
+    return map;
+  }, [docDeadlines]);
+
+  const expenseMap = useMemo(() => {
+    const map = new Map<string, any[]>();
+    plannedExpenses?.forEach(exp => {
+      const key = `${exp.property_id}_${exp.transaction_date}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(exp);
+    });
+    return map;
+  }, [plannedExpenses]);
 
   const days = useMemo(() => {
     const result: Date[] = [];
@@ -265,6 +330,8 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                         const hasMaintenance = dayTasks.some(t => t.task_type === 'maintenance');
                         const cleaningTask = dayTasks.find(t => t.task_type === 'cleaning');
                         const maintenanceTask = dayTasks.find(t => t.task_type === 'maintenance');
+                        const cellDocs = docDeadlineMap.get(`${property.property_id}_${dateKey}`) || [];
+                        const cellExpenses = expenseMap.get(`${property.property_id}_${dateKey}`) || [];
 
                         return (
                           <button
@@ -275,10 +342,11 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               "hover:bg-muted/50 active:bg-muted",
                               isWeekend && "bg-muted/20",
                               today && "bg-primary/5",
+                              cellDocs.length > 0 && "bg-destructive/5",
                             )}
                             style={{ width: CELL_WIDTH }}
                           >
-                            <div className="flex gap-0.5">
+                            <div className="flex gap-0.5 flex-wrap justify-center">
                               {hasCleaning && (
                                 <button
                                   onClick={(e) => cleaningTask && handleTaskIconClick(cleaningTask, e)}
@@ -294,6 +362,38 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                                 >
                                   <Wrench className="h-3 w-3 text-accent-foreground" />
                                 </button>
+                              )}
+                              {cellDocs.length > 0 && (
+                                <TooltipProvider delayDuration={200}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="cursor-help">
+                                        <FileText className="h-3 w-3 text-destructive" />
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs max-w-[200px]">
+                                      {cellDocs.map((d: any) => d.title).join(', ')}
+                                      <br />
+                                      <span className="text-destructive font-medium">
+                                        {isRu ? 'Истекает' : 'Expires'}
+                                      </span>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                              {cellExpenses.length > 0 && (
+                                <TooltipProvider delayDuration={200}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="cursor-help">
+                                        <DollarSign className="h-3 w-3 text-warning" />
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs max-w-[200px]">
+                                      {cellExpenses.map((e: any) => `${e.description || isRu ? 'Оплата' : 'Payment'}: ฿${Number(e.amount).toLocaleString()}`).join(', ')}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
                             </div>
                           </button>
@@ -375,6 +475,14 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
           <div className="flex items-center gap-1.5">
             <Wrench className="h-3 w-3 text-accent-foreground" />
             <span>{isRu ? 'Ремонт' : 'Repair'}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <FileText className="h-3 w-3 text-destructive" />
+            <span>{isRu ? 'Документ' : 'Document'}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <DollarSign className="h-3 w-3 text-warning" />
+            <span>{isRu ? 'Оплата' : 'Payment'}</span>
           </div>
         </div>
       </div>
