@@ -350,9 +350,9 @@ export default function HowItWorksPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <SectionCard className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
+          <SectionCard className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
             <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-green-600" />
+              <Clock className="w-5 h-5 text-success" />
               <h2 className="font-semibold">
                 {isRu ? 'Быстрый старт: 4 минуты' : isTh ? 'เริ่มต้นอย่างรวดเร็ว: 4 นาที' : 'Quick Start: 4 minutes'}
               </h2>

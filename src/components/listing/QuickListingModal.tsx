@@ -22,10 +22,10 @@ interface QuickListingModalProps {
 }
 
 const CATEGORIES = [
-  { id: 'property', icon: Home, labelEn: 'Property', labelRu: 'Недвижимость', color: 'bg-blue-500/10 text-blue-600' },
-  { id: 'service', icon: Briefcase, labelEn: 'Service', labelRu: 'Услуга', color: 'bg-green-500/10 text-green-600' },
-  { id: 'product', icon: ShoppingBag, labelEn: 'Product', labelRu: 'Товар', color: 'bg-purple-500/10 text-purple-600' },
-  { id: 'experience', icon: Compass, labelEn: 'Experience', labelRu: 'Впечатление', color: 'bg-orange-500/10 text-orange-600' },
+  { id: 'property', icon: Home, labelEn: 'Property', labelRu: 'Недвижимость', color: 'bg-info/10 text-info' },
+  { id: 'service', icon: Briefcase, labelEn: 'Service', labelRu: 'Услуга', color: 'bg-success/10 text-success' },
+  { id: 'product', icon: ShoppingBag, labelEn: 'Product', labelRu: 'Товар', color: 'bg-accent-purple/10 text-accent-purple' },
+  { id: 'experience', icon: Compass, labelEn: 'Experience', labelRu: 'Впечатление', color: 'bg-accent-amber/10 text-accent-amber' },
 ];
 
 const SUBCATEGORIES: Record<string, Array<{ id: string; icon: React.ElementType; labelEn: string; labelRu: string }>> = {
@@ -152,8 +152,8 @@ export function QuickListingModal({ isOpen, onClose }: QuickListingModalProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center h-80 text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
-                  <Check className="w-10 h-10 text-green-600" />
+                <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4">
+                  <Check className="w-10 h-10 text-success" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">
                   {language === 'ru' ? 'Спасибо!' : 'Thank You!'}

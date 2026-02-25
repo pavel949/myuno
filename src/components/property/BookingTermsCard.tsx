@@ -72,10 +72,10 @@ export function BookingTermsCard({
   const fullRefundAmount = remainingAmount; // Full refund = everything except 10% deposit
 
   const policyColorClass = {
-    green: 'bg-green-500/10 text-green-600 border-green-500/20',
-    yellow: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-    orange: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-    red: 'bg-red-500/10 text-red-600 border-red-500/20',
+    green: 'bg-success/10 text-success border-success/20',
+    yellow: 'bg-warning/10 text-warning border-warning/20',
+    orange: 'bg-accent-amber/10 text-accent-amber border-accent-amber/20',
+    red: 'bg-destructive/10 text-destructive border-destructive/20',
     destructive: 'bg-destructive/10 text-destructive border-destructive/20',
   }[policy.color] || 'bg-muted text-muted-foreground';
 
@@ -128,17 +128,17 @@ export function BookingTermsCard({
 
               {/* Refund Calculator - Shows exact amounts and dates when available */}
               {fullRefundDeadline && totalPrice && (
-                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 space-y-2">
+                <div className="p-3 rounded-lg bg-success/10 border border-success/20 space-y-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                    <Calendar className="w-4 h-4 text-success" />
+                    <span className="text-sm font-medium text-success">
                       {isRu ? 'Калькулятор возврата' : 'Refund Calculator'}
                     </span>
                   </div>
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-green-700 dark:text-green-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success mt-0.5 flex-shrink-0" />
+                      <span className="text-success">
                         {isRu 
                           ? `До ${format(fullRefundDeadline, 'd MMM, HH:mm', { locale: ruLocale })}: полный возврат ${formatPrice(fullRefundAmount)}`
                           : `Before ${format(fullRefundDeadline, 'd MMM, h:mm a', { locale: enUS })}: full refund ${formatPrice(fullRefundAmount)}`}
@@ -146,8 +146,8 @@ export function BookingTermsCard({
                     </div>
                     {partialRefundDeadline && partialRefundAmount > 0 && (
                       <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-yellow-700 dark:text-yellow-300">
+                        <AlertTriangle className="w-3.5 h-3.5 text-warning mt-0.5 flex-shrink-0" />
+                        <span className="text-warning">
                           {isRu 
                             ? `${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: возврат ${formatPrice(partialRefundAmount)} (${policy.partialRefundPercent}%)`
                             : `${format(fullRefundDeadline, 'd MMM')} — ${format(partialRefundDeadline, 'd MMM')}: refund ${formatPrice(partialRefundAmount)} (${policy.partialRefundPercent}%)`}
@@ -155,8 +155,8 @@ export function BookingTermsCard({
                       </div>
                     )}
                     <div className="flex items-start gap-2">
-                      <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-red-600 dark:text-red-400">
+                      <XCircle className="w-3.5 h-3.5 text-destructive mt-0.5 flex-shrink-0" />
+                      <span className="text-destructive">
                         {isRu 
                           ? `Предоплата ${formatPrice(deposit)} невозвратная`
                           : `${formatPrice(deposit)} deposit is non-refundable`}

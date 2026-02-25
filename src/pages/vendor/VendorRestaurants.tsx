@@ -267,7 +267,7 @@ const VendorRestaurants = () => {
                           )}
                           {item.rating && (
                             <p className="text-sm flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                              <Star className="h-3 w-3 fill-warning text-warning" />
                               {item.rating.toFixed(1)} ({item.review_count})
                             </p>
                           )}
@@ -280,7 +280,7 @@ const VendorRestaurants = () => {
                             <DropdownMenuItem onClick={() => openEditDialog(item)}>
                               <Edit className="h-4 w-4 mr-2" />{isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}>
                               <Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}
                             </DropdownMenuItem>
                           </DropdownMenuContent>

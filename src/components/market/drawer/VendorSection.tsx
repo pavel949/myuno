@@ -54,15 +54,15 @@ export function VendorSection({ onNavigate }: VendorSectionProps) {
         </span>
       </div>
       <VendorLink
-        icon={<Store className="w-5 h-5 text-emerald-600" />}
-        iconBg="bg-emerald-100 dark:bg-emerald-900/30"
+        icon={<Store className="w-5 h-5 text-success" />}
+        iconBg="bg-success/10"
         label={language === 'ru' ? 'Стать продавцом' : 'Become a Seller'}
         description={language === 'ru' ? 'Продавайте на myUNO' : 'Sell on myUNO'}
         onClick={() => handleNav('/vendor/onboarding')}
       />
       <VendorLink
-        icon={<LayoutDashboard className="w-5 h-5 text-blue-600" />}
-        iconBg="bg-blue-100 dark:bg-blue-900/30"
+        icon={<LayoutDashboard className="w-5 h-5 text-accent-purple" />}
+        iconBg="bg-accent-purple/10"
         label={language === 'ru' ? 'Панель продавца' : 'Vendor Dashboard'}
         description={language === 'ru' ? 'Управление товарами' : 'Manage your products'}
         onClick={() => handleNav('/vendor')}

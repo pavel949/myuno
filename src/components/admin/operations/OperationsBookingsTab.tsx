@@ -107,7 +107,7 @@ export function OperationsBookingsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Clock className="h-8 w-8 text-blue-500" />
+            <Clock className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.confirmed}</p>
               <p className="text-sm text-muted-foreground">{isRu ? 'Подтверждено' : 'Confirmed'}</p>
@@ -116,7 +116,7 @@ export function OperationsBookingsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
               <p className="text-sm text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
@@ -125,7 +125,7 @@ export function OperationsBookingsTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <XCircle className="h-8 w-8 text-red-500" />
+            <XCircle className="h-8 w-8 text-destructive" />
             <div>
               <p className="text-2xl font-bold">{stats.cancelled}</p>
               <p className="text-sm text-muted-foreground">{isRu ? 'Отменено' : 'Cancelled'}</p>

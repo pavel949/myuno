@@ -35,7 +35,7 @@ export function AgentLeaderboard({ deals, agents }: Props) {
   return (
     <div className="border rounded-xl p-4 bg-card">
       <p className="text-sm font-medium mb-3 flex items-center gap-2">
-        <Trophy className="h-4 w-4 text-amber-500" />
+        <Trophy className="h-4 w-4 text-accent-amber" />
         {isRu ? 'Рейтинг агентов' : 'Agent Leaderboard'}
       </p>
       <div className="space-y-2">

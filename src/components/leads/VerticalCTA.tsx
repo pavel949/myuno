@@ -194,7 +194,7 @@ export function VerticalCTA({
               {(() => { const Icon = resolveIcon(verticalConfig.icon); return <Icon className="w-7 h-7 text-primary" />; })()}
             </div>
             {/* Online indicator */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             </div>
           </div>
