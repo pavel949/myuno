@@ -34,21 +34,11 @@
 | profiles | 7 | Registered users |
 | wallets | 7 | User wallets |
 
-### Empty Critical Tables (0 records)
-- **ledger_accounts** — financial accounting not activated
-- **ledger_entries** — zero financial records
-- **booking_payments** — no payment records
-- **booking_operations** — no ops tracking
-- **featured_listings** — monetization not started
-- **partner_applications** — no vendor onboarding
-- **crm_contacts / crm_tasks** — CRM unused
-- **marketplace_reviews** — no reviews
-
 ---
 
-## 2. WHAT WAS COMPLETED (Parts 1-3)
+## 2. WHAT WAS COMPLETED (Parts 1-3 + Cleanup)
 
-### Part 1 — Data Foundation (DONE)
+### Part 1 — Data Foundation (DONE ✅)
 - Districts normalized to Title Case (21 unique values, 0 NULLs)
 - Platform fee recalculated: all orders now show exactly 10.0% fee
 - Zero-amount orders addressed
@@ -56,23 +46,31 @@
 - `normalize_district()` trigger added
 - `validate_order_fee()` trigger added
 
-### Part 2 — Booking Flow and MC Layer (DONE)
+### Part 2 — Booking Flow and MC Layer (DONE ✅)
 - `property_bookings` now has 16 records (15 from iCal, 1 from Agoda)
 - `order_id` column added to `property_bookings`
 - `create_property_booking_from_order()` trigger activated
-- 3 Management Companies exist, all verified:
-  - **Show Property Phuket** — 13 properties linked
-  - **Ignatev Estate Co., ltd** — 11 properties linked
-  - **Pavel Real Estate MC** — 0 properties linked
-- 24 of 41 properties linked to MCs (58%)
+- 3 Management Companies exist, all verified
 - `paid_at` column added to orders
 
-### Part 3 — Payment Pipeline (DONE)
+### Part 3 — Payment Pipeline (DONE ✅)
 - Stripe webhook handler: 709 lines, handles checkout.session.completed, payment_intent.payment_failed, refunds, disputes, expiry
 - `record_ledger_entries` RPC created (idempotent)
 - Wallet balances reset to 0 (all 7 wallets)
 - Confirmation emails, notifications, status history all wired
 - 84 Edge Functions deployed
+
+### P0 Cleanup (DONE ✅)
+- P0.1: `src/data/marketplaceProducts.ts` — already deleted (0 imports)
+- P0.2: `src/data/demo/properties.json` — already deleted
+- P0.3: `src/data/demo/restaurants.json` — already deleted
+- Dead code directory `src/data/` is empty
+
+### MC Linkage (DONE ✅)
+- **All 41 properties** now linked to Management Companies (0 orphaned)
+  - **Show Property Phuket** — 21 properties (Kamala, Patong, Kathu + original)
+  - **Ignatev Estate Co., ltd** — 17 properties (Thalang, Si Sunthon, Sakhu, Ao Po, Pasak + original)
+  - **Pavel Real Estate MC** — 3 properties (Phuket Town, Koh Kaew)
 
 ---
 
@@ -88,40 +86,14 @@
 | in_progress | 1 | 1,800 |
 | **Total** | **38** | **962,690** |
 
-### Orders by Vertical
-| Vertical | Count | GMV (THB) |
-|----------|-------|-----------|
-| property | 18 | 511,500 |
-| yacht | 6 | 409,800 |
-| tour | 6 | 25,800 |
-| restaurant | 3 | 4,990 |
-| cleaning | 2 | 3,300 |
-| beauty | 2 | 4,800 |
-| flowers | 1 | 2,500 |
-
 ### Payments
 - **0 real Stripe payments processed** (paid_at is NULL for all 38 orders)
 - Stripe webhook is fully coded but has never fired in production
 - `ledger_accounts`: 0 records
 - `ledger_entries`: 0 records
-- `booking_payments`: 0 records
 
 ### Users
 - **7 profiles** total (internal team only)
-- No external customers yet
-
-### Listings Inventory
-| Vertical | Count |
-|----------|-------|
-| Marketplace products | 124 |
-| Experiences | 112 |
-| Yachts | 97 |
-| Vehicles | 76 |
-| Restaurants | 67 |
-| Bouquets | 66 |
-| Services | 56 |
-| Properties | 41 |
-| **Total listings** | **~639** |
 
 ---
 
@@ -130,50 +102,45 @@
 ### Part 4: Notifications and Guest Experience (Next)
 - Guest check-in flow activation
 - Push notification testing
-- Email templates verification (send-order-email function exists but untested)
-- Booking voucher generation (generate-booking-voucher function exists)
-- Guest messaging (booking_messages table is empty)
+- Email templates verification
+- Booking voucher generation
+- Guest messaging
 
 ### Part 5: Launch Readiness
-- E2E payment test with Stripe test card (CRITICAL — never done)
+- E2E payment test with Stripe test card (CRITICAL)
 - Maintenance mode toggle for public launch
 - Performance audit of 337-table schema
 - Dead table cleanup (182 empty tables)
 - RLS policy verification across all tables
 
-### Outstanding from fix-plan.md
-- P0.1: Delete unused `src/data/marketplaceProducts.ts` (783 lines)
-- P0.2: Delete unused `src/data/demo/properties.json`
-- P0.3: Delete unused `src/data/demo/restaurants.json`
+### Post-Launch (P1-P2)
 - P1.1: Refactor `useAdminContent.ts` (498 lines)
 - P1.2: Deprecate `useSupabaseQuery.ts`
+- P1.3: Align restaurant query keys
+- P1.4: Add ESLint react-hooks/exhaustive-deps
+- P1.5: Type-safe admin mutations
 
 ---
 
-## 5. CRITICAL BLOCKERS
+## 5. REMAINING BLOCKERS
 
 ### Blocker 1: Zero Real Payments
-All 38 orders have `paid_at = NULL`. The Stripe webhook has never processed a real payment. The ledger system is wired but contains 0 entries. **Until an E2E payment test succeeds, the platform cannot accept money.**
+All 38 orders have `paid_at = NULL`. Until an E2E payment test succeeds, the platform cannot accept money.
 
 ### Blocker 2: Ledger System Dead
-`ledger_accounts` and `ledger_entries` both have 0 records. The `record_ledger_entries` RPC exists but has never been called. Financial reporting is impossible.
+`ledger_accounts` and `ledger_entries` both have 0 records. Financial reporting is impossible.
 
-### Blocker 3: 17 Properties Not Linked to MCs
-41 properties total, 24 linked. 17 remain orphaned. The third MC (Pavel Real Estate MC) has 0 properties.
+### Blocker 3: 182 Empty Tables
+54% of the database schema is unused.
 
-### Blocker 4: 182 Empty Tables
-54% of the database schema is unused. This creates maintenance burden, confuses the codebase, and increases attack surface for RLS misconfiguration.
-
-### Blocker 5: No External Users
-7 profiles, all internal. No customer acquisition funnel is active. Partner applications table is empty.
+### Blocker 4: No External Users
+7 profiles, all internal. No customer acquisition funnel is active.
 
 ---
 
 ## 6. RECOMMENDED NEXT STEPS (Priority Order)
 
-1. **E2E Stripe Payment Test** — Create a test order, pay with `4242 4242 4242 4242`, verify webhook fires, order updates to confirmed, ledger entries are created, notification is sent
+1. **E2E Stripe Payment Test** — pay with test card, verify full pipeline
 2. **Part 4 Implementation** — Guest notifications, email templates, vouchers
 3. **Part 5 Implementation** — Launch readiness checklist, dead table audit
-4. **Link remaining 17 properties** to MCs
-5. **Delete dead code files** (P0.1-P0.3)
-6. **First external user onboarding** — Test the full guest journey from discovery to payment to check-in
+4. **First external user onboarding** — Test the full guest journey
