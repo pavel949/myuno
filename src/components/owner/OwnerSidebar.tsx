@@ -94,8 +94,15 @@ const navigationGroups: NavGroup[] = [
       { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
-      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
+    ],
+  },
+  {
+    label: 'Commerce',
+    labelRu: 'Коммерция',
+    defaultOpen: false,
+    items: [
       { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
+      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/owner/insurance', icon: ShieldCheck },
     ],
   },
@@ -106,8 +113,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
       { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
-      { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: ClipboardList },
-      { title: 'Owner Reports', titleRu: 'Отчёты владельцам', path: '/owner/owner-reports', icon: BarChart3 },
+      { title: 'Analytics', titleRu: 'Аналитика', path: '/owner/analytics', icon: ClipboardList },
     ],
   },
   {
@@ -115,8 +121,7 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Команда',
     defaultOpen: false,
     items: [
-      { title: 'Staff Directory', titleRu: 'Сотрудники', path: '/owner/staff', icon: Users },
-      { title: 'Members & Access', titleRu: 'Участники и доступ', path: '/owner/team', icon: UserCog },
+      { title: 'Staff & Access', titleRu: 'Сотрудники и доступ', path: '/owner/staff', icon: Users },
     ],
   },
 ];

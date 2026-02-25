@@ -50,8 +50,14 @@ const MENU_SECTIONS: MenuSection[] = [
       { path: '/owner/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи' },
       { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
       { path: '/owner/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики' },
-      { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
+    ],
+  },
+  {
+    titleEn: 'Commerce',
+    titleRu: 'Коммерция',
+    items: [
       { path: '/owner/rates', icon: Tag, labelEn: 'Rate Seasons', labelRu: 'Тарифы' },
+      { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
       { path: '/owner/insurance', icon: ShieldCheck, labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы' },
     ],
   },
@@ -61,16 +67,14 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { path: '/owner/financials', icon: DollarSign, labelEn: 'Income & Expenses', labelRu: 'Доходы и расходы' },
       { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Счета' },
-      { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
-      { path: '/owner/owner-reports', icon: BarChart3, labelEn: 'Owner Reports', labelRu: 'Отчёты владельцам' },
+      { path: '/owner/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
     ],
   },
   {
     titleEn: 'Team',
     titleRu: 'Команда',
     items: [
-      { path: '/owner/staff', icon: Users, labelEn: 'Staff Directory', labelRu: 'Сотрудники' },
-      { path: '/owner/team', icon: UserCog, labelEn: 'Members & Access', labelRu: 'Участники и доступ' },
+      { path: '/owner/staff', icon: Users, labelEn: 'Staff & Access', labelRu: 'Сотрудники и доступ' },
     ],
   },
 ];
