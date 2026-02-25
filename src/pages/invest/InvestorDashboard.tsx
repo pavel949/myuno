@@ -11,6 +11,7 @@ import {
   InvestorRecommendations,
 } from '@/components/investor/dashboard';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
+import { YourDayFeed } from '@/components/shared/YourDayFeed';
 
 export default function InvestorDashboard() {
   const { user, isLoading } = useAuth();
@@ -46,6 +47,9 @@ export default function InvestorDashboard() {
         fallbackPath="/invest"
       >
         <div className="space-y-6">
+          {/* Your Day Feed */}
+          <YourDayFeed role="investor" compact />
+
           {/* Welcome Card with Stats */}
           <InvestorWelcomeCard />
           
