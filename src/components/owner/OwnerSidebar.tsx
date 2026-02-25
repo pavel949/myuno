@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
+import {
   LayoutDashboard, 
   Building2,
   CalendarDays,
@@ -18,6 +18,10 @@ import {
   UserCog,
   Receipt,
   Settings,
+  Tag,
+  Star,
+  ShieldCheck,
+  BarChart3,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -90,6 +94,9 @@ const navigationGroups: NavGroup[] = [
       { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
+      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
+      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
+      { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/owner/insurance', icon: ShieldCheck },
     ],
   },
   {
@@ -100,6 +107,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
       { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
       { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: ClipboardList },
+      { title: 'Owner Reports', titleRu: 'Отчёты владельцам', path: '/owner/owner-reports', icon: BarChart3 },
     ],
   },
   {

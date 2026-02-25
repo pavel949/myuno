@@ -391,6 +391,10 @@ export const OwnerVaultPage = lazy(() => import('@/pages/owner/OwnerVaultPage'))
 export const ContactImportPage = lazy(() => import('@/pages/owner/ContactImportPage'));
 export const NewDealPage = lazy(() => import('@/pages/owner/NewDealPage'));
 export const PipelineSettingsPage = lazy(() => import('@/pages/owner/PipelineSettingsPage'));
+export const RateManagementPage = lazy(() => import('@/pages/owner/RateManagementPage'));
+export const ReviewsManagementPage = lazy(() => import('@/pages/owner/ReviewsManagementPage'));
+export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/DocumentsInsurancePage'));
+export const OwnerReportsPage = lazy(() => import('@/pages/owner/OwnerReportsPage'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
