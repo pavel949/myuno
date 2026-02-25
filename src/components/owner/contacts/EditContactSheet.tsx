@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUpdateContact, CrmContact, CONTACT_TYPES, CONTACT_SOURCES } from '@/hooks/useCrmContacts';
+import { useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
+import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,8 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
   const isRu = language === 'ru';
   const { toast } = useToast();
   const updateContact = useUpdateContact();
+  const { data: contactTypes = [] } = useCrmOptions(contact.company_id, 'contact_type');
+  const { data: leadSources = [] } = useCrmOptions(contact.company_id, 'lead_source');
 
   const [form, setForm] = useState({
     first_name: contact.first_name,
@@ -176,14 +179,14 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
               <Label>{isRu ? 'Тип' : 'Type'}</Label>
               <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CONTACT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
               <Label>{isRu ? 'Источник' : 'Source'}</Label>
               <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CONTACT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                <SelectContent>{leadSources.map(s => <SelectItem key={s.value} value={s.value}>{isRu ? s.label_ru : s.label_en}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>

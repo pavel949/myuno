@@ -17,6 +17,7 @@ import {
   FileText,
   UserCog,
   Receipt,
+  Settings,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -78,6 +79,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
       { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
+      { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/owner/sales/settings', icon: Settings },
     ],
   },
   {

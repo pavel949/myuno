@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateContact, CONTACT_TYPES, CONTACT_SOURCES } from '@/hooks/useCrmContacts';
+import { useCreateContact } from '@/hooks/useCrmContacts';
+import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,8 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const createContact = useCreateContact();
+  const { data: contactTypes = [] } = useCrmOptions(companyId, 'contact_type');
+  const { data: leadSources = [] } = useCrmOptions(companyId, 'lead_source');
 
   const [form, setForm] = useState({
     first_name: '',
@@ -138,7 +141,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
               <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CONTACT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {(contactTypes).map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -147,7 +150,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
               <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CONTACT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  {(leadSources).map(s => <SelectItem key={s.value} value={s.value}>{isRu ? s.label_ru : s.label_en}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

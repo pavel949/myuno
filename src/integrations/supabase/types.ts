@@ -3626,6 +3626,71 @@ export type Database = {
           },
         ]
       }
+      crm_custom_options: {
+        Row: {
+          category: string
+          color: string | null
+          company_id: string
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          label_en: string
+          label_ru: string
+          probability: number | null
+          short_en: string | null
+          short_ru: string | null
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          category: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          label_en: string
+          label_ru: string
+          probability?: number | null
+          short_en?: string | null
+          short_ru?: string | null
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          category?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          label_en?: string
+          label_ru?: string
+          probability?: number | null
+          short_en?: string | null
+          short_ru?: string | null
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_custom_options_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_tasks: {
         Row: {
           assigned_to: string | null
