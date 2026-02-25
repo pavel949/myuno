@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 
 const COMMON_INTERESTS = [
   'golf', 'diving', 'yoga', 'fitness', 'sailing', 'travel', 'wine', 'cooking',
@@ -55,6 +56,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     family_info: contact.family_info || '',
     interests: contact.interests || [],
     scoring: contact.scoring?.toString() || '0',
+    tags: contact.tags || [],
   });
 
   const [customInterest, setCustomInterest] = useState('');
@@ -84,6 +86,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       family_info: contact.family_info || '',
       interests: contact.interests || [],
       scoring: contact.scoring?.toString() || '0',
+      tags: contact.tags || [],
     });
   }, [contact]);
 
@@ -118,6 +121,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         family_info: form.family_info || null,
         interests: form.interests.length ? form.interests : null,
         scoring: form.scoring ? Number(form.scoring) : 0,
+        tags: form.tags,
       } as any);
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
@@ -304,6 +308,19 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
                   )}>{d}</button>
               ))}
             </div>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
+            <ContactTagPicker
+              companyId={contact.company_id}
+              selectedTags={form.tags}
+              onToggle={(tag) => setForm(f => ({
+                ...f,
+                tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag],
+              }))}
+            />
           </div>
 
           <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>

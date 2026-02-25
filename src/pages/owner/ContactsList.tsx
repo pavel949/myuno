@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
-import { useCrmContacts, CrmContact, CONTACT_TYPES, CONTACT_TAGS } from '@/hooks/useCrmContacts';
+import { useCrmContacts, CrmContact, CONTACT_TYPES } from '@/hooks/useCrmContacts';
+import { useContactTags } from '@/hooks/useContactTags';
+import { ContactTagsDisplay } from '@/components/owner/contacts/ContactTagPicker';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { maskPhone } from '@/lib/contactProtection';
 import { Button } from '@/components/ui/button';
@@ -35,14 +37,7 @@ function getAvatarColor(name: string): string {
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
-const tagBadgeColors: Record<string, string> = {
-  VIP: 'bg-warning/15 text-warning border-warning/30',
-  hot: 'bg-destructive/15 text-destructive border-destructive/30',
-  warm: 'bg-warning/15 text-warning border-warning/30',
-  cold: 'bg-info/15 text-info border-info/30',
-  'follow-up': 'bg-primary/15 text-primary border-primary/30',
-  priority: 'bg-success/15 text-success border-success/30',
-};
+// Tag colors now come from dynamic contact_tags table
 
 const typeBadgeColors: Record<string, string> = {
   buyer: 'bg-primary/15 text-primary border-primary/30',
@@ -93,11 +88,7 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
               {contact.contact_type}
             </Badge>
           )}
-          {contact.tags?.map(tag => (
-            <Badge key={tag} variant="outline" className={cn('text-[9px] h-4 px-1.5 border', tagBadgeColors[tag] || '')}>
-              {tag}
-            </Badge>
-          ))}
+          <ContactTagsDisplay tags={contact.tags || []} companyId={contact.company_id} max={3} />
         </div>
 
         {/* Contact info */}
@@ -152,6 +143,25 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
         <Clock className="h-3.5 w-3.5 text-muted-foreground/40" />
       </div>
     </button>
+  );
+}
+
+function TagFilterChips({ companyId, tagFilter, onTagChange }: { companyId?: string; tagFilter: string | null; onTagChange: (v: string | null) => void }) {
+  const { data: tags = [] } = useContactTags(companyId);
+  if (!tags.length) return <p className="text-xs text-muted-foreground">—</p>;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {tags.map(t => (
+        <button
+          key={t.id}
+          onClick={() => onTagChange(tagFilter === t.name ? null : t.name)}
+          className={cn('px-2 py-0.5 text-xs rounded-full border transition-colors', tagFilter === t.name ? 'text-primary-foreground' : 'text-muted-foreground')}
+          style={tagFilter === t.name ? { backgroundColor: t.color, borderColor: t.color, color: 'white' } : { borderColor: `${t.color}40` }}
+        >
+          {t.name}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -264,17 +274,7 @@ export default function ContactsList() {
           </div>
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Теги' : 'Tags'}</p>
-            <div className="flex flex-wrap gap-1">
-              {CONTACT_TAGS.map(t => (
-                <button
-                  key={t}
-                  onClick={() => handleTagChange(tagFilter === t ? null : t)}
-                  className={cn('px-2 py-0.5 text-xs rounded-full border', tagFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            <TagFilterChips companyId={companyId} tagFilter={tagFilter} onTagChange={handleTagChange} />
           </div>
         </div>
       )}
