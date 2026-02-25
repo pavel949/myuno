@@ -16,7 +16,8 @@ import {
   AlertTriangle, Cake, LogIn, LogOut, Phone, Mail, Users,
   Eye, ClipboardCheck, Bell, FileWarning, CalendarClock,
   ChevronRight, Sparkles, Clock, MessageSquare, Handshake,
-  CreditCard, Calendar,
+  CreditCard, Calendar, Newspaper, PartyPopper, Lightbulb,
+  ExternalLink, MapPin,
 } from 'lucide-react';
 
 /* ─── Section config ─── */
@@ -54,6 +55,18 @@ const SECTIONS: Record<string, SectionConfig> = {
     icon: CalendarClock, titleRu: 'Завтра', titleEn: 'Tomorrow',
     color: 'text-muted-foreground', bg: 'bg-muted/30', border: 'border-l-muted-foreground/40',
   },
+  recommendations: {
+    icon: Lightbulb, titleRu: 'Рекомендации myUNO', titleEn: 'myUNO Recommendations',
+    color: 'text-primary', bg: 'bg-primary/5', border: 'border-l-primary',
+  },
+  news: {
+    icon: Newspaper, titleRu: 'Новости Пхукета', titleEn: 'Phuket News',
+    color: 'text-info', bg: 'bg-info/5', border: 'border-l-info',
+  },
+  events: {
+    icon: PartyPopper, titleRu: 'События и мероприятия', titleEn: 'Events',
+    color: 'text-accent-foreground', bg: 'bg-accent', border: 'border-l-accent',
+  },
 };
 
 /* ─── Item icon mapping ─── */
@@ -68,6 +81,9 @@ function getItemIcon(type: DayItemType, meta?: DayItem['meta']): React.ElementTy
     case 'personal_reminder': return getReminderIcon(meta);
     case 'document_expiry': return FileWarning;
     case 'deadline': return Clock;
+    case 'recommendation': return Lightbulb;
+    case 'news': return Newspaper;
+    case 'event': return PartyPopper;
     default: return Bell;
   }
 }
@@ -104,6 +120,12 @@ function getItemStyle(item: DayItem) {
       return { color: 'text-warning', bg: 'bg-warning/10', border: 'border-l-warning' };
     case 'document_expiry':
       return { color: 'text-destructive', bg: 'bg-destructive/10', border: 'border-l-destructive' };
+    case 'recommendation':
+      return { color: 'text-primary', bg: 'bg-primary/10', border: 'border-l-primary' };
+    case 'news':
+      return { color: 'text-info', bg: 'bg-info/10', border: 'border-l-info' };
+    case 'event':
+      return { color: 'text-accent-foreground', bg: 'bg-accent', border: 'border-l-accent' };
     default:
       return { color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-l-muted-foreground' };
   }
@@ -116,7 +138,11 @@ function getSectionKey(order: number): string {
   if (order === 2) return 'schedule';
   if (order === 3) return 'tasks';
   if (order === 4) return 'reminders';
-  if (order === 5) return 'reminders'; // deadlines merged with reminders
+  if (order === 5) return 'reminders';
+  if (order === 6) return 'tomorrow';
+  if (order === 7) return 'recommendations';
+  if (order === 8) return 'news';
+  if (order === 9) return 'events';
   return 'tomorrow';
 }
 
@@ -136,7 +162,7 @@ export function YourDayFeed() {
       grouped.get(key)!.push(item);
     }
     // Maintain order
-    const order = ['overdue', 'birthday', 'schedule', 'tasks', 'reminders', 'tomorrow'];
+    const order = ['overdue', 'birthday', 'schedule', 'tasks', 'reminders', 'tomorrow', 'recommendations', 'news', 'events'];
     return order
       .filter(k => grouped.has(k))
       .map(k => ({ key: k, config: SECTIONS[k], items: grouped.get(k)! }));
@@ -333,6 +359,9 @@ function getTypeLabel(item: DayItem, isRu: boolean): string {
     personal_reminder: ['Личное', 'Personal'],
     document_expiry: ['Документ', 'Document'],
     deadline: ['Дедлайн', 'Deadline'],
+    recommendation: ['myUNO', 'myUNO'],
+    news: ['Новости', 'News'],
+    event: ['Событие', 'Event'],
   };
   const [ru, en] = labels[item.type] || ['', ''];
   return isRu ? ru : en;
