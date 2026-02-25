@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StaffTaskCalendar } from '@/components/staff/StaffTaskCalendar';
+import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { 
   ClipboardList, 
   Play, 
@@ -115,6 +116,11 @@ export default function StaffDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Your Day Feed */}
+      <div className="mb-6">
+        <YourDayFeed role="staff" compact />
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-6">

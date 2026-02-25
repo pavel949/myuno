@@ -36,6 +36,7 @@ import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
 import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
 import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
 import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorOnboardingChecklist';
+import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
@@ -179,6 +180,9 @@ const VendorDashboard = () => {
           onDismiss={() => setShowOnboarding(false)}
         />
       )}
+
+      {/* Your Day Feed */}
+      <YourDayFeed role="vendor" compact />
 
       {/* Org Header */}
       <Card>

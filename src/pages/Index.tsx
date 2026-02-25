@@ -28,6 +28,7 @@ import { usePostOrderReview } from '@/hooks/usePostOrderReview';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
+import { YourDayFeed } from '@/components/shared/YourDayFeed';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -82,7 +83,12 @@ const Index = () => {
           {/* ─── SECTION 2: Quick Actions ─── */}
           <QuickActionsGrid />
 
-          {/* ─── SECTION 3: Smart Tip (contextual, dismissable) ─── */}
+          {/* ─── SECTION 3: Your Day Feed ─── */}
+          <Suspense fallback={null}>
+            <YourDayFeed compact />
+          </Suspense>
+
+          {/* ─── SECTION 4: Smart Tip (contextual, dismissable) ─── */}
           <LifecycleSmartTip />
 
           {/* ─── SECTION 4: Property Tour Banner ─── */}
