@@ -1,183 +1,123 @@
 
 
-# Аудит блока управления недвижимостью: два сценария + поставщики + документы
+# Аудит блока управления недвижимостью
 
-## Текущее состояние
+## 1. Что сделано хорошо
 
-### Два сценария управления (УК vs Собственник)
+- **Command Center**: Структура дашборда логичная — Today Briefing -> Today Actions -> KPI -> виджеты. Правильная приоритизация.
+- **KPI**: Включены индустриальные метрики (ADR, RevPAR, Occupancy, Margin). Сравнение с прошлым месяцем.
+- **Календарь**: Два режима (single/multi), группировка по комплексам, iCal-синхронизация.
+- **Финансы**: Полноценный модуль — список, графики, прогноз, CSV/Excel экспорт, бюджетирование.
+- **Кадры**: Развитая StaffPage с фильтрами, ролями, зарплатами, назначениями на объекты.
+- **CRM**: Полный цикл — Kanban, контакты, задачи, настраиваемые этапы.
+- **Билингвальность**: Все модули поддерживают RU/EN.
 
-**Что есть:**
-- В `PropertyEditor` можно выбрать `management_type`: `owner` (самостоятельно), `full` (УК), `partial` (сервис-партнёр)
-- Навигация (`OwnerSidebar`) одинаковая для всех — нет адаптации интерфейса под тип управления
-- Все инструменты (Staff, Calendar, Financials, Tasks) доступны всем одинаково
+## 2. Критические проблемы
 
-**Проблемы:**
-- Собственник, управляющий сам, видит функции, которые ему не нужны (Management Portfolio, Team Members & Access, Delegation)
-- УК не видит выделенного раздела для управления отношениями с собственниками объектов
-- Нет визуальной разницы в интерфейсе между двумя сценариями — пользователь не понимает, что система адаптирована под его модель
+### 2.1 Дублирование отчётов (3 страницы делают почти одно и то же)
 
-### Поставщики (Vendor Directory)
+| Страница | Путь | Что делает |
+|---|---|---|
+| `ReportsPage` | `/owner/reports` | Генерация отчётов (monthly/quarterly/annual/P&L/owner statement), PDF, Excel, Email, Portfolio view |
+| `OwnerReportsPage` | `/owner/owner-reports` | Простой расчёт Revenue/Expenses/ADR за месяц + Save |
+| `OwnerRevenueDashboard` | `/owner/revenue` | Revenue + Occupancy + ADR + RevPAR графики, прогноз 3 мес, per-property breakdown |
 
-**Что есть:**
-- `VendorDirectoryPage` — read-only список из `vendor_prospects` (таблица admin-уровня для привлечения вендоров)
-- Отзывы через `VendorReviewSheet` (привязаны к `company_id`)
-- Базовые контакты: phone, email, website, whatsapp
+**Проблема**: Пользователь не понимает куда идти. `OwnerReportsPage` — это упрощённый клон `ReportsPage`. `OwnerRevenueDashboard` — аналитика, а не отчёт, но KPI дублируют дашборд.
 
-**Проблемы:**
-1. **Неправильный источник данных**: справочник тянет из `vendor_prospects` — это воронка привлечения вендоров (admin), а не справочник поставщиков собственника/УК
-2. **Нет CRUD для собственника**: нельзя добавить своего поставщика (клининг-тётя Маша, электрик Сомчай)
-3. **Нет привязки к объектам**: поставщик не привязан к конкретному property
-4. **Нет документов у поставщика**: нельзя прикрепить договор, фото, лицензию
-5. **Нет истории работ**: не видно, когда последний раз работал, сколько заплатили
-6. **Нет разделения**: "мои поставщики" vs "поставщики через myUNO" не различаются
+**Решение**: Объединить в одну страницу "Аналитика и отчёты" с табами: Обзор (метрики + графики из RevenueDashboard) | Отчёты (генерация/история из ReportsPage) | Бюджет (из BudgetPage). Удалить `OwnerReportsPage` как полностью дублирующую.
 
-### Документы
+### 2.2 Дублирование команды (2 страницы)
 
-**Что есть:**
-- `PropertyDocumentsTab` — документы привязаны к объекту (коды, договоры, страховки)
-- `OwnerVaultPage` — файловое хранилище с категориями (contracts, photos, legal, financial)
-- `useUserDocuments` — личные документы пользователя (паспорт, виза)
-- `UnifiedMediaUploader` — система загрузки файлов
+| Страница | Путь | Что делает |
+|---|---|---|
+| `StaffPage` | `/owner/staff` | Сотрудники: создание, роли, зарплаты, назначения, фото, документы |
+| `TeamPage` | `/owner/team` | Делегаты: приглашения, разрешения (view/edit/financials/bookings) |
 
-**Проблемы:**
-1. `PropertyDocumentsTab` не поддерживает загрузку файлов — только текстовые поля (title, description, access_code), поле `file_url` есть в схеме но нигде не заполняется через UI
-2. У `staff_members` нет полей для фото, документов (паспорт, рабочее разрешение)
-3. У поставщиков нет хранилища документов (договоры, акты, лицензии)
-4. Maintenance schedules не могут хранить акты выполненных работ
+**Проблема**: Для руководителя УК это один раздел "Команда". Разделение сбивает: куда добавить нового уборщика vs менеджера с доступом?
 
----
+**Решение**: Объединить в одну страницу с табами: Сотрудники (текущий StaffPage) | Доступ и делегирование (текущий TeamPage) | Приглашения (incoming/outgoing).
 
-## План улучшений
+### 2.3 Навигация "Финансы" перегружена (4 пункта)
 
-### 1. Собственная таблица поставщиков: `owner_service_vendors`
+Текущее:
+- Income & Expenses (`/owner/financials`)
+- Invoices (`/owner/invoices`)
+- Reports (`/owner/reports`)
+- Owner Reports (`/owner/owner-reports`)
 
-Новая таблица для хранения СВОИХ поставщиков собственника/УК (не путать с `vendor_prospects` платформы):
+Плюс скрытые: Budget (`/owner/budget`), Portfolio (`/owner/portfolio`), Revenue Dashboard (`/owner/revenue`) — доступны только через кнопки внутри страниц.
 
-```text
-owner_service_vendors
-+-- id (uuid)
-+-- owner_id (uuid, FK -> auth.users)
-+-- name (text) — "Сомчай Электрик"
-+-- name_ru (text)
-+-- category (text) — cleaning, plumbing, electrical, ac, pest, garden, pool, security, appliances, handyman, other
-+-- contact_person (text)
-+-- phone (text)
-+-- email (text)
-+-- whatsapp (text)
-+-- line_id (text) — популярно в Таиланде
-+-- address (text)
-+-- photo_url (text) — фото человека/компании
-+-- notes (text)
-+-- source (text) — 'own' | 'myuno' — свой или через платформу
-+-- is_favorite (bool)
-+-- is_active (bool, default true)
-+-- avg_rating (numeric) — средняя оценка
-+-- total_jobs (int) — сколько раз привлекался
-+-- created_at / updated_at
-```
+**Решение**: Сократить до 3 пунктов: Финансы (Income/Expenses + Invoices) | Аналитика (объединённые отчёты + revenue dashboard) | Бюджет.
 
-RLS: owner_id = auth.uid()
+### 2.4 Операции не структурированы логически
 
-### 2. Документы поставщика: `vendor_documents`
+Текущая группа "Operations" содержит:
+- Tasks (операционные задачи по объектам)
+- Inventory (расходники)
+- Vendors (поставщики)
+- Reviews (отзывы с OTA)
+- Rate Seasons (тарифы)
+- Insurance & Docs (страховки)
 
-```text
-vendor_documents
-+-- id (uuid)
-+-- vendor_id (FK -> owner_service_vendors)
-+-- owner_id (uuid)
-+-- doc_type (text) — contract, license, insurance, invoice, act, photo, id_card, work_permit, other
-+-- title (text)
-+-- file_url (text)
-+-- file_name (text)
-+-- expiry_date (date, nullable)
-+-- notes (text)
-+-- created_at
-```
+**Проблема**: Reviews и Rate Seasons — это не операции, а коммерция/revenue management. Insurance — это compliance/документооборот.
 
-### 3. Привязка поставщиков к объектам: `vendor_property_assignments`
+**Решение**: Перегруппировать:
+- **Операции**: Tasks, Inventory, Vendors, Maintenance Plan
+- **Коммерция**: Rate Seasons, Reviews, Channel Sync (перенести из дашборда)
+- **Документы**: Insurance & Docs, Document Templates
 
-```text
-vendor_property_assignments
-+-- id (uuid)
-+-- vendor_id (FK -> owner_service_vendors)
-+-- property_id (FK -> owner_properties)
-+-- service_type (text)
-+-- rate (numeric, nullable)
-+-- rate_type (text) — per_visit, hourly, monthly
-+-- notes (text)
-+-- is_active (bool)
-```
+## 3. Что нужно доработать
 
-### 4. Обновление PropertyDocumentsTab — добавить загрузку файлов
+### 3.1 Календарь не связан с операционным управлением
+Календарь показывает бронирования и iCal, но не интегрирует: плановые уборки, техобслуживание, сроки страховок, оплаты. Руководителю нужен единый операционный календарь.
 
-Сейчас форма создания документа не включает загрузку файла, хотя поле `file_url` есть в БД. Добавить `UnifiedMediaUploader` (mode='document') в диалог создания документа, чтобы можно было прикреплять PDF, фото, сканы.
+**Решение**: Добавить слой "operational overlay" в MultiPropertyTimeline — показывать иконки задач, срочных дедлайнов документов, плановых расходов прямо на таймлайне.
 
-### 5. Фото и документы сотрудников
+### 3.2 KPI дублируются между виджетами
+`BusinessKPIWidget` загружает 11 запросов к базе. `TodayActionsWidget` загружает 5 частично совпадающих запросов (overdue tasks, service requests, low stock, pending invoices). Те же данные считаются отдельно в `OwnerRevenueDashboard` и `OwnerReportsPage`.
 
-Добавить поля в `staff_members`:
-- `photo_url` (text) — фото сотрудника
-- Создать связанную таблицу `staff_documents` (work_permit, passport, contract, id_card) — по аналогии с `vendor_documents`
+**Решение**: Создать единый хук `useDashboardMetrics()`, который делает один batch запросов и возвращает все метрики. Все виджеты подписываются на него через React Query.
 
-### 6. Обновлённая страница "Мои поставщики"
+### 3.3 Нет dashboard-level фильтра по объекту
+На дашборде все виджеты показывают агрегат по всем объектам. Нет возможности быстро отфильтровать один объект и увидеть все его метрики.
 
-Полностью переработать `VendorDirectoryPage`:
+**Решение**: Добавить Property Selector в header дашборда (глобальный контекст). При выборе объекта все виджеты фильтруются.
 
-```text
-+------------------------------------------------+
-|  Мои поставщики                    [+ Добавить] |
-|  ------------------------------------------------|
-|  [Все] [Клининг] [Электрика] [Сантехника] ...   |
-|  ------------------------------------------------|
-|  [Мои] [myUNO]                                   |
-|  ------------------------------------------------|
-|                                                  |
-|  +-- Vendor Card ----+  +-- Vendor Card ----+   |
-|  | [photo] Сомчай    |  | [photo] Clean Pro |   |
-|  | Электрик          |  | Cleaning Co.      |   |
-|  | * 4.5 (12 работ)  |  | * 4.8 (28 работ)  |   |
-|  | Villa Ocean, ...  |  | Condo Palm        |   |
-|  | [Call] [WA] [...]  |  | [myUNO badge]     |   |
-|  +-------------------+  +-------------------+   |
-|                                                  |
-|  При клике -> детальная карточка:                |
-|  - Контакты, фото                                |
-|  - Привязанные объекты                           |
-|  - Документы (договоры, лицензии)                |
-|  - История работ и оценки                        |
-+--------------------------------------------------+
-```
+### 3.4 Today Actions ведут на несуществующие роуты
+- `href: '/owner/tasks'` — нет такого роута (правильный: `/owner/operations`)
+- `href: '/owner/inbox'` — нет такого роута (правильный: `/owner/messages`)
 
-### 7. Адаптация навигации по management_type
+## 4. План реализации
 
-Мягкая адаптация — не скрывать разделы, но менять акценты:
-- Для `owner` (self-managed): в Operations подсветить "Мои поставщики" и "Maintenance Plan"
-- Для `full`/`partial` (УК): показать "Management Portfolio" в группе Main
+### Фаза 1: Устранение дублирования и битых ссылок
+1. Удалить `OwnerReportsPage` — его функционал полностью покрыт `ReportsPage`
+2. Объединить `StaffPage` + `TeamPage` в единую страницу с табами
+3. Исправить href в `TodayActionsWidget`: `/owner/tasks` -> `/owner/operations`, `/owner/inbox` -> `/owner/messages`
+4. Убрать "Owner Reports" из сайдбара и мобильного меню
+5. Перегруппировать навигацию:
+   - Operations: Tasks, Inventory, Vendors, Maintenance
+   - Commerce: Rates, Reviews
+   - Finance: Income/Expenses, Invoices, Analytics (unified reports)
+   - Team: Staff + Access (merged)
 
----
+### Фаза 2: Объединение аналитики
+6. Создать единую страницу "Analytics" (`/owner/analytics`), объединяющую: Revenue Dashboard графики + ReportsPage генератор + Budget (как таб)
+7. Удалить отдельные роуты `/owner/revenue`, `/owner/budget`, `/owner/owner-reports`
+8. Создать хук `useDashboardMetrics()` для консолидации запросов
 
-## Технические изменения
+### Фаза 3: Улучшение Command Center
+9. Добавить глобальный Property Selector на дашборд
+10. Добавить operational overlay на MultiPropertyTimeline (задачи, дедлайны документов)
 
-| Файл | Действие |
-|------|----------|
-| `supabase/migrations/...owner_vendors.sql` | 3 новые таблицы + RLS + поля для staff |
-| `src/hooks/useOwnerVendors.ts` | CRUD-хук для owner_service_vendors |
-| `src/hooks/useVendorDocuments.ts` | Хук для документов поставщика |
-| `src/pages/owner/VendorDirectoryPage.tsx` | Полная переработка — CRUD, карточки, фильтры |
-| `src/components/owner/vendors/VendorDetailSheet.tsx` | Новый — детальная карточка с табами (Info, Properties, Docs, History) |
-| `src/components/owner/vendors/AddVendorDialog.tsx` | Новый — форма добавления с фото и категорией |
-| `src/components/owner/vendors/VendorDocumentsTab.tsx` | Новый — документы поставщика с загрузкой |
-| `src/components/owner/PropertyDocumentsTab.tsx` | Добавить UnifiedMediaUploader для file_url |
-| `src/pages/owner/StaffPage.tsx` | Добавить photo_url и ссылку на документы |
-
-### Миграция БД
-
-1. Создание `owner_service_vendors` с RLS (owner_id = auth.uid())
-2. Создание `vendor_documents` с RLS
-3. Создание `vendor_property_assignments` с RLS
-4. ALTER TABLE `staff_members` ADD COLUMN `photo_url` text
-5. Создание `staff_documents` (аналог vendor_documents)
-
-### Загрузка файлов
-
-Все документы загружаются через существующий `UnifiedMediaUploader` (mode='document') в bucket `vendor-uploads` с path `{user_id}/vendors/{vendor_id}/` или `{user_id}/staff/{staff_id}/`.
+### Затрагиваемые файлы
+- `OwnerSidebar.tsx` — перегруппировка навигации
+- `OwnerDashboardMenu.tsx` — синхронизация с сайдбаром
+- `TodayActionsWidget.tsx` — исправление href
+- `AnimatedRoutes.tsx` — обновление роутов
+- `pageRegistry.ts` — удаление неиспользуемых lazy imports
+- `StaffPage.tsx` — добавление табов Team/Access
+- `TeamPage.tsx` — интеграция в StaffPage (удаление отдельной страницы)
+- `OwnerReportsPage.tsx` — удаление
+- Новый: `src/pages/owner/AnalyticsPage.tsx` — объединённая аналитика
+- Новый: `src/hooks/useDashboardMetrics.ts` — консолидированные метрики
 
