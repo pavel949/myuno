@@ -317,10 +317,10 @@ export default function PartnerApplicationsAdmin() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         {[
           { label: language === 'ru' ? 'Всего' : 'Total', value: stats.total, color: 'bg-primary/20 text-primary' },
-          { label: language === 'ru' ? 'Ожидают' : 'Pending', value: stats.pending, color: 'bg-yellow-500/20 text-yellow-500' },
-          { label: language === 'ru' ? 'На рассмотрении' : 'Reviewing', value: stats.reviewing, color: 'bg-blue-500/20 text-blue-500' },
-          { label: language === 'ru' ? 'Одобрено' : 'Approved', value: stats.approved, color: 'bg-green-500/20 text-green-500' },
-          { label: language === 'ru' ? 'Отклонено' : 'Rejected', value: stats.rejected, color: 'bg-red-500/20 text-red-500' },
+          { label: language === 'ru' ? 'Ожидают' : 'Pending', value: stats.pending, color: 'bg-warning/20 text-warning' },
+          { label: language === 'ru' ? 'На рассмотрении' : 'Reviewing', value: stats.reviewing, color: 'bg-info/20 text-info' },
+          { label: language === 'ru' ? 'Одобрено' : 'Approved', value: stats.approved, color: 'bg-success/20 text-success' },
+          { label: language === 'ru' ? 'Отклонено' : 'Rejected', value: stats.rejected, color: 'bg-destructive/20 text-destructive' },
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -680,7 +680,7 @@ export default function PartnerApplicationsAdmin() {
               variant={actionType === 'reject' ? 'destructive' : 'default'}
               onClick={() => handleStatusChange(actionType === 'approve' ? 'approved' : 'rejected')}
               disabled={isProcessing || (actionType === 'reject' && !rejectionReason.trim())}
-              className={actionType === 'approve' ? 'bg-green-600 hover:bg-green-700' : ''}
+              className={actionType === 'approve' ? 'bg-success hover:bg-success/90' : ''}
             >
               {isProcessing ? (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />

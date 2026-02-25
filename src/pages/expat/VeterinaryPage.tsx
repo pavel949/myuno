@@ -74,10 +74,10 @@ const VeterinaryPage = () => {
         </div>
 
         {/* Emergency Banner */}
-        <Card className="mb-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-500/20">
+        <Card className="mb-4 bg-gradient-to-r from-destructive/10 to-accent-amber/10 border-destructive/20">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-medium text-sm mb-1">
                   {isRussian ? 'Экстренная помощь' : 'Pet Emergency'}
@@ -154,7 +154,7 @@ const VeterinaryPage = () => {
               <>
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
-                    <Stethoscope className="h-5 w-5 text-pink-600" />
+                    <Stethoscope className="h-5 w-5 text-accent-coral" />
                     {getName(selectedClinic)}
                   </DialogTitle>
                 </DialogHeader>
@@ -178,7 +178,7 @@ const VeterinaryPage = () => {
                   {/* Features */}
                   <div className="flex flex-wrap gap-2">
                     {selectedClinic.is_24h && (
-                      <Badge className="gap-1 bg-green-500">
+                      <Badge className="gap-1 bg-success">
                         <Clock className="h-3 w-3" />
                         24/7
                       </Badge>
@@ -196,7 +196,7 @@ const VeterinaryPage = () => {
                       </Badge>
                     )}
                     {selectedClinic.is_verified && (
-                      <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+                      <Badge variant="outline" className="gap-1 text-success border-success">
                         <CheckCircle2 className="h-3 w-3" />
                         {isRussian ? 'Проверено' : 'Verified'}
                       </Badge>
@@ -300,7 +300,7 @@ const ClinicCard = ({ clinic, isRussian, getName, onClick }: ClinicCardProps) =>
             className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-accent-coral to-destructive flex items-center justify-center flex-shrink-0">
             <Stethoscope className="h-7 w-7 text-white" />
           </div>
         )}
@@ -319,7 +319,7 @@ const ClinicCard = ({ clinic, isRussian, getName, onClick }: ClinicCardProps) =>
           
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {clinic.is_24h && (
-              <Badge className="text-xs bg-green-500">24/7</Badge>
+              <Badge className="text-xs bg-success">24/7</Badge>
             )}
             {clinic.has_emergency && (
               <Badge variant="destructive" className="text-xs">
@@ -337,7 +337,7 @@ const ClinicCard = ({ clinic, isRussian, getName, onClick }: ClinicCardProps) =>
           <div className="flex items-center gap-3 mt-2 text-xs">
             {clinic.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                <Star className="h-3 w-3 fill-warning text-warning" />
                 {clinic.rating.toFixed(1)}
               </span>
             )}

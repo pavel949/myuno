@@ -709,7 +709,7 @@ export default function OwnerRentalTerms() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Zap className="h-4 w-4 text-yellow-500" />
+                  <Zap className="h-4 w-4 text-warning" />
                   {isRu ? 'Электричество' : 'Electricity'}
                 </CardTitle>
               </CardHeader>
@@ -792,7 +792,7 @@ export default function OwnerRentalTerms() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Droplets className="h-4 w-4 text-blue-500" />
+                  <Droplets className="h-4 w-4 text-info" />
                   {isRu ? 'Вода' : 'Water'}
                 </CardTitle>
               </CardHeader>
