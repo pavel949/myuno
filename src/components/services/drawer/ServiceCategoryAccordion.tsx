@@ -186,7 +186,7 @@ export function ServiceCategoryAccordion({ searchQuery, onNavigate }: ServiceCat
                         {getName(category)}
                       </span>
                       {category.isNew && (
-                        <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-green-500">
+                        <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-success">
                           NEW
                         </Badge>
                       )}

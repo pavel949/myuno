@@ -160,13 +160,13 @@ export default function VisaServiceDetail() {
             {requirements && (
               <div className="bg-card border border-border rounded-xl p-4">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                  <AlertCircle className="w-4 h-4 text-warning" />
                   {language === 'ru' ? 'Требования' : 'Requirements'}
                 </h3>
                 <ul className="space-y-2">
                   {(language === 'ru' ? requirements.ru : requirements.en)?.map((req, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                       <span>{req}</span>
                     </li>
                   ))}
@@ -191,7 +191,7 @@ export default function VisaServiceDetail() {
                     </p>
                     {visa.provider.rating && (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="w-4 h-4 fill-warning text-warning" />
                         <span>{visa.provider.rating}</span>
                         {visa.provider.review_count && (
                           <span>({visa.provider.review_count})</span>

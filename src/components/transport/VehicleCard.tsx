@@ -57,7 +57,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
               </span>
             )}
             {vehicle.is_featured && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/90 text-white text-[10px] font-semibold">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/90 text-white text-[10px] font-semibold">
                 <Sparkles className="w-3 h-3" />
                 {isRu ? 'Лучшее' : 'Best Value'}
               </span>
@@ -65,7 +65,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           </div>
 
           {vehicle.is_verified && (
-            <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-emerald-500/90 text-white text-[10px] font-semibold">
+            <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-success/90 text-white text-[10px] font-semibold">
               <ShieldCheck className="w-3 h-3" />
               G-Verified
             </span>
@@ -75,7 +75,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
         {/* Availability dot */}
         {vehicle.is_available && (
           <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             <span className="text-[10px] text-white font-medium">
               {isRu ? 'Доступен' : 'Available'}
             </span>

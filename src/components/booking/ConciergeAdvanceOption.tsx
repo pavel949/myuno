@@ -38,10 +38,10 @@ export function ConciergeAdvanceOption({
       onClick={onSelect}
       className={cn(
         "w-full p-4 rounded-xl border-2 transition-all text-left",
-        "bg-gradient-to-br from-amber-500/5 to-orange-500/5",
+        "bg-gradient-to-br from-warning/5 to-accent-amber/5",
         isSelected
-          ? "border-amber-500 bg-amber-500/10"
-          : "border-border hover:border-amber-500/50",
+          ? "border-warning bg-warning/10"
+          : "border-border hover:border-warning/50",
         className
       )}
     >
@@ -50,8 +50,8 @@ export function ConciergeAdvanceOption({
         <div className={cn(
           "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
           isSelected 
-            ? "bg-gradient-to-br from-amber-500 to-orange-500 text-white" 
-            : "bg-amber-500/20 text-amber-600"
+            ? "bg-gradient-to-br from-warning to-accent-amber text-white" 
+            : "bg-warning/20 text-warning"
         )}>
           <Sparkles className="w-5 h-5" />
         </div>
@@ -111,11 +111,11 @@ export function ConciergeAdvanceOption({
               <span className="text-muted-foreground">
                 {language === 'ru' ? 'Сервис myUNO' : 'myUNO service'} ({feePercent}%)
               </span>
-              <span className="text-amber-600">+{currencySymbol}{fee.toLocaleString()}</span>
+              <span className="text-warning">+{currencySymbol}{fee.toLocaleString()}</span>
             </div>
             <div className="border-t pt-1.5 flex justify-between font-semibold">
               <span>{language === 'ru' ? 'К оплате' : 'You pay'}</span>
-              <span className="text-amber-600">{currencySymbol}{totalWithFee.toLocaleString()}</span>
+              <span className="text-warning">{currencySymbol}{totalWithFee.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ export function ConciergeAdvanceOption({
         <div className={cn(
           "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-1",
           isSelected 
-            ? "border-amber-500 bg-amber-500" 
+            ? "border-warning bg-warning" 
             : "border-muted-foreground/30"
         )}>
           {isSelected && (

@@ -110,7 +110,7 @@ export function VendorNotificationBell({
       case 'alert':
         return <AlertTriangle className="h-4 w-4 text-warning" />;
       case 'review':
-        return <Star className="h-4 w-4 text-yellow-500" />;
+        return <Star className="h-4 w-4 text-warning" />;
     }
   };
 

@@ -51,12 +51,12 @@ interface QuickCreateOption {
 }
 
 const createOptions: QuickCreateOption[] = [
-  { id: 'product', slug: 'product', icon: Package, labelEn: 'Product', labelRu: 'Товар', color: 'text-emerald-500', path: '/vendor/products?create=true' },
-  { id: 'service', slug: 'service', icon: Wrench, labelEn: 'Service', labelRu: 'Услуга', color: 'text-blue-500', path: '/vendor/services?create=true' },
+  { id: 'product', slug: 'product', icon: Package, labelEn: 'Product', labelRu: 'Товар', color: 'text-success', path: '/vendor/products?create=true' },
+  { id: 'service', slug: 'service', icon: Wrench, labelEn: 'Service', labelRu: 'Услуга', color: 'text-info', path: '/vendor/services?create=true' },
 ];
 
 const verticalOptions: QuickCreateOption[] = [
-  { id: 'beauty', slug: 'beauty', icon: Sparkles, labelEn: 'Beauty', labelRu: 'Красота', color: 'text-pink-500', path: '/vendor/beauty?create=true' },
+  { id: 'beauty', slug: 'beauty', icon: Sparkles, labelEn: 'Beauty', labelRu: 'Красота', color: 'text-accent-coral', path: '/vendor/beauty?create=true' },
   { id: 'restaurants', slug: 'restaurants', icon: Utensils, labelEn: 'Restaurant', labelRu: 'Ресторан', color: 'text-warning', path: '/vendor/restaurants?create=true' },
   { id: 'transport', slug: 'transport', icon: Car, labelEn: 'Vehicle', labelRu: 'Транспорт', color: 'text-accent-purple', path: '/vendor/transport?create=true' },
   { id: 'yachts', slug: 'yachts', icon: Ship, labelEn: 'Boat Charter', labelRu: 'Чартер', color: 'text-accent-cyan', path: '/vendor/yachts?create=true' },

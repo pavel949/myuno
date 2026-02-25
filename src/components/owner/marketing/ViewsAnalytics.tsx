@@ -59,8 +59,8 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
   }, [] as { date: string; views: number; clicks: number; inquiries: number }[]);
   
   const getTrendIcon = (change: number) => {
-    if (change > 0) return <TrendingUp className="h-3 w-3 text-green-500" />;
-    if (change < 0) return <TrendingDown className="h-3 w-3 text-red-500" />;
+    if (change > 0) return <TrendingUp className="h-3 w-3 text-success" />;
+    if (change < 0) return <TrendingDown className="h-3 w-3 text-destructive" />;
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
   
@@ -75,32 +75,32 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
       value: summary.totalViews,
       change: summary.viewsChange,
       icon: Eye,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+      color: 'text-info',
+      bgColor: 'bg-info/10',
     },
     {
       label: isRu ? 'Показы в поиске' : 'Impressions',
       value: summary.totalImpressions,
       change: 0,
       icon: MousePointer,
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/30',
+      color: 'text-accent-purple',
+      bgColor: 'bg-accent-purple/10',
     },
     {
       label: isRu ? 'Запросы' : 'Inquiries',
       value: summary.totalInquiries,
       change: 0,
       icon: MessageSquare,
-      color: 'text-orange-500',
-      bgColor: 'bg-orange-50 dark:bg-orange-950/30',
+      color: 'text-accent-amber',
+      bgColor: 'bg-accent-amber/10',
     },
     {
       label: isRu ? 'Бронирования' : 'Bookings',
       value: summary.totalBookings,
       change: summary.bookingsChange,
       icon: Calendar,
-      color: 'text-green-500',
-      bgColor: 'bg-green-50 dark:bg-green-950/30',
+      color: 'text-success',
+      bgColor: 'bg-success/10',
     },
   ];
   
@@ -145,8 +145,8 @@ export function ViewsAnalytics({ analytics, summary, className }: ViewsAnalytics
                   <div className="flex items-center gap-0.5 text-xs">
                     {getTrendIcon(stat.change)}
                     <span className={cn(
-                      stat.change > 0 ? "text-green-600" : 
-                      stat.change < 0 ? "text-red-500" : 
+                      stat.change > 0 ? "text-success" : 
+                      stat.change < 0 ? "text-destructive" : 
                       "text-muted-foreground"
                     )}>
                       {formatChange(stat.change)}

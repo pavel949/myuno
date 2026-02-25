@@ -69,7 +69,7 @@ export default function PetServiceDetail() {
         <div className="absolute top-4 right-4 flex gap-2">
           <Button size="icon" variant="secondary" className="rounded-full bg-white/20 backdrop-blur-sm"
             onClick={() => toggleFavorite('pet_service', service.id, service as any)}>
-            <Heart className={cn("w-5 h-5", isFav && "fill-red-500 text-red-500")} />
+            <Heart className={cn("w-5 h-5", isFav && "fill-destructive text-destructive")} />
           </Button>
           <Button size="icon" variant="secondary" className="rounded-full bg-white/20 backdrop-blur-sm">
             <Share2 className="w-5 h-5" />
@@ -94,7 +94,7 @@ export default function PetServiceDetail() {
             <h1 className="text-xl font-bold mb-2">{name}</h1>
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <Star className="w-4 h-4 text-warning fill-warning" />
                 <span className="font-medium">{service.rating}</span>
                 <span className="text-muted-foreground">({service.review_count})</span>
               </div>
