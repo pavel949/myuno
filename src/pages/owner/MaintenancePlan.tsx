@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import { useMaintenanceSchedules } from '@/hooks/useMaintenanceSchedules';
+import { useMaintenanceSchedules, MaintenanceSchedule } from '@/hooks/useMaintenanceSchedules';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScheduleCard } from '@/components/owner/maintenance/ScheduleCard';
 import { AddScheduleDialog } from '@/components/owner/maintenance/AddScheduleDialog';
+import { EditScheduleDialog } from '@/components/owner/maintenance/EditScheduleDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, ShieldCheck } from 'lucide-react';
 import { isPast, parseISO, differenceInDays } from 'date-fns';
@@ -12,8 +13,9 @@ export default function MaintenancePlan() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [showAdd, setShowAdd] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<MaintenanceSchedule | null>(null);
 
-  const { data: schedules = [], isLoading, addSchedule, markCompleted, deleteSchedule } = useMaintenanceSchedules();
+  const { data: schedules = [], isLoading, addSchedule, markCompleted, updateSchedule, deleteSchedule } = useMaintenanceSchedules();
   const { data: properties = [] } = useOwnerProperties();
 
   const { overdue, upcoming, onTrack } = useMemo(() => {
@@ -36,6 +38,16 @@ export default function MaintenancePlan() {
     : 100;
 
   const propList = (properties as any[]).map((p: any) => ({ id: p.id, title: p.title }));
+
+  const cardProps = (s: MaintenanceSchedule) => ({
+    key: s.id,
+    schedule: s,
+    isRu,
+    onComplete: (id: string) => markCompleted.mutate(id),
+    onDelete: (id: string) => deleteSchedule.mutate(id),
+    onEdit: (schedule: MaintenanceSchedule) => setEditingSchedule(schedule),
+    isPending: markCompleted.isPending || deleteSchedule.isPending,
+  });
 
   return (
     <div className="space-y-6 pb-24">
@@ -72,70 +84,39 @@ export default function MaintenancePlan() {
 
       {isLoading && <p className="text-sm text-muted-foreground">{isRu ? 'Загрузка...' : 'Loading...'}</p>}
 
-      {/* Overdue */}
       {overdue.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold text-destructive mb-2">
             {isRu ? `Просрочено (${overdue.length})` : `Overdue (${overdue.length})`}
           </h2>
           <div className="space-y-2">
-            {overdue.map(s => (
-              <ScheduleCard
-                key={s.id}
-                schedule={s}
-                isRu={isRu}
-                onComplete={(id) => markCompleted.mutate(id)}
-                onDelete={(id) => deleteSchedule.mutate(id)}
-                isPending={markCompleted.isPending || deleteSchedule.isPending}
-              />
-            ))}
+            {overdue.map(s => <ScheduleCard {...cardProps(s)} />)}
           </div>
         </section>
       )}
 
-      {/* Upcoming */}
       {upcoming.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold mb-2">
             {isRu ? `Ближайшие 30 дней (${upcoming.length})` : `Upcoming 30 days (${upcoming.length})`}
           </h2>
           <div className="space-y-2">
-            {upcoming.map(s => (
-              <ScheduleCard
-                key={s.id}
-                schedule={s}
-                isRu={isRu}
-                onComplete={(id) => markCompleted.mutate(id)}
-                onDelete={(id) => deleteSchedule.mutate(id)}
-                isPending={markCompleted.isPending || deleteSchedule.isPending}
-              />
-            ))}
+            {upcoming.map(s => <ScheduleCard {...cardProps(s)} />)}
           </div>
         </section>
       )}
 
-      {/* On Track */}
       {onTrack.length > 0 && (
         <section>
           <h2 className="text-sm font-semibold mb-2">
             {isRu ? `По графику (${onTrack.length})` : `On Track (${onTrack.length})`}
           </h2>
           <div className="space-y-2">
-            {onTrack.map(s => (
-              <ScheduleCard
-                key={s.id}
-                schedule={s}
-                isRu={isRu}
-                onComplete={(id) => markCompleted.mutate(id)}
-                onDelete={(id) => deleteSchedule.mutate(id)}
-                isPending={markCompleted.isPending || deleteSchedule.isPending}
-              />
-            ))}
+            {onTrack.map(s => <ScheduleCard {...cardProps(s)} />)}
           </div>
         </section>
       )}
 
-      {/* Empty state */}
       {!isLoading && schedules.length === 0 && (
         <div className="text-center py-12">
           <ShieldCheck className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
@@ -157,6 +138,15 @@ export default function MaintenancePlan() {
         isRu={isRu}
         onAdd={(data) => addSchedule.mutate(data)}
         isPending={addSchedule.isPending}
+      />
+
+      <EditScheduleDialog
+        schedule={editingSchedule}
+        open={!!editingSchedule}
+        onOpenChange={(v) => { if (!v) setEditingSchedule(null); }}
+        isRu={isRu}
+        onSave={(data) => updateSchedule.mutate(data)}
+        isPending={updateSchedule.isPending}
       />
     </div>
   );

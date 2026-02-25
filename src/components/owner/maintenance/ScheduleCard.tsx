@@ -3,7 +3,7 @@ import { getTemplateByCategory, FREQUENCY_LABELS, type MaintenanceCategory } fro
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { CheckCircle2, Trash2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays, isPast, parseISO } from 'date-fns';
 
@@ -12,10 +12,11 @@ interface Props {
   isRu: boolean;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (schedule: MaintenanceSchedule) => void;
   isPending: boolean;
 }
 
-export function ScheduleCard({ schedule, isRu, onComplete, onDelete, isPending }: Props) {
+export function ScheduleCard({ schedule, isRu, onComplete, onDelete, onEdit, isPending }: Props) {
   const template = getTemplateByCategory(schedule.category as MaintenanceCategory);
   const Icon = template?.icon;
   const dueDate = parseISO(schedule.next_due_date);
@@ -78,6 +79,15 @@ export function ScheduleCard({ schedule, isRu, onComplete, onDelete, isPending }
             {statusLabel}
           </span>
           <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2"
+              onClick={() => onEdit(schedule)}
+              disabled={isPending}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
             <Button
               size="sm"
               variant="outline"
