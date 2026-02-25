@@ -11227,6 +11227,89 @@ export type Database = {
           },
         ]
       }
+      owner_reports: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          data: Json | null
+          file_url: string | null
+          id: string
+          owner_id: string
+          period_end: string
+          period_start: string
+          property_id: string | null
+          report_type: string
+          sent_at: string | null
+          sent_to: string[] | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          data?: Json | null
+          file_url?: string | null
+          id?: string
+          owner_id: string
+          period_end: string
+          period_start: string
+          property_id?: string | null
+          report_type?: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          data?: Json | null
+          file_url?: string | null
+          id?: string
+          owner_id?: string
+          period_end?: string
+          period_start?: string
+          property_id?: string | null
+          report_type?: string
+          sent_at?: string | null
+          sent_to?: string[] | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_service_vendors: {
         Row: {
           address: string | null
@@ -13776,9 +13859,11 @@ export type Database = {
           access_code: string | null
           access_instructions: string | null
           access_instructions_ru: string | null
+          coverage_amount: number | null
           created_at: string | null
           description: string | null
           description_ru: string | null
+          doc_type: string | null
           document_type: string
           expiry_date: string | null
           file_name: string | null
@@ -13787,7 +13872,13 @@ export type Database = {
           is_sensitive: boolean | null
           is_verified: boolean | null
           issue_date: string | null
+          policy_number: string | null
           property_id: string
+          provider_contact: string | null
+          provider_name: string | null
+          reminder_days: number | null
+          status: string | null
+          tags: string[] | null
           title: string
           title_ru: string | null
           updated_at: string | null
@@ -13799,9 +13890,11 @@ export type Database = {
           access_code?: string | null
           access_instructions?: string | null
           access_instructions_ru?: string | null
+          coverage_amount?: number | null
           created_at?: string | null
           description?: string | null
           description_ru?: string | null
+          doc_type?: string | null
           document_type: string
           expiry_date?: string | null
           file_name?: string | null
@@ -13810,7 +13903,13 @@ export type Database = {
           is_sensitive?: boolean | null
           is_verified?: boolean | null
           issue_date?: string | null
+          policy_number?: string | null
           property_id: string
+          provider_contact?: string | null
+          provider_name?: string | null
+          reminder_days?: number | null
+          status?: string | null
+          tags?: string[] | null
           title: string
           title_ru?: string | null
           updated_at?: string | null
@@ -13822,9 +13921,11 @@ export type Database = {
           access_code?: string | null
           access_instructions?: string | null
           access_instructions_ru?: string | null
+          coverage_amount?: number | null
           created_at?: string | null
           description?: string | null
           description_ru?: string | null
+          doc_type?: string | null
           document_type?: string
           expiry_date?: string | null
           file_name?: string | null
@@ -13833,7 +13934,13 @@ export type Database = {
           is_sensitive?: boolean | null
           is_verified?: boolean | null
           issue_date?: string | null
+          policy_number?: string | null
           property_id?: string
+          provider_contact?: string | null
+          provider_name?: string | null
+          reminder_days?: number | null
+          status?: string | null
+          tags?: string[] | null
           title?: string
           title_ru?: string | null
           updated_at?: string | null
@@ -15152,6 +15259,85 @@ export type Database = {
           },
         ]
       }
+      property_rate_seasons: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          min_stay_nights: number | null
+          monthly_rate: number | null
+          name_en: string
+          name_ru: string | null
+          nightly_rate: number
+          notes: string | null
+          owner_id: string
+          property_id: string
+          start_date: string
+          updated_at: string | null
+          weekly_rate: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          min_stay_nights?: number | null
+          monthly_rate?: number | null
+          name_en: string
+          name_ru?: string | null
+          nightly_rate?: number
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          start_date: string
+          updated_at?: string | null
+          weekly_rate?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          min_stay_nights?: number | null
+          monthly_rate?: number | null
+          name_en?: string
+          name_ru?: string | null
+          nightly_rate?: number
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          start_date?: string
+          updated_at?: string | null
+          weekly_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_reports: {
         Row: {
           created_at: string
@@ -15219,6 +15405,88 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_reviews: {
+        Row: {
+          created_at: string | null
+          external_id: string | null
+          guest_name: string | null
+          id: string
+          is_public: boolean | null
+          language: string | null
+          owner_id: string
+          platform: string
+          property_id: string
+          rating: number | null
+          responded_at: string | null
+          responded_by: string | null
+          response_text: string | null
+          review_date: string | null
+          review_text: string | null
+          sentiment: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id?: string | null
+          guest_name?: string | null
+          id?: string
+          is_public?: boolean | null
+          language?: string | null
+          owner_id: string
+          platform?: string
+          property_id: string
+          rating?: number | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_text?: string | null
+          review_date?: string | null
+          review_text?: string | null
+          sentiment?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string | null
+          guest_name?: string | null
+          id?: string
+          is_public?: boolean | null
+          language?: string | null
+          owner_id?: string
+          platform?: string
+          property_id?: string
+          rating?: number | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_text?: string | null
+          review_date?: string | null
+          review_text?: string | null
+          sentiment?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
