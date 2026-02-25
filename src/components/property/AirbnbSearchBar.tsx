@@ -312,7 +312,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
       {/* Instant Booking */}
       <div className="flex items-center justify-between py-1">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-500" />
+          <Zap className="w-4 h-4 text-warning" />
           <div>
             <p className="text-sm font-medium">{isRu ? 'Мгновенное бронирование' : 'Instant booking'}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Без ожидания подтверждения' : 'No waiting for approval'}</p>

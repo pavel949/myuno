@@ -75,7 +75,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'General service offering',
     descriptionRu: 'Общая услуга',
     route: '/admin/services',
-    color: 'text-blue-500 bg-blue-100 dark:bg-blue-900/30',
+    color: 'text-info bg-info/10',
   },
   {
     id: 'beauty',
@@ -86,7 +86,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Salon, spa, massage',
     descriptionRu: 'Салон, спа, массаж',
     route: '/admin/services',
-    color: 'text-pink-500 bg-pink-100 dark:bg-pink-900/30',
+    color: 'text-accent-coral bg-accent-coral/10',
   },
   {
     id: 'medical',
@@ -97,7 +97,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Clinic, doctor, therapy',
     descriptionRu: 'Клиника, врач, терапия',
     route: '/admin/services',
-    color: 'text-red-500 bg-red-100 dark:bg-red-900/30',
+    color: 'text-destructive bg-destructive/10',
   },
   {
     id: 'education',
@@ -108,7 +108,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Tutoring, courses, school',
     descriptionRu: 'Репетиторство, курсы, школа',
     route: '/admin/services',
-    color: 'text-indigo-500 bg-indigo-100 dark:bg-indigo-900/30',
+    color: 'text-accent-purple bg-accent-purple/10',
   },
   {
     id: 'babysitter',
@@ -119,7 +119,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Childcare services',
     descriptionRu: 'Услуги по уходу за детьми',
     route: '/admin/babysitters',
-    color: 'text-purple-500 bg-purple-100 dark:bg-purple-900/30',
+    color: 'text-accent-purple bg-accent-purple/10',
   },
   {
     id: 'home-service',
@@ -130,7 +130,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Cleaning, repair, maintenance',
     descriptionRu: 'Уборка, ремонт, обслуживание',
     route: '/admin/home-services',
-    color: 'text-orange-500 bg-orange-100 dark:bg-orange-900/30',
+    color: 'text-accent-amber bg-accent-amber/10',
   },
   {
     id: 'legal',
@@ -141,7 +141,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Visa, legal, consulting',
     descriptionRu: 'Виза, юрист, консультации',
     route: '/admin/services',
-    color: 'text-slate-500 bg-slate-100 dark:bg-slate-900/30',
+    color: 'text-muted-foreground bg-muted',
   },
   // Products
   {
@@ -153,7 +153,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'General marketplace product',
     descriptionRu: 'Товар маркетплейса',
     route: '/admin/catalog',
-    color: 'text-green-500 bg-green-100 dark:bg-green-900/30',
+    color: 'text-success bg-success/10',
   },
   {
     id: 'bouquet',
@@ -164,7 +164,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Flower arrangement',
     descriptionRu: 'Цветочная композиция',
     route: '/admin/flowers',
-    color: 'text-rose-500 bg-rose-100 dark:bg-rose-900/30',
+    color: 'text-accent-coral bg-accent-coral/10',
   },
   {
     id: 'food',
@@ -175,7 +175,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Restaurant, cafe, delivery',
     descriptionRu: 'Ресторан, кафе, доставка',
     route: '/admin/catalog',
-    color: 'text-amber-500 bg-amber-100 dark:bg-amber-900/30',
+    color: 'text-warning bg-warning/10',
   },
   // Properties
   {
@@ -187,7 +187,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Real estate listing',
     descriptionRu: 'Объект недвижимости',
     route: '/admin/properties',
-    color: 'text-teal-500 bg-teal-100 dark:bg-teal-900/30',
+    color: 'text-accent-teal bg-accent-teal/10',
   },
   {
     id: 'vehicle',
@@ -198,7 +198,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Car, bike, scooter',
     descriptionRu: 'Автомобиль, мотоцикл, скутер',
     route: '/admin/vehicles',
-    color: 'text-cyan-500 bg-cyan-100 dark:bg-cyan-900/30',
+    color: 'text-accent-cyan bg-accent-cyan/10',
   },
   {
     id: 'yacht',
@@ -209,7 +209,7 @@ const CONTENT_TYPES: ContentTypeConfig[] = [
     descriptionEn: 'Yacht, boat, catamaran charter',
     descriptionRu: 'Аренда яхты, катера, катамарана',
     route: '/admin/yachts',
-    color: 'text-sky-500 bg-sky-100 dark:bg-sky-900/30',
+    color: 'text-info bg-info/10',
   },
 ];
 
@@ -287,7 +287,7 @@ export function ContentCreatorMenu({
 
         {/* Services Group */}
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center gap-2 text-blue-600">
+          <DropdownMenuLabel className="flex items-center gap-2 text-info">
             <Package className="h-4 w-4" />
             {isRu ? GROUP_LABELS.service.ru : GROUP_LABELS.service.en}
           </DropdownMenuLabel>
@@ -316,7 +316,7 @@ export function ContentCreatorMenu({
 
         {/* Products Group */}
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center gap-2 text-green-600">
+          <DropdownMenuLabel className="flex items-center gap-2 text-success">
             <ShoppingCart className="h-4 w-4" />
             {isRu ? GROUP_LABELS.product.ru : GROUP_LABELS.product.en}
           </DropdownMenuLabel>
@@ -345,7 +345,7 @@ export function ContentCreatorMenu({
 
         {/* Properties Group */}
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center gap-2 text-teal-600">
+          <DropdownMenuLabel className="flex items-center gap-2 text-accent-teal">
             <Home className="h-4 w-4" />
             {isRu ? GROUP_LABELS.property.ru : GROUP_LABELS.property.en}
           </DropdownMenuLabel>

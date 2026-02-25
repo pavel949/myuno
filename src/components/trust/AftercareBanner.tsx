@@ -105,7 +105,7 @@ export function AftercareBanner({
       {/* Timeline */}
       <div className="rounded-xl border bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          <CheckCircle2 className="w-4 h-4 text-success" />
           <h4 className="text-sm font-semibold">
             {isRu ? 'Что будет дальше' : 'What happens next'}
           </h4>
@@ -163,7 +163,7 @@ export function AftercareBanner({
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+          className="flex items-center gap-1.5 text-xs font-medium text-success hover:underline"
         >
           <MessageCircle className="w-3.5 h-3.5" />
           {isRu ? 'Напишите нам' : 'Message us'}

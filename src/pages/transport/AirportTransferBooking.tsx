@@ -328,7 +328,7 @@ export default function AirportTransferBooking() {
               {language === 'ru' ? 'Подтверждено' : 'Confirmed'}
             </Badge>
             {formData.paymentMethod === 'concierge_advance' && (
-              <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">
+              <Badge variant="secondary" className="bg-warning/10 text-warning">
                 <Handshake className="w-3 h-3 mr-1" />
                 myUNO
               </Badge>
@@ -839,8 +839,8 @@ export default function AirportTransferBooking() {
                 <div className="grid grid-cols-3 gap-2">
                   {([
                     { key: 'stripe' as const, icon: CreditCard, iconClass: 'text-primary', label: language === 'ru' ? 'Картой' : 'Card', sub: 'Visa, MC' },
-                    { key: 'cash' as const, icon: Banknote, iconClass: 'text-green-600', label: language === 'ru' ? 'Наличные' : 'Cash', sub: language === 'ru' ? 'Водителю' : 'To driver' },
-                    { key: 'concierge_advance' as const, icon: Handshake, iconClass: 'text-amber-500', label: 'myUNO', sub: language === 'ru' ? '0% ком.' : '0% fee' },
+                    { key: 'cash' as const, icon: Banknote, iconClass: 'text-success', label: language === 'ru' ? 'Наличные' : 'Cash', sub: language === 'ru' ? 'Водителю' : 'To driver' },
+                    { key: 'concierge_advance' as const, icon: Handshake, iconClass: 'text-warning', label: 'myUNO', sub: language === 'ru' ? '0% ком.' : '0% fee' },
                   ]).map(pm => (
                     <button
                       key={pm.key}
@@ -863,14 +863,14 @@ export default function AirportTransferBooking() {
                   ))}
                 </div>
                 {formData.paymentMethod === 'cash' && (
-                  <p className="text-xs text-muted-foreground p-2 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground p-2 bg-success/10 rounded-lg">
                     {language === 'ru' 
                       ? 'Оплата наличными водителю при встрече. THB или USD.'
                       : 'Pay cash to the driver upon meeting. THB or USD.'}
                   </p>
                 )}
                 {formData.paymentMethod === 'concierge_advance' && (
-                  <p className="text-xs text-muted-foreground p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+                  <p className="text-xs text-muted-foreground p-2 bg-warning/10 rounded-lg">
                     {language === 'ru' 
                       ? 'myUNO оплатит трансфер. Вы вернёте сумму после поездки удобным способом.'
                       : 'myUNO will pay for your transfer. Return the amount after your trip.'}

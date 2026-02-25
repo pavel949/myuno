@@ -390,7 +390,7 @@ export default function AdminServices() {
                           {isRussian ? (service.name_ru || service.name_en) : service.name_en}
                         </h3>
                         {service.is_featured && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                          <Star className="h-4 w-4 text-warning fill-warning" />
                         )}
                       </div>
                       
@@ -444,7 +444,7 @@ export default function AdminServices() {
                           {isRussian ? 'Дублировать' : 'Duplicate'}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="text-red-500"
+                          className="text-destructive"
                           onClick={() => setDeleteConfirmId(service.id)}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />

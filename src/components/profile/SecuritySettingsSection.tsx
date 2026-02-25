@@ -180,7 +180,7 @@ export function SecuritySettingsSection() {
       description: t.pinSettingsDesc,
       action: hasPin ? undefined : () => handlePinAction('setup'),
       badge: pinLoading ? '...' : (hasPin ? t.configured : t.notConfigured),
-      badgeColor: hasPin ? 'text-green-600 bg-green-100' : 'text-muted-foreground bg-muted',
+      badgeColor: hasPin ? 'text-success bg-success/10' : 'text-muted-foreground bg-muted',
       hasDropdown: hasPin,
       dropdownItems: hasPin ? [
         { label: t.changePin, action: () => handlePinAction('change'), icon: Pencil },
@@ -194,7 +194,7 @@ export function SecuritySettingsSection() {
       description: t.activeSessionsDesc,
       action: handleLogoutAllDevices,
       badge: t.thisDevice,
-      badgeColor: 'text-blue-600 bg-blue-100',
+      badgeColor: 'text-info bg-info/10',
     },
   ];
 
