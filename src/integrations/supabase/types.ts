@@ -11124,6 +11124,75 @@ export type Database = {
           },
         ]
       }
+      owner_service_vendors: {
+        Row: {
+          address: string | null
+          avg_rating: number | null
+          category: string | null
+          contact_person: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          is_favorite: boolean | null
+          line_id: string | null
+          name: string
+          name_ru: string | null
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          photo_url: string | null
+          source: string | null
+          total_jobs: number | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_favorite?: boolean | null
+          line_id?: string | null
+          name: string
+          name_ru?: string | null
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          photo_url?: string | null
+          source?: string | null
+          total_jobs?: number | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          avg_rating?: number | null
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_favorite?: boolean | null
+          line_id?: string | null
+          name?: string
+          name_ru?: string | null
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          photo_url?: string | null
+          source?: string | null
+          total_jobs?: number | null
+          updated_at?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       owner_vault_files: {
         Row: {
           created_at: string
@@ -17219,6 +17288,53 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_documents: {
+        Row: {
+          created_at: string | null
+          doc_type: string | null
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          staff_id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          staff_id: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          staff_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_documents_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_members: {
         Row: {
           created_at: string
@@ -17233,6 +17349,7 @@ export type Database = {
           owner_id: string
           pay_type: string
           phone: string | null
+          photo_url: string | null
           role: string
           updated_at: string
         }
@@ -17249,6 +17366,7 @@ export type Database = {
           owner_id: string
           pay_type?: string
           phone?: string | null
+          photo_url?: string | null
           role?: string
           updated_at?: string
         }
@@ -17265,6 +17383,7 @@ export type Database = {
           owner_id?: string
           pay_type?: string
           phone?: string | null
+          photo_url?: string | null
           role?: string
           updated_at?: string
         }
@@ -20048,6 +20167,53 @@ export type Database = {
           },
         ]
       }
+      vendor_documents: {
+        Row: {
+          created_at: string | null
+          doc_type: string | null
+          expiry_date: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          title: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          title?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          doc_type?: string | null
+          expiry_date?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          title?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_documents_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "owner_service_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_location_services: {
         Row: {
           created_at: string
@@ -20367,6 +20533,74 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_property_assignments: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          owner_id: string
+          property_id: string
+          rate: number | null
+          rate_type: string | null
+          service_type: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          rate?: number | null
+          rate_type?: string | null
+          service_type?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          rate?: number | null
+          rate_type?: string | null
+          service_type?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_property_assignments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "owner_service_vendors"
             referencedColumns: ["id"]
           },
         ]

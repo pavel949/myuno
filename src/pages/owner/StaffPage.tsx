@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
+import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import {
   Sheet,
@@ -127,6 +129,7 @@ interface StaffFormState {
   hourly_rate: string;
   daily_rate: string;
   is_active: boolean;
+  photo_url: string;
 }
 
 const DEFAULT_FORM: StaffFormState = {
@@ -140,6 +143,7 @@ const DEFAULT_FORM: StaffFormState = {
   hourly_rate: '',
   daily_rate: '',
   is_active: true,
+  photo_url: '',
 };
 
 function staffToForm(s: StaffMember): StaffFormState {
@@ -154,6 +158,7 @@ function staffToForm(s: StaffMember): StaffFormState {
     hourly_rate: s.hourly_rate?.toString() ?? '',
     daily_rate: s.daily_rate?.toString() ?? '',
     is_active: s.is_active,
+    photo_url: (s as any).photo_url ?? '',
   };
 }
 
@@ -199,6 +204,7 @@ function StaffCard({
         <div className="flex items-start gap-4">
           {/* Avatar */}
           <Avatar className="h-14 w-14 shrink-0">
+            {(staff as any).photo_url && <AvatarImage src={(staff as any).photo_url} />}
             <AvatarFallback className={`text-lg font-bold ${getAvatarColor(staff.name)}`}>
               {getInitials(staff.name)}
             </AvatarFallback>
@@ -391,7 +397,8 @@ export default function StaffPage() {
       hourly_rate: form.hourly_rate ? parseFloat(form.hourly_rate) : undefined,
       daily_rate: form.daily_rate ? parseFloat(form.daily_rate) : undefined,
       is_active: form.is_active,
-    };
+    } as any;
+    if (form.photo_url) (payload as any).photo_url = form.photo_url;
 
     try {
       if (editing) {
@@ -535,6 +542,17 @@ export default function StaffPage() {
           <div className="space-y-5">
             {/* Basic info */}
             <div className="space-y-4">
+              {/* Photo */}
+              <div>
+                <Label className="mb-1.5 block">{t('Photo', 'Фото')}</Label>
+                <UnifiedMediaUploader
+                  mode="avatar"
+                  value={form.photo_url}
+                  onChange={(url) => setForm(f => ({ ...f, photo_url: typeof url === 'string' ? url : '' }))}
+                  name={form.name}
+                  folder="staff"
+                />
+              </div>
               <div>
                 <Label className="mb-1.5 block">{t('Full Name', 'ФИО')}</Label>
                 <Input
@@ -676,6 +694,16 @@ export default function StaffPage() {
                   onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
                   onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
                 />
+              </div>
+            )}
+
+            {/* Staff Documents (edit mode only) */}
+            {editing && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  {t('Documents', 'Документы')}
+                </h4>
+                <VendorDocumentsTab vendorId={editing.id} docSource="staff" />
               </div>
             )}
 

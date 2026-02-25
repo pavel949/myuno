@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { toast } from 'sonner';
 import { 
   Plus, FileText, Key, Copy, Eye, EyeOff, Trash2, Upload, 
@@ -52,6 +53,8 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
     access_instructions: '',
     issue_date: '',
     expiry_date: '',
+    file_url: '',
+    file_name: '',
   });
 
   const handleCreate = async () => {
@@ -69,6 +72,8 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
         property_id: propertyId,
         document_type: selectedType,
         ...formData,
+        file_url: formData.file_url || undefined,
+        file_name: formData.file_name || undefined,
         issue_date: formData.issue_date || undefined,
         expiry_date: formData.expiry_date || undefined,
       });
@@ -100,6 +105,8 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
       access_instructions: '',
       issue_date: '',
       expiry_date: '',
+      file_url: '',
+      file_name: '',
     });
   };
 
@@ -306,6 +313,23 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
                       </div>
                     </div>
                   </>
+                )}
+
+                {/* File upload - for all non-access document types */}
+                {selectedType && !isAccessType(selectedType as DocumentType) && (
+                  <div className="space-y-2">
+                    <Label>{isRu ? 'Прикрепить файл' : 'Attach File'}</Label>
+                    <UnifiedMediaUploader
+                      mode="document"
+                      value={formData.file_url}
+                      onChange={(url) => {
+                        const u = typeof url === 'string' ? url : '';
+                        setFormData({ ...formData, file_url: u, file_name: u.split('/').pop() || '' });
+                      }}
+                      folder={`properties/${propertyId}/documents`}
+                      placeholder={isRu ? 'PDF, фото, скан документа' : 'PDF, photo, document scan'}
+                    />
+                  </div>
                 )}
 
                 <Button onClick={handleCreate} disabled={isCreating} className="w-full">
