@@ -52,7 +52,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                 <Badge 
                   className={cn(
                     "absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4",
-                    cat.isNew ? "bg-green-500" : "bg-amber-500",
+                    cat.isNew ? "bg-success" : "bg-warning",
                     "text-white border-0"
                   )}
                 >
@@ -99,7 +99,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
                     <Badge 
                       className={cn(
                         "absolute -top-1.5 -right-1.5 text-[8px] px-1.5 py-0.5",
-                        cat.isNew ? "bg-green-500" : "bg-amber-500",
+                        cat.isNew ? "bg-success" : "bg-warning",
                         "text-white border-0"
                       )}
                     >

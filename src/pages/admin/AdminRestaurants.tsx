@@ -352,7 +352,7 @@ export default function AdminRestaurants() {
                             }}>
                               <Copy className="h-4 w-4 mr-2" />{isRussian ? 'Дублировать' : 'Duplicate'}
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500" onClick={() => setDeleteConfirmId(item.id)}>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}>
                               <Trash2 className="h-4 w-4 mr-2" />{isRussian ? 'Удалить' : 'Delete'}
                             </DropdownMenuItem>
                           </DropdownMenuContent>

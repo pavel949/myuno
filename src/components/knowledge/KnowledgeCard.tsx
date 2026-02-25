@@ -27,13 +27,13 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const colorMap: Record<string, string> = {
-  overview: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  culture: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  'dos-donts': 'bg-green-500/10 text-green-600 dark:text-green-400',
-  government: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-  nature: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  practical: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  emergency: 'bg-red-500/10 text-red-600 dark:text-red-400',
+  overview: 'bg-info/10 text-info',
+  culture: 'bg-warning/10 text-warning',
+  'dos-donts': 'bg-success/10 text-success',
+  government: 'bg-muted text-muted-foreground',
+  nature: 'bg-success/10 text-success',
+  practical: 'bg-accent-purple/10 text-accent-purple',
+  emergency: 'bg-destructive/10 text-destructive',
 };
 
 export function KnowledgeCard({ 

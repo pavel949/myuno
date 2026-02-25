@@ -79,7 +79,7 @@ export default function PetServiceDetail() {
         <div className="absolute bottom-4 left-4 right-4">
           <div className="flex items-center gap-2 text-white mb-1">
             {service.is_verified && (
-              <Badge className="bg-emerald-500 text-white text-xs">
+              <Badge className="bg-success text-white text-xs">
                 <Shield className="w-3 h-3 mr-1" />{language === 'ru' ? 'Проверено' : 'Verified'}
               </Badge>
             )}

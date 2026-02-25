@@ -14,14 +14,14 @@ interface QuickService {
 }
 
 const QUICK_SERVICES: QuickService[] = [
-  { path: '/transport/taxi', icon: '🚕', labelEn: 'Taxi', labelRu: 'Такси', color: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  { path: '/experiences', icon: '🏝️', labelEn: 'Tours', labelRu: 'Туры', color: 'bg-blue-100 dark:bg-blue-900/30' },
-  { path: '/beauty', icon: '💆', labelEn: 'Beauty', labelRu: 'Красота', color: 'bg-pink-100 dark:bg-pink-900/30' },
-  { path: '/cleaning', icon: '🧹', labelEn: 'Cleaning', labelRu: 'Уборка', color: 'bg-green-100 dark:bg-green-900/30' },
-  { path: '/restaurants', icon: '🍽️', labelEn: 'Food', labelRu: 'Еда', color: 'bg-orange-100 dark:bg-orange-900/30' },
-  { path: '/yachts', icon: '🚤', labelEn: 'Charters', labelRu: 'Чартер', color: 'bg-cyan-100 dark:bg-cyan-900/30' },
-  { path: '/events', icon: '🎫', labelEn: 'Events', labelRu: 'События', color: 'bg-purple-100 dark:bg-purple-900/30' },
-  { path: '/discover', icon: '⚡', labelEn: 'More', labelRu: 'Ещё', color: 'bg-gray-100 dark:bg-gray-800' },
+  { path: '/transport/taxi', icon: '🚕', labelEn: 'Taxi', labelRu: 'Такси', color: 'bg-warning/10' },
+  { path: '/experiences', icon: '🏝️', labelEn: 'Tours', labelRu: 'Туры', color: 'bg-info/10' },
+  { path: '/beauty', icon: '💆', labelEn: 'Beauty', labelRu: 'Красота', color: 'bg-accent-coral/10' },
+  { path: '/cleaning', icon: '🧹', labelEn: 'Cleaning', labelRu: 'Уборка', color: 'bg-success/10' },
+  { path: '/restaurants', icon: '🍽️', labelEn: 'Food', labelRu: 'Еда', color: 'bg-accent-amber/10' },
+  { path: '/yachts', icon: '🚤', labelEn: 'Charters', labelRu: 'Чартер', color: 'bg-accent-cyan/10' },
+  { path: '/events', icon: '🎫', labelEn: 'Events', labelRu: 'События', color: 'bg-accent-purple/10' },
+  { path: '/discover', icon: '⚡', labelEn: 'More', labelRu: 'Ещё', color: 'bg-muted' },
 ];
 
 export function DashboardQuickServices() {

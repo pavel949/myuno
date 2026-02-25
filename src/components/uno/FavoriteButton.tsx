@@ -58,7 +58,7 @@ export const FavoriteButton = forwardRef<HTMLButtonElement, FavoriteButtonProps>
           className={cn(
             iconSizes[size],
             'transition-all',
-            isActive ? 'fill-red-500 text-red-500' : ''
+            isActive ? 'fill-destructive text-destructive' : ''
           )}
         />
       </Button>

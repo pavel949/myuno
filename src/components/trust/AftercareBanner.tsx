@@ -116,7 +116,7 @@ export function AftercareBanner({
               <div className="flex flex-col items-center">
                 <div className={cn(
                   'w-2 h-2 rounded-full mt-1.5',
-                  i === 0 ? 'bg-emerald-500' : 'bg-border'
+                  i === 0 ? 'bg-success' : 'bg-border'
                 )} />
                 {i < resolvedSteps.length - 1 && (
                   <div className="w-px h-6 bg-border mt-1" />

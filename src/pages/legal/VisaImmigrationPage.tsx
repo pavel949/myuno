@@ -424,14 +424,14 @@ export default function VisaImmigrationPage() {
 
         {/* Important Notice */}
         <div className="px-4 -mt-4">
-          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/30">
+          <Card className="border-warning/30 bg-warning/5">
             <CardContent className="p-4 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                <p className="text-sm font-medium text-warning">
                   {language === 'ru' ? 'Важная информация' : 'Important Notice'}
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {language === 'ru' 
                     ? 'Визовые правила могут меняться. Всегда проверяйте актуальную информацию в Иммиграционном бюро Таиланда или посольстве.'
                     : 'Visa rules may change. Always verify current information with Thai Immigration Bureau or embassy.'}
@@ -521,7 +521,7 @@ export default function VisaImmigrationPage() {
                     <ul className="space-y-2">
                       {selectedVisa.requirements.map((req, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                           <span>{req}</span>
                         </li>
                       ))}
@@ -629,7 +629,7 @@ export default function VisaImmigrationPage() {
                   <ul className="grid grid-cols-2 gap-2">
                     {extensionInfo.documents.map((doc, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />
+                        <CheckCircle2 className="w-3 h-3 text-success flex-shrink-0" />
                         <span>{doc}</span>
                       </li>
                     ))}
@@ -739,9 +739,9 @@ export default function VisaImmigrationPage() {
                               variant="outline" 
                               className={`text-xs ${
                                 visa.visa_type === 'elite' 
-                                  ? 'border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-500/10' 
+                                  ? 'border-warning text-warning bg-warning/10' 
                                   : visa.visa_type === 'retirement'
-                                  ? 'border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10'
+                                  ? 'border-success text-success bg-success/10'
                                   : ''
                               }`}
                             >

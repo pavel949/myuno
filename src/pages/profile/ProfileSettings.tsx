@@ -396,11 +396,11 @@ export default function ProfileSettings() {
 
           {/* Medical Info */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-red-500">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-destructive">
               <Heart className="w-4 h-4" />
               {isRu ? 'Медицинская информация' : 'Medical Information'}
             </div>
-            <SectionCard className="border-red-500/20">
+            <SectionCard className="border-destructive/20">
               <p className="text-xs text-muted-foreground mb-3">
                 {isRu 
                   ? 'Эта информация строго конфиденциальна и будет использована только в экстренных медицинских ситуациях.'

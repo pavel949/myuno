@@ -81,10 +81,10 @@ export function DosDontsCard({ dos, donts, className }: DosDontsCardProps) {
       </Card>
 
       {/* Don'ts Card */}
-      <Card className="border-red-200 dark:border-red-800/50">
+      <Card className="border-destructive/30">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2 text-red-600 dark:text-red-400">
-            <div className="p-1.5 bg-red-100 dark:bg-red-900/50 rounded-full">
+          <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+            <div className="p-1.5 bg-destructive/10 rounded-full">
               <X className="h-4 w-4" />
             </div>
             {language === 'ru' ? 'Чего не делать' : "Don'ts"}
@@ -93,7 +93,7 @@ export function DosDontsCard({ dos, donts, className }: DosDontsCardProps) {
         <CardContent className="space-y-2">
           {displayDonts.map((item, index) => (
             <div key={index} className="flex items-start gap-2">
-              <X className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <X className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
               <span className="text-sm text-foreground">{item.text}</span>
             </div>
           ))}
