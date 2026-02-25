@@ -11681,6 +11681,54 @@ export type Database = {
           },
         ]
       }
+      personal_reminders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          is_recurring: boolean
+          recurrence_interval: string | null
+          remind_days_before: number
+          reminder_type: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          is_recurring?: boolean
+          recurrence_interval?: string | null
+          remind_days_before?: number
+          reminder_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          is_recurring?: boolean
+          recurrence_interval?: string | null
+          remind_days_before?: number
+          reminder_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pet_profiles: {
         Row: {
           age_months: number | null
@@ -17710,6 +17758,7 @@ export type Database = {
         Row: {
           created_at: string
           daily_rate: number | null
+          date_of_birth: string | null
           email: string | null
           hourly_rate: number | null
           id: string
@@ -17727,6 +17776,7 @@ export type Database = {
         Insert: {
           created_at?: string
           daily_rate?: number | null
+          date_of_birth?: string | null
           email?: string | null
           hourly_rate?: number | null
           id?: string
@@ -17744,6 +17794,7 @@ export type Database = {
         Update: {
           created_at?: string
           daily_rate?: number | null
+          date_of_birth?: string | null
           email?: string | null
           hourly_rate?: number | null
           id?: string
