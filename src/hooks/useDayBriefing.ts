@@ -38,7 +38,9 @@ export type DayItemType =
   // Investor-specific
   | 'investment_update'
   // Client (tourist/resident)
-  | 'my_booking';
+  | 'my_booking'
+  // myUNO services for owners
+  | 'myuno_service';
 
 export interface DayItem {
   id: string;

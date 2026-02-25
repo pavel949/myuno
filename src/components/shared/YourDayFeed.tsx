@@ -91,6 +91,7 @@ function getItemIcon(type: DayItemType, meta?: DayItem['meta']): React.ElementTy
     case 'staff_task': return Briefcase;
     case 'investment_update': return TrendingUp;
     case 'my_booking': return CalendarCheck;
+    case 'myuno_service': return Sparkles;
     default: return Bell;
   }
 }
@@ -137,6 +138,8 @@ function getItemStyle(item: DayItem) {
     case 'investment_update':
       return { color: 'text-success', bg: 'bg-success/10', border: 'border-l-success' };
     case 'my_booking':
+      return { color: 'text-primary', bg: 'bg-primary/10', border: 'border-l-primary' };
+    case 'myuno_service':
       return { color: 'text-primary', bg: 'bg-primary/10', border: 'border-l-primary' };
     default:
       return { color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-l-muted-foreground' };
@@ -386,6 +389,7 @@ function getTypeLabel(item: DayItem, isRu: boolean): string {
     staff_task: ['Задание', 'Task'],
     investment_update: ['Инвестиции', 'Investment'],
     my_booking: ['Бронь', 'Booking'],
+    myuno_service: ['Сервис', 'Service'],
   };
   const [ru, en] = labels[item.type] || ['', ''];
   return isRu ? ru : en;
