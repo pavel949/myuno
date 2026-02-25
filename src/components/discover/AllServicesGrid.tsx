@@ -8,17 +8,23 @@ import { resolveVerticalItem } from '@/lib/resolveVerticalItem';
 import { resolveIcon } from '@/lib/iconMap';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { cn } from '@/lib/utils';
-
-
-const INITIAL_GROUPS_VISIBLE = 3;
+import { isActiveVerticalGroup, isActiveVertical, COMING_SOON_VERTICALS } from '@/config/activeVerticals';
+import { useUserContext } from '@/hooks/useUserContext';
 
 export const AllServicesGrid = memo(function AllServicesGrid() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
+  const { activeRole } = useUserContext();
+  const isAdmin = activeRole === 'admin' || activeRole === 'staff' || activeRole === 'uno_team';
 
-  const visibleGroups = expanded ? VERTICAL_GROUPS : VERTICAL_GROUPS.slice(0, INITIAL_GROUPS_VISIBLE);
+  // Filter groups for non-admin users
+  const filteredGroups = isAdmin
+    ? VERTICAL_GROUPS
+    : VERTICAL_GROUPS.filter(g => isActiveVerticalGroup(g.id));
+
+  const visibleGroups = expanded ? filteredGroups : filteredGroups.slice(0, 3);
 
   const handleNav = useCallback((path: string) => {
     triggerHaptic('light');
@@ -32,15 +38,22 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
           <Grid3X3 className="w-4 h-4 text-muted-foreground" />
         </div>
         <h2 className="text-lg font-bold text-foreground">
-          {isRu ? 'Все сервисы' : 'All Services'}
+          {isRu ? 'Сервисы' : 'Services'}
         </h2>
       </div>
 
       <div className="rounded-2xl bg-muted/20 border border-border/40 p-4 space-y-5">
         {visibleGroups.map((group, gi) => {
-          const items = group.items
+          const allItems = group.items
             .map(item => resolveVerticalItem(item, language))
             .filter(Boolean) as NonNullable<ReturnType<typeof resolveVerticalItem>>[];
+
+          // Filter items for non-admin users
+          const items = isAdmin
+            ? allItems
+            : allItems.filter(item => isActiveVertical(item.id));
+
+          if (items.length === 0) return null;
 
           return (
             <motion.div
@@ -86,14 +99,38 @@ export const AllServicesGrid = memo(function AllServicesGrid() {
           );
         })}
 
-        {VERTICAL_GROUPS.length > INITIAL_GROUPS_VISIBLE && (
-            <button
-              onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
-              className="flex items-center gap-1.5 mx-auto py-2 px-4 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
-            >
-              <span>{isRu ? (expanded ? 'Свернуть' : 'Показать все') : (expanded ? 'Show less' : 'Show all')}</span>
-              <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", expanded && "rotate-180")} />
-            </button>
+        {/* Coming Soon section for non-admin users */}
+        {!isAdmin && (
+          <div className="space-y-2.5 pt-2 border-t border-border/30">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              {isRu ? '🔜 Скоро' : '🔜 Coming Soon'}
+            </p>
+            <div className="grid grid-cols-4 gap-2">
+              {COMING_SOON_VERTICALS.map((v) => (
+                <div
+                  key={v.id}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-muted/30 border border-border/20 opacity-50 cursor-default"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-muted/40 flex items-center justify-center">
+                    <span className="text-xs text-muted-foreground">🔒</span>
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground leading-tight line-clamp-2">
+                    {isRu ? v.labelRu : v.labelEn}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filteredGroups.length > 3 && (
+          <button
+            onClick={() => { setExpanded(!expanded); triggerHaptic('light'); }}
+            className="flex items-center gap-1.5 mx-auto py-2 px-4 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+          >
+            <span>{isRu ? (expanded ? 'Свернуть' : 'Показать все') : (expanded ? 'Show less' : 'Show all')}</span>
+            <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", expanded && "rotate-180")} />
+          </button>
         )}
       </div>
     </section>

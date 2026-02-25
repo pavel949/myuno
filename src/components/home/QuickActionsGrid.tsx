@@ -37,22 +37,15 @@ interface QuickAction {
 const TOURIST_ACTIONS: QuickAction[] = [
   { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
   { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/15' },
-  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-accent-coral/15' },
-  { id: 'delivery', icon: Droplets, label: 'Delivery', labelRu: 'Доставка', path: '/market?category=groceries', tint: 'bg-accent-cyan/15' },
   { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/15' },
-  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/15' },
-  { id: 'yachts', icon: Anchor, label: 'Charters', labelRu: 'Чартер', path: '/yachts', tint: 'bg-info/15' },
-  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/15' },
+  { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-accent-purple/15' },
 ];
 
 const RESIDENT_ACTIONS: QuickAction[] = [
-  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Визы', path: '/visa', tint: 'bg-primary/15' },
   { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
-  { id: 'education', icon: GraduationCap, label: 'Education', labelRu: 'Обучение', path: '/education', tint: 'bg-warning/15' },
-  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-accent-coral/15' },
-  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-muted' },
-  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-accent-cyan/15' },
-  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', tint: 'bg-success/15' },
+  { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/15' },
+  { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-accent-purple/15' },
+  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/15' },
 ];
 
 const OWNER_ACTIONS: QuickAction[] = [
@@ -66,12 +59,10 @@ const OWNER_ACTIONS: QuickAction[] = [
 ];
 
 const INVESTOR_ACTIONS: QuickAction[] = [
-  { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-success/15' },
-  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', tint: 'bg-accent-cyan/15' },
   { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', tint: 'bg-success/15' },
-  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-muted' },
-  { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-primary/15' },
-  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-info/15' },
+  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', tint: 'bg-accent-cyan/15' },
+  { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-success/15' },
+  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
 ];
 
 const VENDOR_ACTIONS: QuickAction[] = [
@@ -101,12 +92,8 @@ const getMoreAction = (contentMode: 'services' | 'products'): QuickAction => ({
 const DEFAULT_ACTIONS: QuickAction[] = [
   { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
   { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/15' },
-  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-accent-coral/15' },
   { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/15' },
-  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/15' },
-  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/15' },
-  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', tint: 'bg-accent-coral/15' },
-  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-destructive/15' },
+  { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-accent-purple/15' },
 ];
 
 function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
