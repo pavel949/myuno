@@ -104,6 +104,13 @@ body {
     --accent-cyan: 190 60% 45%;
     --accent-amber: 38 80% 50%;
     --icon-dark: 210 100% 10%;
+    
+    /* Vitrine palette */
+    --navy: 213 56% 23%;
+    --navy-light: 213 40% 35%;
+    --accent-blue: 211 60% 43%;
+    --trust-gold: 43 61% 55%;
+    --primary-light: 211 50% 55%;
 
     /* Card tokens */
     --card-radius: 1rem;
@@ -174,6 +181,12 @@ body {
     --accent-cyan: 190 55% 52%;
     --accent-amber: 38 75% 55%;
     --icon-dark: 210 60% 70%;
+    
+    /* Vitrine palette — dark mode */
+    --navy: 213 40% 70%;
+    --navy-light: 213 35% 60%;
+    --accent-blue: 211 55% 55%;
+    --trust-gold: 43 55% 58%;
 
     --card-elevated: 220 12% 10%;
     --card-hover: 220 12% 12%;
