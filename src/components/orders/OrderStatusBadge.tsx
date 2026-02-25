@@ -32,43 +32,43 @@ const statusConfig: Record<OrderStatus, {
   },
   pending: { 
     icon: Clock, 
-    color: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400', 
+    color: 'bg-warning/20 text-warning', 
     labelEn: 'Pending', 
     labelRu: 'Ожидание' 
   },
   confirmed: { 
     icon: CheckCircle2, 
-    color: 'bg-blue-500/20 text-blue-600 dark:text-blue-400', 
+    color: 'bg-info/20 text-info', 
     labelEn: 'Confirmed', 
     labelRu: 'Подтверждён' 
   },
   in_progress: { 
     icon: Truck, 
-    color: 'bg-purple-500/20 text-purple-600 dark:text-purple-400', 
+    color: 'bg-accent-purple/20 text-accent-purple', 
     labelEn: 'In Progress', 
     labelRu: 'В процессе' 
   },
   completed: { 
     icon: Package, 
-    color: 'bg-green-500/20 text-green-600 dark:text-green-400', 
+    color: 'bg-success/20 text-success', 
     labelEn: 'Completed', 
     labelRu: 'Завершён' 
   },
   cancelled: { 
     icon: XCircle, 
-    color: 'bg-red-500/20 text-red-600 dark:text-red-400', 
+    color: 'bg-destructive/20 text-destructive', 
     labelEn: 'Cancelled', 
     labelRu: 'Отменён' 
   },
   refunded: { 
     icon: RefreshCw, 
-    color: 'bg-orange-500/20 text-orange-600 dark:text-orange-400', 
+    color: 'bg-warning/20 text-warning', 
     labelEn: 'Refunded', 
     labelRu: 'Возврат' 
   },
   disputed: { 
     icon: AlertCircle, 
-    color: 'bg-red-500/20 text-red-600 dark:text-red-400', 
+    color: 'bg-destructive/20 text-destructive', 
     labelEn: 'Disputed', 
     labelRu: 'Спор' 
   },

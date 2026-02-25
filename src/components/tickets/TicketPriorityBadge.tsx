@@ -9,10 +9,10 @@ interface TicketPriorityBadgeProps {
 }
 
 const priorityConfig: Record<TicketPriority, { label: string; labelRu: string; icon: React.ElementType; color: string }> = {
-  urgent: { label: 'Urgent', labelRu: 'Срочно', icon: AlertTriangle, color: 'bg-red-500/10 text-red-600 border-red-200' },
-  high: { label: 'High', labelRu: 'Высокий', icon: ArrowUp, color: 'bg-orange-500/10 text-orange-600 border-orange-200' },
-  normal: { label: 'Normal', labelRu: 'Обычный', icon: Minus, color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
-  low: { label: 'Low', labelRu: 'Низкий', icon: ArrowDown, color: 'bg-gray-500/10 text-gray-600 border-gray-200' },
+  urgent: { label: 'Urgent', labelRu: 'Срочно', icon: AlertTriangle, color: 'bg-destructive/10 text-destructive border-destructive/20' },
+  high: { label: 'High', labelRu: 'Высокий', icon: ArrowUp, color: 'bg-warning/10 text-warning border-warning/20' },
+  normal: { label: 'Normal', labelRu: 'Обычный', icon: Minus, color: 'bg-info/10 text-info border-info/20' },
+  low: { label: 'Low', labelRu: 'Низкий', icon: ArrowDown, color: 'bg-muted text-muted-foreground border-border' },
 };
 
 export function TicketPriorityBadge({ priority, className }: TicketPriorityBadgeProps) {

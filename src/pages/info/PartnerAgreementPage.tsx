@@ -62,13 +62,13 @@ export default function PartnerAgreementPage() {
       violation: isRu ? 'Первое нарушение обхода' : 'First bypass violation',
       action: isRu ? 'Предупреждение + штраф 100% комиссии' : 'Warning + 100% commission penalty',
       icon: AlertTriangle,
-      color: 'text-yellow-500',
+      color: 'text-warning',
     },
     {
       violation: isRu ? 'Второе нарушение' : 'Second violation',
       action: isRu ? 'Штраф 300% комиссии + снижение рейтинга' : '300% commission penalty + rating reduction',
       icon: XCircle,
-      color: 'text-orange-500',
+      color: 'text-warning',
     },
     {
       violation: isRu ? 'Третье нарушение' : 'Third violation',
@@ -80,13 +80,13 @@ export default function PartnerAgreementPage() {
       violation: isRu ? 'Низкий рейтинг (< 3.5)' : 'Low rating (< 3.5)',
       action: isRu ? 'Снижение в выдаче / временная приостановка' : 'Ranking reduction / temporary suspension',
       icon: TrendingUp,
-      color: 'text-yellow-500',
+      color: 'text-warning',
     },
     {
       violation: isRu ? 'Confirmation rate < 80%' : 'Confirmation rate < 80%',
       action: isRu ? 'Предупреждение, затем снижение в выдаче' : 'Warning, then ranking reduction',
       icon: Clock,
-      color: 'text-yellow-500',
+      color: 'text-warning',
     },
     {
       violation: isRu ? 'Мошенничество' : 'Fraud',
@@ -146,7 +146,7 @@ export default function PartnerAgreementPage() {
       benefits: isRu 
         ? ['Топ выдачи', 'Сниженная комиссия (-2%)', 'Персональный менеджер']
         : ['Top ranking', 'Reduced commission (-2%)', 'Personal manager'],
-      color: 'bg-green-500/10',
+      color: 'bg-success/10',
     },
   ];
 
@@ -223,15 +223,15 @@ export default function PartnerAgreementPage() {
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                     <span>{isRu ? 'Escrow-защита платежей' : 'Escrow payment protection'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                     <span>{isRu ? 'Еженедельные выплаты' : 'Weekly payouts'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                     <span>{isRu ? 'Прозрачная отчётность' : 'Transparent reporting'}</span>
                   </div>
                 </div>
@@ -359,8 +359,8 @@ export default function PartnerAgreementPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-              <p className="text-xs text-amber-700 dark:text-amber-400">
+            <div className="mt-4 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+              <p className="text-xs text-warning-foreground">
                 {isRu 
                   ? 'Отказ от предоставления информации или препятствование аудиту = основание для расторжения договора.'
                   : 'Refusal to provide information or obstruction of audit = grounds for contract termination.'}

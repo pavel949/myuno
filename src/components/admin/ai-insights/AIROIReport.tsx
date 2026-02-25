@@ -19,25 +19,25 @@ import { cn } from '@/lib/utils';
 
 const recommendationConfig = {
   KEEP: {
-    color: 'bg-blue-500',
-    textColor: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    color: 'bg-info',
+    textColor: 'text-info',
+    bgColor: 'bg-info/10',
     icon: Clock,
     labelEn: 'KEEP MONITORING',
     labelRu: 'ПРОДОЛЖАТЬ МОНИТОРИНГ',
   },
   ADJUST: {
-    color: 'bg-amber-500',
-    textColor: 'text-amber-600',
-    bgColor: 'bg-amber-50',
+    color: 'bg-warning',
+    textColor: 'text-warning',
+    bgColor: 'bg-warning/10',
     icon: AlertCircle,
     labelEn: 'NEEDS ADJUSTMENT',
     labelRu: 'ТРЕБУЕТ НАСТРОЙКИ',
   },
   SCALE: {
-    color: 'bg-emerald-500',
-    textColor: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
+    color: 'bg-success',
+    textColor: 'text-success',
+    bgColor: 'bg-success/10',
     icon: TrendingUp,
     labelEn: 'READY TO SCALE',
     labelRu: 'ГОТОВ К МАСШТАБИРОВАНИЮ',
@@ -124,13 +124,13 @@ export function AIROIReport() {
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <CheckCircle2 className="w-4 h-4 text-success" />
               {isRussian ? 'Сильные стороны' : 'Strengths'}
             </h4>
             <ul className="space-y-1">
               {report.strengths.map((s, i) => (
                 <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-emerald-500 mt-1">•</span>
+                  <span className="text-success mt-1">•</span>
                   {s}
                 </li>
               ))}
@@ -139,13 +139,13 @@ export function AIROIReport() {
           
           <div className="space-y-2">
             <h4 className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-500" />
+              <AlertCircle className="w-4 h-4 text-warning" />
               {isRussian ? 'Слабые стороны' : 'Weaknesses'}
             </h4>
             <ul className="space-y-1">
               {report.weaknesses.map((w, i) => (
                 <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-amber-500 mt-1">•</span>
+                  <span className="text-warning mt-1">•</span>
                   {w}
                 </li>
               ))}

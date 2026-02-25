@@ -129,7 +129,7 @@ export const DeliveryTypeSelector = ({
                 {language === 'ru' ? '1-2 ч' : '1-2h'}
               </Badge>
               {localDeliveryFee === 0 ? (
-                <Badge className="bg-green-500 text-white text-xs">
+                <Badge className="bg-success text-success-foreground text-xs">
                   {language === 'ru' ? 'Бесплатно' : 'Free'}
                 </Badge>
               ) : (
@@ -155,7 +155,7 @@ export const DeliveryTypeSelector = ({
           <RadioGroupItem value="international" id="international" className="mt-1" />
           <div className="flex-1">
             <Label htmlFor="international" className="text-base font-medium cursor-pointer flex items-center gap-2">
-              <Plane className="w-5 h-5 text-sky-500" />
+              <Plane className="w-5 h-5 text-info" />
               {language === 'ru' ? 'Международная доставка' : 'International Shipping'}
             </Label>
             <p className="text-sm text-muted-foreground mt-1">
@@ -166,9 +166,9 @@ export const DeliveryTypeSelector = ({
             {selectedType === 'international' && (
               <div className="mt-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                 {hasNonShippableItems && (
-                  <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg border border-warning/30">
+                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+                    <p className="text-xs text-warning-foreground">
                       {language === 'ru' 
                         ? 'Некоторые товары в корзине не подходят для международной доставки' 
                         : 'Some items in your cart cannot be shipped internationally'}

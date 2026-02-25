@@ -18,14 +18,14 @@ interface TicketCategoryBadgeProps {
 }
 
 const categoryConfig: Record<TicketCategory, { label: string; labelRu: string; icon: React.ElementType; color: string }> = {
-  refund: { label: 'Refund', labelRu: 'Возврат', icon: RefreshCcw, color: 'bg-purple-500/10 text-purple-600' },
-  quality: { label: 'Quality', labelRu: 'Качество', icon: Star, color: 'bg-yellow-500/10 text-yellow-600' },
-  fraud: { label: 'Fraud', labelRu: 'Мошенничество', icon: ShieldAlert, color: 'bg-red-500/10 text-red-600' },
-  damage: { label: 'Damage', labelRu: 'Повреждение', icon: Wrench, color: 'bg-orange-500/10 text-orange-600' },
-  payment: { label: 'Payment', labelRu: 'Оплата', icon: CreditCard, color: 'bg-green-500/10 text-green-600' },
-  delivery: { label: 'Delivery', labelRu: 'Доставка', icon: Truck, color: 'bg-blue-500/10 text-blue-600' },
-  cancellation: { label: 'Cancellation', labelRu: 'Отмена', icon: XCircle, color: 'bg-gray-500/10 text-gray-600' },
-  other: { label: 'Other', labelRu: 'Другое', icon: HelpCircle, color: 'bg-slate-500/10 text-slate-600' },
+  refund: { label: 'Refund', labelRu: 'Возврат', icon: RefreshCcw, color: 'bg-accent-purple/10 text-accent-purple' },
+  quality: { label: 'Quality', labelRu: 'Качество', icon: Star, color: 'bg-warning/10 text-warning' },
+  fraud: { label: 'Fraud', labelRu: 'Мошенничество', icon: ShieldAlert, color: 'bg-destructive/10 text-destructive' },
+  damage: { label: 'Damage', labelRu: 'Повреждение', icon: Wrench, color: 'bg-warning/10 text-warning' },
+  payment: { label: 'Payment', labelRu: 'Оплата', icon: CreditCard, color: 'bg-success/10 text-success' },
+  delivery: { label: 'Delivery', labelRu: 'Доставка', icon: Truck, color: 'bg-info/10 text-info' },
+  cancellation: { label: 'Cancellation', labelRu: 'Отмена', icon: XCircle, color: 'bg-muted text-muted-foreground' },
+  other: { label: 'Other', labelRu: 'Другое', icon: HelpCircle, color: 'bg-muted text-muted-foreground' },
 };
 
 export function TicketCategoryBadge({ category, className }: TicketCategoryBadgeProps) {
