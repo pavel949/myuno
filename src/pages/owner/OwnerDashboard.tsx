@@ -29,6 +29,7 @@ import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions'
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
+import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 function SectionSkeleton() {
   return (
     <div className="space-y-3">
@@ -74,6 +75,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       );
     case 'invites':
       return <OwnershipInviteBanner />;
+    case 'today_actions':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <TodayActionsWidget />
+        </Suspense>
+      );
     case 'active_stays':
       return (
         <div data-tour="active-stays">

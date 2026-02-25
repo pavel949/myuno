@@ -28,5 +28,8 @@ export { OwnerDashboardMenu } from './OwnerDashboardMenu';
 // Maintenance
 export { MaintenanceHealthWidget } from './MaintenanceHealthWidget';
 
+// Command Center
+export { TodayActionsWidget } from './TodayActionsWidget';
+
 // Property Wizard Steps
 export * from '../property-wizard';
