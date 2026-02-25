@@ -41,11 +41,11 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
 
         <div className="grid gap-4">
           {/* Weekly discount */}
-          <div className="p-4 rounded-xl border bg-gradient-to-r from-blue-500/5 to-transparent">
+          <div className="p-4 rounded-xl border bg-gradient-to-r from-info/5 to-transparent">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-info" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{isRu ? 'Недельная скидка' : 'Weekly Discount'}</p>
@@ -55,7 +55,7 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
                 </div>
               </div>
               {weeklyDiscount > 0 && (
-                <Badge className="bg-blue-500/20 text-blue-700 hover:bg-blue-500/30">
+                <Badge className="bg-info/20 text-info hover:bg-info/30">
                   <TrendingDown className="h-3 w-3 mr-1" />
                   -{weeklyDiscount}%
                 </Badge>
@@ -90,11 +90,11 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
           </div>
 
           {/* Monthly discount */}
-          <div className="p-4 rounded-xl border bg-gradient-to-r from-green-500/5 to-transparent">
+          <div className="p-4 rounded-xl border bg-gradient-to-r from-success/5 to-transparent">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-green-600" />
+                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">{isRu ? 'Месячная скидка' : 'Monthly Discount'}</p>
@@ -104,7 +104,7 @@ function DiscountsSectionInner({ formData, updateFormData }: DiscountsSectionPro
                 </div>
               </div>
               {monthlyDiscount > 0 && (
-                <Badge className="bg-green-500/20 text-green-700 hover:bg-green-500/30">
+                <Badge className="bg-success/20 text-success hover:bg-success/30">
                   <TrendingDown className="h-3 w-3 mr-1" />
                   -{monthlyDiscount}%
                 </Badge>

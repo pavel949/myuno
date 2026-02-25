@@ -66,7 +66,7 @@ export function InvestmentCard({
           {/* Badges */}
           <div className="absolute top-2 left-2 flex gap-1.5">
             {project.is_hot && (
-              <Badge className="bg-orange-500 text-white text-[10px] px-1.5 py-0.5">
+              <Badge className="bg-warning text-white text-[10px] px-1.5 py-0.5">
                 <Flame className="h-3 w-3 mr-0.5" />
                 HOT
               </Badge>
@@ -117,7 +117,7 @@ export function InvestmentCard({
           {/* Key metrics */}
           <div className="flex items-center gap-3 text-xs">
             {project.roi_projected && (
-              <div className="flex items-center gap-1 text-emerald-600">
+              <div className="flex items-center gap-1 text-success">
                 <TrendingUp className="h-3 w-3" />
                 <span className="font-medium">ROI {project.roi_projected}%</span>
               </div>
@@ -176,7 +176,7 @@ export function InvestmentCard({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-2">
           {project.is_hot && (
-            <Badge className="bg-orange-500 text-white">
+            <Badge className="bg-warning text-white">
               <Flame className="h-3.5 w-3.5 mr-1" />
               HOT DEAL
             </Badge>
@@ -229,7 +229,7 @@ export function InvestmentCard({
         {/* Key metrics grid */}
         <div className="grid grid-cols-3 gap-2 py-2 border-y border-border/50">
           <div className="text-center">
-            <div className="text-lg font-bold text-emerald-600">
+            <div className="text-lg font-bold text-success">
               {project.roi_projected ? `${project.roi_projected}%` : '—'}
             </div>
             <div className="text-[10px] text-muted-foreground uppercase">
