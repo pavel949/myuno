@@ -138,7 +138,7 @@ function OwnershipTypeStepInner({ data, onChange }: OwnershipTypeStepProps) {
                     {isRu ? option.titleRu : option.titleEn}
                   </p>
                   {option.requiresVerification && (
-                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded-full">
                       {isRu ? 'Верификация' : 'Verification'}
                     </span>
                   )}
@@ -260,7 +260,7 @@ function OwnershipTypeStepInner({ data, onChange }: OwnershipTypeStepProps) {
           <CardContent className="pt-4">
             <div className="p-3 bg-muted/50 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-sm">
                     {isRu ? 'Требуется подтверждение от собственника' : 'Owner confirmation required'}

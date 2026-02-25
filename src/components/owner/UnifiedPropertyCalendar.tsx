@@ -209,8 +209,8 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
             {hasCheckIn && <div className="w-1.5 h-1.5 rounded-full bg-success" />}
             {hasCheckOut && <div className="w-1.5 h-1.5 rounded-full bg-warning" />}
             {hasCleaning && <div className="w-1.5 h-1.5 rounded-full bg-info" />}
-            {hasMaintenance && <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />}
-            {hasOtherTask && <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
+            {hasMaintenance && <div className="w-1.5 h-1.5 rounded-full bg-accent-amber" />}
+            {hasOtherTask && <div className="w-1.5 h-1.5 rounded-full bg-accent-purple" />}
           </div>
         )}
       </div>
@@ -292,7 +292,7 @@ export function UnifiedPropertyCalendar({ propertyId, properties = [] }: Unified
                   <span>{isRu ? 'Уборка' : 'Cleaning'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-orange-500" />
+                  <div className="w-3 h-3 rounded-full bg-accent-amber" />
                   <span>{isRu ? 'Ремонт' : 'Repair'}</span>
                 </div>
               </div>

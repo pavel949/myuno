@@ -221,7 +221,7 @@ export default function OwnerGuidebookEdit() {
               <div className="flex items-center gap-2">
                 <Input value={shareUrl || ''} readOnly className="text-sm font-mono" />
                 <Button type="button" variant="outline" size="icon" onClick={copyShareLink}>
-                  {copiedLink ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                  {copiedLink ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                 </Button>
                 <Button type="button" variant="outline" size="icon" asChild>
                   <a href={shareUrl || '#'} target="_blank" rel="noopener noreferrer">

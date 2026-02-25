@@ -298,7 +298,7 @@ export default function PartnersPage() {
         {/* Benefits */}
         <div>
           <h2 className="font-semibold mb-3 flex items-center gap-2">
-            <Star className="w-5 h-5 text-amber-500" />
+            <Star className="w-5 h-5 text-accent-amber" />
             {isRu ? 'Преимущества партнёрства' : 'Partnership Benefits'}
           </h2>
           <div className="grid grid-cols-2 gap-3">
@@ -362,7 +362,7 @@ export default function PartnersPage() {
         {/* Business Model - без конкретных процентов */}
         <div>
           <h2 className="font-semibold mb-3 flex items-center gap-2">
-            <Handshake className="w-5 h-5 text-green-500" />
+            <Handshake className="w-5 h-5 text-success" />
             {isRu ? 'Бизнес-модель' : 'Business Model'}
           </h2>
           <SectionCard className="mb-4">
@@ -397,7 +397,7 @@ export default function PartnersPage() {
                     <div className="space-y-1">
                       {item.features.map((feature, fIndex) => (
                         <div key={fIndex} className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <CheckCircle2 className="w-3 h-3 text-green-500" />
+                          <CheckCircle2 className="w-3 h-3 text-success" />
                           {feature}
                         </div>
                       ))}
@@ -430,7 +430,7 @@ export default function PartnersPage() {
                   <div className="flex items-start gap-3">
                     <div className="flex flex-col items-center">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        isLast ? 'bg-green-500 text-white' : 'bg-primary/10'
+                        isLast ? 'bg-success text-white' : 'bg-primary/10'
                       }`}>
                         <Icon className={`w-5 h-5 ${isLast ? '' : 'text-primary'}`} />
                       </div>
@@ -485,9 +485,9 @@ export default function PartnersPage() {
         </div>
 
         {/* G-Trust Badge */}
-        <SectionCard className="bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border-amber-500/20">
+        <SectionCard className="bg-gradient-to-br from-accent-amber/10 to-warning/5 border-accent-amber/20">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-amber to-accent-amber/80 flex items-center justify-center flex-shrink-0">
               <Crown className="w-6 h-6 text-white" />
             </div>
             <div>

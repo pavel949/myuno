@@ -120,23 +120,23 @@ export function TodayBriefingWidget() {
 
   const typeConfig = {
     check_in: {
-      icon: LogIn, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30',
-      border: 'border-l-emerald-500',
+      icon: LogIn, color: 'text-success', bg: 'bg-success/10',
+      border: 'border-l-success',
       label: isRu ? 'Заезд сегодня' : 'Check-in today',
     },
     check_out: {
-      icon: LogOut, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30',
-      border: 'border-l-amber-500',
+      icon: LogOut, color: 'text-warning', bg: 'bg-warning/10',
+      border: 'border-l-warning',
       label: isRu ? 'Выезд сегодня' : 'Check-out today',
     },
     check_in_tomorrow: {
-      icon: LogIn, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30',
-      border: 'border-l-blue-400',
+      icon: LogIn, color: 'text-info', bg: 'bg-info/10',
+      border: 'border-l-info',
       label: isRu ? 'Заезд завтра' : 'Check-in tomorrow',
     },
     check_out_tomorrow: {
-      icon: LogOut, color: 'text-orange-400', bg: 'bg-orange-50 dark:bg-orange-950/30',
-      border: 'border-l-orange-400',
+      icon: LogOut, color: 'text-accent-amber', bg: 'bg-accent-amber/10',
+      border: 'border-l-accent-amber',
       label: isRu ? 'Выезд завтра' : 'Check-out tomorrow',
     },
   };

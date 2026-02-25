@@ -67,7 +67,7 @@ export function UpcomingPaymentsWidget() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Zap className="h-4 w-4 text-amber-500" />
+        <Zap className="h-4 w-4 text-warning" />
         <h3 className="font-semibold text-sm">
           {isRu ? 'Предстоящие платежи' : 'Upcoming Payments'}
         </h3>

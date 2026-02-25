@@ -50,7 +50,7 @@ export default function TransactionHistory() {
               {isRu ? 'Доход' : 'Income'}
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-red-500/10 text-center">
+          <div className="p-3 rounded-lg bg-destructive/10 text-center">
             <p className="text-lg font-bold text-foreground">
               -{stats.totalSpent.toLocaleString()}
             </p>
