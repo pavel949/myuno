@@ -25,7 +25,7 @@ function StarRating({ value, onChange, label }: { value: number; onChange: (v: n
       <div className="flex gap-0.5">
         {[1, 2, 3, 4, 5].map(s => (
           <button key={s} type="button" onClick={() => onChange(s)} className="p-0.5">
-            <Star className={`h-5 w-5 ${s <= value ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`} />
+            <Star className={`h-5 w-5 ${s <= value ? 'fill-warning text-warning' : 'text-muted-foreground/30'}`} />
           </button>
         ))}
       </div>

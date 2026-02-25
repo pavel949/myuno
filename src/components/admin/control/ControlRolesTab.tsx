@@ -8,12 +8,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const roleConfigs = [
-  { key: 'admin', label: 'Admin', labelRu: 'Администратор', icon: Shield, color: 'bg-red-500' },
-  { key: 'uno_team', label: 'myUNO Team', labelRu: 'Команда myUNO', icon: Headphones, color: 'bg-emerald-500' },
-  { key: 'staff', label: 'Staff', labelRu: 'Сотрудник', icon: UserCog, color: 'bg-orange-500' },
-  { key: 'vendor', label: 'Service Provider', labelRu: 'Поставщик услуг', icon: Store, color: 'bg-purple-500' },
-  { key: 'property_owner', label: 'Property Owner', labelRu: 'Владелец недвижимости', icon: Building2, color: 'bg-teal-500' },
-  { key: 'user', label: 'User', labelRu: 'Пользователь', icon: Users, color: 'bg-blue-500' },
+  { key: 'admin', label: 'Admin', labelRu: 'Администратор', icon: Shield, color: 'bg-destructive' },
+  { key: 'uno_team', label: 'myUNO Team', labelRu: 'Команда myUNO', icon: Headphones, color: 'bg-success' },
+  { key: 'staff', label: 'Staff', labelRu: 'Сотрудник', icon: UserCog, color: 'bg-accent-amber' },
+  { key: 'vendor', label: 'Service Provider', labelRu: 'Поставщик услуг', icon: Store, color: 'bg-accent-purple' },
+  { key: 'property_owner', label: 'Property Owner', labelRu: 'Владелец недвижимости', icon: Building2, color: 'bg-accent-teal' },
+  { key: 'user', label: 'User', labelRu: 'Пользователь', icon: Users, color: 'bg-info' },
 ];
 
 export function ControlRolesTab() {

@@ -55,17 +55,17 @@ const STATUS_CONFIG: Record<ProjectStatus, {
   offplan: {
     label: { en: 'Off-Plan', ru: 'Новостройка' },
     icon: Building2,
-    color: 'bg-blue-500/10 text-blue-600',
+    color: 'bg-info/10 text-info',
   },
   under_construction: {
     label: { en: 'Under Construction', ru: 'Строится' },
     icon: HardHat,
-    color: 'bg-amber-500/10 text-amber-600',
+    color: 'bg-warning/10 text-warning',
   },
   completed: {
     label: { en: 'Completed', ru: 'Готово' },
     icon: CheckCircle2,
-    color: 'bg-green-500/10 text-green-600',
+    color: 'bg-success/10 text-success',
   },
 };
 
@@ -188,7 +188,7 @@ export default function OffplanDetail() {
           {/* ROI */}
           {project.roiProjected && (
             <div className="rounded-xl border bg-card p-3 flex flex-col justify-center">
-              <div className="flex items-center gap-2 text-green-600 mb-1">
+              <div className="flex items-center gap-2 text-success mb-1">
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-2xl font-bold">{project.roiProjected}%</span>
               </div>
@@ -289,14 +289,14 @@ export default function OffplanDetail() {
             <div className={cn(
               "rounded-xl p-4 space-y-3 border",
               project.riskLevel 
-                ? "bg-emerald-500/5 border-emerald-500/20" 
-                : "bg-amber-500/5 border-amber-500/20"
+                ? "bg-success/5 border-success/20" 
+                : "bg-warning/5 border-warning/20"
             )}>
               <div className="flex items-start gap-3">
                 {project.riskLevel ? (
-                  <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <ShieldCheck className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
                 ) : (
-                  <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <ShieldAlert className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
                 )}
                 <div className="flex-1">
                   <p className="font-semibold">

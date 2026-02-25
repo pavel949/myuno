@@ -115,7 +115,7 @@ export function WriteReviewModal({
                   <Star
                     className={`w-8 h-8 transition-colors ${
                       star <= (hoverRating || rating)
-                        ? 'fill-yellow-400 text-yellow-400'
+                        ? 'fill-warning text-warning'
                         : 'text-muted-foreground'
                     }`}
                   />

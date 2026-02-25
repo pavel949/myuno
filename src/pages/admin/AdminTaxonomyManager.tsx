@@ -95,8 +95,8 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <FolderTree className="h-5 w-5 text-green-500" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <FolderTree className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{totalValues}</p>
@@ -108,7 +108,7 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10">
+              <div className="p-2 rounded-lg bg-info/10">
                 <span className="text-xl">🏠</span>
               </div>
               <div>
@@ -121,8 +121,8 @@ export default function AdminTaxonomyManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <Settings className="h-5 w-5 text-purple-500" />
+              <div className="p-2 rounded-lg bg-accent-purple/10">
+                <Settings className="h-5 w-5 text-accent-purple" />
               </div>
               <div>
                 <p className="text-2xl font-bold">

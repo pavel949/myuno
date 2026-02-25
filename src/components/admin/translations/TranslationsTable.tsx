@@ -151,7 +151,7 @@ export function TranslationsTable({
                       </Badge>
                     )}
                     {t.is_custom && (
-                      <Badge variant="outline" className="text-[10px] text-green-600">
+                      <Badge variant="outline" className="text-[10px] text-success">
                         изменён
                       </Badge>
                     )}
@@ -209,10 +209,10 @@ export function TranslationsTable({
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={saveEditing}>
-                          <Check className="h-4 w-4 text-green-600" />
+                          <Check className="h-4 w-4 text-success" />
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={cancelEditing}>
-                          <X className="h-4 w-4 text-red-600" />
+                          <X className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </TableCell>

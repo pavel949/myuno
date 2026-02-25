@@ -50,7 +50,7 @@ export function EntityReviewsSummary({ entityType, entityId, compact }: EntityRe
   if (compact) {
     return (
       <div className="flex items-center gap-1.5">
-        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+        <Star className="w-4 h-4 fill-warning text-warning" />
         <span className="font-semibold text-sm text-foreground">{stats.avgRating}</span>
         <span className="text-xs text-muted-foreground">({stats.totalReviews})</span>
       </div>
@@ -67,7 +67,7 @@ export function EntityReviewsSummary({ entityType, entityId, compact }: EntityRe
             {[1, 2, 3, 4, 5].map(star => (
               <Star
                 key={star}
-                className={`w-4 h-4 ${star <= Math.round(stats.avgRating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
+                className={`w-4 h-4 ${star <= Math.round(stats.avgRating) ? 'fill-warning text-warning' : 'text-muted-foreground/30'}`}
               />
             ))}
           </div>

@@ -133,7 +133,7 @@ export default function TeamModerationPage() {
                                           key={i} 
                                           className={cn(
                                             "h-3 w-3",
-                                            i < (item.rating || 0) ? "text-amber-500 fill-amber-500" : "text-muted"
+                                            i < (item.rating || 0) ? "text-warning fill-warning" : "text-muted"
                                           )} 
                                         />
                                       ))}

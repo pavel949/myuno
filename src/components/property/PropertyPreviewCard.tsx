@@ -149,7 +149,7 @@ export function PropertyPreviewCard({ data, className, variant = 'search' }: Pro
             
             {data.rating !== undefined && data.rating > 0 && (
               <div className="flex items-center gap-1 text-sm">
-                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                 <span className="font-medium">{data.rating.toFixed(1)}</span>
                 {data.reviewCount !== undefined && (
                   <span className="text-muted-foreground text-xs">
@@ -265,7 +265,7 @@ export function PropertyPreviewCard({ data, className, variant = 'search' }: Pro
           
           {data.rating !== undefined && data.rating > 0 && (
             <div className="flex items-center gap-1.5">
-              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <Star className="h-5 w-5 fill-warning text-warning" />
               <span className="font-semibold text-lg">{data.rating.toFixed(1)}</span>
               {data.reviewCount !== undefined && (
                 <span className="text-muted-foreground text-sm">

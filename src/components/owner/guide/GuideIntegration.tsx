@@ -85,9 +85,9 @@ export function GuideIntegration() {
                   📅 {isRu ? 'Автоматические задачи:' : 'Automatic tasks:'}
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <span className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-xs">Check-in</span>
-                  <span className="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs">Check-out</span>
-                  <span className="px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full text-xs">
+                  <span className="px-3 py-1 bg-success/20 text-success rounded-full text-xs">Check-in</span>
+                  <span className="px-3 py-1 bg-destructive/20 text-destructive rounded-full text-xs">Check-out</span>
+                  <span className="px-3 py-1 bg-info/20 text-info rounded-full text-xs">
                     {isRu ? 'Уборка' : 'Cleaning'}
                   </span>
                 </div>

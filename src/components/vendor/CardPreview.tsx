@@ -314,7 +314,7 @@ export function CardPreview(props: CardPreviewProps) {
 
         {/* Rating simulation */}
         <div className="flex items-center gap-1 mb-2">
-          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <Star className="w-3.5 h-3.5 fill-warning text-warning" />
           <span className="text-sm font-medium">4.9</span>
           <span className="text-xs text-muted-foreground">(0 {isRussian ? 'отзывов' : 'reviews'})</span>
         </div>

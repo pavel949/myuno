@@ -314,7 +314,7 @@ export function PropertyBookingCard({
               </button>
               
               {showPriceDetails && pricing.discount > 0 && (
-                <div className="flex items-center justify-between text-sm text-green-600">
+                <div className="flex items-center justify-between text-sm text-success">
                   <span>
                     {pricing.discountPercent}% {isRu ? 'скидка' : 'discount'}
                     {pricing.discountPercent === rentalTerms?.monthly_discount 

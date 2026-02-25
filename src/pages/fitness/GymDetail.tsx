@@ -129,7 +129,7 @@ const GymDetail = () => {
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-5 h-5 fill-warning text-warning" />
                 <span className="font-bold">{gym.rating}</span>
               </div>
               <p className="text-sm text-muted-foreground">{gym.review_count} reviews</p>

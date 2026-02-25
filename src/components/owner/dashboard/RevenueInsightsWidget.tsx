@@ -116,8 +116,8 @@ export function RevenueInsightsWidget() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {isUp
-                    ? <TrendingUp className="w-4 h-4 text-green-600" />
-                    : <TrendingDown className="w-4 h-4 text-amber-600" />
+                    ? <TrendingUp className="w-4 h-4 text-success" />
+                    : <TrendingDown className="w-4 h-4 text-warning" />
                   }
                   <span className="text-sm font-medium">
                     {currSym}{rec.current_price.toLocaleString()} → {currSym}{rec.recommended_price.toLocaleString()}
@@ -125,7 +125,7 @@ export function RevenueInsightsWidget() {
                 </div>
                 <Badge
                   variant={isUp ? 'default' : 'secondary'}
-                  className={`text-xs ${isUp ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}`}
+                  className={`text-xs ${isUp ? 'bg-success/10 text-success' : ''}`}
                 >
                   {isUp ? '+' : ''}{diffPct}%
                 </Badge>

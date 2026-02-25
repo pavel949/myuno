@@ -65,7 +65,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
               'text-xs font-semibold px-2 py-0.5 rounded',
               isCritical 
                 ? 'bg-destructive/20 text-destructive' 
-                : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                : 'bg-warning/20 text-warning'
             )}>
               {violationLabel}
             </span>
@@ -93,7 +93,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
               to="/terms#chat-policy" 
               className={cn(
                 'text-xs flex items-center gap-1 hover:underline',
-                isCritical ? 'text-destructive' : 'text-amber-600 dark:text-amber-400'
+                isCritical ? 'text-destructive' : 'text-warning'
               )}
             >
               {isRu ? 'Правила чата' : 'Chat Policy'}

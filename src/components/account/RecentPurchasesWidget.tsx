@@ -14,23 +14,23 @@ import { cn } from '@/lib/utils';
 const STATUS_STYLES: Record<string, { label: { en: string; ru: string }; className: string }> = {
   pending: { 
     label: { en: 'Pending', ru: 'Ожидает' }, 
-    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' 
+    className: 'bg-warning/10 text-warning' 
   },
   confirmed: { 
     label: { en: 'Confirmed', ru: 'Подтверждён' }, 
-    className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' 
+    className: 'bg-info/10 text-info' 
   },
   in_progress: { 
     label: { en: 'In Progress', ru: 'Выполняется' }, 
-    className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' 
+    className: 'bg-accent-purple/10 text-accent-purple' 
   },
   completed: { 
     label: { en: 'Completed', ru: 'Завершён' }, 
-    className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+    className: 'bg-success/10 text-success' 
   },
   cancelled: { 
     label: { en: 'Cancelled', ru: 'Отменён' }, 
-    className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' 
+    className: 'bg-muted text-muted-foreground' 
   },
 };
 
