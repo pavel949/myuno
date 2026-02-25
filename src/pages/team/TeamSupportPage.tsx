@@ -73,18 +73,18 @@ export default function TeamSupportPage() {
             <p className="text-xl font-bold">{openCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Открытых' : 'Open'}</p>
           </Card>
-          <Card className="p-3 text-center bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-            <Clock className="h-5 w-5 mx-auto mb-1 text-blue-600" />
+          <Card className="p-3 text-center bg-info/10 border-info/20">
+            <Clock className="h-5 w-5 mx-auto mb-1 text-info" />
             <p className="text-xl font-bold">{inProgressCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-green-500" />
+            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-success" />
             <p className="text-xl font-bold">12</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Сегодня' : 'Today'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <MessageCircle className="h-5 w-5 mx-auto mb-1 text-purple-500" />
+            <MessageCircle className="h-5 w-5 mx-auto mb-1 text-accent-purple" />
             <p className="text-xl font-bold">~15m</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Ср. ответ' : 'Avg Response'}</p>
           </Card>

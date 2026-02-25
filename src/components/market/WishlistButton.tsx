@@ -41,8 +41,8 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
             iconSize,
             'transition-colors',
             isWishlisted 
-              ? 'fill-red-500 text-red-500' 
-              : 'text-muted-foreground hover:text-red-500'
+              ? 'fill-destructive text-destructive' 
+              : 'text-muted-foreground hover:text-destructive'
           )}
         />
       </button>
@@ -56,7 +56,7 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
       size={size}
       onClick={handleClick}
       className={cn(
-        isWishlisted && 'bg-red-500 hover:bg-red-600 text-white',
+        isWishlisted && 'bg-destructive hover:bg-destructive/90 text-destructive-foreground',
         className
       )}
     >

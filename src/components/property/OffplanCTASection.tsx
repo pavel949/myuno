@@ -64,7 +64,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-base flex items-center gap-2">
               {isRu ? 'Интересуют новостройки Пхукета?' : 'Interested in Phuket New Developments?'}
-              <Sparkles className="w-4 h-4 text-amber-500" />
+              <Sparkles className="w-4 h-4 text-accent-amber" />
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isRu 

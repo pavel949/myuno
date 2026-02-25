@@ -168,8 +168,8 @@ export default function VehicleDetail() {
               {/* Rating */}
               {vehicle.rating && vehicle.rating > 0 && (
                 <div className="flex items-center gap-2 mt-2.5">
-                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10">
-                    <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-warning/10">
+                    <Star className="w-4 h-4 text-warning fill-warning" />
                     <span className="font-bold text-sm">{vehicle.rating.toFixed(1)}</span>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -181,9 +181,9 @@ export default function VehicleDetail() {
 
             {/* G-Trust Block */}
             {vehicle.is_verified && (
-              <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+              <div className="p-4 rounded-2xl bg-success/5 border border-success/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  <ShieldCheck className="w-5 h-5 text-success" />
                   <h3 className="font-semibold text-sm text-foreground">
                     {isRu ? 'G-Trust верификация' : 'G-Trust Verified'}
                   </h3>
@@ -214,7 +214,7 @@ export default function VehicleDetail() {
                     </span>
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-emerald-600">
+                <div className="flex items-center gap-1 text-success">
                   <Shield className="w-4 h-4" />
                   <span className="text-xs font-medium">
                     {isRu ? 'Страховка' : 'Insured'}
@@ -283,7 +283,7 @@ export default function VehicleDetail() {
                 <div className="grid grid-cols-2 gap-2">
                   {localizedFeatures.map((feature, i) => (
                     <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-card border border-border/50">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <Check className="w-4 h-4 text-success shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -383,7 +383,7 @@ function SpecCard({ icon: Icon, label, value }: { icon: typeof Users; label: str
 function TrustItem({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 text-sm">
-      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+      <Check className="w-3.5 h-3.5 text-success shrink-0" />
       <span className="text-muted-foreground text-xs">{label}</span>
     </div>
   );

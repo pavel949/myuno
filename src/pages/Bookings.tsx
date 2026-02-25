@@ -46,13 +46,13 @@ const getBookingIcon = (type: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'confirmed': return 'bg-green-500/10 text-green-600 border-green-500/20';
+    case 'confirmed': return 'bg-success/10 text-success border-success/20';
     case 'pending':
-    case 'submitted': return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
-    case 'completed': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+    case 'submitted': return 'bg-warning/10 text-warning border-warning/20';
+    case 'completed': return 'bg-info/10 text-info border-info/20';
     case 'cancelled':
     case 'cancelled_by_user':
-    case 'cancelled_by_provider': return 'bg-red-500/10 text-red-600 border-red-500/20';
+    case 'cancelled_by_provider': return 'bg-destructive/10 text-destructive border-destructive/20';
     default: return 'bg-muted text-muted-foreground';
   }
 };

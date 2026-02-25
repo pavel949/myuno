@@ -185,8 +185,8 @@ export function OffplanProjectCard({
         <div className={cn(
           "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium",
           project.riskLevel 
-            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" 
-            : "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+            ? "bg-success/10 text-success" 
+            : "bg-warning/10 text-warning"
         )}>
           {project.riskLevel ? (
             <>

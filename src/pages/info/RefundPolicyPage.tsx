@@ -38,14 +38,14 @@ export default function RefundPolicyPage() {
       description: isRu 
         ? 'Оплата через платформу. Деньги удерживаются до оказания услуги. Возврат возможен согласно правилам ниже.'
         : 'Payment through platform. Funds held until service delivery. Refunds possible per rules below.',
-      color: 'bg-green-500/10 text-green-600 border-green-500/30'
+      color: 'bg-success/10 text-success border-success/30'
     },
     lead: {
       label: isRu ? 'Lead-услуга' : 'Lead Service',
       description: isRu 
         ? 'Мы передаём ваш запрос партнёру. Оплата напрямую. Возврат через myUNO невозможен — обращайтесь к партнёру.'
         : 'We forward your request to partner. Direct payment. Refund via myUNO not possible — contact partner directly.',
-      color: 'bg-orange-500/10 text-orange-600 border-orange-500/30'
+      color: 'bg-warning/10 text-warning border-warning/30'
     }
   };
 
@@ -53,7 +53,7 @@ export default function RefundPolicyPage() {
     {
       icon: Home,
       title: isRu ? 'Аренда недвижимости' : 'Property Rentals',
-      color: 'text-blue-500',
+      color: 'text-info',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 30+ дней до заезда' : '30+ days before check-in', refund: '100%' },
@@ -71,7 +71,7 @@ export default function RefundPolicyPage() {
     {
       icon: Ship,
       title: isRu ? 'Аренда яхт и катеров' : 'Boat Charters',
-      color: 'text-cyan-500',
+      color: 'text-accent-cyan',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 7+ дней' : '7+ days before', refund: '100%' },
@@ -89,7 +89,7 @@ export default function RefundPolicyPage() {
     {
       icon: MapPin,
       title: isRu ? 'Туры и экскурсии' : 'Tours & Excursions',
-      color: 'text-green-500',
+      color: 'text-success',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 48+ часов' : '48+ hours before', refund: '100%' },
@@ -106,7 +106,7 @@ export default function RefundPolicyPage() {
     {
       icon: Car,
       title: isRu ? 'Трансферы' : 'Transfers',
-      color: 'text-orange-500',
+      color: 'text-warning',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 24+ часа' : '24+ hours before', refund: '100%' },
@@ -123,7 +123,7 @@ export default function RefundPolicyPage() {
     {
       icon: Utensils,
       title: isRu ? 'Рестораны и доставка' : 'Restaurants & Delivery',
-      color: 'text-red-500',
+      color: 'text-destructive',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'До подтверждения заказа' : 'Before order confirmation', refund: '100%' },
@@ -139,7 +139,7 @@ export default function RefundPolicyPage() {
     {
       icon: Scissors,
       title: isRu ? 'Красота и СПА' : 'Beauty & SPA',
-      color: 'text-pink-500',
+      color: 'text-accent-purple',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 24+ часа' : '24+ hours before', refund: '100%' },
@@ -156,7 +156,7 @@ export default function RefundPolicyPage() {
     {
       icon: Waves,
       title: isRu ? 'Водные развлечения' : 'Water Sports',
-      color: 'text-sky-500',
+      color: 'text-info',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 24+ часа' : '24+ hours before', refund: '100%' },
@@ -173,7 +173,7 @@ export default function RefundPolicyPage() {
     {
       icon: Baby,
       title: isRu ? 'Няни и бебиситтеры' : 'Babysitters',
-      color: 'text-purple-500',
+      color: 'text-accent-purple',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 24+ часа' : '24+ hours before', refund: '100%' },
@@ -190,7 +190,7 @@ export default function RefundPolicyPage() {
     {
       icon: Sparkles,
       title: isRu ? 'Клининг' : 'Cleaning Services',
-      color: 'text-teal-500',
+      color: 'text-accent-teal',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 12+ часов' : '12+ hours before', refund: '100%' },
@@ -207,7 +207,7 @@ export default function RefundPolicyPage() {
     {
       icon: Flower2,
       title: isRu ? 'Цветы' : 'Flowers',
-      color: 'text-rose-500',
+      color: 'text-destructive',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'За 6+ часов до доставки' : '6+ hours before delivery', refund: '100%' },
@@ -223,7 +223,7 @@ export default function RefundPolicyPage() {
     {
       icon: ShoppingBag,
       title: isRu ? 'Маркетплейс' : 'Marketplace',
-      color: 'text-amber-500',
+      color: 'text-accent-amber',
       serviceType: 'escrow',
       policies: [
         { period: isRu ? 'До отправки' : 'Before shipping', refund: '100%' },
@@ -243,7 +243,7 @@ export default function RefundPolicyPage() {
     {
       icon: Stethoscope,
       title: isRu ? 'Медицинские услуги' : 'Medical Services',
-      color: 'text-emerald-500',
+      color: 'text-success',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -256,7 +256,7 @@ export default function RefundPolicyPage() {
     {
       icon: Pill,
       title: isRu ? 'Аптеки' : 'Pharmacies',
-      color: 'text-green-600',
+      color: 'text-success',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -269,7 +269,7 @@ export default function RefundPolicyPage() {
     {
       icon: Scale,
       title: isRu ? 'Юридические услуги' : 'Legal Services',
-      color: 'text-slate-600',
+      color: 'text-muted-foreground',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -282,7 +282,7 @@ export default function RefundPolicyPage() {
     {
       icon: GraduationCap,
       title: isRu ? 'Образование' : 'Education',
-      color: 'text-indigo-500',
+      color: 'text-primary',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -295,7 +295,7 @@ export default function RefundPolicyPage() {
     {
       icon: PawPrint,
       title: isRu ? 'Ветеринария' : 'Pet Services',
-      color: 'text-orange-600',
+      color: 'text-warning',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -308,7 +308,7 @@ export default function RefundPolicyPage() {
     {
       icon: Building,
       title: isRu ? 'Покупка недвижимости' : 'Property Purchase',
-      color: 'text-blue-600',
+      color: 'text-info',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -321,7 +321,7 @@ export default function RefundPolicyPage() {
     {
       icon: Wrench,
       title: isRu ? 'Ремонт и обслуживание' : 'Repairs & Maintenance',
-      color: 'text-gray-600',
+      color: 'text-muted-foreground',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -334,7 +334,7 @@ export default function RefundPolicyPage() {
     {
       icon: Droplets,
       title: isRu ? 'Доставка воды' : 'Water Delivery',
-      color: 'text-blue-400',
+      color: 'text-info',
       serviceType: 'lead',
       policies: [],
       note: isRu 
@@ -406,14 +406,14 @@ export default function RefundPolicyPage() {
         {/* Service Types Explanation */}
         <div className="grid gap-4 mb-8">
           {Object.entries(serviceTypeLabels).map(([type, info]) => (
-            <Card key={type} className={`border ${type === 'escrow' ? 'border-green-500/30' : 'border-orange-500/30'}`}>
+            <Card key={type} className={`border ${type === 'escrow' ? 'border-success/30' : 'border-warning/30'}`}>
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${type === 'escrow' ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
+                  <div className={`p-2 rounded-lg ${type === 'escrow' ? 'bg-success/10' : 'bg-warning/10'}`}>
                     {type === 'escrow' ? (
-                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                      <ShieldCheck className="h-5 w-5 text-success" />
                     ) : (
-                      <Phone className="h-5 w-5 text-orange-600" />
+                      <Phone className="h-5 w-5 text-warning" />
                     )}
                   </div>
                   <div>
@@ -435,21 +435,21 @@ export default function RefundPolicyPage() {
 
         {/* Escrow Services */}
         <div className="flex items-center gap-2 mb-4">
-          <ShieldCheck className="h-5 w-5 text-green-600" />
+          <ShieldCheck className="h-5 w-5 text-success" />
           <h2 className="text-lg font-semibold">
             {isRu ? 'Escrow-услуги (возврат возможен)' : 'Escrow Services (refunds available)'}
           </h2>
         </div>
         <div className="space-y-4 mb-8">
           {escrowVerticals.map((vertical, index) => (
-            <Card key={index} className="border-green-500/20">
+            <Card key={index} className="border-success/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <vertical.icon className={`h-5 w-5 ${vertical.color}`} />
                     {vertical.title}
                   </div>
-                  <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-xs">
+                  <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-xs">
                     Escrow
                   </Badge>
                 </CardTitle>
@@ -463,10 +463,10 @@ export default function RefundPolicyPage() {
                     >
                       <span className="text-sm">{policy.period}</span>
                       <span className={`text-sm font-semibold ${
-                        policy.refund === '100%' ? 'text-green-500' :
-                        policy.refund === '50%' ? 'text-yellow-500' :
-                        policy.refund === '25%' ? 'text-orange-500' :
-                        'text-red-500'
+                        policy.refund === '100%' ? 'text-success' :
+                        policy.refund === '50%' ? 'text-warning' :
+                        policy.refund === '25%' ? 'text-warning' :
+                        'text-destructive'
                       }`}>
                         {policy.refund}
                       </span>
@@ -494,15 +494,15 @@ export default function RefundPolicyPage() {
 
         {/* Lead Services */}
         <div className="flex items-center gap-2 mb-4">
-          <Phone className="h-5 w-5 text-orange-600" />
+          <Phone className="h-5 w-5 text-warning" />
           <h2 className="text-lg font-semibold">
             {isRu ? 'Lead-услуги (возврат через myUNO невозможен)' : 'Lead Services (no refunds via myUNO)'}
           </h2>
         </div>
-        <Card className="mb-4 border-orange-500/30 bg-orange-500/5">
+        <Card className="mb-4 border-warning/30 bg-warning/5">
           <CardContent className="pt-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
               <p className="text-sm text-muted-foreground">
                 {isRu 
                   ? 'Для Lead-услуг myUNO выступает информационным посредником. Мы помогаем найти партнёра, но финансовые отношения — между вами и партнёром напрямую. Возврат средств возможен только через партнёра.'
@@ -513,14 +513,14 @@ export default function RefundPolicyPage() {
         </Card>
         <div className="space-y-4 mb-8">
           {leadVerticals.map((vertical, index) => (
-            <Card key={index} className="border-orange-500/20">
+            <Card key={index} className="border-warning/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <vertical.icon className={`h-5 w-5 ${vertical.color}`} />
                     {vertical.title}
                   </div>
-                  <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/30 text-xs">
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-xs">
                     Lead
                   </Badge>
                 </CardTitle>

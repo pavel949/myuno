@@ -113,9 +113,9 @@ function AgentCard({ agent, onEdit, onDelete, onToggleActive }: {
   };
 
   const typeColors: Record<string, string> = {
-    conversational: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    utility: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-    analyzer: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+    conversational: 'bg-info/10 text-info border-info/20',
+    utility: 'bg-warning/10 text-warning border-warning/20',
+    analyzer: 'bg-accent-purple/10 text-accent-purple border-accent-purple/20',
   };
 
   const typeLabels: Record<string, string> = {

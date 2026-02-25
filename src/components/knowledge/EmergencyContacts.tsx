@@ -49,9 +49,9 @@ export function EmergencyContacts({ citySlug = 'phuket', className }: EmergencyC
   };
 
   return (
-    <Card className={cn("border-red-200 dark:border-red-800/50", className)}>
+    <Card className={cn("border-destructive/30", className)}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2 text-red-600 dark:text-red-400">
+        <CardTitle className="text-lg flex items-center gap-2 text-destructive">
           <AlertTriangle className="h-5 w-5" />
           {language === 'ru' ? 'Экстренные контакты' : 'Emergency Contacts'}
         </CardTitle>
@@ -63,8 +63,8 @@ export function EmergencyContacts({ citySlug = 'phuket', className }: EmergencyC
             className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <contact.icon className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <div className="p-2 bg-destructive/10 rounded-lg">
+                <contact.icon className="h-4 w-4 text-destructive" />
               </div>
               <div>
                 <p className="font-medium text-foreground text-sm">{contact.label}</p>
@@ -76,7 +76,7 @@ export function EmergencyContacts({ citySlug = 'phuket', className }: EmergencyC
             <Button 
               variant="outline" 
               size="sm"
-              className="gap-2 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+              className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10"
               onClick={() => handleCall(contact.number)}
             >
               <Phone className="h-4 w-4" />

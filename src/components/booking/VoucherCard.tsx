@@ -69,7 +69,7 @@ export function VoucherCard({
   const statusConfig = {
     active: { 
       label: isRu ? 'Активен' : 'Active', 
-      color: 'bg-green-500/20 text-green-600 border-green-500/30' 
+      color: 'bg-success/20 text-success border-success/30' 
     },
     used: { 
       label: isRu ? 'Использован' : 'Used', 
@@ -77,11 +77,11 @@ export function VoucherCard({
     },
     expired: { 
       label: isRu ? 'Истёк' : 'Expired', 
-      color: 'bg-orange-500/20 text-orange-600 border-orange-500/30' 
+      color: 'bg-warning/20 text-warning border-warning/30' 
     },
     cancelled: { 
       label: isRu ? 'Отменён' : 'Cancelled', 
-      color: 'bg-red-500/20 text-red-600 border-red-500/30' 
+      color: 'bg-destructive/20 text-destructive border-destructive/30' 
     },
   };
 
@@ -230,7 +230,7 @@ export function VoucherCard({
             )}
             
             {status === 'active' && (
-              <div className="flex items-center gap-1 text-sm text-green-600">
+              <div className="flex items-center gap-1 text-sm text-success">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>{isRu ? 'Готов к использованию' : 'Ready to use'}</span>
               </div>
