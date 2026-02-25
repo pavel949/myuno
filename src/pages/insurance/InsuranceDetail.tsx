@@ -33,9 +33,9 @@ const insuranceTypeLabels: Record<string, { en: string; ru: string }> = {
 };
 
 const tierColors: Record<string, string> = {
-  basic: 'bg-gray-500/20 text-gray-400',
-  standard: 'bg-blue-500/20 text-blue-400',
-  premium: 'bg-purple-500/20 text-purple-400',
+  basic: 'bg-muted text-muted-foreground',
+  standard: 'bg-info/20 text-info',
+  premium: 'bg-accent-purple/20 text-accent-purple',
   vip: 'bg-primary/20 text-primary',
 };
 
@@ -99,12 +99,12 @@ export default function InsuranceDetail() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-5 h-5 fill-warning text-warning" />
                 <span className="font-semibold">{provider.rating}</span>
                 <span className="text-sm text-muted-foreground">({provider.review_count})</span>
               </div>
               {provider.has_24h_support && (
-                <div className="flex items-center gap-1 text-sm text-green-500">
+                <div className="flex items-center gap-1 text-sm text-success">
                   <Clock className="w-4 h-4" />
                   <span>24/7</span>
                 </div>
@@ -180,7 +180,7 @@ export default function InsuranceDetail() {
                     <div className="space-y-1">
                       {(language === 'ru' ? plan.features.ru : plan.features.en)?.slice(0, 3).map((feature, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-sm">
-                          <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />
+                          <CheckCircle2 className="w-3 h-3 text-success flex-shrink-0" />
                           <span className="text-muted-foreground">{feature}</span>
                         </div>
                       ))}
@@ -236,13 +236,13 @@ export default function InsuranceDetail() {
               <div className="space-y-2">
                 {provider.has_online_claims && (
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <CheckCircle2 className="w-4 h-4 text-success" />
                     <span>{language === 'ru' ? 'Онлайн подача заявок' : 'Online claims submission'}</span>
                   </div>
                 )}
                 {provider.has_24h_support && (
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <CheckCircle2 className="w-4 h-4 text-success" />
                     <span>{language === 'ru' ? 'Поддержка 24/7' : '24/7 support'}</span>
                   </div>
                 )}

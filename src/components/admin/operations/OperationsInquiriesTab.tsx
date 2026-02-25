@@ -12,10 +12,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
 const statusColors: Record<string, string> = {
-  open: 'bg-blue-500/20 text-blue-700',
-  pending: 'bg-yellow-500/20 text-yellow-700',
-  resolved: 'bg-green-500/20 text-green-700',
-  closed: 'bg-gray-500/20 text-gray-700',
+  open: 'bg-info/20 text-info',
+  pending: 'bg-warning/20 text-warning',
+  resolved: 'bg-success/20 text-success',
+  closed: 'bg-muted text-muted-foreground',
 };
 
 export function OperationsInquiriesTab() {
@@ -83,7 +83,7 @@ export function OperationsInquiriesTab() {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Clock className="h-8 w-8 text-yellow-500" />
+            <Clock className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
               <p className="text-sm text-muted-foreground">{isRussian ? 'В работе' : 'In Progress'}</p>

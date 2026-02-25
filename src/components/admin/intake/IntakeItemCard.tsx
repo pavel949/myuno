@@ -54,7 +54,7 @@ export function IntakeItemCard({
     <Card className={cn(
       "transition-all group",
       "lg:hover:shadow-md lg:hover:border-primary/20",
-      item.status === 'created' && "border-green-500/50 bg-green-500/5",
+      item.status === 'created' && "border-success/50 bg-success/5",
       item.status === 'discarded' && "border-muted bg-muted/30 opacity-60"
     )}>
       <CardHeader className="pb-2 lg:pb-1.5 lg:pt-3 lg:px-3">
@@ -84,7 +84,7 @@ export function IntakeItemCard({
           
           {/* Status indicator */}
           {item.status === 'created' && (
-            <Badge className="bg-green-500 text-white shrink-0">
+            <Badge className="bg-success text-success-foreground shrink-0">
               <CheckCircle className="h-3 w-3 mr-1" />
               {isRu ? 'Создан' : 'Created'}
             </Badge>
@@ -132,7 +132,7 @@ export function IntakeItemCard({
         {(hasMissingFields || hasWarnings) && (
           <div className="space-y-1">
             {hasMissingFields && (
-              <div className="flex items-start gap-2 text-xs text-amber-600 bg-amber-500/10 p-2 rounded">
+              <div className="flex items-start gap-2 text-xs text-warning bg-warning/10 p-2 rounded">
                 <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>
                   {isRu ? 'Отсутствуют: ' : 'Missing: '}

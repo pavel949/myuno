@@ -65,7 +65,7 @@ export function VendorProspectCard({ prospect, onDragStart, onClick }: VendorPro
         <div className="flex items-center gap-2">
           {prospect.ai_score !== null && (
             <Badge variant="outline" className="text-xs gap-1">
-              <Star className="h-3 w-3 text-yellow-500" />
+              <Star className="h-3 w-3 text-warning" />
               {prospect.ai_score}
             </Badge>
           )}

@@ -106,8 +106,8 @@ export function FieldMapper({ mappings, targetId, sampleData, onUpdateMapping, o
                 status === 'unmapped' 
                   ? 'bg-muted/50' 
                   : status === 'required'
-                    ? 'bg-green-500/10'
-                    : 'bg-blue-500/10'
+                    ? 'bg-success/10'
+                    : 'bg-info/10'
               }`}
             >
               {/* Source column */}
@@ -175,10 +175,10 @@ export function FieldMapper({ mappings, targetId, sampleData, onUpdateMapping, o
               {/* Status indicator */}
               <div className="flex-shrink-0">
                 {status === 'required' && (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 text-success" />
                 )}
                 {status === 'optional' && (
-                  <Check className="h-4 w-4 text-blue-500" />
+                  <Check className="h-4 w-4 text-info" />
                 )}
                 {status === 'unmapped' && (
                   <X className="h-4 w-4 text-muted-foreground" />

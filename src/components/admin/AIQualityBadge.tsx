@@ -32,25 +32,25 @@ export function AIQualityBadge({
       case 'approve':
         return {
           icon: CheckCircle,
-          color: 'bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20',
+          color: 'bg-success/10 text-success border-success/30 hover:bg-success/20',
           label: isRu ? 'Хорошо' : 'Good',
         };
       case 'review':
         return {
           icon: HelpCircle,
-          color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20',
+          color: 'bg-warning/10 text-warning border-warning/30 hover:bg-warning/20',
           label: isRu ? 'Проверить' : 'Review',
         };
       case 'suspicious':
         return {
           icon: AlertTriangle,
-          color: 'bg-orange-500/10 text-orange-600 border-orange-500/30 hover:bg-orange-500/20',
+          color: 'bg-accent-amber/10 text-accent-amber border-accent-amber/30 hover:bg-accent-amber/20',
           label: isRu ? 'Подозрительно' : 'Suspicious',
         };
       case 'reject_recommend':
         return {
           icon: XCircle,
-          color: 'bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20',
+          color: 'bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20',
           label: isRu ? 'Проблемы' : 'Issues',
         };
       default:
@@ -88,12 +88,12 @@ export function AIQualityBadge({
       {issues.length > 0 && (
         <div className="text-xs space-y-0.5">
           {criticalCount > 0 && (
-            <div className="text-red-400">
+            <div className="text-destructive">
               {criticalCount} {isRu ? 'критических' : 'critical'}
             </div>
           )}
           {warningCount > 0 && (
-            <div className="text-yellow-400">
+            <div className="text-warning">
               {warningCount} {isRu ? 'предупреждений' : 'warnings'}
             </div>
           )}

@@ -26,15 +26,15 @@ const MOCK_TASKS = [
 ];
 
 const TASK_TYPE_CONFIG = {
-  lead: { icon: User, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', labelEn: 'Lead', labelRu: 'Лид' },
-  ticket: { icon: MessageCircle, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', labelEn: 'Ticket', labelRu: 'Тикет' },
-  moderation: { icon: Eye, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', labelEn: 'Moderation', labelRu: 'Модерация' },
-  content: { icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', labelEn: 'Content', labelRu: 'Контент' },
+  lead: { icon: User, color: 'bg-info/10 text-info', labelEn: 'Lead', labelRu: 'Лид' },
+  ticket: { icon: MessageCircle, color: 'bg-accent-purple/10 text-accent-purple', labelEn: 'Ticket', labelRu: 'Тикет' },
+  moderation: { icon: Eye, color: 'bg-warning/10 text-warning', labelEn: 'Moderation', labelRu: 'Модерация' },
+  content: { icon: FileText, color: 'bg-success/10 text-success', labelEn: 'Content', labelRu: 'Контент' },
 };
 
 const PRIORITY_CONFIG = {
-  high: { color: 'border-red-300 bg-red-50/50 dark:border-red-700 dark:bg-red-950/20', labelEn: 'Urgent', labelRu: 'Срочно' },
-  medium: { color: 'border-yellow-300 bg-yellow-50/50 dark:border-yellow-700 dark:bg-yellow-950/20', labelEn: 'Medium', labelRu: 'Средний' },
+  high: { color: 'border-destructive/30 bg-destructive/5', labelEn: 'Urgent', labelRu: 'Срочно' },
+  medium: { color: 'border-warning/30 bg-warning/5', labelEn: 'Medium', labelRu: 'Средний' },
   low: { color: '', labelEn: 'Normal', labelRu: 'Обычный' },
 };
 
@@ -92,17 +92,17 @@ export default function TeamInboxPage() {
             <p className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-red-500" />
+            <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-destructive" />
             <p className="text-xl font-bold">{urgentCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Срочных' : 'Urgent'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <Clock className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+            <Clock className="h-5 w-5 mx-auto mb-1 text-warning" />
             <p className="text-xl font-bold">0</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'В работе' : 'In Progress'}</p>
           </Card>
           <Card className="p-3 text-center">
-            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-green-500" />
+            <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-success" />
             <p className="text-xl font-bold">0</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Сегодня' : 'Today'}</p>
           </Card>

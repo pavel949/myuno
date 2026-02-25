@@ -37,7 +37,7 @@ export function IntakeBulkActions({
             {summary.total} {isRu ? 'всего' : 'total'}
           </Badge>
           {approvedCount > 0 && (
-            <Badge className="bg-green-500 text-white">
+            <Badge className="bg-success text-success-foreground">
               {approvedCount} {isRu ? 'создано' : 'created'}
             </Badge>
           )}
@@ -100,7 +100,7 @@ export function IntakeBulkActions({
         )}
 
         {allProcessed && (
-          <Badge className="bg-green-500 text-white">
+          <Badge className="bg-success text-success-foreground">
             <CheckCircle className="h-3 w-3 mr-1" />
             {isRu ? 'Готово!' : 'Done!'}
           </Badge>

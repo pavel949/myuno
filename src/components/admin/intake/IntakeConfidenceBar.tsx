@@ -12,15 +12,15 @@ export function IntakeConfidenceBar({ value, showLabel = true, size = 'md' }: In
   const percentage = Math.round(value * 100);
   
   const getColor = () => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (percentage >= 80) return 'bg-success';
+    if (percentage >= 50) return 'bg-warning';
+    return 'bg-destructive';
   };
 
   const getTextColor = () => {
-    if (percentage >= 80) return 'text-green-600';
-    if (percentage >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+    if (percentage >= 80) return 'text-success';
+    if (percentage >= 50) return 'text-warning';
+    return 'text-destructive';
   };
 
   return (

@@ -93,7 +93,7 @@ export function MCCAnalyticsTab() {
                 <p className="text-2xl font-bold">
                   {summary.revenue >= 1000 ? `$${(summary.revenue / 1000).toFixed(1)}k` : `$${Math.round(summary.revenue)}`}
                 </p>
-                <div className={`flex items-center gap-1 text-xs ${summary.revenueChange >= 0 ? 'text-green-500' : 'text-destructive'}`}>
+                <div className={`flex items-center gap-1 text-xs ${summary.revenueChange >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {summary.revenueChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                   {summary.revenueChange !== 0 ? `${summary.revenueChange > 0 ? '+' : ''}${summary.revenueChange.toFixed(1)}%` : '—'}
                 </div>

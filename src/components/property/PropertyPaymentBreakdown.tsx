@@ -84,7 +84,7 @@ export function PropertyPaymentBreakdown({
 
         {/* Discount if applicable */}
         {discountInfo.discountPercent > 0 && (
-          <div className="flex justify-between text-green-600">
+          <div className="flex justify-between text-success">
             <span className="flex items-center gap-1">
               <Percent className="w-3 h-3" />
               {discountInfo.discountLabel} -{discountInfo.discountPercent}%

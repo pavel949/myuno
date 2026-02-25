@@ -48,7 +48,7 @@ export function IntakeItemPanel({
         <div className="flex items-center gap-2 mb-1.5">
           <IntakeVerticalBadge verticalId={item.detectedVertical} confidence={item.verticalConfidence} size="sm" />
           {item.status === 'created' && (
-            <Badge className="bg-green-500 text-white text-[10px] h-5">
+            <Badge className="bg-success text-success-foreground text-[10px] h-5">
               <CheckCircle className="h-2.5 w-2.5 mr-0.5" />
               {isRu ? 'Создан' : 'Created'}
             </Badge>
@@ -108,7 +108,7 @@ export function IntakeItemPanel({
         <PanelSection title={isRu ? 'Предупреждения' : 'Warnings'}>
           <div className="space-y-1">
             {item.missingRequiredFields.length > 0 && (
-              <div className="flex items-start gap-1.5 text-[10px] text-amber-600 bg-amber-500/10 p-1.5 rounded">
+              <div className="flex items-start gap-1.5 text-[10px] text-warning bg-warning/10 p-1.5 rounded">
                 <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                 <span>{isRu ? 'Нет: ' : 'Missing: '}{item.missingRequiredFields.join(', ')}</span>
               </div>

@@ -186,7 +186,7 @@ export function ImportPreview({
                     </TableCell>
                     <TableCell>
                       {validation?.isValid ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-success" />
                       ) : (
                         <div className="flex items-center gap-1">
                           <AlertTriangle className="h-4 w-4 text-destructive" />

@@ -48,7 +48,7 @@ export function AgentLeaderboard({ deals, agents }: Props) {
                 <span className="flex items-center gap-1"><Target className="h-3 w-3" />{a.won}/{a.total}</span>
                 <span>{a.rate}%</span>
                 {a.volume > 0 && (
-                  <span className="flex items-center gap-1 text-green-600">
+                  <span className="flex items-center gap-1 text-success">
                     <TrendingUp className="h-3 w-3" />{(a.volume / 1e6).toFixed(1)}M
                   </span>
                 )}

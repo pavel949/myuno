@@ -141,7 +141,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       el.className = 'location-marker';
       el.innerHTML = `
         <div class="relative">
-          <div class="w-10 h-10 rounded-full ${type === 'pickup' ? 'bg-green-500' : 'bg-primary'} flex items-center justify-center shadow-lg animate-bounce">
+          <div class="w-10 h-10 rounded-full ${type === 'pickup' ? 'bg-success' : 'bg-primary'} flex items-center justify-center shadow-lg animate-bounce">
             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
             </svg>
@@ -411,11 +411,11 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
           <div className="p-3 rounded-xl bg-muted/50 border border-border/50 mb-3 flex items-start gap-3">
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-              type === 'pickup' ? "bg-green-500/20" : "bg-primary/20"
+              type === 'pickup' ? "bg-success/20" : "bg-primary/20"
             )}>
               <MapPin className={cn(
                 "w-4 h-4",
-                type === 'pickup' ? "text-green-500" : "text-primary"
+                type === 'pickup' ? "text-success" : "text-primary"
               )} />
             </div>
             <div className="flex-1 min-w-0">
