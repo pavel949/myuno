@@ -1,123 +1,95 @@
 
 
-# Аудит блока управления недвижимостью
+# myUNO Professional Services in Owner Recommendations
 
-## 1. Что сделано хорошо
+## What We're Building
 
-- **Command Center**: Структура дашборда логичная — Today Briefing -> Today Actions -> KPI -> виджеты. Правильная приоритизация.
-- **KPI**: Включены индустриальные метрики (ADR, RevPAR, Occupancy, Margin). Сравнение с прошлым месяцем.
-- **Календарь**: Два режима (single/multi), группировка по комплексам, iCal-синхронизация.
-- **Финансы**: Полноценный модуль — список, графики, прогноз, CSV/Excel экспорт, бюджетирование.
-- **Кадры**: Развитая StaffPage с фильтрами, ролями, зарплатами, назначениями на объекты.
-- **CRM**: Полный цикл — Kanban, контакты, задачи, настраиваемые этапы.
-- **Билингвальность**: Все модули поддерживают RU/EN.
+Instead of a separate "Services Hub" page, we embed myUNO professional services (inventory audit, photo shoot, inspection, management audit, etc.) directly into the **"Your Day"** feed as smart recommendation cards for property owners. Clicking a card opens WhatsApp with a pre-filled message AND creates an internal lead (`consultation_requests`) for tracking.
 
-## 2. Критические проблемы
+## How It Works
 
-### 2.1 Дублирование отчётов (3 страницы делают почти одно и то же)
+```text
+Owner Dashboard -> "Your Day" Feed -> "myUNO Recommendations" section
+                                          |
+                                          v
+                              [Inventory Audit] [Photo Shoot] [Inspection] ...
+                                          |
+                                    Click card
+                                          |
+                       +------------------+------------------+
+                       |                                     |
+              Creates consultation_request           Opens WhatsApp with
+              (lead tracking, admin notified)        pre-filled service message
+```
 
-| Страница | Путь | Что делает |
-|---|---|---|
-| `ReportsPage` | `/owner/reports` | Генерация отчётов (monthly/quarterly/annual/P&L/owner statement), PDF, Excel, Email, Portfolio view |
-| `OwnerReportsPage` | `/owner/owner-reports` | Простой расчёт Revenue/Expenses/ADR за месяц + Save |
-| `OwnerRevenueDashboard` | `/owner/revenue` | Revenue + Occupancy + ADR + RevPAR графики, прогноз 3 мес, per-property breakdown |
+## Services to Recommend
 
-**Проблема**: Пользователь не понимает куда идти. `OwnerReportsPage` — это упрощённый клон `ReportsPage`. `OwnerRevenueDashboard` — аналитика, а не отчёт, но KPI дублируют дашборд.
+| Service | Icon | WhatsApp Message |
+|---------|------|------------------|
+| Property Inventory | ClipboardList | "I'd like to order a property inventory audit" |
+| Professional Photo Shoot | Camera | "I'd like to order a professional photo session" |
+| Property Inspection | Search | "I'd like to order a property inspection" |
+| Management Audit | BarChart3 | "I'd like to order a management audit" |
+| 3D Tour / Virtual Tour | Box | "I'd like to order a 3D virtual tour" |
+| Smart Home Sensors | Wifi | "I'd like to discuss smart home sensors installation" |
+| Insurance Consultation | ShieldCheck | "I'd like to consult about property insurance" |
+| Property Sale Assistance | DollarSign | "I'd like to discuss selling my property" |
 
-**Решение**: Объединить в одну страницу "Аналитика и отчёты" с табами: Обзор (метрики + графики из RevenueDashboard) | Отчёты (генерация/история из ReportsPage) | Бюджет (из BudgetPage). Удалить `OwnerReportsPage` как полностью дублирующую.
+## Implementation Steps
 
-### 2.2 Дублирование команды (2 страницы)
+### 1. New Component: `OwnerServiceRecommendations`
+**File**: `src/components/owner/dashboard/OwnerServiceRecommendations.tsx`
 
-| Страница | Путь | Что делает |
-|---|---|---|
-| `StaffPage` | `/owner/staff` | Сотрудники: создание, роли, зарплаты, назначения, фото, документы |
-| `TeamPage` | `/owner/team` | Делегаты: приглашения, разрешения (view/edit/financials/bookings) |
+A horizontal scroll carousel of service cards, styled consistently with the "Your Day" feed. Each card:
+- Shows icon + title (bilingual) + short description + price indicator (e.g. "from 3,000 THB")
+- On click: (1) fires `useUniversalLead` to create a `consultation_request` with `vertical_id: 'property_services'` and `request_type` matching the service; (2) opens WhatsApp via `getWhatsAppUrl()` with a pre-filled message including the service name
 
-**Проблема**: Для руководителя УК это один раздел "Команда". Разделение сбивает: куда добавить нового уборщика vs менеджера с доступом?
+### 2. Integrate into `useDayBriefing.ts`
+Add a new item type `myuno_service` to `DayItemType`. For owner roles, inject 2-3 rotating service recommendations into `sectionOrder: ORDER.recommendations` alongside existing platform recommendations. These are hardcoded service definitions (not from DB) -- rotated based on day-of-week or random seed so owners see different services each day.
 
-**Решение**: Объединить в одну страницу с табами: Сотрудники (текущий StaffPage) | Доступ и делегирование (текущий TeamPage) | Приглашения (incoming/outgoing).
+### 3. Update `YourDayFeed.tsx`
+- Add `myuno_service` to the icon mapping (use `Sparkles` or service-specific icons)
+- Add a special rendering path for `myuno_service` items: instead of standard `DayItemCard`, render as compact service cards with a "Request" CTA button
+- The click handler calls `useUniversalLead.submitLead()` + `window.open(whatsappUrl)`
 
-### 2.3 Навигация "Финансы" перегружена (4 пункта)
+### 4. Alternative: Standalone Section Below "Your Day"
+If embedding into the feed feels crowded, add `OwnerServiceRecommendations` as a **standalone widget** in the Owner Dashboard (new `DashboardWidgetKey: 'myuno_services'`), rendered right after the "Your Day" feed. This keeps the feed clean and gives services their own visual space.
 
-Текущее:
-- Income & Expenses (`/owner/financials`)
-- Invoices (`/owner/invoices`)
-- Reports (`/owner/reports`)
-- Owner Reports (`/owner/owner-reports`)
+## Technical Details
 
-Плюс скрытые: Budget (`/owner/budget`), Portfolio (`/owner/portfolio`), Revenue Dashboard (`/owner/revenue`) — доступны только через кнопки внутри страниц.
+### New/Modified Files:
 
-**Решение**: Сократить до 3 пунктов: Финансы (Income/Expenses + Invoices) | Аналитика (объединённые отчёты + revenue dashboard) | Бюджет.
+1. **`src/components/owner/dashboard/OwnerServiceRecommendations.tsx`** (NEW)
+   - Static service catalog array with bilingual titles, icons, descriptions, price ranges
+   - Daily rotation logic (show 3-4 of 8 services per day)
+   - `useUniversalLead` integration for lead creation on click
+   - `getWhatsAppUrl` for WhatsApp deep link
+   - Horizontal scroll layout matching existing UI patterns
 
-### 2.4 Операции не структурированы логически
+2. **`src/hooks/useDayBriefing.ts`** (EDIT)
+   - Add `myuno_service` to `DayItemType`
+   - For owner roles: inject 2-3 service recommendation `DayItem`s with `sectionOrder: ORDER.recommendations`
 
-Текущая группа "Operations" содержит:
-- Tasks (операционные задачи по объектам)
-- Inventory (расходники)
-- Vendors (поставщики)
-- Reviews (отзывы с OTA)
-- Rate Seasons (тарифы)
-- Insurance & Docs (страховки)
+3. **`src/components/shared/YourDayFeed.tsx`** (EDIT)
+   - Add `myuno_service` to icon mapping and style mapping
+   - Add special card rendering for service items (with "Request" badge and WhatsApp icon)
 
-**Проблема**: Reviews и Rate Seasons — это не операции, а коммерция/revenue management. Insurance — это compliance/документооборот.
+4. **`src/pages/owner/OwnerDashboard.tsx`** (EDIT)
+   - Add `myuno_services` widget key
+   - Render `OwnerServiceRecommendations` as fallback/standalone section
 
-**Решение**: Перегруппировать:
-- **Операции**: Tasks, Inventory, Vendors, Maintenance Plan
-- **Коммерция**: Rate Seasons, Reviews, Channel Sync (перенести из дашборда)
-- **Документы**: Insurance & Docs, Document Templates
+5. **`src/lib/businessRoles.ts`** (EDIT)
+   - Add `myuno_services` to `DashboardWidgetKey` type and owner widget list
 
-## 3. Что нужно доработать
+### Lead Flow:
+- `vertical_id`: `'property_services'`
+- `request_type`: specific service (e.g., `'inventory_audit'`, `'photo_shoot'`)
+- `lead_source`: `'dashboard_recommendation'`
+- `entry_point`: `'owner_dashboard_your_day'`
+- Triggers existing `notify-admin-order` edge function for admin WhatsApp/email alerts
 
-### 3.1 Календарь не связан с операционным управлением
-Календарь показывает бронирования и iCal, но не интегрирует: плановые уборки, техобслуживание, сроки страховок, оплаты. Руководителю нужен единый операционный календарь.
-
-**Решение**: Добавить слой "operational overlay" в MultiPropertyTimeline — показывать иконки задач, срочных дедлайнов документов, плановых расходов прямо на таймлайне.
-
-### 3.2 KPI дублируются между виджетами
-`BusinessKPIWidget` загружает 11 запросов к базе. `TodayActionsWidget` загружает 5 частично совпадающих запросов (overdue tasks, service requests, low stock, pending invoices). Те же данные считаются отдельно в `OwnerRevenueDashboard` и `OwnerReportsPage`.
-
-**Решение**: Создать единый хук `useDashboardMetrics()`, который делает один batch запросов и возвращает все метрики. Все виджеты подписываются на него через React Query.
-
-### 3.3 Нет dashboard-level фильтра по объекту
-На дашборде все виджеты показывают агрегат по всем объектам. Нет возможности быстро отфильтровать один объект и увидеть все его метрики.
-
-**Решение**: Добавить Property Selector в header дашборда (глобальный контекст). При выборе объекта все виджеты фильтруются.
-
-### 3.4 Today Actions ведут на несуществующие роуты
-- `href: '/owner/tasks'` — нет такого роута (правильный: `/owner/operations`)
-- `href: '/owner/inbox'` — нет такого роута (правильный: `/owner/messages`)
-
-## 4. План реализации
-
-### Фаза 1: Устранение дублирования и битых ссылок
-1. Удалить `OwnerReportsPage` — его функционал полностью покрыт `ReportsPage`
-2. Объединить `StaffPage` + `TeamPage` в единую страницу с табами
-3. Исправить href в `TodayActionsWidget`: `/owner/tasks` -> `/owner/operations`, `/owner/inbox` -> `/owner/messages`
-4. Убрать "Owner Reports" из сайдбара и мобильного меню
-5. Перегруппировать навигацию:
-   - Operations: Tasks, Inventory, Vendors, Maintenance
-   - Commerce: Rates, Reviews
-   - Finance: Income/Expenses, Invoices, Analytics (unified reports)
-   - Team: Staff + Access (merged)
-
-### Фаза 2: Объединение аналитики
-6. Создать единую страницу "Analytics" (`/owner/analytics`), объединяющую: Revenue Dashboard графики + ReportsPage генератор + Budget (как таб)
-7. Удалить отдельные роуты `/owner/revenue`, `/owner/budget`, `/owner/owner-reports`
-8. Создать хук `useDashboardMetrics()` для консолидации запросов
-
-### Фаза 3: Улучшение Command Center
-9. Добавить глобальный Property Selector на дашборд
-10. Добавить operational overlay на MultiPropertyTimeline (задачи, дедлайны документов)
-
-### Затрагиваемые файлы
-- `OwnerSidebar.tsx` — перегруппировка навигации
-- `OwnerDashboardMenu.tsx` — синхронизация с сайдбаром
-- `TodayActionsWidget.tsx` — исправление href
-- `AnimatedRoutes.tsx` — обновление роутов
-- `pageRegistry.ts` — удаление неиспользуемых lazy imports
-- `StaffPage.tsx` — добавление табов Team/Access
-- `TeamPage.tsx` — интеграция в StaffPage (удаление отдельной страницы)
-- `OwnerReportsPage.tsx` — удаление
-- Новый: `src/pages/owner/AnalyticsPage.tsx` — объединённая аналитика
-- Новый: `src/hooks/useDashboardMetrics.ts` — консолидированные метрики
+### No Database Changes Required
+- Uses existing `consultation_requests` table
+- Uses existing `useUniversalLead` hook
+- Service catalog is hardcoded (not a new table) -- this keeps it simple and allows fine-tuning without migrations
 
