@@ -1,94 +1,150 @@
 
 
-# Owner Transparency Portal — "Мой объект глазами собственника"
+# Preventive Maintenance System — Плановое обслуживание объектов
 
 ## Проблема
-Собственники живут за рубежом и не доверяют УК из-за отсутствия прозрачности. Им нужно видеть, что происходит с их объектом, без необходимости звонить или просить отчёты.
+
+Сейчас `property_operational_tasks` поддерживает только разовые задачи (check-in, cleaning, maintenance). Нет системы **планового обслуживания** — регулярных работ, которые необходимы для устойчивой эксплуатации недвижимости.
+
+## Какие элементы нужны для устойчивой эксплуатации
+
+На основе лучших практик property maintenance (Buildium, AppFolio, Properly, Breezeway):
+
+### Категории планового обслуживания
+
+| Категория | Периодичность | Примеры |
+|-----------|---------------|---------|
+| **HVAC / Кондиционеры** | Каждые 3-6 мес | Чистка фильтров, заправка фреоном, проверка дренажа |
+| **Сантехника** | Каждые 6 мес | Проверка протечек, чистка сифонов, проверка бойлера |
+| **Электрика** | Каждые 12 мес | Проверка УЗО, состояние проводки, замена батарей в датчиках |
+| **Бассейн** | Еженедельно/ежемесячно | Химия воды, чистка фильтров, проверка насоса |
+| **Борьба с вредителями** | Каждые 3 мес | Обработка от термитов, тараканов, муравьёв |
+| **Генеральная уборка** | Каждые 3-6 мес | Глубокая чистка, мытьё окон, чистка мебели |
+| **Крыша и фасад** | Каждые 12 мес | Проверка протечек, чистка водостоков, мойка фасадов |
+| **Сад/территория** | Еженедельно/ежемесячно | Стрижка, полив, обрезка деревьев |
+| **Безопасность** | Каждые 6 мес | Проверка замков, камер, сигнализации, огнетушителей |
+| **Бытовая техника** | Каждые 6-12 мес | Чистка стиралки, проверка холодильника, духовки |
 
 ## Решение
-Создать **Owner Transparency Dashboard** — read-only портал для собственников, где они в реальном времени видят всю деятельность УК по управлению их объектом.
+
+### 1. Новая таблица: `property_maintenance_schedules`
+
+Хранит шаблоны плановых работ с рекуррентностью:
 
 ```text
-┌─────────────────────────────────────────────┐
-│  /owner/transparency/:propertyId            │
-│                                             │
-│  ┌─── Summary Cards ───────────────────┐    │
-│  │ Revenue  │ Expenses │ Occupancy │ ★  │    │
-│  └──────────────────────────────────────┘    │
-│                                             │
-│  ┌─── Activity Feed (real-time) ───────┐    │
-│  │ 🟢 14:30 Booking confirmed #B123    │    │
-│  │ 🔧 12:00 Cleaning completed         │    │
-│  │ 💰 10:15 Expense ฿2,500 (cleaning)  │    │
-│  │ 📸 09:00 Inspection photos uploaded  │    │
-│  │ 📊 Yesterday - Monthly report ready  │    │
-│  └──────────────────────────────────────┘    │
-│                                             │
-│  ┌── Tabs ─────────────────────────────┐    │
-│  │ Финансы │ Бронирования │ Документы  │    │
-│  │ Задачи  │ Календарь    │ Отчёты    │    │
-│  └──────────────────────────────────────┘    │
-└─────────────────────────────────────────────┘
+property_maintenance_schedules
+├── id (uuid)
+├── property_id (FK -> owner_properties)
+├── category (text) — ac, plumbing, electrical, pool, pest, deep_clean, roof, garden, security, appliances
+├── title / title_ru
+├── description
+├── frequency (text) — weekly, biweekly, monthly, quarterly, biannual, annual
+├── last_completed_at (timestamptz)
+├── next_due_date (date) — автовычисляемая
+├── assigned_provider_id (FK -> service_providers, nullable)
+├── estimated_cost (numeric)
+├── is_active (bool, default true)
+├── priority (text) — low, normal, high
+├── notes
+├── created_by (uuid)
+├── created_at / updated_at
 ```
 
-## Что увидит собственник
+### 2. Автогенерация задач
 
-1. **Сводка по объекту** — доход за месяц, расходы, заполняемость, рейтинг
-2. **Лента активности** — все действия УК в хронологическом порядке (новые бронирования, расходы, уборки, осмотры, изменения цен)
-3. **Финансы** — доходы, расходы, баланс, чеки (read-only доступ к тому, что уже есть)
-4. **Бронирования** — текущие и будущие, с именами гостей и суммами
-5. **Документы** — акты, договоры, фото осмотров из Vault
-6. **Отчёты** — ежемесячные отчёты УК с возможностью скачивания PDF
+Cron-функция (или DB-триггер при обновлении `last_completed_at`) автоматически:
+- Пересчитывает `next_due_date` на основе `frequency`
+- Создаёт задачу в `property_operational_tasks` когда `next_due_date` наступает (за 3 дня до срока)
+- Новый `task_type`: `preventive` — добавляется в существующий enum
 
-## Ключевой UX-принцип
-> Собственник НЕ управляет — он НАБЛЮДАЕТ. Интерфейс полностью read-only, но информативный. Все данные берутся из тех же таблиц, что использует УК.
+### 3. Конфиг с шаблонами по умолчанию
+
+`src/config/maintenanceScheduleTemplates.ts` — готовые шаблоны для быстрого добавления:
+
+```text
+AC Service         — quarterly  — ~2,000 THB
+Pool Maintenance   — weekly     — ~500 THB
+Pest Control       — quarterly  — ~1,500 THB
+Deep Cleaning      — biannual   — ~5,000 THB
+Electrical Check   — annual     — ~2,000 THB
+Plumbing Check     — biannual   — ~1,500 THB
+Garden Service     — biweekly   — ~1,000 THB
+Security Check     — biannual   — ~1,000 THB
+Roof Inspection    — annual     — ~2,000 THB
+Appliance Service  — annual     — ~3,000 THB
+```
+
+### 4. UI: Страница "Maintenance Plan"
+
+Новая вкладка/страница `/owner/maintenance-plan`:
+
+```text
+┌─────────────────────────────────────────────────┐
+│  Maintenance Plan                    [+ Add]    │
+│  ─────────────────────────────────────────────── │
+│                                                 │
+│  OVERDUE (2)                                    │
+│  ┌──────────────────────────────────────────┐   │
+│  │ ❄️ AC Service      Villa Ocean   OVERDUE │   │
+│  │    Last: 15 Jan    Due: 15 Apr   ~2,000  │   │
+│  │                         [Mark Done]      │   │
+│  ├──────────────────────────────────────────┤   │
+│  │ 🐜 Pest Control   Condo Palm    OVERDUE │   │
+│  │    Last: 01 Feb    Due: 01 May   ~1,500  │   │
+│  │                         [Mark Done]      │   │
+│  └──────────────────────────────────────────┘   │
+│                                                 │
+│  UPCOMING (30 days)                             │
+│  ┌──────────────────────────────────────────┐   │
+│  │ 🧹 Deep Clean     Villa Ocean   12 days │   │
+│  │ 🔒 Security Check  Condo Palm   25 days │   │
+│  └──────────────────────────────────────────┘   │
+│                                                 │
+│  ALL SCHEDULES                                  │
+│  ┌──────────────────────────────────────────┐   │
+│  │  Category    Property   Freq   Next Due  │   │
+│  │  ❄️ AC       Villa...   3mo    15 Jul    │   │
+│  │  🏊 Pool     Villa...   1wk    28 Feb    │   │
+│  │  🐜 Pest     Condo...   3mo    01 Aug    │   │
+│  │  ...                                     │   │
+│  └──────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+```
+
+### 5. Dashboard Widget
+
+Компактный виджет на Owner Dashboard показывающий:
+- Количество просроченных плановых работ
+- Ближайшие 3 работы
+- Общий "Health Score" объекта (% выполненных в срок)
 
 ---
 
 ## Технический план
 
-### 1. Новая роль делегата: `owner_readonly`
-Добавить роль в `property_delegates` специально для собственников:
-- Permissions: `{ view: true, financials: true, bookings: true, edit: false, maintenance: false }`
-- УК приглашает собственника по email, собственник принимает и получает доступ
-
-### 2. Activity Log — автоматическая запись действий
-Создать триггерную функцию в БД, которая при INSERT/UPDATE в ключевые таблицы автоматически пишет запись в `property_activity_log`:
-- `property_bookings` — новое бронирование, отмена, изменение
-- `property_financials` — новый доход/расход
-- `property_operational_tasks` — задача создана/завершена
-- `property_service_requests` — запрос на обслуживание
-- `inventory_inspections` — осмотр проведён
-
-### 3. Новая страница: `/owner/transparency/:propertyId`
-Компонент `OwnerTransparencyDashboard`:
-- Summary KPI cards (revenue, expenses, occupancy, rating)
-- Real-time activity feed из `property_activity_log`
-- Табы: Финансы, Бронирования, Документы, Задачи, Отчёты
-- Все данные read-only, привязаны к конкретному `property_id`
-
-### 4. Entry point для собственников
-- В "My Property" (`/property/my`) добавить карточку "Мои управляемые объекты"
-- Для пользователей с активными делегациями показывать список объектов с переходом в Transparency Dashboard
-- Push-уведомления (in-app) при важных событиях (новая бронь, расход > порога)
-
-### 5. Маршрутизация и безопасность
-- Новый маршрут в `AnimatedRoutes.tsx`
-- Проверка доступа через `property_delegates` — только `active` делегаты с `view: true`
-- RLS-политики на `property_activity_log` для делегатов
-
-### Файлы для создания/изменения:
+### Файлы для создания/изменения
 
 | Файл | Действие |
 |------|----------|
-| `supabase/migrations/...activity_triggers.sql` | Триггеры для автозаписи в activity_log |
-| `src/pages/owner/OwnerTransparencyDashboard.tsx` | Новая страница — основной портал собственника |
-| `src/components/owner/transparency/ActivityFeed.tsx` | Компонент ленты активности |
-| `src/components/owner/transparency/OwnerKPISummary.tsx` | Сводные карточки |
-| `src/components/owner/transparency/OwnerFinanceTab.tsx` | Read-only финансы |
-| `src/components/owner/transparency/OwnerBookingsTab.tsx` | Read-only бронирования |
-| `src/hooks/usePropertyDelegates.ts` | Добавить роль `owner_readonly` |
-| `src/pages/property/PropertyMySection.tsx` | Добавить секцию "Управляемые объекты" |
+| `supabase/migrations/...maintenance_schedules.sql` | Новая таблица + RLS + seed-функция |
+| `src/config/maintenanceScheduleTemplates.ts` | Шаблоны плановых работ с ценами |
+| `src/hooks/useMaintenanceSchedules.ts` | CRUD-хук для расписаний |
+| `src/pages/owner/MaintenancePlan.tsx` | Основная страница планового обслуживания |
+| `src/components/owner/maintenance/ScheduleCard.tsx` | Карточка расписания |
+| `src/components/owner/maintenance/AddScheduleDialog.tsx` | Диалог добавления из шаблонов |
+| `src/components/owner/dashboard/MaintenanceHealthWidget.tsx` | Виджет на дашборд |
+| `src/config/taskColors.ts` | Добавить тип `preventive` |
 | `src/components/layout/AnimatedRoutes.tsx` | Новый маршрут |
 | `src/components/layout/pageRegistry.ts` | Регистрация страницы |
+| `src/lib/businessRoles.ts` | Виджет `maintenance_health` для ролей |
 
+### Миграция БД
+
+1. Создание таблицы `property_maintenance_schedules`
+2. RLS-политики: владельцы и делегаты видят расписания своих объектов
+3. Триггер: при обновлении `last_completed_at` пересчитывать `next_due_date`
+4. Функция `generate_preventive_tasks()` — вызывается cron, создаёт задачи за 3 дня до `next_due_date`
+
+### Расширение task_type
+
+Добавить `preventive` в допустимые значения `task_type` в `property_operational_tasks`, обновить `taskColors.ts` и `OperationalTaskCard`.
