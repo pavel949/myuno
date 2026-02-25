@@ -69,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           
           {product.rating && (
             <div className="flex items-center gap-1 mt-1">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <Star className="w-3 h-3 fill-warning text-warning" />
               <span className="text-xs text-muted-foreground">
                 {product.rating} ({product.review_count})
               </span>
@@ -166,7 +166,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         
         {product.rating && (
           <div className="flex items-center gap-1 mt-1">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <Star className="w-3 h-3 fill-warning text-warning" />
             <span className="text-xs text-muted-foreground">
               {product.rating}
             </span>

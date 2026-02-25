@@ -38,9 +38,9 @@ const RecipeBadge = forwardRef<HTMLDivElement, { recipe: ProductRecipe; language
     const [showTooltip, setShowTooltip] = useState(false);
     
     const difficultyColors = {
-      easy: 'bg-green-500',
-      medium: 'bg-amber-500', 
-      hard: 'bg-red-500',
+      easy: 'bg-success',
+      medium: 'bg-warning', 
+      hard: 'bg-destructive',
     };
     
     const difficultyLabels = {
@@ -53,7 +53,7 @@ const RecipeBadge = forwardRef<HTMLDivElement, { recipe: ProductRecipe; language
       <div ref={ref} className="relative">
         <button
           onClick={(e) => { e.stopPropagation(); setShowTooltip(!showTooltip); }}
-          className="flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors"
+          className="flex items-center gap-1 bg-success text-success-foreground text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-md hover:bg-success/90 transition-colors"
         >
           <ChefHat className="w-3 h-3" />
           <span>{language === 'ru' ? recipe.dish_ru : recipe.dish}</span>
@@ -153,19 +153,19 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           {/* Top badges */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
             {product.is_new && (
-              <Badge className="bg-blue-500 text-white text-xs font-medium px-2.5 py-0.5 shadow-lg">
+              <Badge className="bg-info text-info-foreground text-xs font-medium px-2.5 py-0.5 shadow-lg">
                 NEW
               </Badge>
             )}
             {product.is_popular && (
-              <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2.5 py-0.5 shadow-lg">
+              <Badge className="bg-gradient-to-r from-accent-amber to-warning text-white text-xs font-medium px-2.5 py-0.5 shadow-lg">
                 🔥 BESTSELLER
               </Badge>
             )}
           </div>
           
           {discount > 0 && (
-            <Badge className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 shadow-lg">
+            <Badge className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-0.5 shadow-lg">
               -{discount}%
             </Badge>
           )}
@@ -243,12 +243,12 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
           {product.is_new && (
-            <Badge className="absolute top-1.5 left-1.5 bg-blue-500 text-white text-[10px] px-1.5 py-0">
+            <Badge className="absolute top-1.5 left-1.5 bg-info text-info-foreground text-[10px] px-1.5 py-0">
               NEW
             </Badge>
           )}
           {discount > 0 && (
-            <Badge className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0">
+            <Badge className="absolute top-1.5 right-1.5 bg-destructive text-destructive-foreground text-[10px] px-1.5 py-0">
               -{discount}%
             </Badge>
           )}
@@ -354,12 +354,12 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
             <ShippableBadge />
           )}
           {product.is_new && !recipe && !product.is_shippable_international && (
-            <Badge className="bg-blue-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
+            <Badge className="bg-info text-info-foreground text-[10px] font-semibold px-2 py-0.5 shadow-md">
               NEW
             </Badge>
           )}
           {product.is_popular && !product.is_new && !recipe && !product.is_shippable_international && (
-            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
+            <Badge className="bg-gradient-to-r from-accent-amber to-warning text-white text-[10px] font-semibold px-2 py-0.5 shadow-md">
               🔥 HIT
             </Badge>
           )}
@@ -368,14 +368,14 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
         {/* Right side badges */}
         <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
           {discount > 0 && (
-            <Badge className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-md">
+            <Badge className="bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-0.5 shadow-md">
               -{discount}%
             </Badge>
           )}
           {product.is_shippable_international && (product.is_new || product.is_popular) && (
             <Badge className={cn(
               "text-white text-[10px] font-semibold px-2 py-0.5 shadow-md",
-              product.is_new ? "bg-blue-500" : "bg-gradient-to-r from-amber-500 to-orange-500"
+              product.is_new ? "bg-info" : "bg-gradient-to-r from-accent-amber to-warning"
             )}>
               {product.is_new ? 'NEW' : '🔥 HIT'}
             </Badge>

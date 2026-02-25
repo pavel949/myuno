@@ -161,7 +161,7 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
         ))}
       </div>
       
-      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+      <div className="p-4 rounded-xl bg-warning/10 border border-warning/20">
         <p className="text-sm">
           {isRu 
             ? '⏳ После публикации объявление будет проверено модератором. Обычно это занимает до 24 часов.' 

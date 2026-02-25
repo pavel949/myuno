@@ -37,8 +37,8 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
       >
-        <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-          <CheckCircle2 className="h-10 w-10 text-green-600" />
+        <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
+          <CheckCircle2 className="h-10 w-10 text-success" />
         </div>
       </motion.div>
       
