@@ -215,7 +215,7 @@ export function CurrencyRatesEditor() {
 
                     {currentRate?.updated_at && (
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Check className="w-3 h-3 text-green-500" />
+                        <Check className="w-3 h-3 text-success" />
                         Обновлено: {format(new Date(currentRate.updated_at), 'd MMM yyyy, HH:mm', { locale: ru })}
                       </div>
                     )}
@@ -226,12 +226,12 @@ export function CurrencyRatesEditor() {
           })}
         </div>
 
-        <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+        <div className="mt-6 p-4 rounded-lg bg-warning/10 border border-warning/20">
           <div className="flex gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-amber-700">Как работает конвертация:</p>
-              <ul className="mt-1 text-amber-600/80 space-y-1">
+              <p className="font-medium text-warning">Как работает конвертация:</p>
+              <ul className="mt-1 text-warning/80 space-y-1">
                 <li>• Все цены в каталоге хранятся в THB</li>
                 <li>• При отображении пользователю цены конвертируются по текущему курсу</li>
                 <li>• Пользователь выбирает валюту отображения в настройках</li>

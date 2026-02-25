@@ -211,9 +211,9 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
 
       {/* User warning level banner */}
       {warningLevel >= 2 && (
-        <div className="mx-3 px-3 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          <span className="text-xs text-amber-600 dark:text-amber-400">
+        <div className="mx-3 px-3 py-2 bg-warning/10 border border-warning/30 rounded-lg flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
+          <span className="text-xs text-warning">
             {isRu 
               ? `У вас ${warningLevel} предупреждение(й). Соблюдайте правила платформы.`
               : `You have ${warningLevel} warning(s). Please follow platform rules.`}

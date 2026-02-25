@@ -42,7 +42,7 @@ const quickServices: QuickService[] = [
     title: 'Beauty', 
     titleRu: 'Красота',
     href: '/beauty',
-    color: 'text-pink-500'
+    color: 'text-accent-coral'
   },
 ];
 

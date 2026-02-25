@@ -432,12 +432,12 @@ export function AdminYachtForm({
                   onClick={() => update('booking_flow', 'in_app_request')}
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
                     formData.booking_flow === 'in_app_request'
-                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-                      : 'border-border hover:border-amber-300'
+                      ? 'border-warning bg-warning/10'
+                      : 'border-border hover:border-warning/30'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <FileText className="w-4 h-4 text-amber-600" />
+                    <FileText className="w-4 h-4 text-warning" />
                     <span className="font-medium text-sm">{isRu ? 'По заявке' : 'Request to Book'}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">

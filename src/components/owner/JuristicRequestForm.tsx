@@ -120,10 +120,10 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
                     }`}
                   >
                     <div className={`inline-flex p-2 rounded-lg mb-2 ${
-                      value.color === 'orange' ? 'bg-orange-500/10 text-orange-500' :
-                      value.color === 'red' ? 'bg-red-500/10 text-red-500' :
-                      value.color === 'green' ? 'bg-green-500/10 text-green-500' :
-                      'bg-blue-500/10 text-blue-500'
+                      value.color === 'orange' ? 'bg-accent-amber/10 text-accent-amber' :
+                      value.color === 'red' ? 'bg-destructive/10 text-destructive' :
+                      value.color === 'green' ? 'bg-success/10 text-success' :
+                      'bg-info/10 text-info'
                     }`}>
                       <Icon className="h-5 w-5" />
                     </div>
@@ -240,10 +240,10 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
 
             {/* Payment Section */}
             {category === 'payment' && (
-              <div className="space-y-4 p-4 rounded-lg bg-green-500/5 border border-green-500/20">
+              <div className="space-y-4 p-4 rounded-lg bg-success/5 border border-success/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-green-600" />
+                    <CreditCard className="h-5 w-5 text-success" />
                     <Label className="text-base">{isRu ? 'Оплата через UNO' : 'Pay via UNO'}</Label>
                   </div>
                   <Switch
@@ -265,7 +265,7 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
                     </div>
 
                     {formData.payment_amount && formData.payment_amount > 0 && (
-                      <div className="space-y-2 pt-2 border-t border-green-500/20">
+                      <div className="space-y-2 pt-2 border-t border-success/20">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">{isRu ? 'Сумма' : 'Amount'}:</span>
                           <span>฿{formData.payment_amount.toLocaleString()}</span>
@@ -277,9 +277,9 @@ export function JuristicRequestForm({ propertyId, projectId, onSuccess }: Jurist
                           </span>
                           <span>฿{calculateFee(formData.payment_amount).toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between font-semibold pt-2 border-t border-green-500/20">
+                        <div className="flex justify-between font-semibold pt-2 border-t border-success/20">
                           <span>{isRu ? 'Итого' : 'Total'}:</span>
-                          <span className="text-green-600">
+                          <span className="text-success">
                             ฿{calculateTotal(formData.payment_amount).toLocaleString()}
                           </span>
                         </div>

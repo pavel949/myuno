@@ -54,7 +54,7 @@ export function AdminYachtList({ yachts, isLoading, onEdit, onDelete }: AdminYac
   return (
     <div className="space-y-3">
       {yachts.map((yacht) => (
-        <Card key={yacht.id} className={!yacht.is_verified ? 'border-amber-500/50' : ''}>
+        <Card key={yacht.id} className={!yacht.is_verified ? 'border-warning/50' : ''}>
           <CardContent className="p-4">
             <div className="flex gap-3">
               {yacht.cover_image ? (
@@ -73,7 +73,7 @@ export function AdminYachtList({ yachts, isLoading, onEdit, onDelete }: AdminYac
                         {yachtTypes.find(t => t.value === yacht.yacht_type)?.[isRu ? 'labelRu' : 'label']}
                       </Badge>
                       {!yacht.is_verified && (
-                        <Badge variant="outline" className="text-xs text-amber-600">{isRu ? 'На модерации' : 'Pending'}</Badge>
+                        <Badge variant="outline" className="text-xs text-warning">{isRu ? 'На модерации' : 'Pending'}</Badge>
                       )}
                       {yacht.is_featured && (
                         <Badge className="text-xs bg-primary">{isRu ? 'Избранное' : 'Featured'}</Badge>

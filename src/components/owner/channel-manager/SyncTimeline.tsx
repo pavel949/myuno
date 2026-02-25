@@ -54,7 +54,7 @@ export function SyncTimeline({ propertyId, calendarId, limit = 20 }: SyncTimelin
       {logs.map((log, index) => (
         <Card key={log.id} className={cn(
           "transition-all",
-          log.error && "border-red-200 dark:border-red-900"
+          log.error && "border-destructive/20"
         )}>
           <CardContent className="p-3">
             <div className="flex items-start gap-3">
@@ -62,8 +62,8 @@ export function SyncTimeline({ propertyId, calendarId, limit = 20 }: SyncTimelin
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
                 log.error 
-                  ? "bg-red-100 dark:bg-red-900/30 text-red-600" 
-                  : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                  ? "bg-destructive/10 text-destructive" 
+                  : "bg-success/10 text-success"
               )}>
                 {log.error ? (
                   <XCircle className="h-4 w-4" />
@@ -90,19 +90,19 @@ export function SyncTimeline({ propertyId, calendarId, limit = 20 }: SyncTimelin
                 {!log.error && (
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     {log.events_added > 0 && (
-                      <span className="flex items-center gap-1 text-emerald-600">
+                      <span className="flex items-center gap-1 text-success">
                         <Plus className="h-3 w-3" />
                         {log.events_added}
                       </span>
                     )}
                     {log.events_updated > 0 && (
-                      <span className="flex items-center gap-1 text-blue-600">
+                      <span className="flex items-center gap-1 text-info">
                         <RefreshCw className="h-3 w-3" />
                         {log.events_updated}
                       </span>
                     )}
                     {log.events_removed > 0 && (
-                      <span className="flex items-center gap-1 text-red-600">
+                      <span className="flex items-center gap-1 text-destructive">
                         <Trash2 className="h-3 w-3" />
                         {log.events_removed}
                       </span>
@@ -115,7 +115,7 @@ export function SyncTimeline({ propertyId, calendarId, limit = 20 }: SyncTimelin
                 )}
 
                 {log.error && (
-                  <p className="text-xs text-red-500 truncate">
+                  <p className="text-xs text-destructive truncate">
                     {log.error}
                   </p>
                 )}
@@ -171,7 +171,7 @@ export function SyncStatsChart({ propertyId }: { propertyId?: string }) {
                     className={cn(
                       "w-full rounded-t transition-all",
                       day.failed > 0 
-                        ? "bg-red-500" 
+                        ? "bg-destructive" 
                         : total > 0 
                           ? "bg-primary" 
                           : "bg-muted"
@@ -194,7 +194,7 @@ export function SyncStatsChart({ propertyId }: { propertyId?: string }) {
             <span>{isRu ? 'Добавлено/Обновлено' : 'Added/Updated'}</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <div className="w-2 h-2 rounded-full bg-destructive" />
             <span>{isRu ? 'Ошибки' : 'Errors'}</span>
           </div>
         </div>

@@ -430,7 +430,7 @@ function DocumentList({ documents, isRu, onDelete, isDeleting }: DocumentListPro
                     <Calendar className="h-3 w-3" />
                     <span className={`text-xs ${
                       expiryStatus === 'expired' ? 'text-destructive' :
-                      expiryStatus === 'expiring' ? 'text-yellow-600' : 'text-muted-foreground'
+                      expiryStatus === 'expiring' ? 'text-warning' : 'text-muted-foreground'
                     }`}>
                       {expiryStatus === 'expired' && (isRu ? 'Истёк: ' : 'Expired: ')}
                       {expiryStatus === 'expiring' && (isRu ? 'Истекает: ' : 'Expires: ')}
@@ -445,7 +445,7 @@ function DocumentList({ documents, isRu, onDelete, isDeleting }: DocumentListPro
             </div>
             <div className="flex items-center gap-1">
               {doc.is_verified && (
-                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                <CheckCircle className="h-4 w-4 text-success mr-2" />
               )}
               {doc.file_url && (
                 <Button size="icon" variant="ghost" className="h-8 w-8" asChild>

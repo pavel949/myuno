@@ -166,7 +166,7 @@ export function SyncedListingPreview({ connectionId, propertyId, onApplied }: Sy
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+          <CheckCircle2 className="h-5 w-5 text-success" />
           {isRu ? 'Импортированные данные' : 'Imported Data'}
         </CardTitle>
       </CardHeader>

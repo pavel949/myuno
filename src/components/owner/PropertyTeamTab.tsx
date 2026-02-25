@@ -121,7 +121,7 @@ export function PropertyTeamTab({ propertyId }: PropertyTeamTabProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-500"><Check className="h-3 w-3 mr-1" />{isRu ? 'Активен' : 'Active'}</Badge>;
+        return <Badge variant="default" className="bg-success"><Check className="h-3 w-3 mr-1" />{isRu ? 'Активен' : 'Active'}</Badge>;
       case 'pending':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{isRu ? 'Ожидает' : 'Pending'}</Badge>;
       case 'expired':

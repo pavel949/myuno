@@ -17,8 +17,8 @@ const TASK_CONFIG = {
   check_in: { icon: LogIn, color: 'text-success', bg: 'bg-success/10', label: 'Check-in', labelRu: 'Заезд' },
   check_out: { icon: LogOut, color: 'text-warning', bg: 'bg-warning/10', label: 'Check-out', labelRu: 'Выезд' },
   cleaning: { icon: Sparkles, color: 'text-info', bg: 'bg-info/10', label: 'Cleaning', labelRu: 'Уборка' },
-  maintenance: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', label: 'Maintenance', labelRu: 'Ремонт' },
-  inspection: { icon: ClipboardList, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Inspection', labelRu: 'Осмотр' },
+  maintenance: { icon: Wrench, color: 'text-accent-amber', bg: 'bg-accent-amber/10', label: 'Maintenance', labelRu: 'Ремонт' },
+  inspection: { icon: ClipboardList, color: 'text-accent-purple', bg: 'bg-accent-purple/10', label: 'Inspection', labelRu: 'Осмотр' },
   meter_reading: { icon: Clock, color: 'text-primary', bg: 'bg-primary/10', label: 'Meters', labelRu: 'Счётчики' },
 };
 
