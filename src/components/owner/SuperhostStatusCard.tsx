@@ -60,7 +60,7 @@ export function SuperhostStatusCard() {
   // Superhost achieved view
   if (isSuperhost) {
     return (
-      <Card className="overflow-hidden border-amber-500/30 bg-gradient-to-br from-amber-50/50 to-yellow-50/50 dark:from-amber-950/20 dark:to-yellow-950/20">
+      <Card className="overflow-hidden border-accent-amber/30 bg-gradient-to-br from-accent-amber/5 to-warning/5">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export function SuperhostStatusCard() {
               <div>
                 <CardTitle className="text-lg flex items-center gap-2">
                   {isRu ? 'Суперхозяин' : 'Superhost'}
-                  <Badge variant="secondary" className="bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                  <Badge variant="secondary" className="bg-accent-amber/20 text-accent-amber">
                     ★ {(Number(metrics?.avg_rating) || 0).toFixed(1)}
                   </Badge>
                 </CardTitle>
@@ -86,22 +86,22 @@ export function SuperhostStatusCard() {
           {/* Stats */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             <StatItem
-              icon={<Star className="h-4 w-4 text-amber-500" />}
+              icon={<Star className="h-4 w-4 text-accent-amber" />}
               value={(Number(metrics?.avg_rating) || 0).toFixed(1)}
               label={isRu ? 'Рейтинг' : 'Rating'}
             />
             <StatItem
-              icon={<CalendarCheck className="h-4 w-4 text-emerald-500" />}
+              icon={<CalendarCheck className="h-4 w-4 text-success" />}
               value={String(metrics?.completed_bookings || 0)}
               label={isRu ? 'Брони' : 'Bookings'}
             />
             <StatItem
-              icon={<MessageSquare className="h-4 w-4 text-blue-500" />}
+              icon={<MessageSquare className="h-4 w-4 text-info" />}
               value={`${Number(metrics?.response_rate || 0).toFixed(0)}%`}
               label={isRu ? 'Ответы' : 'Response'}
             />
             <StatItem
-              icon={<XCircle className="h-4 w-4 text-red-400" />}
+              icon={<XCircle className="h-4 w-4 text-destructive" />}
               value={`${Number(metrics?.cancellation_rate || 0).toFixed(1)}%`}
               label={isRu ? 'Отмены' : 'Cancel'}
             />
@@ -115,7 +115,7 @@ export function SuperhostStatusCard() {
             <div className="grid grid-cols-1 gap-1.5">
               {benefits.slice(0, 3).map((benefit, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm">
-                  <div className="p-1 rounded-full bg-amber-500/20 text-amber-600">
+                  <div className="p-1 rounded-full bg-accent-amber/20 text-accent-amber">
                     {benefitIcons[benefit.icon]}
                   </div>
                   <span className="text-muted-foreground">{benefit.title}</span>
@@ -134,7 +134,7 @@ export function SuperhostStatusCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Award className="h-5 w-5 text-amber-500" />
+            <Award className="h-5 w-5 text-accent-amber" />
             {isRu ? 'Путь к Суперхозяину' : 'Path to Superhost'}
           </CardTitle>
           {progress && (
@@ -258,14 +258,14 @@ function RequirementItem({ label, current, required, percent, met, icon }: Requi
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {met ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
           ) : (
             <Circle className="h-4 w-4 text-muted-foreground" />
           )}
           <span className="text-sm font-medium">{label}</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <span className={cn(met ? 'text-emerald-600 font-medium' : 'text-muted-foreground')}>
+          <span className={cn(met ? 'text-success font-medium' : 'text-muted-foreground')}>
             {current}
           </span>
           <span className="text-muted-foreground/50">/</span>
@@ -274,7 +274,7 @@ function RequirementItem({ label, current, required, percent, met, icon }: Requi
       </div>
       <Progress 
         value={percent} 
-        className={cn('h-1.5', met ? '[&>div]:bg-emerald-500' : '')} 
+        className={cn('h-1.5', met ? '[&>div]:bg-success' : '')} 
       />
     </div>
   );
@@ -296,7 +296,7 @@ export function SuperhostStatusCompact() {
     return (
       <div
         onClick={() => navigate('/owner/superhost')}
-        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-amber-500/20 cursor-pointer hover:bg-amber-500/20 transition-colors"
+        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-accent-amber/10 to-warning/10 border border-accent-amber/20 cursor-pointer hover:bg-accent-amber/20 transition-colors"
       >
         <SuperhostIcon size="sm" />
         <div className="flex-1">
@@ -317,8 +317,8 @@ export function SuperhostStatusCompact() {
       onClick={() => navigate('/owner/superhost')}
       className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border cursor-pointer hover:bg-muted transition-colors"
     >
-      <div className="p-2 rounded-full bg-amber-500/20">
-        <Award className="h-4 w-4 text-amber-500" />
+      <div className="p-2 rounded-full bg-accent-amber/20">
+        <Award className="h-4 w-4 text-accent-amber" />
       </div>
       <div className="flex-1">
         <p className="font-medium text-sm">
@@ -352,7 +352,7 @@ export function SuperhostStatusCompact() {
               strokeDasharray={100}
               strokeDashoffset={100 - progress.overallProgress}
               strokeLinecap="round"
-              className="text-amber-500"
+              className="text-accent-amber"
             />
           </svg>
           <span className="absolute inset-0 flex items-center justify-center text-xs font-medium">

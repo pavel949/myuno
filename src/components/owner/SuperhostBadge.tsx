@@ -29,14 +29,14 @@ export function SuperhostBadge({ size = 'md', showLabel = true, className }: Sup
     <Badge
       variant="outline"
       className={cn(
-        'font-semibold flex items-center bg-gradient-to-r from-amber-500/20 to-yellow-500/20',
-        'border-amber-500/50 text-amber-700 dark:text-amber-400',
+        'font-semibold flex items-center bg-gradient-to-r from-accent-amber/20 to-warning/20',
+        'border-accent-amber/50 text-accent-amber',
         'shadow-sm',
         sizeClasses[size],
         className
       )}
     >
-      <Award className={cn(iconSizes[size], 'text-amber-500')} />
+      <Award className={cn(iconSizes[size], 'text-accent-amber')} />
       {showLabel && (
         <span>{isRu ? 'Суперхозяин' : 'Superhost'}</span>
       )}
@@ -60,8 +60,8 @@ export function SuperhostIcon({ size = 'md', className }: SuperhostIconProps) {
     <div
       className={cn(
         'relative flex items-center justify-center rounded-full',
-        'bg-gradient-to-br from-amber-400 to-yellow-500',
-        'shadow-lg shadow-amber-500/30',
+        'bg-gradient-to-br from-accent-amber to-warning',
+        'shadow-lg shadow-accent-amber/30',
         size === 'sm' ? 'p-1' : size === 'md' ? 'p-1.5' : 'p-2',
         className
       )}

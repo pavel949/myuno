@@ -100,7 +100,7 @@ export function ExperienceCard({ experience, language, className }: ExperienceCa
           
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-3">
             <span className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4 fill-warning text-warning" />
               {experience.rating.toFixed(1)}
               <span className="text-xs">({experience.review_count})</span>
             </span>

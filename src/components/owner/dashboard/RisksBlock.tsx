@@ -104,7 +104,7 @@ export function RisksBlock() {
             </div>
           )}
           {overdueTasks.length > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
               <AlertCircle className="h-3 w-3" />
               <span>{overdueTasks.length} {isRu ? 'просрочено' : 'overdue'}</span>
             </div>

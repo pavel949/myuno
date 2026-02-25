@@ -29,10 +29,10 @@ export function ControlAnalyticsTab() {
   });
 
   const kpis = [
-    { label: isRussian ? 'Пользователи' : 'Users', value: stats?.users || 0, icon: Users, color: 'text-blue-500' },
-    { label: isRussian ? 'Провайдеры' : 'Providers', value: stats?.providers || 0, icon: TrendingUp, color: 'text-green-500' },
-    { label: isRussian ? 'Заказы' : 'Orders', value: stats?.orders || 0, icon: Calendar, color: 'text-purple-500' },
-    { label: isRussian ? 'Бронирования' : 'Bookings', value: stats?.bookings || 0, icon: BarChart3, color: 'text-orange-500' },
+    { label: isRussian ? 'Пользователи' : 'Users', value: stats?.users || 0, icon: Users, color: 'text-info' },
+    { label: isRussian ? 'Провайдеры' : 'Providers', value: stats?.providers || 0, icon: TrendingUp, color: 'text-success' },
+    { label: isRussian ? 'Заказы' : 'Orders', value: stats?.orders || 0, icon: Calendar, color: 'text-accent-purple' },
+    { label: isRussian ? 'Бронирования' : 'Bookings', value: stats?.bookings || 0, icon: BarChart3, color: 'text-warning' },
   ];
 
   return (

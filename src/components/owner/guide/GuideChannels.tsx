@@ -36,7 +36,7 @@ export function GuideChannels() {
                 <span className="text-3xl block mb-2">{channel.logo}</span>
                 <h4 className="font-medium text-foreground text-sm mb-2">{channel.name}</h4>
                 {channel.status === 'connected' ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-green-500">
+                  <span className="inline-flex items-center gap-1 text-xs text-success">
                     <CheckCircle2 className="w-3 h-3" />
                     {isRu ? 'Подключён' : 'Connected'}
                   </span>

@@ -59,15 +59,15 @@ export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
                 <span className={cn(
                   "text-xs font-medium px-2 py-0.5 rounded-full",
                   f.type === 'income' 
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                    ? 'bg-success/10 text-success'
+                    : 'bg-destructive/10 text-destructive'
                 )}>
                   {f.type === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расход' : 'Expense')}
                 </span>
               </TableCell>
               <TableCell className="text-xs">{f.category || '—'}</TableCell>
               <TableCell className="text-xs max-w-[200px] truncate">{f.description || '—'}</TableCell>
-              <TableCell className={cn("text-right text-sm font-medium", f.type === 'income' ? 'text-emerald-600' : 'text-red-500')}>
+              <TableCell className={cn("text-right text-sm font-medium", f.type === 'income' ? 'text-success' : 'text-destructive')}>
                 {f.type === 'income' ? '+' : '-'}฿{f.amount?.toLocaleString()}
               </TableCell>
             </TableRow>
