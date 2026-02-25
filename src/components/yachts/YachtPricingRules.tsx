@@ -240,9 +240,9 @@ export function YachtPricingRules({
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className={cn(
                         "p-2 rounded-lg",
-                        rule.rule_type === 'season' && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-                        rule.rule_type === 'day_of_week' && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-                        rule.rule_type === 'special_event' && "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                        rule.rule_type === 'season' && "bg-warning/10 text-warning",
+                        rule.rule_type === 'day_of_week' && "bg-info/10 text-info",
+                        rule.rule_type === 'special_event' && "bg-accent-purple/10 text-accent-purple"
                       )}>
                         {getRuleIcon(rule.rule_type)}
                       </div>

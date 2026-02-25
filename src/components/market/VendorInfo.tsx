@@ -86,7 +86,7 @@ export const VendorInfo: React.FC<VendorInfoProps> = ({
               {/* Rating */}
               {vendor.rating && (
                 <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                  <Star className="w-4 h-4 fill-warning text-warning" />
                   <span className="font-medium text-foreground">{vendor.rating}</span>
                   <span className="text-xs">
                     ({vendor.review_count} {language === 'ru' ? 'отзывов' : 'reviews'})

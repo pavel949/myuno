@@ -94,7 +94,7 @@ export default function TutorDetail() {
           <h1 className="text-xl font-bold text-foreground mt-2">{name}</h1>
           <p className="text-primary font-medium">{specialty}</p>
           <div className="flex items-center justify-center gap-1 mt-2">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <Star className="h-4 w-4 fill-warning text-warning" />
             <span className="font-medium">{tutor.rating ?? 0}</span>
             <span className="text-muted-foreground">({tutor.review_count ?? 0} {language === "ru" ? "отзывов" : "reviews"})</span>
           </div>

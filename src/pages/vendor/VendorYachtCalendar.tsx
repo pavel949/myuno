@@ -155,9 +155,9 @@ export default function VendorYachtCalendar() {
 
         {/* Unsaved Changes Warning */}
         {hasChanges && (
-          <Card className="mb-4 border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20">
+          <Card className="mb-4 border-warning/50 bg-warning/5">
             <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-2 text-warning">
                 <AlertCircle className="h-4 w-4" />
                 <span className="text-sm font-medium">
                   {isRu ? 'Есть несохранённые изменения' : 'You have unsaved changes'}

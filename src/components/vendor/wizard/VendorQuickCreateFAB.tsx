@@ -57,19 +57,19 @@ const createOptions: QuickCreateOption[] = [
 
 const verticalOptions: QuickCreateOption[] = [
   { id: 'beauty', slug: 'beauty', icon: Sparkles, labelEn: 'Beauty', labelRu: 'Красота', color: 'text-pink-500', path: '/vendor/beauty?create=true' },
-  { id: 'restaurants', slug: 'restaurants', icon: Utensils, labelEn: 'Restaurant', labelRu: 'Ресторан', color: 'text-amber-500', path: '/vendor/restaurants?create=true' },
-  { id: 'transport', slug: 'transport', icon: Car, labelEn: 'Vehicle', labelRu: 'Транспорт', color: 'text-indigo-500', path: '/vendor/transport?create=true' },
-  { id: 'yachts', slug: 'yachts', icon: Ship, labelEn: 'Boat Charter', labelRu: 'Чартер', color: 'text-cyan-500', path: '/vendor/yachts?create=true' },
-  { id: 'properties', slug: 'properties', icon: Home, labelEn: 'Property', labelRu: 'Недвижимость', color: 'text-emerald-500', path: '/vendor/properties?create=true' },
-  { id: 'tours', slug: 'tours', icon: Calendar, labelEn: 'Tour', labelRu: 'Тур', color: 'text-blue-500', path: '/vendor/tours?create=true' },
-  { id: 'fitness', slug: 'fitness', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Фитнес', color: 'text-orange-500', path: '/vendor/fitness?create=true' },
-  { id: 'cleaning', slug: 'cleaning', icon: Brush, labelEn: 'Cleaning', labelRu: 'Клининг', color: 'text-teal-500', path: '/vendor/cleaning?create=true' },
-  { id: 'babysitters', slug: 'childcare', icon: Baby, labelEn: 'Babysitter', labelRu: 'Няня', color: 'text-rose-500', path: '/vendor/babysitters?create=true' },
-  { id: 'flowers', slug: 'flowers', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', color: 'text-fuchsia-500', path: '/vendor/flowers?create=true' },
-  { id: 'clinics', slug: 'health', icon: Stethoscope, labelEn: 'Clinic', labelRu: 'Клиника', color: 'text-green-500', path: '/vendor/clinics?create=true' },
-  { id: 'education', slug: 'education', icon: GraduationCap, labelEn: 'Education', labelRu: 'Образование', color: 'text-purple-500', path: '/vendor/education?create=true' },
-  { id: 'legal', slug: 'legal', icon: Scale, labelEn: 'Legal', labelRu: 'Юридические', color: 'text-slate-500', path: '/vendor/legal?create=true' },
-  { id: 'pets', slug: 'pets', icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы', color: 'text-yellow-600', path: '/vendor/pets?create=true' },
+  { id: 'restaurants', slug: 'restaurants', icon: Utensils, labelEn: 'Restaurant', labelRu: 'Ресторан', color: 'text-warning', path: '/vendor/restaurants?create=true' },
+  { id: 'transport', slug: 'transport', icon: Car, labelEn: 'Vehicle', labelRu: 'Транспорт', color: 'text-accent-purple', path: '/vendor/transport?create=true' },
+  { id: 'yachts', slug: 'yachts', icon: Ship, labelEn: 'Boat Charter', labelRu: 'Чартер', color: 'text-accent-cyan', path: '/vendor/yachts?create=true' },
+  { id: 'properties', slug: 'properties', icon: Home, labelEn: 'Property', labelRu: 'Недвижимость', color: 'text-success', path: '/vendor/properties?create=true' },
+  { id: 'tours', slug: 'tours', icon: Calendar, labelEn: 'Tour', labelRu: 'Тур', color: 'text-info', path: '/vendor/tours?create=true' },
+  { id: 'fitness', slug: 'fitness', icon: Dumbbell, labelEn: 'Gym', labelRu: 'Фитнес', color: 'text-accent-amber', path: '/vendor/fitness?create=true' },
+  { id: 'cleaning', slug: 'cleaning', icon: Brush, labelEn: 'Cleaning', labelRu: 'Клининг', color: 'text-accent-teal', path: '/vendor/cleaning?create=true' },
+  { id: 'babysitters', slug: 'childcare', icon: Baby, labelEn: 'Babysitter', labelRu: 'Няня', color: 'text-destructive', path: '/vendor/babysitters?create=true' },
+  { id: 'flowers', slug: 'flowers', icon: Flower2, labelEn: 'Flowers', labelRu: 'Цветы', color: 'text-accent-purple', path: '/vendor/flowers?create=true' },
+  { id: 'clinics', slug: 'health', icon: Stethoscope, labelEn: 'Clinic', labelRu: 'Клиника', color: 'text-success', path: '/vendor/clinics?create=true' },
+  { id: 'education', slug: 'education', icon: GraduationCap, labelEn: 'Education', labelRu: 'Образование', color: 'text-accent-purple', path: '/vendor/education?create=true' },
+  { id: 'legal', slug: 'legal', icon: Scale, labelEn: 'Legal', labelRu: 'Юридические', color: 'text-muted-foreground', path: '/vendor/legal?create=true' },
+  { id: 'pets', slug: 'pets', icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы', color: 'text-warning', path: '/vendor/pets?create=true' },
 ];
 
 const specialActions: QuickCreateOption[] = [

@@ -113,7 +113,7 @@ export function ReviewForm({ productId, productName, isOpen, onClose, onSuccess 
                   <Star
                     className={`w-8 h-8 transition-colors ${
                       star <= (hoveredRating || rating)
-                        ? 'fill-amber-400 text-amber-400'
+                        ? 'fill-warning text-warning'
                         : 'text-muted-foreground/30'
                     }`}
                   />

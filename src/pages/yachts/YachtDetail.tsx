@@ -100,7 +100,7 @@ export default function YachtDetail() {
               <MapPin className="w-4 h-4" /><span>{location || 'Phuket'}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4 fill-warning text-warning" />
               <span>{yacht.rating}</span><span>({yacht.review_count})</span>
             </div>
             {yacht.is_verified && (
@@ -193,7 +193,7 @@ export default function YachtDetail() {
               </div>
               <div className="flex items-center justify-center gap-1 mb-1">
                 {[1,2,3,4,5].map(i => (
-                  <Star key={i} className={`w-4 h-4 ${i <= Math.round(yacht.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/20'}`} />
+                  <Star key={i} className={`w-4 h-4 ${i <= Math.round(yacht.rating || 0) ? 'fill-warning text-warning' : 'text-muted-foreground/20'}`} />
                 ))}
               </div>
               <p className="font-semibold text-foreground">{yacht.rating} / 5</p>

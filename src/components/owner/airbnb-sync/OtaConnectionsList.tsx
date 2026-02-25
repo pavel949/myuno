@@ -22,26 +22,26 @@ const PLATFORM_CONFIG = {
   airbnb: {
     name: 'Airbnb',
     logo: '🏠',
-    color: 'from-rose-500 to-pink-600',
-    bgColor: 'bg-rose-50 dark:bg-rose-950/30',
+    color: 'from-destructive to-destructive/80',
+    bgColor: 'bg-destructive/10',
   },
   booking: {
     name: 'Booking.com',
     logo: '🅱️',
-    color: 'from-blue-600 to-indigo-700',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    color: 'from-info to-primary',
+    bgColor: 'bg-info/10',
   },
   vrbo: {
     name: 'VRBO',
     logo: '🏡',
-    color: 'from-cyan-500 to-teal-600',
-    bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
+    color: 'from-accent-cyan to-accent-teal',
+    bgColor: 'bg-accent-cyan/10',
   },
   expedia: {
     name: 'Expedia',
     logo: '✈️',
-    color: 'from-yellow-500 to-amber-600',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-950/30',
+    color: 'from-warning to-accent-amber',
+    bgColor: 'bg-warning/10',
   },
 };
 
@@ -117,7 +117,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold">{platform.name}</h3>
                       {connection.last_sync_status === 'success' && (
-                        <Badge variant="secondary" className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
+                        <Badge variant="secondary" className="text-xs bg-success/10 text-success">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           {isRu ? 'Синхр.' : 'Synced'}
                         </Badge>
@@ -144,7 +144,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                     )}
 
                     {connection.sync_error && (
-                      <p className="text-xs text-red-500 mt-1 truncate">
+                      <p className="text-xs text-destructive mt-1 truncate">
                         {connection.sync_error}
                       </p>
                     )}

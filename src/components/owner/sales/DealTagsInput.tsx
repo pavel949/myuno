@@ -11,12 +11,12 @@ interface Props {
 }
 
 const TAG_COLORS = [
-  'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30',
-  'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30',
-  'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30',
-  'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
-  'bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-500/30',
-  'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/30',
+  'bg-info/10 text-info border-info/30',
+  'bg-accent-purple/10 text-accent-purple border-accent-purple/30',
+  'bg-success/10 text-success border-success/30',
+  'bg-warning/10 text-warning border-warning/30',
+  'bg-destructive/10 text-destructive border-destructive/30',
+  'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30',
 ];
 
 function tagColor(tag: string): string {

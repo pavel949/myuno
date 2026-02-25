@@ -122,11 +122,11 @@ export function DepositPaymentOptions({
       </Card>
 
       {/* Deposit Info */}
-      <Card className="border-green-500/30 bg-green-500/5">
+      <Card className="border-success/30 bg-success/5">
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-medium">{isRu ? 'Предоплата 10%' : '10% Deposit'}</span>
-            <span className="text-xl font-bold text-green-600">{formatPrice(depositAmount)}</span>
+            <span className="text-xl font-bold text-success">{formatPrice(depositAmount)}</span>
           </div>
           <p className="text-xs text-muted-foreground">
             {isRu 

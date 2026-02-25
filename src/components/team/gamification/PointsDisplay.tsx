@@ -71,13 +71,13 @@ export function PointsDisplay({ compact = false, className }: PointsDisplayProps
       {/* Streak */}
       {(stats?.streak_days || 0) > 0 && (
         <div className="mt-3 pt-3 border-t flex items-center justify-between">
-          <div className="flex items-center gap-2 text-amber-500">
+          <div className="flex items-center gap-2 text-warning">
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium">
               {stats?.streak_days} {isRu ? 'дней подряд' : 'day streak'}
             </span>
           </div>
-          <Badge variant="outline" className="text-amber-500 border-amber-500/30">
+          <Badge variant="outline" className="text-warning border-warning/30">
             🔥 {isRu ? 'В ударе!' : 'On fire!'}
           </Badge>
         </div>
@@ -150,9 +150,9 @@ export function StreakCounter({ days, className }: StreakCounterProps) {
   return (
     <div className={cn(
       "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full",
-      "bg-gradient-to-r from-amber-500/20 to-orange-500/20",
-      "border border-amber-500/30",
-      "text-amber-600 dark:text-amber-400",
+      "bg-gradient-to-r from-warning/20 to-accent-amber/20",
+      "border border-warning/30",
+      "text-warning",
       className
     )}>
       <Sparkles className="h-4 w-4 animate-pulse" />

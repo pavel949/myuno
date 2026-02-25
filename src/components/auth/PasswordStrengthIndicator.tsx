@@ -17,9 +17,9 @@ const rules = [
 const levels = [
   { min: 0, labelRu: '', labelEn: '', color: '' },
   { min: 1, labelRu: 'Слабый', labelEn: 'Weak', color: 'bg-destructive' },
-  { min: 2, labelRu: 'Средний', labelEn: 'Fair', color: 'bg-orange-500' },
-  { min: 3, labelRu: 'Хороший', labelEn: 'Good', color: 'bg-yellow-500' },
-  { min: 4, labelRu: 'Сильный', labelEn: 'Strong', color: 'bg-green-500' },
+  { min: 2, labelRu: 'Средний', labelEn: 'Fair', color: 'bg-warning' },
+  { min: 3, labelRu: 'Хороший', labelEn: 'Good', color: 'bg-accent-amber' },
+  { min: 4, labelRu: 'Сильный', labelEn: 'Strong', color: 'bg-success' },
 ];
 
 export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicatorProps) {
@@ -46,7 +46,7 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
         ))}
       </div>
       {level.labelRu && (
-        <p className={cn('text-xs font-medium', passed <= 1 ? 'text-destructive' : passed <= 2 ? 'text-orange-500' : passed <= 3 ? 'text-yellow-600' : 'text-green-600')}>
+        <p className={cn('text-xs font-medium', passed <= 1 ? 'text-destructive' : passed <= 2 ? 'text-warning' : passed <= 3 ? 'text-accent-amber' : 'text-success')}>
           {isRu ? level.labelRu : level.labelEn}
         </p>
       )}
@@ -58,11 +58,11 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
           return (
             <div key={rule.key} className="flex items-center gap-1.5">
               {ok ? (
-                <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                <Check className="w-3.5 h-3.5 text-success flex-shrink-0" />
               ) : (
                 <X className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
               )}
-              <span className={cn('text-xs', ok ? 'text-green-600' : 'text-muted-foreground')}>
+              <span className={cn('text-xs', ok ? 'text-success' : 'text-muted-foreground')}>
                 {isRu ? rule.labelRu : rule.labelEn}
               </span>
             </div>

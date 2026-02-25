@@ -46,8 +46,8 @@ const vipServices: VipService[] = [
     titleRu: 'Вертолётные трансферы',
     description: 'Private helicopter flights, island hopping, aerial tours',
     descriptionRu: 'Частные вертолётные рейсы, полёты на острова, воздушные туры',
-    color: 'text-sky-500',
-    bgColor: 'bg-sky-500/10',
+    color: 'text-info',
+    bgColor: 'bg-info/10',
   },
   {
     id: 'jets',
@@ -56,8 +56,8 @@ const vipServices: VipService[] = [
     titleRu: 'Частные самолёты',
     description: 'Charter flights, airport VIP services, jet rentals',
     descriptionRu: 'Чартерные рейсы, VIP-услуги в аэропорту, аренда самолётов',
-    color: 'text-indigo-500',
-    bgColor: 'bg-indigo-500/10',
+    color: 'text-accent-purple',
+    bgColor: 'bg-accent-purple/10',
   },
   {
     id: 'chefs',
@@ -66,8 +66,8 @@ const vipServices: VipService[] = [
     titleRu: 'Персональные повара',
     description: 'Private chefs, catering, exclusive dining experiences',
     descriptionRu: 'Частные повара, кейтеринг, эксклюзивные ужины',
-    color: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
+    color: 'text-accent-amber',
+    bgColor: 'bg-accent-amber/10',
   },
   {
     id: 'housekeeping',
@@ -76,8 +76,8 @@ const vipServices: VipService[] = [
     titleRu: 'Горничные и уборка',
     description: 'Daily housekeeping, laundry, villa management',
     descriptionRu: 'Ежедневная уборка, прачечная, управление виллой',
-    color: 'text-teal-500',
-    bgColor: 'bg-teal-500/10',
+    color: 'text-accent-teal',
+    bgColor: 'bg-accent-teal/10',
   },
   {
     id: 'cars',
@@ -86,8 +86,8 @@ const vipServices: VipService[] = [
     titleRu: 'Люксовые автомобили',
     description: 'Supercars, limousines, chauffeur services',
     descriptionRu: 'Суперкары, лимузины, услуги водителя',
-    color: 'text-red-500',
-    bgColor: 'bg-red-500/10',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/10',
   },
   {
     id: 'yachts',
@@ -96,8 +96,8 @@ const vipServices: VipService[] = [
     titleRu: 'Аренда яхт и катеров',
     description: 'Yacht charters, sailing trips, boat parties',
     descriptionRu: 'Аренда яхт, парусные поездки, вечеринки на катере',
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-500/10',
+    color: 'text-info',
+    bgColor: 'bg-info/10',
   },
   {
     id: 'events',
@@ -106,8 +106,8 @@ const vipServices: VipService[] = [
     titleRu: 'Частные мероприятия',
     description: 'Birthday parties, weddings, corporate events',
     descriptionRu: 'Дни рождения, свадьбы, корпоративы',
-    color: 'text-pink-500',
-    bgColor: 'bg-pink-500/10',
+    color: 'text-accent-purple',
+    bgColor: 'bg-accent-purple/10',
   },
   {
     id: 'photography',
@@ -116,8 +116,8 @@ const vipServices: VipService[] = [
     titleRu: 'Фото и видео',
     description: 'Professional photographers, drone footage, content creation',
     descriptionRu: 'Профессиональные фотографы, съёмка с дрона, создание контента',
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
+    color: 'text-accent-purple',
+    bgColor: 'bg-accent-purple/10',
   },
   {
     id: 'personal',
@@ -126,8 +126,8 @@ const vipServices: VipService[] = [
     titleRu: 'Личные ассистенты',
     description: 'Translators, guides, personal shoppers',
     descriptionRu: 'Переводчики, гиды, персональные шопперы',
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-500/10',
+    color: 'text-success',
+    bgColor: 'bg-success/10',
   },
   {
     id: 'gifts',
@@ -136,8 +136,8 @@ const vipServices: VipService[] = [
     titleRu: 'Люксовые подарки',
     description: 'Exclusive gifts, flower arrangements, surprises',
     descriptionRu: 'Эксклюзивные подарки, цветочные композиции, сюрпризы',
-    color: 'text-rose-500',
-    bgColor: 'bg-rose-500/10',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/10',
   },
   {
     id: 'security',
@@ -146,8 +146,8 @@ const vipServices: VipService[] = [
     titleRu: 'Личная охрана',
     description: 'Bodyguards, secure transport, 24/7 protection',
     descriptionRu: 'Телохранители, безопасный транспорт, круглосуточная защита',
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-500/10',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
   },
 ];
 
@@ -227,7 +227,7 @@ export default function VipConcierge() {
         {/* VIP Services Grid */}
         <FadeInUp delay={0.1}>
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Crown className="w-5 h-5 text-purple-500" />
+            <Crown className="w-5 h-5 text-accent-purple" />
             {t('vip.ourServices')}
           </h3>
         </FadeInUp>
@@ -238,7 +238,7 @@ export default function VipConcierge() {
             return (
               <AnimatedItem key={service.id}>
               <div 
-                  className="p-4 rounded-2xl border bg-card cursor-pointer hover:border-purple-500/30 transition-colors"
+                  className="p-4 rounded-2xl border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
                   onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
                 >
                   <div className="flex items-center gap-4">
@@ -263,8 +263,8 @@ export default function VipConcierge() {
 
         {/* Bottom CTA */}
         <FadeInUp delay={0.3}>
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-purple-500/20 text-center">
-            <Crown className="w-10 h-10 text-purple-500 mx-auto mb-3" />
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-accent-purple/10 to-accent-purple/5 border border-accent-purple/20 text-center">
+            <Crown className="w-10 h-10 text-accent-purple mx-auto mb-3" />
             <h3 className="font-semibold mb-2">
               {t('vip.readyForVip')}
             </h3>
@@ -272,7 +272,7 @@ export default function VipConcierge() {
               {t('vip.contactUs')}
             </p>
             <Button
-              className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+              className="w-full bg-gradient-to-r from-accent-purple to-accent-purple/80 hover:from-accent-purple/90 hover:to-accent-purple/70 text-white"
               onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />

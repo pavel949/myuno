@@ -109,7 +109,7 @@ export default function CourseDetail() {
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <Star className="h-4 w-4 fill-warning text-warning" />
               <span>{course.rating ?? 0}</span>
               <span>({course.review_count ?? 0} {language === "ru" ? "отзывов" : "reviews"})</span>
             </div>

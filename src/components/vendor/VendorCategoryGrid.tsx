@@ -39,21 +39,21 @@ interface CategoryItem {
 
 // All available verticals - must match onboarding options
 const allCategories: CategoryItem[] = [
-  { id: '1', slug: 'beauty', icon: Sparkles, title: 'Beauty & Spa', titleRu: 'Красота и спа', color: 'text-pink-500', path: '/vendor/beauty' },
-  { id: '2', slug: 'fitness', icon: Dumbbell, title: 'Fitness', titleRu: 'Фитнес', color: 'text-orange-500', path: '/vendor/fitness' },
-  { id: '3', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-amber-500', path: '/vendor/restaurants' },
-  { id: '4', slug: 'tours', icon: Calendar, title: 'Tours', titleRu: 'Туры', color: 'text-blue-500', path: '/vendor/tours' },
-  { id: '5', slug: 'yachts', icon: Ship, title: 'Yachts', titleRu: 'Яхты', color: 'text-cyan-500', path: '/vendor/yachts' },
-  { id: '6', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-indigo-500', path: '/vendor/transport' },
-  { id: '7', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-green-500', path: '/vendor/clinics' },
-  { id: '8', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-purple-500', path: '/vendor/education' },
-  { id: '9', slug: 'properties', icon: Home, title: 'Properties', titleRu: 'Недвижимость', color: 'text-emerald-500', path: '/vendor/properties' },
-  { id: '10', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-teal-500', path: '/vendor/cleaning' },
-  { id: '11', slug: 'childcare', icon: Baby, title: 'Childcare', titleRu: 'Няни', color: 'text-rose-500', path: '/vendor/babysitters' },
-  { id: '12', slug: 'flowers', icon: Flower2, title: 'Flowers', titleRu: 'Цветы', color: 'text-fuchsia-500', path: '/vendor/flowers' },
-  { id: '13', slug: 'events', icon: Calendar, title: 'Events', titleRu: 'Мероприятия', color: 'text-violet-500', path: '/vendor/events' },
-  { id: '14', slug: 'legal', icon: Scale, title: 'Legal', titleRu: 'Юридические', color: 'text-slate-500', path: '/vendor/legal' },
-  { id: '15', slug: 'pets', icon: PawPrint, title: 'Pets', titleRu: 'Питомцы', color: 'text-yellow-600', path: '/vendor/pets' },
+  { id: '1', slug: 'beauty', icon: Sparkles, title: 'Beauty & Spa', titleRu: 'Красота и спа', color: 'text-destructive', path: '/vendor/beauty' },
+  { id: '2', slug: 'fitness', icon: Dumbbell, title: 'Fitness', titleRu: 'Фитнес', color: 'text-accent-amber', path: '/vendor/fitness' },
+  { id: '3', slug: 'restaurants', icon: Utensils, title: 'Restaurants', titleRu: 'Рестораны', color: 'text-warning', path: '/vendor/restaurants' },
+  { id: '4', slug: 'tours', icon: Calendar, title: 'Tours', titleRu: 'Туры', color: 'text-info', path: '/vendor/tours' },
+  { id: '5', slug: 'yachts', icon: Ship, title: 'Yachts', titleRu: 'Яхты', color: 'text-accent-cyan', path: '/vendor/yachts' },
+  { id: '6', slug: 'transport', icon: Car, title: 'Transport', titleRu: 'Транспорт', color: 'text-accent-purple', path: '/vendor/transport' },
+  { id: '7', slug: 'health', icon: Stethoscope, title: 'Health', titleRu: 'Здоровье', color: 'text-success', path: '/vendor/clinics' },
+  { id: '8', slug: 'education', icon: GraduationCap, title: 'Education', titleRu: 'Образование', color: 'text-accent-purple', path: '/vendor/education' },
+  { id: '9', slug: 'properties', icon: Home, title: 'Properties', titleRu: 'Недвижимость', color: 'text-success', path: '/vendor/properties' },
+  { id: '10', slug: 'cleaning', icon: Brush, title: 'Cleaning', titleRu: 'Клининг', color: 'text-accent-teal', path: '/vendor/cleaning' },
+  { id: '11', slug: 'childcare', icon: Baby, title: 'Childcare', titleRu: 'Няни', color: 'text-destructive', path: '/vendor/babysitters' },
+  { id: '12', slug: 'flowers', icon: Flower2, title: 'Flowers', titleRu: 'Цветы', color: 'text-accent-purple', path: '/vendor/flowers' },
+  { id: '13', slug: 'events', icon: Calendar, title: 'Events', titleRu: 'Мероприятия', color: 'text-accent-purple', path: '/vendor/events' },
+  { id: '14', slug: 'legal', icon: Scale, title: 'Legal', titleRu: 'Юридические', color: 'text-muted-foreground', path: '/vendor/legal' },
+  { id: '15', slug: 'pets', icon: PawPrint, title: 'Pets', titleRu: 'Питомцы', color: 'text-warning', path: '/vendor/pets' },
 ];
 
 interface VendorCategoryGridProps {

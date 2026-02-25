@@ -264,9 +264,9 @@ const ProductDetailPage = () => {
           {/* Rating */}
           {product.rating && (
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
-                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+              <div className="flex items-center gap-1 bg-warning/10 px-2 py-1 rounded-full">
+                <Star className="w-4 h-4 fill-warning text-warning" />
+                <span className="text-sm font-semibold text-warning">
                   {product.rating}
                 </span>
               </div>

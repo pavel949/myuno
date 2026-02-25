@@ -284,9 +284,9 @@ export default function SOS() {
 
         {/* Offline indicator */}
         {isOffline && (
-          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
-            <WifiOff className="w-5 h-5 text-amber-500" />
-            <span className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+          <div className="mb-4 p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-2">
+            <WifiOff className="w-5 h-5 text-warning" />
+            <span className="text-sm text-warning font-medium">
               {language === 'ru' ? 'Вы офлайн — данные из кеша' : 'You are offline — using cached data'}
             </span>
           </div>

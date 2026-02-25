@@ -124,12 +124,12 @@ const EventDetail = () => {
 
         {/* Badges overlay */}
         <div className="absolute bottom-4 left-4 flex gap-2 flex-wrap">
-          {event.is_hot && <Badge className="bg-red-500 text-white">🔥 Hot</Badge>}
+          {event.is_hot && <Badge className="bg-destructive text-destructive-foreground">🔥 Hot</Badge>}
           {event.is_recurring && <Badge variant="secondary">🔄 {language === 'ru' ? 'Еженедельно' : 'Weekly'}</Badge>}
           {event.age_policy && event.age_policy !== 'all_ages' && (
-            <Badge className="bg-orange-500 text-white">{event.age_policy}</Badge>
+            <Badge className="bg-warning text-warning-foreground">{event.age_policy}</Badge>
           )}
-          {isFree && <Badge className="bg-green-500 text-white">🆓 {language === 'ru' ? 'Бесплатно' : 'Free Entry'}</Badge>}
+          {isFree && <Badge className="bg-success text-success-foreground">🆓 {language === 'ru' ? 'Бесплатно' : 'Free Entry'}</Badge>}
         </div>
 
         {/* Image Thumbnails */}
@@ -272,13 +272,13 @@ const EventDetail = () => {
         {event.includes.length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               {language === 'ru' ? 'Включено' : 'Included'}
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {event.includes.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-3 h-3 text-green-500 shrink-0" />
+                  <CheckCircle className="w-3 h-3 text-success shrink-0" />
                   <span>{language === 'ru' ? item.ru : item.en}</span>
                 </div>
               ))}

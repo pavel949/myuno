@@ -11,14 +11,14 @@ interface QuickCategoryGridProps {
 }
 
 const QUICK_CATEGORIES = [
-  { value: 'cleaning', icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-blue-500 bg-blue-500/10' },
-  { value: 'repair', icon: Wrench, labelRu: 'Ремонт', labelEn: 'Repair', color: 'text-orange-500 bg-orange-500/10' },
-  { value: 'electricity', icon: Lightbulb, labelRu: 'Свет', labelEn: 'Electric', color: 'text-yellow-500 bg-yellow-500/10' },
-  { value: 'water', icon: Droplet, labelRu: 'Вода', labelEn: 'Water', color: 'text-cyan-500 bg-cyan-500/10' },
-  { value: 'supplies', icon: Package, labelRu: 'Расходники', labelEn: 'Supplies', color: 'text-purple-500 bg-purple-500/10' },
-  { value: 'furniture', icon: Sofa, labelRu: 'Мебель', labelEn: 'Furniture', color: 'text-amber-600 bg-amber-600/10' },
-  { value: 'appliances', icon: Plug, labelRu: 'Техника', labelEn: 'Tech', color: 'text-emerald-500 bg-emerald-500/10' },
-  { value: 'shopping', icon: ShoppingBag, labelRu: 'Закупки', labelEn: 'Shopping', color: 'text-pink-500 bg-pink-500/10' },
+  { value: 'cleaning', icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-info bg-info/10' },
+  { value: 'repair', icon: Wrench, labelRu: 'Ремонт', labelEn: 'Repair', color: 'text-accent-amber bg-accent-amber/10' },
+  { value: 'electricity', icon: Lightbulb, labelRu: 'Свет', labelEn: 'Electric', color: 'text-warning bg-warning/10' },
+  { value: 'water', icon: Droplet, labelRu: 'Вода', labelEn: 'Water', color: 'text-accent-cyan bg-accent-cyan/10' },
+  { value: 'supplies', icon: Package, labelRu: 'Расходники', labelEn: 'Supplies', color: 'text-accent-purple bg-accent-purple/10' },
+  { value: 'furniture', icon: Sofa, labelRu: 'Мебель', labelEn: 'Furniture', color: 'text-warning bg-warning/10' },
+  { value: 'appliances', icon: Plug, labelRu: 'Техника', labelEn: 'Tech', color: 'text-success bg-success/10' },
+  { value: 'shopping', icon: ShoppingBag, labelRu: 'Закупки', labelEn: 'Shopping', color: 'text-destructive bg-destructive/10' },
   { value: 'other', icon: FileText, labelRu: 'Прочее', labelEn: 'Other', color: 'text-muted-foreground bg-muted' },
 ];
 

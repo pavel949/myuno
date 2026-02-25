@@ -322,9 +322,9 @@ export default function DisputeResolutionPage() {
         </Card>
 
         {/* Important Notes */}
-        <Card className="mb-8 border-amber-500/30 bg-amber-500/5">
+        <Card className="mb-8 border-warning/30 bg-warning/5">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <CardTitle className="text-base flex items-center gap-2 text-warning">
               <AlertTriangle className="h-4 w-4" />
               {isRu ? 'Важные ограничения' : 'Important Limitations'}
             </CardTitle>
@@ -347,7 +347,7 @@ export default function DisputeResolutionPage() {
                     'False accusations result in account blocking',
                   ]
               ).map((item, idx) => (
-                <li key={idx} className="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                <li key={idx} className="text-sm text-warning flex items-start gap-2">
                   <span>⚠️</span>
                   {item}
                 </li>
