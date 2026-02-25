@@ -164,7 +164,7 @@ const VendorAnalytics = () => {
                 <div className="flex items-baseline justify-between">
                   <span className="text-xl font-bold">{stat.value}</span>
                   {stat.trend !== undefined && (
-                    <span className={`text-xs flex items-center ${stat.trend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span className={`text-xs flex items-center ${stat.trend >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {stat.trend >= 0 ? (
                         <ArrowUpRight className="h-3 w-3" />
                       ) : (

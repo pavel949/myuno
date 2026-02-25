@@ -95,6 +95,15 @@ export default {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(0 0% 100%)",
         },
+        "accent-purple": {
+          DEFAULT: "hsl(var(--accent-purple))",
+        },
+        "accent-cyan": {
+          DEFAULT: "hsl(var(--accent-cyan))",
+        },
+        "accent-amber": {
+          DEFAULT: "hsl(var(--accent-amber))",
+        },
         "icon-dark": {
           DEFAULT: "hsl(var(--icon-dark))",
         },

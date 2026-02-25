@@ -349,9 +349,9 @@ export default function AdminUnoTeam() {
                         >
                           {VERTICAL_LABELS[perm.vertical]?.[isRu ? 'ru' : 'en'] || perm.vertical}
                           <div className="flex gap-0.5 ml-1">
-                            {perm.can_create && <Plus className="h-3 w-3 text-green-600" />}
-                            {perm.can_edit && <Pencil className="h-3 w-3 text-blue-600" />}
-                            {perm.can_delete && <Trash2 className="h-3 w-3 text-red-600" />}
+                            {perm.can_create && <Plus className="h-3 w-3 text-success" />}
+                            {perm.can_edit && <Pencil className="h-3 w-3 text-info" />}
+                            {perm.can_delete && <Trash2 className="h-3 w-3 text-destructive" />}
                           </div>
                         </Badge>
                       ))
@@ -398,19 +398,19 @@ function PermissionMatrix({
               <TableHead className="font-semibold">{isRu ? 'Вертикаль' : 'Vertical'}</TableHead>
               <TableHead className="text-center w-20">
                 <div className="flex flex-col items-center gap-1">
-                  <Plus className="h-4 w-4 text-green-600" />
+                  <Plus className="h-4 w-4 text-success" />
                   <span className="text-xs">{isRu ? 'Создание' : 'Create'}</span>
                 </div>
               </TableHead>
               <TableHead className="text-center w-20">
                 <div className="flex flex-col items-center gap-1">
-                  <Pencil className="h-4 w-4 text-blue-600" />
+                  <Pencil className="h-4 w-4 text-info" />
                   <span className="text-xs">{isRu ? 'Редактир.' : 'Edit'}</span>
                 </div>
               </TableHead>
               <TableHead className="text-center w-20">
                 <div className="flex flex-col items-center gap-1">
-                  <Trash2 className="h-4 w-4 text-red-600" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                   <span className="text-xs">{isRu ? 'Удаление' : 'Delete'}</span>
                 </div>
               </TableHead>

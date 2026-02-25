@@ -25,18 +25,18 @@ const wizardSteps = [
 ];
 
 const taskTypes = [
-  { icon: Users, labelRu: 'Check-in', labelEn: 'Check-in', color: 'text-green-500' },
-  { icon: Users, labelRu: 'Check-out', labelEn: 'Check-out', color: 'text-red-500' },
-  { icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-blue-500' },
-  { icon: Wrench, labelRu: 'Ремонт', labelEn: 'Maintenance', color: 'text-orange-500' },
-  { icon: ClipboardList, labelRu: 'Инспекция', labelEn: 'Inspection', color: 'text-purple-500' },
-  { icon: Zap, labelRu: 'Счётчики', labelEn: 'Meters', color: 'text-yellow-500' },
+  { icon: Users, labelRu: 'Check-in', labelEn: 'Check-in', color: 'text-success' },
+  { icon: Users, labelRu: 'Check-out', labelEn: 'Check-out', color: 'text-destructive' },
+  { icon: Brush, labelRu: 'Уборка', labelEn: 'Cleaning', color: 'text-info' },
+  { icon: Wrench, labelRu: 'Ремонт', labelEn: 'Maintenance', color: 'text-accent-amber' },
+  { icon: ClipboardList, labelRu: 'Инспекция', labelEn: 'Inspection', color: 'text-accent-purple' },
+  { icon: Zap, labelRu: 'Счётчики', labelEn: 'Meters', color: 'text-warning' },
 ];
 
 const taskStatuses = [
   { icon: Clock, labelRu: 'Ожидает', labelEn: 'Pending', color: 'bg-muted' },
-  { icon: Play, labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-blue-500/20' },
-  { icon: CheckCircle2, labelRu: 'Выполнено', labelEn: 'Completed', color: 'bg-green-500/20' },
+  { icon: Play, labelRu: 'В работе', labelEn: 'In Progress', color: 'bg-info/20' },
+  { icon: CheckCircle2, labelRu: 'Выполнено', labelEn: 'Completed', color: 'bg-success/20' },
 ];
 
 const expenseCategories = [
@@ -227,9 +227,9 @@ export function GuidePropertyCare() {
         </h2>
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <Card className="bg-green-500/10 border-green-500/20">
+          <Card className="bg-success/10 border-success/20">
             <CardContent className="p-4">
-              <CircleDollarSign className="w-8 h-8 text-green-500 mb-3" />
+              <CircleDollarSign className="w-8 h-8 text-success mb-3" />
               <h4 className="font-semibold text-foreground mb-2">
                 {isRu ? 'Доходы' : 'Income'}
               </h4>
@@ -241,9 +241,9 @@ export function GuidePropertyCare() {
             </CardContent>
           </Card>
 
-          <Card className="bg-red-500/10 border-red-500/20">
+          <Card className="bg-destructive/10 border-destructive/20">
             <CardContent className="p-4">
-              <CircleDollarSign className="w-8 h-8 text-red-500 mb-3" />
+              <CircleDollarSign className="w-8 h-8 text-destructive mb-3" />
               <h4 className="font-semibold text-foreground mb-2">
                 {isRu ? 'Расходы (22+ категорий)' : 'Expenses (22+ categories)'}
               </h4>

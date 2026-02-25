@@ -319,7 +319,7 @@ const VendorActivities = () => {
                               {isRussian ? activity.title_ru : activity.title_en}
                             </h3>
                             {activity.is_certified && (
-                              <Shield className="h-4 w-4 text-green-500" />
+                              <Shield className="h-4 w-4 text-success" />
                             )}
                             <ApprovalStatusBadge 
                               status={(activity as any).approval_status} 
@@ -342,7 +342,7 @@ const VendorActivities = () => {
                             </span>
                             {activity.rating && (
                               <span className="flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                                <Star className="h-3 w-3 fill-warning text-warning" />
                                 {activity.rating.toFixed(1)}
                               </span>
                             )}
@@ -370,7 +370,7 @@ const VendorActivities = () => {
                               {isRussian ? 'Редактировать' : 'Edit'}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-red-500"
+                              className="text-destructive"
                               onClick={() => setDeleteConfirmId(activity.id)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />

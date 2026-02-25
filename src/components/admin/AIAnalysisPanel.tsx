@@ -38,19 +38,19 @@ export function AIAnalysisPanel({
   const getSeverityIcon = (severity: QualityIssue['severity']) => {
     switch (severity) {
       case 'critical':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-destructive" />;
       case 'warning':
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+        return <AlertTriangle className="w-4 h-4 text-warning" />;
       case 'info':
-        return <Info className="w-4 h-4 text-blue-500" />;
+        return <Info className="w-4 h-4 text-info" />;
     }
   };
 
   const getImpactBadge = (impact: QualityRecommendation['impact']) => {
     const colors = {
-      high: 'bg-red-500/10 text-red-600 border-red-500/30',
-      medium: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
-      low: 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+      high: 'bg-destructive/10 text-destructive border-destructive/30',
+      medium: 'bg-warning/10 text-warning border-warning/30',
+      low: 'bg-info/10 text-info border-info/30',
     };
     return (
       <Badge variant="outline" className={cn('text-xs', colors[impact])}>
@@ -62,19 +62,19 @@ export function AIAnalysisPanel({
   const getVerdictBadge = () => {
     const configs = {
       approve: { 
-        color: 'bg-green-500/10 text-green-600 border-green-500/30', 
+        color: 'bg-success/10 text-success border-success/30', 
         label: isRu ? 'Одобрить' : 'Approve' 
       },
       review: { 
-        color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30', 
+        color: 'bg-warning/10 text-warning border-warning/30', 
         label: isRu ? 'Проверить' : 'Review' 
       },
       suspicious: { 
-        color: 'bg-orange-500/10 text-orange-600 border-orange-500/30', 
+        color: 'bg-accent-amber/10 text-accent-amber border-accent-amber/30', 
         label: isRu ? 'Подозрительно' : 'Suspicious' 
       },
       reject_recommend: { 
-        color: 'bg-red-500/10 text-red-600 border-red-500/30', 
+        color: 'bg-destructive/10 text-destructive border-destructive/30', 
         label: isRu ? 'Отклонить' : 'Reject' 
       },
     };
@@ -132,7 +132,7 @@ export function AIAnalysisPanel({
                   key={key} 
                   className={cn(
                     'flex items-center gap-1 text-xs p-1.5 rounded',
-                    value ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'
+                    value ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
                   )}
                 >
                   {value ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}

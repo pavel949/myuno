@@ -36,13 +36,13 @@ function formatCurrency(amount: number, currency = 'THB'): string {
 function getStatusBadge(status: string) {
   switch (status) {
     case 'pending':
-      return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">Ожидает</Badge>;
+      return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Ожидает</Badge>;
     case 'processing':
-      return <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">В обработке</Badge>;
+      return <Badge variant="outline" className="bg-info/10 text-info border-info/30">В обработке</Badge>;
     case 'completed':
-      return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">Выплачено</Badge>;
+      return <Badge variant="outline" className="bg-success/10 text-success border-success/30">Выплачено</Badge>;
     case 'failed':
-      return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Ошибка</Badge>;
+      return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">Ошибка</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -126,8 +126,8 @@ export function PayoutManager() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-500" />
+              <div className="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center">
+                <Users className="w-6 h-6 text-info" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Провайдеров</p>
@@ -221,7 +221,7 @@ export function PayoutManager() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-600">
+                        <p className="text-lg font-bold text-success">
                           {formatCurrency(provider.pendingPayout)}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -245,7 +245,7 @@ export function PayoutManager() {
             <CardContent>
               {pendingPayouts.length === 0 ? (
                 <div className="text-center py-10">
-                  <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-500/50 mb-4" />
+                  <CheckCircle2 className="w-12 h-12 mx-auto text-success/50 mb-4" />
                   <p className="text-muted-foreground">Все выплаты обработаны</p>
                 </div>
               ) : (
@@ -316,8 +316,8 @@ export function PayoutManager() {
                       className="flex items-center justify-between p-4 rounded-lg border border-border"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                          <CheckCircle2 className="w-5 h-5 text-success" />
                         </div>
                         <div>
                           <p className="font-medium">{payout.provider?.name || 'Неизвестный провайдер'}</p>
@@ -330,7 +330,7 @@ export function PayoutManager() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-600">{formatCurrency(payout.amount)}</p>
+                        <p className="text-lg font-bold text-success">{formatCurrency(payout.amount)}</p>
                         {payout.payment_reference && (
                           <p className="text-xs text-muted-foreground">Ref: {payout.payment_reference}</p>
                         )}

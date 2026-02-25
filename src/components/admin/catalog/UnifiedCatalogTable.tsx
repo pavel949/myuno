@@ -35,9 +35,9 @@ import { getCatalogItemIcon, getNameInitials } from '@/lib/utils/catalogIconMapp
 import { cn } from '@/lib/utils';
 
 const typeIcons: Record<CatalogItemType, React.ReactNode> = {
-  service: <Package className="h-4 w-4 text-blue-500" />,
-  product: <ShoppingCart className="h-4 w-4 text-green-500" />,
-  property: <Home className="h-4 w-4 text-orange-500" />,
+  service: <Package className="h-4 w-4 text-info" />,
+  product: <ShoppingCart className="h-4 w-4 text-success" />,
+  property: <Home className="h-4 w-4 text-accent-amber" />,
 };
 
 const typeLabels: Record<CatalogItemType, { en: string; ru: string }> = {

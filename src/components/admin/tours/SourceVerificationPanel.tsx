@@ -75,7 +75,7 @@ export function SourceVerificationPanel({ experienceId, sourcePageUrl, bookingUr
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Media:</span>
           {mediaStatus === 'success' ? (
-            <Badge variant="outline" className="text-green-600 border-green-200">
+            <Badge variant="outline" className="text-success border-success/20">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               {mediaCount} images
             </Badge>

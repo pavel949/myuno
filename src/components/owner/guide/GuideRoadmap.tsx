@@ -91,7 +91,7 @@ function StatusBadge({ status }: { status: 'done' | 'in-progress' | 'planned' })
   
   if (status === 'done') {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs text-success bg-success/10 px-2 py-0.5 rounded-full">
         <CheckCircle2 className="w-3 h-3" />
         {isRu ? 'Готово' : 'Done'}
       </span>
@@ -99,7 +99,7 @@ function StatusBadge({ status }: { status: 'done' | 'in-progress' | 'planned' })
   }
   if (status === 'in-progress') {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs text-info bg-info/10 px-2 py-0.5 rounded-full">
         <Clock className="w-3 h-3" />
         {isRu ? 'В работе' : 'In Progress'}
       </span>
