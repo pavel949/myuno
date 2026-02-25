@@ -23,11 +23,11 @@ interface PaymentMethodSelectorProps {
 }
 
 const brandColors: Record<string, string> = {
-  visa: 'from-blue-600 to-blue-800',
-  mastercard: 'from-orange-500 to-red-600',
-  mir: 'from-green-500 to-teal-600',
-  amex: 'from-gray-600 to-gray-800',
-  default: 'from-gray-500 to-gray-700',
+  visa: 'from-info to-primary',
+  mastercard: 'from-warning to-destructive',
+  mir: 'from-success to-accent-teal',
+  amex: 'from-muted-foreground to-foreground',
+  default: 'from-muted-foreground to-secondary-foreground',
 };
 
 const brandLogos: Record<string, string> = {
@@ -154,7 +154,7 @@ export function PaymentMethodSelector({
                   {renderCardMini(method)}
                   <div className="flex items-center gap-2">
                     {method.is_default && (
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-warning text-warning" />
                     )}
                     {selectedMethodId === method.id && (
                       <Check className="w-5 h-5 text-primary" />
@@ -210,7 +210,7 @@ export function PaymentMethodSelector({
               )}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
                   <span className="text-lg">💵</span>
                 </div>
                 <div className="text-left">

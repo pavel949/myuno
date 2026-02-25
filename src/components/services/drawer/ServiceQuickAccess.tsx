@@ -54,26 +54,26 @@ export function ServiceQuickAccess({ onNavigate }: ServiceQuickAccessProps) {
   // Universal Super-App quick access links
   const links = [
     {
-      icon: <Flame className="w-5 h-5 text-orange-600" />,
-      iconBg: 'bg-orange-100 dark:bg-orange-900/30',
+      icon: <Flame className="w-5 h-5 text-warning" />,
+      iconBg: 'bg-warning/10',
       label: language === 'ru' ? 'Акции и скидки' : 'Deals & Discounts',
       path: '/discover?filter=deals',
     },
     {
-      icon: <TrendingUp className="w-5 h-5 text-emerald-600" />,
-      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      icon: <TrendingUp className="w-5 h-5 text-success" />,
+      iconBg: 'bg-success/10',
       label: language === 'ru' ? 'Популярное сегодня' : 'Popular Today',
       path: '/discover?filter=popular',
     },
     {
-      icon: <Clock className="w-5 h-5 text-blue-600" />,
-      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+      icon: <Clock className="w-5 h-5 text-info" />,
+      iconBg: 'bg-info/10',
       label: language === 'ru' ? 'История' : 'History',
       path: '/history',
     },
     {
-      icon: <Heart className="w-5 h-5 text-rose-600" />,
-      iconBg: 'bg-rose-100 dark:bg-rose-900/30',
+      icon: <Heart className="w-5 h-5 text-destructive" />,
+      iconBg: 'bg-destructive/10',
       label: language === 'ru' ? 'Избранное' : 'Favorites',
       path: '/favorites',
       badge: wishlistCount,

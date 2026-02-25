@@ -167,8 +167,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         <div className="space-y-4 mt-4">
           {/* Duplicate warning */}
           {duplicates.length > 0 && (
-            <div className="p-3 rounded-lg border border-amber-500/50 bg-amber-500/10 text-sm">
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-medium mb-1">
+            <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
+              <div className="flex items-center gap-2 text-warning font-medium mb-1">
                 <AlertCircle className="h-4 w-4" />
                 {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
               </div>
