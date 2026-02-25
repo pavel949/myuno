@@ -28,6 +28,7 @@ import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreetin
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
+import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 function SectionSkeleton() {
   return (
     <div className="space-y-3">
@@ -96,6 +97,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
             <OwnerOperationsFlat />
           </Suspense>
         </div>
+      );
+    case 'maintenance_health':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <MaintenanceHealthWidget />
+        </Suspense>
       );
     case 'crm_tasks':
       return (

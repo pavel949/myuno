@@ -25,5 +25,8 @@ export { OwnerPropertiesList } from './OwnerPropertiesList';
 export { OwnerOperationsFlat } from './OwnerOperationsFlat';
 export { OwnerDashboardMenu } from './OwnerDashboardMenu';
 
+// Maintenance
+export { MaintenanceHealthWidget } from './MaintenanceHealthWidget';
+
 // Property Wizard Steps
 export * from '../property-wizard';

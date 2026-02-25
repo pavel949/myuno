@@ -369,6 +369,7 @@ export const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'
 export const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'));
 export const OwnerPropertyImport = lazy(() => import('@/pages/owner/OwnerPropertyImport'));
 export const OwnerTransparencyDashboard = lazy(() => import('@/pages/owner/OwnerTransparencyDashboard'));
+export const MaintenancePlan = lazy(() => import('@/pages/owner/MaintenancePlan'));
 export const TeamPage = lazy(() => import('@/pages/owner/TeamPage'));
 export const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
 export const ManagementPortfolio = lazy(() => import('@/pages/owner/ManagementPortfolio'));

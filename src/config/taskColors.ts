@@ -74,6 +74,13 @@ export const TASK_TYPE_CONFIG: Record<string, TaskTypeConfig> = {
     label: 'Meter Reading', 
     labelRu: 'Счётчики' 
   },
+  preventive: {
+    icon: Wrench,
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
+    label: 'Preventive',
+    labelRu: 'Плановое',
+  },
 } as const;
 
 /**
