@@ -30,6 +30,7 @@ export type DashboardWidgetKey =
   | 'crm_tasks'
   | 'upcoming_payments'
   | 'active_deals'
+  | 'unified_inbox'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -42,6 +43,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'kpi',
       'today_briefing',
       'channel_sync',
+      'unified_inbox',
       'active_stays',
       'properties',
       'revenue_insights',
@@ -90,6 +92,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'kpi',
       'today_briefing',
       'channel_sync',
+      'unified_inbox',
       'active_stays',
       'properties',
       'revenue_insights',

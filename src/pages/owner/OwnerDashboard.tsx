@@ -11,6 +11,8 @@ import { Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
+import { SetupPromptBanner } from '@/components/owner/dashboard/SetupPromptBanner';
+import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidget';
 import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
 import { OwnerOperationsFlat } from '@/components/owner/dashboard/OwnerOperationsFlat';
@@ -25,6 +27,7 @@ import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleS
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
+import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
 function SectionSkeleton() {
   return (
     <div className="space-y-3">
@@ -60,6 +63,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={<SectionSkeleton />}>
           <ChannelSyncWidget />
+        </Suspense>
+      );
+    case 'unified_inbox':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <UnifiedInboxWidget />
         </Suspense>
       );
     case 'invites':
@@ -135,6 +144,7 @@ export default function OwnerDashboard() {
   const isRu = language === 'ru';
   const isDesktop = useIsDesktop();
   const { role, setRole, config } = useBusinessRole();
+  const { data: ownerProperties } = useOwnerProperties();
 
   // On desktop, filter out 'menu' widget since sidebar already provides navigation
   const visibleWidgets = isDesktop
@@ -186,6 +196,9 @@ export default function OwnerDashboard() {
       </motion.div>
 
       <Separator />
+
+      {/* Setup Wizard CTA for new users */}
+      <SetupPromptBanner propertyCount={ownerProperties?.length || 0} />
 
       {/* Composed Widgets — 2-column grid on desktop */}
       <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
