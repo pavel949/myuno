@@ -6,9 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CancellationPolicySelector } from '@/components/property/CancellationPolicySelector';
+import { Badge } from '@/components/ui/badge';
 import { 
   FileText, Key, Volume2, PawPrint, Baby, PartyPopper, 
-  Sparkles, Zap, Car, Droplets
+  Sparkles, Zap, Car, Droplets, Bot
 } from 'lucide-react';
 
 interface RulesSectionProps {
@@ -303,6 +304,48 @@ export function PropertyManageRulesSection({ formData, updateFormData }: RulesSe
             />
           </div>
         </CardContent>
+      </Card>
+
+      {/* AI Auto-Reply */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              {isRu ? 'AI Авто-ответы' : 'AI Auto-Reply'}
+              <Badge variant="secondary" className="text-[10px]">AI</Badge>
+            </CardTitle>
+            <Switch
+              checked={formData.ai_autoreply_enabled || false}
+              onCheckedChange={(checked) => updateFormData({ ai_autoreply_enabled: checked })}
+            />
+          </div>
+          <CardDescription>
+            {isRu
+              ? 'AI автоматически отвечает на сообщения гостей, используя данные вашего объекта'
+              : 'AI automatically replies to guest messages using your property data'}
+          </CardDescription>
+        </CardHeader>
+        {formData.ai_autoreply_enabled && (
+          <CardContent>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Дополнительные инструкции для AI' : 'Custom AI instructions'}</Label>
+              <Textarea
+                value={formData.ai_autoreply_instructions || ''}
+                onChange={(e) => updateFormData({ ai_autoreply_instructions: e.target.value })}
+                placeholder={isRu 
+                  ? 'Например: Всегда предлагай трансфер из аэропорта. Упоминай скидку при бронировании от 7 ночей.'
+                  : 'E.g.: Always offer airport transfer. Mention discount for 7+ night bookings.'}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                {isRu
+                  ? 'AI будет отвечать от имени менеджера, используя описание, правила и гайдбук объекта'
+                  : 'AI will reply as manager using your property description, rules, and guidebook'}
+              </p>
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

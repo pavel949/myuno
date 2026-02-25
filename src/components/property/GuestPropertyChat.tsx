@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, MessageCircle, LogIn, Check, CheckCheck, AlertTriangle } from 'lucide-react';
+import { Send, Loader2, MessageCircle, LogIn, Check, CheckCheck, AlertTriangle, Bot } from 'lucide-react';
 import { format, Locale } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -259,8 +259,11 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, locale, isRu }) => {
+  const isAiGenerated = (message.attachments as Record<string, unknown> | null)?.ai_generated === true;
+
   const getSenderLabel = () => {
     if (isOwn) return isRu ? 'Вы' : 'You';
+    if (isAiGenerated) return isRu ? '🤖 AI Ассистент' : '🤖 AI Assistant';
     switch (message.sender_type) {
       case 'owner': return isRu ? 'Хозяин' : 'Host';
       case 'manager': return isRu ? 'Менеджер' : 'Manager';

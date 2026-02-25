@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Json } from '@/integrations/supabase/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface GuestChatMessage {
   id: string;
@@ -37,6 +38,7 @@ export interface GuestChatConversation {
 export function useGuestPropertyChat(options: { propertyId?: string; bookingId?: string }) {
   const { propertyId, bookingId } = options;
   const { user } = useAuth();
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
 
   const queryKey = ['guest-property-chat', propertyId, bookingId, user?.id];
@@ -92,12 +94,41 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
         .single();
 
       if (error) throw error;
+
+      // Trigger AI auto-reply asynchronously (fire-and-forget)
+      if (propertyId) {
+        triggerAutoReply(propertyId, bookingId, params.message, params.senderName);
+      }
+
       return data as GuestChatMessage;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
     },
   });
+
+  // AI auto-reply trigger (non-blocking)
+  const triggerAutoReply = useCallback(
+    (propId: string, bId?: string, guestMsg?: string, gName?: string) => {
+      supabase.functions
+        .invoke('ai-guest-autoreply', {
+          body: {
+            propertyId: propId,
+            bookingId: bId || undefined,
+            guestMessage: guestMsg || '',
+            guestName: gName || undefined,
+            language: language,
+          },
+        })
+        .then(({ error }) => {
+          if (error) console.warn('[AI AutoReply] Skipped or failed:', error.message);
+        })
+        .catch((err) => {
+          console.warn('[AI AutoReply] Network error:', err);
+        });
+    },
+    [language]
+  );
 
   const markAsRead = useMutation({
     mutationFn: async (messageIds: string[]) => {
