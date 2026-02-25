@@ -91,6 +91,30 @@ export function useMaintenanceSchedules(propertyId?: string) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const updateSchedule = useMutation({
+    mutationFn: async (updates: {
+      id: string;
+      frequency?: string;
+      next_due_date?: string;
+      estimated_cost?: number;
+      currency?: string;
+      priority?: string;
+      notes?: string | null;
+    }) => {
+      const { id, ...fields } = updates;
+      const { error } = await supabase
+        .from('property_maintenance_schedules' as any)
+        .update(fields as any)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
+      toast.success('Schedule updated');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const deleteSchedule = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -106,5 +130,5 @@ export function useMaintenanceSchedules(propertyId?: string) {
     onError: (e: any) => toast.error(e.message),
   });
 
-  return { ...query, addSchedule, markCompleted, deleteSchedule };
+  return { ...query, addSchedule, markCompleted, updateSchedule, deleteSchedule };
 }
