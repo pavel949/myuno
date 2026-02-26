@@ -62,8 +62,8 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
   },
   sales_agent: {
     id: 'sales_agent',
-    labelEn: 'Sales Agent',
-    labelRu: 'Агент по продажам',
+    labelEn: 'Sales Management',
+    labelRu: 'Управление продажами',
     icon: '💼',
     widgets: [
       'your_day',
