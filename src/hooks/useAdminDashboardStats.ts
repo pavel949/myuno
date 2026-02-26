@@ -70,7 +70,7 @@ export function useAdminDashboardStats() {
 
       // Get pending moderation counts
       const [pendingPropertiesRes, pendingYachtsRes, pendingToursRes] = await Promise.all([
-        supabase.from('owner_properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('yachts').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('experiences').select('id', countOptions).eq('experience_type', 'tour').eq('approval_status', 'pending').limit(1),
       ]);

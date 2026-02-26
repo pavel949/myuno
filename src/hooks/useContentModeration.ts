@@ -16,7 +16,7 @@ const COLUMN_MAPPINGS: Record<string, { imageColumn: string; titleColumn: string
   properties: { imageColumn: 'cover_image', titleColumn: 'title_en' },
   events: { imageColumn: 'cover_image', titleColumn: 'title_en' },
   water_activities: { imageColumn: 'cover_image', titleColumn: 'title_en' },
-  owner_properties: { imageColumn: 'cover_image', titleColumn: 'title' },
+  owner_properties: { imageColumn: 'cover_image', titleColumn: 'title_en' },
   vendor_locations: { imageColumn: 'cover_image', titleColumn: 'name' },
   // Default for others: cover_image and name_en
 };
@@ -87,23 +87,24 @@ export function useContentModeration() {
 
     try {
       for (const table of tablesToFetch) {
-        // Special handling for owner_properties - different structure
+        // Special handling for owner_properties - queries unified 'properties' table
         if (table === 'owner_properties') {
           const { data, error } = await supabase
-            .from('owner_properties')
+            .from('properties')
             .select(`
               id,
-              title,
+              title_en,
               owner_id,
               created_at,
               cover_image,
               approval_status
             `)
             .eq('approval_status', statusFilter)
+            .not('owner_id', 'is', null)
             .order('created_at', { ascending: false });
 
           if (error) {
-            console.error(`Error fetching owner_properties:`, error);
+            console.error(`Error fetching owner properties:`, error);
             continue;
           }
 
@@ -111,10 +112,10 @@ export function useContentModeration() {
             const mapped = data.map((item: any) => ({
               id: item.id,
               content_type: 'owner_properties' as ContentType,
-              title: item.title || 'Untitled',
+              title: item.title_en || 'Untitled',
               provider_name: 'Owner',
               provider_id: item.owner_id,
-              owner_user_id: item.owner_id, // For owner_properties, owner_id IS the user_id
+              owner_user_id: item.owner_id,
               created_at: item.created_at,
               cover_image: item.cover_image,
               approval_status: item.approval_status as ApprovalStatus,
@@ -340,7 +341,8 @@ export function useContentModeration() {
   ) => {
     try {
       // Build update payload based on table structure
-      // owner_properties uses approved_by/approved_at, others use reviewed_by/reviewed_at
+      // owner_properties maps to 'properties' table with approved_by/approved_at
+      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
       const updatePayload = contentType === 'owner_properties' 
         ? {
             approval_status: 'approved',
@@ -355,7 +357,7 @@ export function useContentModeration() {
           };
 
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const { error } = await (supabase.from(contentType) as any)
+      const { error } = await (supabase.from(actualTable) as any)
         .update(updatePayload)
         .eq('id', contentId);
 
@@ -407,7 +409,7 @@ export function useContentModeration() {
       const isInfoRequest = rejectionReason.startsWith('[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]:');
       
       // Build update payload based on table structure
-      // owner_properties uses approved_by/approved_at, others use reviewed_by/reviewed_at
+      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
       const updatePayload = contentType === 'owner_properties'
         ? {
             approval_status: 'rejected',
@@ -423,7 +425,7 @@ export function useContentModeration() {
           };
 
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const { error } = await (supabase.from(contentType) as any)
+      const { error } = await (supabase.from(actualTable) as any)
         .update(updatePayload)
         .eq('id', contentId);
 
@@ -475,7 +477,8 @@ export function useContentModeration() {
   ): Promise<Record<string, any> | null> => {
     try {
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const query = (supabase.from(contentType) as any).select('*');
+      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
+      const query = (supabase.from(actualTable) as any).select('*');
       
       // Only add provider join for non-owner_properties tables
       if (contentType !== 'owner_properties') {

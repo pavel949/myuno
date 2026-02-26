@@ -81,12 +81,12 @@ export function usePropertyOwnershipInvites() {
       // Transfer ownership if this is an ownership_transfer invite
       if (invite.invite_type === 'ownership_transfer') {
         const { error: transferError } = await supabase
-          .from('owner_properties')
+          .from('properties')
           .update({
             owner_id: user.id,
             created_on_behalf: false,
             ownership_transferred_at: new Date().toISOString(),
-          })
+          } as any)
           .eq('id', invite.property_id);
 
         if (transferError) throw transferError;
@@ -218,12 +218,12 @@ export function useTransferOwnership() {
 
       // Update property to mark as pending transfer
       const { error: propertyError } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .update({
           actual_owner_email: input.newOwnerEmail,
           actual_owner_name: input.newOwnerName,
           created_on_behalf: true,
-        })
+        } as any)
         .eq('id', input.propertyId);
 
       if (propertyError) throw propertyError;

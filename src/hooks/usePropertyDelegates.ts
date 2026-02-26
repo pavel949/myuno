@@ -318,7 +318,7 @@ export function usePropertyUserRole(propertyId?: string) {
 
       // First check if owner
       const { data: property } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('owner_id')
         .eq('id', propertyId)
         .single();

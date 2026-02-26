@@ -101,7 +101,7 @@ export function useAssignPropertyToComplex() {
   return useMutation({
     mutationFn: async ({ propertyId, complexId }: { propertyId: string; complexId: string | null }) => {
       const { error } = await db
-        .from('owner_properties')
+        .from('properties')
         .update({ complex_id: complexId })
         .eq('id', propertyId);
       if (error) throw error;

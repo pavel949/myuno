@@ -161,7 +161,7 @@ export function useICalExportUrl(propertyId?: string) {
       if (!propertyId) return null;
 
       const { data, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('ical_token, ical_token_expires_at')
         .eq('id', propertyId)
         .single();

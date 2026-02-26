@@ -13026,6 +13026,7 @@ export type Database = {
           amenities: string[] | null
           approval_status: string | null
           area_sqm: number | null
+          auto_report_enabled: boolean | null
           available_from: string | null
           balance_due_days: number | null
           bathrooms: number | null
@@ -13036,6 +13037,7 @@ export type Database = {
           building_year: number | null
           cancellation_policy: string | null
           chanote_number: string | null
+          chat_delegated_to_platform: boolean | null
           check_in_instructions: string | null
           check_in_instructions_ru: string | null
           check_in_time: string | null
@@ -13083,6 +13085,8 @@ export type Database = {
           ical_export_enabled: boolean | null
           ical_last_sync: string | null
           ical_token: string | null
+          ical_token_expires_at: string | null
+          ical_token_refreshed_at: string | null
           id: string
           images: string[] | null
           included_services: Json | null
@@ -13161,6 +13165,8 @@ export type Database = {
           rejection_reason: string | null
           renovation_costs: number | null
           rental_platform: string | null
+          report_frequency: string | null
+          report_recipients: string[] | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -13209,6 +13215,7 @@ export type Database = {
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
+          auto_report_enabled?: boolean | null
           available_from?: string | null
           balance_due_days?: number | null
           bathrooms?: number | null
@@ -13219,6 +13226,7 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          chat_delegated_to_platform?: boolean | null
           check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
@@ -13266,6 +13274,8 @@ export type Database = {
           ical_export_enabled?: boolean | null
           ical_last_sync?: string | null
           ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -13344,6 +13354,8 @@ export type Database = {
           rejection_reason?: string | null
           renovation_costs?: number | null
           rental_platform?: string | null
+          report_frequency?: string | null
+          report_recipients?: string[] | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -13392,6 +13404,7 @@ export type Database = {
           amenities?: string[] | null
           approval_status?: string | null
           area_sqm?: number | null
+          auto_report_enabled?: boolean | null
           available_from?: string | null
           balance_due_days?: number | null
           bathrooms?: number | null
@@ -13402,6 +13415,7 @@ export type Database = {
           building_year?: number | null
           cancellation_policy?: string | null
           chanote_number?: string | null
+          chat_delegated_to_platform?: boolean | null
           check_in_instructions?: string | null
           check_in_instructions_ru?: string | null
           check_in_time?: string | null
@@ -13449,6 +13463,8 @@ export type Database = {
           ical_export_enabled?: boolean | null
           ical_last_sync?: string | null
           ical_token?: string | null
+          ical_token_expires_at?: string | null
+          ical_token_refreshed_at?: string | null
           id?: string
           images?: string[] | null
           included_services?: Json | null
@@ -13527,6 +13543,8 @@ export type Database = {
           rejection_reason?: string | null
           renovation_costs?: number | null
           rental_platform?: string | null
+          report_frequency?: string | null
+          report_recipients?: string[] | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null

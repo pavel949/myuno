@@ -60,8 +60,8 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
     try {
       // Get owner_id from the property
       const { data: property } = await supabase
-        .from('owner_properties')
-        .select('owner_id, title')
+        .from('properties')
+        .select('owner_id, title_en')
         .eq('id', propertyId)
         .single();
 
@@ -70,8 +70,8 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
           user_id: property.owner_id,
           title: language === 'ru' ? 'Новая онлайн-регистрация' : 'New Guest Check-in',
           body: language === 'ru'
-            ? `Гость ${checkInRecord.full_name || 'Unknown'} отправил данные для регистрации в "${property.title}"`
-            : `Guest ${checkInRecord.full_name || 'Unknown'} submitted check-in for "${property.title}"`,
+            ? `Гость ${checkInRecord.full_name || 'Unknown'} отправил данные для регистрации в "${property.title_en}"`
+            : `Guest ${checkInRecord.full_name || 'Unknown'} submitted check-in for "${property.title_en}"`,
           type: 'booking',
           data: {
             check_in_id: checkInRecord.id,

@@ -294,7 +294,7 @@ export function useApplySyncedData() {
 
       // Update the property
       const { error: updateError } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .update(updates)
         .eq('id', propertyId);
       
