@@ -1,14 +1,18 @@
 import React, { memo, forwardRef } from 'react';
-import { Shield, Users, Headphones } from 'lucide-react';
+import { Shield, Users, Headphones, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+interface TrustBannerProps {
+  showEmergency?: boolean;
+}
+
 /**
- * TrustBanner — real trust signals from DB
- * Provider count is live; support is always 24/7; verified badge is static.
+ * TrustBanner — real trust signals from DB + optional emergency slot
  */
-export const TrustBanner = memo(forwardRef<HTMLDivElement>(function TrustBanner(_props, ref) {
+export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(function TrustBanner({ showEmergency }, ref) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -21,7 +25,7 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement>(function TrustBanner(
         .eq('is_active', true);
       return count ?? 0;
     },
-    staleTime: 10 * 60 * 1000, // cache 10 min
+    staleTime: 10 * 60 * 1000,
   });
 
   const displayCount = providerCount
@@ -51,6 +55,25 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement>(function TrustBanner(
           </React.Fragment>
         );
       })}
+
+      {showEmergency && (
+        <>
+          <div className="w-px h-6 bg-border/60" />
+          <Link
+            to="/sos"
+            className="flex flex-col items-center gap-0.5 group transition-colors hover:text-destructive"
+          >
+            <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
+            <span className="text-xs font-semibold text-foreground group-hover:text-destructive transition-colors">
+              SOS
+            </span>
+            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+              {isRu ? 'экстренно' : 'emergency'}
+              <ChevronRight className="w-2.5 h-2.5" />
+            </span>
+          </Link>
+        </>
+      )}
     </div>
   );
 }));
