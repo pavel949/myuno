@@ -6748,6 +6748,7 @@ export type Database = {
           currency: string | null
           id: string
           is_active: boolean | null
+          management_company_id: string | null
           owner_org_id: string | null
           owner_user_id: string | null
           updated_at: string | null
@@ -6759,6 +6760,7 @@ export type Database = {
           currency?: string | null
           id?: string
           is_active?: boolean | null
+          management_company_id?: string | null
           owner_org_id?: string | null
           owner_user_id?: string | null
           updated_at?: string | null
@@ -6770,11 +6772,19 @@ export type Database = {
           currency?: string | null
           id?: string
           is_active?: boolean | null
+          management_company_id?: string | null
           owner_org_id?: string | null
           owner_user_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ledger_accounts_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ledger_accounts_owner_org_id_fkey"
             columns: ["owner_org_id"]
