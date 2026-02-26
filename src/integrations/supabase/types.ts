@@ -14941,6 +14941,7 @@ export type Database = {
           id: string
           manager_user_id: string
           notes: string | null
+          owner_notification_defaults: Json | null
           payment_currency: string
           payment_day: number | null
           property_id: string
@@ -14962,6 +14963,7 @@ export type Database = {
           id?: string
           manager_user_id: string
           notes?: string | null
+          owner_notification_defaults?: Json | null
           payment_currency?: string
           payment_day?: number | null
           property_id: string
@@ -14983,6 +14985,7 @@ export type Database = {
           id?: string
           manager_user_id?: string
           notes?: string | null
+          owner_notification_defaults?: Json | null
           payment_currency?: string
           payment_day?: number | null
           property_id?: string
