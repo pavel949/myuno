@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,18 +35,18 @@ export function ActiveStaysWidget() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties: properties, isLoading: propertiesLoading } = useMyProperties();
   const { activeBookings, isLoading: bookingsLoading } = useAllPropertyBookings();
   
   const activeStays = useMemo<ActiveStay[]>(() => {
-    if (!activeBookings || !properties) return [];
+    if (!activeBookings || !properties?.length) return [];
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     return activeBookings
       .map(booking => {
-        const property = properties.find(p => p.id === booking.property_id);
+        const property = properties.find(p => p.property_id === booking.property_id);
         const checkIn = new Date(booking.check_in);
         const checkOut = new Date(booking.check_out);
         
@@ -56,7 +56,7 @@ export function ActiveStaysWidget() {
           propertyName: property 
             ? (isRu ? property.title_ru : property.title) || property.title
             : isRu ? 'Объект' : 'Property',
-          propertyImage: property?.images?.[0],
+          propertyImage: property?.cover_image,
           guestName: booking.guest_name || (isRu ? 'Гость' : 'Guest'),
           guestPhone: booking.guest_phone,
           guestsCount: booking.guests_count,

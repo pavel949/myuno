@@ -18148,6 +18148,7 @@ export type Database = {
       }
       staff_members: {
         Row: {
+          company_id: string | null
           created_at: string
           daily_rate: number | null
           date_of_birth: string | null
@@ -18166,6 +18167,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           daily_rate?: number | null
           date_of_birth?: string | null
@@ -18184,6 +18186,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           daily_rate?: number | null
           date_of_birth?: string | null
@@ -18201,7 +18204,15 @@ export type Database = {
           role?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_profiles: {
         Row: {

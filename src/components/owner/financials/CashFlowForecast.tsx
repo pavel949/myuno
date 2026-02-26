@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +20,7 @@ import {
   parseISO, isAfter, isBefore, addDays 
 } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
-import { getAccessiblePropertyIds } from '@/hooks/usePropertyFinancials';
+import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 
 interface ForecastItem {
   date: string;
@@ -42,6 +43,8 @@ interface MonthForecast {
 
 export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -57,13 +60,14 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
       if (propertyId) {
         propIds = [propertyId];
       } else {
-        propIds = await getAccessiblePropertyIds(user.id);
+        const result = await getAccessiblePropertyIds({ userId: user.id, activeCompanyId });
+        propIds = result.allIds;
       }
       if (!propIds.length) return [];
 
       const { data, error } = await supabase
         .from('property_bookings')
-        .select('id, check_in, check_out, total_amount, currency, status, property:owner_properties(title, title_ru)')
+        .select('id, check_in, check_out, total_amount, currency, status, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
         .in('status', ['confirmed', 'active', 'pending'])
         .gte('check_in', now.toISOString().split('T')[0])
@@ -85,13 +89,14 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
       if (propertyId) {
         propIds = [propertyId];
       } else {
-        propIds = await getAccessiblePropertyIds(user.id);
+        const result = await getAccessiblePropertyIds({ userId: user.id, activeCompanyId });
+        propIds = result.allIds;
       }
       if (!propIds.length) return [];
 
       const { data, error } = await supabase
         .from('property_financials')
-        .select('*, property:owner_properties(title, title_ru)')
+        .select('*, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
         .eq('recurring', true)
         .not('recurring_interval', 'is', null);
@@ -114,13 +119,14 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
       if (propertyId) {
         propIds = [propertyId];
       } else {
-        propIds = await getAccessiblePropertyIds(user.id);
+        const result = await getAccessiblePropertyIds({ userId: user.id, activeCompanyId });
+        propIds = result.allIds;
       }
       if (!propIds.length) return [];
 
       const { data, error } = await supabase
         .from('property_financials')
-        .select('*, property:owner_properties(title, title_ru)')
+        .select('*, property:properties(title_en, title_ru)')
         .in('property_id', propIds)
         .eq('status', 'pending')
         .gte('due_date', now.toISOString().split('T')[0])

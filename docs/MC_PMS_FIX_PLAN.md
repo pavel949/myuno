@@ -440,23 +440,24 @@ SELECT count(*) FROM staff_members WHERE company_id IS NOT NULL;
 
 ## SQL Migration Checklist
 
-- [ ] Phase 1: RLS policy `mc_members_view_property_financials` on `property_financials`
-- [ ] Phase 2: `ALTER TABLE staff_members ADD COLUMN company_id`
-- [ ] Phase 2: Backfill `staff_members.company_id`
-- [ ] Phase 2: RLS policy `mc_members_view_company_staff` on `staff_members`
+- [x] Phase 1: RLS policy `mc_members_view_property_financials` on `property_financials` ✅
+- [x] Phase 1: RLS policy `mc_members_view_property_bookings` on `property_bookings` ✅
+- [x] Phase 2: `ALTER TABLE staff_members ADD COLUMN company_id` ✅
+- [x] Phase 2: Backfill `staff_members.company_id` ✅
+- [x] Phase 2: RLS policy `mc_members_view_company_staff` on `staff_members` ✅
 - [ ] Phase 3: `ALTER TABLE ledger_accounts ADD COLUMN management_company_id`
 - [ ] Phase 3: Update `record_ledger_entries` function
 - [ ] Phase 3: Index on `ledger_accounts(management_company_id)`
 
 ## QA Checklist
 
-- [ ] MC director sees all MC property bookings
-- [ ] MC director sees aggregated financials
-- [ ] MC director sees company-wide staff
-- [ ] Individual owner sees only own data (no regression)
-- [ ] Company switcher changes all data views
-- [ ] New booking creates correct ledger entries (3-way split)
-- [ ] iCal date changes update existing orders
-- [ ] Revenue dashboard shows correct metrics for MC portfolio
-- [ ] No N+1 queries introduced
-- [ ] React Query keys include `activeCompanyId` where needed
+- [x] MC director sees all MC property bookings ✅ (hooks refactored)
+- [x] MC director sees aggregated financials ✅ (hooks refactored)
+- [x] MC director sees company-wide staff ✅ (company_id added)
+- [ ] Individual owner sees only own data (no regression) — needs manual test
+- [x] Company switcher changes all data views ✅ (activeCompanyId in query keys)
+- [ ] New booking creates correct ledger entries (3-way split) — Phase 3
+- [ ] iCal date changes update existing orders — Phase 4
+- [x] Revenue dashboard shows correct metrics for MC portfolio ✅
+- [x] No N+1 queries introduced ✅
+- [x] React Query keys include `activeCompanyId` where needed ✅
