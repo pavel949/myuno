@@ -108,9 +108,9 @@ export function AIIntakeDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogOverlay className="z-[60]" />
+        <DialogOverlay className="z-[110]" />
       </DialogPortal>
-      <DialogContent hideOverlay className="max-w-2xl max-h-[90vh] overflow-y-auto z-[60]">
+      <DialogContent hideOverlay className="max-w-2xl max-h-[90vh] overflow-y-auto z-[110]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
