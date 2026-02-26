@@ -18,10 +18,14 @@ import { MarketplaceStatusCard } from '@/components/owner/property-detail/Market
 import { PropertyNotesTab } from '@/components/owner/property-detail/PropertyNotesTab';
 import { PropertyOwnerInfoTab } from '@/components/owner/property-detail/PropertyOwnerInfoTab';
 import { usePropertyNotes } from '@/hooks/usePropertyNotes';
+import { usePropertyManagementTerms } from '@/hooks/usePropertyManagementTerms';
+import { ManagementTermsForm } from '@/components/owner/management/ManagementTermsForm';
+import { TermsActivityLog } from '@/components/owner/management/TermsActivityLog';
 import {
   Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
   Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
-  StickyNote, Users, Wrench, Eye, MapPin, DollarSign, Wifi, KeyRound
+  StickyNote, Users, Wrench, Eye, MapPin, DollarSign, Wifi, KeyRound,
+  Handshake
 } from 'lucide-react';
 
 export default function OwnerPropertyDetail() {
@@ -35,6 +39,7 @@ export default function OwnerPropertyDetail() {
   const { data: inspections } = usePropertyInspections(id);
   const { documents } = usePropertyDocuments(id || '');
   const { notes } = usePropertyNotes(id);
+  const { data: termsList } = usePropertyManagementTerms(id);
 
   const serviceTypeLabels: Record<string, { en: string; ru: string }> = {
     check_in: { en: 'Check-in', ru: 'Заезд гостей' },
@@ -167,6 +172,13 @@ export default function OwnerPropertyDetail() {
             {isRu ? 'Заметки' : 'Notes'}
             {(notes?.length || 0) > 0 && (
               <Badge variant="secondary" className="ml-1 text-[10px] px-1">{notes?.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="terms" className="text-xs">
+            <Handshake className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Условия' : 'Terms'}
+            {(termsList?.length || 0) > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{termsList?.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="owners" className="text-xs">
@@ -304,6 +316,37 @@ export default function OwnerPropertyDetail() {
         {/* NOTES TAB */}
         <TabsContent value="notes" className="mt-4">
           {id && <PropertyNotesTab propertyId={id} />}
+        </TabsContent>
+
+        {/* TERMS TAB */}
+        <TabsContent value="terms" className="mt-4 space-y-6">
+          {id && (
+            <>
+              {termsList && termsList.length > 0 ? (
+                termsList.map((terms) => (
+                  <div key={terms.id} className="space-y-4">
+                    <ManagementTermsForm
+                      propertyId={id}
+                      existing={terms}
+                      compact
+                    />
+                    <TermsActivityLog termsId={terms.id} />
+                  </div>
+                ))
+              ) : (
+                <div className="space-y-4">
+                  <Card>
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                      <Handshake className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="font-medium">{isRu ? 'Условия не настроены' : 'No terms configured'}</p>
+                      <p className="text-sm mt-1">{isRu ? 'Задайте комиссии, распределение расходов и условия оплаты' : 'Set commissions, expense split and payment terms'}</p>
+                    </CardContent>
+                  </Card>
+                  <ManagementTermsForm propertyId={id} compact />
+                </div>
+              )}
+            </>
+          )}
         </TabsContent>
 
         {/* OWNER TAB */}
