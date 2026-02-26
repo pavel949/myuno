@@ -1,158 +1,139 @@
-# UNO Platform — Full Status Report
 
-## 1. DATABASE INFRASTRUCTURE
 
-### Scale
-- **337 tables** in the public schema
-- **182 tables are EMPTY** (54% — never used)
-- **155 tables have data** — the active core
+# Система прозрачности УК ↔ Собственник: Комплексное решение
 
-### Key Tables with Data
-| Table | Records | Role |
-|-------|---------|------|
-| calendar_sync_logs | 2,465 | iCal sync audit trail |
-| task_entity_map | 662 | LifeOS task links |
-| catalog_life_map | 431 | LifeOS catalog mappings |
-| lookup_values | 406 | System lookups |
-| salon_services | 261 | Beauty vertical |
-| property_analytics | 155 | Property views/stats |
-| property_projects | 152 | Developer projects |
-| providers | 140 | Vendor registry |
-| marketplace_products | 124 | Marketplace items |
-| experiences | 112 | Tours/activities |
-| yacht_pricing_rules | 111 | Yacht pricing |
-| yachts | 97 | Yacht listings |
-| property_activity_log | 99 | PMS activity |
-| vehicles | 76 | Transport listings |
-| restaurants | 67 | Restaurant listings |
-| bouquets | 66 | Flower arrangements |
-| services | 56 | Service listings |
-| properties | 41 | Core property inventory |
-| orders | 38 | All marketplace orders |
-| property_bookings | 16 | PMS bookings |
-| profiles | 7 | Registered users |
-| wallets | 7 | User wallets |
+## Проблема
 
----
+Сейчас существует базовый портал прозрачности (`/owner/transparency/:propertyId`), но он:
+- Показывает только 3 вкладки (Активность, Финансы, Бронирования) в минималистичном виде
+- Нет уведомлений собственнику о важных событиях
+- Нет механизма одобрения/согласования действий УК
+- Нет месячного отчёта / дайджеста
+- Собственник не видит текущий статус объекта "на одной странице"
 
-## 2. WHAT WAS COMPLETED (Parts 1-5)
+## Архитектурная модель
 
-### Part 1 — Data Foundation (DONE ✅)
-- Districts normalized to Title Case (21 unique values, 0 NULLs)
-- Platform fee recalculated: all orders now show exactly 10.0% fee
-- Zero-amount orders addressed
-- Provider commission rates differentiated: 8% (2 providers), 10% (109), 15% (29)
-- `normalize_district()` trigger added
-- `validate_order_fee()` trigger added
-
-### Part 2 — Booking Flow and MC Layer (DONE ✅)
-- `property_bookings` now has 16 records (15 from iCal, 1 from Agoda)
-- `order_id` column added to `property_bookings`
-- `create_property_booking_from_order()` trigger activated
-- 3 Management Companies exist, all verified
-- All 41 properties linked to MCs (0 orphaned)
-- `paid_at` column added to orders
-
-### Part 3 — Payment Pipeline (DONE ✅)
-- Stripe webhook handler: 709 lines, handles checkout.session.completed, payment_intent.payment_failed, refunds, disputes, expiry
-- `record_ledger_entries` RPC created (idempotent)
-- Wallet balances reset to 0 (all 7 wallets)
-- Confirmation emails, notifications, status history all wired
-- 84 Edge Functions deployed
-
-### Part 4 — Notifications & Guest Experience (DONE ✅)
-- Stripe webhook → in-app notification → email: fully wired
-- 9 branded email templates (welcome, booking, payment, refund, etc.)
-- Voucher auto-generation after Stripe payment
-- Guest check-in flow with owner notifications
-- Real-time guest messaging with AI auto-reply
-- Push notification subscription (needs production VAPID key)
-
-### Part 5 — Launch Readiness (DONE ✅)
-- Security scan: **PASSED** — no RLS issues found
-- Dead code cleanup: `src/data/` directory removed
-- P0.1-P0.3 dead files: confirmed deleted
-- App version bumped to 3.39.0
-- Maintenance mode: built and operational (default OFF for public access)
-- MC linkage: 41/41 properties assigned
-
----
-
-## 3. CURRENT OPERATIONAL STATE
-
-### Orders Summary
-| Status | Count | GMV (THB) |
-|--------|-------|-----------|
-| cancelled | 12 | 3,500 |
-| completed | 10 | 172,640 |
-| confirmed | 10 | 509,650 |
-| pending | 5 | 275,100 |
-| in_progress | 1 | 1,800 |
-| **Total** | **38** | **962,690** |
-
-### Payments
-- **0 real Stripe payments processed** (paid_at is NULL for all 38 orders)
-- Stripe webhook is fully coded but has never fired in production
-- `ledger_accounts`: 0 records
-- `ledger_entries`: 0 records
-
-### Users
-- **7 profiles** total (internal team only)
-
----
-
-## 4. LAUNCH CHECKLIST
-
-| Item | Status | Owner |
-|------|--------|-------|
-| Security scan (RLS) | ✅ Passed | AI |
-| Dead code cleanup | ✅ Done | AI |
-| All properties linked to MCs | ✅ 41/41 | AI |
-| Email notification pipeline | ✅ Wired | AI |
-| Voucher generation | ✅ Wired | AI |
-| Guest check-in flow | ✅ Working | AI |
-| Maintenance mode | ✅ Ready (default OFF) | AI |
-| App version 3.39.0 | ✅ Bumped | AI |
-| **E2E Stripe payment test** | ⏳ **MANUAL** | **Pavel** |
-| **Production VAPID key** | ⏳ **MANUAL** | **Pavel** |
-| **First external user test** | ⏳ **MANUAL** | **Pavel** |
-
----
-
-## 5. REMAINING MANUAL STEPS (Pavel)
-
-### Step 1: E2E Stripe Payment Test
-1. Открыть любой листинг (property/yacht/experience)
-2. Нажать "Book" / "Order"
-3. На странице оплаты использовать тестовую карту: `4242 4242 4242 4242`
-4. Проверить:
-   - Заказ получил статус `confirmed` + `paid_at` заполнен
-   - В таблице `ledger_entries` появились записи
-   - Пришло email-уведомление
-   - Сгенерирован ваучер бронирования
-
-### Step 2: Production VAPID Key (если нужны push-уведомления)
-```bash
-npx web-push generate-vapid-keys
+```text
+┌─────────────────────────────────────────────────────┐
+│                   СОБСТВЕННИК                       │
+│  ┌───────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │ Live      │  │ Месячный │  │ Push/Email       │  │
+│  │ Dashboard │  │ Дайджест │  │ Уведомления      │  │
+│  └─────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
+│        │             │                  │            │
+│  ┌─────▼─────────────▼──────────────────▼─────────┐  │
+│  │         property_activity_log (realtime)        │  │
+│  │         property_financials                     │  │
+│  │         property_bookings                       │  │
+│  │         property_management_terms               │  │
+│  └─────────────────────┬──────────────────────────┘  │
+│                        │ RLS: owner_readonly         │
+├────────────────────────┼────────────────────────────┤
+│                   УК (МЕНЕДЖЕР)                     │
+│  ┌─────────────────────▼──────────────────────────┐  │
+│  │  Полное управление: бронирования, финансы,     │  │
+│  │  задачи, обслуживание, ценообразование         │  │
+│  │  → каждое действие = запись в activity_log     │  │
+│  └────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
 ```
-Заменить placeholder в `src/hooks/usePushSubscription.ts`
 
-### Step 3: Первый внешний пользователь
-1. Открыть сайт в режиме инкогнито
-2. Зарегистрироваться как новый пользователь
-3. Пройти путь: просмотр → бронирование → оплата → check-in
+## Что будет реализовано
+
+### 1. Owner Property Status Card (Главный экран)
+
+Виджет "Статус объекта на сегодня" — одна карточка, которую собственник видит первой:
+- Текущий статус: **Занят** (гость: Ivan, до 3 марта) / **Свободен** / **На обслуживании**
+- Следующее бронирование: дата + гость
+- Доход за текущий месяц vs прошлый месяц
+- Количество открытых задач обслуживания
+- Последнее действие УК (из `property_activity_log`)
+
+### 2. Расширенный Transparency Dashboard (5 вкладок)
+
+Улучшение существующего `/owner/transparency/:propertyId`:
+
+| Вкладка | Содержимое | Уже есть? |
+|---------|-----------|-----------|
+| **Обзор** | Status Card + KPI + последние 5 действий | Частично (KPI есть) |
+| **Активность** | Полная лента с фильтрами по типу | Есть, доработать фильтры |
+| **Финансы** | Таблица + график доход/расход по месяцам + P&L | Есть базовая таблица |
+| **Бронирования** | Календарь-таймлайн + список | Есть список |
+| **Условия** | Текущий договор, комиссия, ответственность | Данные есть, UI нет |
+
+### 3. Система уведомлений собственника
+
+Новая таблица `owner_notifications` для критических событий:
+
+```sql
+CREATE TABLE owner_notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id UUID NOT NULL REFERENCES auth.users(id),
+  property_id UUID NOT NULL REFERENCES owner_properties(id),
+  type TEXT NOT NULL, -- 'booking_new', 'expense_large', 'maintenance_urgent', 'monthly_report'
+  title TEXT NOT NULL,
+  body TEXT,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+Триггер: при вставке в `property_activity_log` — автоматическое создание уведомления для собственника (если тип действия в списке критических).
+
+### 4. Согласование крупных расходов
+
+Новое поле `requires_owner_approval` в `property_management_terms`:
+- Если расход > порогового значения (например, 10,000 THB), он создаётся со статусом `pending_approval`
+- Собственник видит запрос в уведомлениях и может одобрить/отклонить
+- УК видит статус согласования
+
+### 5. Месячный дайджест (Email)
+
+Edge Function `owner-monthly-digest`:
+- Запускается по крону 1-го числа каждого месяца
+- Собирает: доход, расходы, загрузку, топ-действия
+- Отправляет email собственнику через Resend
+- Записывает в `property_activity_log` как `monthly_report_sent`
 
 ---
 
-## 6. POST-LAUNCH BACKLOG (P1-P2)
+## Техническая реализация
 
-| # | Issue | Effort | Priority |
-|---|-------|--------|----------|
-| P1.1 | Refactor `useAdminContent.ts` (498 lines) | 8pt | P1 |
-| P1.2 | Deprecate `useSupabaseQuery.ts` | 5pt | P1 |
-| P1.3 | Align restaurant query keys | 2pt | P1 |
-| P1.4 | Add ESLint react-hooks/exhaustive-deps | 2pt | P1 |
-| P1.5 | Type-safe admin mutations | 3pt | P1 |
-| P2.1 | Filter URL persistence | 5pt | P2 |
-| P2.2 | Admin→Public cache invalidation | 3pt | P2 |
-| P2.3 | Dead table cleanup (182 empty) | 3pt | P2 |
+### Новые миграции БД
+
+1. **`owner_notifications`** — таблица уведомлений с RLS (только owner видит свои)
+2. **Триггер `notify_owner_on_activity`** — автоматическая генерация уведомлений из activity_log
+3. **Поле `approval_threshold`** в `property_management_terms` — порог согласования расходов
+4. **Поле `approval_status`** в `property_financials` — статус одобрения расхода (`auto_approved`, `pending`, `approved`, `rejected`)
+
+### Новые/изменённые компоненты
+
+| Файл | Описание |
+|------|----------|
+| `src/components/owner/transparency/PropertyStatusCard.tsx` | Карточка текущего статуса объекта |
+| `src/components/owner/transparency/OwnerOverviewTab.tsx` | Вкладка "Обзор" с Status Card + KPI + лента |
+| `src/components/owner/transparency/OwnerTermsTab.tsx` | Вкладка условий управления (read-only) |
+| `src/components/owner/transparency/OwnerNotificationBell.tsx` | Колокольчик уведомлений в шапке |
+| `src/components/owner/transparency/ActivityFeed.tsx` | Добавить фильтры по типу действия |
+| `src/components/owner/transparency/OwnerFinanceTab.tsx` | Добавить мини-график + логику согласования |
+| `src/hooks/useOwnerNotifications.ts` | Хук для уведомлений с realtime-подпиской |
+| `src/pages/owner/OwnerTransparencyDashboard.tsx` | Расширить до 5 вкладок |
+| `supabase/functions/owner-monthly-digest/index.ts` | Edge Function для месячного дайджеста |
+
+### Безопасность (RLS)
+
+- `owner_notifications`: SELECT только для `auth.uid() = owner_id`
+- `property_financials.approval_status`: UPDATE только для owner (через `property_delegates` check)
+- Activity log: уже защищён — owner и delegates с `view` permission
+
+### Порядок реализации
+
+1. Миграция БД (таблица `owner_notifications`, триггер, новые поля)
+2. `PropertyStatusCard` + `OwnerOverviewTab`
+3. `useOwnerNotifications` + `OwnerNotificationBell`
+4. Расширение `OwnerTransparencyDashboard` до 5 вкладок
+5. `OwnerTermsTab` (read-only просмотр условий)
+6. Фильтры в `ActivityFeed`
+7. Логика согласования расходов
+8. Edge Function для месячного дайджеста
+
