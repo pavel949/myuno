@@ -12,9 +12,7 @@ import {
   ChevronDown,
   TrendingUp,
   Wrench,
-  ClipboardList,
   PackageOpen,
-  FileText,
   UserCog,
   Receipt,
   Settings,
@@ -114,7 +112,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
       { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
-      { title: 'Analytics', titleRu: 'Аналитика', path: '/owner/analytics', icon: ClipboardList },
+      { title: 'Analytics & Reports', titleRu: 'Аналитика и отчёты', path: '/owner/analytics', icon: BarChart3 },
     ],
   },
   {
