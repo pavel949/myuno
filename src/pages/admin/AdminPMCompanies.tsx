@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePMCompanies, PMCompany, PMCompanyInsert, PMCompanyUpdate } from '@/hooks/usePMCompanies';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +43,13 @@ import {
   Home,
   Shield,
   Clock,
+  Users,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
+import { MCMemberManager } from '@/components/admin/MCMemberManager';
 
 const SERVICE_TYPE_OPTIONS = [
   { value: 'rental_management', labelEn: 'Rental Management', labelRu: 'Управление арендой' },
@@ -57,6 +67,7 @@ const DISTRICT_OPTIONS = [
 
 export default function AdminPMCompanies() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
   const { companies, isLoading, createCompany, updateCompany, deleteCompany } = usePMCompanies();
   
@@ -65,6 +76,7 @@ export default function AdminPMCompanies() {
   const [editingCompany, setEditingCompany] = useState<PMCompany | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [detailCompany, setDetailCompany] = useState<PMCompany | null>(null);
 
   const [formData, setFormData] = useState<Partial<PMCompanyInsert> & { director_name?: string }>({
     name: '',
@@ -231,7 +243,11 @@ export default function AdminPMCompanies() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredCompanies.map((company) => (
-            <Card key={company.id} className={!company.is_active ? 'opacity-60' : ''}>
+            <Card 
+              key={company.id} 
+              className={`cursor-pointer hover:border-primary/30 transition-colors ${!company.is_active ? 'opacity-60' : ''}`}
+              onClick={() => setDetailCompany(company)}
+            >
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
@@ -253,18 +269,22 @@ export default function AdminPMCompanies() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(company)}>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(company); }}>
                         <Edit className="h-4 w-4 mr-2" />
                         {isRu ? 'Редактировать' : 'Edit'}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/admin/properties?provider=${company.id}`); }}>
+                        <Home className="h-4 w-4 mr-2" />
+                        {isRu ? 'Объекты' : 'Properties'}
+                      </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-destructive"
-                        onClick={() => setDeleteConfirmId(company.id)}
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(company.id); }}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         {isRu ? 'Удалить' : 'Delete'}
@@ -530,6 +550,92 @@ export default function AdminPMCompanies() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Company Detail Sheet with Member Management */}
+      <Sheet open={!!detailCompany} onOpenChange={(open) => !open && setDetailCompany(null)}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          {detailCompany && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  {isRu ? (detailCompany.name_ru || detailCompany.name) : detailCompany.name}
+                  {detailCompany.is_verified && <CheckCircle className="h-4 w-4 text-success" />}
+                </SheetTitle>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-6">
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => { setDetailCompany(null); openEditDialog(detailCompany); }}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    {isRu ? 'Редактировать' : 'Edit'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start"
+                    onClick={() => navigate(`/admin/properties?provider=${detailCompany.id}`)}
+                  >
+                    <Home className="h-4 w-4 mr-2" />
+                    {isRu ? 'Объекты' : 'Properties'}
+                  </Button>
+                </div>
+
+                {/* Company Info */}
+                <div className="space-y-2 text-sm">
+                  {detailCompany.director_name && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{isRu ? 'Директор' : 'Director'}</span>
+                      <span className="font-medium">{detailCompany.director_name}</span>
+                    </div>
+                  )}
+                  {detailCompany.phone && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{isRu ? 'Телефон' : 'Phone'}</span>
+                      <span>{detailCompany.phone}</span>
+                    </div>
+                  )}
+                  {detailCompany.email && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Email</span>
+                      <span>{detailCompany.email}</span>
+                    </div>
+                  )}
+                  {detailCompany.website && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{isRu ? 'Сайт' : 'Website'}</span>
+                      <a href={detailCompany.website} target="_blank" rel="noopener" className="text-primary flex items-center gap-1">
+                        {detailCompany.website.replace(/https?:\/\//, '').replace(/\/$/, '')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRu ? 'Комиссия' : 'Commission'}</span>
+                    <span>{detailCompany.default_commission_rate}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isRu ? 'Объектов' : 'Properties'}</span>
+                    <span>{detailCompany.properties_managed}</span>
+                  </div>
+                </div>
+
+                {/* Member Management */}
+                <div className="border-t pt-4">
+                  <MCMemberManager 
+                    companyId={detailCompany.id} 
+                    companyName={detailCompany.name} 
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

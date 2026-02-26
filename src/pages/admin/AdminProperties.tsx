@@ -44,7 +44,7 @@ export default function AdminProperties() {
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
-  const [filterProviderId, setFilterProviderId] = useState<string>('');
+  const [filterProviderId, setFilterProviderId] = useState<string>(searchParams.get('provider') || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   
