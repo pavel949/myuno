@@ -178,7 +178,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
                   onClick={() => { onOpenChange(false); navigate(`/owner/sales/${d.id}`); }}
                   className="block text-xs text-primary hover:underline"
                 >
-                  {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage] : d.stage})
+                  {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})
                 </button>
               ))}
             </div>
@@ -333,7 +333,12 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
 }
 
 // Helper for displaying stage labels in duplicate warning
-const DEAL_STAGE_LABELS_LOOKUP: Record<string, string> = {
-  new: 'Новый', contacted: 'Контакт', showing: 'Показ', negotiation: 'Торг',
-  contract: 'Договор', closed_won: 'Успех', closed_lost: 'Проигрыш',
+const DEAL_STAGE_LABELS_LOOKUP: Record<string, { en: string; ru: string }> = {
+  new: { en: 'New', ru: 'Новый' },
+  contacted: { en: 'Contacted', ru: 'Контакт' },
+  showing: { en: 'Showing', ru: 'Показ' },
+  negotiation: { en: 'Negotiation', ru: 'Торг' },
+  contract: { en: 'Contract', ru: 'Договор' },
+  closed_won: { en: 'Won', ru: 'Успех' },
+  closed_lost: { en: 'Lost', ru: 'Проигрыш' },
 };

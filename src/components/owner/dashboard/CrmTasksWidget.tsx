@@ -24,7 +24,19 @@ export function CrmTasksWidget() {
     .filter(t => t.due_date && (isToday(new Date(t.due_date)) || isPast(new Date(t.due_date))))
     .slice(0, 5);
 
-  if (!urgentTasks.length) return null;
+  if (!urgentTasks.length) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <ListTodo className="h-4 w-4 text-primary" />
+          <h3 className="font-semibold text-sm">
+            {isRu ? 'Задачи на сегодня' : "Today's Tasks"}
+          </h3>
+        </div>
+        <p className="text-sm text-muted-foreground">{isRu ? 'Нет срочных задач ✓' : 'No urgent tasks ✓'}</p>
+      </div>
+    );
+  }
 
   const handleComplete = (id: string) => {
     updateTask.mutate(

@@ -133,7 +133,7 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
           </div>
           {/* Deals count indicator */}
           <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-            <MessageSquare className="h-3 w-3" /> 0
+            <MessageSquare className="h-3 w-3" /> {contact.deal_count ?? 0}
           </span>
           {/* Budget */}
           <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
