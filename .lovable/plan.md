@@ -1,139 +1,91 @@
 
 
-# Система прозрачности УК ↔ Собственник: Комплексное решение
+# Подготовка личного кабинета УК Show Property Phuket
 
 ## Проблема
 
-Сейчас существует базовый портал прозрачности (`/owner/transparency/:propertyId`), но он:
-- Показывает только 3 вкладки (Активность, Финансы, Бронирования) в минималистичном виде
-- Нет уведомлений собственнику о важных событиях
-- Нет механизма одобрения/согласования действий УК
-- Нет месячного отчёта / дайджеста
-- Собственник не видит текущий статус объекта "на одной странице"
+Сейчас при входе в `/owner` директор Show Property Phuket видит **только 1 объект из 21**, потому что:
 
-## Архитектурная модель
+1. **Данные**: 20 из 21 объектов имеют `owner_id = NULL` -- они привязаны к УК через `management_company_id`, но у директора нет `property_manager_assignments`
+2. **MC `properties_count` = 0** -- хук `useOwnerAccess` считает, что у УК нет объектов, что блокирует функционал
+3. **Нет переключателя между УК** -- пользователь привязан к двум компаниям (Show Property + Ignatev Estate), но `useMyCompanyId` берёт только первую
+4. **Объекты не видны в дашборде** -- `useOwnerProperties` ищет по `owner_id`, `useAssignedProperties` ищет по `property_manager_assignments` -- ни то, ни другое не покрывает объекты УК
 
+## План реализации
+
+### 1. Исправление данных в базе
+
+- Обновить `properties_count` для Show Property Phuket на актуальное значение (21)
+- Создать `property_manager_assignments` для всех 21 объектов Show Property, привязанных к пользователю-директору с полными правами
+- Это позволит существующему хуку `useAssignedProperties` сразу подхватить все объекты
+
+### 2. Доработка хука useMyProperties -- поддержка объектов УК
+
+Сейчас `useMyProperties` объединяет owned + assigned. Нужно добавить **третий источник**: объекты, привязанные к УК пользователя через `management_company_id`. Это гарантирует, что директор видит все объекты компании, даже если они формально не назначены ему.
+
+Изменения в `src/hooks/useMyProperties.ts`:
+- Получить `companyId` из `useMyCompanyId`
+- Добавить запрос объектов по `management_company_id`
+- Объединить с owned и managed, дедуплицируя
+
+### 3. Переключатель УК в Header
+
+Создать компонент `CompanySwitcher` для пользователей, привязанных к нескольким УК:
+- Отображается в `OwnerHeader` рядом с ролевым бейджем
+- При переключении сохраняет выбранную компанию в контексте
+- Все хуки (`useMyCompanyId`, `useDashboardMetrics`, `useCrmTasks`) реагируют на выбранную УК
+
+Изменения:
+- Новый файл `src/components/owner/CompanySwitcher.tsx`
+- Новый хук `src/hooks/useActiveCompany.ts` (React Context + localStorage)
+- Обновить `useMyCompanyId` для использования выбранной компании вместо первой попавшейся
+
+### 4. Отображение названия УК в Sidebar и Header
+
+- В `OwnerSidebar`: заменить статичный "myUNO" на название активной УК + логотип
+- В `OwnerHeader`: показывать название компании в ролевом бейдже вместо generic "Owner"
+
+### 5. Обновление properties_count триггером
+
+Создать SQL-триггер, который автоматически обновляет `management_companies.properties_count` при добавлении/удалении объектов с данным `management_company_id`. Это устранит рассинхронизацию навсегда.
+
+## Технические детали
+
+### Миграция данных (SQL)
 ```text
-┌─────────────────────────────────────────────────────┐
-│                   СОБСТВЕННИК                       │
-│  ┌───────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │ Live      │  │ Месячный │  │ Push/Email       │  │
-│  │ Dashboard │  │ Дайджест │  │ Уведомления      │  │
-│  └─────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
-│        │             │                  │            │
-│  ┌─────▼─────────────▼──────────────────▼─────────┐  │
-│  │         property_activity_log (realtime)        │  │
-│  │         property_financials                     │  │
-│  │         property_bookings                       │  │
-│  │         property_management_terms               │  │
-│  └─────────────────────┬──────────────────────────┘  │
-│                        │ RLS: owner_readonly         │
-├────────────────────────┼────────────────────────────┤
-│                   УК (МЕНЕДЖЕР)                     │
-│  ┌─────────────────────▼──────────────────────────┐  │
-│  │  Полное управление: бронирования, финансы,     │  │
-│  │  задачи, обслуживание, ценообразование         │  │
-│  │  → каждое действие = запись в activity_log     │  │
-│  └────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
+-- 1. Обновить properties_count
+UPDATE management_companies SET properties_count = 21 
+WHERE id = '017c9759-af23-4233-8bba-f379c819736a';
+
+-- 2. Создать assignments для директора
+INSERT INTO property_manager_assignments (manager_user_id, property_id, is_active, permissions)
+SELECT '5cbbcd96-7a9b-4311-ae5f-80a114b27b12', id, true, 
+  '{"calendar":true,"pricing":true,"bookings":true,"guests":true}'::jsonb
+FROM properties 
+WHERE management_company_id = '017c9759-af23-4233-8bba-f379c819736a'
+ON CONFLICT DO NOTHING;
+
+-- 3. Триггер для properties_count
+CREATE FUNCTION update_mc_properties_count() ...
+CREATE TRIGGER trg_mc_properties_count ...
 ```
 
-## Что будет реализовано
+### Новые файлы
+- `src/hooks/useActiveCompany.ts` -- контекст активной УК
+- `src/components/owner/CompanySwitcher.tsx` -- UI переключателя
 
-### 1. Owner Property Status Card (Главный экран)
+### Изменяемые файлы
+- `src/hooks/useMyProperties.ts` -- добавить MC-объекты
+- `src/hooks/useAgentDeals.ts` (`useMyCompanyId`) -- использовать activeCompany
+- `src/components/owner/OwnerHeader.tsx` -- добавить CompanySwitcher + название УК
+- `src/components/owner/OwnerSidebar.tsx` -- показать лого и название УК
 
-Виджет "Статус объекта на сегодня" — одна карточка, которую собственник видит первой:
-- Текущий статус: **Занят** (гость: Ivan, до 3 марта) / **Свободен** / **На обслуживании**
-- Следующее бронирование: дата + гость
-- Доход за текущий месяц vs прошлый месяц
-- Количество открытых задач обслуживания
-- Последнее действие УК (из `property_activity_log`)
+## Результат
 
-### 2. Расширенный Transparency Dashboard (5 вкладок)
-
-Улучшение существующего `/owner/transparency/:propertyId`:
-
-| Вкладка | Содержимое | Уже есть? |
-|---------|-----------|-----------|
-| **Обзор** | Status Card + KPI + последние 5 действий | Частично (KPI есть) |
-| **Активность** | Полная лента с фильтрами по типу | Есть, доработать фильтры |
-| **Финансы** | Таблица + график доход/расход по месяцам + P&L | Есть базовая таблица |
-| **Бронирования** | Календарь-таймлайн + список | Есть список |
-| **Условия** | Текущий договор, комиссия, ответственность | Данные есть, UI нет |
-
-### 3. Система уведомлений собственника
-
-Новая таблица `owner_notifications` для критических событий:
-
-```sql
-CREATE TABLE owner_notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  owner_id UUID NOT NULL REFERENCES auth.users(id),
-  property_id UUID NOT NULL REFERENCES owner_properties(id),
-  type TEXT NOT NULL, -- 'booking_new', 'expense_large', 'maintenance_urgent', 'monthly_report'
-  title TEXT NOT NULL,
-  body TEXT,
-  is_read BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
-Триггер: при вставке в `property_activity_log` — автоматическое создание уведомления для собственника (если тип действия в списке критических).
-
-### 4. Согласование крупных расходов
-
-Новое поле `requires_owner_approval` в `property_management_terms`:
-- Если расход > порогового значения (например, 10,000 THB), он создаётся со статусом `pending_approval`
-- Собственник видит запрос в уведомлениях и может одобрить/отклонить
-- УК видит статус согласования
-
-### 5. Месячный дайджест (Email)
-
-Edge Function `owner-monthly-digest`:
-- Запускается по крону 1-го числа каждого месяца
-- Собирает: доход, расходы, загрузку, топ-действия
-- Отправляет email собственнику через Resend
-- Записывает в `property_activity_log` как `monthly_report_sent`
-
----
-
-## Техническая реализация
-
-### Новые миграции БД
-
-1. **`owner_notifications`** — таблица уведомлений с RLS (только owner видит свои)
-2. **Триггер `notify_owner_on_activity`** — автоматическая генерация уведомлений из activity_log
-3. **Поле `approval_threshold`** в `property_management_terms` — порог согласования расходов
-4. **Поле `approval_status`** в `property_financials` — статус одобрения расхода (`auto_approved`, `pending`, `approved`, `rejected`)
-
-### Новые/изменённые компоненты
-
-| Файл | Описание |
-|------|----------|
-| `src/components/owner/transparency/PropertyStatusCard.tsx` | Карточка текущего статуса объекта |
-| `src/components/owner/transparency/OwnerOverviewTab.tsx` | Вкладка "Обзор" с Status Card + KPI + лента |
-| `src/components/owner/transparency/OwnerTermsTab.tsx` | Вкладка условий управления (read-only) |
-| `src/components/owner/transparency/OwnerNotificationBell.tsx` | Колокольчик уведомлений в шапке |
-| `src/components/owner/transparency/ActivityFeed.tsx` | Добавить фильтры по типу действия |
-| `src/components/owner/transparency/OwnerFinanceTab.tsx` | Добавить мини-график + логику согласования |
-| `src/hooks/useOwnerNotifications.ts` | Хук для уведомлений с realtime-подпиской |
-| `src/pages/owner/OwnerTransparencyDashboard.tsx` | Расширить до 5 вкладок |
-| `supabase/functions/owner-monthly-digest/index.ts` | Edge Function для месячного дайджеста |
-
-### Безопасность (RLS)
-
-- `owner_notifications`: SELECT только для `auth.uid() = owner_id`
-- `property_financials.approval_status`: UPDATE только для owner (через `property_delegates` check)
-- Activity log: уже защищён — owner и delegates с `view` permission
-
-### Порядок реализации
-
-1. Миграция БД (таблица `owner_notifications`, триггер, новые поля)
-2. `PropertyStatusCard` + `OwnerOverviewTab`
-3. `useOwnerNotifications` + `OwnerNotificationBell`
-4. Расширение `OwnerTransparencyDashboard` до 5 вкладок
-5. `OwnerTermsTab` (read-only просмотр условий)
-6. Фильтры в `ActivityFeed`
-7. Логика согласования расходов
-8. Edge Function для месячного дайджеста
+После реализации директор Show Property Phuket сможет:
+- Видеть все 21 объект в дашборде и списке Properties
+- Переключаться между Show Property и Ignatev Estate
+- Видеть KPI, финансы, задачи и CRM в контексте выбранной УК
+- Приглашать сотрудников через раздел Team
+- Все данные изолированы по компаниям
 
