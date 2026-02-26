@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Plus, Home, Building2, Users } from 'lucide-react';
+import { ChevronRight, Plus, Home, Building2, Users, Zap, CheckCircle2, XCircle } from 'lucide-react';
 
 export function OwnerPropertiesList() {
   const navigate = useNavigate();
@@ -46,6 +46,7 @@ export function OwnerPropertiesList() {
 
   const renderProperty = (property: UnifiedProperty) => {
     const title = isRu ? property.title_ru : property.title;
+    const isActive = property.is_active;
 
     return (
       <button
@@ -61,13 +62,19 @@ export function OwnerPropertiesList() {
               <Home className="h-6 w-6 text-muted-foreground" />
             </div>
           )}
-          {property.is_active && (
-            <div className="absolute top-1.5 left-1.5 w-3 h-3 rounded-full bg-success border-2 border-background" />
-          )}
+          {/* Active indicator dot */}
+          <div className={`absolute top-1.5 left-1.5 w-3 h-3 rounded-full border-2 border-background ${isActive ? 'bg-success' : 'bg-muted-foreground/40'}`} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-[15px] line-clamp-2">{title}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium text-[15px] line-clamp-1">{title}</p>
+            {!isActive && (
+              <Badge variant="outline" className="text-[10px] h-5 text-muted-foreground">
+                {isRu ? 'Неактивен' : 'Inactive'}
+              </Badge>
+            )}
+          </div>
           {property.address && (
             <p className="text-sm text-muted-foreground mt-0.5 truncate">
               {property.address}

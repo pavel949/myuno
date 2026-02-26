@@ -73,6 +73,7 @@ export interface PropertyCardProps {
   onView?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (id: string) => void;
+  onToggleActive?: (id: string, active: boolean) => void;
   showApprovalStatus?: boolean;
   showInstantBadge?: boolean;
   showProtectionBadge?: boolean;
@@ -253,6 +254,7 @@ interface ListVariantProps {
   onView?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (id: string) => void;
+  onToggleActive?: (id: string, active: boolean) => void;
   onClick: () => void;
 }
 
@@ -269,6 +271,7 @@ function ListVariant({
   onView,
   onDelete,
   onDuplicate,
+  onToggleActive,
   onClick,
 }: ListVariantProps) {
   const approvalConfig = getApprovalConfig(cardProps.approvalStatus, isRu);
@@ -414,7 +417,7 @@ function ListVariant({
               </div>
             )}
             
-            {(mode === 'admin' || (mode === 'owner' && onDuplicate)) && (
+            {(mode === 'admin' || (mode === 'owner' && (onDuplicate || onToggleActive || onDelete))) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -440,7 +443,22 @@ function ListVariant({
                       {isRu ? 'Создать на основе' : 'Duplicate'}
                     </DropdownMenuItem>
                   )}
-                  {onDelete && mode === 'admin' && (
+                  {onToggleActive && (
+                    <DropdownMenuItem onClick={() => onToggleActive(property.id, !!isInactive)}>
+                      {isInactive ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2 text-success" />
+                          {isRu ? 'Активировать' : 'Activate'}
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 mr-2 text-warning" />
+                          {isRu ? 'Деактивировать' : 'Deactivate'}
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
                     <DropdownMenuItem 
                       className="text-destructive"
                       onClick={() => onDelete(property.id)}
@@ -532,6 +550,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
     onView,
     onDelete,
     onDuplicate,
+    onToggleActive,
     showApprovalStatus = true,
     showInstantBadge = false,
     showProtectionBadge = false,
@@ -583,6 +602,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
             onView={onView}
             onDelete={onDelete}
             onDuplicate={onDuplicate}
+            onToggleActive={onToggleActive}
             onClick={handleClick}
           />
         )}
