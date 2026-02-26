@@ -231,8 +231,8 @@ export function useGuestChatList() {
 
       // Fetch property details
       const { data: properties } = await supabase
-        .from('owner_properties')
-        .select('id, title, title_ru, cover_image')
+        .from('properties')
+        .select('id, title_en, title_ru, cover_image')
         .in('id', propertyIds as string[]);
 
       // Get all messages for these properties to check unread count and last message
@@ -256,7 +256,7 @@ export function useGuestChatList() {
         conversationMap.set(`property-${propId}`, {
           id: propId,
           propertyId: propId,
-          propertyTitle: property?.title || 'Property',
+          propertyTitle: property?.title_en || 'Property',
           propertyTitleRu: property?.title_ru || undefined,
           propertyImage: property?.cover_image || undefined,
           lastMessage: lastMsg?.message,

@@ -52,7 +52,7 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
         }
       } else if (propertyId) {
         const { data: property, error: propError } = await supabase
-          .from('owner_properties')
+          .from('properties')
           .select('id, owner_id')
           .eq('id', propertyId)
           .eq('owner_id', user.id) // Security: verify ownership
@@ -205,8 +205,8 @@ export function useOwnerChats() {
       // Parallel fetch for better performance
       const [propertiesRes, messagesCountRes, bookingsRes] = await Promise.all([
         supabase
-          .from('owner_properties')
-          .select('id, title, title_ru, cover_image')
+          .from('properties')
+          .select('id, title_en, title_ru, cover_image')
           .eq('owner_id', user.id),
         supabase
           .from('property_chat_messages')
@@ -245,7 +245,7 @@ export function useOwnerChats() {
             id: prop.id,
             type: 'property',
             propertyId: prop.id,
-            title: prop.title,
+            title: prop.title_en,
             titleRu: prop.title_ru || undefined,
             coverImage: prop.cover_image || undefined,
             lastMessage: propMessages[0]?.message,
@@ -275,7 +275,7 @@ export function useOwnerChats() {
             bookingId: booking.id,
             title: booking.guest_name || 'Guest',
             titleRu: booking.guest_name || undefined,
-            propertyTitle: property?.title,
+            propertyTitle: property?.title_en,
             propertyTitleRu: property?.title_ru || undefined,
             coverImage: property?.cover_image || undefined,
             lastMessage: bMessages[0]?.message,

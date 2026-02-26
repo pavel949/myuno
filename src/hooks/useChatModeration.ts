@@ -71,7 +71,7 @@ export function useChatModeration(propertyId?: string) {
       if (!propertyId) return { isDelegated: false };
 
       const { data, error } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('chat_delegated_to_platform')
         .eq('id', propertyId)
         .single();
@@ -86,8 +86,8 @@ export function useChatModeration(propertyId?: string) {
   const toggleDelegation = useMutation({
     mutationFn: async (params: { propertyId: string; enabled: boolean }) => {
       const { error } = await supabase
-        .from('owner_properties')
-        .update({ chat_delegated_to_platform: params.enabled })
+        .from('properties')
+        .update({ chat_delegated_to_platform: params.enabled } as any)
         .eq('id', params.propertyId);
 
       if (error) throw error;

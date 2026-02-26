@@ -150,7 +150,7 @@ export function useGenerateReport() {
 
       // Resolve the actual owner_id for the property (manager creates on behalf of owner)
       const { data: prop, error: propError } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('owner_id')
         .eq('id', input.property_id)
         .single();
@@ -432,7 +432,7 @@ export function useCanAccessReportFinancials(propertyId: string) {
       
       // Check if user is owner
       const { data: property } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('owner_id')
         .eq('id', propertyId)
         .single();

@@ -188,7 +188,7 @@ export function useJuristicRequests(propertyId?: string) {
 
       // Get property owner
       const { data: property } = await supabase
-        .from('owner_properties')
+        .from('properties')
         .select('owner_id, project_id')
         .eq('id', input.property_id)
         .single();
