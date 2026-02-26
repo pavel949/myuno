@@ -75,7 +75,7 @@ export default function AdminUnoTeam() {
       if (existingRole) {
         toast({ 
           title: isRu ? 'Уже в команде' : 'Already in team', 
-          description: isRu ? 'Этот пользователь уже является членом UNO Team' : 'This user is already a UNO Team member',
+          description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member',
           variant: 'destructive' 
         });
         setIsAdding(false);
@@ -91,7 +91,7 @@ export default function AdminUnoTeam() {
 
       toast({ 
         title: isRu ? 'Успешно' : 'Success', 
-        description: isRu ? `${profile.full_name || profile.email} добавлен в UNO Team` : `${profile.full_name || profile.email} added to UNO Team`
+        description: isRu ? `${profile.full_name || profile.email} добавлен в myUNO Team` : `${profile.full_name || profile.email} added to myUNO Team`
       });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
@@ -128,7 +128,7 @@ export default function AdminUnoTeam() {
 
       toast({ 
         title: isRu ? 'Удалено' : 'Removed', 
-        description: isRu ? `${memberName} удалён из UNO Team` : `${memberName} removed from UNO Team`
+        description: isRu ? `${memberName} удалён из myUNO Team` : `${memberName} removed from myUNO Team`
       });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
@@ -182,7 +182,7 @@ export default function AdminUnoTeam() {
     <>
       <PageContainer>
         <PageHeader 
-          title={isRu ? 'UNO Team' : 'UNO Team'}
+          title={isRu ? 'myUNO Team' : 'myUNO Team'}
           showBack
         />
 
@@ -205,7 +205,7 @@ export default function AdminUnoTeam() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{isRu ? 'Добавить сотрудника UNO Team' : 'Add UNO Team Member'}</DialogTitle>
+                <DialogTitle>{isRu ? 'Добавить сотрудника myUNO Team' : 'Add myUNO Team Member'}</DialogTitle>
                 <DialogDescription>
                   {isRu 
                     ? 'Введите email зарегистрированного пользователя для добавления в команду' 
@@ -264,7 +264,7 @@ export default function AdminUnoTeam() {
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="font-medium">{isRu ? 'Нет сотрудников UNO Team' : 'No UNO Team members'}</p>
+              <p className="font-medium">{isRu ? 'Нет сотрудников myUNO Team' : 'No myUNO Team members'}</p>
               <p className="text-sm mt-2 mb-4">
                 {isRu 
                   ? 'Добавьте первого сотрудника, нажав кнопку выше' 

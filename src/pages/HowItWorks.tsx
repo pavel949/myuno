@@ -19,7 +19,7 @@ const translations = {
     title: 'How It Works',
     subtitle: 'Your complete guide to living abroad',
     heroTitle: 'Everything you need in one app',
-    heroDescription: 'UNO is your personal assistant for comfortable living in Thailand. From housing to services — we handle everything so you can enjoy life.',
+    heroDescription: 'myUNO is your personal assistant for comfortable living in Thailand. From housing to services — we handle everything so you can enjoy life.',
     
     categoriesTitle: 'What you can do',
     categories: [
@@ -31,7 +31,7 @@ const translations = {
       { icon: Flower2, title: 'Send Flowers', desc: 'Beautiful bouquets with same-day delivery across the city' },
     ],
 
-    benefitsTitle: 'Why choose UNO',
+    benefitsTitle: 'Why choose myUNO',
     benefits: [
       { icon: Shield, title: 'Verified Providers', desc: 'Every partner is checked and verified. Read real reviews from real users.' },
       { icon: MessageCircle, title: 'AI Support 24/7', desc: 'Our smart assistant answers questions instantly in your language.' },
@@ -66,7 +66,7 @@ const translations = {
     title: 'Как это работает',
     subtitle: 'Ваш полный гид по жизни за рубежом',
     heroTitle: 'Всё необходимое в одном приложении',
-    heroDescription: 'UNO — ваш персональный помощник для комфортной жизни в Таиланде. От жилья до услуг — мы берём всё на себя, чтобы вы могли наслаждаться жизнью.',
+    heroDescription: 'myUNO — ваш персональный помощник для комфортной жизни в Таиланде. От жилья до услуг — мы берём всё на себя, чтобы вы могли наслаждаться жизнью.',
     
     categoriesTitle: 'Что вы можете',
     categories: [
@@ -78,7 +78,7 @@ const translations = {
       { icon: Flower2, title: 'Отправить цветы', desc: 'Красивые букеты с доставкой в тот же день по всему городу' },
     ],
 
-    benefitsTitle: 'Почему выбирают UNO',
+    benefitsTitle: 'Почему выбирают myUNO',
     benefits: [
       { icon: Shield, title: 'Проверенные партнёры', desc: 'Каждый провайдер проверен и верифицирован. Читайте реальные отзывы.' },
       { icon: MessageCircle, title: 'AI-поддержка 24/7', desc: 'Умный ассистент мгновенно отвечает на вопросы на вашем языке.' },

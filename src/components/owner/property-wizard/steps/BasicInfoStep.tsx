@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Users, Settings2 } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield } from 'lucide-react';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
@@ -60,9 +59,6 @@ const ownershipOptions: OwnershipOption[] = [
   },
 ];
 
-import { MANAGEMENT_TYPE_OPTIONS } from '@/lib/config/ownerConstants';
-
-const managementTypes = MANAGEMENT_TYPE_OPTIONS;
 
 function BasicInfoStepInner({ 
   formData, 
@@ -77,7 +73,6 @@ function BasicInfoStepInner({
   const { options: propertyTypes } = useTaxonomy('property_type');
   
 
-  const needsTerms = formData.management_type === 'full' || formData.management_type === 'partial';
 
   return (
     <div className="space-y-6">
@@ -307,64 +302,7 @@ function BasicInfoStepInner({
         </CardContent>
       </Card>
 
-      {/* Management Type (Compact) */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            {isRu ? 'Тип управления' : 'Management Type'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {managementTypes.map((type) => (
-            <div
-              key={type.value}
-              onClick={() => updateFormData({ management_type: type.value })}
-              className={`p-3 rounded-xl border-2 cursor-pointer transition-colors ${
-                formData.management_type === type.value 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-muted hover:border-muted-foreground/30'
-              }`}
-            >
-              <p className="font-medium text-sm">{isRu ? type.labelRu : type.labelEn}</p>
-              <p className="text-xs text-muted-foreground">{type.desc}</p>
-            </div>
-          ))}
-
-          {/* Rental status */}
-          <div className="pt-3 border-t">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">{isRu ? 'Сдаётся через OTA' : 'Listed on OTAs'}</p>
-                <p className="text-xs text-muted-foreground">
-                  {isRu ? 'Airbnb, Booking и т.д.' : 'Airbnb, Booking, etc.'}
-                </p>
-              </div>
-              <Switch
-                checked={formData.is_rented}
-                onCheckedChange={(checked) => updateFormData({ is_rented: checked })}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Management Terms notice — shown when management type is full or partial */}
-      {needsTerms && (
-        <div className="flex items-start gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
-          <Settings2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">
-              {isRu ? 'Условия управления' : 'Management Terms'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isRu
-                ? 'После добавления объекта вы сможете задать коммерческие условия: комиссию УК, кто платит за уборку и ремонт, день выплаты.'
-                : 'After adding the property you can configure commercial terms: manager commission, who pays for cleaning & repairs, payout day.'}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Management Type & Terms — hidden, management_type defaults to 'full' in usePropertyWizard */}
     </div>
   );
 }

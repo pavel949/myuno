@@ -156,7 +156,7 @@ export const INVESTMENT_DETAILS = {
   useOfFunds: [
     { label: 'Product & Engineering', labelRu: 'Продукт и разработка', percent: 40, color: 'bg-blue-500' },
     { label: 'Marketing & Growth', labelRu: 'Маркетинг и рост', percent: 30, color: 'bg-green-500' },
-    { label: 'Operations & UNO Team', labelRu: 'Операции и UNO Team', percent: 20, color: 'bg-purple-500' },
+    { label: 'Operations & myUNO Team', labelRu: 'Операции и myUNO Team', percent: 20, color: 'bg-purple-500' },
     { label: 'Legal & Compliance', labelRu: 'Юридические', percent: 10, color: 'bg-amber-500' },
   ],
 } as const;
