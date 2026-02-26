@@ -18,6 +18,8 @@ import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
+import { CompanySwitcher } from './CompanySwitcher';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
@@ -56,11 +58,10 @@ export function OwnerHeader() {
   const isRussian = language === 'ru';
   const { roles } = useUserRoles();
   const { unreadCount } = useNotificationActions();
+  const { activeCompany } = useActiveCompany();
   
   const isPropertyManager = roles?.some(r => r.role === 'property_manager');
   const isOwner = roles?.some(r => r.role === 'owner' || r.role === 'property_owner');
-  const roleLabelRu = isOwner ? 'Собственник' : (isPropertyManager ? 'Управляющая компания' : 'Собственник');
-  const roleLabelEn = isOwner ? 'Owner' : (isPropertyManager ? 'Property Manager' : 'Owner');
   const RoleIcon = isOwner ? Building2 : (isPropertyManager ? Users : Building2);
   // Build breadcrumb from current path
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -104,10 +105,9 @@ export function OwnerHeader() {
         <span className="text-sm">{isRussian ? 'На главную' : 'Home'}</span>
       </Button>
       
-      {/* Role badge */}
-      <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/8 text-primary">
-        <RoleIcon className="h-3.5 w-3.5" />
-        <span className="text-xs font-medium">{isRussian ? roleLabelRu : roleLabelEn}</span>
+      {/* Company switcher */}
+      <div className="hidden md:flex items-center">
+        <CompanySwitcher />
       </div>
       
       {/* Separator */}

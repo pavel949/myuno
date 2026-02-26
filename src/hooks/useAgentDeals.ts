@@ -4,6 +4,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export const DEAL_STAGES = [
   'new', 'contacted', 'showing', 'negotiation', 'contract', 'closed_won', 'closed_lost',
@@ -96,12 +97,18 @@ export interface AgentDeal {
 export type AgentDealInsert = Omit<AgentDeal, 'id' | 'created_at' | 'updated_at'>;
 export type AgentDealUpdate = Partial<AgentDealInsert>;
 
-/** Get the user's company_id from management_company_members */
+/** Get the user's active company_id — uses ActiveCompany context when available */
 export function useMyCompanyId() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+
   return useQuery({
-    queryKey: ['my-company-id', user?.id],
+    queryKey: ['my-company-id', user?.id, activeCompany?.company_id],
     queryFn: async () => {
+      // If context provides a company, use it
+      if (activeCompany) {
+        return { company_id: activeCompany.company_id, role: activeCompany.role };
+      }
       if (!user) return null;
       const { data, error } = await supabase
         .from('management_company_members')

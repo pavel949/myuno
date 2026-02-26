@@ -41,6 +41,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 interface NavItem {
   title: string;
@@ -134,6 +135,10 @@ export function OwnerSidebar() {
   const { user, signOut } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const { activeCompany } = useActiveCompany();
+  const companyName = activeCompany
+    ? (isRussian ? activeCompany.name_ru : activeCompany.name_en)
+    : 'myUNO';
   const isActive = (path: string) => {
     if (path === '/owner') return location.pathname === '/owner';
     return location.pathname.startsWith(path);
@@ -155,9 +160,9 @@ export function OwnerSidebar() {
             <Home className="h-5 w-5" />
           </div>
           {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-semibold text-sidebar-foreground">
-                myUNO
+            <div className="flex flex-col min-w-0">
+              <span className="font-semibold text-sidebar-foreground truncate">
+                {companyName}
               </span>
               <span className="text-xs text-sidebar-foreground/60">
                 {isRussian ? '← На главную' : '← Back to Home'}
