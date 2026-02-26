@@ -2,6 +2,7 @@ import React, { memo, forwardRef } from 'react';
 import { Shield, Users, Headphones, AlertTriangle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,7 +50,10 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(fun
             {i > 0 && <div className="w-px h-6 bg-border/60" />}
             <div className="flex flex-col items-center gap-0.5">
               <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold text-foreground">{stat.value}</span>
+              <span className={cn(
+                "text-xs font-semibold text-foreground transition-opacity duration-300",
+                stat.value === '…' ? 'opacity-40' : 'opacity-100'
+              )}>{stat.value}</span>
               <span className="text-[10px] text-muted-foreground">{stat.label}</span>
             </div>
           </React.Fragment>

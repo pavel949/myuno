@@ -5,6 +5,7 @@
  */
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDayBriefing, type DayItem, type DayItemType } from '@/hooks/useDayBriefing';
 import { Card, CardContent } from '@/components/ui/card';
@@ -192,12 +193,17 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <motion.div
+        className="space-y-3"
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0, transition: { duration: 0.15 } }}
+        key="skeleton"
+      >
         <Skeleton className="h-5 w-48" />
         <Skeleton className="h-16 w-full rounded-xl" />
         <Skeleton className="h-16 w-full rounded-xl" />
         <Skeleton className="h-16 w-full rounded-xl" />
-      </div>
+      </motion.div>
     );
   }
 
@@ -221,7 +227,13 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
   const birthdayCount = items.filter(i => i.type === 'birthday').length;
 
   return (
-    <section className={cn('space-y-4', compact && 'space-y-3')}>
+    <motion.section
+      className={cn('space-y-4', compact && 'space-y-3')}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      key="content"
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <h3 className={cn('font-semibold flex items-center gap-2', compact ? 'text-sm' : 'text-[15px]')}>
@@ -264,7 +276,7 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
           </div>
         );
       })}
-    </section>
+    </motion.section>
   );
 }
 
@@ -327,7 +339,7 @@ function DayItemCard({ item, isRu, onClick }: { item: DayItem; isRu: boolean; on
   return (
     <Card
       className={cn(
-        'cursor-pointer hover:shadow-md transition-shadow border-l-4',
+        'cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 border-l-4',
         styles.border
       )}
       onClick={onClick}
