@@ -2,16 +2,17 @@
  * CanonicalPropertyForm - Unified property form for Admin/Vendor/Owner
  * 
  * Full 7-tab form for admin mode: Basic, Location, Photos, Pricing, Utilities, Services, Admin
- * 4-tab form for owner/vendor mode: Basic, Location, Photos, Pricing
+ * Full 10-tab form for owner mode: Basic, Location, Photos, Pricing, Utilities, Services, Rules, Rooms, Calendar, Team
+ * 4-tab form for vendor mode: Basic, Location, Photos, Pricing
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield } from 'lucide-react';
+import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound } from 'lucide-react';
 
 // Import canonical step components from Owner Wizard
 import { 
@@ -22,6 +23,8 @@ import {
   UtilitiesStep,
   ServicesStep,
   AdminSettingsStep,
+  HouseRulesSection,
+  CancellationPolicySection,
 } from '@/components/owner/property-wizard/steps';
 
 export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
@@ -85,6 +88,14 @@ export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
   ical_export_enabled?: boolean;
 }
 
+export interface ExtraTab {
+  id: string;
+  icon: React.ComponentType<{ className?: string }>;
+  labelEn: string;
+  labelRu: string;
+  content: React.ReactNode;
+}
+
 interface CanonicalPropertyFormProps {
   initialData?: CanonicalPropertyFormData;
   onSubmit: (data: CanonicalPropertyFormData) => Promise<void>;
@@ -94,6 +105,20 @@ interface CanonicalPropertyFormProps {
   showOwnership?: boolean;
   showProviderSelector?: boolean;
   providerSelector?: React.ReactNode;
+  /** Extra tabs injected by the host (e.g. Rooms, Calendar, Team) */
+  extraTabs?: ExtraTab[];
+  /** Property ID for tabs that need it (Team, Calendar) */
+  propertyId?: string;
+  /** Hide the built-in action buttons (host renders its own) */
+  hideActions?: boolean;
+  /** External form data control — when provided, the form becomes controlled */
+  controlledFormData?: PropertyFormData;
+  onFormDataChange?: (data: PropertyFormData) => void;
+  /** External extra-data control for utilities/services */
+  controlledUtilities?: Record<string, any>;
+  onUtilitiesChange?: (data: Record<string, any>) => void;
+  controlledServices?: Record<string, any>;
+  onServicesChange?: (data: Record<string, any>) => void;
 }
 
 // Map Admin/Vendor fields to Owner format
@@ -241,15 +266,35 @@ export function CanonicalPropertyForm({
   mode,
   showOwnership = false,
   providerSelector,
+  extraTabs = [],
+  hideActions = false,
+  controlledFormData,
+  onFormDataChange,
+  controlledUtilities,
+  onUtilitiesChange,
+  controlledServices,
+  onServicesChange,
 }: CanonicalPropertyFormProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const isAdmin = mode === 'admin';
+  const isOwner = mode === 'owner';
   
-  // Convert initial data to Owner format
-  const [formData, setFormData] = useState<PropertyFormData>(() => 
+  // Internal state (used when not controlled)
+  const [internalFormData, setInternalFormData] = useState<PropertyFormData>(() => 
     mapToOwnerFormat(initialData)
   );
+  
+  // Use controlled or internal state
+  const formData = controlledFormData || internalFormData;
+  const setFormData = useCallback((updater: PropertyFormData | ((prev: PropertyFormData) => PropertyFormData)) => {
+    if (onFormDataChange) {
+      const newData = typeof updater === 'function' ? updater(formData) : updater;
+      onFormDataChange(newData);
+    } else {
+      setInternalFormData(updater as any);
+    }
+  }, [onFormDataChange, formData]);
   
   const [ownershipData, setOwnershipData] = useState<OwnershipData>({
     ownership_type: 'own',
@@ -264,8 +309,8 @@ export function CanonicalPropertyForm({
     ownership_document_name: '',
   });
 
-  // Extra data for admin tabs
-  const [utilitiesData, setUtilitiesData] = useState(() => ({
+  // Extra data for admin/owner tabs
+  const [internalUtilitiesData, setInternalUtilitiesData] = useState(() => ({
     electricity_included: initialData.electricity_included,
     electricity_unit_price: initialData.electricity_unit_price,
     electricity_provider: initialData.electricity_provider,
@@ -280,7 +325,17 @@ export function CanonicalPropertyForm({
     internet_provider: initialData.internet_provider,
   }));
 
-  const [servicesData, setServicesData] = useState(() => ({
+  const utilitiesData = controlledUtilities || internalUtilitiesData;
+  const setUtilitiesData = useCallback((updater: any) => {
+    if (onUtilitiesChange) {
+      const newData = typeof updater === 'function' ? updater(utilitiesData) : updater;
+      onUtilitiesChange(newData);
+    } else {
+      setInternalUtilitiesData(updater);
+    }
+  }, [onUtilitiesChange, utilitiesData]);
+
+  const [internalServicesData, setInternalServicesData] = useState(() => ({
     cleaning_included: initialData.cleaning_included,
     cleaning_frequency: initialData.cleaning_frequency,
     extra_cleaning_price: initialData.extra_cleaning_price,
@@ -295,6 +350,16 @@ export function CanonicalPropertyForm({
     extra_guest_price: initialData.extra_guest_price,
     extra_guest_threshold: initialData.extra_guest_threshold,
   }));
+
+  const servicesData = controlledServices || internalServicesData;
+  const setServicesData = useCallback((updater: any) => {
+    if (onServicesChange) {
+      const newData = typeof updater === 'function' ? updater(servicesData) : updater;
+      onServicesChange(newData);
+    } else {
+      setInternalServicesData(updater);
+    }
+  }, [onServicesChange, servicesData]);
 
   const [adminData, setAdminData] = useState(() => ({
     is_active: initialData.is_active ?? true,
@@ -324,19 +389,19 @@ export function CanonicalPropertyForm({
 
   const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
-  }, []);
+  }, [setFormData]);
 
   const updateOwnershipData = useCallback((updates: Partial<OwnershipData>) => {
     setOwnershipData(prev => ({ ...prev, ...updates }));
   }, []);
 
   const updateUtilities = useCallback((updates: Record<string, any>) => {
-    setUtilitiesData(prev => ({ ...prev, ...updates }));
-  }, []);
+    setUtilitiesData((prev: any) => ({ ...prev, ...updates }));
+  }, [setUtilitiesData]);
 
   const updateServices = useCallback((updates: Record<string, any>) => {
-    setServicesData(prev => ({ ...prev, ...updates }));
-  }, []);
+    setServicesData((prev: any) => ({ ...prev, ...updates }));
+  }, [setServicesData]);
 
   const updateAdmin = useCallback((updates: Record<string, any>) => {
     setAdminData(prev => ({ ...prev, ...updates }));
@@ -358,13 +423,31 @@ export function CanonicalPropertyForm({
     { id: 'pricing', icon: DollarSign, labelEn: 'Pricing', labelRu: 'Цены' },
   ];
 
-  const adminTabs = [
+  const adminOnlyTabs = [
     { id: 'utilities', icon: Zap, labelEn: 'Utilities', labelRu: 'Комм.' },
     { id: 'services', icon: Sparkles, labelEn: 'Services', labelRu: 'Сервис' },
     { id: 'admin', icon: Shield, labelEn: 'Admin', labelRu: 'Админ' },
   ];
 
-  const tabs = isAdmin ? [...baseTabs, ...adminTabs] : baseTabs;
+  const ownerExtendedTabs = [
+    { id: 'utilities', icon: Zap, labelEn: 'Utilities', labelRu: 'Комм.' },
+    { id: 'services', icon: Sparkles, labelEn: 'Services', labelRu: 'Сервис' },
+    { id: 'rules', icon: FileText, labelEn: 'Rules', labelRu: 'Правила' },
+  ];
+
+  // Build tab list based on mode
+  let tabs = [...baseTabs];
+  if (isAdmin) {
+    tabs = [...tabs, ...adminOnlyTabs];
+  } else if (isOwner) {
+    tabs = [...tabs, ...ownerExtendedTabs];
+    // Add extra tabs (Rooms, Calendar, Team)
+    extraTabs.forEach(et => {
+      tabs.push({ id: et.id, icon: et.icon as any, labelEn: et.labelEn, labelRu: et.labelRu });
+    });
+  }
+
+  const colCount = tabs.length;
 
   return (
     <div className="flex flex-col h-full">
@@ -376,14 +459,16 @@ export function CanonicalPropertyForm({
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-        <TabsList className={`grid w-full mb-4 ${isAdmin ? 'grid-cols-7' : 'grid-cols-4'}`}>
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5">
-              <tab.icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <ScrollArea className="w-full pb-1">
+          <TabsList className={`inline-flex w-full mb-4`} style={{ display: 'grid', gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5">
+                <tab.icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </ScrollArea>
 
         <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(70vh - 200px)' }}>
           <TabsContent value="basic" className="mt-0">
@@ -419,7 +504,7 @@ export function CanonicalPropertyForm({
             />
           </TabsContent>
 
-          {isAdmin && (
+          {(isAdmin || isOwner) && (
             <>
               <TabsContent value="utilities" className="mt-0">
                 <UtilitiesStep data={utilitiesData} onChange={updateUtilities} />
@@ -428,31 +513,51 @@ export function CanonicalPropertyForm({
               <TabsContent value="services" className="mt-0">
                 <ServicesStep data={servicesData} onChange={updateServices} />
               </TabsContent>
-
-              <TabsContent value="admin" className="mt-0">
-                <AdminSettingsStep data={adminData} onChange={updateAdmin} />
-              </TabsContent>
             </>
           )}
+
+          {isAdmin && (
+            <TabsContent value="admin" className="mt-0">
+              <AdminSettingsStep data={adminData} onChange={updateAdmin} />
+            </TabsContent>
+          )}
+
+          {isOwner && (
+            <TabsContent value="rules" className="mt-0">
+              <div className="space-y-4">
+                <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+                <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Render extra tabs (Rooms, Calendar, Team) */}
+          {extraTabs.map(et => (
+            <TabsContent key={et.id} value={et.id} className="mt-0">
+              {et.content}
+            </TabsContent>
+          ))}
         </ScrollArea>
       </Tabs>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 mt-4 border-t">
-        {onCancel && (
-          <Button variant="outline" onClick={onCancel} className="flex-1">
-            {isRu ? 'Отмена' : 'Cancel'}
+      {!hideActions && (
+        <div className="flex gap-3 pt-4 mt-4 border-t">
+          {onCancel && (
+            <Button variant="outline" onClick={onCancel} className="flex-1">
+              {isRu ? 'Отмена' : 'Cancel'}
+            </Button>
+          )}
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isRu ? 'Сохранить' : 'Save'}
           </Button>
-        )}
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting}
-          className="flex-1"
-        >
-          {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          {isRu ? 'Сохранить' : 'Save'}
-        </Button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

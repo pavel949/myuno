@@ -1,2 +1,2 @@
 export { CanonicalPropertyForm } from './CanonicalPropertyForm';
-export type { CanonicalPropertyFormData } from './CanonicalPropertyForm';
+export type { CanonicalPropertyFormData, ExtraTab } from './CanonicalPropertyForm';
