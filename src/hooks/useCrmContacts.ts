@@ -36,6 +36,7 @@ export interface CrmContact {
   scoring: number | null;
   created_at: string;
   updated_at: string;
+  deal_count?: number;
 }
 
 export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring'> & {
@@ -64,7 +65,7 @@ export function useCrmContacts(
       const to = from + pageSize - 1;
       let q = supabase
         .from('crm_contacts')
-        .select('*', { count: 'exact' })
+        .select('*, agent_deals(id)', { count: 'exact' })
         .eq('company_id', companyId!)
         .order('updated_at', { ascending: false })
         .range(from, to);
@@ -92,7 +93,13 @@ export function useCrmContacts(
 
       const { data, error, count } = await q;
       if (error) throw error;
-      return { data: (data || []) as unknown as CrmContact[], count: count || 0 };
+      // Attach deal_count to each contact
+      const enriched = (data || []).map((c: any) => ({
+        ...c,
+        deal_count: Array.isArray(c.agent_deals) ? c.agent_deals.length : 0,
+        agent_deals: undefined,
+      }));
+      return { data: enriched as unknown as CrmContact[], count: count || 0 };
     },
     enabled: !!companyId,
   });

@@ -53,6 +53,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
   const [status, setStatus] = useState('pending');
   const [priority, setPriority] = useState('medium');
   const [assignedTo, setAssignedTo] = useState('none');
+  const [dueDate, setDueDate] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       setStatus(task.status);
       setPriority(task.priority);
       setAssignedTo(task.assigned_to || 'none');
+      setDueDate(task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
     }
   }, [task]);
 
@@ -72,10 +74,15 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
     if (task.source === 'crm') {
       updates.description = description || null;
       updates.status = status;
+      if (dueDate) updates.due_date = new Date(dueDate).toISOString();
       if (status === 'completed') updates.completed_at = new Date().toISOString();
     } else {
       updates.status = status;
       updates.notes = description || null;
+      if (dueDate) {
+        updates.scheduled_date = format(new Date(dueDate), 'yyyy-MM-dd');
+        updates.scheduled_time = format(new Date(dueDate), 'HH:mm');
+      }
       if (status === 'completed') {
         updates.completed_at = new Date().toISOString();
       }
@@ -189,12 +196,15 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
               />
             </div>
 
-            {/* Due date display */}
-            {task.due_date && (
-              <div className="text-sm text-muted-foreground">
-                {t('Due:', 'Срок:')} {format(new Date(task.due_date), 'dd.MM.yyyy HH:mm')}
-              </div>
-            )}
+            {/* Due date */}
+            <div>
+              <Label>{t('Due Date', 'Срок')}</Label>
+              <Input
+                type="datetime-local"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+              />
+            </div>
 
             {/* Actions */}
             <div className="flex gap-2 pt-2">
