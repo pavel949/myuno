@@ -1,33 +1,71 @@
 
-# Скрытие "Тип управления" / "Условия" + исправление бренда на myUNO
 
-## Что делаем
+# Реорганизация боковой панели Owner/УК
 
-### 1. Скрыть блок "Тип управления" и "Условия управления" в форме создания/редактирования объекта
+## Проблема
 
-Файл: `src/components/owner/property-wizard/steps/BasicInfoStep.tsx`
-- Удалить (или обернуть в `{false && ...}`) карточку "Management Type" (строки 310-350) -- блок с выбором типа управления (full / partial / self)
-- Удалить блок "Rental status" (Listed on OTAs) внутри той же карточки (строки 334-348)
-- Удалить блок "Management Terms" (условия управления, строки 352-367)
-- Убрать неиспользуемые импорты (`MANAGEMENT_TYPE_OPTIONS`, `Settings2`, `Users`, `Switch`)
-- Оставить значение по умолчанию `management_type: 'full'` в `usePropertyWizard.ts` -- данные продолжают сохраняться, просто UI скрыт
+Блок **"Коммерция"** (Rate Seasons, Reviews, Insurance & Docs) — искусственная группа из несвязанных функций:
+- Тарифы — это ценообразование, логически относится к Revenue/Finance
+- Отзывы — это работа с гостями, логически относится к CRM
+- Страховки и документы — это комплаенс, логически относится к Operations
 
-### 2. Исправить название платформы: везде должно быть "myUNO" (не "UNO")
+У крупных PMS-платформ (Guesty, Hostaway, Cloudbeds, Lodgify) навигация строится по **бизнес-процессам**, а не по абстрактным категориям.
 
-Затронутые файлы и исправления:
+## Предлагаемая структура (5 групп вместо 6)
 
-| Файл | Было | Станет |
-|------|------|--------|
-| `src/pages/HowItWorks.tsx` | `'Why choose UNO'`, `'UNO is your personal assistant...'`, `'Почему выбирают UNO'`, `'UNO — ваш персональный помощник...'` | `'Why choose myUNO'`, `'myUNO is your personal assistant...'`, `'Почему выбирают myUNO'`, `'myUNO — ваш персональный помощник...'` |
-| `src/components/admin/AdminCommandPalette.tsx` | `'UNO Team'`, `'Команда UNO'` | `'myUNO Team'`, `'Команда myUNO'` |
-| `src/lib/config/investorData.ts` | `'Operations & UNO Team'`, `'Операции и UNO Team'` | `'Operations & myUNO Team'`, `'Операции и myUNO Team'` |
-| `src/pages/admin/AdminUnoTeam.tsx` | Все вхождения `'UNO Team'` | `'myUNO Team'` |
-| `src/components/market/drawer/DrawerFooter.tsx` | `'Phuket Edition v1.0'` | `'myUNO · Phuket Edition'` |
+```text
+ГЛАВНОЕ (Main)
+├── Dashboard
+├── Properties
+├── Calendar
+└── Inbox / Messages
 
-Файлы, где бренд уже корректен (не трогаем): `index.html`, `CompactFooter.tsx`, `ServiceDrawerFooter.tsx`, `OnboardingModal.tsx`, `PropertySubmissionSuccess.tsx`, `types/auth.ts`.
+CRM И ПРОДАЖИ (CRM & Sales)
+├── Sales Pipeline
+├── Contacts
+├── Reviews              ← перенос из "Коммерция"
+└── CRM Settings
 
-## Технические детали
+ОПЕРАЦИИ (Operations)
+├── Tasks
+├── Inventory
+├── Vendors
+└── Insurance & Docs     ← перенос из "Коммерция"
 
-- В `BasicInfoStep.tsx` блоки скрываются полностью (удаление JSX), а не через CSS -- чтобы не загружать лишние данные
-- Поле `management_type` остаётся в форме и базе данных, просто не отображается в UI. Когда функционал потребуется -- легко вернуть
-- Все строки с названием платформы проверены через поиск по паттернам `'UNO`, `"UNO`, исключая правильные `myUNO`
+ФИНАНСЫ (Finance)
+├── Rate Seasons          ← перенос из "Коммерция"
+├── Income & Expenses
+├── Invoices
+└── Analytics & Reports
+
+КОМАНДА (Team)
+└── Staff & Access
+```
+
+## Обоснование
+
+| Элемент | Было | Стало | Почему |
+|---------|------|-------|--------|
+| Rate Seasons | Commerce | Finance | Тарифы = ценообразование = деньги. В Guesty/Hostaway pricing живёт в Revenue Management |
+| Reviews | Commerce | CRM & Sales | Отзывы = работа с гостями = CRM. В Cloudbeds reviews привязаны к Guest Relations |
+| Insurance & Docs | Commerce | Operations | Страховки = compliance = операционная поддержка объектов |
+| Messages/Inbox | нет в сайдбаре | Main | У всех PMS Inbox — один из главных пунктов навигации |
+
+## Технические изменения
+
+### 1. `src/components/owner/OwnerSidebar.tsx`
+- Удалить группу "Commerce" целиком
+- Добавить "Messages" в группу "Main" (`/owner/messages`, иконка `MessageSquare`)
+- Перенести "Reviews" в группу "CRM & Sales" (между Contacts и CRM Settings)
+- Перенести "Rate Seasons" в группу "Finance" (первым пунктом, перед Income & Expenses)
+- Перенести "Insurance & Docs" в группу "Operations" (после Vendors)
+
+### 2. `src/components/owner/dashboard/OwnerDashboardMenu.tsx`
+- Синхронизировать мобильное меню с новой структурой сайдбара (те же 5 групп)
+
+### 3. `src/components/owner/OwnerMobileNav.tsx`
+- Без изменений (нижняя панель уже содержит 4 ключевых пункта)
+
+### 4. `src/lib/businessRoles.ts`
+- Без изменений (виджеты дашборда не зависят от структуры сайдбара)
+
