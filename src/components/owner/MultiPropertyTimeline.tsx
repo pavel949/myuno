@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMultiPropertyBookings } from '@/hooks/useMultiPropertyBookings';
 import { useOperationalTasks } from '@/hooks/useOperationalTasks';
+import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { CalendarDayEventsSheet } from './CalendarDayEventsSheet';
 import { BookingDetailSheet } from './BookingDetailSheet';
 import { TaskDetailSheet } from './TaskDetailSheet';
@@ -38,35 +39,45 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const propertyIds = useMemo(() => properties.map(p => p.property_id), [properties]);
+  const { data: projects } = usePropertyProjects();
 
-  // Sort properties: grouped by complex (alphabetically), then no-complex at the end, then by title within group
+  // Build a unified group name resolver: complex_id OR project_id → label
+  const getGroupKey = useCallback((p: UnifiedProperty) => p.complex_id || p.project_id || null, []);
+  const groupNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    complexes.forEach(c => map.set(c.id, isRu ? (c.name_ru || c.name) : c.name));
+    projects?.forEach(p => { if (!map.has(p.id)) map.set(p.id, isRu ? (p.name_ru || p.name_en) : p.name_en); });
+    return map;
+  }, [complexes, projects, isRu]);
+
+  // Sort properties: grouped by complex/project (alphabetically), then ungrouped at the end
   const sortedProperties = useMemo(() => {
-    const complexMap = new Map(complexes.map(c => [c.id, isRu ? (c.name_ru || c.name) : c.name]));
     return [...properties].sort((a, b) => {
-      const aComplex = a.complex_id ? complexMap.get(a.complex_id) || '' : 'zzz';
-      const bComplex = b.complex_id ? complexMap.get(b.complex_id) || '' : 'zzz';
-      if (aComplex !== bComplex) return aComplex.localeCompare(bComplex);
+      const aKey = getGroupKey(a);
+      const bKey = getGroupKey(b);
+      const aGroup = aKey ? groupNameMap.get(aKey) || '' : 'zzz';
+      const bGroup = bKey ? groupNameMap.get(bKey) || '' : 'zzz';
+      if (aGroup !== bGroup) return aGroup.localeCompare(bGroup);
       const aTitle = isRu ? a.title_ru : a.title;
       const bTitle = isRu ? b.title_ru : b.title;
       return aTitle.localeCompare(bTitle);
     });
-  }, [properties, complexes, isRu]);
+  }, [properties, groupNameMap, isRu, getGroupKey]);
 
-  // Build complex group headers for rendering
+  // Build group headers for rendering
   const complexGroups = useMemo(() => {
     const groups: { complexId: string | null; complexName: string; startIndex: number }[] = [];
-    let lastComplexId: string | null | undefined = undefined;
+    let lastKey: string | null | undefined = undefined;
     sortedProperties.forEach((p, idx) => {
-      if (p.complex_id !== lastComplexId) {
-        const complexName = p.complex_id
-          ? complexes.find(c => c.id === p.complex_id)?.[isRu ? 'name_ru' : 'name'] || complexes.find(c => c.id === p.complex_id)?.name || ''
-          : '';
-        groups.push({ complexId: p.complex_id, complexName, startIndex: idx });
-        lastComplexId = p.complex_id;
+      const key = getGroupKey(p);
+      if (key !== lastKey) {
+        const name = key ? groupNameMap.get(key) || '' : '';
+        groups.push({ complexId: key, complexName: name, startIndex: idx });
+        lastKey = key;
       }
     });
     return groups;
-  }, [sortedProperties, complexes, isRu]);
+  }, [sortedProperties, groupNameMap, getGroupKey]);
 
   const [startDate, setStartDate] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
 

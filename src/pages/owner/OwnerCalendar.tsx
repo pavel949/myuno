@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { usePropertyComplexes } from '@/hooks/usePropertyComplexes';
+import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,7 @@ export default function OwnerCalendar() {
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
-  const [selectedComplexId, setSelectedComplexId] = useState<string>('all');
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
   // Default to multi on desktop (checked via initial window width)
   const [viewMode, setViewMode] = useState<ViewMode>(() => 
     typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
@@ -36,20 +37,33 @@ export default function OwnerCalendar() {
   
   const { allProperties, isLoading: propertiesLoading } = useMyProperties();
   const { data: complexes } = usePropertyComplexes();
+  const { data: projects } = usePropertyProjects();
 
-  // Complexes that actually have properties assigned
-  const activeComplexes = useMemo(() => {
-    if (!complexes) return [];
+  // Build unified grouping options from both complexes and projects
+  const groupOptions = useMemo(() => {
+    const options: { id: string; label: string; type: 'complex' | 'project' }[] = [];
+    
+    // Complexes that have properties
     const usedComplexIds = new Set(allProperties.filter(p => p.complex_id).map(p => p.complex_id));
-    return complexes.filter(c => usedComplexIds.has(c.id));
-  }, [complexes, allProperties]);
+    complexes?.filter(c => usedComplexIds.has(c.id)).forEach(c => {
+      options.push({ id: c.id, label: isRu ? (c.name_ru || c.name) : c.name, type: 'complex' });
+    });
 
-  // Filter properties by selected complex
+    // Projects that have properties
+    const usedProjectIds = new Set(allProperties.filter(p => p.project_id).map(p => p.project_id));
+    projects?.filter(p => usedProjectIds.has(p.id)).forEach(p => {
+      options.push({ id: p.id, label: isRu ? (p.name_ru || p.name_en) : p.name_en, type: 'project' });
+    });
+
+    return options;
+  }, [complexes, projects, allProperties, isRu]);
+
+  // Filter properties by selected group
   const filteredProperties = useMemo(() => {
-    if (selectedComplexId === 'all') return allProperties;
-    if (selectedComplexId === 'no-complex') return allProperties.filter(p => !p.complex_id);
-    return allProperties.filter(p => p.complex_id === selectedComplexId);
-  }, [allProperties, selectedComplexId]);
+    if (selectedGroupId === 'all') return allProperties;
+    if (selectedGroupId === 'no-group') return allProperties.filter(p => !p.complex_id && !p.project_id);
+    return allProperties.filter(p => p.complex_id === selectedGroupId || p.project_id === selectedGroupId);
+  }, [allProperties, selectedGroupId]);
 
   // Map to format expected by PropertyThumbnailSelector
   const propertyRefs = useMemo(() =>
@@ -122,22 +136,22 @@ export default function OwnerCalendar() {
       {isMulti ? (
         /* Multi-property timeline view */
         <div className="space-y-3">
-          {/* Complex filter */}
-          {activeComplexes.length > 0 && (
+          {/* Project / Complex filter */}
+          {groupOptions.length > 0 && (
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
+              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
                 <SelectTrigger className="h-8 text-xs w-auto min-w-[160px]">
-                  <SelectValue placeholder={isRu ? 'Все комплексы' : 'All complexes'} />
+                  <SelectValue placeholder={isRu ? 'Все проекты' : 'All projects'} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{isRu ? 'Все объекты' : 'All properties'}</SelectItem>
-                  {activeComplexes.map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {isRu ? (c.name_ru || c.name) : c.name}
+                  {groupOptions.map(g => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {g.label}
                     </SelectItem>
                   ))}
-                  <SelectItem value="no-complex">{isRu ? 'Без комплекса' : 'No complex'}</SelectItem>
+                  <SelectItem value="no-group">{isRu ? 'Без проекта' : 'No project'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
