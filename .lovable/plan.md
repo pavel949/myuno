@@ -1,71 +1,76 @@
 
+# Unified Task & Team Management Hub
 
-# Реорганизация боковой панели Owner/УК
+## Problem Analysis
 
-## Проблема
+Currently, the system has fragmented task management:
+- **CRM Tasks** (`/owner/tasks`) -- business tasks (calls, meetings, follow-ups) in a narrow mobile layout (`max-w-lg`)
+- **Operational Tasks** (`/owner/operations`) -- property service tasks (check-in, cleaning, maintenance)
+- **Staff Page** (`/owner/staff`) -- employee directory with no task visibility
+- No way to see all tasks across both systems in one place
+- CRM Tasks lack descriptions, comments, and subtask support
+- Staff cards don't show assigned/pending tasks count
 
-Блок **"Коммерция"** (Rate Seasons, Reviews, Insurance & Docs) — искусственная группа из несвязанных функций:
-- Тарифы — это ценообразование, логически относится к Revenue/Finance
-- Отзывы — это работа с гостями, логически относится к CRM
-- Страховки и документы — это комплаенс, логически относится к Operations
+## Plan
 
-У крупных PMS-платформ (Guesty, Hostaway, Cloudbeds, Lodgify) навигация строится по **бизнес-процессам**, а не по абстрактным категориям.
+### 1. Unified Task Hub (`/owner/tasks`)
 
-## Предлагаемая структура (5 групп вместо 6)
+Replace the narrow CrmTasksPage with a full-width task command center containing 3 tabs:
 
-```text
-ГЛАВНОЕ (Main)
-├── Dashboard
-├── Properties
-├── Calendar
-└── Inbox / Messages
+| Tab | Content |
+|---|---|
+| **Business Tasks** | CRM tasks (calls, meetings, deals) -- current crm_tasks data |
+| **Operations** | Property operational tasks (cleaning, check-in/out, maintenance) -- current operational_tasks data |
+| **All** | Combined feed sorted by due date, with type badges |
 
-CRM И ПРОДАЖИ (CRM & Sales)
-├── Sales Pipeline
-├── Contacts
-├── Reviews              ← перенос из "Коммерция"
-└── CRM Settings
+Key improvements:
+- Full-width layout using `PageContainer` instead of `max-w-lg`
+- Task cards show description, assigned person name, and linked property
+- Click on a task opens a detail sheet with: edit fields, notes/comments text area, completion button
+- Quick inline status toggle (pending -> in_progress -> done)
+- Summary KPI row: Overdue / Today / This Week / Completed
 
-ОПЕРАЦИИ (Operations)
-├── Tasks
-├── Inventory
-├── Vendors
-└── Insurance & Docs     ← перенос из "Коммерция"
+### 2. Enhanced Task Creation
 
-ФИНАНСЫ (Finance)
-├── Rate Seasons          ← перенос из "Коммерция"
-├── Income & Expenses
-├── Invoices
-└── Analytics & Reports
+Upgrade the "New Task" sheet:
+- Add **Description** textarea field
+- Add toggle: "Business Task" vs "Operational Task" to route to correct table
+- For operational tasks: show property selector + task type (cleaning, maintenance, etc.)
+- For business tasks: show CRM type grid (call, meeting, follow-up) + contact/deal link
+- Keep existing fields: priority, due date, assign to team member
 
-КОМАНДА (Team)
-└── Staff & Access
-```
+### 3. Staff + Tasks Integration
 
-## Обоснование
+On the Staff Page (`/owner/staff`), add to each StaffCard:
+- A badge showing count of active tasks assigned to that staff member
+- A "View Tasks" action in the dropdown menu that navigates to `/owner/tasks?assignee={staffId}`
+- Task filter on the unified hub accepts `assignee` query param
 
-| Элемент | Было | Стало | Почему |
-|---------|------|-------|--------|
-| Rate Seasons | Commerce | Finance | Тарифы = ценообразование = деньги. В Guesty/Hostaway pricing живёт в Revenue Management |
-| Reviews | Commerce | CRM & Sales | Отзывы = работа с гостями = CRM. В Cloudbeds reviews привязаны к Guest Relations |
-| Insurance & Docs | Commerce | Operations | Страховки = compliance = операционная поддержка объектов |
-| Messages/Inbox | нет в сайдбаре | Main | У всех PMS Inbox — один из главных пунктов навигации |
+### 4. Task Detail Sheet
 
-## Технические изменения
+New component `TaskDetailSheet.tsx`:
+- Title (editable inline)
+- Status selector (Pending / In Progress / Done)
+- Priority selector
+- Due date picker
+- Assignee selector (from company members)
+- Property link
+- Description textarea
+- Simple notes/activity log (stored in `crm_tasks.description` for business tasks)
+- Complete / Delete actions
 
-### 1. `src/components/owner/OwnerSidebar.tsx`
-- Удалить группу "Commerce" целиком
-- Добавить "Messages" в группу "Main" (`/owner/messages`, иконка `MessageSquare`)
-- Перенести "Reviews" в группу "CRM & Sales" (между Contacts и CRM Settings)
-- Перенести "Rate Seasons" в группу "Finance" (первым пунктом, перед Income & Expenses)
-- Перенести "Insurance & Docs" в группу "Operations" (после Vendors)
+## Technical Details
 
-### 2. `src/components/owner/dashboard/OwnerDashboardMenu.tsx`
-- Синхронизировать мобильное меню с новой структурой сайдбара (те же 5 групп)
+### Files to Create
+- `src/components/owner/tasks/UnifiedTaskHub.tsx` -- main 3-tab layout
+- `src/components/owner/tasks/TaskDetailSheet.tsx` -- task detail/edit sheet
+- `src/components/owner/tasks/TaskSummaryKPIs.tsx` -- overdue/today/week counters
 
-### 3. `src/components/owner/OwnerMobileNav.tsx`
-- Без изменений (нижняя панель уже содержит 4 ключевых пункта)
+### Files to Modify
+- `src/pages/owner/CrmTasksPage.tsx` -- replace with unified hub wrapper
+- `src/pages/owner/StaffPage.tsx` -- add task count badges and "View Tasks" action to StaffCard
+- `src/hooks/useCrmTasks.ts` -- add `assigned_to` filter support and description update
+- `src/components/owner/OwnerSidebar.tsx` -- consolidate: rename "Tasks" in Operations group, ensure single entry point
 
-### 4. `src/lib/businessRoles.ts`
-- Без изменений (виджеты дашборда не зависят от структуры сайдбара)
-
+### No Database Changes Required
+Both `crm_tasks` and `property_operational_tasks` tables already have the needed columns (status, priority, due_date, assigned_to, description, property_id). The plan uses existing data infrastructure.
