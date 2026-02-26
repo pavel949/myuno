@@ -132,7 +132,7 @@ export default function OwnerPropertyDetail() {
         </CardContent>
       </Card>
 
-      <MarketplaceStatusCard propertyId={property.id} approvalStatus={property.approval_status} rejectionReason={property.rejection_reason} isRu={isRu} />
+      <MarketplaceStatusCard propertyId={property.id} approvalStatus={property.approval_status} rejectionReason={property.rejection_reason} isActive={property.is_active} isRu={isRu} />
 
       <PropertyQuickActions propertyId={property.id} isRu={isRu} />
 
