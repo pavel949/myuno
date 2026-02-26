@@ -26,6 +26,7 @@ export interface UnifiedProperty {
   source: 'owned' | 'managed';
   complex_id: string | null;
   project_id: string | null;
+  property_type: string | null;
 }
 
 export function useMyProperties() {
@@ -54,6 +55,7 @@ export function useMyProperties() {
       source: 'owned' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
+      property_type: p.property_type || null,
     }));
   }, [ownedRaw]);
 
@@ -74,6 +76,7 @@ export function useMyProperties() {
       source: 'managed' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
+      property_type: (p as any).property_type || null,
     }));
   }, [managedRaw]);
 
