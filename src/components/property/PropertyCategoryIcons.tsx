@@ -1,10 +1,12 @@
+/**
+ * PropertyCategoryIcons — Airbnb-style filter ribbon for property search.
+ * Derives icons from the canonical PROPERTY_FEATURE_GROUPS taxonomy
+ * so guest filters always match what owners/managers set on properties.
+ */
 import React from 'react';
-import {
-  Waves, Footprints, Eye, Droplets, Lock,
-  WashingMachine, PawPrint, Baby, Car, Wifi, Sparkles
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PROPERTY_FEATURE_GROUPS, PROPERTY_FEATURE_MAP, type PropertyFeature } from '@/lib/config/propertyFeatures';
 
 export interface PropertyCategory {
   id: string;
@@ -13,19 +15,37 @@ export interface PropertyCategory {
   labelRu: string;
 }
 
-const CATEGORIES: PropertyCategory[] = [
-  { id: 'beachfront', icon: Waves, labelEn: 'Beachfront', labelRu: 'У пляжа' },
-  { id: 'walk_to_beach', icon: Footprints, labelEn: 'Walk to beach', labelRu: 'Пешком до пляжа' },
-  { id: 'sea_view', icon: Eye, labelEn: 'Sea View', labelRu: 'Вид на море' },
-  { id: 'private_pool', icon: Lock, labelEn: 'Private pool', labelRu: 'Свой бассейн' },
-  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Бассейн' },
-  { id: 'washer', icon: WashingMachine, labelEn: 'Washer', labelRu: 'Стиралка' },
-  { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pets OK', labelRu: 'С питомцами' },
-  { id: 'kid_friendly', icon: Baby, labelEn: 'Kids', labelRu: 'Для детей' },
-  { id: 'parking', icon: Car, labelEn: 'Parking', labelRu: 'Парковка' },
-  { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
-  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс' },
-];
+/**
+ * Curated subset of the canonical feature taxonomy shown on the guest ribbon.
+ * Every ID here MUST exist in PROPERTY_FEATURE_GROUPS so owner ↔ guest filters stay in sync.
+ */
+const RIBBON_FEATURE_IDS = [
+  'beachfront',
+  'walk_to_beach',
+  'sea_view',
+  'private_pool',
+  'pool',
+  'washer',
+  'pet_friendly',
+  'kid_friendly',
+  'parking',
+  'wifi',
+  'luxury',
+  'air_conditioning',
+  'gym',
+  'jacuzzi',
+] as const;
+
+/** Build the ribbon from the canonical map — guarantees IDs match */
+const CATEGORIES: PropertyCategory[] = RIBBON_FEATURE_IDS
+  .map(id => PROPERTY_FEATURE_MAP.get(id))
+  .filter((f): f is PropertyFeature => !!f)
+  .map(f => ({
+    id: f.id,
+    icon: f.icon as React.ElementType,
+    labelEn: f.labelEn,
+    labelRu: f.labelRu,
+  }));
 
 interface PropertyCategoryIconsProps {
   selected: string[];
@@ -85,7 +105,8 @@ export function PropertyCategoryIcons({ selected, onSelect, className }: Propert
 }
 
 /**
- * Matches a property against a category by checking amenities, highlights, view_type, and property_type.
+ * Matches a property against a category by checking highlights and amenities.
+ * Uses the canonical feature IDs from propertyFeatures.ts.
  */
 export function matchesCategory(property: {
   amenities?: string[];
@@ -98,16 +119,17 @@ export function matchesCategory(property: {
   const highlights = (property.highlights || []).map(h => h.toLowerCase());
   const all = [...amenities, ...highlights];
   const viewType = (property.view_type || '').toLowerCase();
-  const propertyType = (property.property_type || '').toLowerCase();
 
+  // Direct match — owner chose this exact feature ID
+  if (all.includes(categoryId)) return true;
+
+  // Fuzzy fallback for legacy / free-text amenities
   switch (categoryId) {
     case 'beachfront':
-      return all.some(a => a.includes('beach'));
+      return all.some(a => a.includes('beach') && (a.includes('front') || a === 'beachfront'));
     case 'walk_to_beach':
       return all.some(a =>
-        a.includes('walk') && a.includes('beach') ||
-        a.includes('walking_to_beach') ||
-        a.includes('beach_close') ||
+        (a.includes('walk') && a.includes('beach')) ||
         a.includes('near beach') ||
         a.includes('close to beach')
       );
@@ -118,7 +140,7 @@ export function matchesCategory(property: {
     case 'pool':
       return all.some(a => a.includes('pool') || a.includes('swimming'));
     case 'washer':
-      return all.some(a => a.includes('washer') || a.includes('washing machine') || a.includes('laundry'));
+      return all.some(a => a.includes('washer') || a.includes('washing') || a.includes('laundry'));
     case 'pet_friendly':
       return all.some(a => a.includes('pet'));
     case 'kid_friendly':
@@ -129,6 +151,12 @@ export function matchesCategory(property: {
       return all.some(a => a.includes('wifi') || a.includes('wi-fi') || a.includes('internet'));
     case 'luxury':
       return all.some(a => a.includes('luxury') || a.includes('premium'));
+    case 'air_conditioning':
+      return all.some(a => a.includes('air') || a.includes('ac') || a.includes('conditioning'));
+    case 'gym':
+      return all.some(a => a.includes('gym') || a.includes('fitness'));
+    case 'jacuzzi':
+      return all.some(a => a.includes('jacuzzi') || a.includes('hot tub'));
     default:
       return false;
   }
