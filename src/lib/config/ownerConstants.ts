@@ -72,7 +72,7 @@ export const MANAGEMENT_TYPE_OPTIONS = [
     value: 'full',
     labelEn: `Full Management (${OWNER_REVENUE.FULL_MANAGEMENT.labelEn})`,
     labelRu: `Полное управление (${OWNER_REVENUE.FULL_MANAGEMENT.labelRu})`,
-    desc: 'UNO handles everything',
+    desc: 'myUNO handles everything',
   },
   {
     value: 'partial',

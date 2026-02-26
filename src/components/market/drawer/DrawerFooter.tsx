@@ -42,7 +42,7 @@ export function DrawerFooter() {
           
           {/* Version + Edition */}
           <span className="text-[10px] text-muted-foreground">
-            Phuket Edition v1.0
+            myUNO · Phuket Edition
           </span>
         </div>
 

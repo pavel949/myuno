@@ -110,7 +110,7 @@ const navigationItems: CommandItem[] = [
   // System
   { id: 'providers', titleEn: 'Providers', titleRu: 'Провайдеры', path: '/admin/providers', icon: Users, group: 'navigation', keywords: ['vendor', 'partner', 'business'] },
   { id: 'services', titleEn: 'Services', titleRu: 'Услуги', path: '/admin/services', icon: Package, group: 'navigation', keywords: ['product', 'offering'] },
-  { id: 'uno-team', titleEn: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users, group: 'navigation', keywords: ['staff', 'employee'] },
+  { id: 'uno-team', titleEn: 'myUNO Team', titleRu: 'Команда myUNO', path: '/admin/uno-team', icon: Users, group: 'navigation', keywords: ['staff', 'employee'] },
   { id: 'cities', titleEn: 'Cities', titleRu: 'Города', path: '/admin/cities', icon: Globe, group: 'navigation', keywords: ['location', 'region'] },
   { id: 'lookups', titleEn: 'Lookup Tables', titleRu: 'Справочники', path: '/admin/lookups', icon: Settings, group: 'navigation', keywords: ['config', 'dictionary'] },
   { id: 'partner-applications', titleEn: 'Partner Applications', titleRu: 'Заявки партнеров', path: '/admin/partner-applications', icon: FileText, group: 'navigation', keywords: ['application', 'request'] },
