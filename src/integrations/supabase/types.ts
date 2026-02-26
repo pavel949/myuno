@@ -15223,6 +15223,61 @@ export type Database = {
           },
         ]
       }
+      property_notes: {
+        Row: {
+          author_id: string
+          category: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          note: string
+          property_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          note: string
+          property_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          note?: string
+          property_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_operational_tasks: {
         Row: {
           assigned_to: string | null
