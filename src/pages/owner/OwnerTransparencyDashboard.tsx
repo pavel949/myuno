@@ -11,10 +11,12 @@ import { useSupabaseSingle } from '@/hooks/useSupabaseQuery';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, Shield } from 'lucide-react';
-import { OwnerKPISummary } from '@/components/owner/transparency/OwnerKPISummary';
+import { OwnerOverviewTab } from '@/components/owner/transparency/OwnerOverviewTab';
 import { ActivityFeed } from '@/components/owner/transparency/ActivityFeed';
 import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab';
 import { OwnerBookingsTab } from '@/components/owner/transparency/OwnerBookingsTab';
+import { OwnerTermsTab } from '@/components/owner/transparency/OwnerTermsTab';
+import { OwnerNotificationBell } from '@/components/owner/transparency/OwnerNotificationBell';
 
 export default function OwnerTransparencyDashboard() {
   const { propertyId } = useParams<{ propertyId: string }>();
@@ -83,6 +85,7 @@ export default function OwnerTransparencyDashboard() {
             {isRu ? 'Режим просмотра — только чтение' : 'Read-only view'}
           </div>
         </div>
+        <OwnerNotificationBell />
       </div>
 
       {/* Cover image */}
@@ -92,16 +95,19 @@ export default function OwnerTransparencyDashboard() {
         </div>
       )}
 
-      {/* KPI Summary */}
-      <OwnerKPISummary propertyId={propertyId!} />
-
       {/* Tabs */}
-      <Tabs defaultValue="activity" className="w-full">
+      <Tabs defaultValue="overview" className="w-full">
         <TabsList className="w-full">
-          <TabsTrigger value="activity">{isRu ? 'Активность' : 'Activity'}</TabsTrigger>
+          <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
+          <TabsTrigger value="activity">{isRu ? 'Лента' : 'Activity'}</TabsTrigger>
           <TabsTrigger value="finance">{isRu ? 'Финансы' : 'Finance'}</TabsTrigger>
-          <TabsTrigger value="bookings">{isRu ? 'Бронирования' : 'Bookings'}</TabsTrigger>
+          <TabsTrigger value="bookings">{isRu ? 'Брони' : 'Bookings'}</TabsTrigger>
+          <TabsTrigger value="terms">{isRu ? 'Условия' : 'Terms'}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview">
+          <OwnerOverviewTab propertyId={propertyId!} />
+        </TabsContent>
 
         <TabsContent value="activity">
           <ActivityFeed propertyId={propertyId!} />
@@ -113,6 +119,10 @@ export default function OwnerTransparencyDashboard() {
 
         <TabsContent value="bookings">
           <OwnerBookingsTab propertyId={propertyId!} />
+        </TabsContent>
+
+        <TabsContent value="terms">
+          <OwnerTermsTab propertyId={propertyId!} />
         </TabsContent>
       </Tabs>
     </div>

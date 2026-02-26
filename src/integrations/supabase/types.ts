@@ -10662,6 +10662,50 @@ export type Database = {
           },
         ]
       }
+      owner_notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          metadata: Json | null
+          owner_id: string
+          property_id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          owner_id: string
+          property_id: string
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          owner_id?: string
+          property_id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_notifications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_performance_metrics: {
         Row: {
           avg_rating: number | null
@@ -14246,6 +14290,7 @@ export type Database = {
       property_financials: {
         Row: {
           amount: number
+          approval_status: string | null
           category: string | null
           cost_source: string | null
           created_at: string
@@ -14278,6 +14323,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          approval_status?: string | null
           category?: string | null
           cost_source?: string | null
           created_at?: string
@@ -14310,6 +14356,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          approval_status?: string | null
           category?: string | null
           cost_source?: string | null
           created_at?: string
@@ -14884,6 +14931,7 @@ export type Database = {
       }
       property_management_terms: {
         Row: {
+          approval_threshold: number | null
           commission_amount: number | null
           commission_base: string
           commission_rate: number | null
@@ -14904,6 +14952,7 @@ export type Database = {
           valid_until: string | null
         }
         Insert: {
+          approval_threshold?: number | null
           commission_amount?: number | null
           commission_base?: string
           commission_rate?: number | null
@@ -14924,6 +14973,7 @@ export type Database = {
           valid_until?: string | null
         }
         Update: {
+          approval_threshold?: number | null
           commission_amount?: number | null
           commission_base?: string
           commission_rate?: number | null

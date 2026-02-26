@@ -70,12 +70,28 @@ function formatTime(dateStr: string, isRu: boolean) {
   return format(d, 'd MMM', { locale: isRu ? ru : undefined });
 }
 
+const FILTER_OPTIONS = [
+  { key: 'all', en: 'All', ru: 'Все' },
+  { key: 'booking', en: 'Bookings', ru: 'Брони' },
+  { key: 'finance', en: 'Finance', ru: 'Финансы' },
+  { key: 'task', en: 'Tasks', ru: 'Задачи' },
+] as const;
+
+function matchFilter(action: string, filter: string) {
+  if (filter === 'all') return true;
+  if (filter === 'booking') return action.startsWith('booking_');
+  if (filter === 'finance') return action === 'income_recorded' || action === 'expense_recorded';
+  if (filter === 'task') return action.startsWith('task_') || action.startsWith('service_request_');
+  return true;
+}
+
 interface ActivityFeedProps {
   propertyId: string;
   limit?: number;
 }
 
 export function ActivityFeed({ propertyId, limit = 50 }: ActivityFeedProps) {
+  const [filter, setFilter] = React.useState('all');
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: activities = [], isLoading, refetch } = usePropertyActivityLog(propertyId, limit);
@@ -124,15 +140,25 @@ export function ActivityFeed({ propertyId, limit = 50 }: ActivityFeedProps) {
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground">
-          {isRu ? 'Лента активности' : 'Activity Feed'}
-        </h3>
+      {/* Filters */}
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        {FILTER_OPTIONS.map(f => (
+          <Button
+            key={f.key}
+            variant={filter === f.key ? 'default' : 'outline'}
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setFilter(f.key)}
+          >
+            {isRu ? f.ru : f.en}
+          </Button>
+        ))}
+        <div className="flex-1" />
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => refetch()}>
           <RefreshCw className="w-3.5 h-3.5" />
         </Button>
       </div>
-      {activities.map((entry) => {
+      {activities.filter(e => matchFilter(e.action, filter)).map((entry) => {
         const config = getActionConfig(entry.action);
         const Icon = config.icon;
         const detail = formatActivityDetail(entry, isRu);
