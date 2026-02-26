@@ -10,6 +10,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { Home, Plus, Download, Building2, Users } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useState } from 'react';
 
 
 export default function OwnerProperties() {
@@ -17,6 +31,9 @@ export default function OwnerProperties() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { roles } = useUserRoles();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   
   const isPropertyManager = roles?.some(r => r.role === 'property_manager');
   const RoleIcon = isPropertyManager ? Users : Building2;
@@ -36,6 +53,38 @@ export default function OwnerProperties() {
 
   const handleDuplicate = (id: string) => {
     navigate(`/owner/properties/new?cloneFrom=${id}`);
+  };
+
+  const handleToggleActive = async (id: string, activate: boolean) => {
+    const { error } = await supabase
+      .from('properties')
+      .update({ is_active: activate })
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    } else {
+      toast({ title: activate ? (isRu ? 'Объект активирован' : 'Property activated') : (isRu ? 'Объект деактивирован' : 'Property deactivated') });
+      queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase
+      .from('properties')
+      .delete()
+      .eq('id', deleteTarget);
+
+    if (error) {
+      toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isRu ? 'Объект удалён' : 'Property deleted' });
+      queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+    }
+    setDeleteTarget(null);
   };
 
   return (
@@ -111,7 +160,10 @@ export default function OwnerProperties() {
                 onView={() => handleView(property.property_id)}
                 onEdit={() => handleEdit(property.property_id)}
                 onDuplicate={() => handleDuplicate(property.property_id)}
+                onToggleActive={(_, activate) => handleToggleActive(property.property_id, activate)}
+                onDelete={() => setDeleteTarget(property.property_id)}
                 showApprovalStatus
+                showInstantBadge
                 showProtectionBadge
                 showMarketplaceBadge
               />
@@ -119,6 +171,26 @@ export default function OwnerProperties() {
           ))}
         </div>
       )}
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{isRu ? 'Удалить объект?' : 'Delete property?'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu 
+                ? 'Это действие необратимо. Все данные объекта, включая бронирования и финансовую историю, будут удалены.'
+                : 'This action cannot be undone. All property data including bookings and financial history will be deleted.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isRu ? 'Удалить' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
