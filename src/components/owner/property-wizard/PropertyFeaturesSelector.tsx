@@ -1,13 +1,13 @@
 /**
- * PropertyFeaturesSelector — Reusable grid of tappable feature chips
- * Uses PROPERTY_CATEGORIES from the search ribbon as single source of truth
+ * PropertyFeaturesSelector — Grouped feature chips for property wizard
+ * Uses comprehensive taxonomy from propertyFeatures.ts
  */
 import { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { PROPERTY_CATEGORIES } from '@/components/property/PropertyCategoryIcons.ribbon';
+import { PROPERTY_FEATURE_GROUPS } from '@/lib/config/propertyFeatures';
 import { Sparkles } from 'lucide-react';
 
 interface PropertyFeaturesSelectorProps {
@@ -20,7 +20,7 @@ interface PropertyFeaturesSelectorProps {
 function PropertyFeaturesSelectorInner({
   highlights,
   onChange,
-  maxHighlights = 6,
+  maxHighlights = 12,
   className,
 }: PropertyFeaturesSelectorProps) {
   const { language } = useLanguage();
@@ -47,30 +47,37 @@ function PropertyFeaturesSelectorInner({
             : `Select up to ${maxHighlights} (${highlights.length}/${maxHighlights})`}
         </p>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2">
-          {PROPERTY_CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isSelected = highlights.includes(cat.id);
-            const isDisabled = !isSelected && highlights.length >= maxHighlights;
+      <CardContent className="space-y-4">
+        {PROPERTY_FEATURE_GROUPS.map((group) => (
+          <div key={group.groupId}>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              {isRu ? group.labelRu : group.labelEn}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {group.features.map((feat) => {
+                const Icon = feat.icon;
+                const isSelected = highlights.includes(feat.id);
+                const isDisabled = !isSelected && highlights.length >= maxHighlights;
 
-            return (
-              <Badge
-                key={cat.id}
-                variant={isSelected ? 'default' : 'outline'}
-                className={cn(
-                  'cursor-pointer gap-1.5 py-1.5 px-3 transition-all text-sm',
-                  isDisabled && 'opacity-50 cursor-not-allowed',
-                  isSelected && 'ring-2 ring-primary/20',
-                )}
-                onClick={() => !isDisabled && toggle(cat.id)}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {isRu ? cat.labelRu : cat.labelEn}
-              </Badge>
-            );
-          })}
-        </div>
+                return (
+                  <Badge
+                    key={feat.id}
+                    variant={isSelected ? 'default' : 'outline'}
+                    className={cn(
+                      'cursor-pointer gap-1.5 py-1.5 px-2.5 transition-all text-xs',
+                      isDisabled && 'opacity-40 cursor-not-allowed',
+                      isSelected && 'ring-2 ring-primary/20',
+                    )}
+                    onClick={() => !isDisabled && toggle(feat.id)}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {isRu ? feat.labelRu : feat.labelEn}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
