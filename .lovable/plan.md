@@ -1,83 +1,72 @@
 
 
-# Снижение когнитивной нагрузки на главной (Desktop)
+# Микроэффекты для главной страницы — в стиле myUNO
 
-## Диагноз
+## Принцип
 
-Сейчас на десктопе **11 секций** идут одной колонкой сверху вниз. Основные проблемы:
+Все эффекты подчиняются бренд-буку: "Как этот эффект снижает тревогу?" Никаких декоративных анимаций ради анимаций. Только те, что дают обратную связь, направляют внимание или создают ощущение "всё под контролем".
 
-1. **Два дублирующих CTA** -- "Browse Full Catalog" и "All Services & Situations" ведут примерно туда же
-2. **Две карусели подряд** -- QuickSolutionsGallery + Products carousel сливаются визуально
-3. **PropertyTourBanner** -- крупный промо-баннер разрывает контент
-4. **Нет desktop-сетки** -- широкий экран 1536px не используется, всё в одну колонку
-5. **Your Day + Smart Tip** -- два информационных блока рядом, но не сгруппированы
+## Что добавить
 
-## Решение: "Calm Grid" layout для десктопа
+### 1. Scroll-triggered reveal для секций главной
 
-### 1. Desktop 2-column grid для средней зоны
+Секции (Quick Actions, YourDayFeed, Solutions, Trust) появляются плавно при скролле вместо мгновенного рендера. Используем `IntersectionObserver` через легковесный хук `useScrollReveal`.
 
-На экранах `lg+` организовать контент в сетку:
+- Эффект: `opacity 0 -> 1` + `translateY(12px -> 0)` за 300ms
+- Порог: 15% видимости элемента
+- Однократно (не реверсируется при скролле вверх)
+- Реализация: обёртка `<RevealOnScroll>` в `Index.tsx` вокруг каждой секции
 
-```text
-+-----------------------------------------------+
-|              HERO (full width)                 |
-+-----------------------------------------------+
-|          QUICK ACTIONS (full width)            |
-+-----------------------------------------------+
-|                                                |
-|   YOUR DAY FEED        |   SMART TIP          |
-|   (main column 2/3)    |   + CONCIERGE        |
-|                         |   + PROPERTY TOUR    |
-|                         |   (sidebar 1/3)      |
-|                         |                      |
-+-----------------------------------------------+
-|     SOLUTIONS GALLERY (full width carousel)    |
-+-----------------------------------------------+
-|   TRUST + EMERGENCY (inline strip)             |
-+-----------------------------------------------+
-```
+### 2. Staggered появление Quick Actions
 
-### 2. Убрать дублирующие CTA
+8 иконок Quick Actions появляются каскадом (50ms между каждой) вместо одновременного рендера. Создаёт ощущение "система загружается для вас".
 
-- **Удалить** `DiscoverCTABanner` -- дублирует кнопку "Browse Full Catalog" и "More" в QuickActions
-- **Объединить** "Browse Full Catalog" в заголовок секции Solutions как "See All" ссылку
+- Реализация: добавить `framer-motion` stagger в `QuickActionsGrid.tsx` с использованием существующих `staggerContainerVariants` / `staggerItemVariants` из `motionPresets.ts`
 
-### 3. Sidebar-блок вместо вертикального потока
+### 3. Skeleton-to-content crossfade
 
-На десктопе перенести в правую колонку (sticky sidebar):
-- `LifecycleSmartTip` -- контекстная подсказка
-- `ConciergeBanner` -- "Need help?"
-- `PropertyTourBanner` -- промо (уменьшенный вариант)
+В `YourDayFeed` и других блоках с загрузкой, заменить мгновенное переключение skeleton -> content на плавный `opacity` переход (200ms).
 
-Это освобождает основной поток и группирует "вспомогательный" контент отдельно.
+- Реализация: обернуть контент в `<motion.div>` с `fadeInVariants` из `motionPresets.ts`
 
-### 4. Trust + Emergency -- горизонтальная полоса
+### 4. Hover-эффект на карточках YourDayFeed
 
-Вместо двух отдельных блоков, на десктопе объединить Trust и Emergency в одну горизонтальную полосу внизу: `Verified | 50+ providers | 24/7 support | Emergency SOS`
+Карточки дня (`DayItemCard`) при наведении слегка приподнимаются (`-translate-y-0.5`) с усилением тени. Уже есть `hover:shadow-md`, добавить `hover:-translate-y-0.5 transition-all duration-150`.
 
-### 5. Увеличить "воздух" между секциями
+### 5. Число провайдеров в TrustBanner — анимированный счётчик
 
-Увеличить `lg:space-y-12` до `lg:space-y-16` для более "дышащего" ощущения.
+Когда число загружается (от `...` до реального числа), оно плавно "проявляется" через opacity-переход. Простой и элегантный, без "бегущих цифр".
+
+---
+
+## Что НЕ делать (по бренд-буку)
+
+- Нет parallax-эффектов
+- Нет bouncing/pulsing анимаций
+- Нет цветных градиентных переходов
+- Нет анимированных иконок (вращение, покачивание)
 
 ---
 
 ## Технический план
 
-### Файл 1: `src/pages/Index.tsx`
-- Добавить `useIsDesktop()` hook
-- На desktop: обернуть YourDayFeed + sidebar-блоки в `lg:grid lg:grid-cols-3 lg:gap-8`
-- Удалить `DiscoverCTABanner` из потока
-- Объединить Trust + Emergency в одну строку на desktop
+### Файл 1 (новый): `src/hooks/useScrollReveal.ts`
+Хук на `IntersectionObserver`, возвращает `ref` и `isVisible`. Респектует `prefers-reduced-motion`.
 
-### Файл 2: `src/components/home/HomeProductsSection.tsx`
-- Убрать отдельную кнопку "Browse Full Catalog"
-- Добавить "See All" ссылку в заголовок QuickSolutionsGallery
+### Файл 2 (новый): `src/components/ui/RevealOnScroll.tsx`
+Обёртка-компонент: принимает `children`, рендерит с `opacity/transform` анимацией при пересечении viewport.
 
-### Файл 3: `src/components/home/TrustBanner.tsx`
-- Добавить слот для Emergency-контента на desktop (4-я колонка)
+### Файл 3: `src/pages/Index.tsx`
+Обернуть каждую секцию (QuickActions, Grid, Products, Trust) в `<RevealOnScroll>`.
+
+### Файл 4: `src/components/home/QuickActionsGrid.tsx`
+Добавить `motion.div` container + stagger для кнопок Quick Actions.
+
+### Файл 5: `src/components/shared/YourDayFeed.tsx`
+Добавить `motion.div` с `fadeInVariants` при переходе от skeleton к контенту. Добавить `hover:-translate-y-0.5` на `DayItemCard`.
+
+### Файл 6: `src/components/home/TrustBanner.tsx`
+Добавить `transition-opacity` на значение счётчика провайдеров.
 
 ### Результат
-- С 11 визуальных блоков до 6 на desktop
-- Чёткая иерархия: Hero → Actions → Daily Brief (+ sidebar) → Solutions → Trust
-- "Confident, clean, premium" -- в соответствии с дизайн-системой
-
+5 тонких, целенаправленных эффектов. Все respektируют `prefers-reduced-motion`. Все соответствуют принципу "confident, clean, premium".
