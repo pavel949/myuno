@@ -41,6 +41,7 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
       { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
+      { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
     ],
   },
   {
@@ -50,14 +51,6 @@ const MENU_SECTIONS: MenuSection[] = [
       { path: '/owner/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи' },
       { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
       { path: '/owner/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики' },
-    ],
-  },
-  {
-    titleEn: 'Commerce',
-    titleRu: 'Коммерция',
-    items: [
-      { path: '/owner/rates', icon: Tag, labelEn: 'Rate Seasons', labelRu: 'Тарифы' },
-      { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
       { path: '/owner/insurance', icon: ShieldCheck, labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы' },
     ],
   },
@@ -65,9 +58,10 @@ const MENU_SECTIONS: MenuSection[] = [
     titleEn: 'Finance',
     titleRu: 'Финансы',
     items: [
+      { path: '/owner/rates', icon: Tag, labelEn: 'Rate Seasons', labelRu: 'Тарифы' },
       { path: '/owner/financials', icon: DollarSign, labelEn: 'Income & Expenses', labelRu: 'Доходы и расходы' },
       { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Счета' },
-      { path: '/owner/analytics', icon: BarChart3, labelEn: 'Analytics', labelRu: 'Аналитика' },
+      { path: '/owner/analytics', icon: BarChart3, labelEn: 'Analytics & Reports', labelRu: 'Аналитика и отчёты' },
     ],
   },
   {

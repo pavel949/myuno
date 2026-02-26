@@ -20,6 +20,7 @@ import {
   Star,
   ShieldCheck,
   BarChart3,
+  MessageSquare,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -73,6 +74,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
       { title: 'Properties', titleRu: 'Объекты', path: '/owner/properties', icon: Building2 },
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
+      { title: 'Messages', titleRu: 'Сообщения', path: '/owner/messages', icon: MessageSquare },
     ],
   },
   {
@@ -82,6 +84,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
       { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
+      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
       { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/owner/sales/settings', icon: Settings },
     ],
   },
@@ -93,15 +96,6 @@ const navigationGroups: NavGroup[] = [
       { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
-    ],
-  },
-  {
-    label: 'Commerce',
-    labelRu: 'Коммерция',
-    defaultOpen: false,
-    items: [
-      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
-      { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/owner/insurance', icon: ShieldCheck },
     ],
   },
@@ -110,6 +104,7 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
+      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
       { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
       { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
       { title: 'Analytics & Reports', titleRu: 'Аналитика и отчёты', path: '/owner/analytics', icon: BarChart3 },
