@@ -6,6 +6,7 @@ import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTa
 import { PageContainer } from '@/components/uno/PageContainer';
 import { AddTeamMemberDialog } from '@/components/owner/team/AddTeamMemberDialog';
 import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
+import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ import {
   MoreVertical,
   UserCheck,
   Search,
+  History,
   ClipboardList,
 } from 'lucide-react';
 import {
@@ -178,6 +180,7 @@ function StaffCard({
   properties,
   onViewTasks,
   onEditPermissions,
+  onViewActivity,
 }: {
   staff: StaffMember;
   isRu: boolean;
@@ -187,6 +190,7 @@ function StaffCard({
   properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
   onEditPermissions: () => void;
+  onViewActivity: () => void;
 }) {
   const t = (en: string, ru: string) => isRu ? ru : en;
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
@@ -340,6 +344,10 @@ function StaffCard({
                 <ShieldCheck className="h-4 w-4 mr-2" />
                 {t('Permissions', 'Права доступа')}
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={onViewActivity}>
+                <History className="h-4 w-4 mr-2" />
+                {t('Activity Log', 'Лог активности')}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               {staff.is_active ? (
                 <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
@@ -382,6 +390,7 @@ export default function StaffPage() {
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string } | null>(null);
+  const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
   const navigate = useNavigate();
@@ -563,6 +572,7 @@ export default function StaffPage() {
               properties={allProperties}
               onViewTasks={() => navigate(`/owner/tasks?assignee=${s.id}`)}
               onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name })}
+              onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
             />
           ))}
         </div>
@@ -800,6 +810,14 @@ export default function StaffPage() {
         onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
         userId={permissionsTarget?.userId ?? null}
         userName={permissionsTarget?.name ?? ''}
+      />
+
+      {/* Member Activity Sheet */}
+      <MemberActivitySheet
+        open={!!activityTarget}
+        onOpenChange={(open) => { if (!open) setActivityTarget(null); }}
+        userId={activityTarget?.userId}
+        memberName={activityTarget?.name}
       />
     </PageContainer>
   );

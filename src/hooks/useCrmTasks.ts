@@ -106,8 +106,9 @@ export function useCreateCrmTask() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-tasks'] });
+      // Activity logging is handled by the caller if needed
     },
   });
 }
