@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
@@ -58,6 +59,7 @@ import {
   MoreVertical,
   UserCheck,
   Search,
+  ClipboardList,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -172,6 +174,7 @@ function StaffCard({
   onDeactivate,
   onReactivate,
   properties,
+  onViewTasks,
 }: {
   staff: StaffMember;
   isRu: boolean;
@@ -179,6 +182,7 @@ function StaffCard({
   onDeactivate: () => void;
   onReactivate: () => void;
   properties: { property_id: string; title: string; title_ru: string }[];
+  onViewTasks: () => void;
 }) {
   const t = (en: string, ru: string) => isRu ? ru : en;
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
@@ -324,6 +328,10 @@ function StaffCard({
                   </a>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem onClick={onViewTasks}>
+                <ClipboardList className="h-4 w-4 mr-2" />
+                {t('View Tasks', 'Задачи')}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               {staff.is_active ? (
                 <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
@@ -366,6 +374,7 @@ export default function StaffPage() {
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
 
   const t = (en: string, ru: string) => isRu ? ru : en;
+  const navigate = useNavigate();
 
   const shown = (staff ?? [])
     .filter(s => staffFilter === 'active' ? s.is_active : true)
@@ -542,6 +551,7 @@ export default function StaffPage() {
               onDeactivate={() => setDeactivateTarget(s)}
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
+              onViewTasks={() => navigate(`/owner/tasks?assignee=${s.id}`)}
             />
           ))}
         </div>
