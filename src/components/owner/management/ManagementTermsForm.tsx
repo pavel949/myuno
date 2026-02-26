@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Zap,
   Send,
+  Bell,
 } from 'lucide-react';
 import {
   ManagementTerms,
@@ -33,7 +34,35 @@ import {
   useUpdateManagementTerms,
 } from '@/hooks/usePropertyManagementTerms';
 import { useLogTermsActivity } from '@/hooks/useManagementTermsActivity';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+
+interface NotificationDefaults {
+  booking_created: boolean;
+  expense_recorded: boolean;
+  income_recorded: boolean;
+  service_request_created: boolean;
+  inspection_completed: boolean;
+  monthly_report: boolean;
+}
+
+const DEFAULT_NOTIFICATION_DEFAULTS: NotificationDefaults = {
+  booking_created: true,
+  expense_recorded: true,
+  income_recorded: true,
+  service_request_created: true,
+  inspection_completed: true,
+  monthly_report: true,
+};
+
+const NOTIFICATION_TYPE_LABELS: { key: keyof NotificationDefaults; en: string; ru: string }[] = [
+  { key: 'booking_created', en: 'New bookings', ru: 'Новые бронирования' },
+  { key: 'income_recorded', en: 'Income recorded', ru: 'Записи о доходах' },
+  { key: 'expense_recorded', en: 'Expenses recorded', ru: 'Записи о расходах' },
+  { key: 'service_request_created', en: 'Service requests', ru: 'Запросы на обслуживание' },
+  { key: 'inspection_completed', en: 'Inspections completed', ru: 'Завершённые осмотры' },
+  { key: 'monthly_report', en: 'Monthly digest', ru: 'Ежемесячный отчёт' },
+];
 
 interface ManagementTermsFormProps {
   propertyId: string;
@@ -172,6 +201,13 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
   }));
 
   const [presetApplied, setPresetApplied] = useState<string | null>(null);
+  const [notifDefaults, setNotifDefaults] = useState<NotificationDefaults>(() => {
+    const existing_defaults = (existing as any)?.owner_notification_defaults;
+    return existing_defaults ? { ...DEFAULT_NOTIFICATION_DEFAULTS, ...existing_defaults } : { ...DEFAULT_NOTIFICATION_DEFAULTS };
+  });
+  const toggleNotif = (key: keyof NotificationDefaults) => {
+    setNotifDefaults(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const update = (updates: Partial<ManagementTermsUpdate>) => {
     setForm(prev => ({ ...prev, ...updates }));
@@ -202,7 +238,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
   };
 
   const handleSave = async (status: 'draft' | 'active' | 'pending_approval' = 'active') => {
-    const payload = { ...form, status, property_id: propertyId };
+    const payload = { ...form, status, property_id: propertyId, owner_notification_defaults: notifDefaults } as any;
     try {
       let result: ManagementTerms;
       if (existing) {
@@ -594,12 +630,38 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* ── Section D: Notes ── */}
+      {/* ── Section D: Owner Notification Defaults ── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            {isRu ? 'D. Уведомления собственника' : 'D. Owner Notifications'}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            {isRu
+              ? 'Настройте, какие уведомления будет получать собственник по умолчанию'
+              : 'Configure which notifications the owner receives by default'}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {NOTIFICATION_TYPE_LABELS.map(item => (
+            <div key={item.key} className="flex items-center justify-between">
+              <Label className="text-sm font-normal">{isRu ? item.ru : item.en}</Label>
+              <Switch
+                checked={notifDefaults[item.key]}
+                onCheckedChange={() => toggleNotif(item.key)}
+              />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* ── Section E: Notes ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <StickyNote className="h-4 w-4" />
-            {isRu ? 'D. Примечания' : 'D. Notes'}
+            {isRu ? 'E. Примечания' : 'E. Notes'}
           </CardTitle>
         </CardHeader>
         <CardContent>
