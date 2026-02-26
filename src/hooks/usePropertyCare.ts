@@ -132,7 +132,7 @@ export function useCreateOwnerProperty() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: Partial<OwnerProperty>) => {
+    mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       
       // Get user profile for owner info
@@ -141,15 +141,33 @@ export function useCreateOwnerProperty() {
         .select('full_name, email')
         .eq('id', user.id)
         .single();
+
+      // Auto-detect management company if not explicitly provided
+      let managementCompanyId = (data as any).management_company_id || data._companyId || null;
+      if (!managementCompanyId) {
+        const { data: membership } = await supabase
+          .from('management_company_members')
+          .select('company_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+        if (membership) {
+          managementCompanyId = membership.company_id;
+        }
+      }
+
+      const { _companyId, ...restData } = data as any;
       
       const insertData = { 
-        ...data, 
+        ...restData, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
         title_en: data.title || data.address || 'New Property',
         title_ru: data.title_ru || data.title || 'Новый объект',
         listing_type: 'rent',
         listing_modes: data.listing_modes || ['rent'],
+        ...(managementCompanyId ? { management_company_id: managementCompanyId } : {}),
       };
       
       const { data: result, error } = await supabase
@@ -175,6 +193,7 @@ export function useCreateOwnerProperty() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['company-properties'] });
       toast.success('Объект добавлен!');
     },
     onError: (error) => {
