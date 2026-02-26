@@ -150,3 +150,6 @@ verify_jwt = false
 [functions.ai-platform-intelligence]
 verify_jwt = false
 
+[functions.invite-team-member]
+verify_jwt = false
+
