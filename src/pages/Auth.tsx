@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift, Phone, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift, Phone, ChevronLeft } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,10 +10,7 @@ import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { usePinAuth } from '@/hooks/usePinAuth';
-import { PinLogin } from '@/components/auth/PinLogin';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
-import { PinSetup } from '@/components/auth/PinSetup';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Validation schemas
@@ -21,7 +18,6 @@ const emailSchema = z.string().email();
 const passwordSchema = z.string().min(6);
 const phoneSchema = z.string().min(10).max(20);
 
-type AuthView = 'pin-login' | 'email-auth' | 'pin-setup';
 type SignupStep = 'info' | 'contact' | 'password';
 
 export default function Auth() {
@@ -36,72 +32,28 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string; fullName?: string; phone?: string }>({});
-  const [showPinSetup, setShowPinSetup] = useState(false);
   const [signupStep, setSignupStep] = useState<SignupStep>('info');
-  // Track failed login attempts to show "Forgot password?" hint
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const SHOW_FORGOT_AFTER = 3;
 
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canUsePinLogin, hasPin, isLoading: pinLoading } = usePinAuth();
   const isRu = language === 'ru';
   
   const redirectPath = (location.state as { from?: string })?.from || 
     searchParams.get('redirect') || 
     '/';
 
-
-
-  // Determine initial view based on PIN availability - single source of truth
-  const [view, setView] = useState<AuthView>('email-auth');
-  
-  // Track if we've already handled the authenticated user
-  const [authHandled, setAuthHandled] = useState(false);
-
-  // Single unified effect for view management - prevents race conditions
+  // Redirect authenticated users immediately
   useEffect(() => {
-    // Wait for PIN loading to complete before making any decisions
-    if (pinLoading) return;
-    
-    // Case 1: User is authenticated
-    if (user) {
-      // Prevent re-processing on subsequent renders
-      if (authHandled) return;
-      
-      // If user already has PIN and came via PIN login, go directly to app
-      if (hasPin && canUsePinLogin) {
-        setAuthHandled(true);
-        navigate(redirectPath, { replace: true });
-        return;
-      }
-      
-      // If user has no PIN, show PIN setup
-      if (!hasPin) {
-        setAuthHandled(true);
-        setShowPinSetup(true);
-        setView('pin-setup');
-        return;
-      }
-      
-      // User has PIN but didn't use PIN login (used email) - redirect
-      setAuthHandled(true);
+    if (user && !authLoading) {
       navigate(redirectPath, { replace: true });
-      return;
     }
-    
-    // Case 2: User is NOT authenticated
-    // Show PIN login if they have saved credentials, otherwise email auth
-    if (canUsePinLogin) {
-      setView('pin-login');
-    } else {
-      setView('email-auth');
-    }
-  }, [user, hasPin, pinLoading, canUsePinLogin, navigate, redirectPath, authHandled]);
+  }, [user, authLoading, navigate, redirectPath]);
 
   const validateStep = (step: SignupStep) => {
     const newErrors: typeof errors = {};
@@ -113,25 +65,18 @@ export default function Auth() {
     }
     
     if (step === 'contact') {
-      try {
-        emailSchema.parse(email);
-      } catch (e) {
+      try { emailSchema.parse(email); } catch { 
         newErrors.email = isRu ? 'Неверный формат email' : 'Invalid email address';
       }
-      
       if (phone && phone.length > 0) {
-        try {
-          phoneSchema.parse(phone.replace(/\D/g, ''));
-        } catch (e) {
+        try { phoneSchema.parse(phone.replace(/\D/g, '')); } catch {
           newErrors.phone = isRu ? 'Неверный формат телефона' : 'Invalid phone number';
         }
       }
     }
     
     if (step === 'password') {
-      try {
-        passwordSchema.parse(password);
-      } catch (e) {
+      try { passwordSchema.parse(password); } catch {
         newErrors.password = isRu ? 'Пароль должен быть не менее 6 символов' : 'Password must be at least 6 characters';
       }
       if (password !== confirmPassword) {
@@ -145,29 +90,19 @@ export default function Auth() {
 
   const validateLoginForm = () => {
     const newErrors: typeof errors = {};
-    
-    try {
-      emailSchema.parse(email);
-    } catch (e) {
+    try { emailSchema.parse(email); } catch {
       newErrors.email = isRu ? 'Неверный формат email' : 'Invalid email address';
     }
-    
-    try {
-      passwordSchema.parse(password);
-    } catch (e) {
+    try { passwordSchema.parse(password); } catch {
       newErrors.password = isRu ? 'Пароль должен быть не менее 6 символов' : 'Password must be at least 6 characters';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleNextStep = () => {
-    if (signupStep === 'info' && validateStep('info')) {
-      setSignupStep('contact');
-    } else if (signupStep === 'contact' && validateStep('contact')) {
-      setSignupStep('password');
-    }
+    if (signupStep === 'info' && validateStep('info')) setSignupStep('contact');
+    else if (signupStep === 'contact' && validateStep('contact')) setSignupStep('password');
   };
 
   const handlePrevStep = () => {
@@ -189,41 +124,25 @@ export default function Auth() {
     
     try {
       const { error, data } = await signUp({ 
-        email, 
-        password, 
-        fullName, 
+        email, password, fullName, 
         phone: phone.replace(/\D/g, '') 
       });
       
       if (error) {
         let description = error.message;
         if (error.message.includes('already registered') || error.message.includes('User already registered')) {
-          description = isRu
-            ? 'Этот email уже зарегистрирован. Войдите в аккаунт.'
-            : 'This email is already registered. Please sign in instead.';
+          description = isRu ? 'Этот email уже зарегистрирован. Войдите в аккаунт.' : 'This email is already registered. Please sign in instead.';
         } else if (error.message.includes('Password should be')) {
-          description = isRu
-            ? 'Пароль должен содержать не менее 6 символов'
-            : 'Password must be at least 6 characters';
+          description = isRu ? 'Пароль должен содержать не менее 6 символов' : 'Password must be at least 6 characters';
         }
-        toast({
-          title: isRu ? 'Ошибка регистрации' : 'Registration failed',
-          description,
-          variant: 'destructive',
-        });
+        toast({ title: isRu ? 'Ошибка регистрации' : 'Registration failed', description, variant: 'destructive' });
       } else {
         if (referralCode && data?.user) {
           try {
-            await supabase.rpc('apply_referral_code', {
-              p_referred_id: data.user.id,
-              p_code: referralCode.toUpperCase(),
-            });
-          } catch (refError) {
-            console.error('Error applying referral code:', refError);
-          }
+            await supabase.rpc('apply_referral_code', { p_referred_id: data.user.id, p_code: referralCode.toUpperCase() });
+          } catch (refError) { console.error('Error applying referral code:', refError); }
         }
 
-        // Log terms acceptance (fire & forget)
         if (data?.user) {
           supabase.from('terms_acceptances').insert([
             { user_id: data.user.id, document_type: 'terms', document_version: '1.0' },
@@ -231,11 +150,9 @@ export default function Auth() {
           ]).then(({ error }) => { if (error) console.error('Terms acceptance log error:', error); });
         }
 
-        // Notify admin about new registration (fire & forget)
         supabase.functions.invoke('notify-new-signup', {
           body: {
-            user_email: email,
-            user_name: fullName,
+            user_email: email, user_name: fullName,
             user_phone: phone.replace(/\D/g, '') || undefined,
             referral_code: referralCode || undefined,
             signup_source: 'auth_page',
@@ -244,20 +161,13 @@ export default function Auth() {
         
         toast({
           title: isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
-          description: isRu
-            ? 'Аккаунт создан. Проверьте почту для подтверждения email.'
-            : 'Account created. Check your email to verify your address.',
+          description: isRu ? 'Аккаунт создан. Проверьте почту для подтверждения email.' : 'Account created. Check your email to verify your address.',
         });
 
-        // Navigate immediately — email verification is soft (banner shown in app)
         navigate(redirectPath, { replace: true });
       }
-    } catch (error) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -265,9 +175,7 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateLoginForm()) return;
-    
     setIsLoading(true);
     
     try {
@@ -280,76 +188,28 @@ export default function Auth() {
         if (error.message === 'Invalid login credentials' || error.message.includes('invalid_credentials')) {
           description = isRu ? 'Неверный email или пароль' : 'Invalid email or password';
         } else if (error.message.includes('Email not confirmed')) {
-          description = isRu
-            ? 'Email не подтверждён. Проверьте почту и перейдите по ссылке.'
-            : 'Email not confirmed. Check your inbox and click the verification link.';
+          description = isRu ? 'Email не подтверждён. Проверьте почту и перейдите по ссылке.' : 'Email not confirmed. Check your inbox and click the verification link.';
         } else {
           description = error.message;
         }
 
-        toast({
-          title: isRu ? 'Ошибка входа' : 'Login failed',
-          description,
-          variant: 'destructive',
-        });
+        toast({ title: isRu ? 'Ошибка входа' : 'Login failed', description, variant: 'destructive' });
       } else {
-        // Reset attempt counter on success
         setLoginAttempts(0);
-
-        // Update refresh_token in localStorage if PIN is already set up
-        const { data: sessionData } = await supabase.auth.getSession();
-        const refreshToken = sessionData.session?.refresh_token;
-        const savedUserId = localStorage.getItem('uno_pin_user_id');
-        
-        if (savedUserId && refreshToken) {
-          localStorage.setItem('uno_pin_refresh_token', refreshToken);
-        }
-        
-        toast({
-          title: t('auth.welcomeBack'),
-          description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in',
-        });
+        toast({ title: t('auth.welcomeBack'), description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
       }
-    } catch (error) {
+    } catch {
       setLoginAttempts(prev => prev + 1);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePinLoginSuccess = () => {
-    navigate(redirectPath, { replace: true });
-  };
+  const switchToSignup = () => { setIsLogin(false); setSignupStep('info'); setErrors({}); };
+  const switchToLogin = () => { setIsLogin(true); setErrors({}); };
 
-  const handleSwitchToEmail = () => {
-    setView('email-auth');
-  };
-
-  const handlePinSetupComplete = () => {
-    navigate(redirectPath, { replace: true });
-  };
-
-  const handleSkipPinSetup = () => {
-    navigate(redirectPath, { replace: true });
-  };
-
-  const switchToSignup = () => {
-    setIsLogin(false);
-    setSignupStep('info');
-    setErrors({});
-  };
-
-  const switchToLogin = () => {
-    setIsLogin(true);
-    setErrors({});
-  };
-
-  if (pinLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -390,443 +250,400 @@ export default function Auth() {
       {/* Main content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          {/* PIN Login View */}
-          {view === 'pin-login' && (
-            <PinLogin 
-              onSuccess={handlePinLoginSuccess}
-              onSwitchToEmail={handleSwitchToEmail}
-            />
-          )}
+          <div className="space-y-6">
+            {/* Login Form */}
+            {isLogin ? (
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <h1 className="text-3xl font-display font-bold text-gradient-gold">
+                    {t('auth.welcomeBack')}
+                  </h1>
+                  <p className="text-muted-foreground">
+                    {isRu ? 'Введите данные для входа' : 'Enter your credentials to continue'}
+                  </p>
+                </div>
 
-          {/* PIN Setup View */}
-          {view === 'pin-setup' && (
-            <PinSetup 
-              onComplete={handlePinSetupComplete}
-              onSkip={handleSkipPinSetup}
-            />
-          )}
-
-          {/* Email Auth View */}
-          {view === 'email-auth' && (
-            <div className="space-y-6">
-              {/* Login Form */}
-              {isLogin ? (
-                <div className="space-y-6">
-                  <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-display font-bold text-gradient-gold">
-                      {t('auth.welcomeBack')}
-                    </h1>
-                    <p className="text-muted-foreground">
-                      {isRu ? 'Введите данные для входа' : 'Enter your credentials to continue'}
-                    </p>
+                <form onSubmit={handleLogin} name="login" className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('auth.email')}</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <input
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className={cn(
+                          "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                          errors.email ? "border-destructive" : "border-border"
+                        )}
+                      />
+                    </div>
+                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                   </div>
 
-                  {canUsePinLogin && (
-                    <button
-                      onClick={() => setView('pin-login')}
-                      className="w-full p-3 rounded-xl border border-border bg-secondary/50 hover:bg-secondary transition-colors text-center"
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('auth.password')}</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className={cn(
+                          "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
+                          "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                          errors.password ? "border-destructive" : "border-border"
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground" />
+                    <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                      {t('auth.forgotPassword')}
+                    </Link>
+                  </div>
+
+                  {loginAttempts >= SHOW_FORGOT_AFTER && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm"
                     >
-                      <span className="text-sm text-muted-foreground">
-                        {isRu ? 'Войти с PIN-кодом' : 'Login with PIN'}
-                      </span>
-                    </button>
+                      <p className="text-destructive font-medium mb-1">
+                        {isRu ? 'Несколько неудачных попыток' : 'Multiple failed attempts'}
+                      </p>
+                      <p className="text-muted-foreground">
+                        {isRu ? 'Может быть, ' : 'Maybe '}
+                        <Link to="/auth/forgot-password" className="text-primary font-medium hover:underline">
+                          {isRu ? 'восстановить пароль?' : 'reset your password?'}
+                        </Link>
+                      </p>
+                    </motion.div>
                   )}
 
-                  <form onSubmit={handleLogin} name="login" className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('auth.email')}</label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <input
-                          type="email"
-                          name="email"
-                          autoComplete="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="your@email.com"
-                          className={cn(
-                            "w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                            "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                            errors.email ? "border-destructive" : "border-border"
-                          )}
-                        />
-                      </div>
-                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                    </div>
+                  <PremiumButton type="submit" className="w-full" size="lg" isLoading={isLoading} data-testid="login-button">
+                    {t('auth.login')}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </PremiumButton>
+                </form>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{t('auth.password')}</label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          name="password"
-                          autoComplete="current-password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className={cn(
-                            "w-full h-12 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
-                            "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                            errors.password ? "border-destructive" : "border-border"
-                          )}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                      {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground" />
-                      <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                        {t('auth.forgotPassword')}
-                      </Link>
-                    </div>
-
-                    {/* Hint after 3 failed attempts */}
-                    {loginAttempts >= SHOW_FORGOT_AFTER && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-sm"
-                      >
-                        <p className="text-destructive font-medium mb-1">
-                          {isRu ? 'Несколько неудачных попыток' : 'Multiple failed attempts'}
-                        </p>
-                        <p className="text-muted-foreground">
-                          {isRu ? 'Может быть, ' : 'Maybe '}
-                          <Link to="/auth/forgot-password" className="text-primary font-medium hover:underline">
-                            {isRu ? 'восстановить пароль?' : 'reset your password?'}
-                          </Link>
-                        </p>
-                      </motion.div>
-                    )}
-
-                    <PremiumButton type="submit" className="w-full" size="lg" isLoading={isLoading} data-testid="login-button">
-                      {t('auth.login')}
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </PremiumButton>
-                  </form>
-
-                  <div className="text-center">
-                    <p className="text-muted-foreground">
-                      {t('auth.noAccount')}{' '}
-                      <button type="button" onClick={switchToSignup} className="text-primary font-medium hover:underline">
-                        {t('auth.signup')}
-                      </button>
-                    </p>
-                  </div>
+                <div className="text-center">
+                  <p className="text-muted-foreground">
+                    {t('auth.noAccount')}{' '}
+                    <button type="button" onClick={switchToSignup} className="text-primary font-medium hover:underline">
+                      {t('auth.signup')}
+                    </button>
+                  </p>
                 </div>
-              ) : (
-                /* Signup Flow - Airbnb Style */
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={signupStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-6"
-                  >
-                    {stepIndicator}
+              </div>
+            ) : (
+              /* Signup Flow */
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={signupStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-6"
+                >
+                  {stepIndicator}
 
-                    {/* Step 1: Name */}
-                    {signupStep === 'info' && (
-                      <>
-                        <div className="text-center space-y-2">
-                          <h1 className="text-2xl font-display font-bold">
-                            {isRu ? 'Как вас зовут?' : "What's your name?"}
-                          </h1>
-                          <p className="text-sm text-muted-foreground">
-                            {isRu 
-                              ? 'Это имя будет использоваться для бронирований и верификации' 
-                              : 'This name will be used for bookings and verification'}
+                  {/* Step 1: Name */}
+                  {signupStep === 'info' && (
+                    <>
+                      <div className="text-center space-y-2">
+                        <h1 className="text-2xl font-display font-bold">
+                          {isRu ? 'Как вас зовут?' : "What's your name?"}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                          {isRu ? 'Это имя будет использоваться для бронирований и верификации' : 'This name will be used for bookings and verification'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t('auth.fullName')}</label>
+                          <div className="relative">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <input
+                              type="text"
+                              name="fullName"
+                              autoComplete="name"
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              placeholder={isRu ? 'Иван Иванов' : 'John Doe'}
+                              className={cn(
+                                "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors text-lg",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                errors.fullName ? "border-destructive" : "border-border"
+                              )}
+                              autoFocus
+                            />
+                          </div>
+                          {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                        </div>
+
+                        {referralCode && (
+                          <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
+                            <Gift className="w-5 h-5 text-primary" />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">
+                                {isRu ? 'Реферальный код активен!' : 'Referral code active!'}
+                              </p>
+                            </div>
+                            <span className="font-mono font-bold text-primary">{referralCode.toUpperCase()}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <PremiumButton onClick={handleNextStep} className="w-full" size="lg">
+                        {isRu ? 'Продолжить' : 'Continue'}
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </PremiumButton>
+                    </>
+                  )}
+
+                  {/* Step 2: Contact */}
+                  {signupStep === 'contact' && (
+                    <>
+                      <div className="text-center space-y-2">
+                        <h1 className="text-2xl font-display font-bold">
+                          {isRu ? 'Контактные данные' : 'Contact information'}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                          {isRu ? 'Эти данные будут использоваться для связи и верификации' : 'This information will be used for communication and verification'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t('auth.email')}</label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <input
+                              type="email"
+                              name="email"
+                              autoComplete="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              placeholder="your@email.com"
+                              className={cn(
+                                "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                errors.email ? "border-destructive" : "border-border"
+                              )}
+                              autoFocus
+                            />
+                          </div>
+                          {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium flex items-center gap-2">
+                            {isRu ? 'Номер телефона' : 'Phone number'}
+                            <span className="text-xs text-muted-foreground font-normal">
+                              ({isRu ? 'рекомендуется' : 'recommended'})
+                            </span>
+                          </label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <input
+                              type="tel"
+                              name="phone"
+                              autoComplete="tel"
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              placeholder="+7 999 123-45-67"
+                              className={cn(
+                                "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                errors.phone ? "border-destructive" : "border-border"
+                              )}
+                            />
+                          </div>
+                          {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                          <p className="text-xs text-muted-foreground">
+                            {isRu ? 'Телефон используется для экстренной связи и подтверждения бронирований' : 'Phone is used for emergency contact and booking confirmations'}
                           </p>
                         </div>
+                      </div>
 
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('auth.fullName')}</label>
-                            <div className="relative">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                              <input
-                                type="text"
-                                name="fullName"
-                                autoComplete="name"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                placeholder={isRu ? 'Иван Иванов' : 'John Doe'}
-                                className={cn(
-                                  "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors text-lg",
-                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                                  errors.fullName ? "border-destructive" : "border-border"
-                                )}
-                                autoFocus
-                              />
-                            </div>
-                            {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                          </div>
-
-                          {referralCode && (
-                            <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-center gap-3">
-                              <Gift className="w-5 h-5 text-primary" />
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">
-                                  {isRu ? 'Реферальный код активен!' : 'Referral code active!'}
-                                </p>
-                              </div>
-                              <span className="font-mono font-bold text-primary">{referralCode.toUpperCase()}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <PremiumButton onClick={handleNextStep} className="w-full" size="lg">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handlePrevStep}
+                          className="h-12 px-4 rounded-xl border border-border hover:bg-secondary transition-colors"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <PremiumButton onClick={handleNextStep} className="flex-1" size="lg">
                           {isRu ? 'Продолжить' : 'Continue'}
                           <ArrowRight className="w-4 h-4 ml-1" />
                         </PremiumButton>
-                      </>
-                    )}
+                      </div>
+                    </>
+                  )}
 
-                    {/* Step 2: Contact */}
-                    {signupStep === 'contact' && (
-                      <>
-                        <div className="text-center space-y-2">
-                          <h1 className="text-2xl font-display font-bold">
-                            {isRu ? 'Контактные данные' : 'Contact information'}
-                          </h1>
-                          <p className="text-sm text-muted-foreground">
-                            {isRu 
-                              ? 'Эти данные будут использоваться для связи и верификации' 
-                              : 'This information will be used for communication and verification'}
-                          </p>
-                        </div>
+                  {/* Step 3: Password */}
+                  {signupStep === 'password' && (
+                    <>
+                      <div className="text-center space-y-2">
+                        <h1 className="text-2xl font-display font-bold">
+                          {isRu ? 'Создайте пароль' : 'Create a password'}
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                          {isRu ? 'Минимум 6 символов для защиты вашего аккаунта' : 'At least 6 characters to protect your account'}
+                        </p>
+                      </div>
 
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('auth.email')}</label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                              <input
-                                type="email"
-                                name="email"
-                                autoComplete="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="your@email.com"
-                                className={cn(
-                                  "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                                  errors.email ? "border-destructive" : "border-border"
-                                )}
-                                autoFocus
-                              />
-                            </div>
-                            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                          </div>
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                              {isRu ? 'Номер телефона' : 'Phone number'}
-                              <span className="text-xs text-muted-foreground font-normal">
-                                ({isRu ? 'рекомендуется' : 'recommended'})
-                              </span>
-                            </label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                              <input
-                                type="tel"
-                                name="phone"
-                                autoComplete="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="+7 999 123-45-67"
-                                className={cn(
-                                  "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                                  errors.phone ? "border-destructive" : "border-border"
-                                )}
-                              />
-                            </div>
-                            {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                            <p className="text-xs text-muted-foreground">
-                              {isRu 
-                                ? 'Телефон используется для экстренной связи и подтверждения бронирований' 
-                                : 'Phone is used for emergency contact and booking confirmations'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3">
-                          <button
-                            onClick={handlePrevStep}
-                            className="h-12 px-4 rounded-xl border border-border hover:bg-secondary transition-colors"
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                          </button>
-                          <PremiumButton onClick={handleNextStep} className="flex-1" size="lg">
-                            {isRu ? 'Продолжить' : 'Continue'}
-                            <ArrowRight className="w-4 h-4 ml-1" />
-                          </PremiumButton>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Step 3: Password */}
-                    {signupStep === 'password' && (
-                      <>
-                        <div className="text-center space-y-2">
-                          <h1 className="text-2xl font-display font-bold">
-                            {isRu ? 'Создайте пароль' : 'Create a password'}
-                          </h1>
-                          <p className="text-sm text-muted-foreground">
-                            {isRu 
-                              ? 'Минимум 6 символов для защиты вашего аккаунта' 
-                              : 'At least 6 characters to protect your account'}
-                          </p>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('auth.password')}</label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                              <input
-                                type={showPassword ? 'text' : 'password'}
-                                name="new-password"
-                                autoComplete="new-password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className={cn(
-                                  "w-full h-14 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
-                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                                  errors.password ? "border-destructive" : "border-border"
-                                )}
-                                autoFocus
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                              >
-                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                              </button>
-                            </div>
-                            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                            <PasswordStrengthIndicator password={password} />
-                          </div>
-
-                          {/* Confirm password */}
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                              {isRu ? 'Подтвердите пароль' : 'Confirm password'}
-                            </label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                              <input
-                                type={showPassword ? 'text' : 'password'}
-                                name="confirm-password"
-                                autoComplete="new-password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className={cn(
-                                  "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
-                                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
-                                  errors.confirmPassword ? "border-destructive" : "border-border"
-                                )}
-                              />
-                            </div>
-                            {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
-                          </div>
-
-                          {!searchParams.get('ref') && (
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-muted-foreground">
-                                {isRu ? 'Реферальный код (если есть)' : 'Referral code (optional)'}
-                              </label>
-                              <div className="relative">
-                                <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                                <input
-                                  type="text"
-                                  value={referralCode}
-                                  onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                                  placeholder="ABC123"
-                                  maxLength={6}
-                                  className="w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border border-border transition-colors font-mono uppercase focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Terms acceptance */}
-                          <label className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">{t('auth.password')}</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                             <input
-                              type="checkbox"
-                              checked={termsAccepted}
-                              onChange={(e) => setTermsAccepted(e.target.checked)}
-                              className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                              {isRu ? (
-                                <>Я принимаю <Link to="/terms" target="_blank" className="text-primary hover:underline">Условия использования</Link> и <Link to="/privacy" target="_blank" className="text-primary hover:underline">Политику конфиденциальности</Link></>
-                              ) : (
-                                <>I agree to the <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link></>
+                              type={showPassword ? 'text' : 'password'}
+                              name="new-password"
+                              autoComplete="new-password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="••••••••"
+                              className={cn(
+                                "w-full h-14 pl-10 pr-12 rounded-xl bg-secondary border transition-colors",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                errors.password ? "border-destructive" : "border-border"
                               )}
-                            </p>
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                          </div>
+                          {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                          <PasswordStrengthIndicator password={password} />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            {isRu ? 'Подтвердите пароль' : 'Confirm password'}
                           </label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              name="confirm-password"
+                              autoComplete="new-password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              placeholder="••••••••"
+                              className={cn(
+                                "w-full h-14 pl-10 pr-4 rounded-xl bg-secondary border transition-colors",
+                                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
+                                errors.confirmPassword ? "border-destructive" : "border-border"
+                              )}
+                            />
+                          </div>
+                          {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                         </div>
 
-                        <div className="flex gap-3">
-                          <button
-                            onClick={handlePrevStep}
-                            className="h-12 px-4 rounded-xl border border-border hover:bg-secondary transition-colors"
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                          </button>
-                          <PremiumButton 
-                            onClick={handleSignup} 
-                            className="flex-1" 
-                            size="lg" 
-                            isLoading={isLoading}
-                            data-testid="signup-button"
-                          >
-                            {t('auth.createAccount')}
-                            <ArrowRight className="w-4 h-4 ml-1" />
-                          </PremiumButton>
-                        </div>
-                      </>
-                    )}
+                        {!searchParams.get('ref') && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-muted-foreground">
+                              {isRu ? 'Реферальный код (если есть)' : 'Referral code (optional)'}
+                            </label>
+                            <div className="relative">
+                              <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                              <input
+                                type="text"
+                                value={referralCode}
+                                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                                placeholder="ABC123"
+                                maxLength={6}
+                                className="w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border border-border transition-colors font-mono uppercase focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                              />
+                            </div>
+                          </div>
+                        )}
 
-                    {/* Switch to login */}
-                    <div className="text-center pt-4">
-                      <p className="text-muted-foreground">
-                        {t('auth.hasAccount')}{' '}
-                        <button type="button" onClick={switchToLogin} className="text-primary font-medium hover:underline">
-                          {t('auth.login')}
+                        <label className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            className="mt-0.5 w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {isRu ? (
+                              <>Я принимаю <Link to="/terms" target="_blank" className="text-primary hover:underline">Условия использования</Link> и <Link to="/privacy" target="_blank" className="text-primary hover:underline">Политику конфиденциальности</Link></>
+                            ) : (
+                              <>I agree to the <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link></>
+                            )}
+                          </p>
+                        </label>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handlePrevStep}
+                          className="h-12 px-4 rounded-xl border border-border hover:bg-secondary transition-colors"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
                         </button>
-                      </p>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              )}
-            </div>
-          )}
+                        <PremiumButton 
+                          onClick={handleSignup} 
+                          className="flex-1" 
+                          size="lg" 
+                          isLoading={isLoading}
+                          data-testid="signup-button"
+                        >
+                          {t('auth.createAccount')}
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </PremiumButton>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Switch to login */}
+                  <div className="text-center pt-4">
+                    <p className="text-muted-foreground">
+                      {t('auth.hasAccount')}{' '}
+                      <button type="button" onClick={switchToLogin} className="text-primary font-medium hover:underline">
+                        {t('auth.login')}
+                      </button>
+                    </p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="relative z-10 p-4 text-center text-sm text-muted-foreground">
         <p>
-          {isRu 
-            ? 'Продолжая, вы соглашаетесь с Условиями использования' 
-            : 'By continuing, you agree to our Terms of Service'}
+          {isRu ? 'Продолжая, вы соглашаетесь с Условиями использования' : 'By continuing, you agree to our Terms of Service'}
         </p>
       </footer>
     </div>
