@@ -1,12 +1,16 @@
 /**
  * @module useMyProperties
- * @description Unified hook combining owned + managed properties
+ * @description Unified hook combining owned + managed + company properties
  */
 
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { useAssignedProperties, type AssignedProperty } from '@/hooks/useAssignedProperties';
 import { useUserContext } from '@/hooks/useUserContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type PropertyAccessRole = 'owner' | 'manager' | 'both';
 
@@ -23,10 +27,35 @@ export interface UnifiedProperty {
   bathrooms: number | null;
   price_per_night: number | null;
   currency: string;
-  source: 'owned' | 'managed';
+  source: 'owned' | 'managed' | 'company';
   complex_id: string | null;
   project_id: string | null;
   property_type: string | null;
+}
+
+/**
+ * Fetch properties belonging to the user's active management company.
+ */
+function useCompanyProperties() {
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id;
+
+  return useQuery({
+    queryKey: ['company-properties', companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data, error } = await supabase
+        .from('properties')
+        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency')
+        .eq('management_company_id', companyId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && !!companyId,
+    staleTime: 30000,
+  });
 }
 
 export function useMyProperties() {
@@ -36,6 +65,7 @@ export function useMyProperties() {
 
   const { data: ownedRaw, isLoading: ownedLoading } = useOwnerProperties();
   const { properties: managedRaw, isLoading: managedLoading } = useAssignedProperties();
+  const { data: companyRaw, isLoading: companyLoading } = useCompanyProperties();
 
   const ownedProperties = useMemo<UnifiedProperty[]>(() => {
     if (!ownedRaw) return [];
@@ -80,28 +110,67 @@ export function useMyProperties() {
     }));
   }, [managedRaw]);
 
-  // Deduplicate: if a property appears in both owned and managed, keep owned
+  const companyProperties = useMemo<UnifiedProperty[]>(() => {
+    if (!companyRaw) return [];
+    return companyRaw.map((p: any) => ({
+      id: p.id,
+      property_id: p.id,
+      title: p.title_en || p.title || 'Untitled',
+      title_ru: p.title_ru || p.title_en || p.title || 'Без названия',
+      cover_image: p.cover_image || p.images?.[0] || null,
+      address: p.address || null,
+      district: p.district || null,
+      is_active: p.is_active ?? true,
+      bedrooms: p.bedrooms ?? null,
+      bathrooms: p.bathrooms ?? null,
+      price_per_night: p.price_per_night ?? null,
+      currency: p.deposit_currency || p.currency || 'THB',
+      source: 'company' as const,
+      complex_id: p.complex_id || null,
+      project_id: p.project_id || null,
+      property_type: p.property_type || null,
+    }));
+  }, [companyRaw]);
+
+  // Deduplicate: owned > managed > company
   const allProperties = useMemo(() => {
-    const ownedIds = new Set(ownedProperties.map(p => p.property_id));
-    const uniqueManaged = managedProperties.filter(p => !ownedIds.has(p.property_id));
-    return [...ownedProperties, ...uniqueManaged];
-  }, [ownedProperties, managedProperties]);
+    const seen = new Set<string>();
+    const result: UnifiedProperty[] = [];
+    for (const p of ownedProperties) {
+      seen.add(p.property_id);
+      result.push(p);
+    }
+    for (const p of managedProperties) {
+      if (!seen.has(p.property_id)) {
+        seen.add(p.property_id);
+        result.push(p);
+      }
+    }
+    for (const p of companyProperties) {
+      if (!seen.has(p.property_id)) {
+        seen.add(p.property_id);
+        result.push(p);
+      }
+    }
+    return result;
+  }, [ownedProperties, managedProperties, companyProperties]);
 
   const accessRole: PropertyAccessRole = useMemo(() => {
     const hasOwned = ownedProperties.length > 0 || isOwner;
-    const hasManaged = managedProperties.length > 0 || isManager;
+    const hasManaged = managedProperties.length > 0 || companyProperties.length > 0 || isManager;
     if (hasOwned && hasManaged) return 'both';
     if (hasManaged) return 'manager';
     if (hasOwned) return 'owner';
-    return 'owner'; // default fallback when user has neither role yet
-  }, [ownedProperties, managedProperties, isOwner, isManager]);
+    return 'owner';
+  }, [ownedProperties, managedProperties, companyProperties, isOwner, isManager]);
 
   return {
     ownedProperties,
     managedProperties,
+    companyProperties,
     allProperties,
     accessRole,
-    isLoading: ownedLoading || managedLoading,
+    isLoading: ownedLoading || managedLoading || companyLoading,
     isOwner,
     isManager,
     hasProperties: allProperties.length > 0,
