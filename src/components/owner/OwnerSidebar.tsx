@@ -44,6 +44,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 
 interface NavItem {
   title: string;
@@ -127,6 +128,25 @@ const navigationGroups: NavGroup[] = [
   },
 ];
 
+// Map paths to permission modules for filtering
+const PATH_TO_MODULE: Record<string, ModuleKey> = {
+  '/owner/properties': 'properties',
+  '/owner/calendar': 'bookings',
+  '/owner/sales': 'crm',
+  '/owner/contacts': 'crm',
+  '/owner/reviews-management': 'crm',
+  '/owner/sales/settings': 'crm',
+  '/owner/marketing': 'crm',
+  '/owner/tasks': 'tasks',
+  '/owner/inventory': 'properties',
+  '/owner/vendors': 'properties',
+  '/owner/rates': 'finance',
+  '/owner/financials': 'finance',
+  '/owner/invoices': 'finance',
+  '/owner/analytics': 'reports',
+  '/owner/staff': 'staff',
+};
+
 export function OwnerSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -136,6 +156,7 @@ export function OwnerSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
+  const { canAccess } = useTeamPermissions();
   const companyName = activeCompany
     ? (isRussian ? activeCompany.name_ru : activeCompany.name_en)
     : 'myUNO';
@@ -147,6 +168,16 @@ export function OwnerSidebar() {
   const getGroupDefaultOpen = (group: NavGroup) => {
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
   };
+
+  // Filter nav items based on team permissions
+  const filteredGroups = navigationGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      const module = PATH_TO_MODULE[item.path];
+      if (!module) return true; // No restriction (dashboard, messages, guide, etc.)
+      return canAccess(module, 'view');
+    }),
+  })).filter(group => group.items.length > 0);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -173,7 +204,7 @@ export function OwnerSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-2">
-        {navigationGroups.map((group) => (
+        {filteredGroups.map((group) => (
           <Collapsible
             key={group.label}
             defaultOpen={getGroupDefaultOpen(group)}

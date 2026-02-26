@@ -19182,6 +19182,47 @@ export type Database = {
         }
         Relationships: []
       }
+      team_member_permissions: {
+        Row: {
+          can_edit: boolean
+          can_view: boolean
+          company_id: string
+          granted_by: string | null
+          id: string
+          module: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_edit?: boolean
+          can_view?: boolean
+          company_id: string
+          granted_by?: string | null
+          id?: string
+          module: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_edit?: boolean
+          can_view?: boolean
+          company_id?: string
+          granted_by?: string | null
+          id?: string
+          module?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           avatar_url: string | null
@@ -24054,6 +24095,10 @@ export type Database = {
       }
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
       is_company_member: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mc_admin: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }

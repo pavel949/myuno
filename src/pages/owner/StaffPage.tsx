@@ -4,6 +4,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
+import { AddTeamMemberDialog } from '@/components/owner/team/AddTeamMemberDialog';
+import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -175,6 +177,7 @@ function StaffCard({
   onReactivate,
   properties,
   onViewTasks,
+  onEditPermissions,
 }: {
   staff: StaffMember;
   isRu: boolean;
@@ -183,6 +186,7 @@ function StaffCard({
   onReactivate: () => void;
   properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
+  onEditPermissions: () => void;
 }) {
   const t = (en: string, ru: string) => isRu ? ru : en;
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
@@ -332,6 +336,10 @@ function StaffCard({
                 <ClipboardList className="h-4 w-4 mr-2" />
                 {t('View Tasks', 'Задачи')}
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={onEditPermissions}>
+                <ShieldCheck className="h-4 w-4 mr-2" />
+                {t('Permissions', 'Права доступа')}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               {staff.is_active ? (
                 <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
@@ -372,6 +380,8 @@ export default function StaffPage() {
   const [deactivateTarget, setDeactivateTarget] = useState<StaffMember | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
   const navigate = useNavigate();
@@ -511,7 +521,7 @@ export default function StaffPage() {
               className="pl-9"
             />
           </div>
-          <Button onClick={openCreate}>
+          <Button onClick={() => setAddMemberOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
             {t('Add', 'Добавить')}
           </Button>
@@ -552,6 +562,7 @@ export default function StaffPage() {
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
               onViewTasks={() => navigate(`/owner/tasks?assignee=${s.id}`)}
+              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name })}
             />
           ))}
         </div>
@@ -776,6 +787,20 @@ export default function StaffPage() {
       </AlertDialog>
       </>
       )}
+
+      {/* Add Team Member Dialog */}
+      <AddTeamMemberDialog
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
+      />
+
+      {/* Member Permissions Sheet */}
+      <MemberPermissionsSheet
+        open={!!permissionsTarget}
+        onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
+        userId={permissionsTarget?.userId ?? null}
+        userName={permissionsTarget?.name ?? ''}
+      />
     </PageContainer>
   );
 }
