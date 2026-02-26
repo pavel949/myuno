@@ -176,12 +176,12 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
-    if (!roleLoading && activeRole && activeRole !== 'user') {
-      // Use active role from user_roles table (source of truth)
-      userActions = getActionsForRole(activeRole);
-    } else if (personas.length > 0) {
-      // Use personas from user_roles table
+    if (personas.length > 0) {
+      // Personas from hero switcher drive home screen content
       userActions = getActionsForPersonas(personas);
+    } else if (!roleLoading && activeRole && activeRole !== 'user') {
+      // Fallback: use active role when no personas selected
+      userActions = getActionsForRole(activeRole);
     } else {
       // Default actions for unauthenticated or plain users
       userActions = DEFAULT_ACTIONS;
