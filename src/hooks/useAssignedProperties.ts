@@ -20,6 +20,8 @@ export interface AssignedProperty {
   bathrooms: number | null;
   price_per_night: number | null;
   currency: string;
+  complex_id: string | null;
+  project_id: string | null;
   permissions: {
     calendar: boolean;
     pricing: boolean;
@@ -65,7 +67,9 @@ export function useAssignedProperties() {
             bathrooms,
             price_per_night,
             currency,
-            owner_id
+            owner_id,
+            complex_id,
+            project_id
           )
         `)
         .eq('manager_user_id', user.id)
@@ -137,7 +141,9 @@ export function useAssignedProperties() {
             bookings: true,
             guests: true,
           },
-          owner_name: null, // Would need profile lookup
+          owner_name: null,
+          complex_id: property.complex_id || null,
+          project_id: property.project_id || null,
           upcoming_bookings_count: propStats.upcoming,
           today_status: propStats.today,
         };
