@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIntakeAgent } from '@/hooks/useIntakeAgent';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Bot, Sparkles, Loader2, ChevronDown, Wand2 } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Bot, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AIIntakePanelProps {
@@ -58,47 +58,61 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="border-dashed border-primary/30 bg-primary/5">
-        <CollapsibleTrigger asChild>
-          <CardContent className="p-4 cursor-pointer hover:bg-primary/10 transition-colors">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <Bot className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium flex items-center gap-2">
-                    {isRu ? 'Быстрый ввод с AI' : 'Quick AI Input'}
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {isRu 
-                      ? 'Вставьте описание из WhatsApp или сайта — AI заполнит форму' 
-                      : 'Paste description from WhatsApp or website — AI will fill the form'}
-                  </p>
-                </div>
-              </div>
-              <ChevronDown className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+    <>
+      {/* Trigger card */}
+      <Card
+        className="border-dashed border-primary/30 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors"
+        onClick={() => setIsOpen(true)}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <Bot className="h-5 w-5 text-primary" />
             </div>
-          </CardContent>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent>
-          <CardContent className="pt-0 px-4 pb-4 space-y-3">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium flex items-center gap-2">
+                {isRu ? 'Быстрый ввод с AI' : 'Quick AI Input'}
+                <Sparkles className="h-4 w-4 text-primary" />
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {isRu
+                  ? 'Вставьте описание из WhatsApp или сайта — AI заполнит форму'
+                  : 'Paste description from WhatsApp or website — AI will fill the form'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sheet overlay — always on top */}
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-primary" />
+              {isRu ? 'Быстрый ввод с AI' : 'Quick AI Input'}
+            </SheetTitle>
+            <SheetDescription>
+              {isRu
+                ? 'Вставьте описание объекта из любого источника — AI заполнит форму автоматически'
+                : 'Paste a property description from any source — AI will fill the form automatically'}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-4 mt-4">
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={isRu 
-                ? 'Вставьте сюда описание объекта из любого источника...\n\nНапример:\n"Современная вилла 3 спальни, 4 ванных, бассейн, 250 м², район Банг Тао, 8500 бат/ночь..."' 
-                : 'Paste property description from any source...\n\nFor example:\n"Modern villa 3 bedrooms, 4 bathrooms, pool, 250 sqm, Bang Tao area, 8500 baht/night..."'}
-              className="min-h-[120px] resize-none"
+              placeholder={isRu
+                ? 'Вставьте сюда описание объекта...\n\nНапример:\n"Современная вилла 3 спальни, 4 ванных, бассейн, 250 м², район Банг Тао, 8500 бат/ночь..."'
+                : 'Paste property description here...\n\nFor example:\n"Modern villa 3 bedrooms, 4 bathrooms, pool, 250 sqm, Bang Tao area, 8500 baht/night..."'}
+              className="min-h-[160px] resize-none text-base"
+              autoFocus
             />
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => {
                   setText('');
                   setIsOpen(false);
@@ -108,7 +122,6 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
               </Button>
               <Button
                 type="button"
-                size="sm"
                 onClick={handleParse}
                 disabled={isProcessing || !text.trim()}
                 className="gap-2"
@@ -126,9 +139,9 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
                 )}
               </Button>
             </div>
-          </CardContent>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
