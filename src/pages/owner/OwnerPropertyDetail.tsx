@@ -3,11 +3,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerProperty, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2, Sparkles, Shield, Settings } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInHours } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -15,36 +14,27 @@ import { PropertyDocumentsTab } from '@/components/owner/PropertyDocumentsTab';
 import { JuristicContactsCard } from '@/components/owner/JuristicContactsCard';
 import { usePropertyDocuments } from '@/hooks/usePropertyDocuments';
 import { PropertyDetailHeader } from '@/components/owner/property-detail/PropertyDetailHeader';
-import { PropertyQuickActions } from '@/components/owner/property-detail/PropertyQuickActions';
 import { MarketplaceStatusCard } from '@/components/owner/property-detail/MarketplaceStatusCard';
-import { Bed, Bath, SquareStack } from 'lucide-react';
+import { PropertyNotesTab } from '@/components/owner/property-detail/PropertyNotesTab';
+import { PropertyOwnerInfoTab } from '@/components/owner/property-detail/PropertyOwnerInfoTab';
+import { usePropertyNotes } from '@/hooks/usePropertyNotes';
+import {
+  Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
+  Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
+  StickyNote, Users, Wrench, Eye, MapPin, DollarSign, Wifi, KeyRound
+} from 'lucide-react';
 
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  
+
   const { data: property, isLoading } = useOwnerProperty(id);
   const { data: serviceRequests } = useServiceRequests(id);
   const { data: inspections } = usePropertyInspections(id);
   const { documents } = usePropertyDocuments(id || '');
-
-  const instantBookingEnabledAt = property?.instant_booking_enabled_at;
-  const protectionEndTime = instantBookingEnabledAt ? new Date(instantBookingEnabledAt) : null;
-  const isInProtectionPeriod = protectionEndTime && protectionEndTime > new Date();
-  const hoursRemaining = protectionEndTime ? Math.max(0, differenceInHours(protectionEndTime, new Date())) : 0;
-  const isRecentlyApproved = property?.approval_status === 'approved' && isInProtectionPeriod;
-
-  const getPropertyTypeLabel = (type: string) => {
-    const types: Record<string, { en: string; ru: string }> = {
-      villa: { en: 'Villa', ru: 'Вилла' },
-      apartment: { en: 'Apartment', ru: 'Квартира' },
-      condo: { en: 'Condo', ru: 'Кондо' },
-      house: { en: 'House', ru: 'Дом' },
-    };
-    return isRu ? types[type]?.ru || type : types[type]?.en || type;
-  };
+  const { notes } = usePropertyNotes(id);
 
   const serviceTypeLabels: Record<string, { en: string; ru: string }> = {
     check_in: { en: 'Check-in', ru: 'Заезд гостей' },
@@ -69,6 +59,7 @@ export default function OwnerPropertyDetail() {
     return (
       <PageContainer>
         <BackButton />
+        <Skeleton className="h-48 w-full rounded-xl mb-4" />
         <Skeleton className="h-8 w-48 mb-4" />
         <Skeleton className="h-64 w-full rounded-xl" />
       </PageContainer>
@@ -87,73 +78,171 @@ export default function OwnerPropertyDetail() {
     );
   }
 
+  const propertyTypeLabels: Record<string, { en: string; ru: string }> = {
+    villa: { en: 'Villa', ru: 'Вилла' },
+    apartment: { en: 'Apartment', ru: 'Квартира' },
+    condo: { en: 'Condo', ru: 'Кондо' },
+    house: { en: 'House', ru: 'Дом' },
+  };
+
   return (
     <PageContainer>
       <BackButton />
-      
+
       <PropertyDetailHeader property={property} isRu={isRu} />
 
-      {/* Recently approved alert */}
-      {isRecentlyApproved && (
-        <Card className="mb-6 border-success/30 bg-success/5">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium text-success">{isRu ? 'Объект одобрен' : 'Property Approved'}</p>
-                <p className="text-sm text-success/80 mt-1">
-                  {isRu ? 'Настройте календарь и цены, чтобы начать принимать бронирования' : 'Set up calendar and pricing to start accepting bookings'}
-                </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => navigate(`/owner/properties/${id}/setup`)}>
-                    <Sparkles className="h-4 w-4 mr-1" />{isRu ? 'Настроить' : 'Set Up Now'}
-                  </Button>
-                  {isInProtectionPeriod && (
-                    <Badge variant="secondary" className="text-xs gap-1">
-                      <Shield className="h-3 w-3" />{isRu ? `Защита: ${hoursRemaining}ч` : `Protection: ${hoursRemaining}h`}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Property specs */}
-      <Card className="mb-6">
+      {/* Internal info bar — rich data for MC only */}
+      <Card className="mb-4">
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground">{getPropertyTypeLabel(property.property_type)}</span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+            <span className="text-muted-foreground">
+              {isRu ? propertyTypeLabels[property.property_type]?.ru : propertyTypeLabels[property.property_type]?.en || property.property_type}
+            </span>
             {property.bedrooms && <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms}</span>}
             {property.bathrooms && <span className="flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms}</span>}
             {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}{isRu ? 'м²' : ' sqm'}</span>}
+            {property.floor && <span className="text-muted-foreground">{isRu ? `Этаж ${property.floor}` : `Floor ${property.floor}`}</span>}
+            {property.unit_number && <span className="text-muted-foreground">#{property.unit_number}</span>}
+            {property.price_per_night && (
+              <span className="flex items-center gap-1 font-medium text-success">
+                <DollarSign className="h-3.5 w-3.5" />
+                ฿{Number(property.price_per_night).toLocaleString()}/{isRu ? 'ночь' : 'night'}
+              </span>
+            )}
           </div>
+          {property.internal_name && (
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              {isRu ? 'Внутреннее имя:' : 'Internal name:'} {property.internal_name}
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      <MarketplaceStatusCard propertyId={property.id} approvalStatus={property.approval_status} rejectionReason={property.rejection_reason} isActive={property.is_active} isRu={isRu} />
+      {/* Publication & Quick Edit */}
+      <div className="flex items-center gap-2 mb-4">
+        <MarketplaceStatusCard
+          propertyId={property.id}
+          approvalStatus={property.approval_status}
+          rejectionReason={property.rejection_reason}
+          isActive={property.is_active}
+          isRu={isRu}
+        />
+      </div>
 
-      <PropertyQuickActions propertyId={property.id} isRu={isRu} />
+      <div className="flex gap-2 mb-6">
+        <Button className="flex-1" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
+          <Settings className="h-4 w-4 mr-2" />
+          {isRu ? 'Редактировать объект' : 'Edit Property'}
+        </Button>
+        <Button variant="outline" onClick={() => navigate(`/owner/properties/${id}/guidebook`)}>
+          {isRu ? 'Гайдбук' : 'Guidebook'}
+        </Button>
+      </div>
 
-      {/* Activity Tabs */}
-      <Tabs defaultValue="services" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="services" className="text-xs px-2">
-            {isRu ? 'Услуги' : 'Services'}
-            {(serviceRequests?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1">{serviceRequests?.length}</Badge>}
+      {/* === UNIFIED TABS === */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="w-full flex overflow-x-auto">
+          <TabsTrigger value="overview" className="text-xs">
+            <Eye className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Обзор' : 'Overview'}
           </TabsTrigger>
-          <TabsTrigger value="inspections" className="text-xs px-2">{isRu ? 'Инспекции' : 'Inspections'}</TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs px-2">
-            <FileText className="h-3 w-3 mr-1" />{isRu ? 'Документы' : 'Docs'}
-            {(documents?.length || 0) > 0 && <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>}
+          <TabsTrigger value="operations" className="text-xs">
+            <Wrench className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Операции' : 'Ops'}
+            {((serviceRequests?.length || 0) + (inspections?.length || 0)) > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">
+                {(serviceRequests?.length || 0) + (inspections?.length || 0)}
+              </Badge>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="juristic" className="text-xs px-2">
-            <Building2 className="h-3 w-3 mr-1" />{isRu ? 'УК' : 'MC'}
+          <TabsTrigger value="documents" className="text-xs">
+            <FileText className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Документы' : 'Docs'}
+            {(documents?.length || 0) > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="notes" className="text-xs">
+            <StickyNote className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Заметки' : 'Notes'}
+            {(notes?.length || 0) > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{notes?.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="owners" className="text-xs">
+            <Users className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
+            {isRu ? 'Владелец' : 'Owner'}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="services" className="mt-4 space-y-3">
+        {/* OVERVIEW TAB */}
+        <TabsContent value="overview" className="mt-4 space-y-4">
+          {/* Access codes quick view */}
+          {(property as any).wifi_password && (
+            <Card>
+              <CardContent className="p-3 flex items-center gap-3">
+                <Wifi className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">WiFi</p>
+                  <p className="text-sm font-mono">{(property as any).wifi_password}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Key operational data */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold">{serviceRequests?.filter(r => r.status !== 'completed').length || 0}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Активных заявок' : 'Active Requests'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold">{documents?.length || 0}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Документов' : 'Documents'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold">{notes?.filter(n => n.is_pinned).length || 0}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Закреп. заметок' : 'Pinned Notes'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold">{inspections?.length || 0}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Инспекций' : 'Inspections'}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* MC / Juristic link */}
+          {property?.project_id && (
+            <JuristicContactsCard projectId={property.project_id} />
+          )}
+
+          {/* Quick actions grid */}
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
+              <Calendar className="h-4 w-4" />
+              <span className="text-xs">{isRu ? 'Календарь' : 'Calendar'}</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate(`/owner/service-request?property=${id}`)}>
+              <Wrench className="h-4 w-4" />
+              <span className="text-xs">{isRu ? 'Заявка' : 'Request'}</span>
+            </Button>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate(`/owner/inspection?property=${id}`)}>
+              <Shield className="h-4 w-4" />
+              <span className="text-xs">{isRu ? 'Инспекция' : 'Inspect'}</span>
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* OPERATIONS TAB */}
+        <TabsContent value="operations" className="mt-4 space-y-4">
+          <h3 className="font-semibold text-sm">{isRu ? 'Заявки на обслуживание' : 'Service Requests'}</h3>
           {!serviceRequests?.length ? (
             <Card><CardContent className="p-6 text-center text-muted-foreground">{isRu ? 'Нет активных заявок' : 'No active requests'}</CardContent></Card>
           ) : (
@@ -180,9 +269,8 @@ export default function OwnerPropertyDetail() {
               </Card>
             ))
           )}
-        </TabsContent>
 
-        <TabsContent value="inspections" className="mt-4 space-y-3">
+          <h3 className="font-semibold text-sm pt-4">{isRu ? 'Инспекции' : 'Inspections'}</h3>
           {!inspections?.length ? (
             <Card><CardContent className="p-6 text-center text-muted-foreground">{isRu ? 'Нет инспекций' : 'No inspections'}</CardContent></Card>
           ) : (
@@ -208,33 +296,34 @@ export default function OwnerPropertyDetail() {
           )}
         </TabsContent>
 
+        {/* DOCUMENTS TAB */}
         <TabsContent value="documents" className="mt-4">
           {id && <PropertyDocumentsTab propertyId={id} />}
         </TabsContent>
 
-        <TabsContent value="juristic" className="mt-4 space-y-4">
-          {property?.project_id ? (
-            <>
-              <JuristicContactsCard projectId={property.project_id} />
-              <Button className="w-full" onClick={() => navigate(`/owner/properties/${id}/juristic-requests`)}>
-                <Building2 className="h-4 w-4 mr-2" />{isRu ? 'Запросы к УК' : 'MC Requests'}
-              </Button>
-            </>
-          ) : (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p className="font-medium mb-1">{isRu ? 'Комплекс не привязан' : 'No project linked'}</p>
-                <p className="text-sm">{isRu ? 'Привяжите объект к комплексу для взаимодействия с УК' : 'Link property to a project to interact with management company'}</p>
-              </CardContent>
-            </Card>
+        {/* NOTES TAB */}
+        <TabsContent value="notes" className="mt-4">
+          {id && <PropertyNotesTab propertyId={id} />}
+        </TabsContent>
+
+        {/* OWNER TAB */}
+        <TabsContent value="owners" className="mt-4">
+          {id && (
+            <PropertyOwnerInfoTab
+              propertyId={id}
+              property={{
+                owner_name: (property as any).owner_name,
+                owner_email: (property as any).owner_email,
+                owner_phone: (property as any).owner_phone,
+                owner_nationality: (property as any).owner_nationality,
+                management_company_id: (property as any).management_company_id,
+                management_type: property.management_type,
+                project_id: property.project_id,
+              }}
+            />
           )}
         </TabsContent>
       </Tabs>
-
-      <Button variant="ghost" className="w-full mt-6" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
-        <Settings className="h-4 w-4 mr-2" />{isRu ? 'Редактировать объект' : 'Edit Property'}
-      </Button>
     </PageContainer>
   );
 }
