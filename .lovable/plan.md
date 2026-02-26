@@ -97,17 +97,43 @@
 
 ---
 
-## 4. WHAT REMAINS TO BE DONE
+## 4. WHAT WAS COMPLETED (Part 4: Notifications & Guest Experience ✅)
 
-### Part 4: Notifications and Guest Experience (Next)
-- Guest check-in flow activation
-- Push notification testing
-- Email templates verification
-- Booking voucher generation
-- Guest messaging
+### Notification Pipeline
+- Stripe webhook → in-app notification → email: fully wired for payment success, failure, refund, expiry, wallet topup
+- Refund email payload format fixed (was sending wrong field names to `send-email` function)
+- 9 branded email templates in `send-email` function (welcome, booking-confirmation, payment-receipt, payment-failed, booking-reminder, review-request, document-expiry, refund-processed, vendor-order)
+- `send-order-email` function handles order_confirmation, order_cancellation, wallet_topup, order_request_received
 
-### Part 5: Launch Readiness
+### Voucher Auto-Generation
+- Stripe webhook now auto-calls `generate-booking-voucher` after successful payment
+- Voucher includes QR code, guest details, amounts, and property info
+- Voucher record saved to `booking_vouchers` table
+
+### Guest Check-in Flow
+- Full online check-in form (passport, contacts, arrival info, house rules acceptance)
+- Check-in submission now notifies property owner via in-app notification
+- Owner can verify check-in via `useOwnerCheckIns` hook
+- Guest sees confirmation status (submitted → verified)
+
+### Guest Messaging
+- Real-time property chat (`property_chat_messages` table + realtime subscription)
+- AI auto-reply via `ai-guest-autoreply` edge function
+- Conversation list with unread counts
+- Pre-booking inquiries + booking-specific chats
+
+### Push Notifications
+- Browser push subscription via `usePushSubscription` hook
+- VAPID key is placeholder — needs production key before launch
+- Notification preferences (booking_reminders, promotions, status_updates)
+
+---
+
+## 5. WHAT REMAINS TO BE DONE
+
+### Part 5: Launch Readiness (Next)
 - E2E payment test with Stripe test card (CRITICAL)
+- Generate production VAPID keys for push notifications
 - Maintenance mode toggle for public launch
 - Performance audit of 337-table schema
 - Dead table cleanup (182 empty tables)

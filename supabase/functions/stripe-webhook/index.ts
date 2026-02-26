@@ -222,6 +222,21 @@ Deno.serve(async (req) => {
           logStep("IDEMPOTENCY: Notification already exists, skipping", { orderId });
         }
 
+        // ===== AUTO-GENERATE BOOKING VOUCHER =====
+        try {
+          await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-booking-voucher`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+            },
+            body: JSON.stringify({ orderId }),
+          });
+          logStep("Voucher auto-generated", { orderId: redactId(orderId) });
+        } catch (voucherError) {
+          logStep("WARN", `Voucher generation failed (non-fatal): ${voucherError}`);
+        }
+
         logStep("Order payment completed", { orderId });
       }
 
@@ -559,21 +574,31 @@ Deno.serve(async (req) => {
               data: { order_id: orderId, refund_amount: refundedAmount, is_full: isFullRefund },
             });
 
-            // Send refund email
+            // Send refund email via send-email (correct payload format)
             try {
-              await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-                },
-                body: JSON.stringify({
-                  template: 'refund-processed',
-                  to: null, // will be resolved by user_id
-                  user_id: order.customer_user_id,
-                  data: { orderNumber: orderId.slice(0, 8), amount: refundedAmount, currency },
-                }),
-              });
+              // Resolve customer email
+              const { data: refundAuthUser } = await supabaseAdmin.auth.admin.getUserById(order.customer_user_id);
+              const refundEmail = refundAuthUser?.user?.email;
+              if (refundEmail) {
+                await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                  },
+                  body: JSON.stringify({
+                    to: refundEmail,
+                    template_id: 'refund-processed',
+                    template_data: {
+                      customerName: refundAuthUser?.user?.user_metadata?.full_name || 'Customer',
+                      orderNumber: orderId.slice(0, 8).toUpperCase(),
+                      amount: refundedAmount,
+                      currency,
+                    },
+                  }),
+                });
+                logStep("Refund email sent");
+              }
             } catch (e) {
               logStep("WARN", `Refund email failed: ${e}`);
             }
