@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerProperty, useUpdateOwnerProperty, OwnerProperty } from '@/hooks/usePropertyCare';
@@ -222,73 +222,97 @@ export default function PropertyEditor() {
   const updateProperty = useUpdateOwnerProperty();
   const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(id);
 
+  const draftKey = `property_editor_${id}`;
+  const [hasDraftToRestore] = useState(() => !!localStorage.getItem(`vendor_draft_${draftKey}`));
+  const [draftRestored, setDraftRestored] = useState(false);
+
   const [formData, setFormData] = useState<EditorFormData>(DEFAULT_FORM_DATA);
   const [localAvailability, setLocalAvailability] = useState<AvailabilityEntry[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Auto-save draft to localStorage on every change (debounced)
+  const draftTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    // Don't save until we have real data (not just defaults)
+    if (!property && !draftRestored) return;
+    if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current);
+    draftTimeoutRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(`vendor_draft_${draftKey}`, JSON.stringify(formData));
+      } catch { /* quota exceeded — ignore */ }
+    }, 800);
+    return () => { if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current); };
+  }, [formData, draftKey, property, draftRestored]);
+
+  // Clear draft on successful save
+  const clearEditorDraft = () => {
+    localStorage.removeItem(`vendor_draft_${draftKey}`);
+  };
+
   // Populate form when property data is loaded
   useEffect(() => {
-    if (property) {
-      setFormData({
-        title: property.title || '',
-        title_ru: property.title_ru || '',
-        property_type: property.property_type || 'apartment',
-        bedrooms: property.bedrooms || 1,
-        bathrooms: property.bathrooms || 1,
-        area_sqm: property.area_sqm?.toString() || '',
-        management_type: property.management_type || 'full',
-        is_rented: property.is_rented || false,
-        description_en: property.description_en || '',
-        description_ru: property.description_ru || '',
-        highlights: property.highlights || [],
-        rooms: (property.rooms as unknown as Room[]) || [],
-        address: property.address || '',
-        district: property.district || '',
-        lat: property.lat,
-        lng: property.lng,
-        cover_image: property.cover_image || '',
-        images: property.images || [],
-        price_per_night: property.price_per_night?.toString() || '',
-        deposit_amount: property.deposit_amount?.toString() || '',
-        deposit_currency: property.deposit_currency || 'THB',
-        weekly_discount: property.weekly_discount?.toString() || '0',
-        monthly_discount: property.monthly_discount?.toString() || '0',
-        seasonal_pricing: (property.seasonal_pricing as unknown as SeasonalPrice[]) || [],
-        min_stay_nights: property.min_stay_nights || 1,
-        max_guests: property.max_guests || 2,
-        instant_booking: property.instant_booking || false,
-        cancellation_policy: property.cancellation_policy || 'flexible',
-        check_in_time: property.check_in_time || '14:00',
-        check_out_time: property.check_out_time || '12:00',
-        early_checkin_price: property.early_checkin_price?.toString() || '',
-        late_checkout_price: property.late_checkout_price?.toString() || '',
-        key_handover: property.key_handover || 'in_person',
-        check_in_instructions: property.check_in_instructions || '',
-        check_in_instructions_ru: property.check_in_instructions_ru || '',
-        electricity_included: property.electricity_included || false,
-        electricity_unit_price: property.electricity_unit_price?.toString() || '7',
-        water_included: property.water_included ?? true,
-        water_unit_price: property.water_unit_price?.toString() || '',
-        internet_speed: property.internet_speed || '',
-        cleaning_included: property.cleaning_included ?? true,
-        cleaning_frequency: property.cleaning_frequency || 'weekly',
-        extra_cleaning_price: property.extra_cleaning_price?.toString() || '',
-        parking_included: property.parking_included ?? true,
-        parking_spaces: property.parking_spaces?.toString() || '1',
-        pets_allowed: property.pets_allowed || false,
-        pet_deposit: property.pet_deposit?.toString() || '',
-        children_friendly: property.children_friendly ?? true,
-        has_crib: property.has_crib || false,
-        has_high_chair: property.has_high_chair || false,
-        quiet_hours_start: property.quiet_hours_start || '22:00',
-        quiet_hours_end: property.quiet_hours_end || '08:00',
-        parties_allowed: property.parties_allowed || false,
-        house_rules: property.house_rules || '',
-        house_rules_ru: property.house_rules_ru || '',
-        smoking_penalty: property.smoking_penalty?.toString() || '',
-      });
-    }
-  }, [property]);
+    if (!property) return;
+    // If there's a saved draft, don't overwrite it — let user decide
+    if (hasDraftToRestore && !draftRestored) return;
+    setFormData({
+      title: property.title || '',
+      title_ru: property.title_ru || '',
+      property_type: property.property_type || 'apartment',
+      bedrooms: property.bedrooms || 1,
+      bathrooms: property.bathrooms || 1,
+      area_sqm: property.area_sqm?.toString() || '',
+      management_type: property.management_type || 'full',
+      is_rented: property.is_rented || false,
+      description_en: property.description_en || '',
+      description_ru: property.description_ru || '',
+      highlights: property.highlights || [],
+      rooms: (property.rooms as unknown as Room[]) || [],
+      address: property.address || '',
+      district: property.district || '',
+      lat: property.lat,
+      lng: property.lng,
+      cover_image: property.cover_image || '',
+      images: property.images || [],
+      price_per_night: property.price_per_night?.toString() || '',
+      deposit_amount: property.deposit_amount?.toString() || '',
+      deposit_currency: property.deposit_currency || 'THB',
+      weekly_discount: property.weekly_discount?.toString() || '0',
+      monthly_discount: property.monthly_discount?.toString() || '0',
+      seasonal_pricing: (property.seasonal_pricing as unknown as SeasonalPrice[]) || [],
+      min_stay_nights: property.min_stay_nights || 1,
+      max_guests: property.max_guests || 2,
+      instant_booking: property.instant_booking || false,
+      cancellation_policy: property.cancellation_policy || 'flexible',
+      check_in_time: property.check_in_time || '14:00',
+      check_out_time: property.check_out_time || '12:00',
+      early_checkin_price: property.early_checkin_price?.toString() || '',
+      late_checkout_price: property.late_checkout_price?.toString() || '',
+      key_handover: property.key_handover || 'in_person',
+      check_in_instructions: property.check_in_instructions || '',
+      check_in_instructions_ru: property.check_in_instructions_ru || '',
+      electricity_included: property.electricity_included || false,
+      electricity_unit_price: property.electricity_unit_price?.toString() || '7',
+      water_included: property.water_included ?? true,
+      water_unit_price: property.water_unit_price?.toString() || '',
+      internet_speed: property.internet_speed || '',
+      cleaning_included: property.cleaning_included ?? true,
+      cleaning_frequency: property.cleaning_frequency || 'weekly',
+      extra_cleaning_price: property.extra_cleaning_price?.toString() || '',
+      parking_included: property.parking_included ?? true,
+      parking_spaces: property.parking_spaces?.toString() || '1',
+      pets_allowed: property.pets_allowed || false,
+      pet_deposit: property.pet_deposit?.toString() || '',
+      children_friendly: property.children_friendly ?? true,
+      has_crib: property.has_crib || false,
+      has_high_chair: property.has_high_chair || false,
+      quiet_hours_start: property.quiet_hours_start || '22:00',
+      quiet_hours_end: property.quiet_hours_end || '08:00',
+      parties_allowed: property.parties_allowed || false,
+      house_rules: property.house_rules || '',
+      house_rules_ru: property.house_rules_ru || '',
+      smoking_penalty: property.smoking_penalty?.toString() || '',
+    });
+  }, [property, hasDraftToRestore, draftRestored]);
 
   // Sync availability from hook
   useEffect(() => {
@@ -375,6 +399,14 @@ export default function PropertyEditor() {
 
       // Save availability
       await syncAvailability(localAvailability);
+
+      clearEditorDraft();
+
+      // If SW update was deferred, reload now that draft is saved
+      if ((window as any).__swPendingReload) {
+        window.location.reload();
+        return;
+      }
 
       toast({
         title: isRu ? 'Сохранено' : 'Saved',
@@ -1133,6 +1165,36 @@ export default function PropertyEditor() {
           </Button>
         }
       />
+
+      {/* Draft Restoration Banner */}
+      {hasDraftToRestore && !draftRestored && (
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-foreground">
+            {isRu 
+              ? 'Найден несохранённый черновик. Восстановить изменения?' 
+              : 'Unsaved draft found. Restore your changes?'}
+          </p>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button size="sm" variant="default" onClick={() => {
+              try {
+                const saved = localStorage.getItem(`vendor_draft_${draftKey}`);
+                if (saved) setFormData(JSON.parse(saved));
+              } catch { /* ignore */ }
+              setDraftRestored(true);
+              toast({ title: isRu ? 'Черновик восстановлен' : 'Draft restored' });
+            }}>
+              {isRu ? 'Восстановить' : 'Restore'}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => {
+              clearEditorDraft();
+              setDraftRestored(true);
+              toast({ title: isRu ? 'Черновик удалён' : 'Draft discarded' });
+            }}>
+              {isRu ? 'Нет' : 'Discard'}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
         <div>
