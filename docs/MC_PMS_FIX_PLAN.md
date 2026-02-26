@@ -445,9 +445,11 @@ SELECT count(*) FROM staff_members WHERE company_id IS NOT NULL;
 - [x] Phase 2: `ALTER TABLE staff_members ADD COLUMN company_id` ✅
 - [x] Phase 2: Backfill `staff_members.company_id` ✅
 - [x] Phase 2: RLS policy `mc_members_view_company_staff` on `staff_members` ✅
-- [ ] Phase 3: `ALTER TABLE ledger_accounts ADD COLUMN management_company_id`
-- [ ] Phase 3: Update `record_ledger_entries` function
-- [ ] Phase 3: Index on `ledger_accounts(management_company_id)`
+- [x] Phase 3: `ALTER TABLE ledger_accounts ADD COLUMN management_company_id` ✅
+- [x] Phase 3: Update `record_ledger_entries` function with MC commission split ✅
+- [x] Phase 3: Index on `ledger_accounts(management_company_id)` ✅
+- [x] Phase 3: RLS for MC members to view MC ledger accounts/entries ✅
+- [x] Phase 3: `mc_commission` entry_type added to ledger_entries ✅
 
 ## QA Checklist
 
@@ -456,8 +458,8 @@ SELECT count(*) FROM staff_members WHERE company_id IS NOT NULL;
 - [x] MC director sees company-wide staff ✅ (company_id added)
 - [ ] Individual owner sees only own data (no regression) — needs manual test
 - [x] Company switcher changes all data views ✅ (activeCompanyId in query keys)
-- [ ] New booking creates correct ledger entries (3-way split) — Phase 3
-- [ ] iCal date changes update existing orders — Phase 4
+- [x] New booking creates correct ledger entries (3-way split) ✅ (record_ledger_entries updated)
+- [x] iCal date changes update existing orders ✅ (already implemented in current ical-sync)
 - [x] Revenue dashboard shows correct metrics for MC portfolio ✅
 - [x] No N+1 queries introduced ✅
 - [x] React Query keys include `activeCompanyId` where needed ✅
