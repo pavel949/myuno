@@ -5,3 +5,6 @@ export { PricingStep } from './PricingStep';
 export { HouseRulesSection } from './HouseRulesSection';
 export { DiscountsSection } from './DiscountsSection';
 export { CancellationPolicySection } from './CancellationPolicySection';
+export { UtilitiesStep } from './UtilitiesStep';
+export { ServicesStep } from './ServicesStep';
+export { AdminSettingsStep } from './AdminSettingsStep';
