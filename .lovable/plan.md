@@ -1,91 +1,96 @@
 
 
-# Подготовка личного кабинета УК Show Property Phuket
+# Рефакторинг Property Editor: полноценная карточка объекта с UnifiedMediaUploader
 
 ## Проблема
 
-Сейчас при входе в `/owner` директор Show Property Phuket видит **только 1 объект из 21**, потому что:
+Текущий PropertyEditor (`src/pages/owner/PropertyEditor.tsx`) -- это **1237-строчный монолит** с собственной реализацией формы, который:
 
-1. **Данные**: 20 из 21 объектов имеют `owner_id = NULL` -- они привязаны к УК через `management_company_id`, но у директора нет `property_manager_assignments`
-2. **MC `properties_count` = 0** -- хук `useOwnerAccess` считает, что у УК нет объектов, что блокирует функционал
-3. **Нет переключателя между УК** -- пользователь привязан к двум компаниям (Show Property + Ignatev Estate), но `useMyCompanyId` берёт только первую
-4. **Объекты не видны в дашборде** -- `useOwnerProperties` ищет по `owner_id`, `useAssignedProperties` ищет по `property_manager_assignments` -- ни то, ни другое не покрывает объекты УК
+1. Использует устаревший `ImageUpload` вместо `UnifiedMediaUploader` (без drag-and-drop сортировки, без импорта из облака, без AI-анализа качества фото)
+2. Дублирует логику, которая уже реализована в `CanonicalPropertyForm` (используется в Admin)
+3. Не показывает все 7 вкладок (Utilities, Services, Admin) -- только 4 базовые + свои кастомные Rooms/Calendar/Rules/Team
+4. Не использует возможности импорта данных из внешних источников
 
-## План реализации
+## Решение
 
-### 1. Исправление данных в базе
+Заменить кастомную 1237-строчную реализацию PropertyEditor на `CanonicalPropertyForm` в режиме `owner` с расширенным набором вкладок, сохранив при этом уникальные фичи текущего редактора (Rooms, Calendar, Team, Preview, Draft restoration).
 
-- Обновить `properties_count` для Show Property Phuket на актуальное значение (21)
-- Создать `property_manager_assignments` для всех 21 объектов Show Property, привязанных к пользователю-директору с полными правами
-- Это позволит существующему хуку `useAssignedProperties` сразу подхватить все объекты
+## Изменения
 
-### 2. Доработка хука useMyProperties -- поддержка объектов УК
+### 1. Расширить CanonicalPropertyForm для Owner-режима
 
-Сейчас `useMyProperties` объединяет owned + assigned. Нужно добавить **третий источник**: объекты, привязанные к УК пользователя через `management_company_id`. Это гарантирует, что директор видит все объекты компании, даже если они формально не назначены ему.
+Файл: `src/components/property/canonical-form/CanonicalPropertyForm.tsx`
 
-Изменения в `src/hooks/useMyProperties.ts`:
-- Получить `companyId` из `useMyCompanyId`
-- Добавить запрос объектов по `management_company_id`
-- Объединить с owned и managed, дедуплицируя
+- Добавить вкладки Rooms, Calendar, Team в owner-режим (сейчас только admin имеет расширенные вкладки)
+- Включить все 7+ вкладок: Basic, Location, Photos, Pricing, Utilities, Services, Rules, Rooms, Calendar, Team
+- PhotosStep уже использует `UnifiedMediaUploader` с drag-and-drop, импортом из облака и AI-анализом качества
 
-### 3. Переключатель УК в Header
+### 2. Переписать PropertyEditor как тонкую обертку
 
-Создать компонент `CompanySwitcher` для пользователей, привязанных к нескольким УК:
-- Отображается в `OwnerHeader` рядом с ролевым бейджем
-- При переключении сохраняет выбранную компанию в контексте
-- Все хуки (`useMyCompanyId`, `useDashboardMetrics`, `useCrmTasks`) реагируют на выбранную УК
+Файл: `src/pages/owner/PropertyEditor.tsx`
 
-Изменения:
-- Новый файл `src/components/owner/CompanySwitcher.tsx`
-- Новый хук `src/hooks/useActiveCompany.ts` (React Context + localStorage)
-- Обновить `useMyCompanyId` для использования выбранной компании вместо первой попавшейся
+Вместо 1237 строк кастомной формы:
+- Загрузка данных через `useOwnerProperty(id)` (уже работает)
+- Маппинг в `CanonicalPropertyFormData` 
+- Рендер `CanonicalPropertyForm` с `mode="owner"` и `initialData`
+- Сохранение Draft Restoration и Preview sidebar
+- Добавление вкладок Rooms, Calendar и Team
 
-### 4. Отображение названия УК в Sidebar и Header
+Итоговый файл -- ~150-200 строк вместо 1237.
 
-- В `OwnerSidebar`: заменить статичный "myUNO" на название активной УК + логотип
-- В `OwnerHeader`: показывать название компании в ролевом бейдже вместо generic "Owner"
+### 3. Обновить Photos tab
 
-### 5. Обновление properties_count триггером
+Файл: `src/components/owner/property-wizard/steps/PhotosStep.tsx`
 
-Создать SQL-триггер, который автоматически обновляет `management_companies.properties_count` при добавлении/удалении объектов с данным `management_company_id`. Это устранит рассинхронизацию навсегда.
+PhotosStep уже использует `UnifiedMediaUploader` в GalleryMode с:
+- Drag-and-drop сортировкой (dnd-kit)
+- Импортом из облака (`enableCloudImport`)
+- Импортом по URL (`enableUrlImport`)
+- Редактированием и обрезкой (`enableEditing`)
+- AI-анализом качества (`enableQualityTips`)
+
+Это уже корректно -- никаких изменений не нужно.
+
+### 4. Расширить CanonicalPropertyForm до полного набора owner-вкладок
+
+Добавить в owner-режим вкладки:
+- **Utilities** (электричество, вода, интернет) -- уже есть компонент `UtilitiesStep`
+- **Services** (уборка, трансфер, доп. услуги) -- уже есть `ServicesStep`  
+- **Rules** (правила проживания) -- собрать из `HouseRulesSection` + `CancellationPolicySection`
+- **Rooms** -- `PropertyRooms` компонент
+- **Calendar** -- `PropertyCalendar` + `SeasonalPricing`
+- **Team** -- `PropertyTeamTab`
 
 ## Технические детали
 
-### Миграция данных (SQL)
-```text
--- 1. Обновить properties_count
-UPDATE management_companies SET properties_count = 21 
-WHERE id = '017c9759-af23-4233-8bba-f379c819736a';
-
--- 2. Создать assignments для директора
-INSERT INTO property_manager_assignments (manager_user_id, property_id, is_active, permissions)
-SELECT '5cbbcd96-7a9b-4311-ae5f-80a114b27b12', id, true, 
-  '{"calendar":true,"pricing":true,"bookings":true,"guests":true}'::jsonb
-FROM properties 
-WHERE management_company_id = '017c9759-af23-4233-8bba-f379c819736a'
-ON CONFLICT DO NOTHING;
-
--- 3. Триггер для properties_count
-CREATE FUNCTION update_mc_properties_count() ...
-CREATE TRIGGER trg_mc_properties_count ...
-```
-
-### Новые файлы
-- `src/hooks/useActiveCompany.ts` -- контекст активной УК
-- `src/components/owner/CompanySwitcher.tsx` -- UI переключателя
-
 ### Изменяемые файлы
-- `src/hooks/useMyProperties.ts` -- добавить MC-объекты
-- `src/hooks/useAgentDeals.ts` (`useMyCompanyId`) -- использовать activeCompany
-- `src/components/owner/OwnerHeader.tsx` -- добавить CompanySwitcher + название УК
-- `src/components/owner/OwnerSidebar.tsx` -- показать лого и название УК
 
-## Результат
+1. **`src/components/property/canonical-form/CanonicalPropertyForm.tsx`**
+   - Добавить props: `propertyId`, `onCalendarChange`, `rooms/calendar/team` tabs
+   - Расширить `tabs` для owner-режима: вместо 4 вкладок показывать 9-10
+   - Добавить поддержку `extraTabs` prop для инъекции кастомных вкладок (Rooms, Calendar, Team)
 
-После реализации директор Show Property Phuket сможет:
-- Видеть все 21 объект в дашборде и списке Properties
-- Переключаться между Show Property и Ignatev Estate
-- Видеть KPI, финансы, задачи и CRM в контексте выбранной УК
-- Приглашать сотрудников через раздел Team
-- Все данные изолированы по компаниям
+2. **`src/pages/owner/PropertyEditor.tsx`**
+   - Сократить до ~200 строк: загрузка данных, маппинг, рендер CanonicalPropertyForm
+   - Сохранить: Draft restoration banner, Preview sidebar, Submit/Save logic
+   - Передавать `initialData` из загруженного property, `mode="owner"`, все вкладки
+
+3. **`src/components/owner/property-wizard/steps/index.ts`**
+   - Экспортировать `HouseRulesSection` и `CancellationPolicySection` если еще не экспортируются
+
+### Что сохраняется
+
+- Draft auto-save и restoration (localStorage)
+- Live Preview sidebar с PropertyPreviewCard
+- Property Team tab
+- Rooms и Calendar управление
+- Все текущие поля формы (30+ полей)
+- Маппинг данных из/в формат properties таблицы
+
+### Что улучшается
+
+- Фото: UnifiedMediaUploader вместо старого ImageUpload (drag-and-drop, импорт из облака/URL, AI качество)
+- Единая кодовая база формы с Admin (CanonicalPropertyForm)
+- Все 10 вкладок доступны Owner: Basic, Location, Photos, Pricing, Utilities, Services, Rules, Rooms, Calendar, Team
+- Код сокращается с 1237 строк до ~200
 
