@@ -97,7 +97,7 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Операции',
     defaultOpen: false,
     items: [
-      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
+      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/tasks', icon: Wrench },
       { title: 'Channel Manager', titleRu: 'Каналы', path: '/owner/channels', icon: Radio },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
