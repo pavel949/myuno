@@ -49,20 +49,40 @@
     <!-- Version check with forced reload on mismatch -->
     <script>
       (function() {
-        // On SW controller change, reload once
+        // Check if user has unsaved form drafts — defer destructive reloads
+        function hasUnsavedDrafts() {
+          try {
+            for (var i = 0; i < localStorage.length; i++) {
+              var key = localStorage.key(i);
+              if (key && key.indexOf('vendor_draft_property_editor_') === 0) return true;
+            }
+          } catch(e) {}
+          return false;
+        }
+
+        function safeReload() {
+          if (hasUnsavedDrafts()) {
+            console.log('[myUNO] Unsaved drafts detected — deferring reload until user leaves editor');
+            window.__swPendingReload = true;
+            return false;
+          }
+          return true;
+        }
+
+        // On SW controller change, reload once (unless editing)
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.addEventListener('controllerchange', function() {
-            if (!window.__swReloading) {
+            if (!window.__swReloading && safeReload()) {
               window.__swReloading = true;
               window.location.reload();
             }
           });
           
-          // Listen for SW_UPDATED message — hard reload to clear old JS from memory
+          // Listen for SW_UPDATED message
           navigator.serviceWorker.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'SW_UPDATED') {
-              console.log('[myUNO] SW_UPDATED received — forcing hard reload');
-              if (!window.__swReloading) {
+              console.log('[myUNO] SW_UPDATED received');
+              if (!window.__swReloading && safeReload()) {
                 window.__swReloading = true;
                 window.location.href = window.location.href;
               }
@@ -90,6 +110,12 @@
             if (htmlVersion && htmlVersion !== serverVersion) needsReload = true;
             
             if (needsReload) {
+              // Defer reload if user has unsaved drafts
+              if (hasUnsavedDrafts()) {
+                console.log('[myUNO] Version mismatch but unsaved drafts — deferring reload');
+                window.__swPendingReload = true;
+                return;
+              }
               console.log('[myUNO] Version mismatch! Clearing all caches and reloading...');
               
               // Guard against reload loops: max 1 reload per version change
