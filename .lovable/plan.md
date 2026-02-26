@@ -1,99 +1,83 @@
 
 
-# Employee Activity Log System
+# Снижение когнитивной нагрузки на главной (Desktop)
 
-## Overview
+## Диагноз
 
-Build a system to track and display what each team member does in the system. Directors/owners can see a full activity log per employee -- what pages they visit, what actions they take (creating tasks, editing properties, viewing contacts, etc.).
+Сейчас на десктопе **11 секций** идут одной колонкой сверху вниз. Основные проблемы:
 
-## Database Changes
+1. **Два дублирующих CTA** -- "Browse Full Catalog" и "All Services & Situations" ведут примерно туда же
+2. **Две карусели подряд** -- QuickSolutionsGallery + Products carousel сливаются визуально
+3. **PropertyTourBanner** -- крупный промо-баннер разрывает контент
+4. **Нет desktop-сетки** -- широкий экран 1536px не используется, всё в одну колонку
+5. **Your Day + Smart Tip** -- два информационных блока рядом, но не сгруппированы
 
-### 1. Update RLS policy on `team_activity_log`
+## Решение: "Calm Grid" layout для десктопа
 
-The current SELECT policy only allows admins (by `user_roles`) and the user themselves to see activity. We need MC directors/managers to also see activity of their company members:
+### 1. Desktop 2-column grid для средней зоны
 
-```sql
-DROP POLICY "Team members can view own activity" ON team_activity_log;
+На экранах `lg+` организовать контент в сетку:
 
-CREATE POLICY "View team activity"
-ON team_activity_log FOR SELECT TO authenticated
-USING (
-  auth.uid() = user_id
-  OR EXISTS (
-    SELECT 1 FROM user_roles
-    WHERE user_roles.user_id = auth.uid()
-    AND user_roles.role = ANY(ARRAY['admin'::app_role, 'staff'::app_role])
-  )
-  OR EXISTS (
-    SELECT 1 FROM management_company_members AS mgr
-    JOIN management_company_members AS mem
-      ON mgr.company_id = mem.company_id
-    WHERE mgr.user_id = auth.uid()
-      AND mgr.role IN ('director', 'admin')
-      AND mem.user_id = team_activity_log.user_id
-  )
-);
+```text
++-----------------------------------------------+
+|              HERO (full width)                 |
++-----------------------------------------------+
+|          QUICK ACTIONS (full width)            |
++-----------------------------------------------+
+|                                                |
+|   YOUR DAY FEED        |   SMART TIP          |
+|   (main column 2/3)    |   + CONCIERGE        |
+|                         |   + PROPERTY TOUR    |
+|                         |   (sidebar 1/3)      |
+|                         |                      |
++-----------------------------------------------+
+|     SOLUTIONS GALLERY (full width carousel)    |
++-----------------------------------------------+
+|   TRUST + EMERGENCY (inline strip)             |
++-----------------------------------------------+
 ```
 
-## Frontend: New Files
+### 2. Убрать дублирующие CTA
 
-### 1. `src/hooks/useTeamActivityLog.ts`
+- **Удалить** `DiscoverCTABanner` -- дублирует кнопку "Browse Full Catalog" и "More" в QuickActions
+- **Объединить** "Browse Full Catalog" в заголовок секции Solutions как "See All" ссылку
 
-Hook with two exports:
+### 3. Sidebar-блок вместо вертикального потока
 
-- **`useLogActivity()`** -- mutation that inserts into `team_activity_log`. Called automatically from key user actions (task creation, property edits, contact views, permission changes, etc.).
-- **`useMemberActivityLog(userId)`** -- query that fetches the last 100 activity entries for a specific team member, ordered by `created_at` desc.
+На десктопе перенести в правую колонку (sticky sidebar):
+- `LifecycleSmartTip` -- контекстная подсказка
+- `ConciergeBanner` -- "Need help?"
+- `PropertyTourBanner` -- промо (уменьшенный вариант)
 
-### 2. `src/components/owner/team/MemberActivitySheet.tsx`
+Это освобождает основной поток и группирует "вспомогательный" контент отдельно.
 
-A side-sheet (like `MemberPermissionsSheet`) showing a chronological activity feed for a selected staff member:
+### 4. Trust + Emergency -- горизонтальная полоса
 
-- Header with member name and "Activity Log" title
-- Scrollable list of activity items, each showing:
-  - Icon based on `action_type` (e.g., eye for "view", pencil for "edit", plus for "create")
-  - Action label (RU/EN): "Viewed contact", "Created task", "Edited property", etc.
-  - Entity info from `entity_type` + `entity_id`
-  - Relative timestamp ("5 min ago", "2 hours ago")
-- Empty state if no activity recorded
+Вместо двух отдельных блоков, на десктопе объединить Trust и Emergency в одну горизонтальную полосу внизу: `Verified | 50+ providers | 24/7 support | Emergency SOS`
 
-### 3. Automatic Activity Logging
+### 5. Увеличить "воздух" между секциями
 
-Add `useLogActivity()` calls in key hooks:
+Увеличить `lg:space-y-12` до `lg:space-y-16` для более "дышащего" ощущения.
 
-- **`useCrmTasks.ts`** -- log when tasks are created/completed
-- **`usePropertyCare.ts`** -- log when properties are edited
-- **Sidebar navigation** -- log page visits via a lightweight wrapper
+---
 
-For the initial implementation, we'll add logging to the most critical operations and expand coverage over time.
+## Технический план
 
-## Frontend: Modified Files
+### Файл 1: `src/pages/Index.tsx`
+- Добавить `useIsDesktop()` hook
+- На desktop: обернуть YourDayFeed + sidebar-блоки в `lg:grid lg:grid-cols-3 lg:gap-8`
+- Удалить `DiscoverCTABanner` из потока
+- Объединить Trust + Emergency в одну строку на desktop
 
-### `src/pages/owner/StaffPage.tsx`
+### Файл 2: `src/components/home/HomeProductsSection.tsx`
+- Убрать отдельную кнопку "Browse Full Catalog"
+- Добавить "See All" ссылку в заголовок QuickSolutionsGallery
 
-- Add "Activity Log" (`History` icon) item to the `StaffCard` dropdown menu
-- Add state for `activityTarget` (selected staff member)
-- Render `MemberActivitySheet` when a staff member is selected
+### Файл 3: `src/components/home/TrustBanner.tsx`
+- Добавить слот для Emergency-контента на desktop (4-я колонка)
 
-## Action Type Mapping
-
-| action_type | Entity Type | Label EN | Label RU |
-|---|---|---|---|
-| page.view | page | Viewed page | Просмотр страницы |
-| task.create | task | Created task | Создал задачу |
-| task.complete | task | Completed task | Завершил задачу |
-| property.edit | property | Edited property | Редактировал объект |
-| contact.view | contact | Viewed contact | Просмотрел контакт |
-| permission.change | permission | Changed permissions | Изменил права |
-| staff.edit | staff | Edited staff | Редактировал сотрудника |
-| document.upload | document | Uploaded document | Загрузил документ |
-
-## Technical Summary
-
-| Action | File |
-|---|---|
-| Create | `src/hooks/useTeamActivityLog.ts` |
-| Create | `src/components/owner/team/MemberActivitySheet.tsx` |
-| Modify | `src/pages/owner/StaffPage.tsx` (add dropdown item + sheet) |
-| Modify | `src/hooks/useCrmTasks.ts` (add activity logging on create/complete) |
-| DB Migration | Update RLS policy on `team_activity_log` |
+### Результат
+- С 11 визуальных блоков до 6 на desktop
+- Чёткая иерархия: Hero → Actions → Daily Brief (+ sidebar) → Solutions → Trust
+- "Confident, clean, premium" -- в соответствии с дизайн-системой
 
