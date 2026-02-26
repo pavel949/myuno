@@ -1,6 +1,8 @@
 import React, { useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+import { staggerContainerVariants, staggerItemVariants } from '@/lib/motionPresets';
 import { 
   Anchor, Plane, Flower2, Home, Utensils, Compass,
   Stethoscope, ShoppingBag, MoreHorizontal, Scale, Shield,
@@ -215,10 +217,15 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   }, [queryClient]);
 
   return (
-    <div className={cn(
-      "grid grid-cols-4 gap-y-3 gap-x-2",
-      "lg:flex lg:items-start lg:justify-evenly lg:gap-3"
-    )}>
+    <motion.div
+      className={cn(
+        "grid grid-cols-4 gap-y-3 gap-x-2",
+        "lg:flex lg:items-start lg:justify-evenly lg:gap-3"
+      )}
+      variants={staggerContainerVariants}
+      initial="initial"
+      animate="animate"
+    >
       {quickActions.map((action) => {
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
@@ -228,8 +235,9 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         const isLocked = action.requiresFullAccess && !hasFullAccess;
         
         return (
-          <button
+          <motion.button
             key={action.id}
+            variants={staggerItemVariants}
             onClick={(e) => handleClick(action, e)}
             onMouseEnter={() => handlePrefetch(action.path)}
             onTouchStart={() => handlePrefetch(action.path)}
@@ -269,9 +277,9 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             )}>
               {label}
             </span>
-          </button>
+          </motion.button>
         );
       })}
-    </div>
+    </motion.div>
   );
 });

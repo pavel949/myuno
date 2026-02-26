@@ -29,6 +29,7 @@ import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpir
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { useIsDesktop } from '@/hooks/use-desktop';
+import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -82,7 +83,9 @@ const Index = () => {
           <HeroBlock />
 
           {/* ─── SECTION 2: Quick Actions (full width) ─── */}
-          <QuickActionsGrid />
+          <RevealOnScroll>
+            <QuickActionsGrid />
+          </RevealOnScroll>
 
           {/* ─── SECTION 3: Content Grid — main + sidebar on desktop ─── */}
           {isDesktop ? (
@@ -128,12 +131,16 @@ const Index = () => {
           )}
 
           {/* ─── SECTION 4: Products / Solutions (full width) ─── */}
-          <HomeProductsSection />
+          <RevealOnScroll>
+            <HomeProductsSection />
+          </RevealOnScroll>
 
           {/* ─── SECTION 5: Trust + Emergency (unified strip) ─── */}
-          <Suspense fallback={null}>
-            <TrustBanner showEmergency />
-          </Suspense>
+          <RevealOnScroll>
+            <Suspense fallback={null}>
+              <TrustBanner showEmergency />
+            </Suspense>
+          </RevealOnScroll>
 
         </div>
       </PullToRefresh>
