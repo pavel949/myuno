@@ -340,7 +340,7 @@ export default function PipelineSettingsPage() {
     return <div className="p-4 space-y-4 max-w-2xl mx-auto"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
   }
 
-  if (!membership || !['owner', 'admin'].includes(membership.role)) {
+  if (!membership || !['owner', 'admin', 'director', 'manager'].includes(membership.role)) {
     return (
       <div className="p-4 text-center text-muted-foreground pt-20 max-w-2xl mx-auto">
         <p>{isRu ? 'Нет доступа. Только владельцы и админы УК.' : 'No access. Owners/admins only.'}</p>
