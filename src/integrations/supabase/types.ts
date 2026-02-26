@@ -3691,6 +3691,112 @@ export type Database = {
           },
         ]
       }
+      crm_documents: {
+        Row: {
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          description: string | null
+          document_type: Database["public"]["Enums"]["crm_document_type"]
+          expires_at: string | null
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_archived: boolean
+          mime_type: string | null
+          property_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          document_type?: Database["public"]["Enums"]["crm_document_type"]
+          expires_at?: string | null
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_archived?: boolean
+          mime_type?: string | null
+          property_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          description?: string | null
+          document_type?: Database["public"]["Enums"]["crm_document_type"]
+          expires_at?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_archived?: boolean
+          mime_type?: string | null
+          property_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_tasks: {
         Row: {
           assigned_to: string | null
@@ -24171,6 +24277,22 @@ export type Database = {
         | "food"
         | "tour"
         | "medical"
+      crm_document_type:
+        | "passport"
+        | "id_card"
+        | "visa"
+        | "rental_contract"
+        | "sale_contract"
+        | "agency_contract"
+        | "power_of_attorney"
+        | "invoice"
+        | "receipt"
+        | "act"
+        | "payment_confirmation"
+        | "correspondence"
+        | "photo"
+        | "screenshot"
+        | "other"
       education_entity_type: "institution" | "individual"
       intent_status:
         | "pending"
@@ -24399,6 +24521,23 @@ export const Constants = {
         "food",
         "tour",
         "medical",
+      ],
+      crm_document_type: [
+        "passport",
+        "id_card",
+        "visa",
+        "rental_contract",
+        "sale_contract",
+        "agency_contract",
+        "power_of_attorney",
+        "invoice",
+        "receipt",
+        "act",
+        "payment_confirmation",
+        "correspondence",
+        "photo",
+        "screenshot",
+        "other",
       ],
       education_entity_type: ["institution", "individual"],
       intent_status: [
