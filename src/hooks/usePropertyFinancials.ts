@@ -1,6 +1,8 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { getAccessiblePropertyIds as getAccessiblePropertyIdsShared } from '@/lib/getAccessiblePropertyIds';
 import { toast } from 'sonner';
 
 export interface PropertyFinancialFull {
@@ -89,16 +91,26 @@ export const PAYMENT_METHODS = [
 
 export function usePropertyFinancialsFull(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-financials-full', user?.id, propertyId],
+    queryKey: ['property-financials-full', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
+
+      // Use unified access layer for MC portfolio visibility
+      const { allIds } = await getAccessiblePropertyIdsShared({
+        userId: user.id,
+        activeCompanyId,
+      });
+      
+      if (allIds.length === 0) return [];
       
       let query = supabase
         .from('property_financials')
-        .select('*, property:owner_properties(id, title, title_ru)')
-        .eq('owner_id', user.id)
+        .select('*, property:properties(id, title_en, title_ru)')
+        .in('property_id', allIds)
         .order('transaction_date', { ascending: false });
       
       if (propertyId) {
@@ -107,7 +119,16 @@ export function usePropertyFinancialsFull(propertyId?: string) {
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as unknown as PropertyFinancialFull[];
+      
+      // Map title_en to title for backward compat
+      return (data || []).map((item: any) => ({
+        ...item,
+        property: item.property ? {
+          id: item.property.id,
+          title: item.property.title_en,
+          title_ru: item.property.title_ru,
+        } : undefined,
+      })) as PropertyFinancialFull[];
     },
     enabled: !!user,
   });
@@ -122,48 +143,34 @@ export function usePropertyFinancialsFull(propertyId?: string) {
  * - Properties the user owns
  * - Properties where user is an active delegate with financials permission
  */
+/**
+ * @deprecated Use getAccessiblePropertyIds from '@/lib/getAccessiblePropertyIds' instead
+ */
 export async function getAccessiblePropertyIds(userId: string): Promise<string[]> {
-  const [ownedRes, delegatedRes] = await Promise.all([
-    supabase
-      .from('owner_properties')
-      .select('id')
-      .eq('owner_id', userId),
-    supabase
-      .from('property_delegates')
-      .select('property_id, permissions')
-      .eq('user_id', userId)
-      .eq('status', 'active'),
-  ]);
-
-  const ownedIds = (ownedRes.data || []).map(p => p.id);
-  const delegatedIds = (delegatedRes.data || [])
-    .filter(d => {
-      const perms = d.permissions as any;
-      return perms?.financials === true;
-    })
-    .map(d => d.property_id);
-
-  return [...new Set([...ownedIds, ...delegatedIds])];
+  const result = await getAccessiblePropertyIdsShared({ userId, activeCompanyId: null });
+  return result.allIds;
 }
 
 export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 50) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useInfiniteQuery({
-    queryKey: ['property-financials-paginated', user?.id, propertyId, pageSize],
+    queryKey: ['property-financials-paginated', user?.id, activeCompanyId, propertyId, pageSize],
     queryFn: async ({ pageParam }) => {
       if (!user) return { data: [], nextCursor: null, hasMore: false };
 
-      // Determine accessible property ids (УК видит управляемые объекты)
       let propertyIds: string[] | undefined;
       if (!propertyId) {
-        propertyIds = await getAccessiblePropertyIds(user.id);
+        const result = await getAccessiblePropertyIdsShared({ userId: user.id, activeCompanyId });
+        propertyIds = result.allIds;
         if (propertyIds.length === 0) return { data: [], nextCursor: null, hasMore: false };
       }
 
       let query = supabase
         .from('property_financials')
-        .select('*, property:owner_properties(id, title, title_ru)')
+        .select('*, property:properties(id, title_en, title_ru)')
         .order('transaction_date', { ascending: false })
         .limit(pageSize + 1);
 
@@ -180,7 +187,10 @@ export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 5
       const { data, error } = await query;
       if (error) throw error;
 
-      const items = data as unknown as PropertyFinancialFull[];
+      const items = (data || []).map((item: any) => ({
+        ...item,
+        property: item.property ? { id: item.property.id, title: item.property.title_en, title_ru: item.property.title_ru } : undefined,
+      })) as PropertyFinancialFull[];
       const hasMore = items.length > pageSize;
       const paginatedItems = hasMore ? items.slice(0, pageSize) : items;
       const nextCursor = hasMore && paginatedItems.length > 0
@@ -200,9 +210,11 @@ export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 5
  */
 export function usePropertyFinancialsCount(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-financials-count', user?.id, propertyId],
+    queryKey: ['property-financials-count', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return 0;
 
@@ -213,9 +225,9 @@ export function usePropertyFinancialsCount(propertyId?: string) {
       if (propertyId) {
         query = query.eq('property_id', propertyId);
       } else {
-        const ids = await getAccessiblePropertyIds(user.id);
-        if (ids.length === 0) return 0;
-        query = query.in('property_id', ids);
+        const result = await getAccessiblePropertyIdsShared({ userId: user.id, activeCompanyId });
+        if (result.allIds.length === 0) return 0;
+        query = query.in('property_id', result.allIds);
       }
 
       const { count, error } = await query;
@@ -228,9 +240,11 @@ export function usePropertyFinancialsCount(propertyId?: string) {
 
 export function useFinancialStats(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['financial-stats', user?.id, propertyId],
+    queryKey: ['financial-stats', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return null;
 
@@ -241,9 +255,9 @@ export function useFinancialStats(propertyId?: string) {
       if (propertyId) {
         query = query.eq('property_id', propertyId);
       } else {
-        const ids = await getAccessiblePropertyIds(user.id);
-        if (ids.length === 0) return null;
-        query = query.in('property_id', ids);
+        const result = await getAccessiblePropertyIdsShared({ userId: user.id, activeCompanyId });
+        if (result.allIds.length === 0) return null;
+        query = query.in('property_id', result.allIds);
       }
 
       const { data, error } = await query;

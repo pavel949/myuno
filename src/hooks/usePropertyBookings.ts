@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('usePropertyBookings');
@@ -81,31 +83,20 @@ function mapOrderToBooking(order: any, propertyId: string): PropertyBooking {
 
 export function usePropertyBookings(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ['property-bookings', user?.id, propertyId],
+    queryKey: ['property-bookings', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Query orders where vertical = 'property'
-      // Filter by user's own properties to prevent data leaks
-      const { data: userProperties } = await supabase
-        .from('owner_properties')
-        .select('id')
-        .eq('owner_id', user.id);
-
-      const userPropertyIds = (userProperties || []).map(p => p.id);
-      
-      // Also include properties user manages via delegation
-      const { data: delegated } = await (supabase as any)
-        .from('property_delegates')
-        .select('property_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active');
-      
-      const delegatedIds = ((delegated || []) as { property_id: string }[]).map((d: { property_id: string }) => d.property_id);
-      const allPropertyIds = [...new Set([...userPropertyIds, ...delegatedIds])];
+      // Use unified access layer (owned + delegated + MC company)
+      const { allIds: allPropertyIds } = await getAccessiblePropertyIds({
+        userId: user.id,
+        activeCompanyId,
+      });
       
       if (allPropertyIds.length === 0) return [];
 
@@ -373,26 +364,21 @@ export function usePropertyBookings(propertyId?: string) {
 // Hook for all owner's bookings across all properties
 export function useAllPropertyBookings() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ['all-property-bookings', user?.id],
+    queryKey: ['all-property-bookings', user?.id, activeCompanyId],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Get all properties owned by user
-      const { data: properties, error: propError } = await supabase
-        .from('owner_properties')
-        .select('id')
-        .eq('owner_id', user.id);
+      // Use unified access layer (owned + delegated + MC company)
+      const { allIds: propertyIds } = await getAccessiblePropertyIds({
+        userId: user.id,
+        activeCompanyId,
+      });
 
-      if (propError) {
-        errorLog.silent(propError, 'fetch_owner_properties');
-        throw propError;
-      }
-
-      if (!properties?.length) return [];
-
-      const propertyIds = properties.map(p => p.id);
+      if (!propertyIds.length) return [];
 
       // Get orders for these properties
       const { data, error } = await supabase
@@ -428,12 +414,12 @@ export function useAllPropertyBookings() {
       
       if (resourceIds.length > 0) {
         const { data: props } = await supabase
-          .from('owner_properties')
-          .select('id, title, title_ru, address, cover_image')
+          .from('properties')
+          .select('id, title_en, title_ru, address, cover_image')
           .in('id', resourceIds);
         
-        propertiesMap = (props || []).reduce((acc, prop) => {
-          acc[prop.id] = prop;
+        propertiesMap = (props || []).reduce((acc, prop: any) => {
+          acc[prop.id] = { ...prop, title: prop.title_en };
           return acc;
         }, {} as typeof propertiesMap);
       }
@@ -515,12 +501,12 @@ export function useGuestPropertyBookings() {
       
       if (resourceIds.length > 0) {
         const { data: props } = await supabase
-          .from('owner_properties')
-          .select('id, title, title_ru, address, cover_image, check_in_time, check_out_time')
+          .from('properties')
+          .select('id, title_en, title_ru, address, cover_image, check_in_time, check_out_time')
           .in('id', resourceIds);
         
-        propertiesMap = (props || []).reduce((acc, prop) => {
-          acc[prop.id] = prop;
+        propertiesMap = (props || []).reduce((acc, prop: any) => {
+          acc[prop.id] = { ...prop, title: prop.title_en };
           return acc;
         }, {} as typeof propertiesMap);
       }

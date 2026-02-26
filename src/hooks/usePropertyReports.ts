@@ -118,7 +118,7 @@ export function usePropertyReports(propertyId?: string) {
         .from('property_reports')
         .select(`
           *,
-          property:owner_properties(id, title, title_ru)
+          property:properties(id, title_en, title_ru)
         `)
         .order('created_at', { ascending: false });
 

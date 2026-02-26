@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,16 +29,16 @@ export function TodayBriefingWidget() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: properties, isLoading: propertiesLoading } = useOwnerProperties();
+  const { allProperties: properties, isLoading: propertiesLoading } = useMyProperties();
   const { upcomingBookings, activeBookings, isLoading: bookingsLoading } = useAllPropertyBookings();
 
   const events = useMemo<TodayEvent[]>(() => {
-    if (!properties) return [];
+    if (!properties?.length) return [];
     const allBookings = [...(upcomingBookings || []), ...(activeBookings || [])];
     const result: TodayEvent[] = [];
 
     for (const booking of allBookings) {
-      const property = properties.find(p => p.id === booking.property_id);
+      const property = properties.find(p => p.property_id === booking.property_id);
       const pName = property
         ? (isRu ? property.title_ru : property.title) || property.title
         : isRu ? 'Объект' : 'Property';

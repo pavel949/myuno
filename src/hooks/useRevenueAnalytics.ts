@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { usePropertyFinancialsFull } from '@/hooks/usePropertyFinancials';
 import { useAllPropertyBookings } from '@/hooks/usePropertyBookings';
 import {
@@ -44,7 +44,7 @@ export interface ForecastPoint {
 
 export function useRevenueAnalytics(monthsBack = 6) {
   const { user } = useAuth();
-  const { data: properties, isLoading: propsLoading } = useOwnerProperties();
+  const { allProperties, isLoading: propsLoading } = useMyProperties();
   const { data: financials, isLoading: finLoading } = usePropertyFinancialsFull();
   const { bookings, isLoading: bookLoading } = useAllPropertyBookings();
 
@@ -52,8 +52,8 @@ export function useRevenueAnalytics(monthsBack = 6) {
 
   /** Monthly breakdown for the last N months */
   const monthlyMetrics = useMemo<MonthlyMetric[]>(() => {
-    if (!properties?.length || !financials || !bookings) return [];
-    const propCount = properties.length;
+    if (!allProperties?.length || !financials || !bookings) return [];
+    const propCount = allProperties.length;
     const months: MonthlyMetric[] = [];
 
     for (let i = monthsBack - 1; i >= 0; i--) {
@@ -104,14 +104,14 @@ export function useRevenueAnalytics(monthsBack = 6) {
       });
     }
     return months;
-  }, [properties, financials, bookings, monthsBack]);
+  }, [allProperties, financials, bookings, monthsBack]);
 
   /** Per-property breakdown (last 30d) */
   const propertyRevenue = useMemo<PropertyRevenue[]>(() => {
-    if (!properties?.length || !financials || !bookings) return [];
+    if (!allProperties?.length || !financials || !bookings) return [];
     const range = { start: subDays(new Date(), 30), end: new Date() };
 
-    return properties.map(p => {
+    return allProperties.map(p => {
       const pFin = financials.filter(f => f.property_id === p.id);
       const income = pFin.filter(f => f.transaction_type === 'income').reduce((s, f) => s + Number(f.amount), 0);
       const expenses = pFin.filter(f => f.transaction_type === 'expense').reduce((s, f) => s + Number(f.amount), 0);
@@ -119,7 +119,7 @@ export function useRevenueAnalytics(monthsBack = 6) {
       let bookedDays = 0;
       let count = 0;
       bookings.forEach(b => {
-        if (b.property_id !== p.id || b.status === 'cancelled') return;
+        if (b.property_id !== p.property_id || b.status === 'cancelled') return;
         const ci = new Date(b.check_in);
         const co = new Date(b.check_out);
         if (co < range.start || ci > range.end) return;
@@ -134,13 +134,13 @@ export function useRevenueAnalytics(monthsBack = 6) {
       const revpar = income / 30;
 
       return {
-        id: p.id,
+        id: p.property_id,
         title: p.title,
         coverImage: p.cover_image,
         income, expenses, occupancy, adr, revpar, bookingCount: count,
       };
     }).sort((a, b) => b.income - a.income);
-  }, [properties, financials, bookings]);
+  }, [allProperties, financials, bookings]);
 
   /** Simple 3-month forecast based on moving average */
   const forecast = useMemo<ForecastPoint[]>(() => {

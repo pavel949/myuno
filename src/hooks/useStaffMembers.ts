@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { toast } from 'sonner';
 
 export type StaffRole = 'cleaner' | 'maintenance' | 'manager' | 'admin' | 'staff';
@@ -40,17 +41,27 @@ const db = supabase as any;
 
 export function useStaffMembers() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['staff-members', user?.id],
+    queryKey: ['staff-members', user?.id, activeCompanyId],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await db
+      let query = db
         .from('staff_members')
         .select('*')
-        .eq('owner_id', user!.id)
         .eq('is_active', true)
         .order('name');
+
+      // If user is in an MC, show company-wide staff; otherwise show own staff
+      if (activeCompanyId) {
+        query = query.eq('company_id', activeCompanyId);
+      } else {
+        query = query.eq('owner_id', user!.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return (data || []) as StaffMember[];
     },
@@ -59,16 +70,25 @@ export function useStaffMembers() {
 
 export function useAllStaffMembers() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['staff-members-all', user?.id],
+    queryKey: ['staff-members-all', user?.id, activeCompanyId],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await db
+      let query = db
         .from('staff_members')
         .select('*')
-        .eq('owner_id', user!.id)
         .order('name');
+
+      if (activeCompanyId) {
+        query = query.eq('company_id', activeCompanyId);
+      } else {
+        query = query.eq('owner_id', user!.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return (data || []) as StaffMember[];
     },
@@ -77,14 +97,23 @@ export function useAllStaffMembers() {
 
 export function useCreateStaffMember() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: StaffMemberInsert) => {
       if (!user) throw new Error('Not authenticated');
+      const insertData: any = { 
+        ...payload, 
+        owner_id: user.id,
+      };
+      // Auto-link to active MC if user is a member
+      if (activeCompany?.company_id) {
+        insertData.company_id = activeCompany.company_id;
+      }
       const { data, error } = await db
         .from('staff_members')
-        .insert({ ...payload, owner_id: user.id })
+        .insert(insertData)
         .select()
         .single();
       if (error) throw error;
