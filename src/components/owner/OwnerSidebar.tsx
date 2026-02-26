@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Wrench,
   PackageOpen,
-  UserCog,
   Receipt,
   Settings,
   Tag,
@@ -21,6 +20,10 @@ import {
   ShieldCheck,
   BarChart3,
   MessageSquare,
+  Radio,
+  BookOpen,
+  FileText,
+  Megaphone,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -86,6 +89,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
       { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
       { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/owner/sales/settings', icon: Settings },
+      { title: 'Marketing', titleRu: 'Маркетинг', path: '/owner/marketing', icon: Megaphone },
     ],
   },
   {
@@ -94,9 +98,11 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Tasks', titleRu: 'Задачи', path: '/owner/operations', icon: Wrench },
+      { title: 'Channel Manager', titleRu: 'Каналы', path: '/owner/channels', icon: Radio },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/owner/insurance', icon: ShieldCheck },
+      { title: 'Documents', titleRu: 'Шаблоны документов', path: '/owner/documents', icon: FileText },
     ],
   },
   {
@@ -116,6 +122,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Staff & Access', titleRu: 'Сотрудники и доступ', path: '/owner/staff', icon: Users },
+      { title: 'Owner Guide', titleRu: 'Руководство', path: '/owner/guide', icon: BookOpen },
     ],
   },
 ];

@@ -530,9 +530,9 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Owner ── */}
         <Route path="/owner/landing" element={<Navigate to="/owner" replace />} />
-        <Route path="/owner/guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
         
         <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
+          <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
           <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
           <Route path="setup" element={<LazyPage><Pages.OwnerSetupWizard /></LazyPage>} />
           <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
@@ -566,7 +566,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="chat/:type/:id" element={<LazyPage><Pages.OwnerChatRoom /></LazyPage>} />
           <Route path="support-chat" element={<LazyPage><Pages.OwnerSupportChat /></LazyPage>} />
           <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
-          <Route path="reviews" element={<LazyPage><Pages.OwnerReviews /></LazyPage>} />
+          <Route path="reviews" element={<Navigate to="/owner/reviews-management" replace />} />
           <Route path="service-request" element={<LazyPage><Pages.ServiceRequest /></LazyPage>} />
           <Route path="inspection" element={<LazyPage><Pages.InspectionRequest /></LazyPage>} />
           <Route path="full-management" element={<LazyPage><Pages.FullManagement /></LazyPage>} />

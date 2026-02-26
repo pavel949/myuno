@@ -8,7 +8,6 @@ import {
   Receipt,
   BarChart3,
   Users,
-  UserCog,
   Building2,
   Package,
   Wrench,
@@ -16,6 +15,10 @@ import {
   Star,
   Tag,
   ShieldCheck,
+  Radio,
+  FileText,
+  Megaphone,
+  BookOpen,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -42,6 +45,7 @@ const MENU_SECTIONS: MenuSection[] = [
       { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
       { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
       { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
+      { path: '/owner/marketing', icon: Megaphone, labelEn: 'Marketing', labelRu: 'Маркетинг' },
     ],
   },
   {
@@ -49,9 +53,11 @@ const MENU_SECTIONS: MenuSection[] = [
     titleRu: 'Операции',
     items: [
       { path: '/owner/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи' },
+      { path: '/owner/channels', icon: Radio, labelEn: 'Channel Manager', labelRu: 'Каналы' },
       { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
       { path: '/owner/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики' },
       { path: '/owner/insurance', icon: ShieldCheck, labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы' },
+      { path: '/owner/documents', icon: FileText, labelEn: 'Documents', labelRu: 'Шаблоны документов' },
     ],
   },
   {
@@ -69,6 +75,7 @@ const MENU_SECTIONS: MenuSection[] = [
     titleRu: 'Команда',
     items: [
       { path: '/owner/staff', icon: Users, labelEn: 'Staff & Access', labelRu: 'Сотрудники и доступ' },
+      { path: '/owner/guide', icon: BookOpen, labelEn: 'Owner Guide', labelRu: 'Руководство' },
     ],
   },
 ];
