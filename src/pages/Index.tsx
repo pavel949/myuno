@@ -17,7 +17,6 @@ import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { DiscoverCTABanner } from '@/components/home/DiscoverCTABanner';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
@@ -29,6 +28,7 @@ import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
+import { useIsDesktop } from '@/hooks/use-desktop';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -38,6 +38,7 @@ const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingMod
 
 const Index = () => {
   const { activeCode } = useLifeSituationContext();
+  const isDesktop = useIsDesktop();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myuno-onboarding-complete') &&
@@ -75,48 +76,63 @@ const Index = () => {
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 lg:px-8 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-12">
+        <div className="px-4 md:px-6 lg:px-8 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-16">
           
-          {/* ─── SECTION 1: Hero ─── */}
+          {/* ─── SECTION 1: Hero (full width) ─── */}
           <HeroBlock />
 
-          {/* ─── SECTION 2: Quick Actions ─── */}
+          {/* ─── SECTION 2: Quick Actions (full width) ─── */}
           <QuickActionsGrid />
 
-          {/* ─── SECTION 3: Your Day Feed ─── */}
-          <Suspense fallback={null}>
-            <YourDayFeed compact />
-          </Suspense>
+          {/* ─── SECTION 3: Content Grid — main + sidebar on desktop ─── */}
+          {isDesktop ? (
+            <div className="grid grid-cols-3 gap-8">
+              {/* Main column (2/3) */}
+              <div className="col-span-2 space-y-6">
+                <Suspense fallback={null}>
+                  <YourDayFeed compact />
+                </Suspense>
+              </div>
+              {/* Sidebar (1/3) */}
+              <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
+                <LifecycleSmartTip />
+                {hasContext ? (
+                  <Suspense fallback={null}>
+                    <LifeOSStatusBlock />
+                  </Suspense>
+                ) : (
+                  <Suspense fallback={null}>
+                    <ConciergeBanner />
+                  </Suspense>
+                )}
+                <PropertyTourBanner />
+              </div>
+            </div>
+          ) : (
+            <>
+              <Suspense fallback={null}>
+                <YourDayFeed compact />
+              </Suspense>
+              <LifecycleSmartTip />
+              <PropertyTourBanner />
+              {hasContext ? (
+                <Suspense fallback={null}>
+                  <LifeOSStatusBlock />
+                </Suspense>
+              ) : (
+                <Suspense fallback={null}>
+                  <ConciergeBanner />
+                </Suspense>
+              )}
+            </>
+          )}
 
-          {/* ─── SECTION 4: Smart Tip (contextual, dismissable) ─── */}
-          <LifecycleSmartTip />
-
-          {/* ─── SECTION 4: Property Tour Banner ─── */}
-          <PropertyTourBanner />
-
-          {/* ─── SECTION 5: Products (marketplace carousel) ─── */}
+          {/* ─── SECTION 4: Products / Solutions (full width) ─── */}
           <HomeProductsSection />
 
-          {/* ─── SECTION 6: Discover CTA ─── */}
-          <DiscoverCTABanner />
-
-          {/* ─── SECTION 7: Support layer ─── */}
-          <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-            {hasContext ? (
-              <Suspense fallback={null}>
-                <LifeOSStatusBlock />
-              </Suspense>
-            ) : (
-              <Suspense fallback={null}>
-                <ConciergeBanner />
-              </Suspense>
-            )}
-            <EmergencyQuickAccess />
-          </div>
-
-          {/* ─── SECTION 8: Trust ─── */}
+          {/* ─── SECTION 5: Trust + Emergency (unified strip) ─── */}
           <Suspense fallback={null}>
-            <TrustBanner />
+            <TrustBanner showEmergency />
           </Suspense>
 
         </div>
