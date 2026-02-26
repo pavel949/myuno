@@ -56,6 +56,8 @@ import {
   LayoutGrid,
   Briefcase,
   FileSpreadsheet,
+  Settings2,
+  UserPlus,
 } from 'lucide-react';
 import {
   format,
@@ -68,6 +70,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { exportReportExcel } from '@/utils/exportFinancialsExcel';
+import { ReportSettingsSheet } from '@/components/owner/reports/ReportSettingsSheet';
+import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
 
 // Hook to load managed properties (via property_delegates)
 function useManagedProperties() {
@@ -115,6 +119,8 @@ export default function ReportsPage() {
   const [selectedReportType, setSelectedReportType] = useState<ReportType>('monthly');
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+  const [showOwnerInvite, setShowOwnerInvite] = useState(false);
 
   // Merge owned + managed for the selector (deduplicated)
   const allSelectableProperties = [
@@ -342,12 +348,21 @@ export default function ReportsPage() {
           </p>
         </div>
         <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {isRu ? 'Создать' : 'Create'}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowOwnerInvite(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              {isRu ? 'Доступ' : 'Access'}
             </Button>
-          </DialogTrigger>
+            <Button variant="outline" size="icon" onClick={() => setShowSettings(true)}>
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                {isRu ? 'Создать' : 'Create'}
+              </Button>
+            </DialogTrigger>
+          </div>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{isRu ? 'Создать новый отчёт' : 'Generate New Report'}</DialogTitle>
@@ -677,6 +692,12 @@ export default function ReportsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Report Settings */}
+      <ReportSettingsSheet open={showSettings} onOpenChange={setShowSettings} />
+
+      {/* Owner Access Invite */}
+      <OwnerAccessInviteDialog open={showOwnerInvite} onOpenChange={setShowOwnerInvite} />
     </PageContainer>
   );
 }
