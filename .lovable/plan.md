@@ -1,76 +1,95 @@
 
-# Unified Task & Team Management Hub
 
-## Problem Analysis
+# Simplified Team Member Onboarding & Permission Management
 
-Currently, the system has fragmented task management:
-- **CRM Tasks** (`/owner/tasks`) -- business tasks (calls, meetings, follow-ups) in a narrow mobile layout (`max-w-lg`)
-- **Operational Tasks** (`/owner/operations`) -- property service tasks (check-in, cleaning, maintenance)
-- **Staff Page** (`/owner/staff`) -- employee directory with no task visibility
-- No way to see all tasks across both systems in one place
-- CRM Tasks lack descriptions, comments, and subtask support
-- Staff cards don't show assigned/pending tasks count
+## Overview
 
-## Plan
+One-click team member creation: Director enters name + email + role, the system auto-creates an account with login credentials and sends a welcome email. Full suspend/delete and granular permission controls from the Staff page.
 
-### 1. Unified Task Hub (`/owner/tasks`)
+## Database Changes
 
-Replace the narrow CrmTasksPage with a full-width task command center containing 3 tabs:
+### 1. New table: `team_member_permissions`
 
-| Tab | Content |
-|---|---|
-| **Business Tasks** | CRM tasks (calls, meetings, deals) -- current crm_tasks data |
-| **Operations** | Property operational tasks (cleaning, check-in/out, maintenance) -- current operational_tasks data |
-| **All** | Combined feed sorted by due date, with type badges |
+Stores module-level access per MC member:
 
-Key improvements:
-- Full-width layout using `PageContainer` instead of `max-w-lg`
-- Task cards show description, assigned person name, and linked property
-- Click on a task opens a detail sheet with: edit fields, notes/comments text area, completion button
-- Quick inline status toggle (pending -> in_progress -> done)
-- Summary KPI row: Overdue / Today / This Week / Completed
+```text
+| Column     | Type    | Purpose                          |
+|------------|---------|----------------------------------|
+| id         | uuid PK | Primary key                      |
+| company_id | uuid FK | management_companies reference   |
+| user_id    | uuid    | The team member                  |
+| module     | text    | Module key                       |
+| can_view   | boolean | Read access (default true)       |
+| can_edit   | boolean | Write access (default false)     |
+| granted_by | uuid    | Who set this                     |
+| updated_at | timestamptz | Last update                  |
+```
 
-### 2. Enhanced Task Creation
+Modules: `properties`, `finance`, `crm`, `tasks`, `bookings`, `reports`, `staff`
 
-Upgrade the "New Task" sheet:
-- Add **Description** textarea field
-- Add toggle: "Business Task" vs "Operational Task" to route to correct table
-- For operational tasks: show property selector + task type (cleaning, maintenance, etc.)
-- For business tasks: show CRM type grid (call, meeting, follow-up) + contact/deal link
-- Keep existing fields: priority, due date, assign to team member
+RLS: MC directors/admins can read/write permissions for their company. Members can read their own permissions.
 
-### 3. Staff + Tasks Integration
+## Backend: Edge Function `invite-team-member`
 
-On the Staff Page (`/owner/staff`), add to each StaffCard:
-- A badge showing count of active tasks assigned to that staff member
-- A "View Tasks" action in the dropdown menu that navigates to `/owner/tasks?assignee={staffId}`
-- Task filter on the unified hub accepts `assignee` query param
+A new edge function that:
 
-### 4. Task Detail Sheet
+1. Validates caller is `director` or `admin` in the specified MC (via `management_company_members`)
+2. Creates auth user via `auth.admin.createUser()` with a generated 16-char password
+3. Creates a `profiles` row (full_name, phone)
+4. Inserts into `user_roles` with `staff` role
+5. Inserts into `management_company_members` with selected role
+6. Inserts default `team_member_permissions` based on role
+7. Sends welcome email via the existing `send-email` function with login URL, email, and temporary password
+8. Returns created user ID
 
-New component `TaskDetailSheet.tsx`:
-- Title (editable inline)
-- Status selector (Pending / In Progress / Done)
-- Priority selector
-- Due date picker
-- Assignee selector (from company members)
-- Property link
-- Description textarea
-- Simple notes/activity log (stored in `crm_tasks.description` for business tasks)
-- Complete / Delete actions
+## Frontend Changes
 
-## Technical Details
+### 1. New: `AddTeamMemberDialog.tsx`
 
-### Files to Create
-- `src/components/owner/tasks/UnifiedTaskHub.tsx` -- main 3-tab layout
-- `src/components/owner/tasks/TaskDetailSheet.tsx` -- task detail/edit sheet
-- `src/components/owner/tasks/TaskSummaryKPIs.tsx` -- overdue/today/week counters
+Single-step dialog replacing the multi-step `InviteTeamMemberDialog`:
+- Full Name (required)
+- Email (required)
+- Phone (optional)
+- Role selector: Director / Manager / Staff / Accountant
+- On submit: calls `invite-team-member` edge function, shows success toast
 
-### Files to Modify
-- `src/pages/owner/CrmTasksPage.tsx` -- replace with unified hub wrapper
-- `src/pages/owner/StaffPage.tsx` -- add task count badges and "View Tasks" action to StaffCard
-- `src/hooks/useCrmTasks.ts` -- add `assigned_to` filter support and description update
-- `src/components/owner/OwnerSidebar.tsx` -- consolidate: rename "Tasks" in Operations group, ensure single entry point
+### 2. New: `MemberPermissionsSheet.tsx`
 
-### No Database Changes Required
-Both `crm_tasks` and `property_operational_tasks` tables already have the needed columns (status, priority, due_date, assigned_to, description, property_id). The plan uses existing data infrastructure.
+Side sheet with a grid of toggle switches for each module (Properties, Finance, CRM, Tasks, Bookings, Reports, Staff) with View/Edit columns. Saves to `team_member_permissions` table.
+
+### 3. New: `useTeamPermissions.ts`
+
+Hook that:
+- Fetches current user's permissions from `team_member_permissions`
+- Provides `canAccess(module, action)` helper
+- Used by sidebar to hide restricted modules
+
+### 4. Modified: `StaffPage.tsx`
+
+- Replace "+" button to open the new `AddTeamMemberDialog`
+- Add dropdown actions: **Edit Permissions**, **Suspend** (sets `is_active=false` on MC member), **Delete** (removes MC membership)
+- Suspend action also calls edge function to disable auth user login
+
+### 5. Modified: `OwnerSidebar.tsx`
+
+- Filter sidebar items based on `useTeamPermissions` -- hide modules the staff member cannot access
+
+## Security
+
+- Edge function uses `SUPABASE_SERVICE_ROLE_KEY` for admin user creation (already available by default)
+- Caller authorization checked via `management_company_members` role before any action
+- RLS on `team_member_permissions` prevents cross-company access
+- Generated passwords are 16 chars with mixed case, digits, and symbols
+
+## Files Summary
+
+| Action  | File |
+|---------|------|
+| Create  | `supabase/functions/invite-team-member/index.ts` |
+| Create  | `src/components/owner/team/AddTeamMemberDialog.tsx` |
+| Create  | `src/components/owner/team/MemberPermissionsSheet.tsx` |
+| Create  | `src/hooks/useTeamPermissions.ts` |
+| Modify  | `src/pages/owner/StaffPage.tsx` |
+| Modify  | `src/components/owner/OwnerSidebar.tsx` |
+| DB Migration | Create `team_member_permissions` table + RLS |
+
