@@ -16,7 +16,7 @@ import { CanonicalPropertyForm, ExtraTab } from '@/components/property/canonical
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bed, Calendar, UsersRound, Eye, Loader2, Check } from 'lucide-react';
+import { Bed, Calendar, UsersRound, Eye, Loader2, Check, Rocket, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
 
@@ -387,10 +387,31 @@ export default function PropertyEditor() {
         fallbackPath={`/owner/properties/${id}`}
         subtitle={property.title}
         actions={
-          <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
-            <Eye className="h-4 w-4 mr-1" />
-            {showPreview ? (isRu ? 'Скрыть' : 'Hide') : (isRu ? 'Превью' : 'Preview')}
-          </Button>
+          <div className="flex items-center gap-2">
+            {property.approval_status === 'approved' && (
+              <Button
+                variant={property.is_active ? "outline" : "default"}
+                size="sm"
+                onClick={() => {
+                  updateProperty.mutate({
+                    id: id!,
+                    is_active: !property.is_active,
+                  } as any);
+                }}
+                disabled={updateProperty.isPending}
+              >
+                {property.is_active ? (
+                  <><EyeOff className="h-4 w-4 mr-1" />{isRu ? 'Снять' : 'Unpublish'}</>
+                ) : (
+                  <><Rocket className="h-4 w-4 mr-1" />{isRu ? 'Опубликовать' : 'Publish'}</>
+                )}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+              <Eye className="h-4 w-4 mr-1" />
+              {showPreview ? (isRu ? 'Скрыть' : 'Hide') : (isRu ? 'Превью' : 'Preview')}
+            </Button>
+          </div>
         }
       />
 

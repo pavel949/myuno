@@ -29,24 +29,24 @@ export function PropertySubmissionSuccess({
   const steps = [
     {
       icon: Eye,
-      title: isRu ? 'Объект на рассмотрении' : 'Property under review',
+      title: isRu ? 'Сохранён как черновик' : 'Saved as draft',
       description: isRu 
-        ? 'Специалисты myUNO проверят информацию' 
-        : 'myUNO team will verify the information'
+        ? 'Объект не виден гостям — только вам и вашей команде' 
+        : 'Not visible to guests — only you and your team can see it'
     },
     {
       icon: Bell,
-      title: isRu ? 'Вы получите уведомление' : 'You will receive a notification',
+      title: isRu ? 'Модерация и одобрение' : 'Review and approval',
       description: isRu 
-        ? 'Когда объект будет одобрен или потребуется доработка' 
-        : 'When property is approved or needs revision'
+        ? 'Специалисты myUNO проверят информацию (обычно от 1 часа)' 
+        : 'myUNO team will review (usually within 1 hour)'
     },
     {
       icon: CalendarCheck,
-      title: isRu ? 'Настройте календарь и цены' : 'Set up calendar and prices',
+      title: isRu ? 'Вы решаете, когда публиковать' : 'You decide when to publish',
       description: isRu 
-        ? 'После одобрения вы сможете принимать бронирования' 
-        : 'After approval you can start accepting bookings'
+        ? 'После одобрения нажмите «Опубликовать для гостей» когда будете готовы' 
+        : 'After approval, click "Publish for guests" when you\'re ready'
     }
   ];
 
@@ -82,10 +82,9 @@ export function PropertySubmissionSuccess({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          {isRu ? 'Спасибо!' : 'Thank you!'}
+          {isRu ? 'Объект сохранён!' : 'Property saved!'}
         </motion.h1>
 
-        {/* Subtitle */}
         <motion.p 
           className="text-center text-muted-foreground mt-2"
           initial={{ opacity: 0, y: 20 }}
@@ -93,8 +92,8 @@ export function PropertySubmissionSuccess({
           transition={{ delay: 0.4 }}
         >
           {isRu 
-            ? 'Информация отправлена специалистам myUNO' 
-            : 'Information sent to myUNO team'}
+            ? 'Объект сохранён как черновик и отправлен на проверку' 
+            : 'Property saved as draft and submitted for review'}
         </motion.p>
 
         {/* Property name if available */}
@@ -181,8 +180,8 @@ export function PropertySubmissionSuccess({
           <Card className="p-3 bg-muted/50">
             <p className="text-xs text-muted-foreground text-center">
               {isRu 
-                ? '🛡️ Первые 48 часов после одобрения все бронирования требуют вашего подтверждения для безопасности' 
-                : '🛡️ First 48 hours after approval all bookings require your confirmation for safety'}
+                ? '🔒 Объект НЕ виден гостям, пока вы не нажмёте «Опубликовать для гостей» после одобрения' 
+                : '🔒 Property is NOT visible to guests until you click "Publish for guests" after approval'}
             </p>
           </Card>
         </motion.div>
