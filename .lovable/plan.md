@@ -1,95 +1,99 @@
 
 
-# Simplified Team Member Onboarding & Permission Management
+# Employee Activity Log System
 
 ## Overview
 
-One-click team member creation: Director enters name + email + role, the system auto-creates an account with login credentials and sends a welcome email. Full suspend/delete and granular permission controls from the Staff page.
+Build a system to track and display what each team member does in the system. Directors/owners can see a full activity log per employee -- what pages they visit, what actions they take (creating tasks, editing properties, viewing contacts, etc.).
 
 ## Database Changes
 
-### 1. New table: `team_member_permissions`
+### 1. Update RLS policy on `team_activity_log`
 
-Stores module-level access per MC member:
+The current SELECT policy only allows admins (by `user_roles`) and the user themselves to see activity. We need MC directors/managers to also see activity of their company members:
 
-```text
-| Column     | Type    | Purpose                          |
-|------------|---------|----------------------------------|
-| id         | uuid PK | Primary key                      |
-| company_id | uuid FK | management_companies reference   |
-| user_id    | uuid    | The team member                  |
-| module     | text    | Module key                       |
-| can_view   | boolean | Read access (default true)       |
-| can_edit   | boolean | Write access (default false)     |
-| granted_by | uuid    | Who set this                     |
-| updated_at | timestamptz | Last update                  |
+```sql
+DROP POLICY "Team members can view own activity" ON team_activity_log;
+
+CREATE POLICY "View team activity"
+ON team_activity_log FOR SELECT TO authenticated
+USING (
+  auth.uid() = user_id
+  OR EXISTS (
+    SELECT 1 FROM user_roles
+    WHERE user_roles.user_id = auth.uid()
+    AND user_roles.role = ANY(ARRAY['admin'::app_role, 'staff'::app_role])
+  )
+  OR EXISTS (
+    SELECT 1 FROM management_company_members AS mgr
+    JOIN management_company_members AS mem
+      ON mgr.company_id = mem.company_id
+    WHERE mgr.user_id = auth.uid()
+      AND mgr.role IN ('director', 'admin')
+      AND mem.user_id = team_activity_log.user_id
+  )
+);
 ```
 
-Modules: `properties`, `finance`, `crm`, `tasks`, `bookings`, `reports`, `staff`
+## Frontend: New Files
 
-RLS: MC directors/admins can read/write permissions for their company. Members can read their own permissions.
+### 1. `src/hooks/useTeamActivityLog.ts`
 
-## Backend: Edge Function `invite-team-member`
+Hook with two exports:
 
-A new edge function that:
+- **`useLogActivity()`** -- mutation that inserts into `team_activity_log`. Called automatically from key user actions (task creation, property edits, contact views, permission changes, etc.).
+- **`useMemberActivityLog(userId)`** -- query that fetches the last 100 activity entries for a specific team member, ordered by `created_at` desc.
 
-1. Validates caller is `director` or `admin` in the specified MC (via `management_company_members`)
-2. Creates auth user via `auth.admin.createUser()` with a generated 16-char password
-3. Creates a `profiles` row (full_name, phone)
-4. Inserts into `user_roles` with `staff` role
-5. Inserts into `management_company_members` with selected role
-6. Inserts default `team_member_permissions` based on role
-7. Sends welcome email via the existing `send-email` function with login URL, email, and temporary password
-8. Returns created user ID
+### 2. `src/components/owner/team/MemberActivitySheet.tsx`
 
-## Frontend Changes
+A side-sheet (like `MemberPermissionsSheet`) showing a chronological activity feed for a selected staff member:
 
-### 1. New: `AddTeamMemberDialog.tsx`
+- Header with member name and "Activity Log" title
+- Scrollable list of activity items, each showing:
+  - Icon based on `action_type` (e.g., eye for "view", pencil for "edit", plus for "create")
+  - Action label (RU/EN): "Viewed contact", "Created task", "Edited property", etc.
+  - Entity info from `entity_type` + `entity_id`
+  - Relative timestamp ("5 min ago", "2 hours ago")
+- Empty state if no activity recorded
 
-Single-step dialog replacing the multi-step `InviteTeamMemberDialog`:
-- Full Name (required)
-- Email (required)
-- Phone (optional)
-- Role selector: Director / Manager / Staff / Accountant
-- On submit: calls `invite-team-member` edge function, shows success toast
+### 3. Automatic Activity Logging
 
-### 2. New: `MemberPermissionsSheet.tsx`
+Add `useLogActivity()` calls in key hooks:
 
-Side sheet with a grid of toggle switches for each module (Properties, Finance, CRM, Tasks, Bookings, Reports, Staff) with View/Edit columns. Saves to `team_member_permissions` table.
+- **`useCrmTasks.ts`** -- log when tasks are created/completed
+- **`usePropertyCare.ts`** -- log when properties are edited
+- **Sidebar navigation** -- log page visits via a lightweight wrapper
 
-### 3. New: `useTeamPermissions.ts`
+For the initial implementation, we'll add logging to the most critical operations and expand coverage over time.
 
-Hook that:
-- Fetches current user's permissions from `team_member_permissions`
-- Provides `canAccess(module, action)` helper
-- Used by sidebar to hide restricted modules
+## Frontend: Modified Files
 
-### 4. Modified: `StaffPage.tsx`
+### `src/pages/owner/StaffPage.tsx`
 
-- Replace "+" button to open the new `AddTeamMemberDialog`
-- Add dropdown actions: **Edit Permissions**, **Suspend** (sets `is_active=false` on MC member), **Delete** (removes MC membership)
-- Suspend action also calls edge function to disable auth user login
+- Add "Activity Log" (`History` icon) item to the `StaffCard` dropdown menu
+- Add state for `activityTarget` (selected staff member)
+- Render `MemberActivitySheet` when a staff member is selected
 
-### 5. Modified: `OwnerSidebar.tsx`
+## Action Type Mapping
 
-- Filter sidebar items based on `useTeamPermissions` -- hide modules the staff member cannot access
+| action_type | Entity Type | Label EN | Label RU |
+|---|---|---|---|
+| page.view | page | Viewed page | Просмотр страницы |
+| task.create | task | Created task | Создал задачу |
+| task.complete | task | Completed task | Завершил задачу |
+| property.edit | property | Edited property | Редактировал объект |
+| contact.view | contact | Viewed contact | Просмотрел контакт |
+| permission.change | permission | Changed permissions | Изменил права |
+| staff.edit | staff | Edited staff | Редактировал сотрудника |
+| document.upload | document | Uploaded document | Загрузил документ |
 
-## Security
+## Technical Summary
 
-- Edge function uses `SUPABASE_SERVICE_ROLE_KEY` for admin user creation (already available by default)
-- Caller authorization checked via `management_company_members` role before any action
-- RLS on `team_member_permissions` prevents cross-company access
-- Generated passwords are 16 chars with mixed case, digits, and symbols
-
-## Files Summary
-
-| Action  | File |
-|---------|------|
-| Create  | `supabase/functions/invite-team-member/index.ts` |
-| Create  | `src/components/owner/team/AddTeamMemberDialog.tsx` |
-| Create  | `src/components/owner/team/MemberPermissionsSheet.tsx` |
-| Create  | `src/hooks/useTeamPermissions.ts` |
-| Modify  | `src/pages/owner/StaffPage.tsx` |
-| Modify  | `src/components/owner/OwnerSidebar.tsx` |
-| DB Migration | Create `team_member_permissions` table + RLS |
+| Action | File |
+|---|---|
+| Create | `src/hooks/useTeamActivityLog.ts` |
+| Create | `src/components/owner/team/MemberActivitySheet.tsx` |
+| Modify | `src/pages/owner/StaffPage.tsx` (add dropdown item + sheet) |
+| Modify | `src/hooks/useCrmTasks.ts` (add activity logging on create/complete) |
+| DB Migration | Update RLS policy on `team_activity_log` |
 
