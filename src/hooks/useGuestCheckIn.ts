@@ -55,6 +55,36 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
 
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
+  // Notify property owner when guest submits check-in
+  const notifyOwnerOfCheckIn = async (propertyId: string, checkInRecord: any) => {
+    try {
+      // Get owner_id from the property
+      const { data: property } = await supabase
+        .from('owner_properties')
+        .select('owner_id, title')
+        .eq('id', propertyId)
+        .single();
+
+      if (property?.owner_id) {
+        await supabase.from('notifications').insert({
+          user_id: property.owner_id,
+          title: language === 'ru' ? 'Новая онлайн-регистрация' : 'New Guest Check-in',
+          body: language === 'ru'
+            ? `Гость ${checkInRecord.full_name || 'Unknown'} отправил данные для регистрации в "${property.title}"`
+            : `Guest ${checkInRecord.full_name || 'Unknown'} submitted check-in for "${property.title}"`,
+          type: 'booking',
+          data: {
+            check_in_id: checkInRecord.id,
+            property_id: propertyId,
+            guest_name: checkInRecord.full_name,
+          },
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to notify owner of check-in:', err);
+    }
+  };
+
   // First, find the property_booking by marketplace_booking_id with owner property details
   const { data: propertyBooking, isLoading: isLoadingPropertyBooking } = useQuery({
     queryKey: ['property-booking-by-marketplace', marketplaceBookingId],
@@ -140,7 +170,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
         return data;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['guest-check-in', propertyBookingId] });
       toast({
         title: t('Check-in submitted', 'Регистрация отправлена'),
@@ -149,6 +179,11 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
           'Ваши данные для регистрации успешно отправлены'
         ),
       });
+
+      // Notify property owner about new check-in submission
+      if (propertyBooking?.property_id) {
+        notifyOwnerOfCheckIn(propertyBooking.property_id, data);
+      }
     },
     onError: (error: Error) => {
       toast({

@@ -69,12 +69,13 @@ export function usePushSubscription() {
       await navigator.serviceWorker.ready;
 
       // Subscribe to push
+      // NOTE: VAPID key below is a placeholder. Replace with your own generated VAPID public key
+      // before enabling push notifications in production.
+      // Generate with: npx web-push generate-vapid-keys
+      const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          // This is a demo VAPID key - in production, generate your own
-          'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
-        ),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
 
       // Save subscription to database
