@@ -1,9 +1,8 @@
 /**
  * CanonicalPropertyForm - Unified property form for Admin/Vendor/Owner
  * 
- * This component provides a canonical property creation/editing experience
- * by reusing the Owner Wizard step components. It ensures consistent data
- * collection across all roles.
+ * Full 7-tab form for admin mode: Basic, Location, Photos, Pricing, Utilities, Services, Admin
+ * 4-tab form for owner/vendor mode: Basic, Location, Photos, Pricing
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,14 +11,17 @@ import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Home, MapPin, Camera, DollarSign, Loader2 } from 'lucide-react';
+import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield } from 'lucide-react';
 
 // Import canonical step components from Owner Wizard
 import { 
   BasicInfoStep, 
   LocationStep, 
   PhotosStep, 
-  PricingStep 
+  PricingStep,
+  UtilitiesStep,
+  ServicesStep,
+  AdminSettingsStep,
 } from '@/components/owner/property-wizard/steps';
 
 export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
@@ -32,12 +34,55 @@ export interface CanonicalPropertyFormData extends Partial<PropertyFormData> {
   price_period?: string;
   amenities?: string[];
   is_active?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
   approval_status?: string;
+  rejection_reason?: string;
+  commission_rate?: number;
+  notes?: string;
   // Map to owner fields
   title_en?: string;
   title_ru?: string;
   description_en?: string;
   description_ru?: string;
+  // Utilities
+  electricity_included?: boolean;
+  electricity_unit_price?: number;
+  electricity_provider?: string;
+  electricity_metering?: string;
+  electricity_notes?: string;
+  electricity_notes_ru?: string;
+  water_included?: boolean;
+  water_unit_price?: number;
+  water_notes?: string;
+  water_notes_ru?: string;
+  internet_speed?: string;
+  internet_provider?: string;
+  // Services
+  cleaning_included?: boolean;
+  cleaning_frequency?: string;
+  extra_cleaning_price?: number;
+  linen_change_price?: number;
+  linen_change_frequency?: string;
+  early_checkin_price?: number;
+  late_checkout_price?: number;
+  transfer_available?: boolean;
+  transfer_airport_price?: number;
+  transfer_notes?: string;
+  transfer_notes_ru?: string;
+  extra_guest_price?: number;
+  extra_guest_threshold?: number;
+  // Investment
+  purchase_price?: number;
+  purchase_date?: string;
+  purchase_currency?: string;
+  acquisition_costs?: number;
+  mortgage_amount?: number;
+  mortgage_bank?: string;
+  mortgage_interest_rate?: number;
+  mortgage_monthly_payment?: number;
+  chanote_number?: string;
+  ical_export_enabled?: boolean;
 }
 
 interface CanonicalPropertyFormProps {
@@ -118,7 +163,8 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
 // Map back to Admin/Vendor format for submission
 function mapFromOwnerFormat(
   ownerData: PropertyFormData, 
-  originalData: CanonicalPropertyFormData
+  originalData: CanonicalPropertyFormData,
+  extraData: ExtraFormData,
 ): CanonicalPropertyFormData {
   return {
     ...originalData,
@@ -166,7 +212,6 @@ function mapFromOwnerFormat(
     monthly_discount: ownerData.monthly_discount,
     house_rules: ownerData.house_rules,
     house_rules_ru: ownerData.house_rules_ru,
-    // Derive listing modes from is_for_sale
     listing_modes: [
       ...(ownerData.is_for_sale ? ['sale'] : []),
       ...(ownerData.price_per_night ? ['rent'] : []),
@@ -175,7 +220,17 @@ function mapFromOwnerFormat(
       ...(ownerData.price_per_night ? ['rent'] : []),
     ] : ['rent'],
     listing_type: ownerData.is_for_sale && !ownerData.price_per_night ? 'sale' : 'rent',
+    // Extra data from new tabs
+    ...extraData.utilities,
+    ...extraData.services,
+    ...extraData.admin,
   };
+}
+
+interface ExtraFormData {
+  utilities: Record<string, any>;
+  services: Record<string, any>;
+  admin: Record<string, any>;
 }
 
 export function CanonicalPropertyForm({
@@ -189,6 +244,7 @@ export function CanonicalPropertyForm({
 }: CanonicalPropertyFormProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isAdmin = mode === 'admin';
   
   // Convert initial data to Owner format
   const [formData, setFormData] = useState<PropertyFormData>(() => 
@@ -207,6 +263,58 @@ export function CanonicalPropertyForm({
     ownership_document_url: '',
     ownership_document_name: '',
   });
+
+  // Extra data for admin tabs
+  const [utilitiesData, setUtilitiesData] = useState(() => ({
+    electricity_included: initialData.electricity_included,
+    electricity_unit_price: initialData.electricity_unit_price,
+    electricity_provider: initialData.electricity_provider,
+    electricity_metering: initialData.electricity_metering,
+    electricity_notes: initialData.electricity_notes,
+    electricity_notes_ru: initialData.electricity_notes_ru,
+    water_included: initialData.water_included,
+    water_unit_price: initialData.water_unit_price,
+    water_notes: initialData.water_notes,
+    water_notes_ru: initialData.water_notes_ru,
+    internet_speed: initialData.internet_speed,
+    internet_provider: initialData.internet_provider,
+  }));
+
+  const [servicesData, setServicesData] = useState(() => ({
+    cleaning_included: initialData.cleaning_included,
+    cleaning_frequency: initialData.cleaning_frequency,
+    extra_cleaning_price: initialData.extra_cleaning_price,
+    linen_change_price: initialData.linen_change_price,
+    linen_change_frequency: initialData.linen_change_frequency,
+    early_checkin_price: initialData.early_checkin_price,
+    late_checkout_price: initialData.late_checkout_price,
+    transfer_available: initialData.transfer_available,
+    transfer_airport_price: initialData.transfer_airport_price,
+    transfer_notes: initialData.transfer_notes,
+    transfer_notes_ru: initialData.transfer_notes_ru,
+    extra_guest_price: initialData.extra_guest_price,
+    extra_guest_threshold: initialData.extra_guest_threshold,
+  }));
+
+  const [adminData, setAdminData] = useState(() => ({
+    is_active: initialData.is_active ?? true,
+    is_featured: initialData.is_featured ?? false,
+    is_verified: initialData.is_verified ?? false,
+    approval_status: initialData.approval_status || 'pending',
+    rejection_reason: initialData.rejection_reason,
+    commission_rate: initialData.commission_rate,
+    notes: initialData.notes,
+    purchase_price: initialData.purchase_price,
+    purchase_date: initialData.purchase_date,
+    purchase_currency: initialData.purchase_currency,
+    acquisition_costs: initialData.acquisition_costs,
+    mortgage_amount: initialData.mortgage_amount,
+    mortgage_bank: initialData.mortgage_bank,
+    mortgage_interest_rate: initialData.mortgage_interest_rate,
+    mortgage_monthly_payment: initialData.mortgage_monthly_payment,
+    chanote_number: initialData.chanote_number,
+    ical_export_enabled: initialData.ical_export_enabled,
+  }));
   
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
@@ -222,17 +330,41 @@ export function CanonicalPropertyForm({
     setOwnershipData(prev => ({ ...prev, ...updates }));
   }, []);
 
+  const updateUtilities = useCallback((updates: Record<string, any>) => {
+    setUtilitiesData(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const updateServices = useCallback((updates: Record<string, any>) => {
+    setServicesData(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  const updateAdmin = useCallback((updates: Record<string, any>) => {
+    setAdminData(prev => ({ ...prev, ...updates }));
+  }, []);
+
   const handleSubmit = async () => {
-    const submissionData = mapFromOwnerFormat(formData, originalData);
+    const submissionData = mapFromOwnerFormat(formData, originalData, {
+      utilities: utilitiesData,
+      services: servicesData,
+      admin: adminData,
+    });
     await onSubmit(submissionData);
   };
 
-  const tabs = useMemo(() => [
+  const baseTabs = [
     { id: 'basic', icon: Home, labelEn: 'Basic', labelRu: 'Основное' },
     { id: 'location', icon: MapPin, labelEn: 'Location', labelRu: 'Локация' },
     { id: 'photos', icon: Camera, labelEn: 'Photos', labelRu: 'Фото' },
     { id: 'pricing', icon: DollarSign, labelEn: 'Pricing', labelRu: 'Цены' },
-  ], []);
+  ];
+
+  const adminTabs = [
+    { id: 'utilities', icon: Zap, labelEn: 'Utilities', labelRu: 'Комм.' },
+    { id: 'services', icon: Sparkles, labelEn: 'Services', labelRu: 'Сервис' },
+    { id: 'admin', icon: Shield, labelEn: 'Admin', labelRu: 'Админ' },
+  ];
+
+  const tabs = isAdmin ? [...baseTabs, ...adminTabs] : baseTabs;
 
   return (
     <div className="flex flex-col h-full">
@@ -244,11 +376,11 @@ export function CanonicalPropertyForm({
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-        <TabsList className="grid w-full grid-cols-4 mb-4">
+        <TabsList className={`grid w-full mb-4 ${isAdmin ? 'grid-cols-7' : 'grid-cols-4'}`}>
           {tabs.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1.5">
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{isRu ? tab.labelRu : tab.labelEn}</span>
+            <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5">
+              <tab.icon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -286,6 +418,22 @@ export function CanonicalPropertyForm({
               selectedProject={selectedProject}
             />
           </TabsContent>
+
+          {isAdmin && (
+            <>
+              <TabsContent value="utilities" className="mt-0">
+                <UtilitiesStep data={utilitiesData} onChange={updateUtilities} />
+              </TabsContent>
+
+              <TabsContent value="services" className="mt-0">
+                <ServicesStep data={servicesData} onChange={updateServices} />
+              </TabsContent>
+
+              <TabsContent value="admin" className="mt-0">
+                <AdminSettingsStep data={adminData} onChange={updateAdmin} />
+              </TabsContent>
+            </>
+          )}
         </ScrollArea>
       </Tabs>
 
