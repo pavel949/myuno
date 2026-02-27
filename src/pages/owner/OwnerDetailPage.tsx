@@ -254,7 +254,7 @@ export default function OwnerDetailPage() {
           </Card>
 
           {/* Quick KPIs */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Card>
               <CardContent className="p-3 text-center">
                 <p className="text-2xl font-bold">{owner.properties_count}</p>
@@ -263,24 +263,30 @@ export default function OwnerDetailPage() {
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold">{owner.documents_count}</p>
-                <p className="text-xs text-muted-foreground">{isRu ? 'Документов' : 'Documents'}</p>
+                <p className="text-2xl font-bold">{owner.avg_occupancy}%</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Загрузка' : 'Occupancy'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
                 <p className="text-2xl font-bold text-primary">
-                  ฿{revenue.toLocaleString()}
+                  ฿{owner.total_revenue.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Доход' : 'Revenue'}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold text-destructive">
-                  ฿{expenses.toLocaleString()}
+                <p className="text-2xl font-bold text-accent-foreground">
+                  ฿{owner.total_commission.toLocaleString()}
                 </p>
-                <p className="text-xs text-muted-foreground">{isRu ? 'Расходы' : 'Expenses'}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Комиссия УК' : 'MC Commission'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3 text-center">
+                <p className="text-2xl font-bold">{owner.documents_count}</p>
+                <p className="text-xs text-muted-foreground">{isRu ? 'Документов' : 'Documents'}</p>
               </CardContent>
             </Card>
           </div>

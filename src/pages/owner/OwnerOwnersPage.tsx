@@ -227,11 +227,21 @@ export default function OwnerOwnersPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 mt-1.5">
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                       <Badge variant="secondary" className="text-[10px]">
                         <Building2 className="h-3 w-3 mr-1" />
                         {owner.properties_count} {isRu ? 'объ.' : 'prop.'}
                       </Badge>
+                      {owner.avg_occupancy > 0 && (
+                        <Badge variant="outline" className="text-[10px]">
+                          {owner.avg_occupancy}% {isRu ? 'загр.' : 'occ.'}
+                        </Badge>
+                      )}
+                      {owner.total_revenue > 0 && (
+                        <Badge variant="outline" className="text-[10px]">
+                          ฿{owner.total_revenue.toLocaleString()}
+                        </Badge>
+                      )}
                       {!owner.has_contract && (
                         <Badge variant="destructive" className="text-[10px]">
                           {isRu ? 'Нет договора' : 'No contract'}
