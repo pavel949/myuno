@@ -130,7 +130,7 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="px-4 pt-6 pb-24 max-w-lg mx-auto space-y-5">
+    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-[1536px] mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">{isRu ? 'Инвентарь' : 'Inventory'}</h1>
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
