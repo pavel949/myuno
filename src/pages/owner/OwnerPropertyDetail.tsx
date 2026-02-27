@@ -374,6 +374,7 @@ export default function OwnerPropertyDetail() {
                 management_company_id: (property as any).management_company_id,
                 management_type: property.management_type,
                 project_id: property.project_id,
+                owner_contact_id: (property as any).owner_contact_id,
               }}
             />
           )}
