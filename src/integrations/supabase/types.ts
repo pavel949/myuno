@@ -2859,6 +2859,74 @@ export type Database = {
         }
         Relationships: []
       }
+      checklist_completions: {
+        Row: {
+          booking_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          id: string
+          items: Json
+          notes: string | null
+          photos: string[] | null
+          property_id: string
+          task_id: string | null
+          template_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          photos?: string[] | null
+          property_id: string
+          task_id?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          photos?: string[] | null
+          property_id?: string
+          task_id?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_completions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_completions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_completions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklist_completions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "property_checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           country_code: string
@@ -14257,6 +14325,44 @@ export type Database = {
           },
         ]
       }
+      property_checklist_templates: {
+        Row: {
+          checklist_type: string
+          company_id: string
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          items: Json
+          name: string
+        }
+        Insert: {
+          checklist_type: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          items?: Json
+          name: string
+        }
+        Update: {
+          checklist_type?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          items?: Json
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_checklist_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_complexes: {
         Row: {
           address: string | null
@@ -15558,6 +15664,7 @@ export type Database = {
           description: string | null
           id: string
           notes: string | null
+          photo_proof: string[] | null
           priority: string | null
           property_id: string
           scheduled_date: string
@@ -15577,6 +15684,7 @@ export type Database = {
           description?: string | null
           id?: string
           notes?: string | null
+          photo_proof?: string[] | null
           priority?: string | null
           property_id: string
           scheduled_date: string
@@ -15596,6 +15704,7 @@ export type Database = {
           description?: string | null
           id?: string
           notes?: string | null
+          photo_proof?: string[] | null
           priority?: string | null
           property_id?: string
           scheduled_date?: string
@@ -19204,6 +19313,36 @@ export type Database = {
         }
         Relationships: []
       }
+      task_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          photos: string[] | null
+          task_id: string
+          task_source: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          photos?: string[] | null
+          task_id: string
+          task_source: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          photos?: string[] | null
+          task_id?: string
+          task_source?: string
+        }
+        Relationships: []
+      }
       task_entity_map: {
         Row: {
           created_at: string
@@ -19539,6 +19678,7 @@ export type Database = {
       team_member_permissions: {
         Row: {
           can_edit: boolean
+          can_export: boolean | null
           can_view: boolean
           company_id: string
           granted_by: string | null
@@ -19549,6 +19689,7 @@ export type Database = {
         }
         Insert: {
           can_edit?: boolean
+          can_export?: boolean | null
           can_view?: boolean
           company_id: string
           granted_by?: string | null
@@ -19559,6 +19700,7 @@ export type Database = {
         }
         Update: {
           can_edit?: boolean
+          can_export?: boolean | null
           can_view?: boolean
           company_id?: string
           granted_by?: string | null

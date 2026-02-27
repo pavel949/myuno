@@ -33,6 +33,8 @@ export { PropertyStatusSnapshot } from './PropertyStatusSnapshot';
 export { TodayActionsWidget } from './TodayActionsWidget';
 export { DashboardPropertyFilter } from './DashboardPropertyFilter';
 export { YourDayFeed } from './YourDayFeed';
+export { CleaningDashboard } from './CleaningDashboard';
+export { MorningBriefing } from './MorningBriefing';
 
 // Property Wizard Steps
 export * from '../property-wizard';

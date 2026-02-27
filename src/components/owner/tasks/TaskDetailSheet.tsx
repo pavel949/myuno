@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Trash2, CheckCircle2, Clock, Play } from 'lucide-react';
 import { toast } from 'sonner';
+import { TaskComments } from '@/components/owner/tasks/TaskComments';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -205,6 +206,9 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
                 onChange={e => setDueDate(e.target.value)}
               />
             </div>
+
+            {/* Comments */}
+            <TaskComments taskId={task.id} taskSource={task.source} />
 
             {/* Actions */}
             <div className="flex gap-2 pt-2">

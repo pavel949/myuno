@@ -35,6 +35,8 @@ import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWid
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
 import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerServiceRecommendations';
 import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
+import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
+import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
 
 function SectionSkeleton() {
   return (
@@ -113,6 +115,18 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={<SectionSkeleton />}>
           <PropertyStatusSnapshot />
+        </Suspense>
+      );
+    case 'morning_briefing':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <MorningBriefing />
+        </Suspense>
+      );
+    case 'cleaning_dashboard':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <CleaningDashboard />
         </Suspense>
       );
     case 'operations':
