@@ -153,3 +153,6 @@ verify_jwt = false
 [functions.invite-team-member]
 verify_jwt = false
 
+[functions.monthly-owner-statements]
+verify_jwt = false
+

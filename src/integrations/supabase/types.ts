@@ -16159,6 +16159,7 @@ export type Database = {
       }
       property_reports: {
         Row: {
+          auto_generated: boolean | null
           created_at: string
           data: Json
           error_message: string | null
@@ -16179,6 +16180,7 @@ export type Database = {
           viewed_at: string | null
         }
         Insert: {
+          auto_generated?: boolean | null
           created_at?: string
           data?: Json
           error_message?: string | null
@@ -16199,6 +16201,7 @@ export type Database = {
           viewed_at?: string | null
         }
         Update: {
+          auto_generated?: boolean | null
           created_at?: string
           data?: Json
           error_message?: string | null
@@ -24683,6 +24686,16 @@ export type Database = {
         Returns: undefined
       }
       recalculate_user_tier: { Args: { p_user_id: string }; Returns: Json }
+      record_deposit_ledger_entry: {
+        Args: {
+          p_amount: number
+          p_booking_id: string
+          p_currency?: string
+          p_entry_type?: string
+          p_property_id: string
+        }
+        Returns: undefined
+      }
       record_ledger_entries: {
         Args: { p_order_id: string }
         Returns: undefined
