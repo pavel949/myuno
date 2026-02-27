@@ -22,6 +22,7 @@ export interface TeamPermission {
   module: string;
   can_view: boolean;
   can_edit: boolean;
+  can_export: boolean;
   granted_by: string | null;
   updated_at: string;
 }
@@ -85,7 +86,7 @@ export function useUpdateMemberPermission() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (args: { userId: string; module: string; can_view: boolean; can_edit: boolean }) => {
+    mutationFn: async (args: { userId: string; module: string; can_view: boolean; can_edit: boolean; can_export?: boolean }) => {
       const companyId = activeCompany?.company_id;
       if (!companyId || !user) throw new Error('No company');
       
@@ -97,6 +98,7 @@ export function useUpdateMemberPermission() {
           module: args.module,
           can_view: args.can_view,
           can_edit: args.can_edit,
+          can_export: args.can_export ?? false,
           granted_by: user.id,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'company_id,user_id,module' });

@@ -23,6 +23,8 @@ import { ManagementTermsForm } from '@/components/owner/management/ManagementTer
 import { TermsActivityLog } from '@/components/owner/management/TermsActivityLog';
 import { PropertyKeyAssignments } from '@/components/owner/property-detail/PropertyKeyAssignments';
 import { PropertyUtilitySchedules } from '@/components/owner/property-detail/PropertyUtilitySchedules';
+import { ChecklistCompletion } from '@/components/owner/checklists/ChecklistCompletion';
+import { ChecklistHistory } from '@/components/owner/checklists/ChecklistHistory';
 import {
   Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
   Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
@@ -235,6 +237,10 @@ export default function OwnerPropertyDetail() {
           {/* Keys & Utilities */}
           {id && <PropertyKeyAssignments propertyId={id} />}
           {id && <PropertyUtilitySchedules propertyId={id} />}
+
+          {/* Checklists */}
+          {id && <ChecklistCompletion propertyId={id} />}
+          {id && <ChecklistHistory propertyId={id} />}
 
           {/* MC / Juristic link */}
           {property?.project_id && (

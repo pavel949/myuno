@@ -29,7 +29,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName }:
   const getPerm = (moduleKey: string): TeamPermission | undefined =>
     permissions.find((p) => p.module === moduleKey);
 
-  const handleToggle = (moduleKey: string, field: 'can_view' | 'can_edit', value: boolean) => {
+  const handleToggle = (moduleKey: string, field: 'can_view' | 'can_edit' | 'can_export', value: boolean) => {
     if (!userId) return;
     const current = getPerm(moduleKey);
     updatePermission.mutate({
@@ -37,6 +37,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName }:
       module: moduleKey,
       can_view: field === 'can_view' ? value : (current?.can_view ?? true),
       can_edit: field === 'can_edit' ? value : (current?.can_edit ?? false),
+      can_export: field === 'can_export' ? value : (current?.can_export ?? false),
     });
   };
 
@@ -60,21 +61,23 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName }:
         ) : (
           <div className="space-y-1">
             {/* Header row */}
-            <div className="grid grid-cols-[1fr_60px_60px] gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="grid grid-cols-[1fr_60px_60px_60px] gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               <span>{t('Module', 'Модуль')}</span>
               <span className="text-center">{t('View', 'Вид')}</span>
               <span className="text-center">{t('Edit', 'Ред.')}</span>
+              <span className="text-center">{t('Export', 'Экс.')}</span>
             </div>
 
             {MODULES.map((mod) => {
               const perm = getPerm(mod.key);
               const canView = perm?.can_view ?? false;
               const canEdit = perm?.can_edit ?? false;
+              const canExport = perm?.can_export ?? false;
 
               return (
                 <div
                   key={mod.key}
-                  className="grid grid-cols-[1fr_60px_60px] gap-2 items-center px-3 py-3 rounded-xl hover:bg-muted/50 transition-colors"
+                  className="grid grid-cols-[1fr_60px_60px_60px] gap-2 items-center px-3 py-3 rounded-xl hover:bg-muted/50 transition-colors"
                 >
                   <span className="text-sm font-medium">
                     {isRu ? mod.labelRu : mod.labelEn}
@@ -89,6 +92,13 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName }:
                     <Switch
                       checked={canEdit}
                       onCheckedChange={(v) => handleToggle(mod.key, 'can_edit', v)}
+                      disabled={!canView}
+                    />
+                  </div>
+                  <div className="flex justify-center">
+                    <Switch
+                      checked={canExport}
+                      onCheckedChange={(v) => handleToggle(mod.key, 'can_export', v)}
                       disabled={!canView}
                     />
                   </div>

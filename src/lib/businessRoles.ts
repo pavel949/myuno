@@ -23,6 +23,8 @@ export type DashboardWidgetKey =
   | 'your_day'
   | 'today_briefing'
   | 'today_actions'
+  | 'morning_briefing'
+  | 'cleaning_dashboard'
   | 'channel_sync'
   | 'revenue_insights'
   | 'invites'
@@ -45,8 +47,10 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Управление недвижимостью',
     icon: '🏠',
     widgets: [
+      'morning_briefing',
       'your_day',
       'kpi',
+      'cleaning_dashboard',
       'property_status',
       'channel_sync',
       'unified_inbox',
