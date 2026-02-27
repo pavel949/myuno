@@ -1,196 +1,268 @@
 
-# Аудит myUNO для управляющей компании (до 50 объектов)
+# Аудит myUNO: Слабые места и план доработок для малой УК
 
-## Операционный контекст целевой компании
+## 1. ОБЪЕКТЫ И ПОРТФЕЛЬ
 
-Типичная УК на Пхукете с 10-50 объектами (виллы, кондо) работает так:
-- 2-5 сотрудников (менеджер, клинеры, "на все руки")
-- Основная работа: заезды/выезды, уборка, мелкий ремонт, контроль коммуналки
-- Главная боль: хаос — кто где, у кого ключи, когда PEA, оплачен ли CAM
-- Критичен мобильный доступ (менеджеры в поле)
-- Собственники хотят видеть отчёты и понимать что происходит
+### Что есть
+- Список объектов с фильтрами, карточка объекта (6 табов), MultiPropertyTimeline (30 дней), PropertyStatusSnapshot (ключи + коммуналка)
+- Управление ключами (property_key_assignments), коммунальные платежи (property_utility_schedules)
 
----
+### Слабые места
+- **Нет единого "здоровья объекта"** -- PropertyStatusSnapshot показывает ключи и утилиты, но не агрегирует: документы (просрочена страховка?), задолженности владельца, открытые задачи, последняя инспекция. Менеджер не может за 3 секунды понять "всё ли ок с объектом"
+- **Нет чеклиста заезда/выезда** -- CreateServiceTaskDialog создает задачи check_in/check_out, но нет формализованного чеклиста с пунктами и фото-подтверждениями (кран работает, кондиционер чист, полотенца на месте)
+- **Нет журнала показаний счётчиков** -- utility_schedules хранит last_paid_date, но не историю показаний (meter readings). Нужно для расчётов с владельцем и PEA
+- **Инвентарь не привязан к чеклисту** -- Inventory существует отдельно, но при заезде/выезде не проверяется автоматически
 
-## Оценка текущей реализации myUNO
-
-### Что ХОРОШО реализовано (7-8/10)
-
-| Модуль | Оценка | Комментарий |
-|--------|--------|-------------|
-| Календарь (Multi-Property Timeline) | 8/10 | 30-дневная горизонтальная сетка, цветные бронирования, drill-down — отлично |
-| Бронирования и заезды/выезды | 8/10 | TodayBriefingWidget показывает заезды/выезды сегодня+завтра, ActiveStaysWidget — текущие гости |
-| Быстрый ввод расходов | 8/10 | QuickExpense — мобильно-первый UX, категории, фото чека, повторяющиеся платежи |
-| Документы по объектам | 7/10 | PropertyDocumentsTab, хранение в vault, привязка к объекту |
-| Задачи и операции | 7/10 | UnifiedTaskHub: CRM + операционные задачи, назначение сотрудников |
-| Финансы по портфелю | 7/10 | Доходы/расходы, предстоящие платежи (UpcomingPaymentsWidget), аналитика |
-| Инвентарь | 7/10 | По объектам, min stock alerts, фото, инспекции |
-| Карточка объекта (Command Center) | 7/10 | 6 табов: Обзор, Операции, Документы, Заметки, Условия, Владелец |
-| CRM и воронка продаж | 7/10 | Pipeline, контакты, сделки — функционально |
-| Прозрачность для собственников | 7/10 | Transparency Dashboard, автоотчёты, делегированный доступ |
-
-### Что СЛАБО или ОТСУТСТВУЕТ (требует доработки)
-
-| Проблема | Текущее состояние | Критичность |
-|----------|-------------------|-------------|
-| **Управление ключами** | Нет. Только lockbox_code в гайдбуке — это для гостей, а не для операционного учёта | ВЫСОКАЯ |
-| **Коммунальные платежи (PEA, вода, CAM)** | Есть recurring expense + CAM fee в projects, но нет **календаря платежей** с дедлайнами и автонапоминаниями | ВЫСОКАЯ |
-| **Дашборд перегружен** | 15+ виджетов, BusinessRoleSwitcher, DashboardPropertyFilter — слишком много для менеджера с 15 объектами | ВЫСОКАЯ |
-| **Навигация избыточна** | 5 групп, 20+ пунктов в сайдбаре. Маленькой УК не нужен Marketing, Channel Manager, Rate Seasons как отдельные разделы | СРЕДНЯЯ |
-| **Статус объекта "прямо сейчас"** | Нет единой карточки: кто живёт, когда выезд, чисто ли, у кого ключи, оплачен ли свет | ВЫСОКАЯ |
-| **Mobile bottom nav** | Всего 4 пункта, "Operations" ведёт на /owner/operations а не на /owner/tasks | СРЕДНЯЯ |
-| **Onboarding для УК** | SetupPromptBanner есть, но wizard заточен под добавление объектов, не под быструю настройку портфеля | НИЗКАЯ |
+### Что добавить
+1. **Property Health Score** -- композитный компонент: % документов в порядке, 0 просроченных платежей, 0 открытых задач = зелёный; иначе жёлтый/красный
+2. **Чеклист заезда/выезда** -- таблица `property_checklists` (template) + `checklist_completions` (факт с фото). Привязка к бронированию
+3. **Журнал показаний счётчиков** -- таблица `meter_readings` (property_id, utility_type, reading_value, photo_url, recorded_at, recorded_by)
 
 ---
 
-## Архитектурные рекомендации
+## 2. БРОНИРОВАНИЯ И КАЛЕНДАРЬ
 
-### 1. "Property Status at a Glance" — виджет статуса объекта
+### Что есть
+- Полноценный CRUD бронирований через orders, MultiPropertyTimeline, BookingCalendar, BookingDetailSheet
+- iCal sync (Airbnb, Booking.com), AddBookingFromCalendarDialog, статусы и участники
 
-Самая важная доработка. На дашборде и в списке объектов каждый объект должен показывать:
+### Слабые места
+- **Нет автоматической генерации задач при бронировании** -- в GuidePropertyCare описано ("система автоматически создаёт задачи"), но реального триггера/функции нет. Создание cleaning/check_in/check_out задач -- ручное
+- **Нет timeline уборок** -- менеджер не видит "какие квартиры нужно убрать сегодня" в одном месте. Уборки разбросаны по задачам
+- **Booking gap analysis отсутствует** -- нет отчёта "пустые ночи между бронированиями" для оптимизации заполняемости
+- **Нет fast-track бронирования с мобильного** -- QuickExpense есть, но Quick Booking (имя, даты, сумма, объект) -- нет
 
-```text
-+------------------------------------------+
-| Villa Sunrise (Rawai)          [Occupied] |
-| Guest: John Smith, выезд через 2 дня     |
-| Ключи: у менеджера Алины                 |
-| PEA: оплачено до 15 мар                  |
-| CAM: просрочен (12,500 THB)              |
-| Уборка: запланирована 28 фев             |
-+------------------------------------------+
-```
-
-**Реализация**: Новый компонент `PropertyStatusSnapshot` — композит данных из:
-- `property_bookings` (текущий гость + следующий заезд)
-- Новая таблица `property_key_assignments` (у кого ключи)
-- `property_financials` (pending payments с due_date)
-- `property_operational_tasks` (ближайшая уборка/maintenance)
-
-### 2. Управление ключами — новая таблица и UI
-
-**Таблица** `property_key_assignments`:
-- `id`, `property_id`, `key_set_label` ("Комплект 1", "Мастер-ключ")
-- `assigned_to_name`, `assigned_to_phone`, `assigned_to_type` (staff/guest/owner/lockbox)
-- `assigned_at`, `expected_return`, `returned_at`
-- `notes`, `photo_url`
-
-**UI**: Секция в карточке объекта (Overview таб) + быстрое действие "Передать ключи" в дашборде.
-
-### 3. Календарь коммунальных платежей
-
-**Таблица** `property_utility_schedules`:
-- `property_id`, `utility_type` (pea/water/internet/cam/insurance)
-- `provider_name`, `account_number`
-- `due_day` (число месяца), `amount_estimate`
-- `last_paid_date`, `last_paid_amount`
-- `auto_remind_days_before`
-
-**UI**: Виджет "Платежи этой недели" на дашборде + отметка "Оплачено" в одно нажатие, создающая запись в `property_financials`.
-
-### 4. Упрощение дашборда для маленькой УК
-
-Вместо 15 виджетов — 5 секций:
-
-1. **Сегодня** — заезды, выезды, задачи на сегодня (уже есть TodayBriefingWidget — оставить)
-2. **Мои объекты** — компактный список со статусами (новый PropertyStatusSnapshot)
-3. **Платежи** — просроченные и на этой неделе (расширить UpcomingPaymentsWidget)
-4. **Задачи** — открытые задачи по приоритету (есть CrmTasksWidget)
-5. **Быстрые действия** — Добавить расход, Передать ключи, Создать задачу
-
-Текущий `BusinessRoleSwitcher` сохранить, но для роли `property_manager` использовать упрощённый набор виджетов.
-
-### 5. Упрощение навигации
-
-Для маленькой УК (до 50 объектов) предложить 3 группы вместо 5:
-
-```text
-Главное:     Обзор | Объекты | Календарь | Задачи
-Финансы:     Доходы/Расходы | Платежи | Отчёты
-Ещё:         Контакты | Команда | Документы | Настройки
-```
-
-Вынести Marketing, Channel Manager, Rate Seasons, Reviews в секцию "Ещё" или скрыть до активации.
+### Что добавить
+1. **Auto-task trigger** -- при создании/подтверждении бронирования автоматически создавать задачи: cleaning (за день до заезда), check_in, check_out
+2. **Cleaning Dashboard** -- виджет "Уборки сегодня/завтра" с группировкой по объектам и статусом (назначена/в процессе/готово)
+3. **Occupancy gap report** -- показывать пустые промежутки между бронированиями для каждого объекта
 
 ---
 
-## План реализации (приоритезированный)
+## 3. ФИНАНСЫ И ОТЧЁТЫ
 
-### Фаза 1 — Ядро операционного контроля (P0)
+### Что есть
+- OwnerFinancials: доходы/расходы, CSV/Excel экспорт, графики, прогноз
+- QuickExpense с фото чека, категории, повторяющиеся платежи
+- FinancialStatsCards, CashFlowForecast, Budget tracking
+- Ledger system (double-entry), MC commission splits
 
-1. **Создать таблицу `property_key_assignments`** + RLS
-2. **Создать таблицу `property_utility_schedules`** + RLS
-3. **Компонент `PropertyStatusSnapshot`** — агрегирует статус объекта из 4 источников
-4. **Виджет ключей** в карточке объекта (Overview таб) — показ + передача
-5. **Виджет коммунальных платежей** — дедлайны, отметка оплаты
+### Слабые места
+- **Нет P&L по объекту за период** -- Revenue Dashboard показывает общие метрики, но владелец хочет видеть "Villa Sunrise: доход 120K, расход 45K, чистая прибыль 75K, комиссия УК 18K" за конкретный месяц
+- **Нет отчёта для владельца "в один клик"** -- ReportSettingsSheet настраивает автоотправку, но нет PDF-генерации месячного отчёта с разбивкой
+- **Нет сверки расходов** -- менеджер записал расход, но нет workflow подтверждения владельцем (approve/reject)
+- **Нет dashboard KPI для принятия решений** -- Occupancy Rate, ADR, RevPAR показаны в OwnerRevenueDashboard, но без сравнения с прошлым месяцом/годом и без бенчмарков
 
-### Фаза 2 — UX упрощение (P1)
+### Какие отчёты нужны
+1. **Месячный P&L по объекту** -- доход, расходы по категориям, комиссия УК, чистый доход владельца. PDF-экспорт
+2. **Портфельный отчёт** -- все объекты сводно: заполняемость, доходность, проблемные объекты
+3. **Сверка расходов для владельца** -- лист расходов с чеками на approve/reject
+4. **Сравнительная аналитика** -- месяц к месяцу, год к году по ключевым KPI
 
-6. **Пересмотр виджетов дашборда** для роли `property_manager` — сократить до 5-7 ключевых
-7. **Упрощение sidebar** — адаптивная навигация по размеру портфеля
-8. **Mobile bottom nav** — заменить "Operations" на "Tasks" (/owner/tasks)
-
-### Фаза 3 — Автоматизация (P2)
-
-9. **Автонапоминания** о PEA/CAM через edge function (cron)
-10. **Quick action "Оплатил"** — одна кнопка создает финансовую запись
-11. **Property checklist** — чеклист состояния при заезде/выезде с фото
+### Что добавить
+1. **Property P&L component** -- генерация отчёта по объекту за выбранный период с PDF-экспортом
+2. **Expense approval workflow** -- статус расхода: pending_owner_approval -> approved/rejected. Уведомление владельцу
+3. **KPI comparison** -- delta vs прошлый месяц на каждом KPI-виджете
 
 ---
 
-## Технические детали
+## 4. ЗАДАЧИ И ОПЕРАЦИИ
 
-### Миграция БД
+### Что есть
+- UnifiedTaskHub: CRM + Operations в 3 табах, TaskSummaryKPIs, TaskDetailSheet
+- property_operational_tasks + crm_tasks, назначение на сотрудников
+- CreateServiceTaskDialog (cleaning, maintenance, inspection, meter_reading, check_in, check_out)
+
+### Слабые места
+- **Нет SLA/дедлайнов с эскалацией** -- задача может висеть вечно, нет автоэскалации "не выполнено за 24ч -> уведомление менеджеру"
+- **Нет повторяющихся задач** -- уборка общих зон, проверка бассейна -- всё создается вручную
+- **Нет привязки задачи к бронированию** -- уборка "для заезда Ивана 1 марта" не связана с конкретным бронированием
+- **Нет фото-отчёта по задаче** -- сотрудник не может прикрепить фото "уборка выполнена"
+
+### Что добавить
+1. **Recurring tasks** -- шаблоны повторяющихся задач (ежедневно, еженедельно, ежемесячно) с автогенерацией
+2. **Task photo proof** -- поле photo_urls[] в задаче, обязательное для завершения cleaning/inspection
+3. **Booking-linked tasks** -- связь задачи с order_id для трейсабельности
+4. **SLA & escalation** -- настраиваемые правила: "если задача не выполнена за N часов, уведомить X"
+
+---
+
+## 5. КОМАНДА И БЕЗОПАСНОСТЬ
+
+### Что есть
+- StaffPage: CRUD сотрудников, роли (cleaner, maintenance, manager, admin, staff)
+- team_member_permissions: гранулярные права по модулям (view/edit)
+- MemberPermissionsSheet, MemberActivitySheet
+- contactProtection.ts: маскирование телефонов/email
+- team_activity_log: логирование действий
+- Водяные знаки на CSV-экспортах
+
+### Слабые места
+- **Нет матрицы ответственности** -- кто за какой объект отвечает видно только через staff_property_assignments, но нет сводного вида "объект -> ответственный менеджер + клинер + техник"
+- **Нет ограничения на экспорт контактов** -- маскирование есть, но нет запрета на скачивание базы контактов для определённых ролей
+- **Нет NDA/трудового договора в системе** -- документы сотрудников есть (VendorDocumentsTab), но нет обязательного подписания NDA при приёме
+- **team_activity_log неполный** -- логируются не все действия, нет dashboard для руководителя "что делал сотрудник сегодня"
+- **Нет разделения данных между сотрудниками** -- менеджер A видит объекты менеджера B. Для малой УК это нормально, но для растущей -- риск
+
+### Защита от воровства данных
+1. **Export restrictions** -- запретить экспорт CRM контактов для ролей ниже director. Водяные знаки уже есть -- хорошо
+2. **Session logging** -- расширить team_activity_log: логировать просмотры контактов, скачивание файлов, экспорт
+3. **Data scope by assignment** -- опциональный режим: сотрудник видит только свои назначенные объекты и их контакты
+4. **Обязательное подписание Terms при приёме** -- интегрировать с уже созданной legal_documents системой: при добавлении сотрудника -- обязательное принятие NDA
+
+### Что добавить
+1. **Responsibility matrix widget** -- на дашборде: объект -> кто отвечает, с быстрым переназначением
+2. **Employee scorecard** -- количество выполненных задач, среднее время выполнения, рейтинг от гостей
+3. **Granular export permissions** -- в team_member_permissions добавить can_export boolean
+
+---
+
+## 6. КОММУНИКАЦИИ (WhatsApp, Telegram, Team Space)
+
+### Что есть
+- OwnerMessages: внутренний чат с гостями (property_chat_messages)
+- WhatsApp/Telegram ссылки для быстрой связи (UnifiedChatFAB, StaffCard)
+- Message templates (OwnerAutoMessaging, BookingMessageRules)
+- CRM контакты хранят whatsapp, telegram поля
+
+### Слабые места
+- **Нет интеграции с WhatsApp Business API** -- только wa.me ссылки, нет входящих/исходящих сообщений в системе. Вся переписка теряется в личных чатах
+- **Нет внутреннего командного чата** -- сотрудники общаются в WhatsApp группах, информация не структурирована
+- **Нет привязки сообщений к объекту/задаче** -- контекст теряется
+
+### Нужен ли Team Space?
+**Да, но в минимальном виде.** Для малой УК (2-5 человек) полноценный чат избыточен. Нужно:
+
+### Что добавить
+1. **Property-level notes/comments** -- уже есть PropertyNotesTab, но сделать его "живой лентой" с @mentions сотрудников и push-уведомлениями
+2. **Task comments** -- возможность обсуждать задачу в контексте (комментарии к задаче)
+3. **WhatsApp Business integration (P2)** -- через connector. Входящие сообщения от гостей попадают в Unified Inbox, исходящие отправляются из системы
+4. **Quick notify team** -- кнопка "Уведомить команду" по объекту/задаче -> push/WhatsApp/Telegram
+
+---
+
+## 7. UX: ЧУВСТВО СИСТЕМЫ И КОНТРОЛЯ
+
+### Текущие проблемы
+- **Дашборд перегружен** -- 13+ виджетов для property_manager. Менеджер с 15 объектами тонет в информации
+- **Навигация: 5 групп, 20+ пунктов** -- слишком много для ежедневной работы
+- **Нет "Morning Briefing"** -- TodayBriefingWidget показывает заезды/выезды, но не даёт полную картину дня: сколько уборок, какие платежи, что просрочено
+- **Нет notification center** -- уведомления разрозненны, нет единого места "что требует внимания"
+
+### Что сделать для чувства контроля
+1. **Morning Dashboard** -- при входе показывать: "Сегодня: 2 заезда, 1 выезд, 3 уборки, 1 просроченный платёж PEA, 2 задачи". Одно предложение = полная картина
+2. **Action-required badge** -- красная точка на сайдбаре показывает количество элементов требующих действия
+3. **Property health grid** -- вместо списка объектов показывать сетку карточек со светофором (зелёный/жёлтый/красный)
+4. **Weekly digest email** -- автоматическая сводка за неделю: занятость, доход, проблемы
+
+---
+
+## 8. СВОДНАЯ ТАБЛИЦА ПРИОРИТЕТОВ
+
+### P0 -- Критично (влияет на ежедневную работу)
+
+| Задача | Компонент | Сложность |
+|--------|-----------|-----------|
+| Чеклист заезда/выезда с фото | Новые таблицы + UI | Средняя |
+| Auto-task trigger при бронировании | Edge function / DB trigger | Средняя |
+| Cleaning dashboard (уборки сегодня) | Новый виджет | Низкая |
+| Property P&L отчёт по объекту | Новый компонент + PDF | Средняя |
+| Morning briefing (единая сводка дня) | Рефактор TodayBriefingWidget | Низкая |
+| Task photo proof | Расширение схемы + UI | Низкая |
+
+### P1 -- Важно (улучшает контроль)
+
+| Задача | Компонент | Сложность |
+|--------|-----------|-----------|
+| Recurring tasks | Шаблоны + cron | Средняя |
+| Property Health Score | Агрегирующий компонент | Средняя |
+| Expense approval workflow (для владельца) | Статусы + уведомления | Средняя |
+| Responsibility matrix | Виджет | Низкая |
+| Export restrictions по ролям | Расширение permissions | Низкая |
+| Task comments | Новая таблица + UI | Низкая |
+
+### P2 -- Стратегические (масштабирование)
+
+| Задача | Компонент | Сложность |
+|--------|-----------|-----------|
+| WhatsApp Business API | Connector + Edge function | Высокая |
+| Meter readings journal | Таблица + UI | Низкая |
+| KPI comparison (MoM/YoY) | Аналитика | Средняя |
+| Employee scorecard | Агрегация данных | Средняя |
+| Weekly digest email | Edge function + cron | Средняя |
+| Booking gap analysis | Отчёт | Низкая |
+
+---
+
+## Технические детали реализации P0
+
+### Новые таблицы
 
 ```sql
--- property_key_assignments
-CREATE TABLE property_key_assignments (
+-- Checklist templates
+CREATE TABLE property_checklist_templates (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  property_id uuid NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-  key_set_label text NOT NULL DEFAULT 'Main',
-  assigned_to_name text NOT NULL,
-  assigned_to_phone text,
-  assigned_to_type text NOT NULL DEFAULT 'staff'
-    CHECK (assigned_to_type IN ('staff','guest','owner','lockbox','security')),
-  assigned_at timestamptz NOT NULL DEFAULT now(),
-  expected_return timestamptz,
-  returned_at timestamptz,
-  notes text,
-  photo_url text,
-  created_by uuid REFERENCES auth.users(id),
+  company_id uuid REFERENCES companies(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  checklist_type text NOT NULL CHECK (checklist_type IN ('check_in','check_out','cleaning','inspection')),
+  items jsonb NOT NULL DEFAULT '[]',
+  is_default boolean DEFAULT false,
   created_at timestamptz DEFAULT now()
 );
 
--- property_utility_schedules
-CREATE TABLE property_utility_schedules (
+-- Checklist completions
+CREATE TABLE checklist_completions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_id uuid REFERENCES property_checklist_templates(id),
+  property_id uuid NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+  booking_id uuid,
+  task_id uuid,
+  completed_by uuid REFERENCES auth.users(id),
+  items jsonb NOT NULL DEFAULT '[]',
+  photos text[] DEFAULT '{}',
+  notes text,
+  completed_at timestamptz DEFAULT now()
+);
+
+-- Meter readings
+CREATE TABLE meter_readings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
-  utility_type text NOT NULL
-    CHECK (utility_type IN ('electricity','water','internet','cam','insurance','gas','other')),
-  provider_name text,
-  account_number text,
-  due_day integer CHECK (due_day BETWEEN 1 AND 31),
-  amount_estimate numeric,
-  currency text DEFAULT 'THB',
-  last_paid_date date,
-  last_paid_amount numeric,
-  auto_remind_days integer DEFAULT 3,
-  is_active boolean DEFAULT true,
+  utility_type text NOT NULL,
+  reading_value numeric NOT NULL,
+  photo_url text,
+  recorded_by uuid REFERENCES auth.users(id),
+  recorded_at timestamptz DEFAULT now()
+);
+
+-- Task comments
+CREATE TABLE task_comments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id uuid NOT NULL,
+  task_source text NOT NULL CHECK (task_source IN ('crm','ops')),
+  author_id uuid NOT NULL REFERENCES auth.users(id),
+  content text NOT NULL,
+  photos text[] DEFAULT '{}',
   created_at timestamptz DEFAULT now()
 );
 ```
 
-### Новые компоненты
+### Модифицируемые таблицы
+- `property_operational_tasks`: добавить `booking_id uuid`, `photo_proof text[]`, `recurring_rule jsonb`
+- `team_member_permissions`: добавить `can_export boolean DEFAULT false`
 
-- `src/components/owner/property-detail/PropertyKeyAssignments.tsx` — CRUD ключей
-- `src/components/owner/property-detail/PropertyUtilitySchedules.tsx` — платежи по коммуналке
-- `src/components/owner/dashboard/PropertyStatusSnapshot.tsx` — компактная карточка статуса
-- `src/hooks/usePropertyKeys.ts` — хук для key_assignments
-- `src/hooks/useUtilitySchedules.ts` — хук для utility_schedules
+### Новые компоненты
+- `src/components/owner/checklists/ChecklistTemplate.tsx` -- управление шаблонами чеклистов
+- `src/components/owner/checklists/ChecklistCompletion.tsx` -- заполнение чеклиста с фото
+- `src/components/owner/dashboard/CleaningDashboard.tsx` -- виджет уборок на сегодня
+- `src/components/owner/dashboard/MorningBriefing.tsx` -- единая сводка дня
+- `src/components/owner/reports/PropertyPnL.tsx` -- P&L по объекту
+- `src/components/owner/tasks/TaskComments.tsx` -- комментарии к задаче
+- `src/components/owner/property-detail/MeterReadings.tsx` -- журнал показаний
 
 ### Модифицируемые файлы
-
-- `src/lib/businessRoles.ts` — оптимизация виджетов для property_manager
-- `src/pages/owner/OwnerPropertyDetail.tsx` — добавить секции ключей и коммуналки в Overview
-- `src/components/owner/OwnerSidebar.tsx` — упрощённая навигация
-- `src/components/owner/OwnerMobileNav.tsx` — Tasks вместо Operations
-- `src/components/owner/dashboard/OwnerPropertiesList.tsx` — интегрировать PropertyStatusSnapshot
+- `src/lib/businessRoles.ts` -- добавить cleaning_dashboard и morning_briefing в виджеты property_manager
+- `src/pages/owner/OwnerDashboard.tsx` -- зарегистрировать новые виджеты
+- `src/components/owner/tasks/TaskDetailSheet.tsx` -- добавить секцию комментариев и фото
+- `src/hooks/useTeamPermissions.ts` -- добавить can_export в интерфейс
+- `src/pages/owner/OwnerPropertyDetail.tsx` -- добавить табы Checklists и Meter Readings
