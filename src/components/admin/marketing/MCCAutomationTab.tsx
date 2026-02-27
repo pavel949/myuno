@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Plus, Zap, Mail, MessageSquare, Bell, Clock, Target, Users, Loader2, Trash2,
-  Timer, RefreshCcw, ShoppingCart, Heart, CalendarSync
+  Timer, RefreshCcw, ShoppingCart, Heart, CalendarSync, Brain, Megaphone
 } from 'lucide-react';
 import { useMCCAutomation, type LifecycleTemplate } from '@/hooks/useMCCAutomation';
 import { formatDistanceToNow } from 'date-fns';
@@ -47,6 +47,8 @@ const LIFECYCLE_TRIGGER_TYPES = [
 const CHANNEL_OPTIONS = ['email', 'push', 'inapp'];
 
 const CRON_JOBS = [
+  { name: 'auto-lead-scoring', schedule: 'Каждые 2 часа', icon: Brain, description: 'Автоскоринг клиентских лидов + уведомления о горячих' },
+  { name: 'execute-campaign-rules', schedule: 'Каждые 15 мин', icon: Megaphone, description: 'Исполнение поведенческих правил Campaign Center' },
   { name: 'update-user-segments', schedule: 'Каждые 6 часов', icon: RefreshCcw, description: 'Обновление сегментов пользователей' },
   { name: 'booking-reminders', schedule: 'Каждый час', icon: Timer, description: 'Напоминания о бронированиях' },
   { name: 'auto-lifecycle-actions', schedule: 'Ежедневно 10:00', icon: Heart, description: 'Реактивация и welcome-цепочки' },

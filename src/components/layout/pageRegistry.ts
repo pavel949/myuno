@@ -22,6 +22,7 @@ export const EditProfile = lazy(() => import('@/pages/profile/EditProfile'));
 export const ProfileSettings = lazy(() => import('@/pages/profile/ProfileSettings'));
 export const UserAccountDashboard = lazy(() => import('@/pages/account/UserAccountDashboard'));
 export const ReferralPage = lazy(() => import('@/pages/profile/ReferralPage'));
+export const ReferralLanding = lazy(() => import('@/pages/ReferralLanding'));
 
 // ── Beauty & Spa ──
 export const BeautySpaIndex = lazy(() => import('@/pages/beauty/BeautySpaIndex'));

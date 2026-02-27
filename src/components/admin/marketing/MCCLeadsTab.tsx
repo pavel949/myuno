@@ -28,8 +28,10 @@ import {
   Brain
 } from 'lucide-react';
 import { useLeadHub, LeadSource, LeadPriority, UnifiedLead } from '@/hooks/useLeadHub';
+import { useLeadsFactory } from '@/hooks/useLeadsFactory';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 export function MCCLeadsTab() {
   const { language } = useLanguage();
@@ -43,6 +45,55 @@ export function MCCLeadsTab() {
     priority: priorityFilter,
     search: searchQuery,
   });
+
+  const { batchScoreLeads, generateFollowUp } = useLeadsFactory();
+
+  const handleWhatsApp = async (lead: UnifiedLead) => {
+    if (!lead.phone) return;
+    const phone = lead.phone.replace(/[^0-9+]/g, '').replace('+', '');
+    
+    // Try to generate AI message first
+    if (lead.source_table === 'consultation_requests') {
+      try {
+        const result = await generateFollowUp.mutateAsync({ leadId: lead.id, channel: 'whatsapp' });
+        const encoded = encodeURIComponent(result.message);
+        window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+        return;
+      } catch {
+        // Fallback to simple message
+      }
+    }
+
+    const fallback = encodeURIComponent(`Здравствуйте, ${lead.name}! Это UNO Properties. Мы получили вашу заявку и хотели бы обсудить детали. Когда вам удобно поговорить?`);
+    window.open(`https://wa.me/${phone}?text=${fallback}`, '_blank');
+  };
+
+  const handleEmail = async (lead: UnifiedLead) => {
+    if (!lead.email) return;
+    
+    if (lead.source_table === 'consultation_requests') {
+      try {
+        const result = await generateFollowUp.mutateAsync({ leadId: lead.id, channel: 'email' });
+        const subject = encodeURIComponent(result.subject || 'UNO Properties');
+        const body = encodeURIComponent(result.message);
+        window.open(`mailto:${lead.email}?subject=${subject}&body=${body}`, '_blank');
+        return;
+      } catch {
+        // Fallback
+      }
+    }
+
+    window.open(`mailto:${lead.email}?subject=${encodeURIComponent('UNO Properties — ваша заявка')}&body=${encodeURIComponent(`Здравствуйте, ${lead.name}!\n\nСпасибо за вашу заявку.`)}`, '_blank');
+  };
+
+  const handlePhone = (lead: UnifiedLead) => {
+    if (!lead.phone) return;
+    window.open(`tel:${lead.phone}`, '_blank');
+  };
+
+  const handleBatchScore = () => {
+    batchScoreLeads.mutate({ limit: 20 });
+  };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
@@ -212,9 +263,9 @@ export function MCCLeadsTab() {
               <SelectItem value="mcc">MCC Leads</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleBatchScore} disabled={batchScoreLeads.isPending}>
             <Sparkles className="h-4 w-4 mr-2" />
-            {isRu ? 'AI Скоринг' : 'AI Score'}
+            {batchScoreLeads.isPending ? (isRu ? 'Скоринг...' : 'Scoring...') : (isRu ? 'AI Скоринг' : 'AI Score')}
           </Button>
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
@@ -316,16 +367,16 @@ export function MCCLeadsTab() {
                       <td className="p-4">
                         <div className="flex gap-1">
                           {lead.email && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEmail(lead)} title={isRu ? 'Написать email' : 'Send email'}>
                               <Mail className="h-4 w-4" />
                             </Button>
                           )}
                           {lead.phone && (
                             <>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handlePhone(lead)} title={isRu ? 'Позвонить' : 'Call'}>
                                 <Phone className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleWhatsApp(lead)} title="WhatsApp">
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
                             </>
