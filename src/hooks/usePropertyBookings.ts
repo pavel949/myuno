@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useStorefront } from '@/contexts/StorefrontContext';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { createErrorHandler } from '@/lib/errorHandler';
 
@@ -84,6 +85,7 @@ function mapOrderToBooking(order: any, propertyId: string): PropertyBooking {
 export function usePropertyBookings(propertyId?: string) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
+  const { storefront } = useStorefront();
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
@@ -156,6 +158,9 @@ export function usePropertyBookings(propertyId?: string) {
           currency: input.currency || 'THB',
           status: (input.status === 'confirmed' ? 'confirmed' : 'pending') as any,
           notes: input.notes,
+          // Storefront attribution
+          source_storefront_id: storefront?.id || null,
+          source_company_id: storefront?.company_id || null,
           metadata: {
             source: input.source || 'manual',
             external_id: input.external_id,
@@ -164,6 +169,7 @@ export function usePropertyBookings(propertyId?: string) {
             documents: input.documents,
             check_in_time: input.check_in_time || '14:00',
             check_out_time: input.check_out_time || '11:00',
+            ...(storefront ? { storefront_slug: storefront.slug } : {}),
           },
         })
         .select()

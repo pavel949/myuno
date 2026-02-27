@@ -3241,6 +3241,56 @@ export type Database = {
         }
         Relationships: []
       }
+      company_storefronts: {
+        Row: {
+          allow_cross_sell: boolean
+          allowed_company_ids: string[] | null
+          brand: Json | null
+          company_id: string
+          created_at: string
+          domain: string | null
+          id: string
+          is_active: boolean
+          mode: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          allow_cross_sell?: boolean
+          allowed_company_ids?: string[] | null
+          brand?: Json | null
+          company_id: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          allow_cross_sell?: boolean
+          allowed_company_ids?: string[] | null
+          brand?: Json | null
+          company_id?: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_storefronts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultation_requests: {
         Row: {
           admin_notes: string | null
@@ -6862,6 +6912,108 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          acceptance_source: string
+          accepted_at: string
+          company_id: string | null
+          content_hash: string
+          doc_id: string
+          doc_key: string
+          id: string
+          ip_address: unknown
+          session_id: string | null
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          acceptance_source?: string
+          accepted_at?: string
+          company_id?: string | null
+          content_hash: string
+          doc_id: string
+          doc_key: string
+          id?: string
+          ip_address?: unknown
+          session_id?: string | null
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          acceptance_source?: string
+          accepted_at?: string
+          company_id?: string | null
+          content_hash?: string
+          doc_id?: string
+          doc_key?: string
+          id?: string
+          ip_address?: unknown
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_acceptances_doc_id_fkey"
+            columns: ["doc_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          applies_to: string[]
+          content_hash: string
+          content_md: string
+          created_at: string
+          doc_key: string
+          id: string
+          is_active: boolean
+          published_at: string
+          title_en: string
+          title_ru: string
+          version: string
+        }
+        Insert: {
+          applies_to?: string[]
+          content_hash?: string
+          content_md?: string
+          created_at?: string
+          doc_key: string
+          id?: string
+          is_active?: boolean
+          published_at?: string
+          title_en?: string
+          title_ru?: string
+          version?: string
+        }
+        Update: {
+          applies_to?: string[]
+          content_hash?: string
+          content_md?: string
+          created_at?: string
+          doc_key?: string
+          id?: string
+          is_active?: boolean
+          published_at?: string
+          title_en?: string
+          title_ru?: string
+          version?: string
+        }
+        Relationships: []
+      }
       legal_services: {
         Row: {
           address: string | null
@@ -10279,6 +10431,8 @@ export type Database = {
           paid_at: string | null
           platform_fee_amount: number | null
           provider_org_id: string | null
+          source_company_id: string | null
+          source_storefront_id: string | null
           start_at: string | null
           status: Database["public"]["Enums"]["order_status"] | null
           subtotal: number | null
@@ -10308,6 +10462,8 @@ export type Database = {
           paid_at?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
+          source_company_id?: string | null
+          source_storefront_id?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number | null
@@ -10337,6 +10493,8 @@ export type Database = {
           paid_at?: string | null
           platform_fee_amount?: number | null
           provider_org_id?: string | null
+          source_company_id?: string | null
+          source_storefront_id?: string | null
           start_at?: string | null
           status?: Database["public"]["Enums"]["order_status"] | null
           subtotal?: number | null
@@ -10359,6 +10517,20 @@ export type Database = {
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_source_company_id_fkey"
+            columns: ["source_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_source_storefront_id_fkey"
+            columns: ["source_storefront_id"]
+            isOneToOne: false
+            referencedRelation: "company_storefronts"
             referencedColumns: ["id"]
           },
         ]

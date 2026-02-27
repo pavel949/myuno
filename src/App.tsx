@@ -29,8 +29,10 @@ import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
+import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
+import { StorefrontProvider } from "@/contexts/StorefrontContext";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
@@ -51,19 +53,20 @@ function AppContent() {
     return <UnderConstruction />;
   }
   
-  return (
-    <>
-      <SkipToContent />
-      <Toaster />
-      <Sonner />
-      <PWAUpdatePrompt />
-      <BrowserRouter>
-        <AnimatedRoutes />
-        <UnifiedChatFAB />
-        <CookieConsentBanner />
-      </BrowserRouter>
-    </>
-  );
+    return (
+      <>
+        <SkipToContent />
+        <Toaster />
+        <Sonner />
+        <PWAUpdatePrompt />
+        <LegalComplianceModal />
+        <BrowserRouter>
+          <AnimatedRoutes />
+          <UnifiedChatFAB />
+          <CookieConsentBanner />
+        </BrowserRouter>
+      </>
+    );
 }
 
 const App = () => (
@@ -79,13 +82,15 @@ const App = () => (
                     <CartProvider>
                       <PWAInstallProvider>
                         <LifeSituationProvider>
-                          <TooltipProvider>
-                            <HintProvider>
-                              <PrefetchProvider>
-                                <AppContent />
-                              </PrefetchProvider>
-                            </HintProvider>
-                          </TooltipProvider>
+                          <StorefrontProvider>
+                            <TooltipProvider>
+                              <HintProvider>
+                                <PrefetchProvider>
+                                  <AppContent />
+                                </PrefetchProvider>
+                              </HintProvider>
+                            </TooltipProvider>
+                          </StorefrontProvider>
                         </LifeSituationProvider>
                       </PWAInstallProvider>
                     </CartProvider>

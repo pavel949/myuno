@@ -260,6 +260,8 @@ export const AdminVehicles = lazy(() => import('@/pages/admin/AdminVehicles'));
 export const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
 export const AdminEducation = lazy(() => import('@/pages/admin/AdminEducation'));
 export const AdminLegal = lazy(() => import('@/pages/admin/AdminLegal'));
+export const AdminLegalDocuments = lazy(() => import('@/pages/admin/AdminLegalDocuments'));
+export const StorefrontPage = lazy(() => import('@/pages/StorefrontPage'));
 export const AdminPets = lazy(() => import('@/pages/admin/AdminPets'));
 export const AdminCleaning = lazy(() => import('@/pages/admin/AdminCleaning'));
 export const AdminBabysitters = lazy(() => import('@/pages/admin/AdminBabysitters'));
