@@ -3642,6 +3642,9 @@ export type Database = {
           created_by: string | null
           currency: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relation: string | null
           family_info: string | null
           first_name: string
           id: string
@@ -3659,6 +3662,7 @@ export type Database = {
           preferred_types: string[] | null
           scoring: number | null
           source: string | null
+          special_notes: string | null
           tags: string[] | null
           telegram: string | null
           updated_at: string
@@ -3677,6 +3681,9 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
           family_info?: string | null
           first_name?: string
           id?: string
@@ -3694,6 +3701,7 @@ export type Database = {
           preferred_types?: string[] | null
           scoring?: number | null
           source?: string | null
+          special_notes?: string | null
           tags?: string[] | null
           telegram?: string | null
           updated_at?: string
@@ -3712,6 +3720,9 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
           family_info?: string | null
           first_name?: string
           id?: string
@@ -3729,6 +3740,7 @@ export type Database = {
           preferred_types?: string[] | null
           scoring?: number | null
           source?: string | null
+          special_notes?: string | null
           tags?: string[] | null
           telegram?: string | null
           updated_at?: string
@@ -13368,6 +13380,7 @@ export type Database = {
           mortgage_monthly_payment: number | null
           nearby_places: Json | null
           notes: string | null
+          owner_contact_id: string | null
           owner_id: string | null
           ownership_form: string | null
           ownership_transferred_at: string | null
@@ -13557,6 +13570,7 @@ export type Database = {
           mortgage_monthly_payment?: number | null
           nearby_places?: Json | null
           notes?: string | null
+          owner_contact_id?: string | null
           owner_id?: string | null
           ownership_form?: string | null
           ownership_transferred_at?: string | null
@@ -13746,6 +13760,7 @@ export type Database = {
           mortgage_monthly_payment?: number | null
           nearby_places?: Json | null
           notes?: string | null
+          owner_contact_id?: string | null
           owner_id?: string | null
           ownership_form?: string | null
           ownership_transferred_at?: string | null
@@ -13848,6 +13863,13 @@ export type Database = {
             columns: ["management_company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_owner_contact_id_fkey"
+            columns: ["owner_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
             referencedColumns: ["id"]
           },
           {

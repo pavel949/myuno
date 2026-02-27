@@ -19,6 +19,7 @@ import {
   FileText,
   Megaphone,
   BookOpen,
+  Crown,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -42,6 +43,7 @@ const MENU_SECTIONS: MenuSection[] = [
     titleEn: 'CRM & Sales',
     titleRu: 'CRM и продажи',
     items: [
+      { path: '/owner/owners', icon: Crown, labelEn: 'Property Owners', labelRu: 'Собственники' },
       { path: '/owner/sales', icon: TrendingUp, labelEn: 'Sales Pipeline', labelRu: 'Воронка продаж' },
       { path: '/owner/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты' },
       { path: '/owner/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы' },
