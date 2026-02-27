@@ -4,6 +4,7 @@ import {
   LayoutDashboard, 
   Building2,
   CalendarDays,
+  Crown,
   DollarSign,
   Users,
   LogOut,
@@ -76,6 +77,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
+      { title: 'Owners', titleRu: 'Собственники', path: '/owner/owners', icon: Crown },
       { title: 'Properties', titleRu: 'Объекты', path: '/owner/properties', icon: Building2 },
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
       { title: 'Messages', titleRu: 'Сообщения', path: '/owner/messages', icon: MessageSquare },
@@ -131,6 +133,7 @@ const navigationGroups: NavGroup[] = [
 // Map paths to permission modules for filtering
 const PATH_TO_MODULE: Record<string, ModuleKey> = {
   '/owner/properties': 'properties',
+  '/owner/owners': 'crm',
   '/owner/calendar': 'bookings',
   '/owner/sales': 'crm',
   '/owner/contacts': 'crm',
