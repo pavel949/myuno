@@ -27,6 +27,7 @@ export { OwnerDashboardMenu } from './OwnerDashboardMenu';
 
 // Maintenance
 export { MaintenanceHealthWidget } from './MaintenanceHealthWidget';
+export { PropertyStatusSnapshot } from './PropertyStatusSnapshot';
 
 // Command Center
 export { TodayActionsWidget } from './TodayActionsWidget';

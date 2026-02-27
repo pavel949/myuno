@@ -28,6 +28,7 @@ export type DashboardWidgetKey =
   | 'invites'
   | 'active_stays'
   | 'properties'
+  | 'property_status'
   | 'operations'
   | 'crm_tasks'
   | 'upcoming_payments'
@@ -46,16 +47,15 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     widgets: [
       'your_day',
       'kpi',
+      'property_status',
       'channel_sync',
       'unified_inbox',
       'active_stays',
+      'upcoming_payments',
+      'crm_tasks',
       'properties',
       'maintenance_health',
-      'myuno_services',
       'revenue_insights',
-      'upcoming_payments',
-      'active_deals',
-      'crm_tasks',
       'operations',
       'menu',
     ],
@@ -97,6 +97,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     widgets: [
       'your_day',
       'kpi',
+      'property_status',
       'channel_sync',
       'unified_inbox',
       'active_stays',
