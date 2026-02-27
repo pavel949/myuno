@@ -153,6 +153,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/install" element={<LazyPage><Pages.Install /></LazyPage>} />
         <Route path="/booking/advance-requested" element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
+        <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
         <Route path="/life-flow/:code" element={<LazyPage><Pages.LifeFlowPage /></LazyPage>} />
@@ -461,7 +462,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/marketing" element={<Pages.MarketingDashboard />} />
           <Route path="/admin/experience-categories" element={<Pages.ExperienceCategoriesPage />} />
           <Route path="/admin/life-situations" element={<Pages.AdminLifeOS />} />
-          <Route path="/admin/lifeos" element={<Navigate to="/admin/life-situations" replace />} />
+           <Route path="/admin/lifeos" element={<Navigate to="/admin/life-situations" replace />} />
+           <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
         </Route>
         
         {/* ── Staff ── */}
