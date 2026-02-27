@@ -15037,6 +15037,76 @@ export type Database = {
           },
         ]
       }
+      property_key_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_to_name: string
+          assigned_to_phone: string | null
+          assigned_to_type: string
+          created_at: string
+          created_by: string | null
+          expected_return: string | null
+          id: string
+          key_set_label: string
+          notes: string | null
+          photo_url: string | null
+          property_id: string
+          returned_at: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_to_name: string
+          assigned_to_phone?: string | null
+          assigned_to_type?: string
+          created_at?: string
+          created_by?: string | null
+          expected_return?: string | null
+          id?: string
+          key_set_label?: string
+          notes?: string | null
+          photo_url?: string | null
+          property_id: string
+          returned_at?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_to_name?: string
+          assigned_to_phone?: string | null
+          assigned_to_type?: string
+          created_at?: string
+          created_by?: string | null
+          expected_return?: string | null
+          id?: string
+          key_set_label?: string
+          notes?: string | null
+          photo_url?: string | null
+          property_id?: string
+          returned_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_key_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_key_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_key_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_listing_scores: {
         Row: {
           amenities_score: number | null
@@ -16228,6 +16298,79 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_utility_schedules: {
+        Row: {
+          account_number: string | null
+          amount_estimate: number | null
+          auto_remind_days: number
+          created_at: string
+          currency: string
+          due_day: number | null
+          id: string
+          is_active: boolean
+          last_paid_amount: number | null
+          last_paid_date: string | null
+          owner_id: string | null
+          property_id: string
+          provider_name: string | null
+          utility_type: string
+        }
+        Insert: {
+          account_number?: string | null
+          amount_estimate?: number | null
+          auto_remind_days?: number
+          created_at?: string
+          currency?: string
+          due_day?: number | null
+          id?: string
+          is_active?: boolean
+          last_paid_amount?: number | null
+          last_paid_date?: string | null
+          owner_id?: string | null
+          property_id: string
+          provider_name?: string | null
+          utility_type: string
+        }
+        Update: {
+          account_number?: string | null
+          amount_estimate?: number | null
+          auto_remind_days?: number
+          created_at?: string
+          currency?: string
+          due_day?: number | null
+          id?: string
+          is_active?: boolean
+          last_paid_amount?: number | null
+          last_paid_date?: string | null
+          owner_id?: string | null
+          property_id?: string
+          provider_name?: string | null
+          utility_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_utility_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_utility_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_utility_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]

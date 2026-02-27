@@ -5,7 +5,7 @@ import {
   LayoutDashboard, 
   Home, 
   Calendar, 
-  Wrench,
+  ClipboardList,
   MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,7 +26,7 @@ const PM_NAV: NavItem[] = [
   { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', path: '/owner' },
   { id: 'properties', icon: Home, labelEn: 'Properties', labelRu: 'Объекты', path: '/owner/properties' },
   { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
-  { id: 'operations', icon: Wrench, labelEn: 'Operations', labelRu: 'Задачи', path: '/owner/operations' },
+  { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: '/owner/tasks' },
 ];
 
 const SALES_NAV: NavItem[] = [

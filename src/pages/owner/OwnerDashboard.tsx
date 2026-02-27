@@ -34,6 +34,7 @@ import { MaintenanceHealthWidget } from '@/components/owner/dashboard/Maintenanc
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
 import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerServiceRecommendations';
+import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
 
 function SectionSkeleton() {
   return (
@@ -107,6 +108,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
             <OwnerPropertiesList />
           </Suspense>
         </div>
+      );
+    case 'property_status':
+      return (
+        <Suspense fallback={<SectionSkeleton />}>
+          <PropertyStatusSnapshot />
+        </Suspense>
       );
     case 'operations':
       return (

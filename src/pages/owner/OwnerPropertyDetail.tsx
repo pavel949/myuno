@@ -21,6 +21,8 @@ import { usePropertyNotes } from '@/hooks/usePropertyNotes';
 import { usePropertyManagementTerms } from '@/hooks/usePropertyManagementTerms';
 import { ManagementTermsForm } from '@/components/owner/management/ManagementTermsForm';
 import { TermsActivityLog } from '@/components/owner/management/TermsActivityLog';
+import { PropertyKeyAssignments } from '@/components/owner/property-detail/PropertyKeyAssignments';
+import { PropertyUtilitySchedules } from '@/components/owner/property-detail/PropertyUtilitySchedules';
 import {
   Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
   Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
@@ -229,6 +231,10 @@ export default function OwnerPropertyDetail() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Keys & Utilities */}
+          {id && <PropertyKeyAssignments propertyId={id} />}
+          {id && <PropertyUtilitySchedules propertyId={id} />}
 
           {/* MC / Juristic link */}
           {property?.project_id && (
