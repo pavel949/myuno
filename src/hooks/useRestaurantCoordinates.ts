@@ -18,11 +18,10 @@ export function useRestaurantCoordinates() {
     queryKey: ['restaurant-coordinates'],
     queryFn: async (): Promise<Record<string, { lat: number; lng: number }>> => {
       const { data, error } = await supabase
-        .from('restaurants')
-        .select('id, lat, lng')
-        .eq('is_active', true)
-        .not('lat', 'is', null)
-        .not('lng', 'is', null);
+        .from('listings')
+        .select('id, attributes')
+        .eq('vertical', 'restaurant')
+        .eq('is_active', true);
 
       if (error) {
         console.error('Error fetching restaurant coordinates:', error);
@@ -31,8 +30,11 @@ export function useRestaurantCoordinates() {
 
       const coordsMap: Record<string, { lat: number; lng: number }> = {};
       data?.forEach((r) => {
-        if (r.lat && r.lng) {
-          coordsMap[r.id] = { lat: r.lat, lng: r.lng };
+        const attrs = (r.attributes || {}) as Record<string, any>;
+        const lat = attrs.lat as number | undefined;
+        const lng = attrs.lng as number | undefined;
+        if (lat && lng) {
+          coordsMap[r.id] = { lat, lng };
         }
       });
 

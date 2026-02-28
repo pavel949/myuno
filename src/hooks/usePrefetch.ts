@@ -42,22 +42,23 @@ export function usePrefetchPopularData() {
   }, [queryClient]);
 
   const prefetchFeaturedContent = useCallback(async () => {
-    // Prefetch featured restaurants
+    // Prefetch featured listings (restaurants, tours from unified table)
     await queryClient.prefetchQuery({
-      queryKey: ['restaurants', { featured: true }],
+      queryKey: ['listings', 'featured-prefetch'],
       queryFn: async () => {
         const { data } = await supabase
-          .from('restaurants')
-          .select('id, name_en, name_ru, cover_image, rating, cuisine')
+          .from('listings')
+          .select('id, vertical, name_en, name_ru, cover_image, rating, price')
           .eq('is_active', true)
           .eq('is_featured', true)
-          .limit(6);
+          .in('vertical', ['restaurant', 'experience', 'yacht'])
+          .limit(18);
         return data || [];
       },
       ...CACHE_PROFILES.SEMI_STATIC,
     });
 
-    // Prefetch featured properties
+    // Prefetch featured properties (separate table)
     await queryClient.prefetchQuery({
       queryKey: ['properties', { featured: true }],
       queryFn: async () => {
@@ -65,22 +66,6 @@ export function usePrefetchPopularData() {
           .from('properties')
           .select('id, title_en, title_ru, images, price, rating, district')
           .eq('is_active', true)
-          .eq('is_featured', true)
-          .limit(6);
-        return data || [];
-      },
-      ...CACHE_PROFILES.SEMI_STATIC,
-    });
-
-    // Prefetch featured tours (from experiences table)
-    await queryClient.prefetchQuery({
-      queryKey: ['tours', { featured: true }],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('experiences')
-          .select('id, title_en, title_ru, cover_image, price, rating, category')
-          .eq('is_active', true)
-          .eq('experience_type', 'tour')
           .eq('is_featured', true)
           .limit(6);
         return data || [];
@@ -162,8 +147,9 @@ export function usePrefetchRoute() {
           queryKey: ['restaurants', {}],
           queryFn: async () => {
             const { data } = await supabase
-              .from('restaurants')
+              .from('listings')
               .select('*')
+              .eq('vertical', 'restaurant')
               .eq('is_active', true)
               .order('rating', { ascending: false })
               .limit(20);
@@ -178,10 +164,10 @@ export function usePrefetchRoute() {
           queryKey: ['tours', {}],
           queryFn: async () => {
             const { data } = await supabase
-              .from('experiences')
+              .from('listings')
               .select('*')
+              .eq('vertical', 'experience')
               .eq('is_active', true)
-              .eq('experience_type', 'tour')
               .order('rating', { ascending: false })
               .limit(20);
             return data || [];

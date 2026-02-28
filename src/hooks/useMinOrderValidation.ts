@@ -70,10 +70,11 @@ export function useMinOrderValidation() {
         .select('id, name_en, name_ru, min_order_amount')
         .in('provider_id', providerIds);
 
-      // Check restaurants for min_order_amount
+      // Check restaurants for min_order_amount (from listings)
       const { data: restaurants } = await supabase
-        .from('restaurants')
-        .select('id, name_en, name_ru, min_order_amount')
+        .from('listings')
+        .select('id, name_en, name_ru, attributes')
+        .eq('vertical', 'restaurant')
         .in('provider_id', providerIds);
 
       const newMinOrders = new Map<string, ProviderMinOrder>();
@@ -90,11 +91,13 @@ export function useMinOrderValidation() {
       });
 
       restaurants?.forEach(restaurant => {
-        if (restaurant.min_order_amount && restaurant.min_order_amount > 0) {
+        const attrs = (restaurant.attributes || {}) as Record<string, any>;
+        const minOrder = attrs.min_order_amount as number | undefined;
+        if (minOrder && minOrder > 0) {
           newMinOrders.set(restaurant.id, {
             providerId: restaurant.id,
             providerName: language === 'ru' ? restaurant.name_ru : restaurant.name_en,
-            minOrderAmount: restaurant.min_order_amount,
+            minOrderAmount: minOrder,
             currency: 'THB',
           });
         }

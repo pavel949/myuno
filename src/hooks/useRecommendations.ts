@@ -36,15 +36,15 @@ const fetchRecommendations = async (userId?: string): Promise<RecommendedItem[]>
     viewedTypes = [...new Set((historyData || []).map(h => h.item_type))];
   }
 
-  // Parallel fetch all data sources
-  const [toursRes, propertiesRes, eventsRes, waterActivitiesRes] = await Promise.all([
+  // Fetch tours from listings table
+  const [listingsRes, propertiesRes, eventsRes, waterActivitiesRes] = await Promise.all([
     supabase
-      .from('experiences')
-      .select('id, title_en, title_ru, cover_image, rating, price')
+      .from('listings')
+      .select('id, vertical, name_en, name_ru, cover_image, rating, price')
       .eq('is_active', true)
-      .eq('experience_type', 'tour')
+      .in('vertical', ['experience', 'yacht', 'restaurant'])
       .order('rating', { ascending: false })
-      .limit(8),
+      .limit(12),
     supabase
       .from('properties')
       .select('id, title_en, title_ru, cover_image, rating, price, district')
@@ -65,18 +65,18 @@ const fetchRecommendations = async (userId?: string): Promise<RecommendedItem[]>
       .limit(8),
   ]);
 
-  // Transform tours
-  if (toursRes.data && toursRes.data.length > 0) {
-    toursRes.data.forEach(tour => {
+  // Transform listings
+  if (listingsRes.data && listingsRes.data.length > 0) {
+    listingsRes.data.forEach(listing => {
       items.push({
-        id: tour.id,
-        item_type: 'tour',
-        title_en: tour.title_en,
-        title_ru: tour.title_ru,
-        image: tour.cover_image || DEFAULT_IMAGE,
-        rating: tour.rating || 0,
-        price: tour.price || 0,
-        reason: 'popular'
+        id: listing.id,
+        item_type: listing.vertical || 'listing',
+        title_en: listing.name_en,
+        title_ru: listing.name_ru || listing.name_en,
+        image: listing.cover_image || DEFAULT_IMAGE,
+        rating: listing.rating || 0,
+        price: listing.price || 0,
+        reason: viewedTypes.includes(listing.vertical || '') ? 'history' : 'popular'
       });
     });
   }

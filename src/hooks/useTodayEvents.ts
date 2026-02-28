@@ -81,16 +81,17 @@ export function useSmartRecommendations() {
       // Parallel fetch all data sources for better performance
       const [toursResult, restaurantsResult, salonsResult] = await Promise.all([
         supabase
-          .from('experiences')
-          .select('id, title_en, title_ru, cover_image, rating, price, duration_minutes')
+          .from('listings')
+          .select('id, name_en, name_ru, cover_image, rating, price, attributes')
           .eq('is_active', true)
-          .eq('experience_type', 'tour')
+          .eq('vertical', 'experience')
           .order('rating', { ascending: false })
           .limit(2),
         supabase
-          .from('restaurants')
-          .select('id, name_en, name_ru, cover_image, rating, price_range')
+          .from('listings')
+          .select('id, name_en, name_ru, cover_image, rating, price')
           .eq('is_active', true)
+          .eq('vertical', 'restaurant')
           .order('rating', { ascending: false })
           .limit(1),
         supabase
@@ -103,16 +104,18 @@ export function useSmartRecommendations() {
 
       const recommendations: SmartRecommendation[] = [];
 
-      // Process tours
+      // Process tours (from listings)
       if (toursResult.data && toursResult.data.length > 0) {
         toursResult.data.forEach(tour => {
+          const attrs = (tour.attributes || {}) as Record<string, any>;
+          const durationMin = attrs.duration_minutes as number | undefined;
           recommendations.push({
             id: tour.id,
             type: 'tour',
-            title_en: tour.title_en,
-            title_ru: tour.title_ru,
-            subtitle_en: tour.duration_minutes ? `${Math.round(tour.duration_minutes / 60)}h adventure` : 'Popular tour',
-            subtitle_ru: tour.duration_minutes ? `${Math.round(tour.duration_minutes / 60)}ч приключения` : 'Популярный тур',
+            title_en: tour.name_en,
+            title_ru: tour.name_ru,
+            subtitle_en: durationMin ? `${Math.round(durationMin / 60)}h adventure` : 'Popular tour',
+            subtitle_ru: durationMin ? `${Math.round(durationMin / 60)}ч приключения` : 'Популярный тур',
             cover_image: tour.cover_image,
             icon: '🏝️',
             path: `/tours/${tour.id}`,

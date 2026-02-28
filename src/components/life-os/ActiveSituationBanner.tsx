@@ -2,7 +2,7 @@
  * ActiveSituationBanner — Calm, minimal context indicator
  * Shows active life situation across all pages
  */
-import React, { memo } from 'react';
+import React, { memo, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
@@ -11,7 +11,7 @@ import { X, ChevronRight } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
-export const ActiveSituationBanner = memo(function ActiveSituationBanner() {
+export const ActiveSituationBanner = memo(forwardRef<HTMLDivElement>(function ActiveSituationBanner(_props, ref) {
   const { activeCode, activeTitle, activeColor, clearLifeSituation } = useLifeSituationContext();
   const { data: situations } = useLifeSituations();
   const { language } = useLanguage();
@@ -28,7 +28,7 @@ export const ActiveSituationBanner = memo(function ActiveSituationBanner() {
   const Icon = activeSituation ? getIcon(activeSituation.icon) : LucideIcons.Compass;
 
   return (
-    <div className="flex items-center gap-2.5 px-4 py-2 text-sm border-b border-border/50 bg-muted/30">
+    <div ref={ref} className="flex items-center gap-2.5 px-4 py-2 text-sm border-b border-border/50 bg-muted/30">
       {/* Icon */}
       <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
 
@@ -59,6 +59,6 @@ export const ActiveSituationBanner = memo(function ActiveSituationBanner() {
       </button>
     </div>
   );
-});
+}));
 
 export default ActiveSituationBanner;
