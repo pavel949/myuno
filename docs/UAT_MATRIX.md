@@ -95,6 +95,76 @@
 | SF-003 | On storefront page | Direct URL to MC_Beta property | 404 or redirect | P0 |
 | SF-004 | Storefront booking | Complete booking | source_storefront_id and source_company_id set | P1 |
 
+### Module 8: UX / Design System
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| DS-001 | index.css loaded | Check all semantic CSS tokens defined | ≥15 tokens (--background, --primary, etc.) | P1 |
+| DS-003 | Themed components | Scan for hardcoded color classes | No text-white, bg-black, text-red-N etc. | P1 |
+| DS-004 | Theme config | Verify primary color format | HSL format "H S% L%" | P1 |
+
+### Module 9: UX / Responsive Layout
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| RL-001 | PageContainer rendered | Check max-width | ≤1536px | P1 |
+| RL-003 | Mobile viewport | Measure bottom nav height | ≤80px | P1 |
+| RL-005 | Layout loaded | Check sidebar visibility | Hidden on mobile, open on desktop | P1 |
+| RL-006 | Desktop viewport | Check FAB visibility | Hidden on desktop (md:hidden) | P1 |
+
+### Module 10: UX / Accessibility
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| A11Y-001 | Interactive elements rendered | Measure tap target sizes | All ≥36px | P0 |
+| A11Y-002 | Input/select rendered on iOS | Check computed font-size | ≥16px (prevents zoom) | P0 |
+| A11Y-003 | Widget error state | Verify retry action exists | Button with RefreshCw icon | P1 |
+| A11Y-005 | Legal modal open | Attempt ESC / outside click | Modal stays open, not dismissible | P0 |
+| A11Y-006 | Nav rendered | Check icon+label pairing | All nav items have both icon and text | P1 |
+
+### Module 11: UX / Internationalization (i18n)
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| I18N-001 | Nav items configured | Verify EN + RU labels | All 5 items have both languages | P1 |
+| I18N-003 | LoginRequiredModal | Check context messages | All 5 contexts (booking/order/purchase/save/default) have EN+RU | P1 |
+| I18N-004 | Seed properties | Check name fields | name_en and name_ru both populated | P1 |
+| I18N-005 | Long RU strings | Check overflow behavior | Word-break applied, no horizontal scroll | P2 |
+
+### Module 12: UX / Mobile Navigation
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| MN-001 | Mobile viewport | Count bottom nav tabs | Exactly 5 per role | P1 |
+| MN-002 | Tab selected | Check visual distinction | Active: text-primary + scale; Inactive: muted | P2 |
+| MN-003 | FAB opened | Check animation | Staggered 50ms per item, max 200ms total | P2 |
+| MN-005 | FAB toggled | Check rotation | 45° rotation on open | P2 |
+| MN-007 | Different roles | Compare nav configs | Each role has unique middle tab | P1 |
+
+### Module 13: UX / Loading & Error Resilience
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| LE-001 | Widget throws error | Check boundary | Error caught, fallback shown, other widgets unaffected | P0 |
+| LE-003 | Dashboard with 20+ widgets | Check animation timing | Max delay 450ms, not linear growth | P2 |
+| LE-005 | App-wide | Check toast system | Single system (sonner), no conflicts | P2 |
+
+### Module 14: UX / Guest Flow
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| GF-001 | Guest visits protected route | Check login required page | Shows 3 benefits + 4 action buttons | P1 |
+| GF-002 | Guest triggers login modal | Check navigation state | Return path preserved for redirect after auth | P1 |
+| GF-004 | Guest mid-booking | Trigger login modal | Cart/step state preserved in preserveState | P1 |
+
+### Module 15: UX / Financial Display
+
+| ID | Preconditions | Steps | Expected | Severity |
+|----|--------------|-------|----------|----------|
+| FD-001 | Amount displayed | Check formatting | Intl.NumberFormat with comma separators | P2 |
+| FD-002 | THB currency | Check display | ฿ symbol + formatted number | P2 |
+| FD-003 | Pricing breakdown | Count line items | 3 items: platform fee, MC commission, owner payout | P2 |
+
 ---
 
 ## Severity Definitions
