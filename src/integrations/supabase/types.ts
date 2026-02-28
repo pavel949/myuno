@@ -15678,12 +15678,16 @@ export type Database = {
       }
       property_operational_tasks: {
         Row: {
+          actual_cost: number | null
           assigned_to: string | null
           booking_id: string | null
           completed_at: string | null
           completed_by: string | null
+          cost_currency: string | null
           created_at: string | null
           description: string | null
+          estimated_cost: number | null
+          expense_created: boolean | null
           id: string
           notes: string | null
           photo_proof: string[] | null
@@ -15698,12 +15702,16 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          actual_cost?: number | null
           assigned_to?: string | null
           booking_id?: string | null
           completed_at?: string | null
           completed_by?: string | null
+          cost_currency?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_cost?: number | null
+          expense_created?: boolean | null
           id?: string
           notes?: string | null
           photo_proof?: string[] | null
@@ -15718,12 +15726,16 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          actual_cost?: number | null
           assigned_to?: string | null
           booking_id?: string | null
           completed_at?: string | null
           completed_by?: string | null
+          cost_currency?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_cost?: number | null
+          expense_created?: boolean | null
           id?: string
           notes?: string | null
           photo_proof?: string[] | null
@@ -24621,6 +24633,10 @@ export type Database = {
       }
       is_mc_admin: {
         Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mc_member_for_property: {
+        Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
       }
       is_mcc_admin: { Args: never; Returns: boolean }
