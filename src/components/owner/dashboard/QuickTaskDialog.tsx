@@ -36,7 +36,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
   const [propertyId, setPropertyId] = useState<string>('');
   const [assignedTo, setAssignedTo] = useState<string>('');
   const [priority, setPriority] = useState('medium');
-  const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
+  const [dueDate, setDueDate] = useState('');
 
   const handleSubmit = () => {
     if (!title.trim() || !user || !company?.company_id) return;
@@ -47,7 +47,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
         title: title.trim(),
         task_type: taskType,
         priority,
-        due_date: dueDate ? `${dueDate}T12:00:00` : undefined,
+        due_date: dueDate ? new Date(dueDate).toISOString() : undefined,
         property_id: propertyId || undefined,
         assigned_to: assignedTo || undefined,
         created_by: user.id,
@@ -60,7 +60,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
           setPropertyId('');
           setAssignedTo('');
           setPriority('medium');
-          setDueDate(new Date().toISOString().split('T')[0]);
+          setDueDate('');
           onOpenChange(false);
         },
       }
@@ -143,7 +143,7 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
 
           <div>
             <Label>{isRu ? 'Дедлайн' : 'Due date'}</Label>
-            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input type="datetime-local" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </div>
         </div>
 
