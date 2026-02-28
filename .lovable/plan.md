@@ -524,6 +524,6 @@ CRM & Sales:
 | 14 | AI CRM Assistant (Edge Fn + Panel) | ✅ Done |
 | 15 | Communication Templates (DB + Hooks + UI) | ✅ Done |
 | 16 | Navigation Updated (Email, Automations, Templates) | ✅ Done |
-| 17 | Duplicate Detection | ⬜ Next |
-| 18 | Web Forms | ⬜ Next |
-| 19 | Round Robin | ⬜ Next |
+| 17 | Duplicate Detection | ✅ Done |
+| 18 | Web Forms | ✅ Done |
+| 19 | Round Robin | ✅ Done |
