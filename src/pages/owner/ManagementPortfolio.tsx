@@ -110,8 +110,8 @@ function TermsMobileCard({
   onNavigate: (path: string) => void;
 }) {
   const title = isRu
-    ? (terms.property?.title_ru || terms.property?.title || '—')
-    : (terms.property?.title || terms.property?.title_ru || '—');
+    ? (terms.property?.title_ru || terms.property?.title_en || '—')
+    : (terms.property?.title_en || terms.property?.title_ru || '—');
   const isExpired = terms.valid_until && new Date(terms.valid_until) < new Date();
 
   return (
@@ -211,7 +211,7 @@ export default function ManagementPortfolio() {
   const filtered = React.useMemo(() => {
     if (!allTerms) return [];
     return allTerms.filter(t => {
-      const title = t.property?.title || t.property?.title_ru || '';
+      const title = t.property?.title_en || t.property?.title_ru || '';
       const matchSearch = !search || title.toLowerCase().includes(search.toLowerCase());
       const matchStatus = filterStatus === 'all' || t.status === filterStatus;
       return matchSearch && matchStatus;
@@ -373,8 +373,8 @@ export default function ManagementPortfolio() {
             <TableBody>
               {filtered.map(terms => {
                 const title = isRu
-                  ? (terms.property?.title_ru || terms.property?.title || '—')
-                  : (terms.property?.title || terms.property?.title_ru || '—');
+                  ? (terms.property?.title_ru || terms.property?.title_en || '—')
+                  : (terms.property?.title_en || terms.property?.title_ru || '—');
                 const isExpired =
                   terms.valid_until && new Date(terms.valid_until) < new Date();
                 return (

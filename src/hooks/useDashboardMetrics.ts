@@ -52,7 +52,7 @@ export function useDashboardMetrics() {
   const totalPropertyCount = selectedPropertyId ? 1 : allProperties.length;
 
   return useQuery({
-    queryKey: ['dashboard-metrics', user?.id, companyId, filteredPropertyIds.join(',')],
+    queryKey: ['dashboard-metrics', user?.id, companyId, [...filteredPropertyIds].sort().join(',')],
     queryFn: async () => {
       if (!user?.id || filteredPropertyIds.length === 0) {
         return { kpi: null, ops: null };
@@ -118,12 +118,11 @@ export function useDashboardMetrics() {
         // Inventory (low stock)
         supabase.from('property_inventory_items').select('id, quantity, min_quantity')
           .eq('owner_id', user.id).eq('is_active', true),
-        // Unread messages
-        filteredPropertyIds.length > 0
-          ? supabase.from('booking_notifications_log').select('id', { count: 'exact', head: true })
-              .is('read_at', null)
-              .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
-          : Promise.resolve({ count: 0 }),
+        // Unread messages — scoped to bookings for filtered properties
+        supabase.from('booking_notifications_log').select('id, booking_id, property_bookings!inner(property_id)', { count: 'exact', head: true })
+            .is('read_at', null)
+            .in('property_bookings.property_id', filteredPropertyIds)
+            .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
         // Pending invoices
         supabase.from('property_financials').select('id', { count: 'exact', head: true })
           .eq('owner_id', user.id).eq('transaction_type', 'expense').eq('status', 'pending'),

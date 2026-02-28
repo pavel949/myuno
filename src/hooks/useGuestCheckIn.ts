@@ -95,7 +95,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
         .from('property_bookings')
         .select(`
           *,
-          owner_properties (
+          properties (
             house_rules,
             house_rules_ru,
             check_in_time,

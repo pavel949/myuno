@@ -443,7 +443,7 @@ export default function GuestCheckIn() {
           <CardContent>
             <div className="bg-muted p-4 rounded-lg mb-4 text-sm space-y-2">
               {(() => {
-                const ownerProperty = propertyBooking?.owner_properties as { house_rules?: string; house_rules_ru?: string; check_in_time?: string; check_out_time?: string } | null;
+                const ownerProperty = (propertyBooking as any)?.properties as { house_rules?: string; house_rules_ru?: string; check_in_time?: string; check_out_time?: string } | null;
                 const houseRules = isRu ? ownerProperty?.house_rules_ru : ownerProperty?.house_rules;
                 const checkInTime = ownerProperty?.check_in_time || '14:00';
                 const checkOutTime = ownerProperty?.check_out_time || '12:00';
