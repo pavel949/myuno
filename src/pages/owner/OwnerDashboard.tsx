@@ -49,42 +49,100 @@ function SectionSkeleton() {
   );
 }
 
+function KPISkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-[88px] rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className="space-y-1">
+      <Skeleton className="h-6 w-36 mb-2" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 py-3">
+          <Skeleton className="w-[72px] h-[72px] rounded-xl flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FeedSkeleton() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-6 w-32" />
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-start gap-3">
+          <Skeleton className="w-9 h-9 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Skeleton map per widget type */
+const WIDGET_SKELETON: Partial<Record<DashboardWidgetKey, React.ReactNode>> = {
+  kpi: <KPISkeleton />,
+  properties: <ListSkeleton />,
+  active_stays: <ListSkeleton />,
+  your_day: <FeedSkeleton />,
+  morning_briefing: <FeedSkeleton />,
+  operations: <ListSkeleton />,
+  crm_tasks: <ListSkeleton />,
+  active_deals: <ListSkeleton />,
+};
+
 /** Maps widget keys to their React components */
 function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; role?: import('@/lib/businessRoles').BusinessRole }) {
+  const skeleton = WIDGET_SKELETON[widgetKey] || <SectionSkeleton />;
+
   switch (widgetKey) {
     case 'your_day':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <YourDayFeed />
         </Suspense>
       );
     case 'kpi':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <BusinessKPIWidget role={role} />
         </Suspense>
       );
     case 'today_briefing':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <TodayBriefingWidget />
         </Suspense>
       );
     case 'revenue_insights':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <RevenueInsightsWidget />
         </Suspense>
       );
     case 'channel_sync':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <ChannelSyncWidget />
         </Suspense>
       );
     case 'unified_inbox':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <UnifiedInboxWidget />
         </Suspense>
       );
@@ -92,14 +150,14 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return <OwnershipInviteBanner />;
     case 'today_actions':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <TodayActionsWidget />
         </Suspense>
       );
     case 'active_stays':
       return (
         <div data-tour="active-stays">
-          <Suspense fallback={<SectionSkeleton />}>
+          <Suspense fallback={skeleton}>
             <ActiveStaysWidget />
           </Suspense>
         </div>
@@ -107,66 +165,66 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
     case 'properties':
       return (
         <div data-tour="properties">
-          <Suspense fallback={<SectionSkeleton />}>
+          <Suspense fallback={skeleton}>
             <OwnerPropertiesList />
           </Suspense>
         </div>
       );
     case 'property_status':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <PropertyStatusSnapshot />
         </Suspense>
       );
     case 'morning_briefing':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <MorningBriefing />
         </Suspense>
       );
     case 'cleaning_dashboard':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <CleaningDashboard />
         </Suspense>
       );
     case 'operations':
       return (
         <div data-tour="operations">
-          <Suspense fallback={<SectionSkeleton />}>
+          <Suspense fallback={skeleton}>
             <OwnerOperationsFlat />
           </Suspense>
         </div>
       );
     case 'maintenance_health':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <MaintenanceHealthWidget />
         </Suspense>
       );
     case 'crm_tasks':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <CrmTasksWidget />
         </Suspense>
       );
     case 'upcoming_payments':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <UpcomingPaymentsWidget />
         </Suspense>
       );
     case 'active_deals':
       return (
         <div data-tour="deals">
-          <Suspense fallback={<SectionSkeleton />}>
+          <Suspense fallback={skeleton}>
             <ActiveDealsWidget />
           </Suspense>
         </div>
       );
     case 'myuno_services':
       return (
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={skeleton}>
           <OwnerServiceRecommendations />
         </Suspense>
       );
@@ -270,7 +328,7 @@ export default function OwnerDashboard() {
                 key={widgetKey}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
+                transition={{ duration: 0.3, delay: Math.min(0.15 + idx * 0.05, 0.45) }}
                 className={isFullWidth ? 'md:col-span-2' : ''}
               >
                 <WidgetErrorBoundary widgetName={widgetKey}>
