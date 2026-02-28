@@ -69,7 +69,7 @@ export function MaintenanceHealthWidget() {
                     {isRu ? (s.title_ru || s.title) : s.title}
                   </span>
                   <span className="text-muted-foreground shrink-0">
-                    {days}d
+                    {days} {isRu ? 'дн.' : 'd'}
                   </span>
                 </div>
               );

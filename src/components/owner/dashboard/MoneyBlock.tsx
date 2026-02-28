@@ -102,7 +102,7 @@ export function MoneyBlock() {
               {depositStats ? formatCurrency(depositStats.totalHeld) : `${currencyInfo.symbol}0`}
             </p>
             {depositStats && depositStats.pendingReturn > 0 && (
-              <p className="text-[10px] text-warning">{depositStats.pendingReturn} pending</p>
+              <p className="text-[10px] text-warning">{depositStats.pendingReturn} {isRu ? 'к возврату' : 'pending'}</p>
             )}
           </div>
         </div>
