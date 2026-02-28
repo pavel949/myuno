@@ -79,7 +79,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               </span>
               <span className={cn(
                 "block text-[11px] leading-tight mt-0.5",
-                isActive ? "text-gray-500" : "text-white/60"
+                isActive ? "text-gray-500" : "text-white/80"
               )}>
                 {isRu ? info.descRu : info.descEn}
               </span>
@@ -209,13 +209,13 @@ export const HeroBlock = memo(function HeroBlock() {
       
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-[15px] text-white/60 font-medium">
+          <p className="text-[15px] text-white/85 font-medium">
             {isRu ? 'Ваш дом на острове' : 'Your home away from home'}
           </p>
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight font-display">
             {greeting}
           </h1>
-          <div className="flex items-center gap-5 text-white/60 text-[15px] pt-1">
+          <div className="flex items-center gap-5 text-white/80 text-[15px] pt-1">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-white/80" />
               <span className="font-medium text-white/90">{isRu ? 'Пхукет' : 'Phuket'}</span>
