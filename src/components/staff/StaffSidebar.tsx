@@ -83,6 +83,10 @@ export function StaffSidebar() {
                     isActive={isActive(item.path)}
                     onClick={() => navigate(item.path)}
                     tooltip={isRu ? item.titleRu : item.title}
+                    className={cn(
+                      "transition-all duration-200",
+                      isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                    )}
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{isRu ? item.titleRu : item.title}</span>
