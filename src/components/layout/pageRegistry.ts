@@ -406,6 +406,9 @@ export const CrmDashboardPage = lazy(() => import('@/pages/owner/CrmDashboardPag
 export const CrmSequencesPage = lazy(() => import('@/pages/owner/CrmSequencesPage'));
 export const CrmQuotesPage = lazy(() => import('@/pages/owner/CrmQuotesPage'));
 export const CrmMeetingsPage = lazy(() => import('@/pages/owner/CrmMeetingsPage'));
+export const CrmEmailsPage = lazy(() => import('@/pages/owner/CrmEmailsPage'));
+export const CrmWorkflowsPage = lazy(() => import('@/pages/owner/CrmWorkflowsPage'));
+export const CrmTemplatesPage = lazy(() => import('@/pages/owner/CrmTemplatesPage'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));

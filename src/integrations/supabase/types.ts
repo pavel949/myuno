@@ -3415,6 +3415,53 @@ export type Database = {
           },
         ]
       }
+      crm_comm_templates: {
+        Row: {
+          body: string
+          channel: string
+          company_id: string
+          created_at: string | null
+          created_by: string
+          id: string
+          language: string | null
+          merge_tags: string[] | null
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          body: string
+          channel: string
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          language?: string | null
+          merge_tags?: string[] | null
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          body?: string
+          channel?: string
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          language?: string | null
+          merge_tags?: string[] | null
+          name?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contact_notes: {
         Row: {
           contact_id: string
@@ -3846,6 +3893,76 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_emails: {
+        Row: {
+          body_html: string | null
+          company_id: string
+          contact_id: string
+          created_at: string | null
+          deal_id: string | null
+          direction: string
+          id: string
+          opened_at: string | null
+          sent_at: string | null
+          sent_by: string | null
+          status: string | null
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          body_html?: string | null
+          company_id: string
+          contact_id: string
+          created_at?: string | null
+          deal_id?: string | null
+          direction?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string | null
+          subject: string
+          to_email: string
+        }
+        Update: {
+          body_html?: string | null
+          company_id?: string
+          contact_id?: string
+          created_at?: string | null
+          deal_id?: string | null
+          direction?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string | null
+          subject?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_emails_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_emails_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
             referencedColumns: ["id"]
           },
         ]
@@ -4422,6 +4539,82 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_workflow_actions: {
+        Row: {
+          action_config: Json
+          action_order: number
+          action_type: string
+          delay_minutes: number | null
+          id: string
+          workflow_id: string
+        }
+        Insert: {
+          action_config?: Json
+          action_order: number
+          action_type: string
+          delay_minutes?: number | null
+          id?: string
+          workflow_id: string
+        }
+        Update: {
+          action_config?: Json
+          action_order?: number
+          action_type?: string
+          delay_minutes?: number | null
+          id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_workflow_actions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_workflows: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_config: Json | null
+          trigger_type: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_config?: Json | null
+          trigger_type: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_config?: Json | null
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
