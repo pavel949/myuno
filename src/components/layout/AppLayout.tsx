@@ -41,7 +41,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const finalShowFooter = isDesktop ? true : showFooter;
 
     return (
-      <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip", className)}>
+      <div ref={ref} className={cn("min-h-screen bg-background flex flex-col max-w-full min-w-0 overflow-x-clip overflow-y-auto", className)}>
         {finalShowHeader && <AppHeader title={title} />}
         <EmailVerificationBanner />
         {showSituationBanner && <ActiveSituationBanner />}

@@ -200,6 +200,8 @@ body {
 @layer base {
   * {
     @apply border-border;
+    /* Prevent any element from overflowing horizontally on mobile */
+    min-width: 0;
   }
 
   body {
@@ -208,6 +210,9 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Global word-break for Russian long words */
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   @media (min-width: 1024px) {
@@ -222,18 +227,22 @@ body {
   /* Typography Scale - optimized for Russian text (longer words) */
   h1 {
     @apply font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight;
+    overflow-wrap: break-word;
   }
   
   h2 {
     @apply font-display text-lg sm:text-xl md:text-2xl font-semibold tracking-tight leading-snug;
+    overflow-wrap: break-word;
   }
   
   h3 {
     @apply font-display text-base sm:text-lg font-semibold tracking-tight leading-snug;
+    overflow-wrap: break-word;
   }
   
   h4, h5, h6 {
     @apply font-display text-sm sm:text-base font-semibold tracking-tight leading-snug;
+    overflow-wrap: break-word;
   }
 
   p {
@@ -242,6 +251,24 @@ body {
 
   small {
     @apply text-xs leading-normal;
+  }
+
+  /* ============ Mobile normalization ============ */
+  /* Ensure text in flex/grid children never overflows */
+  @media (max-width: 767px) {
+    .flex > *, .grid > * {
+      min-width: 0;
+    }
+    
+    /* Slightly larger tap targets on mobile */
+    button, a, [role="button"] {
+      min-height: 36px;
+    }
+    
+    /* Ensure inputs are readable on iOS (prevents zoom) */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
