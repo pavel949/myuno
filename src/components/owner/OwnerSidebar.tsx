@@ -5,6 +5,7 @@ import {
   Building2,
   CalendarDays,
   Crown,
+  CreditCard,
   DollarSign,
   Users,
   LogOut,
@@ -131,6 +132,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Staff & Access', titleRu: 'Сотрудники', path: '/owner/staff', icon: Users },
+      { title: 'Subscription', titleRu: 'Подписка', path: '/owner/subscription', icon: CreditCard },
       { title: 'Owner Guide', titleRu: 'Руководство', path: '/owner/guide', icon: BookOpen },
     ],
   },
