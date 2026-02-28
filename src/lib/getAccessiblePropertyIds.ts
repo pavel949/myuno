@@ -31,12 +31,17 @@ export async function getAccessiblePropertyIds(
 
   // Fire all queries in parallel
   const promises = [
-    // 1. Owned properties
+    // 1a. Owned properties (marketplace table)
     supabase
       .from('properties')
       .select('id')
       .eq('owner_id', userId),
-    // 2. Delegated properties
+    // 1b. Owned properties (PMS table — may have different IDs)
+    supabase
+      .from('owner_properties')
+      .select('id')
+      .eq('owner_id', userId),
+    // 2. Delegated properties (FK → owner_properties)
     supabase
       .from('property_delegates')
       .select('property_id')
@@ -44,7 +49,7 @@ export async function getAccessiblePropertyIds(
       .eq('status', 'active'),
   ] as const;
 
-  // 3. Company properties (only if user has an active company)
+  // 3a. Company properties from properties table
   const companyPromise = activeCompanyId
     ? supabase
         .from('properties')
@@ -52,17 +57,32 @@ export async function getAccessiblePropertyIds(
         .eq('management_company_id', activeCompanyId)
     : null;
 
-  const [ownedRes, delegatedRes] = await Promise.all(promises);
-  const companyRes = companyPromise ? await companyPromise : null;
+  // 3b. Company properties from owner_properties table
+  const companyPromise2 = activeCompanyId
+    ? supabase
+        .from('owner_properties')
+        .select('id')
+        .eq('management_company_id', activeCompanyId)
+    : null;
 
-  const ownedIds = (ownedRes.data || []).map(p => p.id);
+  const [ownedRes, ownedPmsRes, delegatedRes] = await Promise.all(promises);
+  const companyRes = companyPromise ? await companyPromise : null;
+  const companyRes2 = companyPromise2 ? await companyPromise2 : null;
+
+  const ownedIds = [
+    ...(ownedRes.data || []).map(p => p.id),
+    ...(ownedPmsRes.data || []).map((p: any) => p.id as string),
+  ];
   const delegatedIds = (delegatedRes.data || []).map((d: any) => d.property_id as string);
-  const companyIds = companyRes ? (companyRes.data || []).map(p => p.id) : [];
+  const companyIds = [
+    ...(companyRes ? (companyRes.data || []).map(p => p.id) : []),
+    ...(companyRes2 ? (companyRes2.data || []).map((p: any) => p.id as string) : []),
+  ];
 
   // Deduplicate
   const allIds = [...new Set([...ownedIds, ...delegatedIds, ...companyIds])];
 
-  return { ownedIds, delegatedIds, companyIds, allIds };
+  return { ownedIds: [...new Set(ownedIds)], delegatedIds, companyIds: [...new Set(companyIds)], allIds };
 }
 
 /**

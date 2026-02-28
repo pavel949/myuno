@@ -67,15 +67,33 @@ export function useOwnerProperties() {
     queryKey: ['owner-properties', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      // Query unified properties table filtering by owner_id
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
+      // Query both tables in parallel to get all owned properties
+      const [marketplaceRes, pmsRes] = await Promise.all([
+        supabase
+          .from('properties')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('owner_properties')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false }),
+      ]);
       
-      if (error) throw error;
-      return data as OwnerProperty[];
+      if (marketplaceRes.error) throw marketplaceRes.error;
+
+      // Merge: marketplace first, then PMS-only records
+      const seenIds = new Set((marketplaceRes.data || []).map(p => p.id));
+      const pmsOnly = (pmsRes.data || [])
+        .filter((p: any) => !seenIds.has(p.id))
+        .map((p: any) => ({
+          ...p,
+          title_en: p.title,
+          // Map owner_properties fields to properties shape
+        }));
+      
+      return [...(marketplaceRes.data || []), ...pmsOnly] as OwnerProperty[];
     },
     enabled: !!user,
     staleTime: 30000,
