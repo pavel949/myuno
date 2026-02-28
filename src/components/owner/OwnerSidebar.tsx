@@ -35,6 +35,8 @@ import {
   Search,
   Globe,
   Shuffle,
+  ArrowLeftRight,
+  Target,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -125,6 +127,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Tasks', titleRu: 'Задачи', path: '/owner/tasks', icon: ClipboardList, badgeKey: 'tasks' },
+      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
       { title: 'Channel Manager', titleRu: 'Каналы', path: '/owner/channels', icon: Radio },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
       { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Truck },
@@ -137,10 +140,11 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
-      { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
-      { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
-      { title: 'Analytics & Reports', titleRu: 'Аналитика', path: '/owner/analytics', icon: BarChart3 },
+      { title: 'Overview', titleRu: 'Обзор', path: '/owner/finance', icon: DollarSign },
+      { title: 'Transactions', titleRu: 'Транзакции', path: '/owner/financials', icon: ArrowLeftRight },
+      { title: 'Reports', titleRu: 'Отчёты', path: '/owner/reports', icon: BarChart3 },
+      { title: 'Budget', titleRu: 'Бюджет', path: '/owner/budget', icon: Target },
+      { title: 'Invoices', titleRu: 'Инвойсы', path: '/owner/invoices', icon: Receipt },
     ],
   },
   {
@@ -179,9 +183,11 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   '/owner/inventory': 'properties',
   '/owner/vendors': 'properties',
   '/owner/rates': 'finance',
+  '/owner/finance': 'finance',
   '/owner/financials': 'finance',
   '/owner/invoices': 'finance',
-  '/owner/analytics': 'reports',
+  '/owner/reports': 'reports',
+  '/owner/budget': 'finance',
   '/owner/staff': 'staff',
 };
 

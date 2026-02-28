@@ -55,6 +55,7 @@ const MENU_SECTIONS: MenuSection[] = [
     titleRu: 'Операции',
     items: [
       { path: '/owner/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи' },
+      { path: '/owner/rates', icon: Tag, labelEn: 'Rate Seasons', labelRu: 'Тарифы' },
       { path: '/owner/channels', icon: Radio, labelEn: 'Channel Manager', labelRu: 'Каналы' },
       { path: '/owner/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь' },
       { path: '/owner/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики' },
@@ -66,10 +67,11 @@ const MENU_SECTIONS: MenuSection[] = [
     titleEn: 'Finance',
     titleRu: 'Финансы',
     items: [
-      { path: '/owner/rates', icon: Tag, labelEn: 'Rate Seasons', labelRu: 'Тарифы' },
-      { path: '/owner/financials', icon: DollarSign, labelEn: 'Income & Expenses', labelRu: 'Доходы и расходы' },
-      { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Счета' },
-      { path: '/owner/analytics', icon: BarChart3, labelEn: 'Analytics & Reports', labelRu: 'Аналитика и отчёты' },
+      { path: '/owner/finance', icon: DollarSign, labelEn: 'Finance Overview', labelRu: 'Обзор финансов' },
+      { path: '/owner/financials', icon: Receipt, labelEn: 'Transactions', labelRu: 'Транзакции' },
+      { path: '/owner/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты' },
+      { path: '/owner/budget', icon: Tag, labelEn: 'Budget', labelRu: 'Бюджет' },
+      { path: '/owner/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы' },
     ],
   },
   {
