@@ -153,14 +153,16 @@ export function useCreateOwnerProperty() {
         }
       }
 
-      const { _companyId, ...restData } = data as any;
+      const { _companyId, title, title_ru, description, description_ru, ...restData } = data as any;
       
       const insertData = { 
         ...restData, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
-        title_en: data.title || data.address || 'New Property',
-        title_ru: data.title_ru || data.title || 'Новый объект',
+        title_en: title || data.address || 'New Property',
+        title_ru: title_ru || title || 'Новый объект',
+        description_en: description || (data as any).description_en || '',
+        description_ru: description_ru || '',
         listing_type: 'rent',
         listing_modes: data.listing_modes || ['rent'],
         ...(managementCompanyId ? { management_company_id: managementCompanyId } : {}),
