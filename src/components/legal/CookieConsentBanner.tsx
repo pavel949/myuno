@@ -41,8 +41,22 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
   useEffect(() => {
     const existing = getStoredConsent();
     if (!existing) {
-      // Show banner after a short delay (not on first render)
-      const timer = setTimeout(() => setVisible(true), 1500);
+      // Show banner after a delay; also wait for any blocking modals (e.g. legal compliance) to close
+      const timer = setTimeout(() => {
+        // Don't show if a blocking dialog overlay is present
+        const hasBlockingModal = document.querySelector('[data-radix-dialog-overlay]');
+        if (hasBlockingModal) {
+          // Re-check periodically until modal is closed
+          const interval = setInterval(() => {
+            if (!document.querySelector('[data-radix-dialog-overlay]')) {
+              setVisible(true);
+              clearInterval(interval);
+            }
+          }, 1000);
+          return;
+        }
+        setVisible(true);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -74,7 +88,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-[9999] p-4 pb-safe"
+        className="fixed bottom-0 left-0 right-0 z-40 p-4 pb-safe"
       >
         <div className="max-w-lg mx-auto bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
