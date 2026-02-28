@@ -16661,6 +16661,103 @@ export type Database = {
           },
         ]
       }
+      property_payout_rules: {
+        Row: {
+          commission_type: string
+          commission_value: number
+          created_at: string
+          deduct_before_owner: boolean
+          id: string
+          is_active: boolean
+          management_terms_id: string | null
+          min_payout: number | null
+          notes: string | null
+          payout_frequency: string
+          property_id: string
+          recipient_name: string | null
+          recipient_staff_id: string | null
+          recipient_type: string
+          updated_at: string
+        }
+        Insert: {
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          deduct_before_owner?: boolean
+          id?: string
+          is_active?: boolean
+          management_terms_id?: string | null
+          min_payout?: number | null
+          notes?: string | null
+          payout_frequency?: string
+          property_id: string
+          recipient_name?: string | null
+          recipient_staff_id?: string | null
+          recipient_type?: string
+          updated_at?: string
+        }
+        Update: {
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          deduct_before_owner?: boolean
+          id?: string
+          is_active?: boolean
+          management_terms_id?: string | null
+          min_payout?: number | null
+          notes?: string | null
+          payout_frequency?: string
+          property_id?: string
+          recipient_name?: string | null
+          recipient_staff_id?: string | null
+          recipient_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_payout_rules_management_terms_id_fkey"
+            columns: ["management_terms_id"]
+            isOneToOne: false
+            referencedRelation: "property_management_terms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_payout_rules_recipient_staff_id_fkey"
+            columns: ["recipient_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_projects: {
         Row: {
           address: string | null
