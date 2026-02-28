@@ -72,12 +72,14 @@ export function QuickActionsBar() {
             key={action.id}
             variant="ghost"
             size="sm"
-            className="flex-shrink-0 h-auto py-2 px-3 rounded-xl gap-2 bg-primary/8 text-primary hover:bg-primary/15"
+            className="flex-shrink-0 h-auto py-2 px-3 rounded-xl gap-2.5 bg-primary/8 text-primary hover:bg-primary/15 ring-1 ring-primary/10 shadow-sm"
             onClick={() => navigate(action.path)}
             data-tour={action.id === 'property' ? 'add-property' : undefined}
           >
-            <Icon className="h-4 w-4" />
-            <span className="text-xs font-medium">
+            <div className="w-7 h-7 rounded-lg bg-primary/12 flex items-center justify-center flex-shrink-0">
+              <Icon className="h-4 w-4" strokeWidth={2.2} />
+            </div>
+            <span className="text-xs font-semibold whitespace-nowrap">
               {isRu ? action.labelRu : action.labelEn}
             </span>
           </Button>

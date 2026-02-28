@@ -19,7 +19,11 @@ interface MiniAppQuickActionsProps {
 
 const renderActionIcon = (icon: string | LucideIcon) => {
   const Resolved = resolveIcon(icon);
-  return <Resolved className="w-6 h-6 text-icon-dark" />;
+  return (
+    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+      <Resolved className="w-5 h-5 text-primary" strokeWidth={2.2} />
+    </div>
+  );
 };
 
 export function MiniAppQuickActions({
@@ -40,9 +44,9 @@ export function MiniAppQuickActions({
             triggerRipple(e);
             action.onClick?.();
           }}
-          className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
+          className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95 shadow-sm"
         >
-          <div className="mb-1">{renderActionIcon(action.icon)}</div>
+          <div className="mb-1.5">{renderActionIcon(action.icon)}</div>
           <span className="text-xs font-medium text-center truncate w-full">
             {action.label}
           </span>
