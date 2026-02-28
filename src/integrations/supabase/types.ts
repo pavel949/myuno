@@ -255,6 +255,13 @@ export type Database = {
             foreignKeyName: "agent_deals_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -1197,6 +1204,13 @@ export type Database = {
             foreignKeyName: "booking_message_rules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_message_rules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -2065,6 +2079,13 @@ export type Database = {
             foreignKeyName: "calendar_sync_logs_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_sync_logs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -2627,6 +2648,13 @@ export type Database = {
             foreignKeyName: "chat_message_flags_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_message_flags_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -2726,6 +2754,13 @@ export type Database = {
           template_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "checklist_completions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "checklist_completions_property_id_fkey"
             columns: ["property_id"]
@@ -3615,6 +3650,13 @@ export type Database = {
             foreignKeyName: "crm_documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -3712,6 +3754,13 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -3898,6 +3947,13 @@ export type Database = {
             columns: ["inventory_item_id"]
             isOneToOne: false
             referencedRelation: "property_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -4356,6 +4412,13 @@ export type Database = {
           vault_file_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "document_reminders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "document_reminders_property_id_fkey"
             columns: ["property_id"]
@@ -5765,6 +5828,13 @@ export type Database = {
             foreignKeyName: "inventory_inspections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -6180,6 +6250,13 @@ export type Database = {
             foreignKeyName: "juristic_contacts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -6323,6 +6400,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -9616,6 +9700,13 @@ export type Database = {
             foreignKeyName: "meter_readings_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meter_readings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -10417,6 +10508,13 @@ export type Database = {
             foreignKeyName: "ota_listing_connections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ota_listing_connections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -10690,6 +10788,13 @@ export type Database = {
             foreignKeyName: "owner_invoices_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -10744,6 +10849,13 @@ export type Database = {
           type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "owner_notifications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "owner_notifications_property_id_fkey"
             columns: ["property_id"]
@@ -10821,530 +10933,6 @@ export type Database = {
         }
         Relationships: []
       }
-      owner_properties: {
-        Row: {
-          accessibility_features: string[] | null
-          acquisition_costs: number | null
-          actual_owner_email: string | null
-          actual_owner_name: string | null
-          actual_owner_phone: string | null
-          address: string
-          approval_status: string | null
-          approved_at: string | null
-          approved_by: string | null
-          area_sqm: number | null
-          auto_report_enabled: boolean | null
-          balance_due_days: number | null
-          bathrooms: number | null
-          bedrooms: number | null
-          cancellation_policy: string | null
-          chat_delegated_to_platform: boolean | null
-          check_in_instructions: string | null
-          check_in_instructions_ru: string | null
-          check_in_time: string | null
-          check_out_time: string | null
-          children_friendly: boolean | null
-          cleaning_frequency: string | null
-          cleaning_included: boolean | null
-          commercial_terms_redacted: boolean | null
-          complex_id: string | null
-          cover_image: string | null
-          created_at: string
-          created_on_behalf: boolean | null
-          deposit_amount: number | null
-          deposit_currency: string | null
-          deposit_type: string | null
-          description: string | null
-          description_ru: string | null
-          district: string | null
-          early_checkin_price: number | null
-          electricity_included: boolean | null
-          electricity_metering: string | null
-          electricity_notes: string | null
-          electricity_notes_ru: string | null
-          electricity_provider: string | null
-          electricity_unit_price: number | null
-          emergency_contact_name: string | null
-          emergency_contact_phone: string | null
-          equipment: string[] | null
-          extra_cleaning_price: number | null
-          extra_guest_price: number | null
-          extra_guest_threshold: number | null
-          extra_services: Json | null
-          floor: number | null
-          furnishing_level: string | null
-          garden_type: string | null
-          has_crib: boolean | null
-          has_elevator: boolean | null
-          has_high_chair: boolean | null
-          highlights: string[] | null
-          host_languages: string[] | null
-          house_rules: string | null
-          house_rules_ru: string | null
-          ical_token: string | null
-          ical_token_expires_at: string | null
-          ical_token_refreshed_at: string | null
-          id: string
-          images: string[] | null
-          included_services: Json | null
-          instant_booking: boolean | null
-          instant_booking_enabled_at: string | null
-          internal_name: string | null
-          internet_provider: string | null
-          internet_speed: string | null
-          is_for_sale: boolean | null
-          is_rented: boolean | null
-          key_handover: string | null
-          lat: number | null
-          late_checkout_penalty: number | null
-          late_checkout_price: number | null
-          linen_change_frequency: string | null
-          linen_change_price: number | null
-          listing_modes: string[] | null
-          lng: number | null
-          managed_by: string | null
-          managed_by_org_id: string | null
-          management_company_id: string | null
-          management_document_name: string | null
-          management_document_url: string | null
-          management_type: string | null
-          manager_line_id: string | null
-          manager_name: string | null
-          manager_phone: string | null
-          marketplace_property_id: string | null
-          max_guests: number | null
-          max_party_guests: number | null
-          min_stay_nights: number | null
-          monthly_discount: number | null
-          nearby_places: Json | null
-          notes: string | null
-          owner_id: string
-          ownership_form: string | null
-          ownership_transferred_at: string | null
-          ownership_type: string | null
-          ownership_verification_notes: string | null
-          ownership_verification_status: string | null
-          ownership_verified_at: string | null
-          ownership_verified_by: string | null
-          parking_included: boolean | null
-          parking_notes: string | null
-          parking_spaces: number | null
-          parking_type: string | null
-          parties_allowed: boolean | null
-          payment_model: string | null
-          pet_deposit: number | null
-          pet_notes: string | null
-          pet_notes_ru: string | null
-          pets_allowed: boolean | null
-          plot_size_sqm: number | null
-          pm_company_id: string | null
-          pool_type: string | null
-          prepay_percent: number | null
-          price_per_night: number | null
-          project_id: string | null
-          property_type: string
-          purchase_date: string | null
-          purchase_price: number | null
-          quiet_hours_end: string | null
-          quiet_hours_start: string | null
-          rejection_reason: string | null
-          renovation_costs: number | null
-          rental_platform: string | null
-          report_frequency: string | null
-          report_recipients: string[] | null
-          rooms: Json | null
-          safety_features: string[] | null
-          sale_currency: string | null
-          sale_price: number | null
-          seasonal_pricing: Json | null
-          security_deposit_collection: string | null
-          security_deposit_required: boolean | null
-          smoking_penalty: number | null
-          status: string | null
-          title: string
-          title_ru: string | null
-          total_floors: number | null
-          transfer_airport_price: number | null
-          transfer_available: boolean | null
-          transfer_notes: string | null
-          transfer_notes_ru: string | null
-          unit_number: string | null
-          updated_at: string
-          verified_at: string | null
-          verified_by: string | null
-          view_type: string | null
-          water_included: boolean | null
-          water_notes: string | null
-          water_notes_ru: string | null
-          water_unit_price: number | null
-          weekly_discount: number | null
-        }
-        Insert: {
-          accessibility_features?: string[] | null
-          acquisition_costs?: number | null
-          actual_owner_email?: string | null
-          actual_owner_name?: string | null
-          actual_owner_phone?: string | null
-          address: string
-          approval_status?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          area_sqm?: number | null
-          auto_report_enabled?: boolean | null
-          balance_due_days?: number | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          cancellation_policy?: string | null
-          chat_delegated_to_platform?: boolean | null
-          check_in_instructions?: string | null
-          check_in_instructions_ru?: string | null
-          check_in_time?: string | null
-          check_out_time?: string | null
-          children_friendly?: boolean | null
-          cleaning_frequency?: string | null
-          cleaning_included?: boolean | null
-          commercial_terms_redacted?: boolean | null
-          complex_id?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_on_behalf?: boolean | null
-          deposit_amount?: number | null
-          deposit_currency?: string | null
-          deposit_type?: string | null
-          description?: string | null
-          description_ru?: string | null
-          district?: string | null
-          early_checkin_price?: number | null
-          electricity_included?: boolean | null
-          electricity_metering?: string | null
-          electricity_notes?: string | null
-          electricity_notes_ru?: string | null
-          electricity_provider?: string | null
-          electricity_unit_price?: number | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          equipment?: string[] | null
-          extra_cleaning_price?: number | null
-          extra_guest_price?: number | null
-          extra_guest_threshold?: number | null
-          extra_services?: Json | null
-          floor?: number | null
-          furnishing_level?: string | null
-          garden_type?: string | null
-          has_crib?: boolean | null
-          has_elevator?: boolean | null
-          has_high_chair?: boolean | null
-          highlights?: string[] | null
-          host_languages?: string[] | null
-          house_rules?: string | null
-          house_rules_ru?: string | null
-          ical_token?: string | null
-          ical_token_expires_at?: string | null
-          ical_token_refreshed_at?: string | null
-          id?: string
-          images?: string[] | null
-          included_services?: Json | null
-          instant_booking?: boolean | null
-          instant_booking_enabled_at?: string | null
-          internal_name?: string | null
-          internet_provider?: string | null
-          internet_speed?: string | null
-          is_for_sale?: boolean | null
-          is_rented?: boolean | null
-          key_handover?: string | null
-          lat?: number | null
-          late_checkout_penalty?: number | null
-          late_checkout_price?: number | null
-          linen_change_frequency?: string | null
-          linen_change_price?: number | null
-          listing_modes?: string[] | null
-          lng?: number | null
-          managed_by?: string | null
-          managed_by_org_id?: string | null
-          management_company_id?: string | null
-          management_document_name?: string | null
-          management_document_url?: string | null
-          management_type?: string | null
-          manager_line_id?: string | null
-          manager_name?: string | null
-          manager_phone?: string | null
-          marketplace_property_id?: string | null
-          max_guests?: number | null
-          max_party_guests?: number | null
-          min_stay_nights?: number | null
-          monthly_discount?: number | null
-          nearby_places?: Json | null
-          notes?: string | null
-          owner_id: string
-          ownership_form?: string | null
-          ownership_transferred_at?: string | null
-          ownership_type?: string | null
-          ownership_verification_notes?: string | null
-          ownership_verification_status?: string | null
-          ownership_verified_at?: string | null
-          ownership_verified_by?: string | null
-          parking_included?: boolean | null
-          parking_notes?: string | null
-          parking_spaces?: number | null
-          parking_type?: string | null
-          parties_allowed?: boolean | null
-          payment_model?: string | null
-          pet_deposit?: number | null
-          pet_notes?: string | null
-          pet_notes_ru?: string | null
-          pets_allowed?: boolean | null
-          plot_size_sqm?: number | null
-          pm_company_id?: string | null
-          pool_type?: string | null
-          prepay_percent?: number | null
-          price_per_night?: number | null
-          project_id?: string | null
-          property_type?: string
-          purchase_date?: string | null
-          purchase_price?: number | null
-          quiet_hours_end?: string | null
-          quiet_hours_start?: string | null
-          rejection_reason?: string | null
-          renovation_costs?: number | null
-          rental_platform?: string | null
-          report_frequency?: string | null
-          report_recipients?: string[] | null
-          rooms?: Json | null
-          safety_features?: string[] | null
-          sale_currency?: string | null
-          sale_price?: number | null
-          seasonal_pricing?: Json | null
-          security_deposit_collection?: string | null
-          security_deposit_required?: boolean | null
-          smoking_penalty?: number | null
-          status?: string | null
-          title: string
-          title_ru?: string | null
-          total_floors?: number | null
-          transfer_airport_price?: number | null
-          transfer_available?: boolean | null
-          transfer_notes?: string | null
-          transfer_notes_ru?: string | null
-          unit_number?: string | null
-          updated_at?: string
-          verified_at?: string | null
-          verified_by?: string | null
-          view_type?: string | null
-          water_included?: boolean | null
-          water_notes?: string | null
-          water_notes_ru?: string | null
-          water_unit_price?: number | null
-          weekly_discount?: number | null
-        }
-        Update: {
-          accessibility_features?: string[] | null
-          acquisition_costs?: number | null
-          actual_owner_email?: string | null
-          actual_owner_name?: string | null
-          actual_owner_phone?: string | null
-          address?: string
-          approval_status?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          area_sqm?: number | null
-          auto_report_enabled?: boolean | null
-          balance_due_days?: number | null
-          bathrooms?: number | null
-          bedrooms?: number | null
-          cancellation_policy?: string | null
-          chat_delegated_to_platform?: boolean | null
-          check_in_instructions?: string | null
-          check_in_instructions_ru?: string | null
-          check_in_time?: string | null
-          check_out_time?: string | null
-          children_friendly?: boolean | null
-          cleaning_frequency?: string | null
-          cleaning_included?: boolean | null
-          commercial_terms_redacted?: boolean | null
-          complex_id?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_on_behalf?: boolean | null
-          deposit_amount?: number | null
-          deposit_currency?: string | null
-          deposit_type?: string | null
-          description?: string | null
-          description_ru?: string | null
-          district?: string | null
-          early_checkin_price?: number | null
-          electricity_included?: boolean | null
-          electricity_metering?: string | null
-          electricity_notes?: string | null
-          electricity_notes_ru?: string | null
-          electricity_provider?: string | null
-          electricity_unit_price?: number | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          equipment?: string[] | null
-          extra_cleaning_price?: number | null
-          extra_guest_price?: number | null
-          extra_guest_threshold?: number | null
-          extra_services?: Json | null
-          floor?: number | null
-          furnishing_level?: string | null
-          garden_type?: string | null
-          has_crib?: boolean | null
-          has_elevator?: boolean | null
-          has_high_chair?: boolean | null
-          highlights?: string[] | null
-          host_languages?: string[] | null
-          house_rules?: string | null
-          house_rules_ru?: string | null
-          ical_token?: string | null
-          ical_token_expires_at?: string | null
-          ical_token_refreshed_at?: string | null
-          id?: string
-          images?: string[] | null
-          included_services?: Json | null
-          instant_booking?: boolean | null
-          instant_booking_enabled_at?: string | null
-          internal_name?: string | null
-          internet_provider?: string | null
-          internet_speed?: string | null
-          is_for_sale?: boolean | null
-          is_rented?: boolean | null
-          key_handover?: string | null
-          lat?: number | null
-          late_checkout_penalty?: number | null
-          late_checkout_price?: number | null
-          linen_change_frequency?: string | null
-          linen_change_price?: number | null
-          listing_modes?: string[] | null
-          lng?: number | null
-          managed_by?: string | null
-          managed_by_org_id?: string | null
-          management_company_id?: string | null
-          management_document_name?: string | null
-          management_document_url?: string | null
-          management_type?: string | null
-          manager_line_id?: string | null
-          manager_name?: string | null
-          manager_phone?: string | null
-          marketplace_property_id?: string | null
-          max_guests?: number | null
-          max_party_guests?: number | null
-          min_stay_nights?: number | null
-          monthly_discount?: number | null
-          nearby_places?: Json | null
-          notes?: string | null
-          owner_id?: string
-          ownership_form?: string | null
-          ownership_transferred_at?: string | null
-          ownership_type?: string | null
-          ownership_verification_notes?: string | null
-          ownership_verification_status?: string | null
-          ownership_verified_at?: string | null
-          ownership_verified_by?: string | null
-          parking_included?: boolean | null
-          parking_notes?: string | null
-          parking_spaces?: number | null
-          parking_type?: string | null
-          parties_allowed?: boolean | null
-          payment_model?: string | null
-          pet_deposit?: number | null
-          pet_notes?: string | null
-          pet_notes_ru?: string | null
-          pets_allowed?: boolean | null
-          plot_size_sqm?: number | null
-          pm_company_id?: string | null
-          pool_type?: string | null
-          prepay_percent?: number | null
-          price_per_night?: number | null
-          project_id?: string | null
-          property_type?: string
-          purchase_date?: string | null
-          purchase_price?: number | null
-          quiet_hours_end?: string | null
-          quiet_hours_start?: string | null
-          rejection_reason?: string | null
-          renovation_costs?: number | null
-          rental_platform?: string | null
-          report_frequency?: string | null
-          report_recipients?: string[] | null
-          rooms?: Json | null
-          safety_features?: string[] | null
-          sale_currency?: string | null
-          sale_price?: number | null
-          seasonal_pricing?: Json | null
-          security_deposit_collection?: string | null
-          security_deposit_required?: boolean | null
-          smoking_penalty?: number | null
-          status?: string | null
-          title?: string
-          title_ru?: string | null
-          total_floors?: number | null
-          transfer_airport_price?: number | null
-          transfer_available?: boolean | null
-          transfer_notes?: string | null
-          transfer_notes_ru?: string | null
-          unit_number?: string | null
-          updated_at?: string
-          verified_at?: string | null
-          verified_by?: string | null
-          view_type?: string | null
-          water_included?: boolean | null
-          water_notes?: string | null
-          water_notes_ru?: string | null
-          water_unit_price?: number | null
-          weekly_discount?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_owner_properties_project"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "property_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_complex_id_fkey"
-            columns: ["complex_id"]
-            isOneToOne: false
-            referencedRelation: "property_complexes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_managed_by_org_id_fkey"
-            columns: ["managed_by_org_id"]
-            isOneToOne: false
-            referencedRelation: "orgs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_management_company_id_fkey"
-            columns: ["management_company_id"]
-            isOneToOne: false
-            referencedRelation: "management_companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
-            columns: ["marketplace_property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
-            columns: ["marketplace_property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "owner_properties_marketplace_property_id_fkey"
-            columns: ["marketplace_property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       owner_reports: {
         Row: {
           company_id: string | null
@@ -11403,6 +10991,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -11547,6 +11142,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "owner_vault_files_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "owner_vault_files_property_id_fkey"
             columns: ["property_id"]
@@ -12563,6 +12165,13 @@ export type Database = {
             foreignKeyName: "pricing_recommendations_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_recommendations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -13549,6 +13158,13 @@ export type Database = {
             foreignKeyName: "property_activity_log_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_activity_log_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -13616,6 +13232,13 @@ export type Database = {
             foreignKeyName: "property_analytics_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_analytics_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -13678,6 +13301,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_availability_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -13890,6 +13520,13 @@ export type Database = {
             foreignKeyName: "property_bookings_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -13957,6 +13594,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_budgets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_budgets_property_id_fkey"
             columns: ["property_id"]
@@ -14032,6 +13676,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_chat_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -14188,6 +13839,13 @@ export type Database = {
             foreignKeyName: "property_delegates_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_delegates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -14271,6 +13929,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_deposits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -14395,6 +14060,13 @@ export type Database = {
             foreignKeyName: "property_documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -14464,6 +14136,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_external_calendars_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_external_calendars_property_id_fkey"
             columns: ["property_id"]
@@ -14592,6 +14271,13 @@ export type Database = {
             foreignKeyName: "property_financials_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_financials_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -14708,6 +14394,13 @@ export type Database = {
             foreignKeyName: "property_guidebook_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_guidebook_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -14774,6 +14467,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_inquiries_property_id_fkey"
             columns: ["property_id"]
@@ -14866,6 +14566,13 @@ export type Database = {
             foreignKeyName: "property_inspections_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -14954,6 +14661,13 @@ export type Database = {
             foreignKeyName: "property_inventory_items_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_inventory_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15020,6 +14734,13 @@ export type Database = {
           returned_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_key_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_key_assignments_property_id_fkey"
             columns: ["property_id"]
@@ -15093,6 +14814,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_listing_scores_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_listing_scores_property_id_fkey"
             columns: ["property_id"]
@@ -15182,6 +14910,13 @@ export type Database = {
             foreignKeyName: "property_maintenance_schedules_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_maintenance_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15260,6 +14995,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_management_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_management_requests_property_id_fkey"
             columns: ["property_id"]
@@ -15355,6 +15097,13 @@ export type Database = {
             foreignKeyName: "property_management_terms_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_management_terms_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15409,6 +15158,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_manager_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_manager_assignments_property_id_fkey"
             columns: ["property_id"]
@@ -15480,6 +15236,13 @@ export type Database = {
             foreignKeyName: "property_meters_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_meters_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15531,6 +15294,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_notes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_notes_property_id_fkey"
             columns: ["property_id"]
@@ -15639,6 +15409,13 @@ export type Database = {
             foreignKeyName: "property_operational_tasks_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_operational_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15706,6 +15483,13 @@ export type Database = {
             foreignKeyName: "property_ownership_invites_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_ownership_invites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -15763,6 +15547,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_passport_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_passport_events_property_id_fkey"
             columns: ["property_id"]
@@ -16013,6 +15804,13 @@ export type Database = {
             foreignKeyName: "property_promotions_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_promotions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -16088,6 +15886,13 @@ export type Database = {
           weekly_rate?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_rate_seasons_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_rate_seasons_property_id_fkey"
             columns: ["property_id"]
@@ -16180,6 +15985,13 @@ export type Database = {
             foreignKeyName: "property_reports_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -16258,6 +16070,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_reviews_property_id_fkey"
             columns: ["property_id"]
@@ -16377,6 +16196,13 @@ export type Database = {
             foreignKeyName: "property_service_requests_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -16446,6 +16272,13 @@ export type Database = {
           utility_type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_utility_schedules_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_utility_schedules_property_id_fkey"
             columns: ["property_id"]
@@ -17966,6 +17799,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
             referencedColumns: ["id"]
           },
           {
@@ -21280,6 +21120,13 @@ export type Database = {
             foreignKeyName: "vendor_performance_reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_performance_reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -21344,6 +21191,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendor_property_assignments_property_id_fkey"
             columns: ["property_id"]
@@ -23320,6 +23174,339 @@ export type Database = {
           title_ru: string | null
         }
         Relationships: []
+      }
+      owner_properties: {
+        Row: {
+          accessibility_features: string[] | null
+          address: string | null
+          area_sqm: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          cancellation_policy: string | null
+          check_in_instructions: string | null
+          check_in_instructions_ru: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          children_friendly: boolean | null
+          cleaning_frequency: string | null
+          cleaning_included: boolean | null
+          cover_image: string | null
+          created_at: string | null
+          deposit_amount: number | null
+          deposit_currency: string | null
+          deposit_type: string | null
+          description: string | null
+          description_ru: string | null
+          district: string | null
+          early_checkin_price: number | null
+          electricity_included: boolean | null
+          electricity_metering: string | null
+          electricity_notes: string | null
+          electricity_notes_ru: string | null
+          electricity_provider: string | null
+          electricity_unit_price: number | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          equipment: string[] | null
+          extra_cleaning_price: number | null
+          extra_guest_price: number | null
+          extra_guest_threshold: number | null
+          extra_services: Json | null
+          floor: number | null
+          furnishing_level: string | null
+          has_crib: boolean | null
+          has_high_chair: boolean | null
+          host_languages: string[] | null
+          house_rules: string | null
+          house_rules_ru: string | null
+          ical_token: string | null
+          id: string | null
+          images: string[] | null
+          included_services: Json | null
+          instant_booking: boolean | null
+          internet_provider: string | null
+          internet_speed: string | null
+          is_rented: boolean | null
+          key_handover: string | null
+          lat: number | null
+          late_checkout_penalty: number | null
+          late_checkout_price: number | null
+          linen_change_frequency: string | null
+          linen_change_price: number | null
+          lng: number | null
+          management_company_id: string | null
+          management_type: string | null
+          manager_line_id: string | null
+          manager_name: string | null
+          manager_phone: string | null
+          marketplace_property_id: string | null
+          max_guests: number | null
+          max_party_guests: number | null
+          min_stay_nights: number | null
+          monthly_discount: number | null
+          notes: string | null
+          owner_id: string | null
+          parking_included: boolean | null
+          parking_notes: string | null
+          parking_spaces: number | null
+          parties_allowed: boolean | null
+          pet_deposit: number | null
+          pet_notes: string | null
+          pet_notes_ru: string | null
+          pets_allowed: boolean | null
+          price_per_night: number | null
+          project_id: string | null
+          property_type: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          rental_platform: string | null
+          rooms: Json | null
+          seasonal_pricing: Json | null
+          smoking_penalty: number | null
+          status: string | null
+          title: string | null
+          title_ru: string | null
+          transfer_airport_price: number | null
+          transfer_available: boolean | null
+          transfer_notes: string | null
+          transfer_notes_ru: string | null
+          unit_number: string | null
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+          view_type: string | null
+          water_included: boolean | null
+          water_notes: string | null
+          water_notes_ru: string | null
+          water_unit_price: number | null
+          weekly_discount: number | null
+        }
+        Insert: {
+          accessibility_features?: string[] | null
+          address?: string | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          cover_image?: string | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          early_checkin_price?: number | null
+          electricity_included?: boolean | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
+          host_languages?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_token?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          instant_booking?: boolean | null
+          internet_provider?: string | null
+          internet_speed?: string | null
+          is_rented?: boolean | null
+          key_handover?: string | null
+          lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
+          lng?: number | null
+          management_company_id?: string | null
+          management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
+          marketplace_property_id?: string | null
+          max_guests?: number | null
+          max_party_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parties_allowed?: boolean | null
+          pet_deposit?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pets_allowed?: boolean | null
+          price_per_night?: number | null
+          project_id?: string | null
+          property_type?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          rental_platform?: string | null
+          rooms?: Json | null
+          seasonal_pricing?: Json | null
+          smoking_penalty?: number | null
+          status?: string | null
+          title?: string | null
+          title_ru?: string | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_type?: string | null
+          water_included?: boolean | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+        }
+        Update: {
+          accessibility_features?: string[] | null
+          address?: string | null
+          area_sqm?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          cancellation_policy?: string | null
+          check_in_instructions?: string | null
+          check_in_instructions_ru?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          children_friendly?: boolean | null
+          cleaning_frequency?: string | null
+          cleaning_included?: boolean | null
+          cover_image?: string | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          deposit_currency?: string | null
+          deposit_type?: string | null
+          description?: string | null
+          description_ru?: string | null
+          district?: string | null
+          early_checkin_price?: number | null
+          electricity_included?: boolean | null
+          electricity_metering?: string | null
+          electricity_notes?: string | null
+          electricity_notes_ru?: string | null
+          electricity_provider?: string | null
+          electricity_unit_price?: number | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          equipment?: string[] | null
+          extra_cleaning_price?: number | null
+          extra_guest_price?: number | null
+          extra_guest_threshold?: number | null
+          extra_services?: Json | null
+          floor?: number | null
+          furnishing_level?: string | null
+          has_crib?: boolean | null
+          has_high_chair?: boolean | null
+          host_languages?: string[] | null
+          house_rules?: string | null
+          house_rules_ru?: string | null
+          ical_token?: string | null
+          id?: string | null
+          images?: string[] | null
+          included_services?: Json | null
+          instant_booking?: boolean | null
+          internet_provider?: string | null
+          internet_speed?: string | null
+          is_rented?: boolean | null
+          key_handover?: string | null
+          lat?: number | null
+          late_checkout_penalty?: number | null
+          late_checkout_price?: number | null
+          linen_change_frequency?: string | null
+          linen_change_price?: number | null
+          lng?: number | null
+          management_company_id?: string | null
+          management_type?: string | null
+          manager_line_id?: string | null
+          manager_name?: string | null
+          manager_phone?: string | null
+          marketplace_property_id?: string | null
+          max_guests?: number | null
+          max_party_guests?: number | null
+          min_stay_nights?: number | null
+          monthly_discount?: number | null
+          notes?: string | null
+          owner_id?: string | null
+          parking_included?: boolean | null
+          parking_notes?: string | null
+          parking_spaces?: number | null
+          parties_allowed?: boolean | null
+          pet_deposit?: number | null
+          pet_notes?: string | null
+          pet_notes_ru?: string | null
+          pets_allowed?: boolean | null
+          price_per_night?: number | null
+          project_id?: string | null
+          property_type?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          rental_platform?: string | null
+          rooms?: Json | null
+          seasonal_pricing?: Json | null
+          smoking_penalty?: number | null
+          status?: string | null
+          title?: string | null
+          title_ru?: string | null
+          transfer_airport_price?: number | null
+          transfer_available?: boolean | null
+          transfer_notes?: string | null
+          transfer_notes_ru?: string | null
+          unit_number?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_type?: string | null
+          water_included?: boolean | null
+          water_notes?: string | null
+          water_notes_ru?: string | null
+          water_unit_price?: number | null
+          weekly_discount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_services: {
         Row: {
