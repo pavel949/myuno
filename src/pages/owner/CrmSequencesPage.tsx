@@ -50,7 +50,7 @@ export default function CrmSequencesPage() {
   const selected = sequences.find(s => s.id === selectedId);
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Последовательности' : 'Sequences'}</h1>

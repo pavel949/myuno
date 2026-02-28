@@ -65,7 +65,7 @@ export default function OwnerOwnersPage() {
   const missingDocs = owners?.filter(o => !o.has_contract || !o.has_passport).length || 0;
 
   return (
-    <div className="space-y-6 p-4 md:p-6 max-w-5xl mx-auto">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8 max-w-[1536px] mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

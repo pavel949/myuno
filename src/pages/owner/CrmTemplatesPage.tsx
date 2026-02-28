@@ -62,7 +62,7 @@ export default function CrmTemplatesPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Шаблоны коммуникаций' : 'Communication Templates'}</h1>

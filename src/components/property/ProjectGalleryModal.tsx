@@ -3,10 +3,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, DownloadCloud } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ProjectGalleryModalProps {
   images: string[];
@@ -68,6 +69,42 @@ export function ProjectGalleryModal({
 
   if (!images.length) return null;
 
+  const handleDownloadCurrent = async () => {
+    try {
+      const url = images[currentIndex];
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+      link.download = `${projectName || 'photo'}_${currentIndex + 1}.${ext}`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      toast.error('Download failed');
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    toast.info('Downloading all photos...');
+    for (let i = 0; i < images.length; i++) {
+      try {
+        const url = images[i];
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+        link.download = `${projectName || 'photo'}_${i + 1}.${ext}`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        // Small delay between downloads
+        await new Promise(r => setTimeout(r, 300));
+      } catch { /* skip failed */ }
+    }
+    toast.success(`Downloaded ${images.length} photos`);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[100vw] max-h-[100vh] w-screen h-screen p-0 bg-black/95 border-none">
@@ -82,6 +119,26 @@ export function ProjectGalleryModal({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={handleDownloadCurrent}
+              title="Download current"
+            >
+              <Download className="h-5 w-5" />
+            </Button>
+            {images.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={handleDownloadAll}
+                title="Download all"
+              >
+                <DownloadCloud className="h-5 w-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
