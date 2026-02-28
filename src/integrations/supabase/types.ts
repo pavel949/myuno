@@ -3850,6 +3850,76 @@ export type Database = {
           },
         ]
       }
+      crm_meetings: {
+        Row: {
+          company_id: string
+          contact_id: string | null
+          created_at: string | null
+          deal_id: string | null
+          duration_minutes: number | null
+          host_user_id: string
+          id: string
+          location: string | null
+          meeting_type: string | null
+          notes: string | null
+          scheduled_at: string
+          status: string | null
+          title: string
+        }
+        Insert: {
+          company_id: string
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          duration_minutes?: number | null
+          host_user_id: string
+          id?: string
+          location?: string | null
+          meeting_type?: string | null
+          notes?: string | null
+          scheduled_at: string
+          status?: string | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          duration_minutes?: number | null
+          host_user_id?: string
+          id?: string
+          location?: string | null
+          meeting_type?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_meetings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meetings_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meetings_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_pipeline_stages: {
         Row: {
           color: string | null
@@ -3938,6 +4008,88 @@ export type Database = {
           },
         ]
       }
+      crm_quotes: {
+        Row: {
+          company_id: string
+          contact_id: string
+          created_at: string | null
+          created_by: string
+          currency: string | null
+          deal_id: string | null
+          id: string
+          items: Json
+          notes: string | null
+          pdf_url: string | null
+          quote_number: string
+          status: string | null
+          subtotal: number | null
+          tax_percent: number | null
+          title: string | null
+          total: number | null
+          valid_until: string | null
+        }
+        Insert: {
+          company_id: string
+          contact_id: string
+          created_at?: string | null
+          created_by: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          pdf_url?: string | null
+          quote_number: string
+          status?: string | null
+          subtotal?: number | null
+          tax_percent?: number | null
+          title?: string | null
+          total?: number | null
+          valid_until?: string | null
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string
+          created_at?: string | null
+          created_by?: string
+          currency?: string | null
+          deal_id?: string | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          pdf_url?: string | null
+          quote_number?: string
+          status?: string | null
+          subtotal?: number | null
+          tax_percent?: number | null
+          title?: string | null
+          total?: number | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_quotes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_score_log: {
         Row: {
           contact_id: string
@@ -4014,6 +4166,149 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "crm_scoring_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_sequence_enrollments: {
+        Row: {
+          completed_at: string | null
+          contact_id: string
+          current_step: number | null
+          deal_id: string | null
+          enrolled_at: string | null
+          enrolled_by: string
+          id: string
+          next_action_at: string | null
+          sequence_id: string
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          contact_id: string
+          current_step?: number | null
+          deal_id?: string | null
+          enrolled_at?: string | null
+          enrolled_by: string
+          id?: string
+          next_action_at?: string | null
+          sequence_id: string
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          contact_id?: string
+          current_step?: number | null
+          deal_id?: string | null
+          enrolled_at?: string | null
+          enrolled_by?: string
+          id?: string
+          next_action_at?: string | null
+          sequence_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sequence_enrollments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sequence_enrollments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_sequence_enrollments_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "crm_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_sequence_steps: {
+        Row: {
+          action_type: string
+          delay_days: number | null
+          id: string
+          sequence_id: string
+          sort_order: number | null
+          step_order: number
+          task_title: string | null
+          task_type: string | null
+          template_content: string | null
+        }
+        Insert: {
+          action_type: string
+          delay_days?: number | null
+          id?: string
+          sequence_id: string
+          sort_order?: number | null
+          step_order: number
+          task_title?: string | null
+          task_type?: string | null
+          template_content?: string | null
+        }
+        Update: {
+          action_type?: string
+          delay_days?: number | null
+          id?: string
+          sequence_id?: string
+          sort_order?: number | null
+          step_order?: number
+          task_title?: string | null
+          task_type?: string | null
+          template_content?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sequence_steps_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "crm_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_sequences: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sequences_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"

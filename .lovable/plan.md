@@ -506,22 +506,23 @@ CRM & Sales:
 
 ## Порядок реализации
 
-| Шаг | Задача | Оценка |
+| Шаг | Задача | Статус |
 |-----|--------|--------|
-| 1 | Multiple Pipelines + Stages | 1 сессия |
-| 2 | Lifecycle Stages | 0.5 сессии |
-| 3 | Custom Fields | 1 сессия |
-| 4 | Lead Scoring | 1 сессия |
-| 5 | Weighted Pipeline + Forecast | 1 сессия |
-| 6 | Activity Timeline | 1 сессия |
-| 7 | Sequences | 1.5 сессии |
-| 8 | CRM Dashboard | 1 сессия |
-| 9 | Quotations | 1 сессия |
-| 10 | Email Integration | 1 сессия |
-| 11 | Workflow Builder | 1.5 сессии |
-| 12 | Meeting Scheduler | 1 сессия |
-| 13 | AI Assistant | 1 сессия |
-| 14 | Templates | 0.5 сессии |
-| 15 | Duplicate Detection | 1 сессия |
-| 16 | Web Forms | 1 сессия |
-| 17 | Round Robin | 0.5 сессии |
+| 1 | Multiple Pipelines + Stages | ✅ Done |
+| 2 | Lifecycle Stages | ✅ Done |
+| 3 | Custom Fields | ✅ Done |
+| 4 | Lead Scoring | ✅ Done |
+| 5 | Weighted Pipeline + Forecast | ✅ Done |
+| 6 | Activity Timeline | ✅ Done |
+| 7 | Sequences (DB + Hooks + UI) | ✅ Done |
+| 8 | CRM Dashboard | ✅ Done |
+| 9 | Quotations (DB + Hooks + UI) | ✅ Done |
+| 10 | Meetings (DB + Hooks + UI) | ✅ Done |
+| 11 | Sidebar Navigation Updated | ✅ Done |
+| 12 | Email Integration | ⬜ Next |
+| 13 | Workflow Builder | ⬜ Next |
+| 14 | AI Assistant | ⬜ Next |
+| 15 | Templates | ⬜ Next |
+| 16 | Duplicate Detection | ⬜ Next |
+| 17 | Web Forms | ⬜ Next |
+| 18 | Round Robin | ⬜ Next |

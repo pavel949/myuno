@@ -402,6 +402,10 @@ export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/Documents
 export const AnalyticsPage = lazy(() => import('@/pages/owner/AnalyticsPage'));
 export const OwnerOwnersPage = lazy(() => import('@/pages/owner/OwnerOwnersPage'));
 export const OwnerDetailPage = lazy(() => import('@/pages/owner/OwnerDetailPage'));
+export const CrmDashboardPage = lazy(() => import('@/pages/owner/CrmDashboardPage'));
+export const CrmSequencesPage = lazy(() => import('@/pages/owner/CrmSequencesPage'));
+export const CrmQuotesPage = lazy(() => import('@/pages/owner/CrmQuotesPage'));
+export const CrmMeetingsPage = lazy(() => import('@/pages/owner/CrmMeetingsPage'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
