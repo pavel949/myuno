@@ -37,7 +37,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
     queryFn: async () => {
       let q = supabase
         .from('property_maintenance_schedules' as any)
-        .select('*, property:owner_properties!property_id(title)')
+        .select('*, property:properties!property_id(title)')
         .eq('is_active', true)
         .order('next_due_date', { ascending: true });
 

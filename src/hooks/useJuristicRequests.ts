@@ -155,7 +155,7 @@ export function useJuristicRequests(propertyId?: string) {
         .from('juristic_requests')
         .select(`
           *,
-          property:owner_properties!property_id (
+          property:properties!property_id (
             id,
             title,
             address

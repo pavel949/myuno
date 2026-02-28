@@ -87,7 +87,7 @@ export const INTAKE_VERTICALS: VerticalConfig[] = [
   // 🏡 Owner Properties
   {
     id: 'owner_properties',
-    table: 'owner_properties',
+    table: 'properties',
     nameEn: 'Owner Properties',
     nameRu: 'Объекты собственников',
     icon: '🏡',

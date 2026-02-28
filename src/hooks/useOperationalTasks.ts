@@ -89,7 +89,7 @@ export function useOperationalTasks(options?: {
         .from('property_operational_tasks')
         .select(`
           *,
-          property:owner_properties!property_id (
+          property:properties!property_id (
             id,
             title,
             title_ru,

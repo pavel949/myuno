@@ -130,7 +130,7 @@ export function useMyDelegations() {
         .from('property_delegates')
         .select(`
           *,
-          property:owner_properties(id, title, title_ru, address, cover_image)
+          property:properties!property_id(id, title, title_ru, address, cover_image)
         `)
         .or(`user_id.eq.${user.id},invited_email.eq.${user.email}`)
         .in('status', ['pending', 'active'])

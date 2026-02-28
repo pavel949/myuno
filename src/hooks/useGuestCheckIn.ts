@@ -251,14 +251,14 @@ export function useOwnerCheckIns() {
             check_out,
             guest_name,
             property_id,
-            owner_properties!inner (
+            properties!inner (
               id,
               title,
               owner_id
             )
           )
         `)
-        .eq('property_bookings.owner_properties.owner_id', user.id)
+        .eq('property_bookings.properties.owner_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
