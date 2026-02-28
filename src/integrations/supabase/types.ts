@@ -164,6 +164,7 @@ export type Database = {
           next_action: string | null
           next_action_date: string | null
           notes: string | null
+          pipeline_id: string | null
           preferred_districts: string[] | null
           preferred_types: string[] | null
           priority: number | null
@@ -196,6 +197,7 @@ export type Database = {
           next_action?: string | null
           next_action_date?: string | null
           notes?: string | null
+          pipeline_id?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
           priority?: number | null
@@ -228,6 +230,7 @@ export type Database = {
           next_action?: string | null
           next_action_date?: string | null
           notes?: string | null
+          pipeline_id?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
           priority?: number | null
@@ -249,6 +252,13 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_deals_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
             referencedColumns: ["id"]
           },
           {
@@ -3335,6 +3345,76 @@ export type Database = {
           },
         ]
       }
+      crm_activities: {
+        Row: {
+          activity_date: string | null
+          activity_type: string
+          company_id: string
+          contact_id: string | null
+          created_at: string | null
+          deal_id: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          logged_by: string
+          metadata: Json | null
+          outcome: string | null
+          subject: string | null
+        }
+        Insert: {
+          activity_date?: string | null
+          activity_type: string
+          company_id: string
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          logged_by: string
+          metadata?: Json | null
+          outcome?: string | null
+          subject?: string | null
+        }
+        Update: {
+          activity_date?: string | null
+          activity_type?: string
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          logged_by?: string
+          metadata?: Json | null
+          outcome?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contact_notes: {
         Row: {
           contact_id: string
@@ -3395,6 +3475,9 @@ export type Database = {
           job_title: string | null
           language: string | null
           last_name: string
+          lead_score: number | null
+          lead_temperature: string | null
+          lifecycle_stage: string | null
           line_id: string | null
           nationality: string | null
           notes: string | null
@@ -3434,6 +3517,9 @@ export type Database = {
           job_title?: string | null
           language?: string | null
           last_name?: string
+          lead_score?: number | null
+          lead_temperature?: string | null
+          lifecycle_stage?: string | null
           line_id?: string | null
           nationality?: string | null
           notes?: string | null
@@ -3473,6 +3559,9 @@ export type Database = {
           job_title?: string | null
           language?: string | null
           last_name?: string
+          lead_score?: number | null
+          lead_temperature?: string | null
+          lifecycle_stage?: string | null
           line_id?: string | null
           nationality?: string | null
           notes?: string | null
@@ -3491,6 +3580,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "crm_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_custom_field_values: {
+        Row: {
+          entity_id: string
+          field_id: string
+          id: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          entity_id: string
+          field_id: string
+          id?: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          entity_id?: string
+          field_id?: string
+          id?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_custom_field_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "crm_custom_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_custom_fields: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          entity_type: string
+          field_key: string
+          field_type: string
+          id: string
+          is_filterable: boolean | null
+          is_required: boolean | null
+          label_en: string
+          label_ru: string
+          options: Json | null
+          sort_order: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          entity_type: string
+          field_key: string
+          field_type: string
+          id?: string
+          is_filterable?: boolean | null
+          is_required?: boolean | null
+          label_en: string
+          label_ru: string
+          options?: Json | null
+          sort_order?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          entity_type?: string
+          field_key?: string
+          field_type?: string
+          id?: string
+          is_filterable?: boolean | null
+          is_required?: boolean | null
+          label_en?: string
+          label_ru?: string
+          options?: Json | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_custom_fields_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
@@ -3672,6 +3846,177 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipeline_stages: {
+        Row: {
+          color: string | null
+          id: string
+          is_lost: boolean | null
+          is_won: boolean | null
+          name_en: string
+          name_ru: string
+          pipeline_id: string
+          probability: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string | null
+          id?: string
+          is_lost?: boolean | null
+          is_won?: boolean | null
+          name_en: string
+          name_ru: string
+          pipeline_id: string
+          probability?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string | null
+          id?: string
+          is_lost?: boolean | null
+          is_won?: boolean | null
+          name_en?: string
+          name_ru?: string
+          pipeline_id?: string
+          probability?: number | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipeline_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipelines: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name_en: string
+          name_ru: string
+          pipeline_type: string
+          sort_order: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name_en: string
+          name_ru: string
+          pipeline_type?: string
+          sort_order?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name_en?: string
+          name_ru?: string
+          pipeline_type?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipelines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_score_log: {
+        Row: {
+          contact_id: string
+          id: string
+          points: number
+          reason: string
+          rule_id: string | null
+          scored_at: string | null
+        }
+        Insert: {
+          contact_id: string
+          id?: string
+          points: number
+          reason: string
+          rule_id?: string | null
+          scored_at?: string | null
+        }
+        Update: {
+          contact_id?: string
+          id?: string
+          points?: number
+          reason?: string
+          rule_id?: string | null
+          scored_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_score_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_score_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "crm_scoring_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_scoring_rules: {
+        Row: {
+          company_id: string
+          condition_config: Json
+          condition_type: string
+          id: string
+          is_active: boolean | null
+          points: number
+          rule_name: string
+          sort_order: number | null
+        }
+        Insert: {
+          company_id: string
+          condition_config?: Json
+          condition_type: string
+          id?: string
+          is_active?: boolean | null
+          points?: number
+          rule_name: string
+          sort_order?: number | null
+        }
+        Update: {
+          company_id?: string
+          condition_config?: Json
+          condition_type?: string
+          id?: string
+          is_active?: boolean | null
+          points?: number
+          rule_name?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_scoring_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
