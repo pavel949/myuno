@@ -23,8 +23,9 @@ export function LegalComplianceModal() {
   const [checkedDocs, setCheckedDocs] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
-  if (isLoading || allAccepted) return null;
+  if (isLoading || allAccepted || dismissed) return null;
 
   const allChecked = pendingDocs.every(doc => checkedDocs.has(doc.id));
 
@@ -42,6 +43,7 @@ export function LegalComplianceModal() {
     setIsSubmitting(true);
     try {
       await acceptDocuments(pendingDocs.map(d => d.id));
+      setDismissed(true);
       queryClient.invalidateQueries({ queryKey: ['legal-compliance'] });
       toast.success(isRu ? 'Документы приняты' : 'Documents accepted');
     } catch (err) {
