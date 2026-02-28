@@ -34,7 +34,6 @@ export function PWAWelcomeScreen() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          style={{ minHeight: '100dvh' }}
           onClick={handleClose}
         >
           <motion.div
@@ -43,7 +42,7 @@ export function PWAWelcomeScreen() {
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-primary via-primary/95 to-primary/90 rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl"
+            className="bg-gradient-to-br from-primary via-primary/95 to-primary/90 rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl m-auto"
           >
             {/* Success Icon */}
             <motion.div
