@@ -34,9 +34,10 @@ export function BookingSearchBar() {
       if (booking.guest_email?.toLowerCase().includes(searchLower)) return true;
       // Search by booking ID
       if (booking.id.toLowerCase().includes(searchLower)) return true;
-      // Search by property title
+      // Search by property title (field is title_en from properties table, aliased as title in map)
       const property = booking.owner_properties as any;
       if (property?.title?.toLowerCase().includes(searchLower)) return true;
+      if (property?.title_en?.toLowerCase().includes(searchLower)) return true;
       if (property?.title_ru?.toLowerCase().includes(searchLower)) return true;
       // Search by date (format: dd.mm or yyyy-mm-dd)
       if (booking.check_in.includes(searchLower) || booking.check_out.includes(searchLower)) return true;

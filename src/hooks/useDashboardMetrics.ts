@@ -65,6 +65,11 @@ export function useDashboardMetrics() {
       const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0, 10);
       const today = now.toISOString().slice(0, 10);
 
+      // Pre-fetch booking IDs for unread message scoping
+      const { data: propBookingIds } = await supabase
+        .from('property_bookings').select('id').in('property_id', filteredPropertyIds);
+      const bookingIdList = (propBookingIds || []).map(b => b.id);
+
       // All queries in parallel
       const [
         incomeRes, expenseRes, incomePrevRes, expensePrevRes, bookingsRes,
@@ -118,11 +123,13 @@ export function useDashboardMetrics() {
         // Inventory (low stock)
         supabase.from('property_inventory_items').select('id, quantity, min_quantity')
           .eq('owner_id', user.id).eq('is_active', true),
-        // Unread messages — scoped to bookings for filtered properties
-        supabase.from('booking_notifications_log').select('id, booking_id, property_bookings!inner(property_id)', { count: 'exact', head: true })
-            .is('read_at', null)
-            .in('property_bookings.property_id', filteredPropertyIds)
-            .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
+        // Unread messages — scoped to filtered properties
+        bookingIdList.length > 0
+          ? supabase.from('booking_notifications_log').select('id', { count: 'exact', head: true })
+              .is('read_at', null)
+              .in('booking_id', bookingIdList)
+              .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
+          : Promise.resolve({ count: 0 }),
         // Pending invoices
         supabase.from('property_financials').select('id', { count: 'exact', head: true })
           .eq('owner_id', user.id).eq('transaction_type', 'expense').eq('status', 'pending'),
