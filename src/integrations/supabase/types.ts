@@ -321,10 +321,15 @@ export type Database = {
       ai_agent_logs: {
         Row: {
           agent_id: string
+          agent_version: number | null
+          correlation_id: string | null
           created_at: string
+          error_code: string | null
           feedback: string | null
           id: string
+          is_success: boolean | null
           messages_count: number | null
+          model: string | null
           response_time_ms: number | null
           session_id: string | null
           tokens_used: number | null
@@ -333,10 +338,15 @@ export type Database = {
         }
         Insert: {
           agent_id: string
+          agent_version?: number | null
+          correlation_id?: string | null
           created_at?: string
+          error_code?: string | null
           feedback?: string | null
           id?: string
+          is_success?: boolean | null
           messages_count?: number | null
+          model?: string | null
           response_time_ms?: number | null
           session_id?: string | null
           tokens_used?: number | null
@@ -345,10 +355,15 @@ export type Database = {
         }
         Update: {
           agent_id?: string
+          agent_version?: number | null
+          correlation_id?: string | null
           created_at?: string
+          error_code?: string | null
           feedback?: string | null
           id?: string
+          is_success?: boolean | null
           messages_count?: number | null
+          model?: string | null
           response_time_ms?: number | null
           session_id?: string | null
           tokens_used?: number | null
@@ -914,220 +929,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      babysitters: {
-        Row: {
-          age_groups: string[] | null
-          approval_status: string | null
-          availability: Json | null
-          background_checked: boolean | null
-          bio_en: string | null
-          bio_ru: string | null
-          can_cook: boolean | null
-          can_drive: boolean | null
-          certifications: string[] | null
-          created_at: string | null
-          created_by_uno_team: boolean | null
-          currency: string | null
-          experience_years: number | null
-          first_aid_certified: boolean | null
-          id: string
-          images: string[] | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          is_verified: boolean | null
-          languages: string[] | null
-          name_en: string
-          name_ru: string
-          photo: string | null
-          price_per_day: number | null
-          price_per_hour: number | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          uno_team_creator_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          age_groups?: string[] | null
-          approval_status?: string | null
-          availability?: Json | null
-          background_checked?: boolean | null
-          bio_en?: string | null
-          bio_ru?: string | null
-          can_cook?: boolean | null
-          can_drive?: boolean | null
-          certifications?: string[] | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          experience_years?: number | null
-          first_aid_certified?: boolean | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          name_en: string
-          name_ru: string
-          photo?: string | null
-          price_per_day?: number | null
-          price_per_hour?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          age_groups?: string[] | null
-          approval_status?: string | null
-          availability?: Json | null
-          background_checked?: boolean | null
-          bio_en?: string | null
-          bio_ru?: string | null
-          can_cook?: boolean | null
-          can_drive?: boolean | null
-          certifications?: string[] | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          experience_years?: number | null
-          first_aid_certified?: boolean | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          name_en?: string
-          name_ru?: string
-          photo?: string | null
-          price_per_day?: number | null
-          price_per_hour?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "babysitters_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      banks: {
-        Row: {
-          accepts_foreigners: boolean | null
-          bank_type: string | null
-          cover_image: string | null
-          created_at: string | null
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          email: string | null
-          features: string[] | null
-          id: string
-          is_active: boolean | null
-          is_featured: boolean | null
-          languages: string[] | null
-          logo: string | null
-          min_deposit: number | null
-          mobile_app: boolean | null
-          name_en: string
-          name_ru: string
-          online_banking: boolean | null
-          phone: string | null
-          provider_id: string | null
-          rating: number | null
-          review_count: number | null
-          services: string[] | null
-          swift_code: string | null
-          updated_at: string | null
-          website: string | null
-        }
-        Insert: {
-          accepts_foreigners?: boolean | null
-          bank_type?: string | null
-          cover_image?: string | null
-          created_at?: string | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          email?: string | null
-          features?: string[] | null
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          languages?: string[] | null
-          logo?: string | null
-          min_deposit?: number | null
-          mobile_app?: boolean | null
-          name_en: string
-          name_ru: string
-          online_banking?: boolean | null
-          phone?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          review_count?: number | null
-          services?: string[] | null
-          swift_code?: string | null
-          updated_at?: string | null
-          website?: string | null
-        }
-        Update: {
-          accepts_foreigners?: boolean | null
-          bank_type?: string | null
-          cover_image?: string | null
-          created_at?: string | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          email?: string | null
-          features?: string[] | null
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          languages?: string[] | null
-          logo?: string | null
-          min_deposit?: number | null
-          mobile_app?: boolean | null
-          name_en?: string
-          name_ru?: string
-          online_banking?: boolean | null
-          phone?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          review_count?: number | null
-          services?: string[] | null
-          swift_code?: string | null
-          updated_at?: string | null
-          website?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "banks_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       booking_addresses: {
         Row: {
@@ -3125,128 +2926,6 @@ export type Database = {
           },
         ]
       }
-      clinics: {
-        Row: {
-          address: string | null
-          approval_status: string | null
-          clinic_type: string
-          consultation_price: number | null
-          cover_image: string | null
-          created_at: string
-          created_by_uno_team: boolean | null
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          district: string | null
-          email: string | null
-          id: string
-          images: string[] | null
-          is_24h: boolean | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          is_verified: boolean | null
-          languages: string[] | null
-          lat: number | null
-          lng: number | null
-          name_en: string
-          name_ru: string
-          phone: string | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          specialty: string[] | null
-          uno_team_creator_id: string | null
-          updated_at: string
-          website: string | null
-          working_hours: Json | null
-        }
-        Insert: {
-          address?: string | null
-          approval_status?: string | null
-          clinic_type?: string
-          consultation_price?: number | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          district?: string | null
-          email?: string | null
-          id?: string
-          images?: string[] | null
-          is_24h?: boolean | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          lat?: number | null
-          lng?: number | null
-          name_en: string
-          name_ru: string
-          phone?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          specialty?: string[] | null
-          uno_team_creator_id?: string | null
-          updated_at?: string
-          website?: string | null
-          working_hours?: Json | null
-        }
-        Update: {
-          address?: string | null
-          approval_status?: string | null
-          clinic_type?: string
-          consultation_price?: number | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          district?: string | null
-          email?: string | null
-          id?: string
-          images?: string[] | null
-          is_24h?: boolean | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          languages?: string[] | null
-          lat?: number | null
-          lng?: number | null
-          name_en?: string
-          name_ru?: string
-          phone?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          specialty?: string[] | null
-          uno_team_creator_id?: string | null
-          updated_at?: string
-          website?: string | null
-          working_hours?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "clinics_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cohort_analytics: {
         Row: {
           active_users: number | null
@@ -4634,15 +4313,7 @@ export type Database = {
           specialty_ru?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "doctors_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
-            referencedRelation: "clinics"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       document_reminders: {
         Row: {
@@ -5234,22 +4905,7 @@ export type Database = {
           source_image_url?: string | null
           stored_path?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "experience_media_experience_id_fkey"
-            columns: ["experience_id"]
-            isOneToOne: false
-            referencedRelation: "experiences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experience_media_experience_id_fkey"
-            columns: ["experience_id"]
-            isOneToOne: false
-            referencedRelation: "experiences_normalized"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       experience_pricing: {
         Row: {
@@ -5288,222 +4944,7 @@ export type Database = {
           price_type?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "experience_pricing_experience_id_fkey"
-            columns: ["experience_id"]
-            isOneToOne: false
-            referencedRelation: "experiences"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experience_pricing_experience_id_fkey"
-            columns: ["experience_id"]
-            isOneToOne: false
-            referencedRelation: "experiences_normalized"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      experiences: {
-        Row: {
-          age_restriction: number | null
-          approval_status: string | null
-          available_days: string[] | null
-          booking_model: string | null
-          booking_url: string | null
-          category: string | null
-          certification_details: string | null
-          commission_rate: number | null
-          cover_image: string | null
-          created_at: string | null
-          created_by_uno_team: boolean | null
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          difficulty: string | null
-          duration_minutes: number | null
-          equipment_included: boolean | null
-          excludes: Json | null
-          exclusions: Json | null
-          experience_type: string
-          external_link: string | null
-          highlights: Json | null
-          id: string
-          images: string[] | null
-          includes: Json | null
-          inclusions: Json | null
-          is_active: boolean | null
-          is_certified: boolean | null
-          is_featured: boolean | null
-          itinerary: Json | null
-          location_name: string | null
-          long_description: string | null
-          max_participants: number | null
-          meeting_point: string | null
-          meeting_point_lat: number | null
-          meeting_point_lng: number | null
-          min_participants: number | null
-          notes: Json | null
-          partner_id: string | null
-          pickup_included: boolean | null
-          price: number | null
-          price_per: string | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          requirements: Json | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          safety_briefing_required: boolean | null
-          short_description: string | null
-          slug: string | null
-          source_page_url: string | null
-          source_type: string | null
-          start_times: string[] | null
-          status: string | null
-          tags: string[] | null
-          title_en: string
-          title_ru: string
-          uno_team_creator_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          age_restriction?: number | null
-          approval_status?: string | null
-          available_days?: string[] | null
-          booking_model?: string | null
-          booking_url?: string | null
-          category?: string | null
-          certification_details?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          difficulty?: string | null
-          duration_minutes?: number | null
-          equipment_included?: boolean | null
-          excludes?: Json | null
-          exclusions?: Json | null
-          experience_type?: string
-          external_link?: string | null
-          highlights?: Json | null
-          id?: string
-          images?: string[] | null
-          includes?: Json | null
-          inclusions?: Json | null
-          is_active?: boolean | null
-          is_certified?: boolean | null
-          is_featured?: boolean | null
-          itinerary?: Json | null
-          location_name?: string | null
-          long_description?: string | null
-          max_participants?: number | null
-          meeting_point?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          min_participants?: number | null
-          notes?: Json | null
-          partner_id?: string | null
-          pickup_included?: boolean | null
-          price?: number | null
-          price_per?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          requirements?: Json | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          safety_briefing_required?: boolean | null
-          short_description?: string | null
-          slug?: string | null
-          source_page_url?: string | null
-          source_type?: string | null
-          start_times?: string[] | null
-          status?: string | null
-          tags?: string[] | null
-          title_en: string
-          title_ru: string
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          age_restriction?: number | null
-          approval_status?: string | null
-          available_days?: string[] | null
-          booking_model?: string | null
-          booking_url?: string | null
-          category?: string | null
-          certification_details?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          difficulty?: string | null
-          duration_minutes?: number | null
-          equipment_included?: boolean | null
-          excludes?: Json | null
-          exclusions?: Json | null
-          experience_type?: string
-          external_link?: string | null
-          highlights?: Json | null
-          id?: string
-          images?: string[] | null
-          includes?: Json | null
-          inclusions?: Json | null
-          is_active?: boolean | null
-          is_certified?: boolean | null
-          is_featured?: boolean | null
-          itinerary?: Json | null
-          location_name?: string | null
-          long_description?: string | null
-          max_participants?: number | null
-          meeting_point?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          min_participants?: number | null
-          notes?: Json | null
-          partner_id?: string | null
-          pickup_included?: boolean | null
-          price?: number | null
-          price_per?: string | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          requirements?: Json | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          safety_briefing_required?: boolean | null
-          short_description?: string | null
-          slug?: string | null
-          source_page_url?: string | null
-          source_type?: string | null
-          start_times?: string[] | null
-          status?: string | null
-          tags?: string[] | null
-          title_en?: string
-          title_ru?: string
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "experiences_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       favorites: {
         Row: {
@@ -10064,15 +9505,7 @@ export type Database = {
           price?: number
           specialty?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "medical_services_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
-            referencedRelation: "clinics"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       message_templates: {
         Row: {
@@ -12479,122 +11912,6 @@ export type Database = {
           weight_kg?: number | null
         }
         Relationships: []
-      }
-      pet_services: {
-        Row: {
-          address: string | null
-          approval_status: string | null
-          cover_image: string | null
-          created_at: string | null
-          created_by_uno_team: boolean | null
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          district: string | null
-          email: string | null
-          features: string[] | null
-          id: string
-          images: string[] | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          is_verified: boolean | null
-          lat: number | null
-          lng: number | null
-          name_en: string
-          name_ru: string
-          pet_types: string[] | null
-          phone: string | null
-          price_from: number | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          service_type: string | null
-          uno_team_creator_id: string | null
-          updated_at: string | null
-          working_hours: Json | null
-        }
-        Insert: {
-          address?: string | null
-          approval_status?: string | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          district?: string | null
-          email?: string | null
-          features?: string[] | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          lat?: number | null
-          lng?: number | null
-          name_en: string
-          name_ru: string
-          pet_types?: string[] | null
-          phone?: string | null
-          price_from?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_type?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-          working_hours?: Json | null
-        }
-        Update: {
-          address?: string | null
-          approval_status?: string | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          district?: string | null
-          email?: string | null
-          features?: string[] | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          lat?: number | null
-          lng?: number | null
-          name_en?: string
-          name_ru?: string
-          pet_types?: string[] | null
-          phone?: string | null
-          price_from?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          service_type?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-          working_hours?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pet_services_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       pharmacies: {
         Row: {
@@ -17894,15 +17211,7 @@ export type Database = {
           time_slot?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_availability_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       restaurant_hours: {
         Row: {
@@ -17932,15 +17241,7 @@ export type Database = {
           open_time?: string
           restaurant_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_hours_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       restaurant_menu_categories: {
         Row: {
@@ -17970,15 +17271,7 @@ export type Database = {
           restaurant_id?: string
           sort_order?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_menu_categories_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       restaurant_menu_items: {
         Row: {
@@ -18049,13 +17342,6 @@ export type Database = {
             referencedRelation: "restaurant_menu_categories"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "restaurant_menu_items_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
         ]
       }
       restaurant_menus: {
@@ -18098,218 +17384,7 @@ export type Database = {
           source_url?: string | null
           title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_menus_restaurant_id_fkey"
-            columns: ["restaurant_id"]
-            isOneToOne: false
-            referencedRelation: "restaurants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      restaurants: {
-        Row: {
-          address: string | null
-          approval_status: string | null
-          area: string | null
-          avg_check_thb: number | null
-          canonical_description_source: string | null
-          city: string | null
-          cover_image: string | null
-          created_at: string
-          created_by_uno_team: boolean | null
-          cuisine: string
-          cuisine_tags: string[] | null
-          data_sources: Json | null
-          delivery_available: boolean | null
-          delivery_fee: number | null
-          delivery_provider: string | null
-          delivery_time: string | null
-          description_en: string | null
-          description_ru: string | null
-          description_short: string | null
-          district: string | null
-          email: string | null
-          features: string[] | null
-          gallery_image_urls: string[] | null
-          grabfood_search_query: string | null
-          hero_image_url: string | null
-          id: string
-          images: string[] | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          is_verified: boolean | null
-          last_verified_at: string | null
-          lat: number | null
-          lng: number | null
-          menu_last_updated_note: string | null
-          menu_url: string | null
-          min_order_amount: number | null
-          name_en: string
-          name_ru: string
-          needs_manual_verification: boolean | null
-          order_url: string | null
-          phone: string | null
-          price_band: string | null
-          price_level: string | null
-          price_range: number | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          reservation_policy: string | null
-          reservation_provider: string | null
-          reservation_supported: boolean | null
-          reservation_url: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          seo_description: string | null
-          seo_title: string | null
-          slug: string | null
-          uno_team_creator_id: string | null
-          updated_at: string
-          verification_notes: string | null
-          website: string | null
-          working_hours: Json | null
-        }
-        Insert: {
-          address?: string | null
-          approval_status?: string | null
-          area?: string | null
-          avg_check_thb?: number | null
-          canonical_description_source?: string | null
-          city?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          cuisine?: string
-          cuisine_tags?: string[] | null
-          data_sources?: Json | null
-          delivery_available?: boolean | null
-          delivery_fee?: number | null
-          delivery_provider?: string | null
-          delivery_time?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          description_short?: string | null
-          district?: string | null
-          email?: string | null
-          features?: string[] | null
-          gallery_image_urls?: string[] | null
-          grabfood_search_query?: string | null
-          hero_image_url?: string | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          last_verified_at?: string | null
-          lat?: number | null
-          lng?: number | null
-          menu_last_updated_note?: string | null
-          menu_url?: string | null
-          min_order_amount?: number | null
-          name_en: string
-          name_ru: string
-          needs_manual_verification?: boolean | null
-          order_url?: string | null
-          phone?: string | null
-          price_band?: string | null
-          price_level?: string | null
-          price_range?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          reservation_policy?: string | null
-          reservation_provider?: string | null
-          reservation_supported?: boolean | null
-          reservation_url?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string
-          verification_notes?: string | null
-          website?: string | null
-          working_hours?: Json | null
-        }
-        Update: {
-          address?: string | null
-          approval_status?: string | null
-          area?: string | null
-          avg_check_thb?: number | null
-          canonical_description_source?: string | null
-          city?: string | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          cuisine?: string
-          cuisine_tags?: string[] | null
-          data_sources?: Json | null
-          delivery_available?: boolean | null
-          delivery_fee?: number | null
-          delivery_provider?: string | null
-          delivery_time?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          description_short?: string | null
-          district?: string | null
-          email?: string | null
-          features?: string[] | null
-          gallery_image_urls?: string[] | null
-          grabfood_search_query?: string | null
-          hero_image_url?: string | null
-          id?: string
-          images?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          last_verified_at?: string | null
-          lat?: number | null
-          lng?: number | null
-          menu_last_updated_note?: string | null
-          menu_url?: string | null
-          min_order_amount?: number | null
-          name_en?: string
-          name_ru?: string
-          needs_manual_verification?: boolean | null
-          order_url?: string | null
-          phone?: string | null
-          price_band?: string | null
-          price_level?: string | null
-          price_range?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          reservation_policy?: string | null
-          reservation_provider?: string | null
-          reservation_supported?: boolean | null
-          reservation_url?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string
-          verification_notes?: string | null
-          website?: string | null
-          working_hours?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "restaurants_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       returning_guests: {
         Row: {
@@ -20637,156 +19712,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "tour_bookings_tour_id_fkey"
-            columns: ["tour_id"]
-            isOneToOne: false
-            referencedRelation: "tours"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tours: {
-        Row: {
-          approval_status: string | null
-          available_days: string[] | null
-          category: string | null
-          commission_rate: number | null
-          cover_image: string | null
-          created_at: string
-          created_by_uno_team: boolean | null
-          currency: string | null
-          description_en: string | null
-          description_ru: string | null
-          difficulty: string | null
-          duration_hours: number | null
-          excludes: string[] | null
-          external_link: string | null
-          highlights: string[] | null
-          id: string
-          images: string[] | null
-          includes: string[] | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          itinerary: Json | null
-          max_participants: number | null
-          meeting_point: string | null
-          meeting_point_lat: number | null
-          meeting_point_lng: number | null
-          partner_id: string | null
-          price: number | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          source_type: string | null
-          start_times: string[] | null
-          title_en: string
-          title_ru: string
-          uno_team_creator_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          approval_status?: string | null
-          available_days?: string[] | null
-          category?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          difficulty?: string | null
-          duration_hours?: number | null
-          excludes?: string[] | null
-          external_link?: string | null
-          highlights?: string[] | null
-          id?: string
-          images?: string[] | null
-          includes?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          itinerary?: Json | null
-          max_participants?: number | null
-          meeting_point?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          partner_id?: string | null
-          price?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          source_type?: string | null
-          start_times?: string[] | null
-          title_en: string
-          title_ru: string
-          uno_team_creator_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          approval_status?: string | null
-          available_days?: string[] | null
-          category?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          description_en?: string | null
-          description_ru?: string | null
-          difficulty?: string | null
-          duration_hours?: number | null
-          excludes?: string[] | null
-          external_link?: string | null
-          highlights?: string[] | null
-          id?: string
-          images?: string[] | null
-          includes?: string[] | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          itinerary?: Json | null
-          max_participants?: number | null
-          meeting_point?: string | null
-          meeting_point_lat?: number | null
-          meeting_point_lng?: number | null
-          partner_id?: string | null
-          price?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          source_type?: string | null
-          start_times?: string[] | null
-          title_en?: string
-          title_ru?: string
-          uno_team_creator_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tours_partner_id_fkey"
-            columns: ["partner_id"]
-            isOneToOne: false
-            referencedRelation: "partners"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tours_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       transfers: {
         Row: {
@@ -21877,182 +20803,6 @@ export type Database = {
           utm_source?: string | null
         }
         Relationships: []
-      }
-      vehicles: {
-        Row: {
-          approval_status: string | null
-          brand: string | null
-          capacity: number | null
-          class_label: string | null
-          color: string | null
-          commission_rate: number | null
-          cover_image: string | null
-          created_at: string | null
-          created_by_uno_team: boolean | null
-          currency: string | null
-          delivery_available: boolean | null
-          deposit_amount: number | null
-          description_en: string | null
-          description_ru: string | null
-          doors: number | null
-          engine_size: string | null
-          extra_km_price: number | null
-          features: string[] | null
-          free_km_per_day: number | null
-          fuel_type: string | null
-          helmet_included: boolean | null
-          id: string
-          images: string[] | null
-          insurance_note: string | null
-          is_active: boolean | null
-          is_available: boolean | null
-          is_featured: boolean | null
-          is_verified: boolean | null
-          license_plate: string | null
-          location_name: string | null
-          location_ru: string | null
-          luggage_capacity: number | null
-          mileage_policy: string | null
-          min_rental_days: number | null
-          name_en: string
-          name_ru: string
-          price_airport_transfer: number | null
-          price_per_day: number | null
-          price_per_hour: number | null
-          price_per_month: number | null
-          price_per_week: number | null
-          provider_id: string | null
-          rating: number | null
-          rejection_reason: string | null
-          review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          transmission: string | null
-          uno_team_creator_id: string | null
-          updated_at: string | null
-          vehicle_type: string | null
-          with_driver_available: boolean | null
-          year_built: number | null
-        }
-        Insert: {
-          approval_status?: string | null
-          brand?: string | null
-          capacity?: number | null
-          class_label?: string | null
-          color?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          delivery_available?: boolean | null
-          deposit_amount?: number | null
-          description_en?: string | null
-          description_ru?: string | null
-          doors?: number | null
-          engine_size?: string | null
-          extra_km_price?: number | null
-          features?: string[] | null
-          free_km_per_day?: number | null
-          fuel_type?: string | null
-          helmet_included?: boolean | null
-          id?: string
-          images?: string[] | null
-          insurance_note?: string | null
-          is_active?: boolean | null
-          is_available?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          license_plate?: string | null
-          location_name?: string | null
-          location_ru?: string | null
-          luggage_capacity?: number | null
-          mileage_policy?: string | null
-          min_rental_days?: number | null
-          name_en: string
-          name_ru: string
-          price_airport_transfer?: number | null
-          price_per_day?: number | null
-          price_per_hour?: number | null
-          price_per_month?: number | null
-          price_per_week?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          transmission?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-          vehicle_type?: string | null
-          with_driver_available?: boolean | null
-          year_built?: number | null
-        }
-        Update: {
-          approval_status?: string | null
-          brand?: string | null
-          capacity?: number | null
-          class_label?: string | null
-          color?: string | null
-          commission_rate?: number | null
-          cover_image?: string | null
-          created_at?: string | null
-          created_by_uno_team?: boolean | null
-          currency?: string | null
-          delivery_available?: boolean | null
-          deposit_amount?: number | null
-          description_en?: string | null
-          description_ru?: string | null
-          doors?: number | null
-          engine_size?: string | null
-          extra_km_price?: number | null
-          features?: string[] | null
-          free_km_per_day?: number | null
-          fuel_type?: string | null
-          helmet_included?: boolean | null
-          id?: string
-          images?: string[] | null
-          insurance_note?: string | null
-          is_active?: boolean | null
-          is_available?: boolean | null
-          is_featured?: boolean | null
-          is_verified?: boolean | null
-          license_plate?: string | null
-          location_name?: string | null
-          location_ru?: string | null
-          luggage_capacity?: number | null
-          mileage_policy?: string | null
-          min_rental_days?: number | null
-          name_en?: string
-          name_ru?: string
-          price_airport_transfer?: number | null
-          price_per_day?: number | null
-          price_per_hour?: number | null
-          price_per_month?: number | null
-          price_per_week?: number | null
-          provider_id?: string | null
-          rating?: number | null
-          rejection_reason?: string | null
-          review_count?: number | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          transmission?: string | null
-          uno_team_creator_id?: string | null
-          updated_at?: string | null
-          vehicle_type?: string | null
-          with_driver_available?: boolean | null
-          year_built?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vehicles_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       vendor_analytics: {
         Row: {
@@ -23726,15 +22476,7 @@ export type Database = {
           updated_at?: string
           yacht_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "yacht_availability_yacht_id_fkey"
-            columns: ["yacht_id"]
-            isOneToOne: false
-            referencedRelation: "yachts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       yacht_external_calendars: {
         Row: {
@@ -23773,15 +22515,7 @@ export type Database = {
           updated_at?: string
           yacht_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "yacht_external_calendars_yacht_id_fkey"
-            columns: ["yacht_id"]
-            isOneToOne: false
-            referencedRelation: "yachts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       yacht_pricing_rules: {
         Row: {
@@ -23835,227 +22569,137 @@ export type Database = {
           updated_at?: string
           yacht_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "yacht_pricing_rules_yacht_id_fkey"
-            columns: ["yacht_id"]
-            isOneToOne: false
-            referencedRelation: "yachts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      yachts: {
+    }
+    Views: {
+      babysitters: {
         Row: {
-          addons: string[] | null
+          address: string | null
+          age_groups: Json | null
           approval_status: string | null
-          balance_due_hours: number | null
-          bathrooms: number | null
-          beam: string | null
-          booking_flow: string | null
-          cabins: number | null
-          cancellation_policy: string | null
-          capacity: number | null
-          charter_options: string[] | null
-          cover_image: string | null
-          created_at: string
+          availability: Json | null
+          background_checked: boolean | null
+          bio_en: string | null
+          bio_ru: string | null
+          can_cook: boolean | null
+          can_drive: boolean | null
+          certifications: Json | null
+          created_at: string | null
           created_by_uno_team: boolean | null
-          cruising_speed: string | null
           currency: string | null
-          departure_times: string[] | null
-          deposit_percent: number | null
-          description_en: string | null
-          description_ru: string | null
-          draft: string | null
-          engines: string | null
-          exclusions_en: string[] | null
-          exclusions_ru: string[] | null
-          features_en: string[] | null
-          features_ru: string[] | null
-          fuel_capacity: string | null
-          fuel_policy: string | null
-          has_catering: boolean | null
-          has_crew: boolean | null
-          ical_token: string | null
-          ical_token_expires_at: string | null
-          ical_token_refreshed_at: string | null
-          id: string
+          district: string | null
+          email: string | null
+          experience_years: number | null
+          first_aid_certified: boolean | null
+          id: string | null
           images: string[] | null
-          insurance_included: string | null
-          insurance_notes: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_verified: boolean | null
+          languages: string[] | null
           lat: number | null
-          length_meters: number | null
-          lifeos_context: string | null
           lng: number | null
-          location_name: string | null
-          location_ru: string | null
-          marketing_tags: string[] | null
-          max_speed: string | null
-          name_en: string
-          name_ru: string
-          price_full_day: number | null
-          price_half_day: number | null
-          price_overnight: number | null
-          price_sunset: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          photo: string | null
+          price_per_day: number | null
+          price_per_hour: number | null
           provider_id: string | null
           rating: number | null
           rejection_reason: string | null
           review_count: number | null
           reviewed_at: string | null
           reviewed_by: string | null
-          skipper_included: string | null
-          slug: string | null
-          source_urls: string[] | null
           uno_team_creator_id: string | null
-          updated_at: string
-          weather_dependency: string | null
-          yacht_type: string | null
-          year_built: number | null
+          updated_at: string | null
         }
         Insert: {
-          addons?: string[] | null
+          address?: string | null
+          age_groups?: never
           approval_status?: string | null
-          balance_due_hours?: number | null
-          bathrooms?: number | null
-          beam?: string | null
-          booking_flow?: string | null
-          cabins?: number | null
-          cancellation_policy?: string | null
-          capacity?: number | null
-          charter_options?: string[] | null
-          cover_image?: string | null
-          created_at?: string
+          availability?: never
+          background_checked?: never
+          bio_en?: string | null
+          bio_ru?: string | null
+          can_cook?: never
+          can_drive?: never
+          certifications?: never
+          created_at?: string | null
           created_by_uno_team?: boolean | null
-          cruising_speed?: string | null
           currency?: string | null
-          departure_times?: string[] | null
-          deposit_percent?: number | null
-          description_en?: string | null
-          description_ru?: string | null
-          draft?: string | null
-          engines?: string | null
-          exclusions_en?: string[] | null
-          exclusions_ru?: string[] | null
-          features_en?: string[] | null
-          features_ru?: string[] | null
-          fuel_capacity?: string | null
-          fuel_policy?: string | null
-          has_catering?: boolean | null
-          has_crew?: boolean | null
-          ical_token?: string | null
-          ical_token_expires_at?: string | null
-          ical_token_refreshed_at?: string | null
-          id?: string
+          district?: string | null
+          email?: string | null
+          experience_years?: never
+          first_aid_certified?: never
+          id?: string | null
           images?: string[] | null
-          insurance_included?: string | null
-          insurance_notes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          languages?: string[] | null
           lat?: number | null
-          length_meters?: number | null
-          lifeos_context?: string | null
           lng?: number | null
-          location_name?: string | null
-          location_ru?: string | null
-          marketing_tags?: string[] | null
-          max_speed?: string | null
-          name_en: string
-          name_ru: string
-          price_full_day?: number | null
-          price_half_day?: number | null
-          price_overnight?: number | null
-          price_sunset?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          photo?: string | null
+          price_per_day?: never
+          price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          skipper_included?: string | null
-          slug?: string | null
-          source_urls?: string[] | null
           uno_team_creator_id?: string | null
-          updated_at?: string
-          weather_dependency?: string | null
-          yacht_type?: string | null
-          year_built?: number | null
+          updated_at?: string | null
         }
         Update: {
-          addons?: string[] | null
+          address?: string | null
+          age_groups?: never
           approval_status?: string | null
-          balance_due_hours?: number | null
-          bathrooms?: number | null
-          beam?: string | null
-          booking_flow?: string | null
-          cabins?: number | null
-          cancellation_policy?: string | null
-          capacity?: number | null
-          charter_options?: string[] | null
-          cover_image?: string | null
-          created_at?: string
+          availability?: never
+          background_checked?: never
+          bio_en?: string | null
+          bio_ru?: string | null
+          can_cook?: never
+          can_drive?: never
+          certifications?: never
+          created_at?: string | null
           created_by_uno_team?: boolean | null
-          cruising_speed?: string | null
           currency?: string | null
-          departure_times?: string[] | null
-          deposit_percent?: number | null
-          description_en?: string | null
-          description_ru?: string | null
-          draft?: string | null
-          engines?: string | null
-          exclusions_en?: string[] | null
-          exclusions_ru?: string[] | null
-          features_en?: string[] | null
-          features_ru?: string[] | null
-          fuel_capacity?: string | null
-          fuel_policy?: string | null
-          has_catering?: boolean | null
-          has_crew?: boolean | null
-          ical_token?: string | null
-          ical_token_expires_at?: string | null
-          ical_token_refreshed_at?: string | null
-          id?: string
+          district?: string | null
+          email?: string | null
+          experience_years?: never
+          first_aid_certified?: never
+          id?: string | null
           images?: string[] | null
-          insurance_included?: string | null
-          insurance_notes?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_verified?: boolean | null
+          languages?: string[] | null
           lat?: number | null
-          length_meters?: number | null
-          lifeos_context?: string | null
           lng?: number | null
-          location_name?: string | null
-          location_ru?: string | null
-          marketing_tags?: string[] | null
-          max_speed?: string | null
-          name_en?: string
-          name_ru?: string
-          price_full_day?: number | null
-          price_half_day?: number | null
-          price_overnight?: number | null
-          price_sunset?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          photo?: string | null
+          price_per_day?: never
+          price_per_hour?: number | null
           provider_id?: string | null
           rating?: number | null
           rejection_reason?: string | null
           review_count?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          skipper_included?: string | null
-          slug?: string | null
-          source_urls?: string[] | null
           uno_team_creator_id?: string | null
-          updated_at?: string
-          weather_dependency?: string | null
-          yacht_type?: string | null
-          year_built?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "yachts_provider_id_fkey"
+            foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -24063,8 +22707,110 @@ export type Database = {
           },
         ]
       }
-    }
-    Views: {
+      banks: {
+        Row: {
+          accepts_foreigners: boolean | null
+          address: string | null
+          bank_type: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          features: string[] | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          logo: string | null
+          min_deposit: number | null
+          mobile_app: boolean | null
+          name_en: string | null
+          name_ru: string | null
+          online_banking: boolean | null
+          phone: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          swift_code: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          accepts_foreigners?: never
+          address?: string | null
+          bank_type?: never
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo?: string | null
+          min_deposit?: never
+          mobile_app?: never
+          name_en?: string | null
+          name_ru?: string | null
+          online_banking?: never
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          swift_code?: never
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          accepts_foreigners?: never
+          address?: string | null
+          bank_type?: never
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo?: string | null
+          min_deposit?: never
+          mobile_app?: never
+          name_en?: string | null
+          name_ru?: string | null
+          online_banking?: never
+          phone?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          swift_code?: never
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_life_map_v2: {
         Row: {
           entity_id: string | null
@@ -24081,65 +22827,100 @@ export type Database = {
         }
         Relationships: []
       }
-      experiences_normalized: {
+      cleaning_providers: {
         Row: {
-          age_restriction: number | null
+          address: string | null
           approval_status: string | null
-          available_days: string[] | null
-          category: string | null
-          category_normalized: string | null
-          certification_details: string | null
-          commission_rate: number | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
           currency: string | null
           description_en: string | null
           description_ru: string | null
-          difficulty: string | null
-          difficulty_normalized: string | null
-          duration_minutes: number | null
-          equipment_included: boolean | null
-          excludes: Json | null
-          experience_type: string | null
-          external_link: string | null
-          highlights: Json | null
+          district: string | null
+          email: string | null
+          features: string[] | null
           id: string | null
           images: string[] | null
-          includes: Json | null
-          inferred_classification: string | null
           is_active: boolean | null
-          is_certified: boolean | null
           is_featured: boolean | null
-          itinerary: Json | null
-          location_name: string | null
-          max_participants: number | null
-          meeting_point: string | null
-          meeting_point_lat: number | null
-          meeting_point_lng: number | null
-          min_participants: number | null
-          partner_id: string | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
           price: number | null
-          price_per: string | null
           provider_id: string | null
           rating: number | null
-          rejection_reason: string | null
-          requirements: Json | null
           review_count: number | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          safety_briefing_required: boolean | null
-          source_type: string | null
-          start_times: string[] | null
-          tags: string[] | null
-          title_en: string | null
-          title_ru: string | null
           uno_team_creator_id: string | null
           updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "experiences_provider_id_fkey"
+            foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -24147,19 +22928,377 @@ export type Database = {
           },
         ]
       }
-      life_os_catalog: {
+      clinics: {
         Row: {
+          address: string | null
+          approval_status: string | null
+          clinic_type: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
           currency: string | null
-          entity_id: string | null
-          entity_type: string | null
-          location: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          emergency_available: boolean | null
+          features: string[] | null
+          id: string | null
+          images: string[] | null
+          insurance_accepted: boolean | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
           price: number | null
           provider_id: string | null
-          title: string | null
-          title_ru: string | null
-          trust_level: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string | null
+          specializations: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
         }
-        Relationships: []
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          clinic_type?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          emergency_available?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          insurance_accepted?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          specializations?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          clinic_type?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          emergency_available?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          insurance_accepted?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          specializations?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_centers: {
+        Row: {
+          address: string | null
+          age_groups: string | null
+          approval_status: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          education_type: string | null
+          email: string | null
+          features: string[] | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          price: number | null
+          programs: string | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          age_groups?: never
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          education_type?: never
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          programs?: never
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          age_groups?: never
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          education_type?: never
+          email?: string | null
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          programs?: never
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiences: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty_level: string | null
+          district: string | null
+          duration: string | null
+          email: string | null
+          experience_type: string | null
+          features: string[] | null
+          id: string | null
+          images: string[] | null
+          included: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          max_participants: number | null
+          meeting_point: string | null
+          min_participants: number | null
+          name_en: string | null
+          name_ru: string | null
+          not_included: string | null
+          phone: string | null
+          price: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string | null
+          tags: string[] | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty_level?: never
+          district?: string | null
+          duration?: never
+          email?: string | null
+          experience_type?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_participants?: never
+          meeting_point?: never
+          min_participants?: never
+          name_en?: string | null
+          name_ru?: string | null
+          not_included?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty_level?: never
+          district?: string | null
+          duration?: never
+          email?: string | null
+          experience_type?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_participants?: never
+          meeting_point?: never
+          min_participants?: never
+          name_en?: string | null
+          name_ru?: string | null
+          not_included?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lifeos_health_view: {
         Row: {
@@ -24181,6 +23320,432 @@ export type Database = {
           title_ru: string | null
         }
         Relationships: []
+      }
+      pet_services: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          emergency_available: boolean | null
+          features: string[] | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          pet_types: string | null
+          phone: string | null
+          price: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          service_type: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          emergency_available?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          pet_types?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          emergency_available?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          pet_types?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_type?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          area: string | null
+          avg_check_thb: number | null
+          city: string | null
+          cover_image: string | null
+          created_at: string | null
+          cuisine: string | null
+          cuisine_tags: Json | null
+          currency: string | null
+          data_sources: Json | null
+          delivery_available: boolean | null
+          delivery_fee: number | null
+          delivery_provider: string | null
+          delivery_time: string | null
+          description_en: string | null
+          description_ru: string | null
+          description_short: string | null
+          district: string | null
+          email: string | null
+          gallery_image_urls: Json | null
+          hero_image_url: string | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          last_verified_at: string | null
+          lat: number | null
+          lng: number | null
+          menu_url: string | null
+          min_order_amount: number | null
+          name_en: string | null
+          name_ru: string | null
+          needs_manual_verification: boolean | null
+          order_url: string | null
+          phone: string | null
+          price: number | null
+          price_band: string | null
+          price_level: string | null
+          price_range: string | null
+          provider_id: string | null
+          rating: number | null
+          reservation_policy: string | null
+          reservation_provider: string | null
+          reservation_supported: boolean | null
+          reservation_url: string | null
+          review_count: number | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string | null
+          updated_at: string | null
+          verification_notes: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          area?: never
+          avg_check_thb?: never
+          city?: never
+          cover_image?: string | null
+          created_at?: string | null
+          cuisine?: never
+          cuisine_tags?: never
+          currency?: string | null
+          data_sources?: never
+          delivery_available?: never
+          delivery_fee?: never
+          delivery_provider?: never
+          delivery_time?: never
+          description_en?: string | null
+          description_ru?: string | null
+          description_short?: never
+          district?: string | null
+          email?: string | null
+          gallery_image_urls?: never
+          hero_image_url?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          last_verified_at?: never
+          lat?: number | null
+          lng?: number | null
+          menu_url?: never
+          min_order_amount?: never
+          name_en?: string | null
+          name_ru?: string | null
+          needs_manual_verification?: never
+          order_url?: never
+          phone?: string | null
+          price?: number | null
+          price_band?: never
+          price_level?: never
+          price_range?: never
+          provider_id?: string | null
+          rating?: number | null
+          reservation_policy?: never
+          reservation_provider?: never
+          reservation_supported?: never
+          reservation_url?: never
+          review_count?: number | null
+          seo_description?: never
+          seo_title?: never
+          slug?: string | null
+          updated_at?: string | null
+          verification_notes?: never
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          area?: never
+          avg_check_thb?: never
+          city?: never
+          cover_image?: string | null
+          created_at?: string | null
+          cuisine?: never
+          cuisine_tags?: never
+          currency?: string | null
+          data_sources?: never
+          delivery_available?: never
+          delivery_fee?: never
+          delivery_provider?: never
+          delivery_time?: never
+          description_en?: string | null
+          description_ru?: string | null
+          description_short?: never
+          district?: string | null
+          email?: string | null
+          gallery_image_urls?: never
+          hero_image_url?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          last_verified_at?: never
+          lat?: number | null
+          lng?: number | null
+          menu_url?: never
+          min_order_amount?: never
+          name_en?: string | null
+          name_ru?: string | null
+          needs_manual_verification?: never
+          order_url?: never
+          phone?: string | null
+          price?: number | null
+          price_band?: never
+          price_level?: never
+          price_range?: never
+          provider_id?: string | null
+          rating?: number | null
+          reservation_policy?: never
+          reservation_provider?: never
+          reservation_supported?: never
+          reservation_url?: never
+          review_count?: number | null
+          seo_description?: never
+          seo_title?: never
+          slug?: string | null
+          updated_at?: string | null
+          verification_notes?: never
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tours: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          difficulty_level: string | null
+          district: string | null
+          duration: string | null
+          email: string | null
+          experience_type: string | null
+          features: string[] | null
+          id: string | null
+          images: string[] | null
+          included: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          max_participants: number | null
+          meeting_point: string | null
+          min_participants: number | null
+          name_en: string | null
+          name_ru: string | null
+          not_included: string | null
+          phone: string | null
+          price: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string | null
+          tags: string[] | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty_level?: never
+          district?: string | null
+          duration?: never
+          email?: string | null
+          experience_type?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_participants?: never
+          meeting_point?: never
+          min_participants?: never
+          name_en?: string | null
+          name_ru?: string | null
+          not_included?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          difficulty_level?: never
+          district?: string | null
+          duration?: never
+          email?: string | null
+          experience_type?: never
+          features?: string[] | null
+          id?: string | null
+          images?: string[] | null
+          included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          max_participants?: never
+          meeting_point?: never
+          min_participants?: never
+          name_en?: string | null
+          name_ru?: string | null
+          not_included?: never
+          phone?: string | null
+          price?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_marketplace_listings: {
         Row: {
@@ -24990,6 +24555,155 @@ export type Database = {
           },
         ]
       }
+      vehicles: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          brand: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          delivery_available: boolean | null
+          deposit: number | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          driver_available: boolean | null
+          email: string | null
+          features: string[] | null
+          fuel_type: string | null
+          id: string | null
+          images: string[] | null
+          insurance_included: boolean | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          lat: number | null
+          lng: number | null
+          model: string | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          price: number | null
+          price_per_day: number | null
+          price_per_month: number | null
+          price_per_week: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          seats: number | null
+          slug: string | null
+          tags: string[] | null
+          transmission: string | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          vehicle_type: string | null
+          website: string | null
+          year: number | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          brand?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          delivery_available?: never
+          deposit?: never
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          driver_available?: never
+          email?: string | null
+          features?: string[] | null
+          fuel_type?: never
+          id?: string | null
+          images?: string[] | null
+          insurance_included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          model?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_per_day?: never
+          price_per_month?: never
+          price_per_week?: never
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          seats?: never
+          slug?: string | null
+          tags?: string[] | null
+          transmission?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vehicle_type?: never
+          website?: string | null
+          year?: never
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          brand?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          delivery_available?: never
+          deposit?: never
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          driver_available?: never
+          email?: string | null
+          features?: string[] | null
+          fuel_type?: never
+          id?: string | null
+          images?: string[] | null
+          insurance_included?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          model?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_per_day?: never
+          price_per_month?: never
+          price_per_week?: never
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          seats?: never
+          slug?: string | null
+          tags?: string[] | null
+          transmission?: never
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vehicle_type?: never
+          website?: string | null
+          year?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vertical_task_coverage: {
         Row: {
           contextual_tasks: number | null
@@ -25000,6 +24714,254 @@ export type Database = {
           vertical_code: string | null
         }
         Relationships: []
+      }
+      yachts: {
+        Row: {
+          addons: Json | null
+          address: string | null
+          approval_status: string | null
+          balance_due_hours: number | null
+          bathrooms: number | null
+          beam: string | null
+          booking_flow: string | null
+          cabins: number | null
+          cancellation_policy: string | null
+          capacity: number | null
+          charter_options: Json | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          cruising_speed: string | null
+          currency: string | null
+          departure_times: Json | null
+          deposit_percent: number | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          draft: string | null
+          email: string | null
+          engines: string | null
+          exclusions_en: Json | null
+          exclusions_ru: Json | null
+          features: string[] | null
+          features_en: Json | null
+          features_ru: Json | null
+          fuel_capacity: string | null
+          fuel_policy: string | null
+          has_catering: boolean | null
+          has_crew: boolean | null
+          ical_token: string | null
+          ical_token_expires_at: string | null
+          ical_token_refreshed_at: string | null
+          id: string | null
+          images: string[] | null
+          insurance_included: boolean | null
+          insurance_notes: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          length_meters: number | null
+          lifeos_context: string | null
+          lng: number | null
+          location_name: string | null
+          location_ru: string | null
+          marketing_tags: Json | null
+          max_speed: string | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          price: number | null
+          price_full_day: number | null
+          price_half_day: number | null
+          price_overnight: number | null
+          price_sunset: number | null
+          provider_id: string | null
+          rating: number | null
+          rejection_reason: string | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          skipper_included: boolean | null
+          slug: string | null
+          source_urls: Json | null
+          tags: string[] | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          weather_dependency: string | null
+          website: string | null
+          working_hours: Json | null
+          yacht_type: string | null
+          year_built: number | null
+        }
+        Insert: {
+          addons?: never
+          address?: string | null
+          approval_status?: string | null
+          balance_due_hours?: never
+          bathrooms?: never
+          beam?: never
+          booking_flow?: never
+          cabins?: never
+          cancellation_policy?: never
+          capacity?: never
+          charter_options?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          cruising_speed?: never
+          currency?: string | null
+          departure_times?: never
+          deposit_percent?: never
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          draft?: never
+          email?: string | null
+          engines?: never
+          exclusions_en?: never
+          exclusions_ru?: never
+          features?: string[] | null
+          features_en?: never
+          features_ru?: never
+          fuel_capacity?: never
+          fuel_policy?: never
+          has_catering?: never
+          has_crew?: never
+          ical_token?: never
+          ical_token_expires_at?: never
+          ical_token_refreshed_at?: never
+          id?: string | null
+          images?: string[] | null
+          insurance_included?: never
+          insurance_notes?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          length_meters?: never
+          lifeos_context?: never
+          lng?: number | null
+          location_name?: never
+          location_ru?: never
+          marketing_tags?: never
+          max_speed?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_full_day?: never
+          price_half_day?: never
+          price_overnight?: never
+          price_sunset?: never
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skipper_included?: never
+          slug?: string | null
+          source_urls?: never
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          weather_dependency?: never
+          website?: string | null
+          working_hours?: Json | null
+          yacht_type?: never
+          year_built?: never
+        }
+        Update: {
+          addons?: never
+          address?: string | null
+          approval_status?: string | null
+          balance_due_hours?: never
+          bathrooms?: never
+          beam?: never
+          booking_flow?: never
+          cabins?: never
+          cancellation_policy?: never
+          capacity?: never
+          charter_options?: never
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          cruising_speed?: never
+          currency?: string | null
+          departure_times?: never
+          deposit_percent?: never
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          draft?: never
+          email?: string | null
+          engines?: never
+          exclusions_en?: never
+          exclusions_ru?: never
+          features?: string[] | null
+          features_en?: never
+          features_ru?: never
+          fuel_capacity?: never
+          fuel_policy?: never
+          has_catering?: never
+          has_crew?: never
+          ical_token?: never
+          ical_token_expires_at?: never
+          ical_token_refreshed_at?: never
+          id?: string | null
+          images?: string[] | null
+          insurance_included?: never
+          insurance_notes?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          length_meters?: never
+          lifeos_context?: never
+          lng?: number | null
+          location_name?: never
+          location_ru?: never
+          marketing_tags?: never
+          max_speed?: never
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_full_day?: never
+          price_half_day?: never
+          price_overnight?: never
+          price_sunset?: never
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skipper_included?: never
+          slug?: string | null
+          source_urls?: never
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          weather_dependency?: never
+          website?: string | null
+          working_hours?: Json | null
+          yacht_type?: never
+          year_built?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

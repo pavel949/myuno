@@ -10,6 +10,22 @@ export type ContentType =
   | 'flower_shops' | 'stores' | 'vendor_locations';
 
 // Column mappings for tables with different column names
+// Map ContentType → actual DB table/view name
+const TABLE_NAME_MAP: Record<string, string> = {
+  owner_properties: 'properties',
+  cleaning_services: 'cleaning_providers',
+  education_providers: 'education_centers',
+  legal_services: 'lawyers',
+  insurance_providers: 'insurance_plans',
+  stores: 'marketplace_products',
+  pharmacies: 'pharmacies',
+  tours: 'tours',
+};
+
+function resolveTable(contentType: string): string {
+  return TABLE_NAME_MAP[contentType] || contentType;
+}
+
 const COLUMN_MAPPINGS: Record<string, { imageColumn: string; titleColumn: string }> = {
   babysitters: { imageColumn: 'photo', titleColumn: 'name_en' },
   tours: { imageColumn: 'cover_image', titleColumn: 'title_en' },
@@ -208,8 +224,7 @@ export function useContentModeration() {
           `;
         }
 
-        const { data, error } = await supabase
-          .from(table)
+        const { data, error } = await (supabase as any).from(resolveTable(table))
           .select(selectQuery)
           .eq('approval_status', statusFilter)
           .order('created_at', { ascending: false });
@@ -342,7 +357,7 @@ export function useContentModeration() {
     try {
       // Build update payload based on table structure
       // owner_properties maps to 'properties' table with approved_by/approved_at
-      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
+      const actualTable = resolveTable(contentType);
       const updatePayload = contentType === 'owner_properties' 
         ? {
             approval_status: 'approved',
@@ -357,7 +372,7 @@ export function useContentModeration() {
           };
 
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const { error } = await (supabase.from(actualTable) as any)
+      const { error } = await (supabase as any).from(actualTable)
         .update(updatePayload)
         .eq('id', contentId);
 
@@ -409,7 +424,7 @@ export function useContentModeration() {
       const isInfoRequest = rejectionReason.startsWith('[ЗАПРОС ИНФОРМАЦИИ / INFO REQUEST]:');
       
       // Build update payload based on table structure
-      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
+      const actualTable = resolveTable(contentType);
       const updatePayload = contentType === 'owner_properties'
         ? {
             approval_status: 'rejected',
@@ -425,7 +440,7 @@ export function useContentModeration() {
           };
 
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const { error } = await (supabase.from(actualTable) as any)
+      const { error } = await (supabase as any).from(actualTable)
         .update(updatePayload)
         .eq('id', contentId);
 
@@ -477,8 +492,8 @@ export function useContentModeration() {
   ): Promise<Record<string, any> | null> => {
     try {
       // Use 'as any' to avoid TypeScript union type complexity with dynamic table names
-      const actualTable = contentType === 'owner_properties' ? 'properties' : contentType;
-      const query = (supabase.from(actualTable) as any).select('*');
+      const actualTable = resolveTable(contentType);
+      const query = (supabase as any).from(actualTable).select('*');
       
       // Only add provider join for non-owner_properties tables
       if (contentType !== 'owner_properties') {
