@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { format as formatDate } from 'date-fns';
+import { ru as ruLocale } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateFinancial } from '@/hooks/usePropertyFinancials';
 import { useMyProperties } from '@/hooks/useMyProperties';
@@ -17,9 +19,11 @@ import { VendorCombobox } from '@/components/owner/expense/VendorCombobox';
 import { VoiceInput } from '@/components/ui/voice-input';
 import {
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
-  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp, RefreshCw
+  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp, RefreshCw, CalendarIcon
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/lib/errorHandler';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -73,6 +77,7 @@ export default function QuickExpense() {
   const [showExtras, setShowExtras] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringInterval, setRecurringInterval] = useState('monthly');
+  const [transactionDate, setTransactionDate] = useState<Date>(new Date());
 
   const handleCategorySuggestion = (suggestedCategory: string) => {
     if (!category) setCategory(suggestedCategory);
@@ -95,7 +100,7 @@ export default function QuickExpense() {
         category,
         description,
         payment_method: paymentMethod || 'cash',
-        transaction_date: format(new Date(), 'yyyy-MM-dd'),
+        transaction_date: formatDate(transactionDate, 'yyyy-MM-dd'),
         status: 'completed',
         receipt_url: receiptUrl || undefined,
         vendor_name: vendorName || undefined,
@@ -213,7 +218,49 @@ export default function QuickExpense() {
           })}
         </div>
 
-        {/* Recurring toggle */}
+        {/* Date picker */}
+        <div>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Дата расхода' : 'Expense date'}</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal h-10",
+                  !transactionDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formatDate(transactionDate, 'd MMMM yyyy', { locale: isRu ? ruLocale : undefined })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={transactionDate}
+                onSelect={(date) => date && setTransactionDate(date)}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Comment */}
+        <div>
+          <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Комментарий' : 'Comment'}</Label>
+          <div className="flex gap-2">
+            <Textarea
+              placeholder={isRu ? 'Что купили?' : 'What was purchased?'}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className="flex-1 text-sm resize-none"
+            />
+            <VoiceInput onTranscript={handleVoiceTranscript} className="self-end shrink-0" />
+          </div>
+        </div>
+
         <div className={cn(
           'flex items-center justify-between p-3 rounded-xl border transition-colors',
           isRecurring ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
@@ -249,7 +296,7 @@ export default function QuickExpense() {
             <Button variant="ghost" className="w-full h-10 text-muted-foreground hover:text-foreground gap-2">
               {showExtras ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {isRu ? 'Дополнительно' : 'More details'}
-              {(vendorName || description || receiptUrl) && (
+              {(vendorName || receiptUrl) && (
                 <span className="ml-1 w-2 h-2 rounded-full bg-primary" />
               )}
             </Button>
@@ -262,19 +309,6 @@ export default function QuickExpense() {
                 onChange={setVendorName}
                 onCategorySuggestion={handleCategorySuggestion}
               />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 block">{isRu ? 'Описание' : 'Description'}</Label>
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder={isRu ? 'Что купили?' : 'What was purchased?'}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={2}
-                  className="flex-1 text-sm resize-none"
-                />
-                <VoiceInput onTranscript={handleVoiceTranscript} className="self-end shrink-0" />
-              </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">
