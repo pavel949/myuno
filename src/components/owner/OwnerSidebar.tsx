@@ -162,7 +162,7 @@ export function OwnerSidebar() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { user, signOut } = useAuth();
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
   const { canAccess } = useTeamPermissions();
@@ -196,12 +196,17 @@ export function OwnerSidebar() {
     }),
   })).filter(group => group.items.length > 0);
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (isMobile) setOpenMobile(false);
+  };
+
   const renderNavItem = (item: NavItem) => {
     const badgeCount = getBadgeCount(item.badgeKey);
     return (
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
-          onClick={() => navigate(item.path)}
+          onClick={() => handleNavigate(item.path)}
           isActive={isActive(item.path)}
           tooltip={isRussian ? item.titleRu : item.title}
           className={cn(

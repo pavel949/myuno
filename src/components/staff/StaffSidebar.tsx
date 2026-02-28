@@ -47,10 +47,15 @@ export function StaffSidebar() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, signOut } = useAuth();
-  const { open } = useSidebar();
+  const { open, isMobile, setOpenMobile } = useSidebar();
   const isRu = language === 'ru';
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -81,7 +86,7 @@ export function StaffSidebar() {
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     isActive={isActive(item.path)}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => handleNavigate(item.path)}
                     tooltip={isRu ? item.titleRu : item.title}
                     className={cn(
                       "transition-all duration-200",
