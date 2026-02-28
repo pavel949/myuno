@@ -63,12 +63,22 @@ export default function AdminRestaurantDataQuality() {
   });
 
   const markVerified = async (id: string) => {
+    // Update JSONB attributes in listings table
+    const { data: current } = await supabase
+      .from('listings')
+      .select('attributes')
+      .eq('id', id)
+      .single();
+    
+    const updatedAttrs = {
+      ...(current?.attributes as Record<string, any> || {}),
+      needs_manual_verification: false,
+      last_verified_at: new Date().toISOString(),
+    };
+
     const { error } = await supabase
-      .from('restaurants')
-      .update({
-        needs_manual_verification: false,
-        last_verified_at: new Date().toISOString(),
-      })
+      .from('listings')
+      .update({ attributes: updatedAttrs } as any)
       .eq('id', id);
 
     if (error) {
