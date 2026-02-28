@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { untypedTables } from '@/lib/untypedTables';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,8 +30,7 @@ export default function AdminAIOps() {
     queryKey: ['ai-decisions-24h'],
     queryFn: async () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await (supabase as any)
-        .from('ai_decisions_log')
+      const { data } = await untypedTables.aiDecisionsLog()
         .select('*')
         .gte('created_at', since)
         .order('created_at', { ascending: false })
@@ -44,7 +44,7 @@ export default function AdminAIOps() {
     queryKey: ['social-posts-stats'],
     queryFn: async () => {
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await (supabase as any).from('social_posts').select('status, platform').gte('created_at', since);
+      const { data } = await untypedTables.socialPosts().select('status, platform').gte('created_at', since);
       return {
         total: data?.length || 0,
         published: data?.filter(p => p.status === 'published').length || 0,
@@ -58,8 +58,7 @@ export default function AdminAIOps() {
     queryKey: ['content-calendar'],
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
-      const { data } = await (supabase as any)
-        .from('social_content_calendar')
+      const { data } = await untypedTables.socialContentCalendar()
         .select('*')
         .gte('scheduled_date', today)
         .order('scheduled_date')
@@ -73,7 +72,7 @@ export default function AdminAIOps() {
   const { data: ownerPipeline } = useQuery({
     queryKey: ['owner-pipeline'],
     queryFn: async () => {
-      const { data } = await (supabase as any).from('owner_prospects').select('status, nurture_stage, ai_score');
+      const { data } = await untypedTables.ownerProspects().select('status, nurture_stage, ai_score');
       const stats = {
         total: data?.length || 0,
         new: data?.filter(o => o.status === 'new').length || 0,
@@ -333,8 +332,7 @@ export default function AdminAIOps() {
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  const { error } = await (supabase as any)
-                                    .from('social_content_calendar')
+                                  const { error } = await untypedTables.socialContentCalendar()
                                     .update({ status: 'approved' })
                                     .eq('id', item.id);
                                   if (error) throw error;
