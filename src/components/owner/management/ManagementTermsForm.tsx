@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import {
   Percent,
@@ -23,6 +24,10 @@ import {
   Zap,
   Send,
   Bell,
+  Users,
+  FileText,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import {
   ManagementTerms,
@@ -34,6 +39,19 @@ import {
   useUpdateManagementTerms,
 } from '@/hooks/usePropertyManagementTerms';
 import { useLogTermsActivity } from '@/hooks/useManagementTermsActivity';
+import {
+  usePayoutRules,
+  useCreatePayoutRule,
+  useDeletePayoutRule,
+  PayoutRule,
+  PayoutRuleInsert,
+  RecipientType,
+  CommissionType,
+  PayoutFrequency,
+  AccountingPolicy,
+  DEFAULT_ACCOUNTING_POLICY,
+} from '@/hooks/usePayoutRules';
+import { PayoutWaterfall } from './PayoutWaterfall';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
@@ -182,6 +200,10 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
   const logActivity = useLogTermsActivity();
   const isLoading = createTerms.isPending || updateTerms.isPending;
 
+  const createPayoutRule = useCreatePayoutRule();
+  const deletePayoutRule = useDeletePayoutRule();
+  const { data: payoutRules = [] } = usePayoutRules(propertyId);
+
   const [form, setForm] = useState<ManagementTermsUpdate>(() => ({
     property_id: propertyId,
     manager_user_id: existing?.manager_user_id || user?.id || '',
@@ -199,6 +221,23 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
     notes: existing?.notes || '',
     status: existing?.status || 'draft',
   }));
+
+  const [accountingPolicy, setAccountingPolicy] = useState<AccountingPolicy>(() => {
+    const existingPolicy = (existing as any)?.accounting_policy;
+    return existingPolicy && Object.keys(existingPolicy).length > 0
+      ? { ...DEFAULT_ACCOUNTING_POLICY, ...existingPolicy }
+      : { ...DEFAULT_ACCOUNTING_POLICY };
+  });
+
+  // New payout rule form
+  const [newRule, setNewRule] = useState<Partial<PayoutRuleInsert>>({
+    recipient_type: 'coagent',
+    commission_type: 'percent_net',
+    commission_value: 5,
+    payout_frequency: 'monthly',
+    deduct_before_owner: false,
+    is_active: true,
+  });
 
   const [presetApplied, setPresetApplied] = useState<string | null>(null);
   const [notifDefaults, setNotifDefaults] = useState<NotificationDefaults>(() => {
@@ -238,7 +277,7 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
   };
 
   const handleSave = async (status: 'draft' | 'active' | 'pending_approval' = 'active') => {
-    const payload = { ...form, status, property_id: propertyId, owner_notification_defaults: notifDefaults } as any;
+    const payload = { ...form, status, property_id: propertyId, owner_notification_defaults: notifDefaults, accounting_policy: accountingPolicy } as any;
     try {
       let result: ManagementTerms;
       if (existing) {
@@ -656,7 +695,192 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
         </CardContent>
       </Card>
 
-      {/* ── Section E: Notes ── */}
+      {/* ── Section F: Co-agent & Staff Commissions ── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            {isRu ? 'F. Комиссии со-агентов и сотрудников' : 'F. Co-agent & Staff Commissions'}
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            {isRu ? 'Настройте правила выплат для каждого получателя' : 'Configure payout rules for each recipient'}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {payoutRules.map((rule) => (
+            <div key={rule.id} className="flex items-center gap-2 p-3 rounded-xl bg-muted/40 border">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="secondary" className="text-xs">
+                    {rule.recipient_type === 'coagent' ? (isRu ? 'Со-агент' : 'Co-agent')
+                      : rule.recipient_type === 'staff' ? (isRu ? 'Сотрудник' : 'Staff')
+                      : (isRu ? 'Партнёр' : 'Partner')}
+                  </Badge>
+                  <span className="text-sm font-medium truncate">{rule.recipient_name || '—'}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {rule.commission_type === 'percent_net' ? `${rule.commission_value}% ${isRu ? 'от чистого' : 'of net'}`
+                    : rule.commission_type === 'percent_gross' ? `${rule.commission_value}% ${isRu ? 'от валового' : 'of gross'}`
+                    : rule.commission_type === 'fixed' ? `${rule.commission_value} ${form.payment_currency || 'THB'} ${isRu ? 'фикс' : 'fixed'}`
+                    : `${rule.commission_value} ${isRu ? 'за бронирование' : 'per booking'}`}
+                  {rule.deduct_before_owner && ` · ${isRu ? 'до доли собственника' : 'before owner split'}`}
+                </p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => deletePayoutRule.mutate({ id: rule.id, propertyId })}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+
+          <div className="space-y-3 p-3 rounded-xl border border-dashed border-primary/30">
+            <p className="text-xs font-medium text-primary">{isRu ? 'Добавить получателя' : 'Add recipient'}</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">{isRu ? 'Тип' : 'Type'}</Label>
+                <Select value={newRule.recipient_type || 'coagent'} onValueChange={(v) => setNewRule(prev => ({ ...prev, recipient_type: v as RecipientType }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="coagent">{isRu ? 'Со-агент' : 'Co-agent'}</SelectItem>
+                    <SelectItem value="staff">{isRu ? 'Сотрудник' : 'Staff'}</SelectItem>
+                    <SelectItem value="partner">{isRu ? 'Партнёр' : 'Partner'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{isRu ? 'Имя' : 'Name'}</Label>
+                <Input className="h-9" placeholder={isRu ? 'Имя получателя' : 'Recipient name'} value={newRule.recipient_name || ''} onChange={(e) => setNewRule(prev => ({ ...prev, recipient_name: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">{isRu ? 'Тип комиссии' : 'Commission'}</Label>
+                <Select value={newRule.commission_type || 'percent_net'} onValueChange={(v) => setNewRule(prev => ({ ...prev, commission_type: v as CommissionType }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percent_net">% net</SelectItem>
+                    <SelectItem value="percent_gross">% gross</SelectItem>
+                    <SelectItem value="fixed">{isRu ? 'Фикс' : 'Fixed'}</SelectItem>
+                    <SelectItem value="per_booking">{isRu ? 'За бронь' : 'Per booking'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{isRu ? 'Значение' : 'Value'}</Label>
+                <Input type="number" className="h-9" min={0} value={newRule.commission_value ?? ''} onChange={(e) => setNewRule(prev => ({ ...prev, commission_value: Number(e.target.value) }))} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{isRu ? 'Частота' : 'Freq'}</Label>
+                <Select value={newRule.payout_frequency || 'monthly'} onValueChange={(v) => setNewRule(prev => ({ ...prev, payout_frequency: v as PayoutFrequency }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="per_booking">{isRu ? 'За бронь' : 'Per booking'}</SelectItem>
+                    <SelectItem value="monthly">{isRu ? 'Мес.' : 'Monthly'}</SelectItem>
+                    <SelectItem value="quarterly">{isRu ? 'Кварт.' : 'Quarterly'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch checked={newRule.deduct_before_owner ?? false} onCheckedChange={(v) => setNewRule(prev => ({ ...prev, deduct_before_owner: v }))} />
+                <Label className="text-xs font-normal">{isRu ? 'Вычитать до доли собственника' : 'Deduct before owner split'}</Label>
+              </div>
+              <Button size="sm" variant="outline" disabled={!newRule.recipient_name || createPayoutRule.isPending} onClick={() => {
+                createPayoutRule.mutate({
+                  property_id: propertyId, management_terms_id: existing?.id || null,
+                  recipient_type: newRule.recipient_type || 'coagent', recipient_staff_id: null,
+                  recipient_name: newRule.recipient_name || '', commission_type: newRule.commission_type || 'percent_net',
+                  commission_value: newRule.commission_value || 0, deduct_before_owner: newRule.deduct_before_owner || false,
+                  min_payout: null, payout_frequency: newRule.payout_frequency || 'monthly', notes: null, is_active: true,
+                });
+                setNewRule({ recipient_type: 'coagent', commission_type: 'percent_net', commission_value: 5, payout_frequency: 'monthly', deduct_before_owner: false, is_active: true });
+              }}>
+                <Plus className="h-3 w-3 mr-1" />{isRu ? 'Добавить' : 'Add'}
+              </Button>
+            </div>
+          </div>
+
+          {(payoutRules.length > 0 || commissionRate > 0) && (
+            <div className="mt-4">
+              <p className="text-xs font-medium text-muted-foreground mb-2">{isRu ? 'Формула распределения (пример на 100,000)' : 'Distribution formula (example on 100,000)'}</p>
+              <PayoutWaterfall grossIncome={100000} payoutRules={payoutRules} ownerSplitPercent={ownerSplit} managerSplitPercent={commissionRate} commissionBase={form.commission_base || 'gross'} currency={form.payment_currency || 'THB'} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Section G: Accounting Policy ── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {isRu ? 'G. Учётная политика' : 'G. Accounting Policy'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm">{isRu ? 'Вычеты для чистого дохода' : 'Net income deductions'}</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {EXPENSE_ITEMS.map(({ key, labelEn, labelRu }) => (
+                <div key={key} className="flex items-center gap-2">
+                  <Checkbox checked={accountingPolicy.net_profit_deductions.includes(key)} onCheckedChange={(checked) => setAccountingPolicy(prev => ({ ...prev, net_profit_deductions: checked ? [...prev.net_profit_deductions, key] : prev.net_profit_deductions.filter(k => k !== key) }))} />
+                  <Label className="text-xs font-normal">{isRu ? labelRu : labelEn}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <Separator />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Частота отчётов' : 'Report frequency'}</Label>
+              <Select value={accountingPolicy.report_frequency} onValueChange={(v) => setAccountingPolicy(prev => ({ ...prev, report_frequency: v as AccountingPolicy['report_frequency'] }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">{isRu ? 'Ежемесячно' : 'Monthly'}</SelectItem>
+                  <SelectItem value="quarterly">{isRu ? 'Ежеквартально' : 'Quarterly'}</SelectItem>
+                  <SelectItem value="on_demand">{isRu ? 'По запросу' : 'On demand'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Формат' : 'Format'}</Label>
+              <Select value={accountingPolicy.report_format} onValueChange={(v) => setAccountingPolicy(prev => ({ ...prev, report_format: v as AccountingPolicy['report_format'] }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">{isRu ? 'Краткий' : 'Summary'}</SelectItem>
+                  <SelectItem value="detailed">{isRu ? 'Детальный' : 'Detailed'}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Мин. выплата' : 'Min payout'}</Label>
+              <Input type="number" min={0} placeholder="5000" value={accountingPolicy.minimum_payout ?? ''} onChange={(e) => setAccountingPolicy(prev => ({ ...prev, minimum_payout: e.target.value ? Number(e.target.value) : null }))} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Удержание (дней)' : 'Hold (days)'}</Label>
+              <Input type="number" min={0} placeholder="7" value={accountingPolicy.payout_hold_days ?? ''} onChange={(e) => setAccountingPolicy(prev => ({ ...prev, payout_hold_days: e.target.value ? Number(e.target.value) : null }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Порог одобрения' : 'Approval threshold'}</Label>
+              <Input type="number" min={0} placeholder="10000" value={accountingPolicy.owner_approval_required_above ?? ''} onChange={(e) => setAccountingPolicy(prev => ({ ...prev, owner_approval_required_above: e.target.value ? Number(e.target.value) : null }))} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{isRu ? 'Налог (%)' : 'Tax (%)'}</Label>
+              <Input type="number" min={0} max={100} placeholder="0" value={accountingPolicy.tax_withholding_percent ?? ''} onChange={(e) => setAccountingPolicy(prev => ({ ...prev, tax_withholding_percent: e.target.value ? Number(e.target.value) : null }))} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch checked={!accountingPolicy.include_pending_bookings} onCheckedChange={(v) => setAccountingPolicy(prev => ({ ...prev, include_pending_bookings: !v }))} />
+            <Label className="text-xs font-normal">{isRu ? 'Только подтверждённые бронирования' : 'Confirmed bookings only'}</Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Section H: Notes ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
