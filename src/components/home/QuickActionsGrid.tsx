@@ -248,21 +248,21 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               isLocked && "opacity-60",
             )}
           >
-            {/* Icon container — saturated tint background */}
+            {/* Icon container — saturated tint with subtle gradient */}
             <div className={cn(
               "relative w-14 h-14 rounded-2xl flex items-center justify-center",
-              "transition-transform duration-200 group-hover:scale-105",
-              "shadow-sm",
+              "transition-all duration-200 group-hover:scale-105 group-active:scale-95",
+              "shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06]",
               tint,
               "lg:w-16 lg:h-16"
             )}>
               <Icon 
                 className={cn(
                   isMore ? "text-muted-foreground" : iconColor,
-                  "lg:!w-7 lg:!h-7"
+                  "lg:!w-7 lg:!h-7 drop-shadow-sm"
                 )}
                 style={{ width: 26, height: 26 }}
-                strokeWidth={2}
+                strokeWidth={2.2}
               />
               {isLocked && (
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center">

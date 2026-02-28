@@ -20,11 +20,12 @@ import {
   Megaphone,
   BookOpen,
   Crown,
+  type LucideIcon,
 } from 'lucide-react';
 
 interface MenuItem {
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   labelEn: string;
   labelRu: string;
 }
@@ -96,18 +97,20 @@ export function OwnerDashboardMenu() {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 px-1">
             {isRu ? section.titleRu : section.titleEn}
           </p>
-          <div className="divide-y">
+          <div className="divide-y divide-border/50">
             {section.items.map((item) => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className="w-full flex items-center gap-4 py-3.5 text-left hover:opacity-70 transition-opacity active:scale-[0.99]"
+                  className="w-full flex items-center gap-3.5 py-3.5 text-left hover:opacity-70 transition-all active:scale-[0.99]"
                 >
-                  <Icon className="h-5 w-5 text-foreground/70 flex-shrink-0" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+                    <Icon className="h-5 w-5 text-primary" strokeWidth={2} />
+                  </div>
                   <span className="flex-1 text-[15px] font-medium">{isRu ? item.labelRu : item.labelEn}</span>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/40" strokeWidth={2.5} />
                 </button>
               );
             })}
