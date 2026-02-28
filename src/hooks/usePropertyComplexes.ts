@@ -14,9 +14,8 @@ export interface PropertyComplex {
   created_at: string;
   updated_at: string;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
+// Type-safe: property_complexes exists in Database schema
+const db = supabase;
 
 export function usePropertyComplexes() {
   const { user } = useAuth();

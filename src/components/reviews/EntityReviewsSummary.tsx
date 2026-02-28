@@ -23,8 +23,8 @@ export function EntityReviewsSummary({ entityType, entityId, compact }: EntityRe
   const { data: stats } = useQuery<ReviewStats>({
     queryKey: ['entity-reviews-stats', entityType, entityId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from('reviews')
+      // TS2589 workaround: reviews table causes deep type instantiation
+      const { data, error } = await (supabase.from as any)('reviews')
         .select('rating')
         .eq('entity_type', entityType)
         .eq('entity_id', entityId)
@@ -87,7 +87,7 @@ export function EntityReviewsSummary({ entityType, entityId, compact }: EntityRe
               <span className="w-3 text-muted-foreground">{star}</span>
               <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-amber-400 transition-all"
+                  className="h-full rounded-full bg-warning transition-all"
                   style={{ width: `${pct}%` }}
                 />
               </div>

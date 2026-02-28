@@ -59,9 +59,8 @@ export const DEFAULT_EXPENSES: ExpenseResponsibility = {
   insurance: 'owner',
   marketing: 'manager',
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
+// Type-safe: property_management_terms exists in Database schema
+const db = supabase;
 
 export function usePropertyManagementTerms(propertyId?: string) {
   const { user } = useAuth();
@@ -77,7 +76,7 @@ export function usePropertyManagementTerms(propertyId?: string) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as ManagementTerms[];
+      return (data || []) as unknown as ManagementTerms[];
     },
   });
 }
@@ -98,7 +97,7 @@ export function useAllManagementTerms() {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as ManagementTerms[];
+      return (data || []) as unknown as ManagementTerms[];
     },
   });
 }
@@ -136,7 +135,7 @@ export function useCreateManagementTerms() {
         .single();
 
       if (error) throw error;
-      return result as ManagementTerms;
+      return result as unknown as ManagementTerms;
     },
     onSuccess: (result: ManagementTerms) => {
       queryClient.invalidateQueries({ queryKey: ['management-terms', result.property_id] });
@@ -163,7 +162,7 @@ export function useUpdateManagementTerms() {
         .single();
 
       if (error) throw error;
-      return data as ManagementTerms;
+      return data as unknown as ManagementTerms;
     },
     onSuccess: (result: ManagementTerms) => {
       queryClient.invalidateQueries({ queryKey: ['management-terms', result.property_id] });

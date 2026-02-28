@@ -15,7 +15,8 @@ interface OwnerFinanceTabProps {
   propertyId: string;
 }
 
-const db = supabase as any;
+// Type-safe: property_financials exists in Database schema
+const db = supabase;
 
 export function OwnerFinanceTab({ propertyId }: OwnerFinanceTabProps) {
   const { language } = useLanguage();

@@ -15,7 +15,7 @@ export interface OwnerNotification {
   created_at: string;
 }
 
-const db = supabase as any;
+const db = supabase;
 
 export function useOwnerNotifications() {
   const { user } = useAuth();
