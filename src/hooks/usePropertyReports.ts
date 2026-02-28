@@ -103,6 +103,10 @@ export interface GenerateReportInput {
   report_type: ReportType;
   period_start: string;
   period_end: string;
+  includeIncome?: boolean;
+  includeExpenses?: boolean;
+  incomeCategories?: string[];
+  expenseCategories?: string[];
 }
 
 // Fetch reports for a property (owners + delegates with financials permission)
@@ -188,27 +192,33 @@ export function useGenerateReport() {
         transactions: [] as ReportData['expenses']['transactions'],
       };
 
+      const shouldIncludeIncome = input.includeIncome !== false;
+      const shouldIncludeExpenses = input.includeExpenses !== false;
+      const allowedIncomeCategories = input.incomeCategories;
+      const allowedExpenseCategories = input.expenseCategories;
+
       (financials || []).forEach((f: any) => {
-        if (f.transaction_type === 'income') {
+        const cat = f.category || 'other';
+        if (f.transaction_type === 'income' && shouldIncludeIncome) {
+          if (allowedIncomeCategories && !allowedIncomeCategories.includes(cat)) return;
           income.total += Number(f.amount);
-          income.by_category[f.category || 'other'] =
-            (income.by_category[f.category || 'other'] || 0) + Number(f.amount);
+          income.by_category[cat] = (income.by_category[cat] || 0) + Number(f.amount);
           income.transactions.push({
             id: f.id,
             date: f.transaction_date,
             amount: Number(f.amount),
-            category: f.category || 'other',
+            category: cat,
             description: f.description || '',
           });
-        } else if (f.transaction_type === 'expense') {
+        } else if (f.transaction_type === 'expense' && shouldIncludeExpenses) {
+          if (allowedExpenseCategories && !allowedExpenseCategories.includes(cat)) return;
           expenses.total += Number(f.amount);
-          expenses.by_category[f.category || 'other'] =
-            (expenses.by_category[f.category || 'other'] || 0) + Number(f.amount);
+          expenses.by_category[cat] = (expenses.by_category[cat] || 0) + Number(f.amount);
           expenses.transactions.push({
             id: f.id,
             date: f.transaction_date,
             amount: Number(f.amount),
-            category: f.category || 'other',
+            category: cat,
             description: f.description || '',
             vendor: f.vendor_name,
           });
