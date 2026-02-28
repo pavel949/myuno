@@ -195,40 +195,54 @@ function extractUrls(text: string): string[] {
 /**
  * Call Firecrawl to scrape URLs
  */
-async function scrapeUrls(urls: string[], supabaseUrl: string, supabaseKey: string): Promise<Record<string, { title: string; content: string; metadata: Record<string, unknown> }>> {
+async function scrapeUrls(urls: string[], firecrawlApiKey?: string): Promise<Record<string, { title: string; content: string; metadata: Record<string, unknown> }>> {
   if (urls.length === 0) return {};
+
+  if (!firecrawlApiKey) {
+    console.warn('[INTAKE] FIRECRAWL_API_KEY not configured, URL scraping skipped');
+    return {};
+  }
 
   const results: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
 
-  // Scrape each URL individually (firecrawl-scrape expects a single url)
   for (const url of urls) {
     try {
-      const response = await fetch(`${supabaseUrl}/functions/v1/firecrawl-scrape`, {
+      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabaseKey}`,
+          'Authorization': `Bearer ${firecrawlApiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({
+          url,
+          formats: ['markdown', 'html'],
+          onlyMainContent: true,
+          waitFor: 5000,
+        }),
       });
 
-      if (!response.ok) {
-        console.error(`[INTAKE] Firecrawl error for ${url}:`, response.status);
+      const data = await response.json();
+
+      if (!response.ok || data.success === false) {
+        console.error(`[INTAKE] Firecrawl error for ${url}:`, data?.error || response.status);
         continue;
       }
 
-      const data = await response.json();
-      
-      // firecrawl-scrape returns { success, data: { markdown, metadata, ... } }
-      const scraped = data.data || data;
-      if (data.success !== false) {
-        results[url] = {
-          title: scraped.metadata?.title || '',
-          content: scraped.markdown || scraped.html || '',
-          metadata: scraped.metadata || {},
-        };
-        console.log(`[INTAKE] Scraped ${url}: ${results[url].content.length} chars`);
+      const scraped = data.data || {};
+      const content = scraped.markdown || scraped.html || '';
+
+      if (!content.trim()) {
+        console.warn(`[INTAKE] Empty scraped content for ${url}`);
+        continue;
       }
+
+      results[url] = {
+        title: scraped.metadata?.title || '',
+        content,
+        metadata: scraped.metadata || {},
+      };
+
+      console.log(`[INTAKE] Scraped ${url}: ${content.length} chars`);
     } catch (error) {
       console.error(`[INTAKE] Firecrawl exception for ${url}:`, error);
     }
@@ -547,6 +561,8 @@ Deno.serve(async (req) => {
       );
     }
 
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY") || undefined;
+
     const items: IntakeItem[] = [];
     const scrapedContent: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
 
@@ -556,7 +572,7 @@ Deno.serve(async (req) => {
     // Process based on mode
     if (mode === 'bulk_urls' && urls && urls.length > 0) {
       // Scrape all URLs
-      const scraped = await scrapeUrls(urls, supabaseUrl, supabaseServiceKey);
+      const scraped = await scrapeUrls(urls, FIRECRAWL_API_KEY);
       Object.assign(scrapedContent, scraped);
 
       for (const url of urls) {
@@ -597,7 +613,7 @@ Deno.serve(async (req) => {
       const extractedUrls = extractUrls(rawText);
       if (extractedUrls.length > 0 && mode !== 'bulk_text') {
         // Scrape URLs first
-        const scraped = await scrapeUrls(extractedUrls, supabaseUrl, supabaseServiceKey);
+        const scraped = await scrapeUrls(extractedUrls, FIRECRAWL_API_KEY);
         Object.assign(scrapedContent, scraped);
       }
 
