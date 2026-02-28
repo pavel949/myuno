@@ -11211,6 +11211,7 @@ export type Database = {
           lng: number | null
           managed_by: string | null
           managed_by_org_id: string | null
+          management_company_id: string | null
           management_document_name: string | null
           management_document_url: string | null
           management_type: string | null
@@ -11367,6 +11368,7 @@ export type Database = {
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
+          management_company_id?: string | null
           management_document_name?: string | null
           management_document_url?: string | null
           management_type?: string | null
@@ -11523,6 +11525,7 @@ export type Database = {
           lng?: number | null
           managed_by?: string | null
           managed_by_org_id?: string | null
+          management_company_id?: string | null
           management_document_name?: string | null
           management_document_url?: string | null
           management_type?: string | null
@@ -11617,6 +11620,13 @@ export type Database = {
             columns: ["managed_by_org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
           {
