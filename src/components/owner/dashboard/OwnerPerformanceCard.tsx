@@ -107,7 +107,7 @@ export function OwnerPerformanceCard() {
           </h2>
           {isSuperhost && (
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning/10 text-warning">
-              Superhost
+              {isRu ? 'Суперхозяин' : 'Superhost'}
             </span>
           )}
         </div>

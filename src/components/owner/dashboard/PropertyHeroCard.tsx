@@ -120,7 +120,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
         <div className="p-4">
           <h3 className="font-semibold text-base truncate mb-1">{title}</h3>
           <p className="text-sm text-muted-foreground">
-            {property.property_type ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en') : 'Property'}
+            {property.property_type ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en') : (isRu ? 'Объект' : 'Property')}
             {property.bedrooms && ` · ${property.bedrooms} ${isRu ? 'спален' : 'bedrooms'}`}
           </p>
           
