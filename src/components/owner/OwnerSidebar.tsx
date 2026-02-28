@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, 
+  LayoutDashboard,
   Building2,
   CalendarDays,
   Crown,
@@ -25,6 +25,8 @@ import {
   BookOpen,
   FileText,
   Megaphone,
+  Truck,
+  ClipboardList,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -46,13 +48,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
+import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 
 interface NavItem {
   title: string;
   titleRu: string;
   path: string;
   icon: React.ElementType;
-  badge?: number;
+  badgeKey?: 'tasks' | 'messages';
 }
 
 interface NavGroup {
@@ -60,27 +63,29 @@ interface NavGroup {
   labelRu: string;
   items: NavItem[];
   defaultOpen?: boolean;
+  /** Items always visible even when group is collapsed */
+  pinned?: boolean;
 }
 
 /**
- * 5 logical groups, no duplicates:
- * 1. Main — Dashboard, Properties, Calendar (daily operational core)
- * 2. CRM — Sales Pipeline, Contacts (revenue generation)
- * 3. Operations — Tasks, Inventory, Vendors (field work)
- * 4. Finance — Income/Expenses, Invoices, Reports (money tracking)
- * 5. Team — Staff directory + MC members/delegation (people management)
+ * 5 logical groups:
+ * 1. Main — Dashboard, Properties, Calendar, Messages (daily operational core)
+ * 2. CRM — Owners, Contacts, Sales, Reviews, Marketing
+ * 3. Operations — Tasks, Channels, Inventory, Vendors, Insurance, Docs
+ * 4. Finance — Rates, Income/Expenses, Invoices, Reports
+ * 5. Team — Staff, Guide
  */
 const navigationGroups: NavGroup[] = [
   {
     label: 'Main',
     labelRu: 'Главное',
     defaultOpen: true,
+    pinned: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
-      { title: 'Owners', titleRu: 'Собственники', path: '/owner/owners', icon: Crown },
       { title: 'Properties', titleRu: 'Объекты', path: '/owner/properties', icon: Building2 },
       { title: 'Calendar', titleRu: 'Календарь', path: '/owner/calendar', icon: CalendarDays },
-      { title: 'Messages', titleRu: 'Сообщения', path: '/owner/messages', icon: MessageSquare },
+      { title: 'Messages', titleRu: 'Сообщения', path: '/owner/messages', icon: MessageSquare, badgeKey: 'messages' },
     ],
   },
   {
@@ -88,11 +93,12 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'CRM и продажи',
     defaultOpen: false,
     items: [
-      { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
+      { title: 'Owners', titleRu: 'Собственники', path: '/owner/owners', icon: Crown },
       { title: 'Contacts', titleRu: 'Контакты', path: '/owner/contacts', icon: ContactRound },
+      { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/owner/sales', icon: TrendingUp },
       { title: 'Reviews', titleRu: 'Отзывы', path: '/owner/reviews-management', icon: Star },
-      { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/owner/sales/settings', icon: Settings },
       { title: 'Marketing', titleRu: 'Маркетинг', path: '/owner/marketing', icon: Megaphone },
+      { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/owner/sales/settings', icon: Settings },
     ],
   },
   {
@@ -100,12 +106,12 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Операции',
     defaultOpen: false,
     items: [
-      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/tasks', icon: Wrench },
+      { title: 'Tasks', titleRu: 'Задачи', path: '/owner/tasks', icon: ClipboardList, badgeKey: 'tasks' },
       { title: 'Channel Manager', titleRu: 'Каналы', path: '/owner/channels', icon: Radio },
       { title: 'Inventory', titleRu: 'Инвентарь', path: '/owner/inventory', icon: PackageOpen },
-      { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Building2 },
+      { title: 'Vendors', titleRu: 'Поставщики', path: '/owner/vendors', icon: Truck },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/owner/insurance', icon: ShieldCheck },
-      { title: 'Documents', titleRu: 'Шаблоны документов', path: '/owner/documents', icon: FileText },
+      { title: 'Templates', titleRu: 'Шаблоны', path: '/owner/documents', icon: FileText },
     ],
   },
   {
@@ -116,7 +122,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/owner/rates', icon: Tag },
       { title: 'Income & Expenses', titleRu: 'Доходы и расходы', path: '/owner/financials', icon: DollarSign },
       { title: 'Invoices', titleRu: 'Счета', path: '/owner/invoices', icon: Receipt },
-      { title: 'Analytics & Reports', titleRu: 'Аналитика и отчёты', path: '/owner/analytics', icon: BarChart3 },
+      { title: 'Analytics & Reports', titleRu: 'Аналитика', path: '/owner/analytics', icon: BarChart3 },
     ],
   },
   {
@@ -124,7 +130,7 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Команда',
     defaultOpen: false,
     items: [
-      { title: 'Staff & Access', titleRu: 'Сотрудники и доступ', path: '/owner/staff', icon: Users },
+      { title: 'Staff & Access', titleRu: 'Сотрудники', path: '/owner/staff', icon: Users },
       { title: 'Owner Guide', titleRu: 'Руководство', path: '/owner/guide', icon: BookOpen },
     ],
   },
@@ -160,9 +166,12 @@ export function OwnerSidebar() {
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
   const { canAccess } = useTeamPermissions();
+  const { data: todayTasksCount } = useTodayTasksCount();
+
   const companyName = activeCompany
     ? (isRussian ? activeCompany.name_ru : activeCompany.name_en)
     : 'myUNO';
+
   const isActive = (path: string) => {
     if (path === '/owner') return location.pathname === '/owner';
     return location.pathname.startsWith(path);
@@ -172,15 +181,45 @@ export function OwnerSidebar() {
     return group.items.some(item => isActive(item.path)) || group.defaultOpen;
   };
 
+  const getBadgeCount = (key?: 'tasks' | 'messages'): number => {
+    if (key === 'tasks') return todayTasksCount || 0;
+    return 0;
+  };
+
   // Filter nav items based on team permissions
   const filteredGroups = navigationGroups.map(group => ({
     ...group,
     items: group.items.filter(item => {
       const module = PATH_TO_MODULE[item.path];
-      if (!module) return true; // No restriction (dashboard, messages, guide, etc.)
+      if (!module) return true;
       return canAccess(module, 'view');
     }),
   })).filter(group => group.items.length > 0);
+
+  const renderNavItem = (item: NavItem) => {
+    const badgeCount = getBadgeCount(item.badgeKey);
+    return (
+      <SidebarMenuItem key={item.path}>
+        <SidebarMenuButton
+          onClick={() => navigate(item.path)}
+          isActive={isActive(item.path)}
+          tooltip={isRussian ? item.titleRu : item.title}
+          className={cn(
+            "transition-all duration-200",
+            isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+          )}
+        >
+          <item.icon className="h-4 w-4" />
+          <span>{isRussian ? item.titleRu : item.title}</span>
+          {badgeCount > 0 && (
+            <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground px-1">
+              {badgeCount > 99 ? '99+' : badgeCount}
+            </span>
+          )}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -225,27 +264,7 @@ export function OwnerSidebar() {
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {group.items.map((item) => (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          onClick={() => navigate(item.path)}
-                          isActive={isActive(item.path)}
-                          tooltip={isRussian ? item.titleRu : item.title}
-                          className={cn(
-                            "transition-all duration-200",
-                            isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                          )}
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{isRussian ? item.titleRu : item.title}</span>
-                          {item.badge && item.badge > 0 && (
-                            <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                              {item.badge > 9 ? '9+' : item.badge}
-                            </span>
-                          )}
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
+                    {group.items.map(renderNavItem)}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </CollapsibleContent>
