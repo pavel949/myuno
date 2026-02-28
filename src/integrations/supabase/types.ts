@@ -3415,6 +3415,57 @@ export type Database = {
           },
         ]
       }
+      crm_assignment_rules: {
+        Row: {
+          assignees: string[]
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_assigned_index: number | null
+          name: string
+          pipeline_id: string | null
+          rule_type: string
+        }
+        Insert: {
+          assignees?: string[]
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_assigned_index?: number | null
+          name?: string
+          pipeline_id?: string | null
+          rule_type?: string
+        }
+        Update: {
+          assignees?: string[]
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_assigned_index?: number | null
+          name?: string
+          pipeline_id?: string | null
+          rule_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_assignment_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_assignment_rules_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_comm_templates: {
         Row: {
           body: string
@@ -4539,6 +4590,131 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_web_form_submissions: {
+        Row: {
+          contact_id: string | null
+          created_at: string | null
+          data: Json
+          deal_id: string | null
+          form_id: string
+          id: string
+          ip_address: string | null
+          source_url: string | null
+          status: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string | null
+          data?: Json
+          deal_id?: string | null
+          form_id: string
+          id?: string
+          ip_address?: string | null
+          source_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string | null
+          data?: Json
+          deal_id?: string | null
+          form_id?: string
+          id?: string
+          ip_address?: string | null
+          source_url?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_web_form_submissions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_web_form_submissions_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_web_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "crm_web_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_web_forms: {
+        Row: {
+          assign_rule_id: string | null
+          company_id: string
+          created_at: string | null
+          created_by: string
+          default_stage_id: string | null
+          description: string | null
+          fields_config: Json
+          id: string
+          is_active: boolean | null
+          name: string
+          pipeline_id: string | null
+          submit_count: number | null
+        }
+        Insert: {
+          assign_rule_id?: string | null
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          default_stage_id?: string | null
+          description?: string | null
+          fields_config?: Json
+          id?: string
+          is_active?: boolean | null
+          name: string
+          pipeline_id?: string | null
+          submit_count?: number | null
+        }
+        Update: {
+          assign_rule_id?: string | null
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          default_stage_id?: string | null
+          description?: string | null
+          fields_config?: Json
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          pipeline_id?: string | null
+          submit_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_web_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_web_forms_default_stage_id_fkey"
+            columns: ["default_stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_web_forms_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
             referencedColumns: ["id"]
           },
         ]
