@@ -35,9 +35,8 @@ export interface StaffPropertyAssignment {
 }
 
 export type StaffMemberInsert = Omit<StaffMember, 'id' | 'owner_id' | 'created_at' | 'updated_at'>;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
+// Type-safe: staff_members & staff_property_assignments exist in Database schema
+const db = supabase;
 
 export function useStaffMembers() {
   const { user } = useAuth();

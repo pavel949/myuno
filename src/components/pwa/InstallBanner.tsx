@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Download, X, Share, Plus, Loader2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ const texts = {
 const BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';
 const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000;
 
-export function InstallBanner() {
+export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_, ref) {
   const [isVisible, setIsVisible] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +67,7 @@ export function InstallBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          ref={ref}
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
@@ -117,4 +118,4 @@ export function InstallBanner() {
       )}
     </AnimatePresence>
   );
-}
+});
