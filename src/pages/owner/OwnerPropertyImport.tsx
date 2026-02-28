@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOtaConnections, useOtaSync, useOtaSyncedListing, useApplySyncedData } from '@/hooks/useOtaSync';
 import { useIntakeAgent } from '@/hooks/useIntakeAgent';
+import { useDataImport } from '@/hooks/useDataImport';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,10 +15,13 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { FileImporter } from '@/components/admin/data-import/FileImporter';
+import { FieldMapper } from '@/components/admin/data-import/FieldMapper';
+import { ImportPreview } from '@/components/admin/data-import/ImportPreview';
 import { 
   Globe, Sparkles, Loader2, CheckCircle2, AlertCircle, ExternalLink,
   Home, Bed, Bath, Users, DollarSign, Image, FileText, MapPin, ShieldAlert, PenLine,
-  Bot, Wand2, Edit3, ArrowRight
+  Bot, Wand2, Edit3, ArrowRight, FileSpreadsheet, CheckCircle, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
@@ -26,7 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const errorLog = createErrorHandler('OwnerPropertyImport');
 
 // Import modes
-type ImportMode = 'url' | 'ai';
+type ImportMode = 'spreadsheet' | 'url' | 'ai';
 
 // Supported OTA platforms
 const OTA_PLATFORMS = [
@@ -50,14 +54,14 @@ const IMPORT_FIELDS = [
   { id: 'house_rules', labelEn: 'House Rules', labelRu: 'Правила', icon: FileText },
 ];
 
-type ImportStep = 'input' | 'preview' | 'select' | 'complete' | 'blocked' | 'ai-result';
+type ImportStep = 'input' | 'preview' | 'select' | 'complete' | 'blocked' | 'ai-result' | 'spreadsheet-map' | 'spreadsheet-preview' | 'spreadsheet-done';
 
 export default function OwnerPropertyImport() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
-  const [importMode, setImportMode] = useState<ImportMode>('url');
+  const [importMode, setImportMode] = useState<ImportMode>('spreadsheet');
   const [step, setStep] = useState<ImportStep>('input');
   const [url, setUrl] = useState('');
   const [aiText, setAiText] = useState('');
@@ -74,6 +78,54 @@ export default function OwnerPropertyImport() {
   
   // AI Intake
   const { session: intakeSession, isProcessing: isIntakeProcessing, analyze, reset: resetIntake } = useIntakeAgent();
+
+  // Spreadsheet import
+  const SPREADSHEET_TARGET = 'properties';
+  const {
+    parsedData,
+    fieldMappings,
+    isLoading: isSpreadsheetLoading,
+    importResult,
+    parseFile,
+    generateAutoMappings,
+    setFieldMappings,
+    updateMapping,
+    transformData,
+    importData,
+    reset: resetSpreadsheet,
+  } = useDataImport();
+
+  const handleSpreadsheetFileSelect = useCallback(async (file: File) => {
+    const data = await parseFile(file);
+    if (data) {
+      const autoMappings = generateAutoMappings(data.headers, SPREADSHEET_TARGET);
+      setFieldMappings(autoMappings);
+      setStep('spreadsheet-map');
+    }
+    return data;
+  }, [parseFile, generateAutoMappings, setFieldMappings]);
+
+  const handleSpreadsheetAutoMap = useCallback(() => {
+    if (parsedData) {
+      const autoMappings = generateAutoMappings(parsedData.headers, SPREADSHEET_TARGET);
+      setFieldMappings(autoMappings);
+    }
+  }, [parsedData, generateAutoMappings, setFieldMappings]);
+
+  const spreadsheetTransformedData = useMemo(() => {
+    if (!parsedData) return [];
+    return transformData(parsedData, fieldMappings);
+  }, [parsedData, fieldMappings, transformData]);
+
+  const handleSpreadsheetImport = useCallback(async (selectedIndices?: number[]) => {
+    await importData(SPREADSHEET_TARGET, spreadsheetTransformedData, selectedIndices);
+    setStep('spreadsheet-done');
+  }, [spreadsheetTransformedData, importData]);
+
+  const handleSpreadsheetReset = useCallback(() => {
+    resetSpreadsheet();
+    setStep('input');
+  }, [resetSpreadsheet]);
 
   // Detect platform from URL
   const detectPlatform = (inputUrl: string) => {
@@ -215,10 +267,10 @@ export default function OwnerPropertyImport() {
   return (
     <PageContainer className="pb-24">
       <PageHeader
-        title={isRu ? 'Импорт объекта' : 'Import Property'}
+        title={isRu ? 'Импорт объектов' : 'Import Properties'}
         subtitle={isRu 
-          ? 'AI автоматически распарсит данные и создаст объект'
-          : 'AI will automatically parse data and create a property'
+          ? 'Загрузите данные из Excel/CSV, ссылки OTA или через AI'
+          : 'Upload from Excel/CSV, OTA link or via AI'
         }
       />
 
@@ -227,7 +279,11 @@ export default function OwnerPropertyImport() {
         <div className="space-y-6">
           {/* Mode tabs */}
           <Tabs value={importMode} onValueChange={(v) => setImportMode(v as ImportMode)} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="spreadsheet" className="flex items-center gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                {isRu ? 'Таблица' : 'Spreadsheet'}
+              </TabsTrigger>
               <TabsTrigger value="url" className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 {isRu ? 'Ссылка (OTA)' : 'URL (OTA)'}
@@ -237,6 +293,53 @@ export default function OwnerPropertyImport() {
                 {isRu ? 'AI Парсинг' : 'AI Parse'}
               </TabsTrigger>
             </TabsList>
+
+            {/* Spreadsheet Mode */}
+            <TabsContent value="spreadsheet" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileSpreadsheet className="h-5 w-5 text-primary" />
+                    {isRu ? 'Импорт из таблицы' : 'Import from Spreadsheet'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isRu 
+                      ? 'Скачайте таблицу из Google Sheets как .xlsx или .csv и загрузите сюда. Система автоматически распознает колонки.'
+                      : 'Download your Google Sheet as .xlsx or .csv and upload here. The system will auto-detect columns.'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FileImporter
+                    onFileSelect={handleSpreadsheetFileSelect}
+                    parsedData={parsedData}
+                    isLoading={isSpreadsheetLoading}
+                    onClear={handleSpreadsheetReset}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Tips */}
+              <Card className="bg-muted/50">
+                <CardContent className="pt-4">
+                  <div className="flex gap-3">
+                    <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-medium mb-2 text-foreground">
+                        {isRu ? 'Подсказки:' : 'Tips:'}
+                      </p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• {isRu ? 'Google Sheets → Файл → Скачать → .xlsx или .csv' : 'Google Sheets → File → Download → .xlsx or .csv'}</li>
+                        <li>• {isRu ? 'Первая строка должна быть заголовками колонок' : 'First row should be column headers'}</li>
+                        <li>• {isRu ? 'Обязательные поля: название (EN), тип недвижимости, тип объявления' : 'Required: title (EN), property type, listing type'}</li>
+                        <li>• {isRu ? 'AI автоматически сопоставит колонки с полями системы' : 'AI will auto-map columns to system fields'}</li>
+                        <li>• {isRu ? 'Поддерживаются русские и английские названия колонок' : 'Both Russian and English column names are supported'}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {/* URL Mode */}
             <TabsContent value="url" className="space-y-6 mt-6">
@@ -813,6 +916,92 @@ export default function OwnerPropertyImport() {
             </>
           )}
         </div>
+      )}
+
+      {/* Spreadsheet: Field Mapping Step */}
+      {step === 'spreadsheet-map' && parsedData && (
+        <div className="space-y-4">
+          <FieldMapper
+            mappings={fieldMappings}
+            targetId={SPREADSHEET_TARGET}
+            sampleData={parsedData.rows.slice(0, 5)}
+            onUpdateMapping={updateMapping}
+            onAutoMap={handleSpreadsheetAutoMap}
+          />
+          
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={handleSpreadsheetReset}>
+              {isRu ? 'Назад' : 'Back'}
+            </Button>
+            <Button 
+              onClick={() => setStep('spreadsheet-preview')}
+              disabled={fieldMappings.filter(m => m.targetField).length === 0}
+            >
+              {isRu ? 'Продолжить' : 'Continue'}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Spreadsheet: Preview & Import Step */}
+      {step === 'spreadsheet-preview' && parsedData && (
+        <div className="space-y-4">
+          <ImportPreview
+            parsedData={parsedData}
+            mappings={fieldMappings}
+            targetId={SPREADSHEET_TARGET}
+            transformedData={spreadsheetTransformedData}
+            onImport={handleSpreadsheetImport}
+            isLoading={isSpreadsheetLoading}
+          />
+          
+          <div className="flex justify-start">
+            <Button variant="outline" onClick={() => setStep('spreadsheet-map')}>
+              {isRu ? 'Назад к маппингу' : 'Back to mapping'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Spreadsheet: Done Step */}
+      {step === 'spreadsheet-done' && importResult && (
+        <Card className="max-w-lg mx-auto">
+          <CardContent className="pt-6 text-center">
+            <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-success" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">
+              {isRu ? 'Импорт завершён!' : 'Import Complete!'}
+            </h3>
+            <div className="flex justify-center gap-4 mb-4">
+              <Badge variant="default" className="text-lg px-4 py-1">
+                {importResult.success} {isRu ? 'объектов' : 'properties'}
+              </Badge>
+              {importResult.failed > 0 && (
+                <Badge variant="destructive" className="text-lg px-4 py-1">
+                  {importResult.failed} {isRu ? 'ошибок' : 'failed'}
+                </Badge>
+              )}
+            </div>
+            {importResult.errors.length > 0 && (
+              <div className="text-left bg-destructive/10 p-3 rounded-lg mb-4 max-h-32 overflow-auto">
+                {importResult.errors.slice(0, 5).map((err, i) => (
+                  <p key={i} className="text-xs text-destructive">{err}</p>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" onClick={handleSpreadsheetReset}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {isRu ? 'Новый импорт' : 'New Import'}
+              </Button>
+              <Button onClick={() => navigate('/owner/properties')}>
+                {isRu ? 'К объектам' : 'View Properties'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </PageContainer>
   );
