@@ -136,10 +136,10 @@ export default function OwnerFinancials() {
 
   return (
     <PageContainer>
-      <BackButton fallbackPath="/owner" />
+      <BackButton fallbackPath="/owner/finance" />
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold">{isRu ? 'Финансы' : 'Financials'}</h1>
+          <h1 className="text-2xl font-bold">{isRu ? 'Транзакции' : 'Transactions'}</h1>
           <p className="text-sm text-muted-foreground">{isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}</p>
         </div>
         <div className="flex gap-2">
@@ -147,9 +147,9 @@ export default function OwnerFinancials() {
             <Target className="h-4 w-4 mr-1" />
             {isRu ? 'Бюджет' : 'Budget'}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/owner/portfolio')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/owner/reports')}>
             <BarChart3 className="h-4 w-4 mr-1" />
-            {isRu ? 'Портфель' : 'Portfolio'}
+            {isRu ? 'Отчёты' : 'Reports'}
           </Button>
         </div>
       </div>
