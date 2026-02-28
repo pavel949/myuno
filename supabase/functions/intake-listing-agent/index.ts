@@ -198,38 +198,43 @@ function extractUrls(text: string): string[] {
 async function scrapeUrls(urls: string[], supabaseUrl: string, supabaseKey: string): Promise<Record<string, { title: string; content: string; metadata: Record<string, unknown> }>> {
   if (urls.length === 0) return {};
 
-  try {
-    const response = await fetch(`${supabaseUrl}/functions/v1/firecrawl-scrape`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ urls }),
-    });
+  const results: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
 
-    if (!response.ok) {
-      console.error('[INTAKE] Firecrawl error:', response.status);
-      return {};
-    }
+  // Scrape each URL individually (firecrawl-scrape expects a single url)
+  for (const url of urls) {
+    try {
+      const response = await fetch(`${supabaseUrl}/functions/v1/firecrawl-scrape`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
 
-    const data = await response.json();
-    const results: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
-    
-    for (const r of data.results || []) {
-      if (r.success && r.url) {
-        results[r.url] = {
-          title: r.title || '',
-          content: r.content || '',
-          metadata: r.metadata || {},
-        };
+      if (!response.ok) {
+        console.error(`[INTAKE] Firecrawl error for ${url}:`, response.status);
+        continue;
       }
+
+      const data = await response.json();
+      
+      // firecrawl-scrape returns { success, data: { markdown, metadata, ... } }
+      const scraped = data.data || data;
+      if (data.success !== false) {
+        results[url] = {
+          title: scraped.metadata?.title || '',
+          content: scraped.markdown || scraped.html || '',
+          metadata: scraped.metadata || {},
+        };
+        console.log(`[INTAKE] Scraped ${url}: ${results[url].content.length} chars`);
+      }
+    } catch (error) {
+      console.error(`[INTAKE] Firecrawl exception for ${url}:`, error);
     }
-    return results;
-  } catch (error) {
-    console.error('[INTAKE] Firecrawl exception:', error);
-    return {};
   }
+
+  return results;
 }
 
 /**
