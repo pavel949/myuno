@@ -155,8 +155,8 @@ export function OwnerHeader() {
       </Breadcrumb>
 
       {/* Mobile: page title + role */}
-      <div className="md:hidden flex-1 min-w-0">
-        <h1 className="font-semibold text-lg truncate">{pageTitle}</h1>
+      <div className="md:hidden flex-1 min-w-0 overflow-hidden">
+        <h1 className="font-semibold text-sm leading-tight truncate">{pageTitle}</h1>
         {roleLabel && (
           <span className="text-[10px] text-muted-foreground">
             {roleLabel}
@@ -164,8 +164,8 @@ export function OwnerHeader() {
         )}
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      {/* Spacer — desktop only, mobile title is flex-1 */}
+      <div className="hidden md:block flex-1" />
 
       {/* Actions */}
       <div className="flex items-center gap-1">
