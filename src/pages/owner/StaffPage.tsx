@@ -88,6 +88,9 @@ import {
   PayType,
 } from '@/hooks/useStaffMembers';
 import { useMyProperties } from '@/hooks/useMyProperties';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { supabase } from '@/integrations/supabase/client';
+import { toast as toastSonner } from 'sonner';
 import { format } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
 
@@ -138,6 +141,7 @@ interface StaffFormState {
   daily_rate: string;
   is_active: boolean;
   photo_url: string;
+  sendCredentials: boolean;
 }
 
 const DEFAULT_FORM: StaffFormState = {
@@ -152,6 +156,7 @@ const DEFAULT_FORM: StaffFormState = {
   daily_rate: '',
   is_active: true,
   photo_url: '',
+  sendCredentials: false,
 };
 
 function staffToForm(s: StaffMember): StaffFormState {
@@ -167,6 +172,7 @@ function staffToForm(s: StaffMember): StaffFormState {
     daily_rate: s.daily_rate?.toString() ?? '',
     is_active: s.is_active,
     photo_url: (s as any).photo_url ?? '',
+    sendCredentials: false,
   };
 }
 
@@ -377,6 +383,7 @@ export default function StaffPage() {
   const updateMutation = useUpdateStaffMember();
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
+  const { activeCompany } = useActiveCompany();
   const assignStaff = useAssignStaffToProperty();
   const removeAssignment = useRemoveStaffAssignment();
 
@@ -436,6 +443,35 @@ export default function StaffPage() {
         await updateMutation.mutateAsync({ id: editing.id, ...payload });
       } else {
         await createMutation.mutateAsync(payload);
+
+        // Send login credentials if toggle is on and email is provided
+        if (form.sendCredentials && form.email && activeCompany?.company_id) {
+          try {
+            const { data, error } = await supabase.functions.invoke('invite-team-member', {
+              body: {
+                company_id: activeCompany.company_id,
+                full_name: form.name.trim(),
+                email: form.email.trim().toLowerCase(),
+                phone: form.phone.trim() || undefined,
+                role: form.role === 'admin' ? 'manager' : 'staff',
+              },
+            });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            toastSonner.success(
+              isRu 
+                ? `Данные для входа отправлены на ${form.email}` 
+                : `Login credentials sent to ${form.email}`
+            );
+          } catch (inviteErr: any) {
+            console.error('Failed to send credentials:', inviteErr);
+            toastSonner.error(
+              isRu 
+                ? `Сотрудник добавлен, но не удалось отправить данные: ${inviteErr.message}` 
+                : `Staff added, but failed to send credentials: ${inviteErr.message}`
+            );
+          }
+        }
       }
       setSheetOpen(false);
     } catch {
@@ -670,6 +706,27 @@ export default function StaffPage() {
                   />
                 </div>
               </div>
+
+              {/* Send credentials toggle - only for new staff with email */}
+              {!editing && form.email.trim() && activeCompany?.company_id && (
+                <div className="flex items-center justify-between rounded-lg border border-border p-3 bg-muted/30">
+                  <div className="space-y-0.5 min-w-0 mr-3">
+                    <p className="text-sm font-medium">
+                      {t('Send login credentials', 'Отправить данные для входа')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        'Create account and send password to email',
+                        'Создать аккаунт и отправить пароль на email'
+                      )}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={form.sendCredentials}
+                    onCheckedChange={checked => setForm(f => ({ ...f, sendCredentials: checked }))}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Pay */}
