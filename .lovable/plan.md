@@ -519,10 +519,11 @@ CRM & Sales:
 | 9 | Quotations (DB + Hooks + UI) | ✅ Done |
 | 10 | Meetings (DB + Hooks + UI) | ✅ Done |
 | 11 | Sidebar Navigation Updated | ✅ Done |
-| 12 | Email Integration | ⬜ Next |
-| 13 | Workflow Builder | ⬜ Next |
-| 14 | AI Assistant | ⬜ Next |
-| 15 | Templates | ⬜ Next |
-| 16 | Duplicate Detection | ⬜ Next |
-| 17 | Web Forms | ⬜ Next |
-| 18 | Round Robin | ⬜ Next |
+| 12 | Email Integration (DB + Hook + Edge Fn) | ✅ Done |
+| 13 | Workflow Builder (DB + Hooks + UI) | ✅ Done |
+| 14 | AI CRM Assistant (Edge Fn + Panel) | ✅ Done |
+| 15 | Communication Templates (DB + Hooks + UI) | ✅ Done |
+| 16 | Navigation Updated (Email, Automations, Templates) | ✅ Done |
+| 17 | Duplicate Detection | ⬜ Next |
+| 18 | Web Forms | ⬜ Next |
+| 19 | Round Robin | ⬜ Next |
