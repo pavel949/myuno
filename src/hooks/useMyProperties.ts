@@ -106,13 +106,13 @@ export function useMyProperties() {
       source: 'managed' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
-      property_type: (p as any).property_type || null,
+      property_type: 'property_type' in p ? (p as AssignedProperty & { property_type?: string | null }).property_type || null : null,
     }));
   }, [managedRaw]);
 
   const companyProperties = useMemo<UnifiedProperty[]>(() => {
     if (!companyRaw) return [];
-    return companyRaw.map((p: any) => ({
+    return companyRaw.map((p) => ({
       id: p.id,
       property_id: p.id,
       title: p.title_en || p.title || 'Untitled',
