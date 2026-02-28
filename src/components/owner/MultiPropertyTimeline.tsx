@@ -17,7 +17,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, addDays, subDays, isToday, startOfWeek } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UnifiedProperty } from '@/hooks/useMyProperties';
@@ -34,6 +35,7 @@ const LABEL_WIDTH = 180;
 
 export function MultiPropertyTimeline({ properties, isLoading: propsLoading, complexes = [] }: MultiPropertyTimelineProps) {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -269,16 +271,21 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                         </span>
                       </div>
                     )}
-                    <div className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2">
+                    <div
+                      className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
+                      onClick={() => navigate(`/owner/properties/${property.property_id}`)}
+                      title={isRu ? 'Открыть объект' : 'View property'}
+                    >
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarImage src={property.cover_image || undefined} alt={isRu ? property.title_ru : property.title} />
                         <AvatarFallback className="text-[10px] bg-muted">
                           {(isRu ? property.title_ru : property.title).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs font-medium truncate leading-tight">
+                      <span className="text-xs font-medium truncate leading-tight group-hover/label:text-primary transition-colors">
                         {isRu ? property.title_ru : property.title}
                       </span>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover/label:opacity-100 transition-opacity flex-shrink-0 ml-auto" />
                     </div>
                   </div>
                 );
