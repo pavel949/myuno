@@ -252,7 +252,7 @@ export function usePropertyWizard() {
 
   // Apply prefill data from AI or OTA
   const applyPrefillData = useCallback((prefillData: Record<string, any>) => {
-    if (!prefillData || isCloneDataApplied) return;
+    if (!prefillData) return;
     
     setFormData(prev => ({
       ...prev,
