@@ -17,6 +17,15 @@ export interface DashboardStats {
   gyms: number;
   vehicles: number;
   events: number;
+  education: number;
+  pets: number;
+  cleaning: number;
+  babysitters: number;
+  flowers: number;
+  pharmacies: number;
+  stores: number;
+  insurance: number;
+  waterActivities: number;
   // Users
   totalUsers: number;
   unoTeamMembers: number;
@@ -32,50 +41,62 @@ export function useAdminDashboardStats() {
   return useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async (): Promise<DashboardStats> => {
-      // Use GET with count:'exact' instead of HEAD requests to avoid errors
       const countOptions = { count: 'exact' as const, head: false };
       
-      // Parallel queries for performance - using proper count method
+      // Query unified listings table grouped by vertical
+      const { data: listingCounts, error: listingsError } = await supabase
+        .from('listings')
+        .select('vertical');
+      
+      // Count by vertical from listings
+      const verticalCounts: Record<string, number> = {};
+      if (!listingsError && listingCounts) {
+        listingCounts.forEach((row: any) => {
+          const v = row.vertical;
+          verticalCounts[v] = (verticalCounts[v] || 0) + 1;
+        });
+      }
+
+      // Parallel queries for non-listings tables
       const [
         providersRes,
         servicesRes,
-        yachtsRes,
-        toursRes,
         propertiesRes,
-        restaurantsRes,
-        salonsRes,
-        clinicsRes,
-        gymsRes,
-        vehiclesRes,
-        eventsRes,
         profilesRes,
         unoTeamRes,
         bookingsRes,
+        salonsRes,
+        gymsRes,
+        eventsRes,
+        pharmaciesRes,
+        storesRes,
+        insuranceRes,
+        waterRes,
+        flowersRes,
       ] = await Promise.all([
         supabase.from('providers').select('id', countOptions).limit(1),
         supabase.from('services').select('id', countOptions).limit(1),
-        supabase.from('yachts').select('id', countOptions).limit(1),
-        supabase.from('experiences').select('id', countOptions).eq('experience_type', 'tour').limit(1),
         supabase.from('properties').select('id', countOptions).limit(1),
-        supabase.from('restaurants').select('id', countOptions).limit(1),
-        supabase.from('salons').select('id', countOptions).limit(1),
-        supabase.from('clinics').select('id', countOptions).limit(1),
-        supabase.from('gyms').select('id', countOptions).limit(1),
-        supabase.from('vehicles').select('id', countOptions).limit(1),
-        supabase.from('events').select('id', countOptions).limit(1),
         supabase.from('profiles').select('id', countOptions).limit(1),
         supabase.from('user_roles').select('id', countOptions).eq('role', 'uno_team').limit(1),
         supabase.from('bookings').select('id', countOptions).limit(1),
+        supabase.from('salons').select('id', countOptions).limit(1),
+        supabase.from('gyms').select('id', countOptions).limit(1),
+        supabase.from('events').select('id', countOptions).limit(1),
+        supabase.from('pharmacies').select('id', countOptions).limit(1),
+        supabase.from('marketplace_products').select('id', countOptions).limit(1),
+        supabase.from('insurance_plans').select('id', countOptions).limit(1),
+        supabase.from('water_activities').select('id', countOptions).limit(1),
+        supabase.from('flower_shops').select('id', countOptions).limit(1),
       ]);
 
-      // Get pending moderation counts
-      const [pendingPropertiesRes, pendingYachtsRes, pendingToursRes] = await Promise.all([
+      // Pending moderation
+      const [pendingPropertiesRes, pendingListingsRes] = await Promise.all([
         supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('yachts').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('experiences').select('id', countOptions).eq('experience_type', 'tour').eq('approval_status', 'pending').limit(1),
+        supabase.from('listings').select('id', countOptions).eq('approval_status', 'pending').limit(1),
       ]);
 
-      // Get active/pending providers counts
+      // Active/pending providers
       const [activeProvidersRes, pendingProvidersRes, pendingBookingsRes] = await Promise.all([
         supabase.from('providers').select('id', countOptions).eq('is_active', true).limit(1),
         supabase.from('providers').select('id', countOptions).eq('is_verified', false).limit(1),
@@ -83,26 +104,38 @@ export function useAdminDashboardStats() {
       ]);
 
       const pendingProperties = pendingPropertiesRes.count || 0;
-      const pendingYachts = pendingYachtsRes.count || 0;
-      const pendingTours = pendingToursRes.count || 0;
-      const totalPendingContent = pendingProperties + pendingYachts + pendingTours + (pendingProvidersRes.count || 0);
+      const pendingListings = pendingListingsRes.count || 0;
+      const totalPendingContent = pendingProperties + pendingListings + (pendingProvidersRes.count || 0);
 
       return {
         providers: providersRes.count || 0,
         services: servicesRes.count || 0,
         activeProviders: activeProvidersRes.count || 0,
         pendingProviders: pendingProvidersRes.count || 0,
-        yachts: yachtsRes.count || 0,
-        tours: toursRes.count || 0,
+        // Verticals from listings table
+        yachts: verticalCounts['yacht'] || 0,
+        tours: verticalCounts['experience'] || 0,
+        restaurants: verticalCounts['restaurant'] || 0,
+        clinics: verticalCounts['clinic'] || 0,
+        vehicles: verticalCounts['vehicle'] || 0,
+        education: verticalCounts['education'] || 0,
+        pets: verticalCounts['pet_service'] || 0,
+        cleaning: verticalCounts['cleaning'] || 0,
+        babysitters: verticalCounts['babysitter'] || 0,
+        // Non-listings tables
         properties: propertiesRes.count || 0,
-        restaurants: restaurantsRes.count || 0,
         salons: salonsRes.count || 0,
-        clinics: clinicsRes.count || 0,
         gyms: gymsRes.count || 0,
-        vehicles: vehiclesRes.count || 0,
         events: eventsRes.count || 0,
+        flowers: flowersRes.count || 0,
+        pharmacies: pharmaciesRes.count || 0,
+        stores: storesRes.count || 0,
+        insurance: insuranceRes.count || 0,
+        waterActivities: waterRes.count || 0,
+        // Users
         totalUsers: profilesRes.count || 0,
         unoTeamMembers: unoTeamRes.count || 0,
+        // Bookings
         totalBookings: bookingsRes.count || 0,
         pendingBookings: pendingBookingsRes.count || 0,
         pendingProperties,
