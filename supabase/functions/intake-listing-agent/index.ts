@@ -275,29 +275,94 @@ Return a JSON object with:
 3. "description": { "en": "English description (2-3 sentences)", "ru": "Russian description (2-3 sentences)" }
 4. "confidence": Overall extraction confidence (0-1)
 
-Common fields to extract based on vertical type:
-- name_en, name_ru: Names/titles
-- description_en, description_ru: Descriptions  
-- price, price_per_day, price_per_hour, price_per_month, price_per_night: Prices
-- address, district: Location info
+COMPLETE LIST OF FIELDS TO EXTRACT (extract ALL that can be found or inferred):
+
+=== Identity & Descriptions ===
+- name_en, name_ru: Property/listing name in English and Russian
+- title_en, title_ru: Short title for cards
+- internal_name: Internal reference name (e.g. "Villa Sunset B12")
+- description_en, description_ru: Full description (2-4 sentences, professional, engaging)
+- short_description_en, short_description_ru: One-liner summary
+
+=== Property Type & Structure ===
+- property_type: villa, apartment, condo, house, townhouse, penthouse, studio, duplex
+- bedrooms: Number of bedrooms (integer)
+- bathrooms: Number of bathrooms (integer)
+- area_sqm: Total area in square meters (number)
+- plot_size_sqm: Land plot size for villas/houses (number)
+- floor: Floor number (integer)
+- total_floors: Total floors in building (integer)
+- unit_number: Unit/apt number (string)
+- has_elevator: true/false
+
+=== Location ===
+- address: Full street address
+- district: Area/district name (e.g. Rawai, Bang Tao, Kata, Kamala, Patong, Cherng Talay, Layan)
+- lat: Latitude coordinate (number)
+- lng: Longitude coordinate (number)
+
+=== Pricing & Terms ===
+- price: Base price (number only)
+- price_per_night: Nightly rental rate (number)
+- price_per_day, price_per_hour, price_per_month: Other pricing models (number)
+- deposit_amount: Security deposit (number)
+- min_stay_nights: Minimum stay in nights (integer)
+- max_guests: Maximum number of guests (integer)
+- check_in_time: Check-in time (e.g. "14:00")
+- check_out_time: Check-out time (e.g. "12:00")
+- instant_booking: true/false
+- weekly_discount: Weekly discount percentage (0-100)
+- monthly_discount: Monthly discount percentage (0-100)
+- cancellation_policy: flexible, moderate, strict, super_strict
+
+=== Property Features ===
+- parking_type: garage, carport, open, street, none
+- parking_spaces: Number of parking spaces (integer)
+- pool_type: private, shared, rooftop, infinity, plunge, none
+- garden_type: private, shared, tropical, rooftop, none
+- view_type: sea, ocean, mountain, pool, garden, city, panoramic, lake
+- furnishing_level: fully_furnished, partially_furnished, unfurnished
+- equipment: Array of equipment items (e.g. ["washing_machine", "dishwasher", "air_conditioning", "wifi", "tv", "microwave", "oven", "iron"])
+- amenities: Array of amenities (e.g. ["gym", "sauna", "jacuzzi", "bbq", "playground", "security", "cctv"])
+- highlights: Array of property highlights (e.g. ["beachfront", "newly_renovated", "mountain_view", "private_pool"])
+
+=== Ownership & Management ===
+- ownership_form: freehold, leasehold, company, foreign_company
+- management_type: full, partial, self
+- is_for_sale: true/false
+- sale_price: Sale price if for sale (number)
+
+=== House Rules ===
+- pets_allowed: true/false
+- pet_deposit: Pet deposit amount (number)
+- smoking_allowed: true/false
+- smoking_penalty: Smoking penalty amount (number)
+- parties_allowed: true/false
+- max_party_guests: Max guests for parties (integer)
+- children_friendly: true/false
+- has_crib: true/false
+- has_high_chair: true/false
+- quiet_hours_start: Quiet hours start (e.g. "22:00")
+- quiet_hours_end: Quiet hours end (e.g. "08:00")
+- house_rules: House rules text in English
+- house_rules_ru: House rules text in Russian
+
+=== Non-Property Verticals (additional fields) ===
 - phone, email, website: Contact info
-- features, amenities, services: Lists of features/amenities
-- capacity, bedrooms, bathrooms, area_sqm: Numeric specs
-- parking_type: Parking type (garage, carport, open, street, none)
-- parking_spaces: Number of parking spaces
-- pool_type: Pool type (private, shared, rooftop, none)
-- garden_type: Garden type (private, shared, tropical, none)
-- view_type: View type (sea, mountain, pool, garden, city)
-- furnishing_level: Furnishing (fully_furnished, partially, unfurnished)
-- property_type: Type (villa, apartment, condo, house, townhouse)
-- floor, total_floors: Floor info
+- features, services: Lists of features/services
+- capacity: Max capacity (integer)
 - working_hours: Operating schedule
+- pricing_model: fixed, hourly, daily, per_person
+- availability_type: instant, request, schedule
+- category_id: Category identifier
 - images, cover_image: Image URLs
 
-IMPORTANT: Always extract as many fields as possible from the content.
-For prices, extract the numeric value only.
+IMPORTANT: Extract ALL fields that can be found or reasonably inferred from the content.
+For prices, extract the numeric value only (no currency symbols).
+For boolean fields, return true/false.
 For arrays, return as arrays of strings.
-Generate professional, engaging descriptions in both languages.`;
+Generate professional, engaging descriptions in both languages.
+If a field can be reasonably inferred (e.g. a beachfront villa likely has sea view), include it with lower confidence.`;
 
   const userPrompt = `Extract listing data for vertical "${vertical}" from this content:
 
