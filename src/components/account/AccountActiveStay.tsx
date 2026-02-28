@@ -40,9 +40,9 @@ export function AccountActiveStay() {
           status,
           total_amount,
           currency,
-          property:owner_properties(
+          property:properties(
             id,
-            title,
+            title_en,
             title_ru,
             address,
             images
@@ -71,6 +71,7 @@ export function AccountActiveStay() {
   }
 
   const property = activeStay.property as any;
+  const propertyTitle = isRussian ? (property?.title_ru || property?.title_en) : (property?.title_en || property?.title_ru);
   const checkIn = parseISO(activeStay.check_in);
   const checkOut = parseISO(activeStay.check_out);
   const daysLeft = differenceInDays(checkOut, new Date());
@@ -90,7 +91,7 @@ export function AccountActiveStay() {
             {property?.images?.[0] ? (
               <img
                 src={property.images[0]}
-                alt={isRussian ? property.title_ru : property.title}
+                alt={propertyTitle || ''}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -112,7 +113,7 @@ export function AccountActiveStay() {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
               <p className="font-semibold text-sm truncate">
-                  {isRussian ? property?.title_ru : property?.title}
+                  {propertyTitle}
                 </p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                   <MapPin className="h-3 w-3" />

@@ -21,19 +21,16 @@ import type {
   PropertyFinancial 
 } from '@/types/property';
 
+import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+
 /**
- * Helper: get all property IDs the user can manage (owned + assigned).
- * Returns { ownedIds, managedIds, allIds }.
+ * Helper: get all property IDs the user can manage.
+ * Delegates to the central getAccessiblePropertyIds (owned + delegated + company).
  */
-async function getUserPropertyIds(userId: string) {
-  const [ownedRes, assignedRes] = await Promise.all([
-    supabase.from('properties').select('id').eq('owner_id', userId),
-    supabase.from('property_manager_assignments').select('property_id').eq('manager_user_id', userId).eq('is_active', true),
-  ]);
-  const ownedIds = (ownedRes.data || []).map(p => p.id);
-  const managedIds = (assignedRes.data || []).map(a => a.property_id);
-  const allIds = [...new Set([...ownedIds, ...managedIds])];
-  return { ownedIds, managedIds, allIds };
+async function getUserPropertyIds(userId: string, activeCompanyId: string | null = null) {
+  const result = await getAccessiblePropertyIds({ userId, activeCompanyId });
+  return { ownedIds: result.ownedIds, managedIds: [...result.delegatedIds, ...result.companyIds], allIds: result.allIds };
 }
 
 /**

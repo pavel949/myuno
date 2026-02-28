@@ -39,7 +39,7 @@ export interface ManagementTerms {
   // joined
   property?: {
     id: string;
-    title: string | null;
+    title_en: string | null;
     title_ru: string | null;
     management_type: string | null;
     address: string | null;
@@ -93,7 +93,7 @@ export function useAllManagementTerms() {
         .from('property_management_terms')
         .select(`
           *,
-          property:owner_properties(id, title, title_ru, management_type, address)
+          property:properties(id, title_en, title_ru, management_type, address)
         `)
         .order('updated_at', { ascending: false });
 

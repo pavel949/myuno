@@ -106,11 +106,11 @@ export default function MyStay() {
         check_in: currentBooking.check_in,
         check_out: currentBooking.check_out,
         property_id: currentBooking.property_id,
-        property: (currentBooking as any).owner_properties || (currentBooking as any).properties
+        property: (currentBooking as any).owner_properties
           ? {
-              title: currentBooking.owner_properties.title,
-              address: currentBooking.owner_properties.address,
-              cover_image: currentBooking.owner_properties.cover_image,
+              title: (currentBooking as any).owner_properties.title || (currentBooking as any).owner_properties.title_en,
+              address: (currentBooking as any).owner_properties.address,
+              cover_image: (currentBooking as any).owner_properties.cover_image,
             }
           : undefined,
       }
