@@ -124,7 +124,7 @@ export function AdminSidebar() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { user, signOut } = useAuth();
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   
   // Load group states from localStorage
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -164,6 +164,11 @@ export function AdminSidebar() {
 
   const toggleGroup = (groupId: string) => {
     setOpenGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (isMobile) setOpenMobile(false);
   };
 
   return (
@@ -208,7 +213,7 @@ export function AdminSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
-                      onClick={() => navigate(item.path)}
+                      onClick={() => handleNavigate(item.path)}
                       isActive={isActive(item.path)}
                       tooltip={isRussian ? item.titleRu : item.title}
                       className={cn(
@@ -230,7 +235,7 @@ export function AdminSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
-                      onClick={() => navigate(item.path)}
+                      onClick={() => handleNavigate(item.path)}
                       isActive={isActive(item.path)}
                       tooltip={isRussian ? item.titleRu : item.title}
                       className={cn(
