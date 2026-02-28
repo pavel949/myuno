@@ -91,7 +91,7 @@ const ITEM_SEPARATORS = [
 ];
 
 interface IntakeRequest {
-  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls';
+  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls' | 'files';
   rawText?: string;
   fileData?: { rows: Record<string, unknown>[] };
   urls?: string[];
@@ -597,7 +597,10 @@ Deno.serve(async (req) => {
   const startTime = Date.now();
 
   try {
-    const { mode, rawText, fileData, urls, images, forceVertical, sessionId } = await req.json() as IntakeRequest;
+    const body = await req.json() as IntakeRequest & { uploadedImages?: string[] };
+    const { mode, rawText, fileData, urls, forceVertical, sessionId } = body;
+    // Support both "images" and "uploadedImages" from frontend
+    const images = body.images || body.uploadedImages || [];
 
     console.log(`[INTAKE] Processing request: mode=${mode}, sessionId=${sessionId || 'new'}`);
 
@@ -692,6 +695,12 @@ Deno.serve(async (req) => {
           });
         }
       }
+    } else if (mode === 'files' && images.length > 0) {
+      // Files mode: uploaded images/documents - describe them for AI extraction
+      const imageListText = images.map((url: string, i: number) => `Image ${i + 1}: ${url}`).join('\n');
+      const content = `Uploaded files for listing creation:\n${imageListText}\n\nPlease extract all possible listing information from these images/documents.`;
+      const item = await processItem(content, undefined, images, forceVertical, LOVABLE_API_KEY, verticals);
+      items.push(item);
     } else if (mode === 'bulk_file' && fileData?.rows) {
       // Process file rows
       for (const row of fileData.rows) {
