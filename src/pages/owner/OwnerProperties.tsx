@@ -188,7 +188,7 @@ export default function OwnerProperties() {
         </Button>
         <Button variant="outline" onClick={() => navigate('/owner/properties/import')}>
           <Download className="h-4 w-4 mr-2" />
-          {isRu ? 'Импорт с OTA' : 'Import from OTA'}
+          {isRu ? 'Импорт' : 'Import'}
         </Button>
       </div>
 
