@@ -142,13 +142,24 @@ export function UnifiedTaskHub() {
     return format(d, 'dd.MM');
   };
 
+  const logActivity = async (action: string, entityType: string, entityId?: string, meta?: Record<string, unknown>) => {
+    if (!user) return;
+    await supabase.from('team_activity_log').insert({
+      user_id: user.id,
+      action_type: action,
+      entity_type: entityType,
+      entity_id: entityId ?? null,
+      metadata: meta ?? null,
+    } as any).then(() => {});
+  };
+
   const handleCreate = async () => {
     if (!companyId || !user) return;
     if (!title.trim()) { toast.error(t('Title required', 'Введите название')); return; }
 
     try {
       if (taskCategory === 'business') {
-        await createCrmTask.mutateAsync({
+        const result = await createCrmTask.mutateAsync({
           company_id: companyId,
           title: title.trim(),
           description: description || undefined,
@@ -159,9 +170,10 @@ export function UnifiedTaskHub() {
           assigned_to: assignedTo === 'self' ? user.id : assignedTo,
           property_id: propertyId !== 'none' ? propertyId : undefined,
         });
+        logActivity('task_created', 'crm_task', result?.id, { title: title.trim(), task_type: taskType });
       } else {
         if (propertyId === 'none') { toast.error(t('Select property', 'Выберите объект')); return; }
-        const { error } = await supabase.from('property_operational_tasks').insert({
+        const { data, error } = await supabase.from('property_operational_tasks').insert({
           property_id: propertyId,
           task_type: opsTaskType,
           title: title.trim(),
@@ -171,9 +183,10 @@ export function UnifiedTaskHub() {
           priority: priority === 'medium' ? 'normal' : priority as any,
           assigned_to: assignedTo === 'self' ? user.id : assignedTo,
           status: 'pending',
-        } as any);
+        } as any).select('id').single();
         if (error) throw error;
         queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+        logActivity('task_created', 'ops_task', data?.id, { title: title.trim(), task_type: opsTaskType });
       }
       toast.success(t('Task created', 'Задача создана'));
       setSheetOpen(false);
@@ -185,6 +198,7 @@ export function UnifiedTaskHub() {
 
   const handleQuickComplete = (task: UnifiedTask) => {
     handleUpdate(task.id, task.source, { status: 'completed', completed_at: new Date().toISOString() });
+    logActivity('task_completed', task.source === 'crm' ? 'crm_task' : 'ops_task', task.id, { title: task.title });
     toast.success(t('Done', 'Выполнено'));
   };
 
@@ -195,6 +209,7 @@ export function UnifiedTaskHub() {
       await supabase.from('property_operational_tasks').update(updates as any).eq('id', id);
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
     }
+    queryClient.invalidateQueries({ queryKey: ['day-briefing'] });
   };
 
   const handleDelete = async (id: string, source: 'crm' | 'ops') => {
@@ -204,6 +219,7 @@ export function UnifiedTaskHub() {
       await supabase.from('property_operational_tasks').delete().eq('id', id);
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
     }
+    logActivity('task_deleted', source === 'crm' ? 'crm_task' : 'ops_task', id);
   };
 
   const propertiesList = allProperties.map(p => ({ property_id: p.property_id, title: isRu ? (p.title_ru || p.title) : p.title }));

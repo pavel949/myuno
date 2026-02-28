@@ -108,7 +108,8 @@ export function useCreateCrmTask() {
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-tasks'] });
-      // Activity logging is handled by the caller if needed
+      qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
+      qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
   });
 }
@@ -126,6 +127,8 @@ export function useUpdateCrmTask() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['crm-tasks'] });
+      qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
+      qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
   });
 }
@@ -143,6 +146,8 @@ export function useDeleteCrmTask() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['crm-tasks'] });
+      qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
+      qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
   });
 }

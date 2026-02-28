@@ -387,7 +387,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `task-${t.id}`,
             type: isOverdue ? 'overdue_task' : 'crm_task',
             sectionOrder: isOverdue ? ORDER.overdue : ORDER.tasks,
-            title: t.title, href: '/owner/operations',
+            title: t.title, href: '/owner/tasks',
             meta: { priority: t.priority },
           });
         }

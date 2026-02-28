@@ -93,14 +93,26 @@ export default function OwnerDetailPage() {
   const handleCreateReminder = async () => {
     if (!activeCompany?.company_id || !id) return;
     try {
+      const currentUser = (await supabase.auth.getUser()).data.user;
       await supabase.from('crm_tasks').insert({
         company_id: activeCompany.company_id,
         contact_id: id,
         title: isRu ? `Связаться с ${owner.first_name} ${owner.last_name}` : `Follow up with ${owner.first_name} ${owner.last_name}`,
-        status: 'todo',
+        task_type: 'follow_up',
+        status: 'pending',
         priority: 'medium',
-        created_by: (await supabase.auth.getUser()).data.user?.id || '',
+        created_by: currentUser?.id || '',
       });
+      // Log activity
+      if (currentUser) {
+        await supabase.from('team_activity_log').insert({
+          user_id: currentUser.id,
+          action_type: 'task_created',
+          entity_type: 'crm_task',
+          entity_id: id,
+          metadata: { contact_name: `${owner.first_name} ${owner.last_name}` },
+        } as any);
+      }
       toast.success(isRu ? 'Напоминание создано' : 'Reminder created');
     } catch {
       toast.error(isRu ? 'Ошибка' : 'Error');
