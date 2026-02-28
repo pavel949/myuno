@@ -330,12 +330,12 @@ export function isEmoji(str: string): boolean {
 
 // Standardized icon sizes for consistent UI across the app
 export const iconSizes = {
-  xs: 'w-3 h-3',      // 12px - very small inline icons
-  sm: 'w-3.5 h-3.5',  // 14px - small icons in badges/chips
-  md: 'w-4 h-4',      // 16px - default icon size
-  lg: 'w-5 h-5',      // 20px - medium emphasis
-  xl: 'w-6 h-6',      // 24px - high emphasis, quick actions
-  '2xl': 'w-8 h-8',   // 32px - hero icons
+  xs: 'w-3.5 h-3.5',  // 14px - small inline icons
+  sm: 'w-4 h-4',      // 16px - badges/chips
+  md: 'w-5 h-5',      // 20px - default icon size
+  lg: 'w-6 h-6',      // 24px - medium emphasis
+  xl: 'w-7 h-7',      // 28px - high emphasis, quick actions
+  '2xl': 'w-9 h-9',   // 36px - hero icons
   '3xl': 'w-12 h-12', // 48px - placeholder icons
 } as const;
 
