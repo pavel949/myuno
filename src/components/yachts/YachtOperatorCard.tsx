@@ -42,8 +42,9 @@ export function YachtOperatorCard({ providerId }: YachtOperatorCardProps) {
       if (!prov) return;
 
       const { count } = await supabase
-        .from('yachts')
+        .from('listings')
         .select('id', { count: 'exact', head: true })
+        .eq('vertical', 'yacht')
         .eq('provider_id', providerId)
         .eq('is_active', true);
 

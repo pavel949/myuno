@@ -75,24 +75,24 @@ export function useAdminNotificationsList() {
         });
       }
 
-      // Fetch pending moderation items
-      const { data: pendingYachts } = await supabase
-        .from('yachts')
-        .select('id, name_en, created_at')
+      // Fetch pending moderation items from unified listings
+      const { data: pendingListings } = await supabase
+        .from('listings')
+        .select('id, vertical, name_en, created_at')
         .eq('approval_status', 'pending')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
 
-      if (pendingYachts) {
-        pendingYachts.forEach((yacht) => {
+      if (pendingListings) {
+        pendingListings.forEach((listing) => {
           notifications.push({
-            id: `moderation-yacht-${yacht.id}`,
+            id: `moderation-${listing.vertical}-${listing.id}`,
             type: 'moderation',
-            title: `Yacht pending: ${yacht.name_en}`,
-            titleRu: `Яхта на модерации: ${yacht.name_en}`,
+            title: `${listing.vertical} pending: ${listing.name_en}`,
+            titleRu: `На модерации: ${listing.name_en}`,
             description: 'Awaiting approval',
             descriptionRu: 'Ожидает одобрения',
-            createdAt: yacht.created_at || now.toISOString(),
+            createdAt: listing.created_at || now.toISOString(),
             isRead: false,
             link: '/admin/operations?tab=moderation',
             priority: 'medium',

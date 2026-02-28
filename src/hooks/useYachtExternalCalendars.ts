@@ -160,15 +160,18 @@ export function useYachtICalExportUrl(yachtId?: string) {
       if (!yachtId) return null;
 
       const { data, error } = await supabase
-        .from('yachts')
-        .select('ical_token')
+        .from('listings')
+        .select('attributes')
         .eq('id', yachtId)
+        .eq('vertical', 'yacht')
         .single();
 
       if (error) throw error;
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      return `${supabaseUrl}/functions/v1/yacht-calendar-export?yacht=${yachtId}&token=${data.ical_token}`;
+      const attrs = (data.attributes || {}) as Record<string, any>;
+      const icalToken = attrs.ical_token as string | undefined;
+      return `${supabaseUrl}/functions/v1/yacht-calendar-export?yacht=${yachtId}&token=${icalToken || ''}`;
     },
     enabled: !!yachtId && !!user?.id,
   });

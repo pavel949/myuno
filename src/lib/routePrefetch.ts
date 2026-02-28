@@ -10,11 +10,11 @@ import { CACHE_PROFILES } from '@/lib/queryConfig';
 // Route to module mapping for code prefetching
 const routeModules: Record<string, () => Promise<unknown>> = {
   '/yachts': () => import('@/pages/yachts/YachtsIndex'),
-  '/tours': () => import('@/pages/experiences/ExperiencesIndex'), // Legacy - redirects to experiences
+  '/tours': () => import('@/pages/experiences/ExperiencesIndex'),
   '/property': () => import('@/pages/property/PropertyIndex'),
   '/transport': () => import('@/pages/transport/TransportIndex'),
   '/flowers': () => import('@/pages/flowers/FlowersIndex'),
-  '/water': () => import('@/pages/experiences/ExperiencesIndex'), // Legacy - redirects to experiences
+  '/water': () => import('@/pages/experiences/ExperiencesIndex'),
   '/experiences': () => import('@/pages/experiences/ExperiencesIndex'),
   '/events': () => import('@/pages/events/EventsIndex'),
   '/restaurants': () => import('@/pages/restaurants/RestaurantsIndex'),
@@ -28,40 +28,31 @@ const routeModules: Record<string, () => Promise<unknown>> = {
   '/insurance': () => import('@/pages/insurance/InsuranceIndex'),
 };
 
+// Helper to prefetch from listings table by vertical
+const prefetchListings = (qc: QueryClient, vertical: string, queryKey: string[], limit = 12) => {
+  qc.prefetchQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('vertical', vertical)
+        .eq('is_active', true)
+        .eq('approval_status', 'approved')
+        .order('rating', { ascending: false })
+        .limit(limit);
+      return data || [];
+    },
+    ...CACHE_PROFILES.SEMI_STATIC,
+  });
+};
+
 // Route to data query mapping
 const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
-  '/yachts': (qc) => {
-    qc.prefetchQuery({
-      queryKey: ['yachts', 'featured'],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('yachts')
-          .select('id, name_en, name_ru, cover_image, rating, price_full_day')
-          .eq('is_active', true)
-          .eq('approval_status', 'approved')
-          .order('rating', { ascending: false })
-          .limit(12);
-        return data || [];
-      },
-      ...CACHE_PROFILES.SEMI_STATIC,
-    });
-  },
-  '/tours': (qc) => {
-    qc.prefetchQuery({
-      queryKey: ['tours', 'all', undefined, undefined],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('experiences')
-          .select('*')
-          .eq('is_active', true)
-          .eq('experience_type', 'tour')
-          .order('rating', { ascending: false })
-          .limit(20);
-        return data || [];
-      },
-      ...CACHE_PROFILES.SEMI_STATIC,
-    });
-  },
+  '/yachts': (qc) => prefetchListings(qc, 'yacht', ['yachts', 'featured']),
+  '/tours': (qc) => prefetchListings(qc, 'experience', ['tours', 'all', undefined as any, undefined as any], 20),
+  '/transport': (qc) => prefetchListings(qc, 'vehicle', ['vehicles', 'all'], 20),
+  '/restaurants': (qc) => prefetchListings(qc, 'restaurant', ['restaurants', 'featured']),
   '/property': (qc) => {
     qc.prefetchQuery({
       queryKey: ['properties', 'featured'],
@@ -72,21 +63,6 @@ const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
           .eq('is_active', true)
           .order('rating', { ascending: false })
           .limit(12);
-        return data || [];
-      },
-      ...CACHE_PROFILES.SEMI_STATIC,
-    });
-  },
-  '/transport': (qc) => {
-    qc.prefetchQuery({
-      queryKey: ['vehicles', 'all'],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('vehicles')
-          .select('*')
-          .eq('is_active', true)
-          .order('is_featured', { ascending: false })
-          .limit(20);
         return data || [];
       },
       ...CACHE_PROFILES.SEMI_STATIC,
@@ -137,21 +113,6 @@ const routeDataQueries: Record<string, (queryClient: QueryClient) => void> = {
       ...CACHE_PROFILES.SEMI_STATIC,
     });
   },
-  '/restaurants': (qc) => {
-    qc.prefetchQuery({
-      queryKey: ['restaurants', 'featured'],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('restaurants')
-          .select('id, name_en, name_ru, cover_image, rating, price_range')
-          .eq('is_active', true)
-          .order('rating', { ascending: false })
-          .limit(12);
-        return data || [];
-      },
-      ...CACHE_PROFILES.SEMI_STATIC,
-    });
-  },
 };
 
 // Track prefetched routes to avoid duplicate prefetches
@@ -159,40 +120,23 @@ const prefetchedRoutes = new Set<string>();
 
 /**
  * Prefetch both code and data for a route
- * Call this on mouseEnter/touchStart for navigation items
  */
 export function prefetchRoute(path: string, queryClient?: QueryClient) {
-  // Normalize path
   const normalizedPath = path.split('?')[0];
-  
-  // Check if already prefetched in this session
-  if (prefetchedRoutes.has(normalizedPath)) {
-    return;
-  }
-  
+  if (prefetchedRoutes.has(normalizedPath)) return;
   prefetchedRoutes.add(normalizedPath);
   
-  // Prefetch code chunk
   const moduleLoader = routeModules[normalizedPath];
   if (moduleLoader) {
-    moduleLoader().catch(() => {
-      // Ignore prefetch errors silently
-      prefetchedRoutes.delete(normalizedPath);
-    });
+    moduleLoader().catch(() => { prefetchedRoutes.delete(normalizedPath); });
   }
   
-  // Prefetch data if queryClient is provided
   if (queryClient) {
     const dataQuery = routeDataQueries[normalizedPath];
-    if (dataQuery) {
-      dataQuery(queryClient);
-    }
+    if (dataQuery) dataQuery(queryClient);
   }
 }
 
-/**
- * Clear prefetch cache (useful for testing or forced refresh)
- */
 export function clearPrefetchCache() {
   prefetchedRoutes.clear();
 }
