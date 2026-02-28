@@ -58,7 +58,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           className
         )}
       >
-        <div className="flex items-center justify-between h-12 lg:h-[68px] px-4 lg:px-8 max-w-[1536px] mx-auto">
+        <div className="flex items-center justify-between h-12 lg:h-[68px] px-3 sm:px-4 lg:px-8 max-w-[1536px] mx-auto gap-1">
           {/* Logo with hover animation */}
           <Link
             to="/"
@@ -108,7 +108,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           )}
 
           {/* Right — grouped utilities */}
-          <div className="flex items-center gap-0.5 lg:gap-1 ml-auto">
+          <div className="flex items-center gap-0.5 lg:gap-1 ml-auto shrink-0">
             {/* Utility group */}
             <div className="hidden lg:flex items-center gap-0.5 bg-muted/40 rounded-lg p-0.5">
               <LanguageSwitcher size="sm" />

@@ -31,18 +31,25 @@ export function TeamLayout({
     <AppLayout 
       title={title || (isRu ? 'Управление недвижимостью — Команда' : 'Property Management — Team')}
     >
-      <div className="flex h-[calc(100vh-64px)] overflow-x-hidden max-w-full">
+      <div className="flex h-[calc(100vh-64px)] overflow-x-hidden max-w-[100vw]">
         {/* Desktop Sidebar */}
         {showSidebar && (
           <TeamSidebar className="hidden lg:flex" />
         )}
         
         {/* Main Content */}
-        <main className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden pb-16 lg:pb-0 min-w-0 max-w-full",
-          !fullWidth && "container",
-          className
-        )}>
+        <main 
+          className={cn(
+            "flex-1 overflow-y-auto overflow-x-hidden min-w-0 max-w-full",
+            "pb-20 lg:pb-4",
+            !fullWidth && "container",
+            className
+          )}
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
+          }}
+        >
           {children}
         </main>
       </div>
