@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 export function MaintenanceHealthWidget() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const navigate = useNavigate();
   const { data: schedules = [], isLoading } = useMaintenanceSchedules();
 
@@ -36,7 +37,7 @@ export function MaintenanceHealthWidget() {
               healthScore >= 80 ? "text-success" : healthScore >= 50 ? "text-warning" : "text-destructive"
             )} />
             <h3 className="font-semibold text-sm">
-              {isRu ? 'Обслуживание' : 'Maintenance'}
+              {isRu ? 'Обслуживание' : isTh ? 'การบำรุงรักษา' : 'Maintenance'}
             </h3>
           </div>
           <div className="flex items-center gap-1">

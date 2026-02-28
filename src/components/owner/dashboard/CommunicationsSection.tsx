@@ -14,6 +14,7 @@ export function CommunicationsSection() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { chats, isLoading, totalUnread } = useOwnerChats();
 
   if (isLoading) {
@@ -38,7 +39,7 @@ export function CommunicationsSection() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base">
-            {isRu ? 'Сообщения' : 'Messages'}
+            {isRu ? 'Сообщения' : isTh ? 'ข้อความ' : 'Messages'}
           </h2>
         </div>
         
@@ -47,7 +48,7 @@ export function CommunicationsSection() {
             <MessageCircle className="h-5 w-5 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Нет сообщений' : 'No messages yet'}
+            {isRu ? 'Нет сообщений' : isTh ? 'ยังไม่มีข้อความ' : 'No messages yet'}
           </p>
         </Card>
       </div>
@@ -59,7 +60,7 @@ export function CommunicationsSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base">
-            {isRu ? 'Сообщения' : 'Messages'}
+            {isRu ? 'Сообщения' : isTh ? 'ข้อความ' : 'Messages'}
           </h2>
           {totalUnread > 0 && (
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-primary-foreground">
@@ -68,7 +69,7 @@ export function CommunicationsSection() {
           )}
         </div>
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/messages')}>
-          {isRu ? 'Все' : 'View all'}
+          {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
       </div>

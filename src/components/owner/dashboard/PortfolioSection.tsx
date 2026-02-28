@@ -33,7 +33,7 @@ export function PortfolioSection() {
     return (
       <div className="space-y-3">
         <h2 className="font-semibold text-base">
-          {isRu ? 'Ваши объекты' : 'Your Properties'}
+          {isRu ? 'Ваши объекты' : language === 'th' ? 'อสังหาฯ ของคุณ' : 'Your Properties'}
         </h2>
         
         <div 
@@ -53,7 +53,7 @@ export function PortfolioSection() {
           </p>
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            {isRu ? 'Добавить объект' : 'Add Property'}
+            {isRu ? 'Добавить объект' : language === 'th' ? 'เพิ่มอสังหาฯ' : 'Add Property'}
           </Button>
         </div>
       </div>

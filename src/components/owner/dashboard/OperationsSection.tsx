@@ -23,6 +23,7 @@ export function OperationsSection() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { todayTasks, tasksByType, isLoading } = useTodayOperations();
 
   if (isLoading) {
@@ -53,10 +54,10 @@ export function OperationsSection() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base">
-            {isRu ? 'Операции' : 'Operations'}
+            {isRu ? 'Операции' : isTh ? 'การดำเนินงาน' : 'Operations'}
           </h2>
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/operations')}>
-            {isRu ? 'Все' : 'View all'}
+            {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
             <ChevronRight className="h-3 w-3 ml-1" />
           </Button>
         </div>
@@ -68,10 +69,10 @@ export function OperationsSection() {
             </div>
             <div>
               <p className="font-medium text-success">
-                {isRu ? 'Всё выполнено!' : 'All tasks complete!'}
+                {isRu ? 'Всё выполнено!' : isTh ? 'เสร็จทั้งหมด!' : 'All tasks complete!'}
               </p>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'Нет задач на сегодня' : 'No pending tasks for today'}
+                {isRu ? 'Нет задач на сегодня' : isTh ? 'ไม่มีงานค้างวันนี้' : 'No pending tasks for today'}
               </p>
             </div>
           </div>
@@ -85,14 +86,14 @@ export function OperationsSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base">
-            {isRu ? 'Сегодня' : 'Today'}
+            {isRu ? 'Сегодня' : isTh ? 'วันนี้' : 'Today'}
           </h2>
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-            {pendingTasks.length} {isRu ? 'задач' : 'tasks'}
+            {pendingTasks.length} {isRu ? 'задач' : isTh ? 'งาน' : 'tasks'}
           </span>
         </div>
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/operations')}>
-          {isRu ? 'Все' : 'View all'}
+          {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
       </div>

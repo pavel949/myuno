@@ -8,7 +8,7 @@ import {
   CheckCircle2, ArrowRight 
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, th } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const ACTIVITY_ICONS = {
@@ -22,6 +22,7 @@ export function ActivityBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   
   // Get recently completed tasks
   const { tasks, isLoading } = useOperationalTasks({
@@ -51,16 +52,18 @@ export function ActivityBlock() {
         <CardContent className="p-3">
           <div className="flex items-center gap-1.5 mb-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : 'ACTIVITY'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : isTh ? 'กิจกรรม' : 'ACTIVITY'}</span>
           </div>
           
           <p className="text-xs text-muted-foreground">
-            {isRu ? 'Нет недавних действий' : 'No recent activity'}
+            {isRu ? 'Нет недавних действий' : isTh ? 'ไม่มีกิจกรรมล่าสุด' : 'No recent activity'}
           </p>
         </CardContent>
       </Card>
     );
   }
+
+  const getLocale = () => isRu ? ru : isTh ? th : undefined;
 
   return (
     <Card 
@@ -72,7 +75,7 @@ export function ActivityBlock() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : 'ACTIVITY'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'АКТИВНОСТЬ' : isTh ? 'กิจกรรม' : 'ACTIVITY'}</span>
           </div>
           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
@@ -85,7 +88,7 @@ export function ActivityBlock() {
             const Icon = config.icon;
             const timeAgo = formatDistanceToNow(new Date(task.completed_at!), {
               addSuffix: true,
-              locale: isRu ? ru : undefined
+              locale: getLocale()
             });
 
             return (

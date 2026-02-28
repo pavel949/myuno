@@ -10,6 +10,7 @@ export function RisksBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   
   // Get all pending/in-progress tasks that represent risks (maintenance, urgent items)
   const { tasks, isLoading } = useOperationalTasks({
@@ -48,14 +49,14 @@ export function RisksBlock() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground">{isRu ? 'РИСКИ' : 'RISKS'}</span>
+              <span className="text-xs font-medium text-muted-foreground">{isRu ? 'РИСКИ' : isTh ? 'ความเสี่ยง' : 'RISKS'}</span>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-success" />
             <p className="text-sm font-semibold text-success">
-              {isRu ? 'Всё в порядке' : 'All clear'}
+              {isRu ? 'Всё в порядке' : isTh ? 'ทุกอย่างเรียบร้อย' : 'All clear'}
             </p>
           </div>
         </CardContent>
@@ -79,7 +80,7 @@ export function RisksBlock() {
               "h-4 w-4",
               urgentTasks.length > 0 ? "text-destructive" : "text-warning"
             )} />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'РИСКИ' : 'RISKS'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'РИСКИ' : isTh ? 'ความเสี่ยง' : 'RISKS'}</span>
           </div>
           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
@@ -91,7 +92,7 @@ export function RisksBlock() {
         )}>
           {totalIssues}
           <span className="text-sm font-normal text-muted-foreground ml-1.5">
-            {isRu ? 'проблем' : 'issues'}
+            {isRu ? 'проблем' : isTh ? 'ปัญหา' : 'issues'}
           </span>
         </p>
 
@@ -100,19 +101,19 @@ export function RisksBlock() {
           {urgentTasks.length > 0 && (
             <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
               <AlertTriangle className="h-3 w-3" />
-              <span>{urgentTasks.length} {isRu ? 'срочно' : 'urgent'}</span>
+              <span>{urgentTasks.length} {isRu ? 'срочно' : isTh ? 'เร่งด่วน' : 'urgent'}</span>
             </div>
           )}
           {overdueTasks.length > 0 && (
             <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
               <AlertCircle className="h-3 w-3" />
-              <span>{overdueTasks.length} {isRu ? 'просрочено' : 'overdue'}</span>
+              <span>{overdueTasks.length} {isRu ? 'просрочено' : isTh ? 'เกินกำหนด' : 'overdue'}</span>
             </div>
           )}
           {maintenanceTasks.length > 0 && (
             <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
               <Wrench className="h-3 w-3" />
-              <span>{maintenanceTasks.length} {isRu ? 'ремонт' : 'repairs'}</span>
+              <span>{maintenanceTasks.length} {isRu ? 'ремонт' : isTh ? 'ซ่อมบำรุง' : 'repairs'}</span>
             </div>
           )}
         </div>

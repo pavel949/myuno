@@ -13,6 +13,7 @@ export function MoneyBlock() {
   const { language } = useLanguage();
   const { currencyInfo, convertPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: stats, isLoading } = useFinancialStats();
   const { data: depositStats, isLoading: depositsLoading } = useDepositStats();
 
@@ -50,16 +51,14 @@ export function MoneyBlock() {
       onClick={() => navigate('/owner/financials')}
     >
       <CardContent className="p-3">
-        {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5">
             <Wallet className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ФИНАНСЫ' : 'FINANCES'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ФИНАНСЫ' : isTh ? 'การเงิน' : 'FINANCES'}</span>
           </div>
           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
 
-        {/* Net profit - hero metric */}
         <div className="mb-3">
           <p className={cn(
             "text-3xl font-bold tracking-tight",
@@ -68,41 +67,37 @@ export function MoneyBlock() {
             {netProfit >= 0 ? '+' : ''}{formatCurrency(netProfit)}
           </p>
           <p className="text-xs text-muted-foreground">
-            {isRu ? 'чистая прибыль' : 'net profit'}
+            {isRu ? 'чистая прибыль' : isTh ? 'กำไรสุทธิ' : 'net profit'}
           </p>
         </div>
 
-        {/* Stats grid - 3 columns */}
         <div className="grid grid-cols-3 gap-2">
-          {/* Income */}
           <div className="p-2 rounded-lg bg-success/5 border border-success/10">
             <div className="flex items-center gap-1 mb-0.5">
               <TrendingUp className="h-3 w-3 text-success" />
-              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Доход' : 'Income'}</span>
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Доход' : isTh ? 'รายได้' : 'Income'}</span>
             </div>
             <p className="text-sm font-semibold text-success">{formatCurrency(income)}</p>
           </div>
 
-          {/* Expenses */}
           <div className="p-2 rounded-lg bg-destructive/5 border border-destructive/10">
             <div className="flex items-center gap-1 mb-0.5">
               <TrendingDown className="h-3 w-3 text-destructive" />
-              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Расход' : 'Expenses'}</span>
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Расход' : isTh ? 'รายจ่าย' : 'Expenses'}</span>
             </div>
             <p className="text-sm font-semibold text-destructive">{formatCurrency(expenses)}</p>
           </div>
 
-          {/* Deposits */}
           <div className="p-2 rounded-lg bg-info/5 border border-info/10">
             <div className="flex items-center gap-1 mb-0.5">
               <Shield className="h-3 w-3 text-info" />
-              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Депозит' : 'Deposits'}</span>
+              <span className="text-[10px] text-muted-foreground uppercase">{isRu ? 'Депозит' : isTh ? 'เงินมัดจำ' : 'Deposits'}</span>
             </div>
             <p className="text-sm font-semibold">
               {depositStats ? formatCurrency(depositStats.totalHeld) : `${currencyInfo.symbol}0`}
             </p>
             {depositStats && depositStats.pendingReturn > 0 && (
-              <p className="text-[10px] text-warning">{depositStats.pendingReturn} {isRu ? 'к возврату' : 'pending'}</p>
+              <p className="text-[10px] text-warning">{depositStats.pendingReturn} {isRu ? 'к возврату' : isTh ? 'รอคืน' : 'pending'}</p>
             )}
           </div>
         </div>
