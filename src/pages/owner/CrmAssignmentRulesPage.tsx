@@ -39,8 +39,8 @@ export default function CrmAssignmentRulesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Распределение лидов' : 'Lead Assignment'}</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -49,7 +49,7 @@ export default function CrmAssignmentRulesPage() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />{isRu ? 'Новое правило' : 'New Rule'}</Button>
+            <Button className="shrink-0"><Plus className="h-4 w-4 mr-2" />{isRu ? 'Новое правило' : 'New Rule'}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -84,7 +84,7 @@ export default function CrmAssignmentRulesPage() {
           {rules.map(rule => (
             <Card key={rule.id}>
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Shuffle className="h-4 w-4 text-primary" />
                     {rule.name}
