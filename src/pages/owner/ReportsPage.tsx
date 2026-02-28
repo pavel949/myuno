@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useMyProperties } from '@/hooks/useMyProperties';
+import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import {
   usePropertyReports,
   useGenerateReport,
@@ -15,6 +15,7 @@ import {
   ReportType,
   PropertyReport
 } from '@/hooks/usePropertyReports';
+import { usePropertyComplexes, type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
@@ -58,6 +59,10 @@ import {
   FileSpreadsheet,
   Settings2,
   UserPlus,
+  Users,
+  Home,
+  Layers,
+  Filter,
 } from 'lucide-react';
 import {
   format,
@@ -76,6 +81,48 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+
+/** Report scope: what entity are we generating/filtering for */
+type ReportScope = 'property' | 'complex' | 'owner' | 'portfolio';
+
+/** Hook to fetch owner contacts + their property IDs via owner_contact_id */
+function useOwnerContacts() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['owner-contacts-for-reports', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      // Get owner-type contacts
+      const { data: contacts, error } = await supabase
+        .from('crm_contacts')
+        .select('id, first_name, last_name, email')
+        .eq('contact_type', 'owner')
+        .order('first_name');
+      if (error) throw error;
+      if (!contacts?.length) return [];
+
+      // Get properties linked to each owner contact
+      const { data: props } = await supabase
+        .from('properties')
+        .select('id, owner_contact_id')
+        .in('owner_contact_id', contacts.map(c => c.id));
+
+      const propsByOwner = new Map<string, string[]>();
+      (props || []).forEach((p: any) => {
+        if (!p.owner_contact_id) return;
+        const list = propsByOwner.get(p.owner_contact_id) || [];
+        list.push(p.id);
+        propsByOwner.set(p.owner_contact_id, list);
+      });
+
+      return contacts.map(c => ({
+        ...c,
+        propertyIds: propsByOwner.get(c.id) || [],
+      }));
+    },
+    enabled: !!user,
+  });
+}
 
 const REPORT_CONFIG_KEY = 'uno-report-config';
 
@@ -137,6 +184,8 @@ export default function ReportsPage() {
   const { allProperties: ownedProperties } = useMyProperties();
   const { data: managedProperties } = useManagedProperties();
   const { data: reports, isLoading } = usePropertyReports();
+  const { data: complexes } = usePropertyComplexes();
+  const { data: ownerContacts } = useOwnerContacts();
   const generateReport = useGenerateReport();
   const deleteReport = useDeleteReport();
   const generatePdf = useGeneratePdf();
@@ -157,6 +206,17 @@ export default function ReportsPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showOwnerInvite, setShowOwnerInvite] = useState(false);
 
+  // Report scope state
+  const [generateScope, setGenerateScope] = useState<ReportScope>('property');
+  const [selectedComplexId, setSelectedComplexId] = useState('');
+  const [selectedOwnerId, setSelectedOwnerId] = useState('');
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
+
+  // Filter state for report list
+  const [filterScope, setFilterScope] = useState<'all' | 'complex' | 'owner'>('all');
+  const [filterComplexId, setFilterComplexId] = useState('');
+  const [filterOwnerId, setFilterOwnerId] = useState('');
+
   // Category filter state
   const [includeIncome, setIncludeIncome] = useState(true);
   const [includeExpenses, setIncludeExpenses] = useState(true);
@@ -168,6 +228,57 @@ export default function ReportsPage() {
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // All properties list (deduped)
+  const allSelectableProperties = useMemo(() => {
+    const deduped = [
+      ...(ownedProperties || []),
+      ...(managedProperties || []).filter(
+        (mp: any) => !(ownedProperties || []).some((op: any) => op.id === mp.id)
+      ),
+    ];
+    return deduped;
+  }, [ownedProperties, managedProperties]);
+
+  // Resolve properties for selected scope
+  const scopePropertyIds = useMemo<string[]>(() => {
+    if (generateScope === 'property') return selectedPropertyId ? [selectedPropertyId] : [];
+    if (generateScope === 'portfolio') return allSelectableProperties.map((p: any) => p.id || p.property_id);
+    if (generateScope === 'complex' && selectedComplexId) {
+      return allSelectableProperties
+        .filter((p: any) => p.complex_id === selectedComplexId)
+        .map((p: any) => p.id || p.property_id);
+    }
+    if (generateScope === 'owner' && selectedOwnerId) {
+      const owner = (ownerContacts || []).find(o => o.id === selectedOwnerId);
+      const linkedIds = owner?.propertyIds || [];
+      if (linkedIds.length > 0) {
+        return allSelectableProperties
+          .filter((p: any) => linkedIds.includes(p.id || p.property_id))
+          .map((p: any) => p.id || p.property_id);
+      }
+      return [];
+    }
+    return [];
+  }, [generateScope, selectedPropertyId, selectedComplexId, selectedOwnerId, allSelectableProperties, ownerContacts]);
+
+  // Filtered reports list
+  const filteredReports = useMemo(() => {
+    if (!reports) return [];
+    if (filterScope === 'all') return reports;
+    if (filterScope === 'complex' && filterComplexId) {
+      const complexPropIds = allSelectableProperties
+        .filter((p: any) => p.complex_id === filterComplexId)
+        .map((p: any) => p.id || p.property_id);
+      return reports.filter(r => complexPropIds.includes(r.property_id));
+    }
+    if (filterScope === 'owner' && filterOwnerId) {
+      const owner = (ownerContacts || []).find(o => o.id === filterOwnerId);
+      const linkedIds = owner?.propertyIds || [];
+      return reports.filter(r => linkedIds.includes(r.property_id));
+    }
+    return reports;
+  }, [reports, filterScope, filterComplexId, filterOwnerId, allSelectableProperties, ownerContacts]);
+
   // Load saved config defaults on mount
   useEffect(() => {
     const cfg = loadReportConfig();
@@ -177,14 +288,6 @@ export default function ReportsPage() {
       setIncludeExpenses(cfg.sections.expenses);
     }
   }, []);
-
-  // Merge owned + managed for the selector (deduplicated)
-  const allSelectableProperties = [
-    ...(ownedProperties || []),
-    ...(managedProperties || []).filter(
-      (mp: any) => !(ownedProperties || []).some((op: any) => op.id === mp.id)
-    ),
-  ];
 
   const isManager = (managedProperties || []).length > 0;
 
@@ -214,25 +317,53 @@ export default function ReportsPage() {
     }
   };
 
-  const handleGenerate = () => {
-    if (!selectedPropertyId) return;
+  const handleGenerate = async () => {
     const period = getReportPeriod(selectedReportType);
-    generateReport.mutate({
-      property_id: selectedPropertyId,
-      report_type: selectedReportType,
-      period_start: period.start,
-      period_end: period.end,
-      includeIncome,
-      includeExpenses,
-      incomeCategories: selectedIncomeCategories,
-      expenseCategories: selectedExpenseCategories,
-    }, {
-      onSuccess: () => {
+    const ids = scopePropertyIds;
+    if (ids.length === 0) return;
+
+    if (ids.length === 1) {
+      // Single property
+      generateReport.mutate({
+        property_id: ids[0],
+        report_type: selectedReportType,
+        period_start: period.start,
+        period_end: period.end,
+        includeIncome,
+        includeExpenses,
+        incomeCategories: selectedIncomeCategories,
+        expenseCategories: selectedExpenseCategories,
+      }, {
+        onSuccess: () => {
+          setShowGenerateDialog(false);
+          setSelectedPropertyId('');
+          setSelectedReportType('monthly');
+        }
+      });
+    } else {
+      // Batch generation for multiple properties
+      setIsBatchGenerating(true);
+      try {
+        for (const propId of ids) {
+          await generateReport.mutateAsync({
+            property_id: propId,
+            report_type: selectedReportType,
+            period_start: period.start,
+            period_end: period.end,
+            includeIncome,
+            includeExpenses,
+            incomeCategories: selectedIncomeCategories,
+            expenseCategories: selectedExpenseCategories,
+          });
+        }
         setShowGenerateDialog(false);
         setSelectedPropertyId('');
         setSelectedReportType('monthly');
+        setGenerateScope('property');
+      } finally {
+        setIsBatchGenerating(false);
       }
-    });
+    }
   };
 
   const handleGeneratePdf = (report: PropertyReport) => {
@@ -432,42 +563,115 @@ export default function ReportsPage() {
             </DialogHeader>
 
             <div className="space-y-4">
+              {/* Scope selector */}
               <div className="space-y-2">
-                <Label>{isRu ? 'Объект' : 'Property'}</Label>
-                <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(ownedProperties || []).length > 0 && (
-                      <>
-                        <div className="px-2 py-1 text-xs text-muted-foreground font-medium">
-                          {isRu ? 'Мои объекты' : 'My Properties'}
-                        </div>
-                        {(ownedProperties || []).map((p: any) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {isRu ? p.title_ru || p.title : p.title}
-                          </SelectItem>
-                        ))}
-                      </>
-                    )}
-                    {(managedProperties || []).length > 0 && (
-                      <>
-                        <div className="px-2 py-1 text-xs text-muted-foreground font-medium">
-                          {isRu ? 'Управляемые объекты' : 'Managed Properties'}
-                        </div>
-                        {(managedProperties || [])
-                          .filter((mp: any) => !(ownedProperties || []).some((op: any) => op.id === mp.id))
-                          .map((p: any) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {isRu ? p.title_ru || p.title : p.title}
-                            </SelectItem>
-                          ))}
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
+                <Label>{isRu ? 'Область отчёта' : 'Report Scope'}</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { value: 'property' as ReportScope, icon: Home, label: isRu ? 'Объект' : 'Property' },
+                    { value: 'complex' as ReportScope, icon: Layers, label: isRu ? 'Комплекс' : 'Complex' },
+                    { value: 'owner' as ReportScope, icon: Users, label: isRu ? 'Собственник' : 'Owner' },
+                    { value: 'portfolio' as ReportScope, icon: Briefcase, label: isRu ? 'Весь портфель' : 'Full Portfolio' },
+                  ] as const).map(scope => {
+                    const Icon = scope.icon;
+                    return (
+                      <button
+                        key={scope.value}
+                        onClick={() => setGenerateScope(scope.value)}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm font-medium transition-colors ${
+                          generateScope === scope.value
+                            ? 'bg-primary/10 border-primary/30 text-primary'
+                            : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {scope.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
+              {/* Property selector (single property scope) */}
+              {generateScope === 'property' && (
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Объект' : 'Property'}</Label>
+                  <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allSelectableProperties.map((p: any) => (
+                        <SelectItem key={p.id || p.property_id} value={p.id || p.property_id}>
+                          {isRu ? p.title_ru || p.title : p.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Complex selector */}
+              {generateScope === 'complex' && (
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Комплекс' : 'Complex'}</Label>
+                  <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={isRu ? 'Выберите комплекс' : 'Select complex'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(complexes || []).map((c: PropertyComplex) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {isRu ? c.name_ru || c.name : c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedComplexId && (
+                    <p className="text-xs text-muted-foreground">
+                      {isRu ? `${scopePropertyIds.length} объект(ов) в комплексе` : `${scopePropertyIds.length} properties in complex`}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Owner selector */}
+              {generateScope === 'owner' && (
+                <div className="space-y-2">
+                  <Label>{isRu ? 'Собственник' : 'Owner'}</Label>
+                  <Select value={selectedOwnerId} onValueChange={setSelectedOwnerId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={isRu ? 'Выберите собственника' : 'Select owner'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(ownerContacts || []).map((o: any) => (
+                        <SelectItem key={o.id} value={o.id}>
+                          {o.first_name} {o.last_name}
+                          {o.propertyIds?.length > 0 && (
+                            <span className="text-muted-foreground ml-1">({o.propertyIds.length})</span>
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedOwnerId && (
+                    <p className="text-xs text-muted-foreground">
+                      {isRu ? `${scopePropertyIds.length} объект(ов) собственника` : `${scopePropertyIds.length} owner properties`}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Portfolio summary */}
+              {generateScope === 'portfolio' && (
+                <div className="rounded-lg border bg-muted/30 p-3">
+                  <p className="text-sm text-muted-foreground">
+                    {isRu
+                      ? `Отчёт будет создан для всех ${scopePropertyIds.length} объектов в портфеле`
+                      : `Report will be generated for all ${scopePropertyIds.length} properties in portfolio`}
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>{isRu ? 'Тип отчёта' : 'Report Type'}</Label>
@@ -594,11 +798,13 @@ export default function ReportsPage() {
               <Button
                 onClick={handleGenerate}
                 className="w-full"
-                disabled={!selectedPropertyId || generateReport.isPending}
+                disabled={scopePropertyIds.length === 0 || generateReport.isPending || isBatchGenerating}
               >
-                {generateReport.isPending
-                  ? (isRu ? 'Генерация...' : 'Generating...')
-                  : (isRu ? 'Создать отчёт' : 'Generate Report')}
+                {(generateReport.isPending || isBatchGenerating)
+                  ? (isRu ? `Генерация... ${scopePropertyIds.length > 1 ? `(${scopePropertyIds.length} объектов)` : ''}` : `Generating... ${scopePropertyIds.length > 1 ? `(${scopePropertyIds.length} properties)` : ''}`)
+                  : scopePropertyIds.length > 1
+                    ? (isRu ? `Создать ${scopePropertyIds.length} отчётов` : `Generate ${scopePropertyIds.length} Reports`)
+                    : (isRu ? 'Создать отчёт' : 'Generate Report')}
               </Button>
             </div>
           </DialogContent>
@@ -622,13 +828,80 @@ export default function ReportsPage() {
 
         {/* All Reports */}
         <TabsContent value="all">
+          {/* Filter ribbon */}
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+            <button
+              onClick={() => { setFilterScope('all'); setFilterComplexId(''); setFilterOwnerId(''); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 border transition-colors ${
+                filterScope === 'all' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-secondary border-border text-muted-foreground'
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              {isRu ? 'Все' : 'All'}
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{reports?.length || 0}</Badge>
+            </button>
+
+            {(complexes || []).length > 0 && (
+              <>
+                <div className="w-px h-5 bg-border shrink-0" />
+                {(complexes || []).map((c: PropertyComplex) => {
+                  const count = (reports || []).filter(r => {
+                    const prop = allSelectableProperties.find((p: any) => (p.id || p.property_id) === r.property_id);
+                    return prop && (prop as any).complex_id === c.id;
+                  }).length;
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => { setFilterScope('complex'); setFilterComplexId(c.id); setFilterOwnerId(''); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 border transition-colors ${
+                        filterScope === 'complex' && filterComplexId === c.id
+                          ? 'bg-primary/10 text-primary border-primary/30'
+                          : 'bg-secondary border-border text-muted-foreground'
+                      }`}
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      {isRu ? c.name_ru || c.name : c.name}
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{count}</Badge>
+                    </button>
+                  );
+                })}
+              </>
+            )}
+
+            {(ownerContacts || []).length > 0 && (
+              <>
+                <div className="w-px h-5 bg-border shrink-0" />
+                {(ownerContacts || []).filter((o: any) => o.propertyIds?.length > 0).map((o: any) => {
+                  const count = (reports || []).filter(r => (o.propertyIds || []).includes(r.property_id)).length;
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={o.id}
+                      onClick={() => { setFilterScope('owner'); setFilterOwnerId(o.id); setFilterComplexId(''); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 border transition-colors ${
+                        filterScope === 'owner' && filterOwnerId === o.id
+                          ? 'bg-primary/10 text-primary border-primary/30'
+                          : 'bg-secondary border-border text-muted-foreground'
+                      }`}
+                    >
+                      <Users className="h-3.5 w-3.5" />
+                      {o.first_name} {o.last_name?.[0] || ''}.
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{count}</Badge>
+                    </button>
+                  );
+                })}
+              </>
+            )}
+          </div>
+
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full" />)}
             </div>
-          ) : reports && reports.length > 0 ? (
+          ) : filteredReports.length > 0 ? (
             <div className="grid gap-4">
-              {reports.map((report) => <ReportCard key={report.id} report={report} />)}
+              {filteredReports.map((report) => <ReportCard key={report.id} report={report} />)}
             </div>
           ) : (
             <Card>
