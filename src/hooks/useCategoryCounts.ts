@@ -44,56 +44,66 @@ const CATEGORY_TABLE_MAP: Record<string, keyof CategoryCounts> = {
   'babysitter': 'babysitters',
   'babysitters': 'babysitters',
   'pets': 'pets',
-  'pet': 'pets',
   'services': 'services',
 };
 
+// Vertical name in listings table → CategoryCounts key
+const VERTICAL_TO_KEY: Record<string, keyof CategoryCounts> = {
+  yacht: 'yachts',
+  experience: 'tours', // tours = experiences with type 'tour'
+  restaurant: 'restaurants',
+  bouquet: 'flowers',
+  clinic: 'clinics',
+  education: 'education',
+  cleaning: 'cleaning',
+  babysitter: 'babysitters',
+  pet_service: 'pets',
+  vehicle: 'yachts', // vehicles counted separately below
+};
+
 async function fetchCategoryCounts(): Promise<CategoryCounts> {
-  // Run all queries in parallel for maximum efficiency
-  const [
-    yachtsResult,
-    toursResult,
-    restaurantsResult,
-    propertiesResult,
-    servicesResult,
-    flowersResult,
-    clinicsResult,
-    fitnessResult,
-    eventsResult,
-    educationResult,
-    cleaningResult,
-    babysittersResult,
-    petsResult,
-  ] = await Promise.all([
-    supabase.from('yachts').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('experiences').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('experience_type', 'tour'),
-    supabase.from('restaurants').select('id', { count: 'exact', head: true }).eq('is_active', true),
+  // Single query to listings table for all verticals!
+  const [listingsResult, propertiesResult, servicesResult, eventsResult, fitnessResult] = await Promise.all([
+    supabase.rpc('get_listing_counts_by_vertical' as any) as any,
     supabase.from('properties').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('services').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('bouquets').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('clinics').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('gyms').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('education_providers').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('cleaning_services').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('babysitters').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('pet_services').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('gyms').select('id', { count: 'exact', head: true }).eq('is_active', true),
   ]);
 
+  // Fallback: if RPC doesn't exist, query listings directly
+  let verticalCounts: Record<string, number> = {};
+  if (listingsResult.error || !listingsResult.data) {
+    // Fallback: direct count query
+    const { data } = await supabase
+      .from('listings')
+      .select('vertical')
+      .eq('is_active', true);
+    if (data) {
+      for (const row of data) {
+        verticalCounts[row.vertical] = (verticalCounts[row.vertical] || 0) + 1;
+      }
+    }
+  } else {
+    for (const row of listingsResult.data as any[]) {
+      verticalCounts[row.vertical] = Number(row.count || row.cnt || 0);
+    }
+  }
+
   return {
-    yachts: yachtsResult.count || 0,
-    tours: toursResult.count || 0,
-    restaurants: restaurantsResult.count || 0,
+    yachts: verticalCounts['yacht'] || 0,
+    tours: verticalCounts['experience'] || 0,
+    restaurants: verticalCounts['restaurant'] || 0,
     properties: propertiesResult.count || 0,
     services: servicesResult.count || 0,
-    flowers: flowersResult.count || 0,
-    clinics: clinicsResult.count || 0,
+    flowers: verticalCounts['bouquet'] || 0,
+    clinics: verticalCounts['clinic'] || 0,
     fitness: fitnessResult.count || 0,
     events: eventsResult.count || 0,
-    education: educationResult.count || 0,
-    cleaning: cleaningResult.count || 0,
-    babysitters: babysittersResult.count || 0,
-    pets: petsResult.count || 0,
+    education: verticalCounts['education'] || 0,
+    cleaning: verticalCounts['cleaning'] || 0,
+    babysitters: verticalCounts['babysitter'] || 0,
+    pets: verticalCounts['pet_service'] || 0,
   };
 }
 
@@ -101,23 +111,18 @@ export function useCategoryCounts() {
   const query = useQuery({
     queryKey: ['category-counts'],
     queryFn: fetchCategoryCounts,
-    ...CACHE_PROFILES.STATIC, // Cache for longer since counts don't change often
+    ...CACHE_PROFILES.STATIC,
   });
 
-  // Get count for a specific category by slug or mini_app_type
   const getCount = (slugOrType: string): number | undefined => {
     if (!query.data) return undefined;
-    
     const tableKey = CATEGORY_TABLE_MAP[slugOrType];
     if (tableKey && query.data[tableKey] !== undefined) {
       return query.data[tableKey];
     }
-    
-    // For services, return total services count
     if (slugOrType === 'services' || slugOrType === 'home-services') {
       return query.data.services;
     }
-    
     return undefined;
   };
 
@@ -129,33 +134,14 @@ export function useCategoryCounts() {
   };
 }
 
-// Mini-app category slugs - categories with full booking flow
 export const MINI_APP_SLUGS = new Set([
-  'yachts',
-  'tours',
-  'restaurants',
-  'property',
-  'real-estate',
-  'beauty',
-  'beauty-spa',
-  'fitness',
-  'medical',
-  'events',
-  'education',
-  'kids-education',
-  'flowers',
-  'flower-delivery',
-  'pharmacy',
-  'pets',
-  'transport',
-  'market',
-  'marketplace',
-  'cleaning',
-  'water',
-  'babysitter',
+  'yachts', 'tours', 'restaurants', 'property', 'real-estate',
+  'beauty', 'beauty-spa', 'fitness', 'medical', 'events',
+  'education', 'kids-education', 'flowers', 'flower-delivery',
+  'pharmacy', 'pets', 'transport', 'market', 'marketplace',
+  'cleaning', 'water', 'babysitter',
 ]);
 
-// Check if a category slug represents a mini-app
 export function isMiniAppCategory(slug: string, miniAppType?: string | null): boolean {
   return MINI_APP_SLUGS.has(slug) || (miniAppType !== null && miniAppType !== undefined && MINI_APP_SLUGS.has(miniAppType));
 }

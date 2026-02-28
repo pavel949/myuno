@@ -92,18 +92,19 @@ export function useClinics(filters?: ClinicsFilters) {
 
     try {
       let query = supabase
-        .from('clinics')
+        .from('listings')
         .select('*')
+        .eq('vertical', 'clinic')
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
         .order('rating', { ascending: false });
 
       if (filters?.specialty && filters.specialty !== 'all') {
-        query = query.contains('specialty', [filters.specialty]);
+        query = query.contains('attributes->specialty', JSON.stringify([filters.specialty]));
       }
 
       if (filters?.clinicType) {
-        query = query.eq('clinic_type', filters.clinicType);
+        query = query.eq('category', filters.clinicType);
       }
 
       if (filters?.district) {
@@ -111,14 +112,24 @@ export function useClinics(filters?: ClinicsFilters) {
       }
 
       if (filters?.is24h) {
-        query = query.eq('is_24h', true);
+        query = query.eq('attributes->>is_24h', 'true');
       }
 
       const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
 
-      let result = (data || []) as Clinic[];
+      let result = (data || []).map((raw: any) => {
+        const attrs = raw.attributes || {};
+        return {
+          ...raw,
+          clinic_type: raw.category || attrs.clinic_type || 'clinic',
+          specialty: attrs.specialty || [],
+          is_24h: attrs.is_24h ?? false,
+          consultation_price: raw.price || attrs.consultation_price,
+          working_hours: raw.working_hours || {},
+        } as Clinic;
+      });
 
       // Client-side search filtering
       if (filters?.searchQuery) {

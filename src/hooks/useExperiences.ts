@@ -125,69 +125,74 @@ const parseJsonArray = (data: Json | null): unknown[] => {
 };
 
 const transformExperience = (raw: Record<string, unknown>): Experience => {
+  // Support both legacy (direct columns) and unified listings (attributes JSONB)
+  const attrs = (raw.attributes as Record<string, unknown>) || {};
+  const get = (key: string) => raw[key] !== undefined ? raw[key] : attrs[key];
+
   return {
     id: raw.id as string,
-    experience_type: (raw.experience_type as ExperienceType) || 'tour',
-    title_en: raw.title_en as string,
-    title_ru: raw.title_ru as string,
+    experience_type: (get('experience_type') as ExperienceType) || 'tour',
+    title_en: (raw.title_en || raw.name_en) as string,
+    title_ru: (raw.title_ru || raw.name_ru) as string,
     description_en: raw.description_en as string | null,
     description_ru: raw.description_ru as string | null,
-    category: raw.category as string | null,
+    category: (raw.category || get('category')) as string | null,
     cover_image: raw.cover_image as string | null,
     images: (raw.images as string[]) || [],
     price: raw.price as number | null,
-    price_per: raw.price_per as string | null,
+    price_per: (raw.price_per || raw.price_period || get('price_per')) as string | null,
     currency: (raw.currency as string) || 'THB',
-    duration_minutes: raw.duration_minutes as number | null,
-    max_participants: raw.max_participants as number | null,
-    min_participants: raw.min_participants as number | null,
-    difficulty: raw.difficulty as string | null,
-    equipment_included: (raw.equipment_included as boolean) ?? false,
-    is_certified: (raw.is_certified as boolean) ?? false,
-    certification_details: raw.certification_details as string | null,
-    safety_briefing_required: (raw.safety_briefing_required as boolean) ?? false,
-    age_restriction: raw.age_restriction as number | null,
-    includes: parseJsonArray(raw.includes as Json) as IncludeItem[],
-    excludes: parseJsonArray(raw.excludes as Json) as IncludeItem[],
-    requirements: parseJsonArray(raw.requirements as Json) as IncludeItem[],
-    highlights: parseJsonArray(raw.highlights as Json) as IncludeItem[],
-    itinerary: parseJsonArray(raw.itinerary as Json) as ItineraryItem[],
-    location_name: raw.location_name as string | null,
-    meeting_point: raw.meeting_point as string | null,
-    meeting_point_lat: raw.meeting_point_lat as number | null,
-    meeting_point_lng: raw.meeting_point_lng as number | null,
-    available_days: (raw.available_days as string[]) || [],
-    start_times: (raw.start_times as string[]) || [],
+    duration_minutes: get('duration_minutes') as number | null,
+    max_participants: get('max_participants') as number | null,
+    min_participants: get('min_participants') as number | null,
+    difficulty: get('difficulty') as string | null,
+    equipment_included: (get('equipment_included') as boolean) ?? false,
+    is_certified: (get('is_certified') as boolean) ?? false,
+    certification_details: get('certification_details') as string | null,
+    safety_briefing_required: (get('safety_briefing_required') as boolean) ?? false,
+    age_restriction: get('age_restriction') as number | null,
+    includes: parseJsonArray(get('includes') as Json) as IncludeItem[],
+    excludes: parseJsonArray(get('excludes') as Json) as IncludeItem[],
+    requirements: parseJsonArray(get('requirements') as Json) as IncludeItem[],
+    highlights: parseJsonArray(get('highlights') as Json) as IncludeItem[],
+    itinerary: parseJsonArray(get('itinerary') as Json) as ItineraryItem[],
+    location_name: get('location_name') as string | null,
+    meeting_point: (raw.address || get('meeting_point')) as string | null,
+    meeting_point_lat: (raw.lat || get('meeting_point_lat')) as number | null,
+    meeting_point_lng: (raw.lng || get('meeting_point_lng')) as number | null,
+    available_days: (get('available_days') as string[]) || [],
+    start_times: (get('start_times') as string[]) || [],
     tags: (raw.tags as string[]) || [],
     rating: (raw.rating as number) || 0,
     review_count: (raw.review_count as number) || 0,
     is_active: (raw.is_active as boolean) ?? true,
     is_featured: (raw.is_featured as boolean) ?? false,
     provider_id: raw.provider_id as string | null,
-    external_link: raw.external_link as string | null,
-    booking_url: raw.booking_url as string | null,
-    source_page_url: raw.source_page_url as string | null,
-    short_description: raw.short_description as string | null,
+    external_link: get('external_link') as string | null,
+    booking_url: get('booking_url') as string | null,
+    source_page_url: get('source_page_url') as string | null,
+    short_description: get('short_description') as string | null,
     long_description: raw.long_description as string | null,
-    pickup_included: (raw.pickup_included as boolean) ?? false,
-    inclusions: parseJsonArray(raw.inclusions as Json) as string[],
-    exclusions: parseJsonArray(raw.exclusions as Json) as string[],
+    pickup_included: (get('pickup_included') as boolean) ?? false,
+    inclusions: parseJsonArray(get('inclusions') as Json) as string[],
+    exclusions: parseJsonArray(get('exclusions') as Json) as string[],
     slug: raw.slug as string | null,
-    status: raw.status as string | null,
-    booking_model: (raw.booking_model as BookingModel) || 'group',
+    status: get('status') as string | null,
+    booking_model: (get('booking_model') as BookingModel) || 'group',
   };
 };
 
 // ====== FETCH FUNCTIONS ======
 const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experience[]> => {
   let query = supabase
-    .from('experiences')
+    .from('listings')
     .select('*')
+    .eq('vertical', 'experience')
     .eq('is_active', true);
 
-  // Filter by type
+  // Filter by type via attributes
   if (options.type && options.type !== 'all') {
-    query = query.eq('experience_type', options.type);
+    query = query.eq('attributes->>experience_type', options.type);
   }
 
   // Filter by category
@@ -200,29 +205,28 @@ const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experie
     query = query.eq('is_featured', true);
   }
 
-  // Search
+  // Search (listings uses name_en/name_ru)
   if (options.search) {
-    query = query.or(`title_en.ilike.%${options.search}%,title_ru.ilike.%${options.search}%`);
+    query = query.or(`name_en.ilike.%${options.search}%,name_ru.ilike.%${options.search}%`);
   }
 
-  // Order by rating
   query = query.order('rating', { ascending: false });
 
-  // Limit
   if (options.limit) {
     query = query.limit(options.limit);
   }
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data || []).map((item) => transformExperience(item as Record<string, unknown>));
+  return (data || []).map((item: any) => transformExperience(item as Record<string, unknown>));
 };
 
 const fetchExperienceById = async (id: string): Promise<Experience | null> => {
   const { data, error } = await supabase
-    .from('experiences')
+    .from('listings')
     .select('*')
     .eq('id', id)
+    .eq('vertical', 'experience')
     .maybeSingle();
 
   if (error) throw error;

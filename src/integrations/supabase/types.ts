@@ -7743,6 +7743,140 @@ export type Database = {
         }
         Relationships: []
       }
+      listings: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          attributes: Json | null
+          category: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by_uno_team: boolean | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string | null
+          phone: string | null
+          price: number | null
+          price_period: string | null
+          provider_id: string | null
+          rating: number | null
+          rejection_reason: string | null
+          review_count: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slug: string | null
+          tags: string[] | null
+          uno_team_creator_id: string | null
+          updated_at: string | null
+          vertical: string
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          attributes?: Json | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_period?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vertical: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          attributes?: Json | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by_uno_team?: boolean | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string | null
+          phone?: string | null
+          price?: number | null
+          price_period?: string | null
+          provider_id?: string | null
+          rating?: number | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          uno_team_creator_id?: string | null
+          updated_at?: string | null
+          vertical?: string
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_knowledge: {
         Row: {
           city_id: string
