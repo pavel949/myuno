@@ -277,7 +277,7 @@ export function usePublicGuidebook(shareToken?: string) {
         .from('property_guidebook')
         .select(`
           *,
-          owner_properties (
+          properties!property_id (
             title,
             title_ru,
             address,
@@ -298,7 +298,7 @@ export function usePublicGuidebook(shareToken?: string) {
 
       return {
         guidebook: parseGuidebook(data as Record<string, unknown>),
-        property: (data as Record<string, unknown>).owner_properties as {
+        property: (data as Record<string, unknown>).properties as {
           title: string;
           title_ru: string | null;
           address: string | null;

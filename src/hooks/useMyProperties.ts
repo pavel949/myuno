@@ -45,35 +45,13 @@ function useCompanyProperties() {
     queryKey: ['company-properties', companyId],
     queryFn: async () => {
       if (!companyId) return [];
-      // Query both tables to get all company properties
-      const [marketplaceRes, pmsRes] = await Promise.all([
-        supabase
-          .from('properties')
-          .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency')
-          .eq('management_company_id', companyId)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('owner_properties')
-          .select('id, title, title_ru, cover_image, images, address, district, bedrooms, bathrooms, price_per_night, property_type')
-          .eq('management_company_id', companyId)
-          .order('created_at', { ascending: false }),
-      ]);
-      if (marketplaceRes.error) throw marketplaceRes.error;
-
-      const seenIds = new Set((marketplaceRes.data || []).map(p => p.id));
-      const pmsOnly = (pmsRes.data || [])
-        .filter((p: any) => !seenIds.has(p.id))
-        .map((p: any) => ({
-          ...p,
-          title_en: p.title,
-          is_active: true,
-          currency: 'THB',
-          complex_id: null,
-          project_id: null,
-          deposit_currency: 'THB',
-        }));
-
-      return [...(marketplaceRes.data || []), ...pmsOnly];
+      const { data, error } = await supabase
+        .from('properties')
+        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency')
+        .eq('management_company_id', companyId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!user && !!companyId,
     staleTime: 30000,

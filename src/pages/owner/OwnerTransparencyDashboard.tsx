@@ -27,7 +27,7 @@ export default function OwnerTransparencyDashboard() {
 
   const { data: role, isLoading: roleLoading } = usePropertyUserRole(propertyId);
   const { data: property, isLoading: propLoading } = useSupabaseSingle<any>({
-    table: 'owner_properties',
+    table: 'properties',
     id: propertyId,
     select: 'id, title, title_ru, address, cover_image',
   });

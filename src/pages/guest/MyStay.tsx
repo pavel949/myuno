@@ -106,7 +106,7 @@ export default function MyStay() {
         check_in: currentBooking.check_in,
         check_out: currentBooking.check_out,
         property_id: currentBooking.property_id,
-        property: currentBooking.owner_properties
+        property: (currentBooking as any).owner_properties || (currentBooking as any).properties
           ? {
               title: currentBooking.owner_properties.title,
               address: currentBooking.owner_properties.address,

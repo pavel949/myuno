@@ -40,7 +40,7 @@ export function usePropertyOwnershipInvites() {
         .from('property_ownership_invites')
         .select(`
           *,
-          property:owner_properties!property_id(id, title, cover_image, address)
+          property:properties!property_id(id, title, cover_image, address)
         `)
         .eq('invitee_email', user.email)
         .eq('status', 'pending')

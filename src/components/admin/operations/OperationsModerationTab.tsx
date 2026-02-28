@@ -52,18 +52,18 @@ export function OperationsModerationTab() {
 
       // Fetch properties pending approval
       const { data: properties } = await supabase
-        .from('owner_properties')
-        .select('id, title, title_ru, created_at, status')
-        .order('created_at', { ascending: false })
+        .from('properties')
+        .select('id, title_en, title_ru, created_at, status, approval_status')
+        .not('owner_id', 'is', null)
         .limit(50);
 
       properties?.forEach(p => {
         items.push({
           id: p.id,
           type: 'property',
-          name: isRussian ? p.title_ru || p.title : p.title,
+          name: isRussian ? (p as any).title_ru || (p as any).title_en : (p as any).title_en,
           created_at: p.created_at,
-          status: p.status === 'active' ? 'approved' : 'pending',
+          status: (p as any).approval_status === 'approved' || p.status === 'active' ? 'approved' : 'pending',
         });
       });
 
@@ -93,7 +93,7 @@ export function OperationsModerationTab() {
   const approveMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: string }) => {
       const table = type === 'service' ? 'services' 
-        : type === 'property' ? 'owner_properties' 
+        : type === 'property' ? 'properties' 
         : 'marketplace_products';
       
       const { error } = await supabase
@@ -115,7 +115,7 @@ export function OperationsModerationTab() {
   const rejectMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: string }) => {
       const table = type === 'service' ? 'services' 
-        : type === 'property' ? 'owner_properties' 
+        : type === 'property' ? 'properties' 
         : 'marketplace_products';
       
       // For rejection, we could add a rejection_reason field or just keep inactive

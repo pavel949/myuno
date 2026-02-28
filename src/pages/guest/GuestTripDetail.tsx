@@ -35,7 +35,7 @@ interface PropertyBooking {
   status: string;
   currency: string;
   created_at: string;
-  owner_properties: {
+  properties: {
     id: string;
     title: string;
     title_ru: string;
@@ -73,7 +73,7 @@ export default function GuestTripDetail() {
         .from('property_bookings')
         .select(`
           *,
-          owner_properties (
+          properties!property_id (
             id, title, title_ru, address, district, images,
             check_in_time, check_out_time, check_in_instructions, check_in_instructions_ru,
             wifi_network, wifi_password, key_handover,
@@ -135,7 +135,7 @@ export default function GuestTripDetail() {
     );
   }
 
-  const property = booking.owner_properties;
+  const property = booking.properties;
   const checkIn = new Date(booking.check_in);
   const checkOut = new Date(booking.check_out);
   const nights = differenceInDays(checkOut, checkIn);

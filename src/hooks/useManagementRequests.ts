@@ -66,7 +66,7 @@ export function useIncomingRequests() {
         .from('property_management_requests')
         .select(`
           *,
-          property:owner_properties(id, title, title_ru)
+          property:properties!property_id(id, title, title_ru)
         `)
         .or(`target_email.eq.${user.email},target_user_id.eq.${user.id}`)
         .eq('status', 'pending')
@@ -92,7 +92,7 @@ export function useOutgoingRequests() {
         .from('property_management_requests')
         .select(`
           *,
-          property:owner_properties(id, title, title_ru)
+          property:properties!property_id(id, title, title_ru)
         `)
         .eq('requester_id', user.id)
         .order('created_at', { ascending: false });
