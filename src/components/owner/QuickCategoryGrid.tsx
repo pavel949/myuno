@@ -49,10 +49,10 @@ export function QuickCategoryGrid({
             )}
           >
             <div className={cn(
-              'w-9 h-9 rounded-lg flex items-center justify-center',
+              'w-10 h-10 rounded-xl flex items-center justify-center shadow-sm',
               isSelected ? 'bg-primary-foreground/20' : cat.color
             )}>
-              <Icon className={cn('h-4 w-4', isSelected && 'text-primary-foreground')} />
+              <Icon className={cn('h-5 w-5', isSelected && 'text-primary-foreground')} strokeWidth={2.2} />
             </div>
             <span className={cn(
               'text-[10px] font-medium leading-tight whitespace-nowrap',

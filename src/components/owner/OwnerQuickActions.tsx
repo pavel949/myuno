@@ -106,10 +106,10 @@ export function OwnerQuickActions() {
               className="h-auto flex-col gap-1.5 py-3 hover:bg-muted"
               onClick={() => handleAction(action)}
             >
-              <div className="p-2 rounded-full bg-primary/8">
-                <action.icon className="h-4 w-4 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+                <action.icon className="h-5 w-5 text-primary" strokeWidth={2.2} />
               </div>
-              <span className="text-xs font-medium">
+              <span className="text-xs font-semibold">
                 {isRu ? action.titleRu : action.title}
               </span>
             </Button>

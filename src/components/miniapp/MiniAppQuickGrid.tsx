@@ -35,7 +35,7 @@ export const MiniAppQuickGrid = forwardRef<HTMLDivElement, MiniAppQuickGridProps
 
   const renderIcon = (icon: string | LucideIcon) => {
     const Resolved = resolveIcon(icon);
-    return <Resolved className="w-6 h-6 text-primary" />;
+    return <Resolved className="w-5 h-5 text-primary" strokeWidth={2.2} />;
   };
 
   return (
@@ -58,9 +58,9 @@ export const MiniAppQuickGrid = forwardRef<HTMLDivElement, MiniAppQuickGridProps
               navigate(item.path);
             }
           }}
-          className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95"
+          className="relative overflow-hidden flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all active:scale-95 shadow-sm"
         >
-          <div className="mb-1.5 flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+          <div className="mb-1.5 flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
             {renderIcon(item.icon)}
           </div>
           <span className="text-xs font-medium text-center truncate w-full">{item.label}</span>
