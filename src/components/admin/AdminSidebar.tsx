@@ -212,27 +212,12 @@ export function AdminSidebar() {
                       isActive={isActive(item.path)}
                       tooltip={isRussian ? item.titleRu : item.title}
                       className={cn(
-                        "h-auto py-2.5 px-3 transition-all duration-200 rounded-xl",
-                        isActive(item.path) 
-                          ? "bg-primary text-primary-foreground shadow-md" 
-                          : "hover:bg-sidebar-accent"
+                        "transition-all duration-200",
+                        isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       )}
                     >
-                      <div className="flex items-center gap-3 w-full">
-                        <div className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-lg shrink-0",
-                          isActive(item.path) 
-                            ? "bg-primary-foreground/20" 
-                            : "bg-sidebar-accent"
-                        )}>
-                          <item.icon className="h-4 w-4" />
-                        </div>
-                        {!isCollapsed && (
-                          <span className="font-medium text-sm truncate">
-                            {isRussian ? item.titleRu : item.title}
-                          </span>
-                        )}
-                      </div>
+                      <item.icon className="h-4 w-4" />
+                      <span>{isRussian ? item.titleRu : item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -241,7 +226,7 @@ export function AdminSidebar() {
 
             {/* In collapsed mode, show items without group headers */}
             {isCollapsed && (
-              <SidebarMenu className="space-y-1">
+              <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
@@ -249,22 +234,11 @@ export function AdminSidebar() {
                       isActive={isActive(item.path)}
                       tooltip={isRussian ? item.titleRu : item.title}
                       className={cn(
-                        "h-auto py-2.5 px-3 transition-all duration-200 rounded-xl",
-                        isActive(item.path) 
-                          ? "bg-primary text-primary-foreground shadow-md" 
-                          : "hover:bg-sidebar-accent"
+                        "transition-all duration-200",
+                        isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       )}
                     >
-                      <div className="flex items-center justify-center w-full">
-                        <div className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-lg",
-                          isActive(item.path) 
-                            ? "bg-primary-foreground/20" 
-                            : "bg-sidebar-accent"
-                        )}>
-                          <item.icon className="h-4 w-4" />
-                        </div>
-                      </div>
+                      <item.icon className="h-4 w-4" />
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

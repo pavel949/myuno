@@ -20,7 +20,6 @@ import {
   TrendingUp,
   Headphones,
   Sparkles,
-  ChevronRight,
 } from 'lucide-react';
 
 interface SidebarLink {
@@ -114,16 +113,16 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
         <nav className="px-2 space-y-1">
           {filteredLinks.map(link => {
             const Icon = link.icon;
-            const isActive = location.pathname === link.path;
+            const active = location.pathname === link.path;
             
             return (
               <NavLink
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-                  "hover:bg-muted/50",
-                  isActive && "bg-primary/10 text-primary font-medium"
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                  "hover:bg-sidebar-accent/50",
+                  active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -135,7 +134,6 @@ export function TeamSidebar({ className }: TeamSidebarProps) {
                     {link.badge}
                   </Badge>
                 )}
-                {isActive && <ChevronRight className="h-4 w-4 opacity-50" />}
               </NavLink>
             );
           })}
