@@ -17910,6 +17910,51 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_test_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          failed: number | null
+          id: string
+          passed: number | null
+          results: Json | null
+          run_id: string
+          skipped: number | null
+          started_at: string
+          summary: string | null
+          total_tests: number | null
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          failed?: number | null
+          id?: string
+          passed?: number | null
+          results?: Json | null
+          run_id: string
+          skipped?: number | null
+          started_at?: string
+          summary?: string | null
+          total_tests?: number | null
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          failed?: number | null
+          id?: string
+          passed?: number | null
+          results?: Json | null
+          run_id?: string
+          skipped?: number | null
+          started_at?: string
+          summary?: string | null
+          total_tests?: number | null
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       quick_listings: {
         Row: {
           admin_notes: string | null
