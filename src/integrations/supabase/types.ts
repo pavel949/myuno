@@ -7597,6 +7597,7 @@ export type Database = {
           min_contract_months: number | null
           name_en: string
           name_ru: string
+          paid_slots: number
           phone: string | null
           properties_count: number | null
           properties_managed: number | null
@@ -7607,6 +7608,8 @@ export type Database = {
           service_types: string[] | null
           services: string[] | null
           slug: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           tax_id: string | null
           updated_at: string
           verified_at: string | null
@@ -7638,6 +7641,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en: string
           name_ru: string
+          paid_slots?: number
           phone?: string | null
           properties_count?: number | null
           properties_managed?: number | null
@@ -7648,6 +7652,8 @@ export type Database = {
           service_types?: string[] | null
           services?: string[] | null
           slug: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           tax_id?: string | null
           updated_at?: string
           verified_at?: string | null
@@ -7679,6 +7685,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en?: string
           name_ru?: string
+          paid_slots?: number
           phone?: string | null
           properties_count?: number | null
           properties_managed?: number | null
@@ -7689,6 +7696,8 @@ export type Database = {
           service_types?: string[] | null
           services?: string[] | null
           slug?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           tax_id?: string | null
           updated_at?: string
           verified_at?: string | null
@@ -8538,6 +8547,72 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mc_property_slots: {
+        Row: {
+          activated_at: string
+          company_id: string
+          created_at: string
+          deactivated_at: string | null
+          id: string
+          is_active: boolean
+          property_id: string
+        }
+        Insert: {
+          activated_at?: string
+          company_id: string
+          created_at?: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          property_id: string
+        }
+        Update: {
+          activated_at?: string
+          company_id?: string
+          created_at?: string
+          deactivated_at?: string | null
+          id?: string
+          is_active?: boolean
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mc_property_slots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]
