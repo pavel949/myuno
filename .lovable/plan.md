@@ -1,6 +1,6 @@
 # Plan: Unified Listings Table (Variant C)
 
-## Status: Phase 2 IN PROGRESS (6/24 files done)
+## Status: Phase 2 MOSTLY COMPLETE (18/24 files done)
 
 ## Previous Plan (COMPLETED): Consolidate `owner_properties` → `properties` ✅
 
@@ -35,12 +35,26 @@ No FK references from other tables — migration is safe.
 3. Create compatibility views
 4. Add RLS + indexes
 
-## Phase 2: Frontend (24 files)
-- Adapters: contentAdapters.ts, vehicleAdapters.ts, yachtAdapters.ts
-- Hooks: useExperiences, useVehicles, useBanks, useBouquets, useClinics, useEducation, useAdminContent
-- Search: useGlobalSearch, useCategoryCounts, useRelatedEntities
-- Intake: intakeVerticals.ts
-- Admin panels
+## Phase 2: Frontend ✅ (mostly)
+### Done:
+- ✅ useExperiences → listings
+- ✅ useVehicles → listings 
+- ✅ useBanks → listings
+- ✅ useClinics → listings (fixed duplicate code bug)
+- ✅ useYachts → listings
+- ✅ useEducation → listings
+- ✅ useAdminExperiences → listings
+- ✅ useCategoryCounts → listings
+- ✅ useRelatedEntities → listings
+- ✅ useGlobalSearch → unified listings query + reduced individual table queries
+
+### Remaining:
+- ⬜ useBouquets — has FK to flower_shops, needs special handling
+- ⬜ useAdminBouquets — same FK dependency
+- ⬜ intakeVerticals.ts — update `table` refs for migrated verticals
+- ⬜ vehicleAdapters.ts / yachtAdapters.ts — no changes needed (consume Vehicle/Yacht types, already compatible)
+- ⬜ contentAdapters.ts — no changes needed (maps Product/Service/Property, not migrated verticals)
+- ⬜ Admin panels (restaurants, cleaning, babysitters, pet_services)
 
 ## Phase 3: Cleanup
 - Drop old tables after verification

@@ -1,5 +1,7 @@
 import { useMemo, useCallback } from 'react';
-import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { CACHE_PROFILES } from '@/lib/queryConfig';
 
 export interface Yacht {
   id: string;
@@ -24,7 +26,6 @@ export interface Yacht {
   is_featured: boolean;
   features_en: string[] | null;
   features_ru: string[] | null;
-  // Technical specs
   length_meters: number | null;
   year_built: number | null;
   beam: string | null;
@@ -43,40 +44,106 @@ export interface Yacht {
   addons?: unknown;
   charter_options?: unknown;
   departure_times?: string[] | null;
-  booking_flow?: string | null;         // 'instant' | 'in_app_request'
-  deposit_percent?: number | null;      // default 50
-  balance_due_hours?: number | null;    // default 48
+  booking_flow?: string | null;
+  deposit_percent?: number | null;
+  balance_due_hours?: number | null;
+}
+
+function transformYacht(raw: any): Yacht {
+  const attrs = raw.attributes || {};
+  return {
+    id: raw.id,
+    name_en: raw.name_en,
+    name_ru: raw.name_ru || '',
+    description_en: raw.description_en,
+    description_ru: raw.description_ru,
+    yacht_type: raw.category || attrs.yacht_type || 'motor_yacht',
+    cover_image: raw.cover_image,
+    images: raw.images || [],
+    capacity: attrs.capacity || 0,
+    price_half_day: attrs.price_half_day || null,
+    price_full_day: raw.price || attrs.price_full_day || null,
+    price_sunset: attrs.price_sunset || null,
+    price_overnight: attrs.price_overnight || null,
+    currency: raw.currency || 'THB',
+    location_name: raw.address || attrs.location_name || null,
+    location_ru: attrs.location_ru || null,
+    rating: raw.rating || 0,
+    review_count: raw.review_count || 0,
+    is_verified: raw.is_verified ?? false,
+    is_featured: raw.is_featured ?? false,
+    features_en: attrs.features_en || raw.features || null,
+    features_ru: attrs.features_ru || null,
+    length_meters: attrs.length_meters || null,
+    year_built: attrs.year_built || null,
+    beam: attrs.beam || null,
+    draft: attrs.draft || null,
+    engines: attrs.engines || null,
+    cruising_speed: attrs.cruising_speed || null,
+    max_speed: attrs.max_speed || null,
+    fuel_capacity: attrs.fuel_capacity || null,
+    cabins: attrs.cabins || null,
+    bathrooms: attrs.bathrooms || null,
+    has_crew: attrs.has_crew ?? null,
+    has_catering: attrs.has_catering ?? null,
+    provider_id: raw.provider_id,
+    approval_status: raw.approval_status,
+    is_active: raw.is_active ?? true,
+    addons: attrs.addons,
+    charter_options: attrs.charter_options,
+    departure_times: attrs.departure_times || null,
+    booking_flow: attrs.booking_flow || null,
+    deposit_percent: attrs.deposit_percent || null,
+    balance_due_hours: attrs.balance_due_hours || null,
+  };
+}
+
+async function fetchYachts(yachtType?: string): Promise<Yacht[]> {
+  let query = supabase
+    .from('listings')
+    .select('*')
+    .eq('vertical', 'yacht')
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false });
+
+  if (yachtType && yachtType !== 'all') {
+    query = query.eq('category', yachtType);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map(transformYacht);
+}
+
+async function fetchYachtById(id: string): Promise<Yacht | null> {
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('id', id)
+    .eq('vertical', 'yacht')
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? transformYacht(data) : null;
 }
 
 export function useYachts(yachtType?: string) {
-  const filters = useMemo((): QueryFilter[] => {
-    const result: QueryFilter[] = [
-      { column: 'is_active', value: true },
-      { column: 'approval_status', value: 'approved' },
-    ];
-    if (yachtType && yachtType !== 'all') {
-      result.push({ column: 'yacht_type', value: yachtType });
-    }
-    return result;
-  }, [yachtType]);
-
-  const { data, isLoading } = useSupabaseQuery<Yacht>({
-    table: 'yachts',
-    filters,
-    orderBy: { column: 'is_featured', ascending: false },
+  const { data, isLoading } = useQuery({
+    queryKey: ['yachts', yachtType || 'all'],
+    queryFn: () => fetchYachts(yachtType),
+    ...CACHE_PROFILES.SEMI_STATIC,
   });
 
-  return { yachts: data, isLoading };
+  return { yachts: data || [], isLoading };
 }
 
 export function useYacht(id: string) {
-  const transform = useCallback((data: unknown) => data as Yacht, []);
-
-  const { data, isLoading } = useSupabaseSingle<Yacht>({
-    table: 'yachts',
-    id,
-    transform,
+  const { data, isLoading } = useQuery({
+    queryKey: ['yacht', id],
+    queryFn: () => fetchYachtById(id),
+    enabled: !!id,
+    ...CACHE_PROFILES.SEMI_STATIC,
   });
 
-  return { yacht: data, isLoading };
+  return { yacht: data ?? null, isLoading };
 }

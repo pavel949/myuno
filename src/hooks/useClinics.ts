@@ -81,6 +81,41 @@ interface ClinicsFilters {
   searchQuery?: string;
 }
 
+function transformClinic(raw: any): Clinic {
+  const attrs = raw.attributes || {};
+  return {
+    id: raw.id,
+    name_en: raw.name_en,
+    name_ru: raw.name_ru || '',
+    description_en: raw.description_en,
+    description_ru: raw.description_ru,
+    clinic_type: raw.category || attrs.clinic_type || 'clinic',
+    specialty: attrs.specialty || [],
+    cover_image: raw.cover_image,
+    images: raw.images || [],
+    address: raw.address,
+    district: raw.district,
+    lat: raw.lat,
+    lng: raw.lng,
+    phone: raw.phone,
+    email: raw.email,
+    website: raw.website,
+    working_hours: raw.working_hours || {},
+    languages: raw.languages || [],
+    is_24h: attrs.is_24h ?? false,
+    is_verified: raw.is_verified ?? false,
+    is_featured: raw.is_featured ?? false,
+    is_active: raw.is_active ?? true,
+    rating: raw.rating || 0,
+    review_count: raw.review_count || 0,
+    consultation_price: raw.price || attrs.consultation_price,
+    currency: raw.currency || 'THB',
+    provider_id: raw.provider_id,
+    created_at: raw.created_at,
+    updated_at: raw.updated_at,
+  };
+}
+
 export function useClinics(filters?: ClinicsFilters) {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,19 +154,8 @@ export function useClinics(filters?: ClinicsFilters) {
 
       if (fetchError) throw fetchError;
 
-      let result = (data || []).map((raw: any) => {
-        const attrs = raw.attributes || {};
-        return {
-          ...raw,
-          clinic_type: raw.category || attrs.clinic_type || 'clinic',
-          specialty: attrs.specialty || [],
-          is_24h: attrs.is_24h ?? false,
-          consultation_price: raw.price || attrs.consultation_price,
-          working_hours: raw.working_hours || {},
-        } as Clinic;
-      });
+      let result = (data || []).map(transformClinic);
 
-      // Client-side search filtering
       if (filters?.searchQuery) {
         const searchLower = filters.searchQuery.toLowerCase();
         result = result.filter(clinic =>
@@ -151,65 +175,7 @@ export function useClinics(filters?: ClinicsFilters) {
   };
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadClinics = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        let query = supabase
-          .from('clinics')
-          .select('*')
-          .eq('is_active', true)
-          .order('is_featured', { ascending: false })
-          .order('rating', { ascending: false });
-
-        if (filters?.specialty && filters.specialty !== 'all') {
-          query = query.contains('specialty', [filters.specialty]);
-        }
-
-        if (filters?.clinicType) {
-          query = query.eq('clinic_type', filters.clinicType);
-        }
-
-        if (filters?.district) {
-          query = query.eq('district', filters.district);
-        }
-
-        if (filters?.is24h) {
-          query = query.eq('is_24h', true);
-        }
-
-        const { data, error: fetchError } = await query;
-
-        if (fetchError) throw fetchError;
-        if (!isMounted) return;
-
-        let result = (data || []) as Clinic[];
-
-        // Client-side search filtering
-        if (filters?.searchQuery) {
-          const searchLower = filters.searchQuery.toLowerCase();
-          result = result.filter(clinic =>
-            clinic.name_en.toLowerCase().includes(searchLower) ||
-            clinic.name_ru.toLowerCase().includes(searchLower) ||
-            clinic.address?.toLowerCase().includes(searchLower)
-          );
-        }
-
-        setClinics(result);
-      } catch (err) {
-        if (isMounted) setError(err as Error);
-        console.error('Error fetching clinics:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    
-    loadClinics();
-    
-    return () => { isMounted = false; };
+    fetchClinics();
   }, [filters?.specialty, filters?.clinicType, filters?.district, filters?.is24h, filters?.searchQuery]);
 
   return { clinics, isLoading, error, refetch: fetchClinics };
@@ -232,13 +198,14 @@ export function useClinic(id: string | undefined) {
       setIsLoading(true);
       try {
         const { data, error: fetchError } = await supabase
-          .from('clinics')
+          .from('listings')
           .select('*')
           .eq('id', id)
+          .eq('vertical', 'clinic')
           .maybeSingle();
 
         if (fetchError) throw fetchError;
-        if (isMounted) setClinic(data as Clinic);
+        if (isMounted) setClinic(data ? transformClinic(data) : null);
       } catch (err) {
         if (isMounted) setError(err as Error);
         console.error('Error fetching clinic:', err);
