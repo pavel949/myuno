@@ -24,6 +24,32 @@ export interface Babysitter {
   is_verified: boolean;
 }
 
+function transformBabysitter(raw: any): Babysitter {
+  const attrs = raw.attributes || {};
+  return {
+    id: raw.id,
+    name_en: raw.name_en,
+    name_ru: raw.name_ru || '',
+    bio_en: raw.description_en,
+    bio_ru: raw.description_ru,
+    photo: raw.cover_image || attrs.photo,
+    experience_years: attrs.experience_years || 0,
+    age_groups: attrs.age_groups || [],
+    languages: raw.languages || [],
+    certifications: attrs.certifications || [],
+    price_per_hour: raw.price || attrs.price_per_hour || null,
+    price_per_day: attrs.price_per_day || null,
+    currency: raw.currency || 'THB',
+    first_aid_certified: attrs.first_aid_certified ?? false,
+    background_checked: attrs.background_checked ?? false,
+    can_cook: attrs.can_cook ?? false,
+    can_drive: attrs.can_drive ?? false,
+    rating: raw.rating || 0,
+    review_count: raw.review_count || 0,
+    is_verified: raw.is_verified ?? false,
+  };
+}
+
 export function useBabysitters(ageGroup?: string) {
   const [babysitters, setBabysitters] = useState<Babysitter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,13 +59,18 @@ export function useBabysitters(ageGroup?: string) {
     
     const fetchBabysitters = async () => {
       setIsLoading(true);
-      let query = supabase.from('babysitters').select('*').eq('is_active', true);
+      let query = supabase
+        .from('listings')
+        .select('*')
+        .eq('vertical', 'babysitter')
+        .eq('is_active', true);
+
       if (ageGroup && ageGroup !== 'all') {
-        query = query.contains('age_groups', [ageGroup]);
+        query = query.contains('attributes->age_groups', JSON.stringify([ageGroup]));
       }
       const { data, error } = await query.order('is_featured', { ascending: false });
       if (isMounted) {
-        if (!error && data) setBabysitters(data as Babysitter[]);
+        if (!error && data) setBabysitters(data.map(transformBabysitter));
         setIsLoading(false);
       }
     };
@@ -60,9 +91,15 @@ export function useBabysitter(id: string) {
     
     if (!id) return;
     const fetchBabysitter = async () => {
-      const { data, error } = await supabase.from('babysitters').select('*').eq('id', id).maybeSingle();
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', id)
+        .eq('vertical', 'babysitter')
+        .maybeSingle();
+
       if (isMounted) {
-        if (!error && data) setBabysitter(data as Babysitter);
+        if (!error && data) setBabysitter(transformBabysitter(data));
         setIsLoading(false);
       }
     };

@@ -5,7 +5,7 @@ import { Yacht } from './useYachts';
 import { VendorActivity } from './useVendorActivities';
 import { VendorProperty } from './useVendorProperties';
 
-// Admin hook for yachts - can see all yachts and assign to any provider
+// Admin hook for yachts - queries listings table
 export function useAdminYachts(filterProviderId?: string) {
   const { user } = useAuth();
   const [yachts, setYachts] = useState<Yacht[]>([]);
@@ -16,7 +16,7 @@ export function useAdminYachts(filterProviderId?: string) {
     if (!user) return;
     if (checkMounted()) setIsLoading(true);
     
-    let query = supabase.from('yachts').select('*');
+    let query = supabase.from('listings' as any).select('*').eq('vertical', 'yacht');
     
     if (filterProviderId) {
       query = query.eq('provider_id', filterProviderId);
@@ -24,7 +24,7 @@ export function useAdminYachts(filterProviderId?: string) {
     
     const { data, error } = await query.order('created_at', { ascending: false });
     
-    if (!error && data && checkMounted()) setYachts(data as Yacht[]);
+    if (!error && data && checkMounted()) setYachts(data as unknown as Yacht[]);
     if (checkMounted()) setIsLoading(false);
   }, [user, filterProviderId]);
 
@@ -38,9 +38,10 @@ export function useAdminYachts(filterProviderId?: string) {
     if (!user) return { error: new Error('Not authenticated') };
     
     const { data, error } = await supabase
-      .from('yachts')
+      .from('listings' as any)
       .insert({
         ...yachtData,
+        vertical: 'yacht',
         approval_status: 'approved',
         is_verified: true,
       } as any)
@@ -53,7 +54,7 @@ export function useAdminYachts(filterProviderId?: string) {
 
   const updateYacht = async (id: string, yachtData: Partial<Yacht>) => {
     const { data, error } = await supabase
-      .from('yachts')
+      .from('listings' as any)
       .update(yachtData as any)
       .eq('id', id)
       .select()
@@ -65,7 +66,7 @@ export function useAdminYachts(filterProviderId?: string) {
 
   const deleteYacht = async (id: string) => {
     const { error } = await supabase
-      .from('yachts')
+      .from('listings' as any)
       .delete()
       .eq('id', id);
     
@@ -228,7 +229,7 @@ export function useAdminProperties(filterProviderId?: string, filterType?: 'prov
   return { properties, isLoading, createProperty, updateProperty, deleteProperty, refetch: fetchProperties };
 }
 
-// Admin hook for restaurants
+// Admin hook for restaurants - queries listings table
 export function useAdminRestaurants(filterProviderId?: string) {
   const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -238,7 +239,7 @@ export function useAdminRestaurants(filterProviderId?: string) {
     const checkMounted = isMounted || (() => true);
     if (!user) return;
     if (checkMounted()) setIsLoading(true);
-    let query = supabase.from('restaurants').select('*');
+    let query = supabase.from('listings' as any).select('*').eq('vertical', 'restaurant');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (!error && data && checkMounted()) setRestaurants(data);
@@ -248,17 +249,17 @@ export function useAdminRestaurants(filterProviderId?: string) {
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createRestaurant = async (data: any) => {
-    const { data: result, error } = await supabase.from('restaurants').insert({ ...data, is_verified: true }).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'restaurant', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const updateRestaurant = async (id: string, data: any) => {
-    const { data: result, error } = await supabase.from('restaurants').update(data).eq('id', id).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const deleteRestaurant = async (id: string) => {
-    const { error } = await supabase.from('restaurants').delete().eq('id', id);
+    const { error } = await supabase.from('listings' as any).delete().eq('id', id);
     if (!error) await fetchData();
     return { error };
   };
@@ -302,7 +303,7 @@ export function useAdminSalons(filterProviderId?: string) {
   return { salons, isLoading, createSalon, updateSalon, deleteSalon, refetch: fetchData };
 }
 
-// Admin hook for clinics
+// Admin hook for clinics - queries listings table
 export function useAdminClinics(filterProviderId?: string) {
   const { user } = useAuth();
   const [clinics, setClinics] = useState<any[]>([]);
@@ -312,7 +313,7 @@ export function useAdminClinics(filterProviderId?: string) {
     const checkMounted = isMounted || (() => true);
     if (!user) return;
     if (checkMounted()) setIsLoading(true);
-    let query = supabase.from('clinics').select('*');
+    let query = supabase.from('listings' as any).select('*').eq('vertical', 'clinic');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (!error && data && checkMounted()) setClinics(data);
@@ -322,17 +323,17 @@ export function useAdminClinics(filterProviderId?: string) {
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createClinic = async (data: any) => {
-    const { data: result, error } = await supabase.from('clinics').insert({ ...data, is_verified: true }).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'clinic', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const updateClinic = async (id: string, data: any) => {
-    const { data: result, error } = await supabase.from('clinics').update(data).eq('id', id).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const deleteClinic = async (id: string) => {
-    const { error } = await supabase.from('clinics').delete().eq('id', id);
+    const { error } = await supabase.from('listings' as any).delete().eq('id', id);
     if (!error) await fetchData();
     return { error };
   };
@@ -376,7 +377,7 @@ export function useAdminGyms(filterProviderId?: string) {
   return { gyms, isLoading, createGym, updateGym, deleteGym, refetch: fetchData };
 }
 
-// Admin hook for vehicles
+// Admin hook for vehicles - queries listings table
 export function useAdminVehicles(filterProviderId?: string) {
   const { user } = useAuth();
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -386,7 +387,7 @@ export function useAdminVehicles(filterProviderId?: string) {
     const checkMounted = isMounted || (() => true);
     if (!user) return;
     if (checkMounted()) setIsLoading(true);
-    let query = supabase.from('vehicles').select('*');
+    let query = supabase.from('listings' as any).select('*').eq('vertical', 'vehicle');
     if (filterProviderId) query = query.eq('provider_id', filterProviderId);
     const { data, error } = await query.order('created_at', { ascending: false });
     if (!error && data && checkMounted()) setVehicles(data);
@@ -396,17 +397,17 @@ export function useAdminVehicles(filterProviderId?: string) {
   useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
 
   const createVehicle = async (data: any) => {
-    const { data: result, error } = await supabase.from('vehicles').insert({ ...data, is_verified: true }).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical: 'vehicle', is_verified: true }).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const updateVehicle = async (id: string, data: any) => {
-    const { data: result, error } = await supabase.from('vehicles').update(data).eq('id', id).select().single();
+    const { data: result, error } = await supabase.from('listings' as any).update(data).eq('id', id).select().single();
     if (!error) await fetchData();
     return { data: result, error };
   };
   const deleteVehicle = async (id: string) => {
-    const { error } = await supabase.from('vehicles').delete().eq('id', id);
+    const { error } = await supabase.from('listings' as any).delete().eq('id', id);
     if (!error) await fetchData();
     return { error };
   };
@@ -450,7 +451,47 @@ export function useAdminEvents(filterProviderId?: string) {
   return { events, isLoading, createEvent, updateEvent, deleteEvent, refetch: fetchData };
 }
 
-// Generic admin hook factory
+// Generic admin hook factory for listings-based verticals
+function createListingsAdminHook(vertical: string) {
+  return function useAdminGeneric(filterProviderId?: string) {
+    const { user } = useAuth();
+    const [items, setItems] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchData = useCallback(async (isMounted?: () => boolean) => {
+      const checkMounted = isMounted || (() => true);
+      if (!user) return;
+      if (checkMounted()) setIsLoading(true);
+      let query = supabase.from('listings' as any).select('*').eq('vertical', vertical);
+      if (filterProviderId) query = query.eq('provider_id', filterProviderId);
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (!error && data && checkMounted()) setItems(data);
+      if (checkMounted()) setIsLoading(false);
+    }, [user, filterProviderId]);
+
+    useEffect(() => { let m = true; fetchData(() => m); return () => { m = false; }; }, [fetchData]);
+
+    const createItem = async (data: any) => {
+      const { data: result, error } = await supabase.from('listings' as any).insert({ ...data, vertical, is_active: true }).select().single();
+      if (!error) await fetchData();
+      return { data: result, error };
+    };
+    const updateItem = async (data: any) => {
+      const { id, ...rest } = data;
+      const { data: result, error } = await supabase.from('listings' as any).update(rest).eq('id', id).select().single();
+      if (!error) await fetchData();
+      return { data: result, error };
+    };
+    const deleteItem = async (id: string) => {
+      const { error } = await supabase.from('listings' as any).delete().eq('id', id);
+      if (!error) await fetchData();
+      return { error };
+    };
+    return { items, isLoading, createItem, updateItem, deleteItem, refetch: fetchData };
+  };
+}
+
+// Generic admin hook factory for non-migrated tables
 function createAdminHook(tableName: string) {
   return function useAdminGeneric(filterProviderId?: string) {
     const { user } = useAuth();
@@ -490,9 +531,12 @@ function createAdminHook(tableName: string) {
   };
 }
 
-export const useAdminEducation = createAdminHook('education_providers');
+// Migrated verticals → listings table
+export const useAdminEducation = createListingsAdminHook('education');
+export const useAdminPets = createListingsAdminHook('pet_service');
+export const useAdminCleaning = createListingsAdminHook('cleaning');
+export const useAdminBabysitters = createListingsAdminHook('babysitter');
+
+// Non-migrated tables
 export const useAdminLegal = createAdminHook('legal_services');
-export const useAdminPets = createAdminHook('pet_services');
-export const useAdminCleaning = createAdminHook('cleaning_services');
-export const useAdminBabysitters = createAdminHook('babysitters');
 export const useAdminFlowers = createAdminHook('flower_shops');
