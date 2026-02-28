@@ -31,23 +31,31 @@ interface TableConfig {
   hasApprovalStatus: boolean;
 }
 
+// Vertical-to-path mapping for listings table
+const LISTING_VERTICAL_PATHS: Record<string, string> = {
+  yacht: '/yachts/',
+  experience: '/tours/',
+  vehicle: '/transport/vehicle/',
+  restaurant: '/restaurants/',
+  clinic: '/medical/clinic/',
+  education: '/education/tutor/',
+  bank: '/banking/',
+  babysitter: '/babysitter/',
+  cleaning: '/cleaning/',
+  pet_service: '/pets/',
+  bouquet: '/flowers/bouquet/',
+};
+
+// Tables NOT migrated to listings (still queried individually)
 const searchTables: TableConfig[] = [
-  { table: 'yachts', type: 'yachts', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_full_day', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/yachts/', idField: 'id', hasApprovalStatus: true },
-  { table: 'tours', type: 'tours', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'meeting_point', locationRu: 'meeting_point', rating: 'rating', pathPrefix: '/tours/', idField: 'id', hasApprovalStatus: true },
   { table: 'properties', type: 'property', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true },
-  { table: 'restaurants', type: 'food', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/restaurants/', idField: 'id', hasApprovalStatus: true },
   { table: 'salons', type: 'beauty', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/beauty/salon/', idField: 'id', hasApprovalStatus: true },
-  { table: 'clinics', type: 'medical', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'consultation_price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/medical/clinic/', idField: 'id', hasApprovalStatus: true },
   { table: 'gyms', type: 'fitness', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true },
-  { table: 'vehicles', type: 'transport', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_per_day', locationEn: null, locationRu: null, rating: 'rating', pathPrefix: '/transport/vehicle/', idField: 'id', hasApprovalStatus: true },
   { table: 'events', type: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true },
   { table: 'water_activities', type: 'water', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_name', rating: 'rating', pathPrefix: '/water/', idField: 'id', hasApprovalStatus: true },
-  { table: 'education_providers', type: 'education', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_per_hour', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/education/tutor/', idField: 'id', hasApprovalStatus: true },
+  { table: 'tours', type: 'tours', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'meeting_point', locationRu: 'meeting_point', rating: 'rating', pathPrefix: '/tours/', idField: 'id', hasApprovalStatus: true },
   { table: 'legal_services', type: 'legal', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_consultation', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/legal/provider/', idField: 'id', hasApprovalStatus: true },
-  { table: 'pet_services', type: 'pets', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/pets/', idField: 'id', hasApprovalStatus: true },
   { table: 'flower_shops', type: 'flowers', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/flowers/shop/', idField: 'id', hasApprovalStatus: true },
-  { table: 'cleaning_services', type: 'cleaning', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_per_hour', locationEn: null, locationRu: null, rating: 'rating', pathPrefix: '/cleaning/', idField: 'id', hasApprovalStatus: true },
-  { table: 'babysitters', type: 'babysitter', titleEn: 'name_en', titleRu: 'name_ru', image: 'photo', price: 'price_per_hour', locationEn: null, locationRu: null, rating: 'rating', pathPrefix: '/babysitter/', idField: 'id', hasApprovalStatus: true },
   { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true },
   { table: 'stores', type: 'market', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/market/store/', idField: 'id', hasApprovalStatus: true },
   { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: true },
@@ -211,7 +219,39 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         });
       }
 
-      // 3. Entity tables in parallel
+      // 3. Unified listings search (migrated verticals)
+      try {
+        const { data: listingsData } = await supabase
+          .from('listings')
+          .select('id, vertical, name_en, name_ru, cover_image, price, address, district, rating')
+          .eq('is_active', true)
+          .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
+          .limit(10);
+
+        if (controller.signal.aborted) return;
+
+        if (listingsData) {
+          listingsData.forEach((item: any) => {
+            const pathPrefix = LISTING_VERTICAL_PATHS[item.vertical] || `/${item.vertical}/`;
+            allResults.push({
+              id: item.id,
+              type: item.vertical,
+              titleEn: item.name_en || '',
+              titleRu: item.name_ru || '',
+              image: item.cover_image,
+              price: item.price,
+              locationEn: item.address || item.district,
+              locationRu: item.district,
+              rating: item.rating,
+              path: `${pathPrefix}${item.id}`,
+            });
+          });
+        }
+      } catch (err) {
+        console.warn('Search: listings query failed:', err);
+      }
+
+      // 4. Non-migrated entity tables in parallel
       const searchPromises = searchTables.map(async (config) => {
         try {
           const selectFields = [
