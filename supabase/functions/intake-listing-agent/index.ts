@@ -277,16 +277,25 @@ Return a JSON object with:
 
 Common fields to extract based on vertical type:
 - name_en, name_ru: Names/titles
-- description_en, description_ru: Descriptions
-- price, price_per_day, price_per_hour, price_per_month: Prices
+- description_en, description_ru: Descriptions  
+- price, price_per_day, price_per_hour, price_per_month, price_per_night: Prices
 - address, district: Location info
 - phone, email, website: Contact info
-- features, amenities, services: Lists
+- features, amenities, services: Lists of features/amenities
 - capacity, bedrooms, bathrooms, area_sqm: Numeric specs
+- parking_type: Parking type (garage, carport, open, street, none)
+- parking_spaces: Number of parking spaces
+- pool_type: Pool type (private, shared, rooftop, none)
+- garden_type: Garden type (private, shared, tropical, none)
+- view_type: View type (sea, mountain, pool, garden, city)
+- furnishing_level: Furnishing (fully_furnished, partially, unfurnished)
+- property_type: Type (villa, apartment, condo, house, townhouse)
+- floor, total_floors: Floor info
 - working_hours: Operating schedule
 - images, cover_image: Image URLs
 
-For prices, extract the numeric value only. 
+IMPORTANT: Always extract as many fields as possible from the content.
+For prices, extract the numeric value only.
 For arrays, return as arrays of strings.
 Generate professional, engaging descriptions in both languages.`;
 
@@ -457,6 +466,25 @@ async function processItem(
 
   // Extract fields with AI
   const extraction = await extractFieldsWithAI(content, verticalResult.vertical, apiKey);
+
+  // Auto-fill name fields from AI-generated title if not in extracted fields
+  if (!extraction.fields.name_en?.value && extraction.title?.en) {
+    extraction.fields.name_en = { value: extraction.title.en, confidence: 0.9, source: 'inferred' };
+  }
+  if (!extraction.fields.name_ru?.value && extraction.title?.ru) {
+    extraction.fields.name_ru = { value: extraction.title.ru, confidence: 0.9, source: 'inferred' };
+  }
+  // Auto-fill title_en for owner_properties vertical
+  if (!extraction.fields.title_en?.value && extraction.title?.en) {
+    extraction.fields.title_en = { value: extraction.title.en, confidence: 0.9, source: 'inferred' };
+  }
+  // Auto-fill description fields from AI-generated description
+  if (!extraction.fields.description_en?.value && extraction.description?.en) {
+    extraction.fields.description_en = { value: extraction.description.en, confidence: 0.85, source: 'inferred' };
+  }
+  if (!extraction.fields.description_ru?.value && extraction.description?.ru) {
+    extraction.fields.description_ru = { value: extraction.description.ru, confidence: 0.85, source: 'inferred' };
+  }
 
   // Check required fields
   const requiredFields = getRequiredFields(verticalResult.vertical);
