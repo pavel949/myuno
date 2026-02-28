@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -70,8 +70,43 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { exportReportExcel } from '@/utils/exportFinancialsExcel';
-import { ReportSettingsSheet } from '@/components/owner/reports/ReportSettingsSheet';
+import { ReportSettingsSheet, ReportConfig } from '@/components/owner/reports/ReportSettingsSheet';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+
+const REPORT_CONFIG_KEY = 'uno-report-config';
+
+function loadReportConfig(): ReportConfig | null {
+  try {
+    const saved = localStorage.getItem(REPORT_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+}
+
+// All known financial categories
+const INCOME_CATEGORIES = [
+  { value: 'rental', labelEn: 'Rental Income', labelRu: 'Доход от аренды' },
+  { value: 'booking', labelEn: 'Booking Income', labelRu: 'Доход от бронирований' },
+  { value: 'cleaning_fee', labelEn: 'Cleaning Fee', labelRu: 'Плата за уборку' },
+  { value: 'deposit', labelEn: 'Deposit Income', labelRu: 'Депозиты' },
+  { value: 'other', labelEn: 'Other Income', labelRu: 'Прочие доходы' },
+];
+
+const EXPENSE_CATEGORIES = [
+  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Уборка' },
+  { value: 'maintenance', labelEn: 'Maintenance', labelRu: 'Обслуживание' },
+  { value: 'repair', labelEn: 'Repairs', labelRu: 'Ремонт' },
+  { value: 'utilities', labelEn: 'Utilities', labelRu: 'Коммунальные' },
+  { value: 'management_fee', labelEn: 'Management Fee', labelRu: 'Комиссия УК' },
+  { value: 'commission', labelEn: 'Commission', labelRu: 'Комиссия' },
+  { value: 'supplies', labelEn: 'Supplies', labelRu: 'Расходные материалы' },
+  { value: 'insurance', labelEn: 'Insurance', labelRu: 'Страховка' },
+  { value: 'taxes', labelEn: 'Taxes', labelRu: 'Налоги' },
+  { value: 'other', labelEn: 'Other Expenses', labelRu: 'Прочие расходы' },
+];
 
 // Hook to load managed properties (via property_delegates)
 function useManagedProperties() {
@@ -122,6 +157,27 @@ export default function ReportsPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showOwnerInvite, setShowOwnerInvite] = useState(false);
 
+  // Category filter state
+  const [includeIncome, setIncludeIncome] = useState(true);
+  const [includeExpenses, setIncludeExpenses] = useState(true);
+  const [selectedIncomeCategories, setSelectedIncomeCategories] = useState<string[]>(
+    INCOME_CATEGORIES.map(c => c.value)
+  );
+  const [selectedExpenseCategories, setSelectedExpenseCategories] = useState<string[]>(
+    EXPENSE_CATEGORIES.map(c => c.value)
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Load saved config defaults on mount
+  useEffect(() => {
+    const cfg = loadReportConfig();
+    if (cfg) {
+      setSelectedReportType(cfg.defaultType as ReportType);
+      setIncludeIncome(cfg.sections.income);
+      setIncludeExpenses(cfg.sections.expenses);
+    }
+  }, []);
+
   // Merge owned + managed for the selector (deduplicated)
   const allSelectableProperties = [
     ...(ownedProperties || []),
@@ -166,6 +222,10 @@ export default function ReportsPage() {
       report_type: selectedReportType,
       period_start: period.start,
       period_end: period.end,
+      includeIncome,
+      includeExpenses,
+      incomeCategories: selectedIncomeCategories,
+      expenseCategories: selectedExpenseCategories,
     }, {
       onSuccess: () => {
         setShowGenerateDialog(false);
@@ -458,6 +518,78 @@ export default function ReportsPage() {
                   </div>
                 </div>
               )}
+
+              {/* Advanced: Income/Expense category configuration */}
+              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Settings2 className="h-4 w-4" />
+                      {isRu ? 'Настроить категории' : 'Configure categories'}
+                    </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-2">
+                  {/* Income toggle + categories */}
+                  <div className="space-y-2 rounded-lg border p-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-success">
+                        {isRu ? 'Доходы' : 'Income'}
+                      </Label>
+                      <Switch checked={includeIncome} onCheckedChange={setIncludeIncome} />
+                    </div>
+                    {includeIncome && (
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        {INCOME_CATEGORIES.map(cat => (
+                          <label key={cat.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={selectedIncomeCategories.includes(cat.value)}
+                              onCheckedChange={(checked) => {
+                                setSelectedIncomeCategories(prev =>
+                                  checked
+                                    ? [...prev, cat.value]
+                                    : prev.filter(c => c !== cat.value)
+                                );
+                              }}
+                            />
+                            {isRu ? cat.labelRu : cat.labelEn}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expense toggle + categories */}
+                  <div className="space-y-2 rounded-lg border p-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-destructive">
+                        {isRu ? 'Расходы' : 'Expenses'}
+                      </Label>
+                      <Switch checked={includeExpenses} onCheckedChange={setIncludeExpenses} />
+                    </div>
+                    {includeExpenses && (
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        {EXPENSE_CATEGORIES.map(cat => (
+                          <label key={cat.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <Checkbox
+                              checked={selectedExpenseCategories.includes(cat.value)}
+                              onCheckedChange={(checked) => {
+                                setSelectedExpenseCategories(prev =>
+                                  checked
+                                    ? [...prev, cat.value]
+                                    : prev.filter(c => c !== cat.value)
+                                );
+                              }}
+                            />
+                            {isRu ? cat.labelRu : cat.labelEn}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
               <Button
                 onClick={handleGenerate}
