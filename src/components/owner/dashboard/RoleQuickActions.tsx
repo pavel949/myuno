@@ -4,7 +4,7 @@ import { type BusinessRole } from '@/lib/businessRoles';
 import { Button } from '@/components/ui/button';
 import {
   Plus, Receipt, Sparkles, Calendar, Download, Users, FileText,
-  Target, Phone, ClipboardList
+  Target, Phone, ClipboardList, ListTodo
 } from 'lucide-react';
 
 interface QuickAction {
@@ -17,6 +17,7 @@ interface QuickAction {
 
 const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
   property_manager: [
+    { id: 'task', icon: ListTodo, labelEn: 'New Task', labelRu: '+ Задача', path: '__quick_task__' },
     { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Импорт OTA', path: '/owner/channels' },
     { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Расход', path: '/owner/quick-expense' },
     { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', path: '/owner/service-request?type=cleaning' },
@@ -46,9 +47,10 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
 
 interface RoleQuickActionsProps {
   role: BusinessRole;
+  onQuickTask?: () => void;
 }
 
-export function RoleQuickActions({ role }: RoleQuickActionsProps) {
+export function RoleQuickActions({ role, onQuickTask }: RoleQuickActionsProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -58,13 +60,16 @@ export function RoleQuickActions({ role }: RoleQuickActionsProps) {
     <div data-tour="quick-actions" className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
       {actions.map((action) => {
         const Icon = action.icon;
+        const handleClick = action.path === '__quick_task__'
+          ? () => onQuickTask?.()
+          : () => navigate(action.path);
         return (
           <Button
             key={action.id}
             variant="ghost"
             size="sm"
             className="flex-shrink-0 h-auto py-2.5 px-3.5 rounded-xl gap-2 bg-primary/8 text-primary hover:bg-primary/15 border border-primary/10"
-            onClick={() => navigate(action.path)}
+            onClick={handleClick}
           >
             <Icon className="h-4 w-4" />
             <span className="text-xs font-medium whitespace-nowrap">
