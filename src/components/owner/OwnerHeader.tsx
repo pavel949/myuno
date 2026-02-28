@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, Home, HelpCircle, Building2, Users } from 'lucide-react';
+import { Bell, ChevronRight, HelpCircle, Building2, Users } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -93,18 +93,6 @@ export function OwnerHeader() {
       {/* Sidebar trigger */}
       <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
       
-      {/* Back to main app button - Desktop */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate('/')}
-        className="hidden md:flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
-        title={isRussian ? 'На главную' : 'Back to Home'}
-      >
-        <Home className="h-4 w-4" />
-        <span className="text-sm">{isRussian ? 'На главную' : 'Home'}</span>
-      </Button>
-      
       {/* Company switcher */}
       <div className="hidden md:flex items-center">
         <CompanySwitcher />
@@ -146,17 +134,8 @@ export function OwnerHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Mobile: Back button + title */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate('/')}
-        className="md:hidden -ml-2"
-        title={isRussian ? 'На главную' : 'Home'}
-      >
-        <Home className="h-4 w-4" />
-      </Button>
-      <h1 className="md:hidden font-semibold text-lg flex-1">{pageTitle}</h1>
+      {/* Mobile: page title */}
+      <h1 className="md:hidden font-semibold text-lg flex-1 truncate">{pageTitle}</h1>
 
       {/* Spacer */}
       <div className="flex-1" />
