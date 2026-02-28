@@ -58,6 +58,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner/marketing': { en: 'Marketing', ru: 'Маркетинг' },
   '/owner/vault': { en: 'File Vault', ru: 'Хранилище файлов' },
   '/owner/contacts/import': { en: 'Import Contacts', ru: 'Импорт контактов' },
+  '/owner/modules': { en: 'All Modules', ru: 'Все модули' },
 };
 
 export function OwnerHeader() {

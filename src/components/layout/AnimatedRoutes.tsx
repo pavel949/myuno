@@ -538,6 +538,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
           <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
           <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
+          <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
           <Route path="setup" element={<LazyPage><Pages.OwnerSetupWizard /></LazyPage>} />
           <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
           <Route path="revenue" element={<Navigate to="/owner/finance" replace />} />
