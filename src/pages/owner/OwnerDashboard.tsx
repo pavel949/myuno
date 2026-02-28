@@ -37,6 +37,7 @@ import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerS
 import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
+import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
 
 function SectionSkeleton() {
   return (
@@ -272,7 +273,9 @@ export default function OwnerDashboard() {
                 transition={{ duration: 0.3, delay: 0.15 + idx * 0.05 }}
                 className={isFullWidth ? 'md:col-span-2' : ''}
               >
-                <DashboardWidget widgetKey={widgetKey} role={role} />
+                <WidgetErrorBoundary widgetName={widgetKey}>
+                  <DashboardWidget widgetKey={widgetKey} role={role} />
+                </WidgetErrorBoundary>
               </motion.div>
             );
           })}

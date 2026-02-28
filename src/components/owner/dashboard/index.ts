@@ -35,6 +35,7 @@ export { DashboardPropertyFilter } from './DashboardPropertyFilter';
 export { YourDayFeed } from './YourDayFeed';
 export { CleaningDashboard } from './CleaningDashboard';
 export { MorningBriefing } from './MorningBriefing';
+export { WidgetErrorBoundary } from './WidgetErrorBoundary';
 
 // Property Wizard Steps
 export * from '../property-wizard';
