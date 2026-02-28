@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -6,6 +6,7 @@ import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTa
 import { PageContainer } from '@/components/uno/PageContainer';
 import { AddTeamMemberDialog } from '@/components/owner/team/AddTeamMemberDialog';
 import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
+import { useMemberPermissions, MODULES } from '@/hooks/useTeamPermissions';
 import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -176,6 +177,71 @@ function staffToForm(s: StaffMember): StaffFormState {
   };
 }
 
+/** Compact permission indicators for staff card */
+function StaffPermissionBadges({ userId, isRu, onClick }: { userId: string; isRu: boolean; onClick: () => void }) {
+  const { data: permissions = [] } = useMemberPermissions(userId);
+  const t = (en: string, ru: string) => isRu ? ru : en;
+  
+  if (permissions.length === 0) {
+    return (
+      <button
+        onClick={onClick}
+        className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        <span>{t('Set up permissions', 'Настроить права')}</span>
+      </button>
+    );
+  }
+
+  const moduleLabels: Record<string, { short: string; shortRu: string }> = {
+    properties: { short: 'Prop', shortRu: 'Объ' },
+    finance: { short: 'Fin', shortRu: 'Фин' },
+    crm: { short: 'CRM', shortRu: 'CRM' },
+    tasks: { short: 'Tasks', shortRu: 'Зад' },
+    bookings: { short: 'Book', shortRu: 'Бр' },
+    reports: { short: 'Rep', shortRu: 'Отч' },
+    staff: { short: 'Staff', shortRu: 'Ком' },
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className="mt-3 pt-3 border-t border-border/40 w-full group"
+    >
+      <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
+        <ShieldCheck className="h-3 w-3" />
+        {t('Permissions', 'Права доступа')}
+        <Pencil className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {MODULES.map(mod => {
+          const perm = permissions.find(p => p.module === mod.key);
+          const hasView = perm?.can_view ?? false;
+          const hasEdit = perm?.can_edit ?? false;
+          const label = isRu ? (moduleLabels[mod.key]?.shortRu ?? mod.key) : (moduleLabels[mod.key]?.short ?? mod.key);
+          
+          return (
+            <span
+              key={mod.key}
+              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                hasEdit
+                  ? 'bg-primary/10 text-primary'
+                  : hasView
+                    ? 'bg-muted text-muted-foreground'
+                    : 'bg-muted/40 text-muted-foreground/40 line-through'
+              }`}
+              title={`${isRu ? mod.labelRu : mod.labelEn}: ${hasEdit ? (isRu ? 'Редактирование' : 'Edit') : hasView ? (isRu ? 'Просмотр' : 'View') : (isRu ? 'Нет доступа' : 'No access')}`}
+            >
+              {label}
+            </span>
+          );
+        })}
+      </div>
+    </button>
+  );
+}
+
 /** Rich staff card component */
 function StaffCard({
   staff,
@@ -293,6 +359,9 @@ function StaffCard({
                 {staff.notes}
               </p>
             )}
+
+            {/* Permission badges - clickable */}
+            <StaffPermissionBadges userId={staff.id} isRu={isRu} onClick={onEditPermissions} />
 
             {/* Footer: hire date */}
             <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
