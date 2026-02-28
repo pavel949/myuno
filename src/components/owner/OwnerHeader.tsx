@@ -21,6 +21,15 @@ import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { CompanySwitcher } from './CompanySwitcher';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 
+// Company role labels
+const companyRoleLabels: Record<string, { en: string; ru: string }> = {
+  director: { en: 'Director', ru: 'Директор' },
+  admin: { en: 'Admin', ru: 'Администратор' },
+  manager: { en: 'Manager', ru: 'Управляющий' },
+  accountant: { en: 'Accountant', ru: 'Бухгалтер' },
+  staff: { en: 'Staff', ru: 'Сотрудник' },
+};
+
 // Route to breadcrumb mapping
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner': { en: 'Dashboard', ru: 'Обзор' },
@@ -88,14 +97,24 @@ export function OwnerHeader() {
     ? (isRussian ? currentRoute.ru : currentRoute.en) 
     : (isRussian ? 'Мой дом' : 'My Home');
 
+  const companyRole = activeCompany?.role;
+  const roleLabel = companyRole && companyRoleLabels[companyRole]
+    ? (isRussian ? companyRoleLabels[companyRole].ru : companyRoleLabels[companyRole].en)
+    : null;
+
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       {/* Sidebar trigger */}
       <SidebarTrigger data-sidebar="trigger" className="-ml-1" />
       
-      {/* Company switcher */}
-      <div className="hidden md:flex items-center">
+      {/* Company switcher + role badge */}
+      <div className="hidden md:flex items-center gap-2">
         <CompanySwitcher />
+        {roleLabel && (
+          <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+            {roleLabel}
+          </span>
+        )}
       </div>
       
       {/* Separator */}
@@ -134,8 +153,15 @@ export function OwnerHeader() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Mobile: page title */}
-      <h1 className="md:hidden font-semibold text-lg flex-1 truncate">{pageTitle}</h1>
+      {/* Mobile: page title + role */}
+      <div className="md:hidden flex-1 min-w-0">
+        <h1 className="font-semibold text-lg truncate">{pageTitle}</h1>
+        {roleLabel && (
+          <span className="text-[10px] text-muted-foreground">
+            {roleLabel}
+          </span>
+        )}
+      </div>
 
       {/* Spacer */}
       <div className="flex-1" />
