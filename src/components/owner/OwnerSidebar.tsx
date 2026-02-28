@@ -238,18 +238,24 @@ export function OwnerSidebar() {
 
   const renderNavItem = (item: NavItem) => {
     const badgeCount = getBadgeCount(item.badgeKey);
+    const active = isActive(item.path);
     return (
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
           onClick={() => handleNavigate(item.path)}
-          isActive={isActive(item.path)}
+          isActive={active}
           tooltip={isRussian ? item.titleRu : item.title}
           className={cn(
-            "transition-all duration-200",
-            isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+            "transition-all duration-200 gap-3",
+            active && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
           )}
         >
-          <item.icon className="h-4 w-4" />
+          <div className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+            active ? "bg-primary/15 text-primary" : "bg-muted/60 text-muted-foreground"
+          )}>
+            <item.icon className="h-4 w-4" strokeWidth={active ? 2.2 : 1.8} />
+          </div>
           <span>{isRussian ? item.titleRu : item.title}</span>
           {badgeCount > 0 && (
             <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground px-1">

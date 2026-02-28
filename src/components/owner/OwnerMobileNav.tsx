@@ -7,12 +7,10 @@ import {
   Calendar, 
   ClipboardList,
   MessageSquare,
+  Grid3X3,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-/**
- * Role-adaptive mobile bottom navigation (max 4 items per memory constraint).
- */
 
 interface NavItem {
   id: string;
@@ -23,24 +21,27 @@ interface NavItem {
 }
 
 const PM_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Properties', labelRu: 'Объекты', path: '/owner/properties' },
+  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
+  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
   { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
   { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: '/owner/tasks' },
+  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
 ];
 
 const SALES_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Properties', labelRu: 'Объекты', path: '/owner/properties' },
+  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
+  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
   { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
-  { id: 'messages', icon: MessageSquare, labelEn: 'Messages', labelRu: 'Сообщения', path: '/owner/messages' },
+  { id: 'messages', icon: MessageSquare, labelEn: 'Chat', labelRu: 'Чат', path: '/owner/messages' },
+  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
 ];
 
 const DEFAULT_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Properties', labelRu: 'Объекты', path: '/owner/properties' },
+  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
+  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
   { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
-  { id: 'messages', icon: MessageSquare, labelEn: 'Messages', labelRu: 'Сообщения', path: '/owner/messages' },
+  { id: 'finance', icon: DollarSign, labelEn: 'Finance', labelRu: 'Финансы', path: '/owner/finance' },
+  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
 ];
 
 const NAV_BY_ROLE: Record<string, NavItem[]> = {
@@ -67,8 +68,8 @@ export function OwnerMobileNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t md:hidden safe-area-bottom">
-      <div className="grid grid-cols-4 h-16 px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.08)]">
+      <div className="grid grid-cols-5 h-[68px] px-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -78,24 +79,26 @@ export function OwnerMobileNav() {
               key={item.id}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center h-full gap-1 transition-colors",
+                "flex flex-col items-center justify-center h-full gap-0.5 transition-all",
                 active 
                   ? "text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground/70 active:text-foreground"
               )}
             >
               <div className={cn(
-                "p-1.5 rounded-xl transition-colors",
-                active && "bg-primary/10"
+                "w-10 h-7 flex items-center justify-center rounded-full transition-all",
+                active 
+                  ? "bg-primary/12 shadow-sm" 
+                  : ""
               )}>
-                <Icon className={cn(
-                  "h-5 w-5 transition-transform",
-                  active && "scale-110"
-                )} />
+                <Icon 
+                  className={cn("h-[22px] w-[22px] transition-transform", active && "scale-105")} 
+                  strokeWidth={active ? 2.4 : 1.8} 
+                />
               </div>
               <span className={cn(
-                "text-[10px] font-medium",
-                active && "font-semibold"
+                "text-[10px] leading-tight",
+                active ? "font-bold" : "font-medium"
               )}>
                 {isRu ? item.labelRu : item.labelEn}
               </span>
