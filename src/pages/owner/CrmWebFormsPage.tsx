@@ -61,8 +61,8 @@ export default function CrmWebFormsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Веб-формы' : 'Web Forms'}</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -71,7 +71,7 @@ export default function CrmWebFormsPage() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />{isRu ? 'Новая форма' : 'New Form'}</Button>
+            <Button className="shrink-0"><Plus className="h-4 w-4 mr-2" />{isRu ? 'Новая форма' : 'New Form'}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -102,12 +102,12 @@ export default function CrmWebFormsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {forms.map(form => (
             <Card key={form.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">{form.name}</CardTitle>
+                  <CardTitle className="text-sm truncate">{form.name}</CardTitle>
                   <Badge variant={form.is_active ? 'default' : 'secondary'}>
                     {form.is_active ? (isRu ? 'Активна' : 'Active') : (isRu ? 'Неактивна' : 'Inactive')}
                   </Badge>

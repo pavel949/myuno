@@ -12,7 +12,6 @@ export default function CrmDuplicatesPage() {
   const isRu = language === 'ru';
   const { activeCompany } = useActiveCompany();
   const detect = useDetectDuplicates();
-
   const companyId = activeCompany?.company_id;
 
   const handleScan = () => {
@@ -24,15 +23,15 @@ export default function CrmDuplicatesPage() {
   const duplicates = detect.data?.duplicates || [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Поиск дубликатов' : 'Duplicate Detection'}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isRu ? 'Найдите и объедините дублирующиеся контакты' : 'Find and merge duplicate contacts'}
           </p>
         </div>
-        <Button onClick={handleScan} disabled={detect.isPending || !companyId}>
+        <Button onClick={handleScan} disabled={detect.isPending || !companyId} className="shrink-0">
           {detect.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
@@ -89,12 +88,12 @@ function DuplicateGroupCard({ group, isRu }: { group: DuplicateGroup; isRu: bool
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-warning" />
             {group.contacts.length} {isRu ? 'контактов совпадают' : 'contacts match'}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {group.match_reasons.map(r => (
               <Badge key={r} variant="secondary" className="text-xs">
                 {reasonLabels[r] || r}
@@ -109,13 +108,13 @@ function DuplicateGroupCard({ group, isRu }: { group: DuplicateGroup; isRu: bool
       <CardContent>
         <div className="divide-y">
           {group.contacts.map(c => (
-            <div key={c.id} className="py-2 flex items-center justify-between text-sm">
+            <div key={c.id} className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm">
               <div>
                 <span className="font-medium">{c.first_name} {c.last_name}</span>
                 {c.company_name && <span className="text-muted-foreground ml-2">({c.company_name})</span>}
               </div>
               <div className="flex gap-4 text-muted-foreground text-xs">
-                {c.email && <span>{c.email}</span>}
+                {c.email && <span className="truncate max-w-[200px]">{c.email}</span>}
                 {c.phone && <span>{c.phone}</span>}
               </div>
             </div>

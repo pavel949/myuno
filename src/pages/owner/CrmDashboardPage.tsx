@@ -22,7 +22,7 @@ export default function CrmDashboardPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 space-y-6 max-w-[1536px] mx-auto">
       <div>
         <h1 className="text-2xl font-bold">{isRu ? 'CRM Дашборд' : 'CRM Dashboard'}</h1>
         <p className="text-sm text-muted-foreground mt-1">

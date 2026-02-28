@@ -156,3 +156,14 @@ verify_jwt = false
 [functions.monthly-owner-statements]
 verify_jwt = false
 
+[functions.send-crm-email]
+verify_jwt = false
+
+[functions.crm-ai-assistant]
+verify_jwt = false
+
+[functions.detect-crm-duplicates]
+verify_jwt = false
+
+[functions.submit-web-form]
+verify_jwt = false
