@@ -22,11 +22,11 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
   // Fetch financials for this property this month
   const { data: financials = [] } = useSupabaseQuery<any>({
     table: 'property_financials',
-    select: 'type, amount',
+    select: 'transaction_type, amount',
     filters: [
       { column: 'property_id', value: propertyId },
-      { column: 'date', value: monthStart, operator: 'gte' },
-      { column: 'date', value: monthEnd, operator: 'lte' },
+      { column: 'transaction_date', value: monthStart, operator: 'gte' },
+      { column: 'transaction_date', value: monthEnd, operator: 'lte' },
     ],
     enabled: !!user && !!propertyId,
   });
@@ -34,21 +34,21 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
   // Fetch bookings for occupancy
   const { data: bookings = [] } = useSupabaseQuery<any>({
     table: 'property_bookings',
-    select: 'check_in_date, check_out_date, status',
+    select: 'check_in, check_out, status',
     filters: [
       { column: 'property_id', value: propertyId },
-      { column: 'check_in_date', value: monthEnd, operator: 'lte' },
-      { column: 'check_out_date', value: monthStart, operator: 'gte' },
+      { column: 'check_in', value: monthEnd, operator: 'lte' },
+      { column: 'check_out', value: monthStart, operator: 'gte' },
     ],
     enabled: !!user && !!propertyId,
   });
 
   const totalIncome = financials
-    .filter((f: any) => f.type === 'income')
+    .filter((f: any) => f.transaction_type === 'income')
     .reduce((sum: number, f: any) => sum + (f.amount || 0), 0);
 
   const totalExpenses = financials
-    .filter((f: any) => f.type === 'expense')
+    .filter((f: any) => f.transaction_type === 'expense')
     .reduce((sum: number, f: any) => sum + (f.amount || 0), 0);
 
   // Simple occupancy: count days booked / days in month
@@ -56,8 +56,8 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
   const bookedDays = bookings
     .filter((b: any) => b.status !== 'cancelled')
     .reduce((days: number, b: any) => {
-      const ci = new Date(Math.max(new Date(b.check_in_date).getTime(), new Date(monthStart).getTime()));
-      const co = new Date(Math.min(new Date(b.check_out_date).getTime(), new Date(monthEnd).getTime()));
+      const ci = new Date(Math.max(new Date(b.check_in).getTime(), new Date(monthStart).getTime()));
+      const co = new Date(Math.min(new Date(b.check_out).getTime(), new Date(monthEnd).getTime()));
       return days + Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / 86400000));
     }, 0);
   const occupancy = daysInMonth > 0 ? Math.round((bookedDays / daysInMonth) * 100) : 0;

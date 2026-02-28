@@ -16,7 +16,10 @@ interface EmptyStateProps {
 }
 
 function isLucideIcon(icon: unknown): icon is LucideIcon {
-  return typeof icon === 'function';
+  // lucide-react icons can be functions OR forwardRef objects ($$typeof + render)
+  if (typeof icon === 'function') return true;
+  if (typeof icon === 'object' && icon !== null && '$$typeof' in icon && 'render' in icon) return true;
+  return false;
 }
 
 export function EmptyState({ 
