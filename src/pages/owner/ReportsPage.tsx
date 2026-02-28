@@ -82,13 +82,13 @@ function useManagedProperties() {
       if (!user) return [];
       const { data, error } = await supabase
         .from('property_delegates')
-        .select('property_id, permissions, owner_properties:owner_properties(id, title, title_ru)')
+        .select('property_id, permissions, properties:properties(id, title_en, title_ru)')
         .eq('user_id', user.id)
         .eq('status', 'active');
       if (error) throw error;
       return (data || [])
         .filter((d: any) => (d.permissions as Record<string, boolean>)?.financials)
-        .map((d: any) => d.owner_properties)
+        .map((d: any) => d.properties)
         .filter(Boolean);
     },
     enabled: !!user,

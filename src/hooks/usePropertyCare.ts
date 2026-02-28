@@ -315,14 +315,15 @@ export function usePublishToMarketplace() {
 // Inspections — includes managed properties
 export function usePropertyInspections(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-inspections', user?.id, propertyId],
+    queryKey: ['property-inspections', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       
       if (propertyId) {
-        // Specific property — verify access
         const hasAccess = await canAccessProperty(user.id, propertyId);
         if (!hasAccess) return [];
         
@@ -335,8 +336,7 @@ export function usePropertyInspections(propertyId?: string) {
         return (data || []) as unknown as PropertyInspection[];
       }
 
-      // All properties — owned + managed
-      const { allIds } = await getUserPropertyIds(user.id);
+      const { allIds } = await getUserPropertyIds(user.id, activeCompanyId);
       if (allIds.length === 0) return [];
 
       const { data, error } = await supabase
@@ -379,9 +379,11 @@ export function useCreateInspection() {
 // Service Requests — includes managed properties
 export function useServiceRequests(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-service-requests', user?.id, propertyId],
+    queryKey: ['property-service-requests', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       
@@ -398,7 +400,7 @@ export function useServiceRequests(propertyId?: string) {
         return data as PropertyServiceRequest[];
       }
 
-      const { allIds } = await getUserPropertyIds(user.id);
+      const { allIds } = await getUserPropertyIds(user.id, activeCompanyId);
       if (allIds.length === 0) return [];
 
       const { data, error } = await supabase
@@ -441,9 +443,11 @@ export function useCreateServiceRequest() {
 // Financials — includes managed properties
 export function usePropertyFinancials(propertyId?: string) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-financials', user?.id, propertyId],
+    queryKey: ['property-financials', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user) return [];
       
@@ -460,7 +464,7 @@ export function usePropertyFinancials(propertyId?: string) {
         return data as PropertyFinancial[];
       }
 
-      const { allIds } = await getUserPropertyIds(user.id);
+      const { allIds } = await getUserPropertyIds(user.id, activeCompanyId);
       if (allIds.length === 0) return [];
 
       const { data, error } = await supabase
@@ -478,13 +482,15 @@ export function usePropertyFinancials(propertyId?: string) {
 // Stats — includes managed properties
 export function usePropertyCareStats() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['property-care-stats', user?.id],
+    queryKey: ['property-care-stats', user?.id, activeCompanyId],
     queryFn: async () => {
       if (!user) return null;
 
-      const { allIds } = await getUserPropertyIds(user.id);
+      const { allIds } = await getUserPropertyIds(user.id, activeCompanyId);
       if (allIds.length === 0) {
         return {
           totalProperties: 0, activeProperties: 0,
