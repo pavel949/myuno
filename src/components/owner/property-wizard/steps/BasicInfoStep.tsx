@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload } from 'lucide-react';
+import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
 import { UnitFields } from '@/components/property/UnitFields';
@@ -118,7 +119,7 @@ function BasicInfoStepInner({
                 <p className="text-sm text-muted-foreground">
                   {isRu ? 'Контакты собственника для верификации:' : 'Owner contacts for verification:'}
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <Input
                     placeholder={isRu ? 'Имя' : 'Name'}
                     value={ownershipData.actual_owner_name}
@@ -129,6 +130,44 @@ function BasicInfoStepInner({
                     type="email"
                     value={ownershipData.actual_owner_email}
                     onChange={(e) => updateOwnershipData({ actual_owner_email: e.target.value })}
+                  />
+                  <Input
+                    placeholder={isRu ? 'Телефон' : 'Phone'}
+                    type="tel"
+                    value={ownershipData.actual_owner_phone}
+                    onChange={(e) => updateOwnershipData({ actual_owner_phone: e.target.value })}
+                  />
+                </div>
+
+                {/* Document upload for management agreement */}
+                {ownershipData.ownership_type === 'management_agreement' && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5 text-sm">
+                      <Upload className="h-3.5 w-3.5" />
+                      {isRu ? 'Договор управления *' : 'Management Agreement *'}
+                    </Label>
+                    <UnifiedMediaUploader
+                      mode="document"
+                      value={ownershipData.management_document_url || ''}
+                      onChange={(url) => updateOwnershipData({ management_document_url: typeof url === 'string' ? url : '' })}
+                      bucket="property-documents"
+                      placeholder={isRu ? 'Загрузите скан или фото договора' : 'Upload scan or photo of agreement'}
+                    />
+                  </div>
+                )}
+
+                {/* Optional ownership document */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5 text-sm">
+                    <Upload className="h-3.5 w-3.5" />
+                    {isRu ? 'Документ о собственности (необязательно)' : 'Ownership document (optional)'}
+                  </Label>
+                  <UnifiedMediaUploader
+                    mode="document"
+                    value={ownershipData.ownership_document_url || ''}
+                    onChange={(url) => updateOwnershipData({ ownership_document_url: typeof url === 'string' ? url : '' })}
+                    bucket="property-documents"
+                    placeholder={isRu ? 'Чанот, договор аренды и т.д.' : 'Chanote, lease contract, etc.'}
                   />
                 </div>
               </div>

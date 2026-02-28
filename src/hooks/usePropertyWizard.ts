@@ -277,14 +277,15 @@ export function usePropertyWizard() {
   // Validate step
   const validateStep = useCallback((stepId: string): boolean => {
     switch (stepId) {
-      case 'ownership':
+      case 'basic':
+        if (!formData.title.trim()) {
+          toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
+          return false;
+        }
+        // Ownership validation (embedded in basic step)
         if (ownershipData.ownership_type === 'verbal') {
           if (!ownershipData.actual_owner_name.trim()) {
             toast.error(isRu ? 'Введите имя собственника' : 'Enter owner name');
-            return false;
-          }
-          if (!ownershipData.actual_owner_email.trim()) {
-            toast.error(isRu ? 'Введите email собственника' : 'Enter owner email');
             return false;
           }
           if (!ownershipData.actual_owner_phone.trim()) {
@@ -297,12 +298,6 @@ export function usePropertyWizard() {
             toast.error(isRu ? 'Загрузите договор управления' : 'Upload management agreement');
             return false;
           }
-        }
-        return true;
-      case 'basic':
-        if (!formData.title.trim()) {
-          toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
-          return false;
         }
         return true;
       case 'location':
