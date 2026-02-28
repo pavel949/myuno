@@ -13,6 +13,7 @@ export function SetupPromptBanner({ propertyCount }: SetupPromptBannerProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // Don't show if user has properties and completed setup
   if (propertyCount > 0) return null;
@@ -31,15 +32,17 @@ export function SetupPromptBanner({ propertyCount }: SetupPromptBannerProps) {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-base mb-1">
-                {isRu ? 'Начните за 5 минут' : 'Get started in 5 minutes'}
+                {isRu ? 'Начните за 5 минут' : isTh ? 'เริ่มต้นใน 5 นาที' : 'Get started in 5 minutes'}
               </h3>
               <p className="text-sm text-muted-foreground mb-3">
                 {isRu
                   ? 'Пошаговый мастер поможет добавить объект, подключить каналы и настроить цены'
+                  : isTh
+                  ? 'ตัวช่วยทีละขั้นตอนช่วยเพิ่มอสังหาฯ เชื่อมต่อช่องทาง และตั้งราคา'
                   : 'Step-by-step wizard helps you add a property, connect channels and set pricing'}
               </p>
               <Button onClick={() => navigate('/owner/setup')} size="sm">
-                {isRu ? 'Быстрый старт' : 'Quick Start'}
+                {isRu ? 'Быстрый старт' : isTh ? 'เริ่มต้นเร็ว' : 'Quick Start'}
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>

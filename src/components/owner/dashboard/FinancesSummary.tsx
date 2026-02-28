@@ -11,6 +11,7 @@ export function FinancesSummary() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: stats, isLoading } = useFinancialStats();
 
   const formatCurrency = (value: number) => {
@@ -42,10 +43,10 @@ export function FinancesSummary() {
     <div data-tour="finances" className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-base">
-          {isRu ? 'Финансы' : 'Finances'}
+          {isRu ? 'Финансы' : isTh ? 'การเงิน' : 'Finances'}
         </h2>
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/financials')}>
-          {isRu ? 'Подробнее' : 'Details'}
+          {isRu ? 'Подробнее' : isTh ? 'รายละเอียด' : 'Details'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
       </div>
@@ -57,14 +58,14 @@ export function FinancesSummary() {
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="h-4 w-4 text-success" />
             <span className="text-xs text-muted-foreground">
-              {isRu ? 'Доход' : 'Income'}
+              {isRu ? 'Доход' : isTh ? 'รายได้' : 'Income'}
             </span>
           </div>
           <p className="text-xl font-bold text-success">
             {formatCurrency(income)}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {isRu ? 'за месяц' : 'this month'}
+            {isRu ? 'за месяц' : isTh ? 'เดือนนี้' : 'this month'}
           </p>
         </Card>
 
@@ -73,14 +74,14 @@ export function FinancesSummary() {
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingDown className="h-4 w-4 text-destructive" />
             <span className="text-xs text-muted-foreground">
-              {isRu ? 'Расходы' : 'Expenses'}
+              {isRu ? 'Расходы' : isTh ? 'รายจ่าย' : 'Expenses'}
             </span>
           </div>
           <p className="text-xl font-bold text-destructive">
             {formatCurrency(expenses)}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {isRu ? 'за месяц' : 'this month'}
+            {isRu ? 'за месяц' : isTh ? 'เดือนนี้' : 'this month'}
           </p>
         </Card>
       </div>
@@ -92,7 +93,7 @@ export function FinancesSummary() {
       )}>
         <div>
           <span className="text-xs text-muted-foreground">
-            {isRu ? 'Чистая прибыль' : 'Net Profit'}
+            {isRu ? 'Чистая прибыль' : isTh ? 'กำไรสุทธิ' : 'Net Profit'}
           </span>
           <p className={cn(
             "text-lg font-bold",
@@ -107,7 +108,7 @@ export function FinancesSummary() {
           className="h-8"
           onClick={() => navigate('/owner/quick-expense')}
         >
-          {isRu ? '+ Расход' : '+ Expense'}
+          {isRu ? '+ Расход' : isTh ? '+ รายจ่าย' : '+ Expense'}
         </Button>
       </Card>
     </div>

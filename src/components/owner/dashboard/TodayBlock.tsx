@@ -20,6 +20,7 @@ export function TodayBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { todayTasks, tasksByType, isLoading } = useTodayOperations();
 
   const pendingTasks = todayTasks.filter(t => t.status !== 'completed');
@@ -50,7 +51,7 @@ export function TodayBlock() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : 'TODAY'}</span>
+              <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : isTh ? 'วันนี้' : 'TODAY'}</span>
             </div>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
@@ -59,7 +60,7 @@ export function TodayBlock() {
             <CheckCircle2 className="h-5 w-5 text-success" />
             <div>
               <p className="text-sm font-semibold text-success">
-                {isRu ? 'Всё готово' : 'All done'}
+                {isRu ? 'Всё готово' : isTh ? 'เสร็จทั้งหมด' : 'All done'}
               </p>
             </div>
           </div>
@@ -78,7 +79,7 @@ export function TodayBlock() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5">
             <CalendarCheck className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : 'TODAY'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'СЕГОДНЯ' : isTh ? 'วันนี้' : 'TODAY'}</span>
           </div>
           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
@@ -87,7 +88,7 @@ export function TodayBlock() {
         <p className="text-2xl font-bold mb-2">
           {pendingTasks.length}
           <span className="text-sm font-normal text-muted-foreground ml-1.5">
-            {isRu ? 'задач' : 'tasks'}
+            {isRu ? 'задач' : isTh ? 'งาน' : 'tasks'}
           </span>
         </p>
 

@@ -12,6 +12,7 @@ export function PropertiesBlock() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: properties, isLoading } = useOwnerProperties();
 
   if (isLoading) {
@@ -40,7 +41,7 @@ export function PropertiesBlock() {
         <CardContent className="p-3">
           <div className="flex items-center gap-1.5 mb-3">
             <Home className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ОБЪЕКТЫ' : 'PROPERTIES'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ОБЪЕКТЫ' : isTh ? 'อสังหาฯ' : 'PROPERTIES'}</span>
           </div>
           
           <div className="text-center py-4">
@@ -48,11 +49,11 @@ export function PropertiesBlock() {
               <Home className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-xs text-muted-foreground mb-3">
-              {isRu ? 'Добавьте первый объект' : 'Add your first property'}
+              {isRu ? 'Добавьте первый объект' : isTh ? 'เพิ่มอสังหาฯ แรก' : 'Add your first property'}
             </p>
             <Button size="sm" onClick={() => navigate('/owner/properties/new')}>
               <Plus className="h-3.5 w-3.5 mr-1.5" />
-              {isRu ? 'Добавить' : 'Add property'}
+              {isRu ? 'Добавить' : isTh ? 'เพิ่ม' : 'Add property'}
             </Button>
           </div>
         </CardContent>
@@ -80,7 +81,7 @@ export function PropertiesBlock() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-1.5">
             <Home className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ОБЪЕКТЫ' : 'PROPERTIES'}</span>
+            <span className="text-xs font-medium text-muted-foreground">{isRu ? 'ОБЪЕКТЫ' : isTh ? 'อสังหาฯ' : 'PROPERTIES'}</span>
           </div>
           <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
@@ -88,7 +89,7 @@ export function PropertiesBlock() {
         {/* Stats row */}
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-2xl font-bold">{totalCount}</span>
-          <span className="text-sm text-muted-foreground">{isRu ? 'объектов' : 'properties'}</span>
+          <span className="text-sm text-muted-foreground">{isRu ? 'объектов' : isTh ? 'อสังหาฯ' : 'properties'}</span>
           
           <div className="flex items-center gap-2 ml-auto text-xs">
             {activeCount > 0 && (

@@ -49,7 +49,7 @@ export function MessagesBlock() {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
         <p className="text-sm text-muted-foreground mt-2">
-          {isRu ? 'Нет сообщений' : 'No messages'}
+          {isRu ? 'Нет сообщений' : language === 'th' ? 'ไม่มีข้อความ' : 'No messages'}
         </p>
       </Card>
     );
