@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,6 +37,8 @@ import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerS
 import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
+import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
+import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
 
 function SectionSkeleton() {
@@ -176,6 +178,12 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <PropertyStatusSnapshot />
         </Suspense>
       );
+    case 'property_priority':
+      return (
+        <Suspense fallback={skeleton}>
+          <PropertyPriorityWidget />
+        </Suspense>
+      );
     case 'morning_briefing':
       return (
         <Suspense fallback={skeleton}>
@@ -255,6 +263,7 @@ export default function OwnerDashboard() {
   const isDesktop = useIsDesktop();
   const { role, setRole, config } = useBusinessRole();
   const { data: ownerProperties } = useOwnerProperties();
+  const [quickTaskOpen, setQuickTaskOpen] = useState(false);
 
   const visibleWidgets = isDesktop
     ? config.widgets.filter((w) => w !== 'menu')
@@ -302,8 +311,10 @@ export default function OwnerDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <RoleQuickActions role={role} />
+          <RoleQuickActions role={role} onQuickTask={() => setQuickTaskOpen(true)} />
         </motion.div>
+
+        <QuickTaskDialog open={quickTaskOpen} onOpenChange={setQuickTaskOpen} />
 
         <Separator />
 

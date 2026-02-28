@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCrmTasks } from '@/hooks/useCrmTasks';
 import { useUpdateCrmTask } from '@/hooks/useCrmTasks';
+import { useStaffMembers } from '@/hooks/useStaffMembers';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ListTodo, ChevronRight } from 'lucide-react';
 import { isPast, isToday } from 'date-fns';
 import { toast } from 'sonner';
@@ -18,6 +20,12 @@ export function CrmTasksWidget() {
   const isRu = language === 'ru';
   const { data: tasks } = useCrmTasks({ status: 'pending' });
   const updateTask = useUpdateCrmTask();
+  const { data: staffList } = useStaffMembers();
+  const staffMap = React.useMemo(() => {
+    const m = new Map<string, string>();
+    (staffList || []).forEach(s => m.set(s.id, s.name));
+    return m;
+  }, [staffList]);
 
   // Show only tasks due today or overdue, max 5
   const urgentTasks = (tasks || [])
@@ -77,6 +85,13 @@ export function CrmTasksWidget() {
                 <TypeIcon className={cn("h-3.5 w-3.5", config.color)} />
               </div>
               <span className="text-sm flex-1 truncate">{task.title}</span>
+              {task.assigned_to && staffMap.has(task.assigned_to) && (
+                <Avatar className="h-5 w-5 flex-shrink-0">
+                  <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                    {staffMap.get(task.assigned_to)!.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               {isOverdue && (
                 <Badge variant="destructive" className="text-[10px] px-1 py-0">!</Badge>
               )}

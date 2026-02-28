@@ -31,6 +31,7 @@ export type DashboardWidgetKey =
   | 'active_stays'
   | 'properties'
   | 'property_status'
+  | 'property_priority'
   | 'operations'
   | 'crm_tasks'
   | 'upcoming_payments'
@@ -50,6 +51,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'morning_briefing',
       'your_day',
       'kpi',
+      'property_priority',
       'cleaning_dashboard',
       'property_status',
       'channel_sync',
