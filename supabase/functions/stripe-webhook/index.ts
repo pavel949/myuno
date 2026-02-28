@@ -719,6 +719,67 @@ Deno.serve(async (req) => {
       }
     }
 
+    // =====================================================
+    // HANDLE: customer.subscription.updated (MC slots)
+    // =====================================================
+    if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as Stripe.Subscription;
+      const companyId = subscription.metadata?.company_id;
+      const isMCSub = subscription.metadata?.type === "mc_subscription";
+
+      if (isMCSub && companyId) {
+        logStep("Processing MC subscription event", { type: event.type, companyId: redactId(companyId) });
+
+        if (event.type === "customer.subscription.deleted") {
+          // Subscription cancelled — reset slots
+          await supabaseAdmin
+            .from("management_companies")
+            .update({ paid_slots: 0, stripe_subscription_id: null })
+            .eq("id", companyId);
+
+          // Deactivate all slots
+          await supabaseAdmin
+            .from("mc_property_slots")
+            .update({ is_active: false, deactivated_at: new Date().toISOString() })
+            .eq("company_id", companyId);
+
+          logStep("MC subscription cancelled, all slots deactivated", { companyId });
+        } else {
+          // Subscription updated — sync quantity
+          const quantity = subscription.items.data[0]?.quantity || 0;
+          await supabaseAdmin
+            .from("management_companies")
+            .update({
+              paid_slots: quantity,
+              stripe_subscription_id: subscription.id,
+            })
+            .eq("id", companyId);
+
+          logStep("MC subscription updated", { companyId, quantity });
+        }
+      }
+    }
+
+    // =====================================================
+    // HANDLE: checkout.session.completed for MC subscription (set subscription_id)
+    // =====================================================
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (session.metadata?.type === "mc_subscription" && session.subscription) {
+        const companyId = session.metadata.company_id;
+        const subId = typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription.id;
+
+        await supabaseAdmin
+          .from("management_companies")
+          .update({ stripe_subscription_id: subId })
+          .eq("id", companyId);
+
+        logStep("MC subscription ID saved after checkout", { companyId: redactId(companyId) });
+      }
+    }
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
