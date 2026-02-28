@@ -15,36 +15,34 @@ export default function AdminDashboard() {
   const isRussian = language === 'ru';
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 lg:space-y-3 overflow-x-hidden max-w-full max-w-[1536px] mx-auto w-full">
-      {/* Header */}
-      <div className="mb-2">
-        <h1 className="text-xl font-bold">
-          {isRussian ? 'Панель управления' : 'Dashboard'}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {isRussian ? 'Обзор платформы UNO' : 'UNO platform overview'}
-        </p>
+    <div className="p-4 md:p-6 lg:p-8 space-y-3 lg:space-y-2.5 overflow-x-hidden max-w-full max-w-[1536px] mx-auto w-full">
+      {/* Header + Launch Switch inline */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">
+            {isRussian ? 'Панель управления' : 'Dashboard'}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {isRussian ? 'Обзор платформы UNO' : 'UNO platform overview'}
+          </p>
+        </div>
+        <LaunchSwitch variant="compact" />
       </div>
-
-      {/* Launch Switch - Site Status Control */}
-      <LaunchSwitch />
 
       {/* Row 1: KPI Metrics */}
       <AdminKPIGrid />
 
-      {/* Row 2: Quick Actions */}
-      <AdminQuickActionsGrid />
-
-      {/* Row 3: Alerts + Revenue side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Row 2: Quick Actions + Alerts + Revenue */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <AdminOperationalAlerts />
         <AdminRevenueBlock />
+        <AdminQuickActionsGrid />
       </div>
 
-      {/* Row 4: All Verticals */}
+      {/* Row 3: All Verticals */}
       <AdminAllVerticalsGrid />
 
-      {/* Row 5: Activity */}
+      {/* Row 4: Activity */}
       <AdminActivityBlock />
     </div>
   );
