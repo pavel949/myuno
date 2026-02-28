@@ -29,6 +29,7 @@ import { TaskSummaryKPIs } from './TaskSummaryKPIs';
 import { TaskDetailSheet, UnifiedTask } from './TaskDetailSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 
 const PRIORITY_ICONS: Record<string, React.ReactNode> = {
   high: <AlertTriangle className="h-3 w-3 text-destructive" />,
@@ -105,6 +106,7 @@ export function UnifiedTaskHub() {
   const createCrmTask = useCreateCrmTask();
   const updateCrmTask = useUpdateCrmTask();
   const deleteCrmTask = useDeleteCrmTask();
+  const { notifyAssignment } = useTaskNotifications();
 
   // Normalize all tasks
   const allUnified = useMemo(() => {
@@ -171,6 +173,10 @@ export function UnifiedTaskHub() {
           property_id: propertyId !== 'none' ? propertyId : undefined,
         });
         logActivity('task_created', 'crm_task', result?.id, { title: title.trim(), task_type: taskType });
+        const realAssignee = assignedTo === 'self' ? user.id : assignedTo;
+        if (realAssignee !== user.id) {
+          notifyAssignment({ assigneeId: realAssignee, taskTitle: title.trim(), taskId: result?.id, taskSource: 'crm', propertyId: propertyId !== 'none' ? propertyId : null });
+        }
       } else {
         if (propertyId === 'none') { toast.error(t('Select property', 'Выберите объект')); return; }
         const { data, error } = await supabase.from('property_operational_tasks').insert({
@@ -187,6 +193,10 @@ export function UnifiedTaskHub() {
         if (error) throw error;
         queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
         logActivity('task_created', 'ops_task', data?.id, { title: title.trim(), task_type: opsTaskType });
+        const realAssignee = assignedTo === 'self' ? user.id : assignedTo;
+        if (realAssignee !== user.id) {
+          notifyAssignment({ assigneeId: realAssignee, taskTitle: title.trim(), taskId: data?.id, taskSource: 'ops', propertyId: propertyId });
+        }
       }
       toast.success(t('Task created', 'Задача создана'));
       setSheetOpen(false);

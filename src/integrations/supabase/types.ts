@@ -11906,7 +11906,7 @@ export type Database = {
           is_read: boolean | null
           metadata: Json | null
           owner_id: string
-          property_id: string
+          property_id: string | null
           title: string
           type: string
         }
@@ -11917,7 +11917,7 @@ export type Database = {
           is_read?: boolean | null
           metadata?: Json | null
           owner_id: string
-          property_id: string
+          property_id?: string | null
           title: string
           type: string
         }
@@ -11928,7 +11928,7 @@ export type Database = {
           is_read?: boolean | null
           metadata?: Json | null
           owner_id?: string
-          property_id?: string
+          property_id?: string | null
           title?: string
           type?: string
         }

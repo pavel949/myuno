@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Trash2, CheckCircle2, Clock, Play } from 'lucide-react';
+import { Trash2, CheckCircle2, Clock, Play, MessageSquareMore } from 'lucide-react';
 import { toast } from 'sonner';
 import { TaskComments } from '@/components/owner/tasks/TaskComments';
+import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -46,8 +48,10 @@ const STATUS_OPTIONS = [
 
 export function TaskDetailSheet({ task, open, onOpenChange, members, properties, onUpdate, onDelete }: TaskDetailSheetProps) {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const t = (en: string, ru: string) => isRu ? ru : en;
+  const { notifyAssignment, notifyStatusRequest } = useTaskNotifications();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -74,6 +78,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
 
   const handleSave = () => {
     const updates: Record<string, any> = { title, priority };
+    const prevAssignee = task.assigned_to;
     if (task.source === 'crm') {
       updates.description = description || null;
       updates.status = status;
@@ -94,9 +99,32 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       }
     }
     if (assignedTo !== 'none') updates.assigned_to = assignedTo;
+
+    // Notify if assignee changed
+    if (assignedTo !== 'none' && assignedTo !== prevAssignee && assignedTo !== user?.id) {
+      notifyAssignment({ assigneeId: assignedTo, taskTitle: title, taskId: task.id, taskSource: task.source, propertyId: task.property_id });
+    }
+
     onUpdate(task.id, task.source, updates);
     onOpenChange(false);
     toast.success(t('Task updated', 'Задача обновлена'));
+  };
+
+  const handleRequestStatus = async () => {
+    if (!task.assigned_to || task.assigned_to === user?.id) {
+      toast.info(t('Task is assigned to you', 'Задача назначена вам'));
+      return;
+    }
+    const myName = members.find(m => m.user_id === user?.id)?.name;
+    await notifyStatusRequest({
+      assigneeId: task.assigned_to,
+      taskTitle: task.title,
+      taskId: task.id,
+      taskSource: task.source,
+      propertyId: task.property_id,
+      requesterName: myName,
+    });
+    toast.success(t('Status request sent', 'Запрос статуса отправлен'));
   };
 
   const handleDelete = () => {
@@ -234,6 +262,14 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
 
             {/* Comments */}
             <TaskComments taskId={task.id} taskSource={task.source} />
+
+            {/* Request Status */}
+            {task.assigned_to && task.assigned_to !== user?.id && task.status !== 'completed' && (
+              <Button variant="outline" className="w-full" onClick={handleRequestStatus}>
+                <MessageSquareMore className="h-4 w-4 mr-2" />
+                {t('Request Status Update', 'Запросить статус')}
+              </Button>
+            )}
 
             {/* Actions */}
             <div className="flex gap-2 pt-2">
