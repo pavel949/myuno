@@ -55,6 +55,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
   const [priority, setPriority] = useState('medium');
   const [assignedTo, setAssignedTo] = useState('none');
   const [dueDate, setDueDate] = useState('');
+  const [actualCost, setActualCost] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
@@ -65,6 +66,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       setPriority(task.priority);
       setAssignedTo(task.assigned_to || 'none');
       setDueDate(task.due_date ? format(new Date(task.due_date), "yyyy-MM-dd'T'HH:mm") : '');
+      setActualCost(String(task.raw?.actual_cost ?? ''));
     }
   }, [task]);
 
@@ -86,6 +88,9 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       }
       if (status === 'completed') {
         updates.completed_at = new Date().toISOString();
+      }
+      if (actualCost) {
+        updates.actual_cost = Number(actualCost) || 0;
       }
     }
     if (assignedTo !== 'none') updates.assigned_to = assignedTo;
@@ -206,6 +211,26 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
                 onChange={e => setDueDate(e.target.value)}
               />
             </div>
+
+            {/* Cost (ops tasks only) */}
+            {task.source === 'ops' && (
+              <div>
+                <Label>{t('Actual Cost (THB)', 'Фактическая стоимость (THB)')}</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={actualCost}
+                  onChange={e => setActualCost(e.target.value)}
+                  placeholder="0"
+                />
+                {status === 'completed' && Number(actualCost) > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t('💰 Expense will be auto-recorded to financials', '💰 Расход будет автоматически записан в финансы')}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Comments */}
             <TaskComments taskId={task.id} taskSource={task.source} />
