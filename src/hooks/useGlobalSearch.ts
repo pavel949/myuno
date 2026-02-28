@@ -53,7 +53,7 @@ const searchTables: TableConfig[] = [
   { table: 'gyms', type: 'fitness', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true },
   { table: 'events', type: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true },
   { table: 'water_activities', type: 'water', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_name', rating: 'rating', pathPrefix: '/water/', idField: 'id', hasApprovalStatus: true },
-  { table: 'tours', type: 'tours', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'meeting_point', locationRu: 'meeting_point', rating: 'rating', pathPrefix: '/tours/', idField: 'id', hasApprovalStatus: true },
+  // tours: migrated to listings.experience — searched via unified listings query above
   { table: 'legal_services', type: 'legal', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_consultation', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/legal/provider/', idField: 'id', hasApprovalStatus: true },
   { table: 'flower_shops', type: 'flowers', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/flowers/shop/', idField: 'id', hasApprovalStatus: true },
   { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true },
@@ -264,19 +264,6 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           // Build OR filter — always search title fields, plus extra fields for some tables
           const orParts = [`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`];
-          // For clinics, also search specialty array and clinic_type
-          if (config.table === 'clinics') {
-            orParts.push(`specialty.cs.{${searchTerm}}`);
-            orParts.push(`clinic_type.ilike.%${searchTerm}%`);
-          }
-          // For vehicles, also search vehicle_type
-          if (config.table === 'vehicles') {
-            orParts.push(`vehicle_type.ilike.%${searchTerm}%`);
-          }
-          // For experiences, also search category
-          if (config.table === 'experiences') {
-            orParts.push(`category.ilike.%${searchTerm}%`);
-          }
 
           let queryBuilder = supabase
             .from(config.table as any)

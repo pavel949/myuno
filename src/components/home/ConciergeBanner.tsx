@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, forwardRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
@@ -8,7 +8,7 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
  * Trust signal: real human responds in 15 minutes
  * No marketing gradients, just reliable presence
  */
-export const ConciergeBanner = memo(function ConciergeBanner() {
+export const ConciergeBanner = memo(forwardRef<HTMLAnchorElement>(function ConciergeBanner(_props, ref) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -18,6 +18,7 @@ export const ConciergeBanner = memo(function ConciergeBanner() {
 
   return (
     <a
+      ref={ref}
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
@@ -41,4 +42,4 @@ export const ConciergeBanner = memo(function ConciergeBanner() {
       />
     </a>
   );
-});
+}));
