@@ -10897,6 +10897,69 @@ export type Database = {
           },
         ]
       }
+      moderation_queue: {
+        Row: {
+          category: string | null
+          content: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          item_type: string
+          metadata: Json | null
+          photo_count: number | null
+          rating: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string
+          submitted_by_name: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          item_type: string
+          metadata?: Json | null
+          photo_count?: number | null
+          rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by: string
+          submitted_by_name?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          item_type?: string
+          metadata?: Json | null
+          photo_count?: number | null
+          rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          submitted_by_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           booking_reminders: boolean

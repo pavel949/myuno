@@ -1,29 +1,21 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TeamLayout } from '@/components/team/TeamLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  Headphones, Search, MessageCircle, Phone, Clock, CheckCircle2,
-  AlertTriangle, User, ExternalLink, Filter,
+  Headphones, Search, MessageCircle, Clock, CheckCircle2,
+  AlertTriangle, Loader2,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
-// TODO: Replace with DB query - tickets should come from support_tickets table
-// Mock tickets data for demo purposes
-const MOCK_TICKETS = [
-  { id: '1', subject: 'Payment not processed', user: 'John Smith', status: 'open', priority: 'high', created: new Date(Date.now() - 30 * 60000) },
-  { id: '2', subject: 'Booking cancellation request', user: 'Maria Garcia', status: 'in_progress', priority: 'medium', created: new Date(Date.now() - 2 * 3600000) },
-  { id: '3', subject: 'Property not available on dates', user: 'Alex Johnson', status: 'open', priority: 'low', created: new Date(Date.now() - 5 * 3600000) },
-  { id: '4', subject: 'Refund inquiry', user: 'Emily Brown', status: 'resolved', priority: 'medium', created: new Date(Date.now() - 24 * 3600000) },
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const STATUS_CONFIG = {
   open: { labelEn: 'Open', labelRu: 'Открыт', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
@@ -32,6 +24,15 @@ const STATUS_CONFIG = {
   closed: { labelEn: 'Closed', labelRu: 'Закрыт', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
 };
 
+interface SupportTicket {
+  id: string;
+  subject: string;
+  status: string;
+  priority: string;
+  reporter_name: string | null;
+  created_at: string;
+}
+
 export default function TeamSupportPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -39,19 +40,40 @@ export default function TeamSupportPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('open');
 
-  const filteredTickets = MOCK_TICKETS.filter(ticket => {
-    if (activeTab === 'open') return ticket.status === 'open' || ticket.status === 'in_progress';
-    if (activeTab === 'resolved') return ticket.status === 'resolved' || ticket.status === 'closed';
-    return true;
+  const { data: tickets = [], isLoading } = useQuery({
+    queryKey: ['support-tickets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('id, subject, status, priority, reporter_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return (data || []) as SupportTicket[];
+    },
   });
 
-  const openCount = MOCK_TICKETS.filter(t => t.status === 'open').length;
-  const inProgressCount = MOCK_TICKETS.filter(t => t.status === 'in_progress').length;
+  const filteredTickets = tickets.filter(ticket => {
+    const matchesTab = activeTab === 'open'
+      ? ticket.status === 'open' || ticket.status === 'in_progress'
+      : ticket.status === 'resolved' || ticket.status === 'closed';
+    const matchesSearch = !searchQuery || 
+      ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ticket.reporter_name || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTab && matchesSearch;
+  });
+
+  const openCount = tickets.filter(t => t.status === 'open').length;
+  const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+  const resolvedTodayCount = tickets.filter(t => {
+    if (t.status !== 'resolved' && t.status !== 'closed') return false;
+    const today = new Date().toISOString().split('T')[0];
+    return t.created_at?.startsWith(today);
+  }).length;
 
   return (
     <TeamLayout title={isRu ? 'Поддержка' : 'Support'}>
       <div className="py-6 px-4 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -59,14 +81,11 @@ export default function TeamSupportPage() {
               {isRu ? 'Центр поддержки' : 'Support Center'}
             </h1>
             <p className="text-muted-foreground">
-              {isRu 
-                ? 'Управление тикетами и запросами клиентов' 
-                : 'Manage customer tickets and requests'}
+              {isRu ? 'Управление тикетами и запросами клиентов' : 'Manage customer tickets and requests'}
             </p>
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-4 gap-3">
           <Card className="p-3 text-center bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800">
             <AlertTriangle className="h-5 w-5 mx-auto mb-1 text-yellow-600" />
@@ -80,17 +99,16 @@ export default function TeamSupportPage() {
           </Card>
           <Card className="p-3 text-center">
             <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-success" />
-            <p className="text-xl font-bold">12</p>
+            <p className="text-xl font-bold">{resolvedTodayCount}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Сегодня' : 'Today'}</p>
           </Card>
           <Card className="p-3 text-center">
             <MessageCircle className="h-5 w-5 mx-auto mb-1 text-accent-purple" />
-            <p className="text-xl font-bold">~15m</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Ср. ответ' : 'Avg Response'}</p>
+            <p className="text-xl font-bold">{tickets.length}</p>
+            <p className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</p>
           </Card>
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -101,7 +119,6 @@ export default function TeamSupportPage() {
           />
         </div>
 
-        {/* Tickets */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="open" className="gap-2">
@@ -117,7 +134,11 @@ export default function TeamSupportPage() {
             <Card>
               <CardContent className="p-0">
                 <ScrollArea className="h-[500px]">
-                  {filteredTickets.length === 0 ? (
+                  {isLoading ? (
+                    <div className="py-12 text-center text-muted-foreground">
+                      <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin" />
+                    </div>
+                  ) : filteredTickets.length === 0 ? (
                     <div className="py-12 text-center text-muted-foreground">
                       <Headphones className="h-12 w-12 mx-auto mb-4 opacity-30" />
                       <p className="font-medium">{isRu ? 'Нет тикетов' : 'No tickets'}</p>
@@ -126,37 +147,31 @@ export default function TeamSupportPage() {
                     <div className="divide-y">
                       {filteredTickets.map(ticket => {
                         const status = STATUS_CONFIG[ticket.status as keyof typeof STATUS_CONFIG];
-                        
                         return (
-                          <div 
-                            key={ticket.id}
-                            className="p-4 hover:bg-muted/30 cursor-pointer transition-colors"
-                          >
+                          <div key={ticket.id} className="p-4 hover:bg-muted/30 cursor-pointer transition-colors">
                             <div className="flex items-start gap-3">
                               <Avatar className="h-9 w-9">
-                                <AvatarFallback>{ticket.user.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{(ticket.reporter_name || '?').charAt(0)}</AvatarFallback>
                               </Avatar>
-                              
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
                                   <span className="font-medium truncate">{ticket.subject}</span>
-                                  {ticket.priority === 'high' && (
+                                  {(ticket.priority === 'high' || ticket.priority === 'urgent') && (
                                     <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
                                       {isRu ? 'Срочно' : 'Urgent'}
                                     </Badge>
                                   )}
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                  {ticket.user} • #{ticket.id}
+                                  {ticket.reporter_name || (isRu ? 'Аноним' : 'Anonymous')} • #{ticket.id.slice(0, 8)}
                                 </p>
                               </div>
-
                               <div className="text-right shrink-0">
                                 <Badge className={cn("text-[10px]", status?.color)}>
                                   {isRu ? status?.labelRu : status?.labelEn}
                                 </Badge>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {formatDistanceToNow(ticket.created, { addSuffix: true, locale: dateLocale })}
+                                  {formatDistanceToNow(new Date(ticket.created_at), { addSuffix: true, locale: dateLocale })}
                                 </p>
                               </div>
                             </div>
