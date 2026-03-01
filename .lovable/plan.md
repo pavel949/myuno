@@ -1,122 +1,108 @@
 
-# Разделение рабочих пространств: myUNO Admin vs УК (Management Company)
+# Онбординг-флоу для новой Управляющей Компании
 
-## Текущая проблема
+## Обзор
 
-Сейчас **все** функции УК (CRM, бронирования, финансы, команда, объекты) и функции индивидуальных собственников живут под одним префиксом `/owner`. Это создает путаницу:
+Создаём полноценный пошаговый мастер регистрации УК, доступный по маршруту `/mc/onboarding`. Флоу состоит из 4 шагов:
 
-- УК-менеджер и простой собственник видят один и тот же URL `/owner`
-- Нет четкой границы между платформой myUNO (`/admin`) и рабочим пространством УК
-- Сотрудники УК теоретически могут попасть в admin-интерфейс
+1. **Регистрация УК** -- название, контакты, описание
+2. **Загрузка логотипа** -- брендирование
+3. **Приглашение первых сотрудников** -- email + роль
+4. **Добавление первого объекта** -- переход к существующему визарду
 
-## Предлагаемая архитектура
+## Архитектура
 
-```text
-/admin/*          -- myUNO Platform (admin, uno_team ONLY)
-/mc/*             -- Management Company workspace (MC members)
-/my-property/*    -- Owner Portal (read-only для собственников)
-/staff/*          -- Staff dashboard
-/vendor/*         -- Vendor portal
-```
+### Backend (Edge Function)
 
-### Почему `/mc` а не `/mc/:slug`?
+**Новая Edge Function `register-mc/index.ts`:**
+- Принимает данные формы (name_en, name_ru, slug, email, phone, address, description)
+- Создаёт запись в `management_companies` (is_active=true, created_by=user.id)
+- Автоматически добавляет текущего пользователя в `management_company_members` с ролью `director`
+- Добавляет роль `property_manager` в `user_roles` (если отсутствует)
+- Возвращает `company_id`
 
-Slug в URL добавляет сложность (каждая ссылка должна знать slug). Компания уже определяется через `useActiveCompany` (из membership в БД). Если пользователь состоит в нескольких УК -- он переключается через селектор в хедере, а не через URL. Это проще и безопаснее.
+**Миграция:**
+- RLS-политика на `management_companies` для INSERT: authenticated users могут создавать (created_by = auth.uid())
+- Альтернативно, используем Edge Function с service role ключом, что безопаснее
 
-## План реализации (3 фазы)
+### Frontend
 
-### Фаза 1: Создание MC Layout и Guard
+**1. Новая страница `src/pages/mc/MCOnboarding.tsx`**
 
-**Новые файлы:**
-- `src/components/mc/MCLayout.tsx` -- Layout для MC workspace (копия OwnerLayout, адаптированная для MC)
-- `src/components/mc/MCSidebar.tsx` -- Sidebar с MC-модулями (CRM, Properties, Calendar, Finance, Staff, Operations)
-- `src/components/mc/MCHeader.tsx` -- Header с названием компании и company switcher
-- `src/components/auth/MCGuard.tsx` -- Guard: проверяет membership в `management_company_members`
+4-шаговый визард внутри `OnboardingLayout`:
 
-**MCGuard логика:**
-- Проверяет, что пользователь является участником хотя бы одной `management_company`
-- Если нет -- показывает "Access Denied" или редирект на `/owner/setup`
-- Не проверяет admin/uno_team роли (они работают через AdminGuard)
+- **Шаг 1: О компании** -- форма с полями name_en, name_ru, slug (авто-генерация из name_en), email, phone, address, description. Валидация обязательных полей.
+- **Шаг 2: Логотип** -- загрузка логотипа в storage bucket, превью. Можно пропустить.
+- **Шаг 3: Команда** -- мини-форма для приглашения до 3 сотрудников (email + роль). Использует существующую Edge Function `invite-team-member`. Можно пропустить.
+- **Шаг 4: Первый объект** -- кнопка перехода к `/mc/properties/new` или summary + "Начать работу"
 
-### Фаза 2: Перенос маршрутов из /owner в /mc
+**2. Регистрация маршрута**
 
-**Маршруты, переносимые в `/mc`** (PMS-функционал УК):
-- `/mc/properties`, `/mc/properties/new`, `/mc/properties/:id/*`
-- `/mc/calendar`, `/mc/bookings`
-- `/mc/financials`, `/mc/budget`, `/mc/quick-expense`, `/mc/income/quick`
-- `/mc/contacts`, `/mc/contacts/:id`, `/mc/contacts/import`
-- `/mc/sales`, `/mc/sales/*`
-- `/mc/tasks`, `/mc/crm-dashboard`, `/mc/sequences`, `/mc/quotes`
-- `/mc/meetings`, `/mc/crm-emails`, `/mc/automations`
-- `/mc/staff`, `/mc/team`
-- `/mc/operations`, `/mc/maintenance-plan`
-- `/mc/channels`, `/mc/rates`, `/mc/reviews-management`
-- `/mc/inventory`, `/mc/documents`, `/mc/vault`
-- `/mc/vendors`, `/mc/marketing`
-- `/mc/invoices`, `/mc/reports`
-- `/mc/owners`, `/mc/owners/:id`
-- `/mc/subscription`
-- `/mc/properties/:id/portal-settings`
-- `/mc/messages`, `/mc/auto-messaging`, `/mc/chat/:type/:id`
-- `/mc/support-chat`, `/mc/message-templates`
-- `/mc/management-terms`, `/mc/insurance`
+- `pageRegistry.ts` -- добавить `MCOnboarding` lazy import
+- `AnimatedRoutes.tsx` -- добавить маршрут `/mc/onboarding` (вне MCGuard, но с проверкой auth)
 
-**Маршруты, остающиеся на `/owner`** (для индивидуальных собственников):
-- `/owner` -- Dashboard (Transparency)
-- `/owner/setup` -- Wizard настройки
-- `/owner/portfolio` -- Портфолио объектов
-- `/owner/finance` -- Финансовый обзор (read-only)
-- `/owner/superhost` -- Superhost рейтинг
-- `/owner/guide` -- Гид
-- `/owner/service-request`, `/owner/inspection`, `/owner/full-management`
+**3. Точки входа**
 
-**Редиректы:** Все старые `/owner/contacts`, `/owner/sales`, `/owner/tasks` и т.д. получат `<Navigate to="/mc/..." replace />` для обратной совместимости.
+- Кнопка "Зарегистрировать УК" на `/owner` dashboard (в SetupPromptBanner или отдельный баннер)
+- MCGuard: если user авторизован но нет компаний -- показывать кнопку "Создать УК" вместо AccessDenied
+- CompanySwitcher: добавить кнопку "+ Создать УК" внизу списка
 
-### Фаза 3: Обновление внутренних ссылок
+## Технические детали
 
-**87 файлов** содержат hardcoded `/owner/...` пути. Для каждого:
-- MC-компоненты (в `src/components/owner/`) -- обновить на `/mc/...`
-- Страницы (в `src/pages/owner/`) -- обновить на `/mc/...`
-- Утилиты и хуки -- обновить навигацию
-
-**Обновить `APP_ROUTES` в `routes.ts`:**
-```text
-MC: '/mc'
-MC_PROPERTIES: '/mc/properties'
-MC_CALENDAR: '/mc/calendar'
-MC_CONTACTS: '/mc/contacts'
-MC_SALES: '/mc/sales'
-MC_TASKS: '/mc/tasks'
-MC_FINANCE: '/mc/financials'
-MC_STAFF: '/mc/staff'
-...
-OWNER: '/owner'           -- (для индивидуальных собственников)
-OWNER_PORTAL: '/my-property'  -- (read-only портал)
-```
-
-## Итоговая матрица доступа
+### Edge Function `register-mc`
 
 ```text
-Роль               | /admin | /mc   | /owner | /my-property | /staff
---------------------|--------|-------|--------|--------------|-------
-admin               |   OK   |  OK   |   OK   |     OK       |  OK
-uno_team            |   OK   |  --   |   --   |     --       |  OK
-MC director/manager |   --   |  OK   |   OK   |     --       |  --
-MC accountant       |   --   |  OK   |   --   |     --       |  --
-Property owner      |   --   |  --   |   OK   |     OK       |  --
-staff               |   --   |  --   |   --   |     --       |  OK
-vendor              |   --   |  --   |   --   |     --       |  --
+POST /register-mc
+Body: { name_en, name_ru, slug, email, phone, address, description_en, description_ru }
+Auth: Bearer token (required)
+Response: { company_id, slug }
 ```
 
-## Технический объем
+Логика:
+1. Проверить auth
+2. Генерировать slug если не передан (slugify name_en)
+3. INSERT в management_companies
+4. INSERT в management_company_members (role: director)
+5. UPSERT в user_roles (role: property_manager) если нет
+6. Вернуть company_id
 
-| Компонент | Действие | Файлы |
-|-----------|----------|-------|
-| MCLayout, MCSidebar, MCHeader | Создать | 3 новых |
-| MCGuard | Создать | 1 новый |
-| AnimatedRoutes.tsx | Разделить /owner на /mc + /owner | 1 |
-| routes.ts | Добавить MC_* константы | 1 |
-| Внутренние ссылки | Обновить navigate/Link | ~60-80 файлов |
-| Redirect-слой | /owner/* -> /mc/* для MC-маршрутов | в AnimatedRoutes |
+### Файлы для создания/изменения
 
-**Риск:** Большой объем изменений. Рекомендую делать пофазно с тестированием после каждой фазы.
+| Файл | Действие |
+|------|----------|
+| `supabase/functions/register-mc/index.ts` | Создать -- Edge Function регистрации УК |
+| `src/pages/mc/MCOnboarding.tsx` | Создать -- 4-шаговый визард |
+| `src/components/layout/pageRegistry.ts` | Добавить MCOnboarding |
+| `src/components/layout/AnimatedRoutes.tsx` | Добавить маршрут /mc/onboarding |
+| `src/components/auth/MCGuard.tsx` | Заменить AccessDenied на кнопку "Создать УК" |
+| `src/components/owner/CompanySwitcher.tsx` | Добавить "+ Создать УК" внизу |
+
+### Шаг 1: Форма регистрации
+
+Поля:
+- name_en (required) -- название на английском
+- name_ru (required) -- название на русском
+- email -- контактный email
+- phone -- телефон
+- address -- адрес офиса
+- description_en / description_ru -- краткое описание
+
+Slug генерируется автоматически из name_en (латиница, lowercase, дефисы).
+
+### Шаг 3: Приглашение команды
+
+Переиспользуем существующую Edge Function `invite-team-member`. Показываем мини-форму: email + роль (manager/staff/accountant). До 3 приглашений. Каждое отправляется отдельным запросом. Шаг можно пропустить.
+
+### Интеграция с ActiveCompanyProvider
+
+После успешной регистрации:
+1. Инвалидируем query `user-companies`
+2. Устанавливаем новую компанию как activeCompanyId
+3. Перенаправляем на следующий шаг визарда
+
+### UX
+
+- Двуязычный интерфейс (ru/en) как во всём проекте
+- Используем существующий `OnboardingLayout` с прогресс-баром
+- Анимации через framer-motion (как в OwnerSetupWizard)
+- Mobile-first дизайн
