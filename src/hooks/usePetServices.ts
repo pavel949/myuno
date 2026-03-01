@@ -21,7 +21,8 @@ export interface PetService {
   is_verified: boolean;
 }
 
-function transformPetService(raw: any): PetService {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformPetService(raw: Record<string, any>): PetService {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,

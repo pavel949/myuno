@@ -49,6 +49,7 @@ export function useOwnerInvoices(status?: string) {
         .order('created_at', { ascending: false });
 
       if (status && status !== 'all') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         q = q.eq('status', status as any);
       }
 
@@ -85,6 +86,7 @@ export function useCreateInvoice() {
         .insert({
           ...invoice,
           invoice_number: '', // trigger will generate
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .select()
         .single();
@@ -102,7 +104,7 @@ export function useUpdateInvoiceStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status, paid_date }: { id: string; status: string; paid_date?: string }) => {
-      const update: any = { status };
+      const update: Record<string, string> = { status };
       if (paid_date) update.paid_date = paid_date;
       const { error } = await supabase
         .from('owner_invoices')

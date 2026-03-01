@@ -187,7 +187,7 @@ export function useInviteDelegate() {
       queryClient.invalidateQueries({ queryKey: ['property-delegates', variables.property_id] });
       toast.success('Приглашение отправлено');
     },
-    onError: (error: any) => {
+    onError: (error: Error & { code?: string }) => {
       if (error.code === '23505') {
         toast.error('Этот пользователь уже приглашён');
       } else {

@@ -103,6 +103,7 @@ export function useCreateStaffMember() {
   return useMutation({
     mutationFn: async (payload: StaffMemberInsert) => {
       if (!user) throw new Error('Not authenticated');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const insertData: any = { 
         ...payload, 
         owner_id: user.id,
@@ -124,8 +125,7 @@ export function useCreateStaffMember() {
       queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
       toast.success('Сотрудник добавлен');
     },
-    onError: (e) => {
-      console.error(e);
+    onError: () => {
       toast.error('Ошибка при добавлении сотрудника');
     },
   });
@@ -150,8 +150,7 @@ export function useUpdateStaffMember() {
       queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
       toast.success('Данные сотрудника обновлены');
     },
-    onError: (e) => {
-      console.error(e);
+    onError: () => {
       toast.error('Ошибка при обновлении сотрудника');
     },
   });
