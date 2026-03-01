@@ -46,7 +46,7 @@ export function useCrmCompanies(companyId: string | undefined, search?: string) 
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []).map((c: any) => ({
+      return (data || []).map((c: Record<string, unknown>) => ({
         ...c,
         contact_count: Array.isArray(c.crm_contacts) ? c.crm_contacts.length : 0,
         crm_contacts: undefined,

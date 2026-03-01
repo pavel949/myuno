@@ -109,7 +109,7 @@ export function useCrmContacts(
       const { data, error, count } = await q;
       if (error) throw error;
       // Attach deal_count to each contact
-      const enriched = (data || []).map((c: any) => ({
+      const enriched = (data || []).map((c: Record<string, unknown>) => ({
         ...c,
         deal_count: Array.isArray(c.agent_deals) ? c.agent_deals.length : 0,
         agent_deals: undefined,

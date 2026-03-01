@@ -42,6 +42,7 @@ async function fetchBanks(): Promise<Bank[]> {
     .order('rating', { ascending: false });
 
   if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data || []).map((raw: any) => {
     const attrs = raw.attributes || {};
     return {

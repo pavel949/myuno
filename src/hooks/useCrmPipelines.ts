@@ -46,7 +46,7 @@ export function useCrmPipelines(companyId: string | undefined) {
         .order('sort_order');
       if (pErr) throw pErr;
 
-      const pipelineIds = (pipelines || []).map((p: any) => p.id);
+      const pipelineIds = (pipelines || []).map((p: { id: string }) => p.id);
       if (pipelineIds.length === 0) return [];
 
       const { data: stages, error: sErr } = await from('crm_pipeline_stages')

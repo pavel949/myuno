@@ -91,23 +91,23 @@ export function useBudgetVsActual(propertyId: string, month: string) {
 
       // Build map of actuals by category+type
       const actualMap: Record<string, number> = {};
-      (actuals || []).forEach((a: any) => {
+      (actuals || []).forEach((a: { transaction_type: string; category: string | null; amount: number }) => {
         const key = `${a.transaction_type}:${a.category || 'other'}`;
         actualMap[key] = (actualMap[key] || 0) + Number(a.amount);
       });
 
       // Build comparison rows
       const allCategories = new Set<string>();
-      (budgets || []).forEach((b: any) => allCategories.add(`${b.transaction_type}:${b.category}`));
+      (budgets || []).forEach((b: { transaction_type: string; category: string }) => allCategories.add(`${b.transaction_type}:${b.category}`));
       Object.keys(actualMap).forEach(k => allCategories.add(k));
 
       const results: BudgetVsActual[] = [];
       allCategories.forEach(key => {
         const [type, category] = key.split(':');
         const budget = (budgets || []).find(
-          (b: any) => b.category === category && b.transaction_type === type
+          (b: { category: string; transaction_type: string; planned_amount?: number }) => b.category === category && b.transaction_type === type
         );
-        const planned = budget ? Number((budget as any).planned_amount) : 0;
+        const planned = budget ? Number(budget.planned_amount || 0) : 0;
         const actual = actualMap[key] || 0;
         const variance = planned - actual;
         const variancePercent = planned > 0 ? Math.round((variance / planned) * 100) : actual > 0 ? -100 : 0;
