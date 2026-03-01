@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { loadCyrillicFont } from './pdfFonts';
 import type { ReportData } from '@/hooks/usePropertyReports';
 
 interface GeneratePdfOptions {
@@ -160,7 +161,7 @@ function formatDate(dateString: string): string {
   });
 }
 
-export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
+export async function generateReportPdf(options: GeneratePdfOptions): Promise<jsPDF> {
   const { propertyTitle, reportType, periodStart, periodEnd, data, language = 'ru', currency = 'THB' } = options;
   const isManagement = reportType === 'management' || options.isManagement;
   const isOwnerStatement = reportType === 'owner_statement';
@@ -169,6 +170,8 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   const catLabels = categoryLabels[language];
 
   const doc = new jsPDF();
+  await loadCyrillicFont(doc);
+  const fontStyles = { font: 'Roboto' } as const;
   let yPosition = 20;
 
   // Header
@@ -247,6 +250,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'striped',
       headStyles: { fillColor: [22, 163, 74] },
       margin: { left: 20, right: 20 },
+      styles: { ...fontStyles },
     });
     
     yPosition = (doc as any).lastAutoTable.finalY + 15;
@@ -271,6 +275,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'striped',
       headStyles: { fillColor: [220, 38, 38] },
       margin: { left: 20, right: 20 },
+      styles: { ...fontStyles },
     });
     
     yPosition = (doc as any).lastAutoTable.finalY + 15;
@@ -304,7 +309,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] },
       margin: { left: 20, right: 20 },
-      styles: { fontSize: 9 },
+      styles: { fontSize: 9, ...fontStyles },
     });
     
     yPosition = (doc as any).lastAutoTable.finalY + 15;
@@ -337,7 +342,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'striped',
       headStyles: { fillColor: [107, 114, 128] },
       margin: { left: 20, right: 20 },
-      styles: { fontSize: 8 },
+      styles: { fontSize: 8, ...fontStyles },
     });
 
     yPosition = (doc as any).lastAutoTable.finalY + 15;
@@ -368,7 +373,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
         theme: 'striped',
         headStyles: { fillColor: [234, 88, 12] },
         margin: { left: 20, right: 20 },
-        styles: { fontSize: 9 },
+        styles: { fontSize: 9, ...fontStyles },
       });
 
       yPosition = (doc as any).lastAutoTable.finalY + 15;
@@ -436,7 +441,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'plain',
       headStyles: { fillColor: [59, 130, 246], textColor: 255 },
       margin: { left: 20, right: 20 },
-      styles: { fontSize: 10 },
+      styles: { fontSize: 10, ...fontStyles },
       columnStyles: { 0: { fontStyle: 'bold', cellWidth: 80 }, 1: { halign: 'right', cellWidth: 50 }, 2: { halign: 'right', fontStyle: 'bold', cellWidth: 50 } },
     });
 
@@ -482,7 +487,7 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
       theme: 'striped',
       headStyles: { fillColor: [22, 163, 74] },
       margin: { left: 20, right: 20 },
-      styles: { fontSize: 10 },
+      styles: { fontSize: 10, ...fontStyles },
       columnStyles: { 1: { halign: 'right' } },
       didParseCell: (hookData: any) => {
         // Bold the payout row
@@ -521,8 +526,8 @@ export function generateReportPdf(options: GeneratePdfOptions): jsPDF {
   return doc;
 }
 
-export function downloadReportPdf(options: GeneratePdfOptions, filename?: string): void {
-  const doc = generateReportPdf(options);
+export async function downloadReportPdf(options: GeneratePdfOptions, filename?: string): Promise<void> {
+  const doc = await generateReportPdf(options);
   const name = filename || `report-${options.periodStart}-${options.periodEnd}.pdf`;
   doc.save(name);
 }
