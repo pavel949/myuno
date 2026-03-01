@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
 import { useCompanyCategorySettings } from '@/hooks/useCompanyCategorySettings';
+import { getCategoryDefaults, type CategoryClass, type CategoryGroup, type AllocationMethod } from '@/lib/categoryDefaults';
 import { toast } from 'sonner';
 
 export interface FinancialCategory {
@@ -13,17 +14,24 @@ export interface FinancialCategory {
   icon?: string;
   color?: string;
   isCustom?: boolean;
+  // Classification metadata
+  category_class: CategoryClass;
+  category_group: CategoryGroup;
+  affects_net_profit: boolean;
+  is_tax_deductible: boolean;
+  allocation_method: AllocationMethod;
 }
 
 /**
  * Returns merged list of standard + custom categories for active MC,
- * filtered by company_category_settings (if configured).
+ * filtered by company_category_settings (if configured),
+ * enriched with classification metadata.
  */
 export function useFinancialCategories(type: 'expense' | 'income') {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { enabledCodes } = useCompanyCategorySettings(type);
+  const { enabledCodes, settings } = useCompanyCategorySettings(type);
 
   const { data: customCategories = [], isLoading } = useQuery({
     queryKey: ['financial-categories', companyId, type],
@@ -43,12 +51,33 @@ export function useFinancialCategories(type: 'expense' | 'income') {
         name_ru: string;
         icon: string | null;
         color: string | null;
+        category_class: string | null;
+        category_group: string | null;
+        affects_net_profit: boolean | null;
+        is_tax_deductible: boolean | null;
+        allocation_method: string | null;
       }>;
     },
     enabled: !!user && !!companyId,
   });
 
   const standardCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+
+  // Build overrides map from company settings
+  const overridesMap = new Map<string, {
+    category_class?: string | null;
+    category_group?: string | null;
+    affects_net_profit?: boolean | null;
+    is_tax_deductible?: boolean | null;
+    allocation_method?: string | null;
+    custom_name_en?: string | null;
+    custom_name_ru?: string | null;
+  }>();
+  if (settings) {
+    for (const s of settings) {
+      overridesMap.set(s.category_code, s);
+    }
+  }
 
   // Filter standard categories by company settings (null = all enabled)
   const filteredStandard = enabledCodes
@@ -58,11 +87,20 @@ export function useFinancialCategories(type: 'expense' | 'income') {
   // Merge: filtered standard first, then custom (skip duplicates by code)
   const standardCodes = new Set(filteredStandard.map(c => c.value));
   const merged: FinancialCategory[] = [
-    ...filteredStandard.map(c => ({
-      code: c.value,
-      name_en: c.labelEn,
-      name_ru: c.labelRu,
-    })),
+    ...filteredStandard.map(c => {
+      const defaults = getCategoryDefaults(c.value, type);
+      const override = overridesMap.get(c.value);
+      return {
+        code: c.value,
+        name_en: override?.custom_name_en || c.labelEn,
+        name_ru: override?.custom_name_ru || c.labelRu,
+        category_class: (override?.category_class as CategoryClass) || defaults.class,
+        category_group: (override?.category_group as CategoryGroup) || defaults.group,
+        affects_net_profit: override?.affects_net_profit ?? defaults.affectsProfit,
+        is_tax_deductible: override?.is_tax_deductible ?? defaults.taxDeductible,
+        allocation_method: (override?.allocation_method as AllocationMethod) || defaults.allocation,
+      };
+    }),
     ...customCategories
       .filter(c => !standardCodes.has(c.code))
       .map(c => ({
@@ -72,6 +110,11 @@ export function useFinancialCategories(type: 'expense' | 'income') {
         icon: c.icon || undefined,
         color: c.color || undefined,
         isCustom: true,
+        category_class: (c.category_class as CategoryClass) || 'variable',
+        category_group: (c.category_group as CategoryGroup) || 'other',
+        affects_net_profit: c.affects_net_profit ?? true,
+        is_tax_deductible: c.is_tax_deductible ?? false,
+        allocation_method: (c.allocation_method as AllocationMethod) || 'direct',
       })),
   ];
 
@@ -91,6 +134,11 @@ export function useCreateFinancialCategory() {
       name_ru: string;
       icon?: string;
       color?: string;
+      category_class?: string;
+      category_group?: string;
+      affects_net_profit?: boolean;
+      is_tax_deductible?: boolean;
+      allocation_method?: string;
     }) => {
       if (!user || !activeCompany) throw new Error('Not authenticated');
       const { error } = await supabase

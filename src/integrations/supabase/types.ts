@@ -3063,30 +3063,51 @@ export type Database = {
       }
       company_category_settings: {
         Row: {
+          affects_net_profit: boolean | null
+          allocation_method: string | null
+          category_class: string | null
           category_code: string
+          category_group: string | null
           category_type: string
           company_id: string
           created_at: string | null
+          custom_name_en: string | null
+          custom_name_ru: string | null
           id: string
           is_enabled: boolean
+          is_tax_deductible: boolean | null
           sort_order: number | null
         }
         Insert: {
+          affects_net_profit?: boolean | null
+          allocation_method?: string | null
+          category_class?: string | null
           category_code: string
+          category_group?: string | null
           category_type: string
           company_id: string
           created_at?: string | null
+          custom_name_en?: string | null
+          custom_name_ru?: string | null
           id?: string
           is_enabled?: boolean
+          is_tax_deductible?: boolean | null
           sort_order?: number | null
         }
         Update: {
+          affects_net_profit?: boolean | null
+          allocation_method?: string | null
+          category_class?: string | null
           category_code?: string
+          category_group?: string | null
           category_type?: string
           company_id?: string
           created_at?: string | null
+          custom_name_en?: string | null
+          custom_name_ru?: string | null
           id?: string
           is_enabled?: boolean
+          is_tax_deductible?: boolean | null
           sort_order?: number | null
         }
         Relationships: [
@@ -6225,6 +6246,10 @@ export type Database = {
       }
       financial_categories: {
         Row: {
+          affects_net_profit: boolean | null
+          allocation_method: string | null
+          category_class: string | null
+          category_group: string | null
           category_type: string
           code: string
           color: string | null
@@ -6234,11 +6259,16 @@ export type Database = {
           icon: string | null
           id: string
           is_active: boolean
+          is_tax_deductible: boolean | null
           name_en: string
           name_ru: string
           sort_order: number
         }
         Insert: {
+          affects_net_profit?: boolean | null
+          allocation_method?: string | null
+          category_class?: string | null
+          category_group?: string | null
           category_type: string
           code: string
           color?: string | null
@@ -6248,11 +6278,16 @@ export type Database = {
           icon?: string | null
           id?: string
           is_active?: boolean
+          is_tax_deductible?: boolean | null
           name_en: string
           name_ru: string
           sort_order?: number
         }
         Update: {
+          affects_net_profit?: boolean | null
+          allocation_method?: string | null
+          category_class?: string | null
+          category_group?: string | null
           category_type?: string
           code?: string
           color?: string | null
@@ -6262,6 +6297,7 @@ export type Database = {
           icon?: string | null
           id?: string
           is_active?: boolean
+          is_tax_deductible?: boolean | null
           name_en?: string
           name_ru?: string
           sort_order?: number

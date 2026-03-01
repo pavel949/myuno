@@ -5,12 +5,20 @@ import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
 import { toast } from 'sonner';
 
-interface CategorySetting {
+export interface CategorySetting {
   id: string;
   category_code: string;
   category_type: string;
   is_enabled: boolean;
   sort_order: number;
+  // Classification overrides (null = use default)
+  category_class: string | null;
+  category_group: string | null;
+  affects_net_profit: boolean | null;
+  is_tax_deductible: boolean | null;
+  allocation_method: string | null;
+  custom_name_en: string | null;
+  custom_name_ru: string | null;
 }
 
 export function useCompanyCategorySettings(type: 'expense' | 'income') {
@@ -33,12 +41,11 @@ export function useCompanyCategorySettings(type: 'expense' | 'income') {
     enabled: !!user && !!companyId,
   });
 
-  // If no settings exist yet, all categories are enabled (backward compatible)
   const hasSettings = settings !== null && settings !== undefined && settings.length > 0;
 
   const enabledCodes: Set<string> | null = hasSettings
     ? new Set(settings!.filter(s => s.is_enabled).map(s => s.category_code))
-    : null; // null means "all enabled"
+    : null;
 
   return { settings, enabledCodes, hasSettings, isLoading };
 }
@@ -57,7 +64,6 @@ export function useToggleCategorySetting() {
       if (!user || !activeCompany) throw new Error('Not authenticated');
       const companyId = activeCompany.company_id;
 
-      // Upsert: insert or update
       const { error } = await supabase
         .from('company_category_settings' as any)
         .upsert(
@@ -74,6 +80,52 @@ export function useToggleCategorySetting() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['company-category-settings'] });
       queryClient.invalidateQueries({ queryKey: ['financial-categories'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Ошибка: ' + err.message);
+    },
+  });
+}
+
+/** Update classification overrides for a category */
+export function useUpdateCategoryOverrides() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+
+  return useMutation({
+    mutationFn: async (data: {
+      category_type: 'expense' | 'income';
+      category_code: string;
+      category_class?: string | null;
+      category_group?: string | null;
+      affects_net_profit?: boolean | null;
+      is_tax_deductible?: boolean | null;
+      allocation_method?: string | null;
+      custom_name_en?: string | null;
+      custom_name_ru?: string | null;
+    }) => {
+      if (!user || !activeCompany) throw new Error('Not authenticated');
+      const companyId = activeCompany.company_id;
+
+      const { error } = await supabase
+        .from('company_category_settings' as any)
+        .upsert(
+          {
+            company_id: companyId,
+            category_type: data.category_type,
+            category_code: data.category_code,
+            is_enabled: true,
+            ...data,
+          } as any,
+          { onConflict: 'company_id,category_type,category_code' }
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company-category-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-categories'] });
+      toast.success('Настройки категории сохранены');
     },
     onError: (err: Error) => {
       toast.error('Ошибка: ' + err.message);
