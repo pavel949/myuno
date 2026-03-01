@@ -287,6 +287,7 @@ export const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslati
 
 export const AdminLocationKnowledge = lazy(() => import('@/pages/admin/AdminLocationKnowledge'));
 export const AdminPMCompanies = lazy(() => import('@/pages/admin/AdminPMCompanies'));
+export const AdminMCDashboard = lazy(() => import('@/pages/admin/AdminMCDashboard'));
 export const AdminContracts = lazy(() => import('@/pages/admin/AdminContracts'));
 export const AdminProviderDetail = lazy(() => import('@/pages/admin/AdminProviderDetail'));
 export const AdminDataImport = lazy(() => import('@/pages/admin/AdminDataImport'));
