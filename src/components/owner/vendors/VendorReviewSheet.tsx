@@ -3,12 +3,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useCreateVendorReview } from '@/hooks/useVendorReviews';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface VendorReviewSheetProps {
   vendorId: string;
@@ -40,98 +40,63 @@ export function VendorReviewSheet({ vendorId, vendorName, propertyId, taskId, tr
   const { data: company } = useMyCompanyId();
   const createReview = useCreateVendorReview();
   const [open, setOpen] = useState(false);
-
   const [quality, setQuality] = useState(0);
   const [speed, setSpeed] = useState(0);
   const [communication, setCommunication] = useState(0);
   const [notes, setNotes] = useState('');
 
-  const overall = quality && speed && communication
-    ? Math.round(((quality + speed + communication) / 3) * 10) / 10
-    : 0;
+  const overall = quality && speed && communication ? Math.round(((quality + speed + communication) / 3) * 10) / 10 : 0;
 
   const handleSubmit = async () => {
     if (!company?.company_id || !user) return;
-    if (!quality || !speed || !communication) {
-      toast.error(isRu ? 'Оцените все категории' : 'Rate all categories');
-      return;
-    }
-
+    if (!quality || !speed || !communication) { toast.error(isRu ? 'Оцените все категории' : 'Rate all categories'); return; }
     try {
       await createReview.mutateAsync({
-        company_id: company.company_id,
-        vendor_id: vendorId,
-        property_id: propertyId,
-        task_id: taskId,
-        quality_score: quality,
-        speed_score: speed,
-        communication_score: communication,
-        overall_score: overall,
-        notes: notes || undefined,
-        reviewed_by: user.id,
+        company_id: company.company_id, vendor_id: vendorId, property_id: propertyId, task_id: taskId,
+        quality_score: quality, speed_score: speed, communication_score: communication, overall_score: overall,
+        notes: notes || undefined, reviewed_by: user.id,
       });
       toast.success(isRu ? 'Оценка сохранена' : 'Review saved');
-      setOpen(false);
-      setQuality(0);
-      setSpeed(0);
-      setCommunication(0);
-      setNotes('');
-    } catch (e: any) {
-      toast.error(e.message);
-    }
+      setOpen(false); setQuality(0); setSpeed(0); setCommunication(0); setNotes('');
+    } catch (e: any) { toast.error(e.message); }
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <>
+      <div onClick={() => setOpen(true)}>
         {trigger || (
           <Button variant="outline" size="sm">
-            <Star className="h-4 w-4 mr-1" />
-            {isRu ? 'Оценить' : 'Review'}
+            <Star className="h-4 w-4 mr-1" />{isRu ? 'Оценить' : 'Review'}
           </Button>
         )}
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-auto max-h-[70vh]">
-        <SheetHeader>
-          <SheetTitle>
-            {isRu ? `Оценка: ${vendorName}` : `Review: ${vendorName}`}
-          </SheetTitle>
-        </SheetHeader>
+      </div>
 
-        <div className="space-y-4 mt-4">
-          <StarRating
-            value={quality}
-            onChange={setQuality}
-            label={isRu ? 'Качество работы' : 'Quality'}
-          />
-          <StarRating
-            value={speed}
-            onChange={setSpeed}
-            label={isRu ? 'Скорость' : 'Speed'}
-          />
-          <StarRating
-            value={communication}
-            onChange={setCommunication}
-            label={isRu ? 'Коммуникация' : 'Communication'}
-          />
-
-          {overall > 0 && (
-            <div className="flex items-center justify-between py-2 border-t border-border">
-              <span className="font-semibold text-sm">{isRu ? 'Итого' : 'Overall'}</span>
-              <span className="font-bold text-lg">{overall} / 5</span>
-            </div>
-          )}
-
-          <div>
-            <Label>{isRu ? 'Комментарий' : 'Notes'}</Label>
-            <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
-          </div>
-
+      <ResponsiveModal
+        open={open}
+        onOpenChange={setOpen}
+        title={isRu ? `Оценка: ${vendorName}` : `Review: ${vendorName}`}
+        icon={<Star className="w-5 h-5 text-warning" />}
+        size="sm"
+        footer={
           <Button className="w-full" onClick={handleSubmit} disabled={createReview.isPending}>
             {isRu ? 'Сохранить оценку' : 'Submit Review'}
           </Button>
+        }
+      >
+        <StarRating value={quality} onChange={setQuality} label={isRu ? 'Качество работы' : 'Quality'} />
+        <StarRating value={speed} onChange={setSpeed} label={isRu ? 'Скорость' : 'Speed'} />
+        <StarRating value={communication} onChange={setCommunication} label={isRu ? 'Коммуникация' : 'Communication'} />
+        {overall > 0 && (
+          <div className="flex items-center justify-between py-2 border-t border-border">
+            <span className="font-semibold text-sm">{isRu ? 'Итого' : 'Overall'}</span>
+            <span className="font-bold text-lg">{overall} / 5</span>
+          </div>
+        )}
+        <div>
+          <Label>{isRu ? 'Комментарий' : 'Notes'}</Label>
+          <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModal>
+    </>
   );
 }
