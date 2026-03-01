@@ -1,86 +1,73 @@
 
-# Аудит и улучшения: Профиль УК, Команда, Подписка, Бэкап
 
-## Обнаруженные проблемы
+# Раздел управления подписками УК в админ-панели
 
-### 1. Профиль компании (CompanyProfileSettings)
-- **Нет документов**: отсутствует возможность прикрепить документы компании (лицензии, сертификаты, регистрацию)
-- **Нет DBD карточки**: нет поля для загрузки DBD карточки (Department of Business Development — регистрация в Таиланде)
-- **Неполные реквизиты**: нет полей для регистрационного номера компании, юридического адреса (отдельно от фактического), банковских реквизитов
-- **Нет cover image upload**: поле cover_image есть в БД, но загрузчик для него не реализован
+## Текущее состояние
 
-### 2. Команда (StaffPage)
-- **Все работает**: создание сотрудников, отправка учётных данных по email через `invite-team-member`, делегирование прав по модулям, назначение на объекты — реализовано и функционально
-- **Нет проблем с иерархией**: director > admin > manager > staff/cleaner/maintenance — структура ролей корректная
+Существует `AdminMCDashboard` (`/admin/mc-dashboard`) с обзором всех УК, KPI-карточками и деталями в Sheet. Однако **нет отдельного раздела для управления подписками** — только базовые badge-статусы (Subscribed/Trial) и Stripe ID в деталях компании. Администратор не может:
+- Видеть историю платежей и MRR
+- Управлять слотами компании вручную (добавить/убрать бесплатные слоты)
+- Приостановить или отменить подписку
+- Видеть сводную аналитику по доходам от подписок
 
-### 3. Подписка (MCSubscriptionPage)
-- **Нет даты активации** у объектов в списке — видно только Active/Off, но не когда был активирован
-- **Нет бэкапа данных**: полностью отсутствует функционал экспорта/бэкапа
+## Что будет реализовано
 
----
+### 1. Новая вкладка "Subscriptions" в AdminMCDashboard
 
-## План реализации
+Добавить Tabs-навигацию в существующий `AdminMCDashboard.tsx` с двумя вкладками:
+- **Overview** (текущий контент) — список компаний с фильтрами
+- **Subscriptions** (новый) — сводка подписок и управление
 
-### Шаг 1: Расширение профиля компании
+### 2. Компонент AdminMCSubscriptions
 
-**Миграция БД** — добавить колонки в `management_companies`:
-- `legal_name` (text) — юридическое название
-- `registration_number` (text) — номер регистрации
-- `legal_address` (text) — юридический адрес
-- `bank_name` (text) — название банка
-- `bank_account` (text) — номер счёта
-- `swift_code` (text) — SWIFT код
-- `dbd_card_url` (text) — URL DBD-карточки
-- `documents` (jsonb, default '[]') — массив документов [{name, url, type, uploaded_at}]
+Новый файл `src/components/admin/mc/AdminMCSubscriptions.tsx`:
 
-**Обновить CompanyProfileSettings.tsx**:
-- Добавить секцию "Юридические данные" с новыми полями (legal_name, registration_number, legal_address)
-- Добавить секцию "Банковские реквизиты" (bank_name, bank_account, swift_code)
-- Добавить загрузчик DBD-карточки (UnifiedMediaUploader mode="single")
-- Добавить загрузчик Cover Image
-- Добавить секцию "Документы компании" (UnifiedMediaUploader mode="document") для лицензий, сертификатов и т.д.
-- Все новые секции — компактные, в Accordion или Card формате
+**Блок KPI (верхняя полоса):**
+- MRR (Monthly Recurring Revenue) — сумма paid_slots x $25 по всем активным подпискам
+- Всего подписчиков / Пробный период / Отменённые
+- Средний чек / Средний размер портфолио
 
-### Шаг 2: Дата активации в подписке
+**Таблица подписок:**
+- Название УК, план (Starter/Professional/Enterprise/Custom), оплаченные слоты, использованные слоты, статус (Active/Trial/Cancelled/Past Due), дата начала, следующий платёж
+- Фильтры: All / Active / Trial / Cancelled / Past Due
+- Поиск по названию
 
-**Обновить MCSubscriptionPage.tsx**:
-- В списке объектов показать дату активации из `mc_property_slots.activated_at`
-- Добавить badge с датой рядом со статусом Active
+**Действия администратора (в строке или в Sheet):**
+- "Grant Free Slots" — добавить бесплатные слоты компании (обновление `paid_slots` напрямую в БД без Stripe)
+- "View in Stripe" — ссылка на Stripe Dashboard (для stripe_customer_id)
+- "Toggle Active" — приостановка/активация компании
 
-### Шаг 3: Бэкап данных УК
+### 3. Миграция БД
 
-**Новый компонент** `src/components/mc/settings/DataBackupSettings.tsx`:
-- Кнопки экспорта по категориям: Объекты, CRM-контакты, Финансы, Отчёты
-- Формат экспорта: JSON (структурированный) или CSV
-- Данные формируются на клиенте из уже доступных Supabase-запросов
+Добавить колонку `free_slots` (integer, default 0) в `management_companies` — для учёта бесплатных/промо-слотов, выданных администратором (отдельно от paid_slots через Stripe).
 
-**Новая Edge Function** `export-mc-data`:
-- Принимает company_id + export_type (properties/crm/finance/reports/all)
-- Возвращает JSON с данными
-- Проверка авторизации: только director/admin
+### 4. Edge Function: admin-manage-mc-subscription
 
-**Автобэкап**: настройка в UI (ежемесячный/еженедельный)
-- Сохранять настройку в `management_companies.backup_settings` (jsonb)
-- Cron-задача для генерации и сохранения в Storage бакет `mc-backups`
-
-**Добавить таб "Data" в MCSettingsPage**:
-- Интегрировать DataBackupSettings в настройки
+Новый `supabase/functions/admin-manage-mc-subscription/index.ts`:
+- Принимает: `company_id`, `action` (grant_slots | revoke_slots | toggle_active)
+- Проверяет: JWT + роль admin через `has_role()`
+- Действия:
+  - `grant_slots`: обновляет `free_slots` в management_companies
+  - `toggle_active`: переключает `is_active`
+- Аудит: записывает действие в audit_logs
 
 ---
 
 ## Технические детали
 
 ### Новые файлы
-1. `src/components/mc/settings/DataBackupSettings.tsx` — UI бэкапа
-2. `supabase/functions/export-mc-data/index.ts` — Edge Function экспорта
-3. Миграция БД — новые колонки для management_companies
+1. `src/components/admin/mc/AdminMCSubscriptions.tsx` — UI таблицы подписок с KPI
+2. `supabase/functions/admin-manage-mc-subscription/index.ts` — Edge Function для управления
 
 ### Изменяемые файлы
-4. `src/components/mc/settings/CompanyProfileSettings.tsx` — расширенный профиль
-5. `src/pages/mc/MCSettingsPage.tsx` — новый таб "Data/Данные"
-6. `src/pages/owner/MCSubscriptionPage.tsx` — дата активации слотов
-7. `src/hooks/useManagementCompanies.ts` — обновить интерфейс ManagementCompany
+3. `src/pages/admin/AdminMCDashboard.tsx` — добавить Tabs (Overview / Subscriptions)
+4. `src/integrations/supabase/types.ts` — автообновление после миграции
+
+### Миграция
+- `ALTER TABLE management_companies ADD COLUMN free_slots integer NOT NULL DEFAULT 0;`
+- Обновить Edge Function `check-mc-subscription` чтобы учитывать `paid_slots + free_slots` как общее количество доступных слотов
 
 ### Безопасность
-- Edge Function проверяет JWT + membership в компании с ролью director/admin
-- Storage бакет `mc-backups` с RLS: доступ только участникам компании
+- Edge Function проверяет `has_role(user_id, 'admin')` перед любым действием
+- Все изменения логируются в `admin_audit_logs`
+
