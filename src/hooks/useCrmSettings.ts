@@ -6,7 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export type CrmOptionCategory = 'contact_type' | 'lead_source' | 'deal_type' | 'task_type';
+export type CrmOptionCategory = 'contact_type' | 'lead_source' | 'deal_type' | 'task_type' | 'lost_reason';
 
 export interface CrmCustomOption {
   id: string;
@@ -69,11 +69,23 @@ export const DEFAULT_TASK_TYPES: Omit<CrmCustomOption, 'id' | 'company_id'>[] = 
   { category: 'task_type', value: 'other', label_en: 'Other', label_ru: 'Прочее', color: '#78716c', icon: 'ClipboardList', short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 12 },
 ];
 
+export const DEFAULT_LOST_REASONS: Omit<CrmCustomOption, 'id' | 'company_id'>[] = [
+  { category: 'lost_reason', value: 'price', label_en: 'Price too high', label_ru: 'Слишком дорого', color: '#ef4444', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 1 },
+  { category: 'lost_reason', value: 'competitor', label_en: 'Chose competitor', label_ru: 'Выбрал конкурента', color: '#f59e0b', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 2 },
+  { category: 'lost_reason', value: 'no_budget', label_en: 'No budget', label_ru: 'Нет бюджета', color: '#78716c', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 3 },
+  { category: 'lost_reason', value: 'timing', label_en: 'Bad timing', label_ru: 'Неподходящее время', color: '#06b6d4', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 4 },
+  { category: 'lost_reason', value: 'no_response', label_en: 'No response', label_ru: 'Нет ответа', color: '#8b5cf6', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 5 },
+  { category: 'lost_reason', value: 'location', label_en: 'Wrong location', label_ru: 'Не подошла локация', color: '#3b82f6', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 6 },
+  { category: 'lost_reason', value: 'changed_mind', label_en: 'Changed mind', label_ru: 'Передумал', color: '#ec4899', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 7 },
+  { category: 'lost_reason', value: 'other', label_en: 'Other', label_ru: 'Другое', color: '#78716c', icon: null, short_en: null, short_ru: null, probability: null, is_system: true, is_active: true, sort_order: 8 },
+];
+
 const DEFAULTS_MAP: Record<CrmOptionCategory, Omit<CrmCustomOption, 'id' | 'company_id'>[]> = {
   contact_type: DEFAULT_CONTACT_TYPES,
   lead_source: DEFAULT_LEAD_SOURCES,
   deal_type: DEFAULT_DEAL_TYPES,
   task_type: DEFAULT_TASK_TYPES,
+  lost_reason: DEFAULT_LOST_REASONS,
 };
 
 /** Fetch options for a category, auto-seed defaults if empty */

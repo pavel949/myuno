@@ -6,7 +6,10 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Download, ChevronDown, ChevronRight } from 'lucide-react';
+import { Download, ChevronDown, ChevronRight, FileText, FileSpreadsheet, Sheet } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import ExcelJS from 'exceljs';
 
 interface Props {
   deals: AgentDeal[];
@@ -45,11 +48,11 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
   const [measure, setMeasure] = useState<MeasureKey>('expected_revenue');
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const [showMeasureMenu, setShowMeasureMenu] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const stages = pipelineData.activeStages;
 
   const { monthKeys, pivotData, monthTotals, stageTotals, grandTotal } = useMemo(() => {
-    // Group deals by month × stage
     const data: Record<string, Record<string, number>> = {};
     const mTotals: Record<string, number> = {};
     const sTotals: Record<string, number> = {};
@@ -85,6 +88,8 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
     return formatValue(val);
   };
 
+  const formatCellRaw = (val: number | undefined) => val || 0;
+
   const toggleMonth = (mk: string) => {
     setExpandedMonths(prev => {
       const next = new Set(prev);
@@ -93,26 +98,137 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
     });
   };
 
-  const exportCSV = () => {
-    const header = ['Month', ...stages.map(s => isRu ? s.nameRu : s.nameEn), 'Total'];
+  // ─── Build table data for exports ───
+  const getTableData = () => {
+    const stageNames = stages.map(s => isRu ? s.nameRu : s.nameEn);
+    const header = [isRu ? 'Месяц' : 'Month', ...stageNames, isRu ? 'Итого' : 'Total'];
     const rows = monthKeys.map(mk => [
-      getMonthLabel(mk, false),
-      ...stages.map(s => String(pivotData[mk]?.[s.key] || '')),
-      String(monthTotals[mk] || ''),
+      getMonthLabel(mk, isRu),
+      ...stages.map(s => formatCellRaw(pivotData[mk]?.[s.key])),
+      formatCellRaw(monthTotals[mk]),
     ]);
-    rows.push(['Total', ...stages.map(s => String(stageTotals[s.key] || '')), String(grandTotal)]);
+    const totalRow = [isRu ? 'Итого' : 'Total', ...stages.map(s => formatCellRaw(stageTotals[s.key])), grandTotal];
+    return { header, rows, totalRow, stageNames };
+  };
 
-    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  // ─── CSV Export ───
+  const exportCSV = () => {
+    const { header, rows, totalRow } = getTableData();
+    const allRows = [header, ...rows, totalRow];
+    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(',')).join('\n');
+    downloadBlob(csv, 'text/csv', `pipeline-pivot-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  };
+
+  // ─── PDF Export ───
+  const exportPDF = () => {
+    const { header, rows, totalRow } = getTableData();
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(14);
+    doc.text(isRu ? 'Воронка продаж — Pivot' : 'Sales Pipeline — Pivot', 14, 15);
+    doc.setFontSize(9);
+    doc.text(`${currentMeasure.labelEn} · ${format(new Date(), 'dd.MM.yyyy')}`, 14, 22);
+
+    autoTable(doc, {
+      head: [header],
+      body: [...rows.map(r => r.map(c => typeof c === 'number' ? c.toLocaleString() : c)), totalRow.map(c => typeof c === 'number' ? c.toLocaleString() : c)],
+      startY: 28,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
+      footStyles: { fillColor: [243, 244, 246], fontStyle: 'bold' },
+      didParseCell: (data) => {
+        // Bold last row
+        if (data.row.index === rows.length) {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [243, 244, 246];
+        }
+      },
+    });
+
+    doc.save(`pipeline-pivot-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  };
+
+  // ─── Excel Export ───
+  const exportExcel = async () => {
+    const { header, rows, totalRow } = getTableData();
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Pipeline Pivot');
+
+    // Header row
+    const headerRow = ws.addRow(header);
+    headerRow.eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3B82F6' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    // Data rows
+    for (const row of rows) {
+      const r = ws.addRow(row);
+      r.eachCell((cell, colNumber) => {
+        if (colNumber > 1) {
+          cell.numFmt = '#,##0';
+          cell.alignment = { horizontal: 'right' };
+        }
+      });
+    }
+
+    // Total row
+    const totRow = ws.addRow(totalRow);
+    totRow.eachCell((cell, colNumber) => {
+      cell.font = { bold: true };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+      if (colNumber > 1) {
+        cell.numFmt = '#,##0';
+        cell.alignment = { horizontal: 'right' };
+      }
+    });
+
+    // Auto-width
+    ws.columns.forEach(col => { col.width = 18; });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    downloadBlob(buffer, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', `pipeline-pivot-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+  };
+
+  // ─── Google Sheets (CSV + open in Sheets) ───
+  const exportGoogleSheets = () => {
+    const { header, rows, totalRow } = getTableData();
+    const allRows = [header, ...rows, totalRow];
+    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
+
+    // Download CSV first, then open Google Sheets import
     const a = document.createElement('a');
     a.href = url;
     a.download = `pipeline-pivot-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+
+    // Open Google Sheets in new tab
+    setTimeout(() => {
+      window.open('https://sheets.google.com/create', '_blank');
+    }, 500);
   };
 
+  function downloadBlob(content: string | ArrayBuffer | BlobPart, type: string, filename: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const currentMeasure = MEASURES.find(m => m.key === measure)!;
+
+  const exportOptions = [
+    { key: 'csv', label: 'CSV', icon: FileText, action: exportCSV },
+    { key: 'excel', label: 'Excel (.xlsx)', icon: FileSpreadsheet, action: exportExcel },
+    { key: 'pdf', label: 'PDF', icon: FileText, action: exportPDF },
+    { key: 'gsheets', label: 'Google Sheets', icon: Sheet, action: exportGoogleSheets },
+  ];
 
   return (
     <div className="space-y-3">
@@ -123,7 +239,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
             variant="outline"
             size="sm"
             className="text-xs gap-1"
-            onClick={() => setShowMeasureMenu(!showMeasureMenu)}
+            onClick={() => { setShowMeasureMenu(!showMeasureMenu); setShowExportMenu(false); }}
           >
             {isRu ? 'Метрика' : 'Measures'}
             <ChevronDown className="h-3 w-3" />
@@ -145,10 +261,38 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
             </div>
           )}
         </div>
-        <Button variant="outline" size="sm" className="text-xs gap-1" onClick={exportCSV}>
-          <Download className="h-3 w-3" />
-          CSV
-        </Button>
+
+        {/* Export dropdown */}
+        <div className="relative">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs gap-1"
+            onClick={() => { setShowExportMenu(!showExportMenu); setShowMeasureMenu(false); }}
+          >
+            <Download className="h-3 w-3" />
+            {isRu ? 'Экспорт' : 'Export'}
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+          {showExportMenu && (
+            <div className="absolute top-full left-0 mt-1 bg-popover border rounded-lg shadow-lg z-50 min-w-[180px] py-1">
+              {exportOptions.map(opt => {
+                const Icon = opt.icon;
+                return (
+                  <button
+                    key={opt.key}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-muted transition-colors flex items-center gap-2"
+                    onClick={() => { opt.action(); setShowExportMenu(false); }}
+                  >
+                    <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         <span className="text-xs text-muted-foreground ml-auto">
           {isRu ? currentMeasure.labelRu : currentMeasure.labelEn}
         </span>
@@ -169,18 +313,6 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
                 </th>
               ))}
               <th className="text-right p-2.5 font-bold whitespace-nowrap min-w-[130px] bg-muted/80">
-                {isRu ? currentMeasure.labelRu : currentMeasure.labelEn}
-              </th>
-            </tr>
-            {/* Sub-header showing measure name per stage */}
-            <tr className="border-b">
-              <th className="text-left p-2 font-normal text-muted-foreground sticky left-0 bg-card" />
-              {stages.map(s => (
-                <th key={s.key} className="text-right p-2 font-normal text-[10px] text-muted-foreground whitespace-nowrap">
-                  {isRu ? currentMeasure.labelRu : currentMeasure.labelEn}
-                </th>
-              ))}
-              <th className="text-right p-2 font-normal text-[10px] text-muted-foreground bg-muted/30">
                 {isRu ? currentMeasure.labelRu : currentMeasure.labelEn}
               </th>
             </tr>

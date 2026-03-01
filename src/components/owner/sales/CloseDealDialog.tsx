@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUpdateDeal, DealStage } from '@/hooks/useAgentDeals';
+import { useUpdateDeal, DealStage, useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCrmOptions } from '@/hooks/useCrmSettings';
+import { cn } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -25,12 +27,25 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
   const { toast } = useToast();
   const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
+  const { data: membership } = useMyCompanyId();
+  const { data: lostReasons = [] } = useCrmOptions(membership?.company_id, 'lost_reason');
 
   const [dealValue, setDealValue] = useState('');
   const [commissionPercent, setCommissionPercent] = useState('');
-  const [lostReason, setLostReason] = useState('');
+  const [selectedReason, setSelectedReason] = useState('');
+  const [lostReasonText, setLostReasonText] = useState('');
+
+  const reasonLabel = selectedReason
+    ? (isRu
+      ? lostReasons.find(r => r.value === selectedReason)?.label_ru
+      : lostReasons.find(r => r.value === selectedReason)?.label_en) || selectedReason
+    : lostReasonText;
 
   const handleSubmit = async () => {
+    const finalReason = selectedReason === 'other'
+      ? lostReasonText || (isRu ? 'Другое' : 'Other')
+      : reasonLabel || lostReasonText;
+
     try {
       if (mode === 'won') {
         await updateDeal.mutateAsync({
@@ -46,7 +61,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
           id: dealId,
           stage: 'closed_lost',
           closed_at: new Date().toISOString(),
-          lost_reason: lostReason || null,
+          lost_reason: finalReason || null,
         });
       }
       await addActivity.mutateAsync({
@@ -55,7 +70,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
         activity_type: 'stage_change',
         description: mode === 'won'
           ? (isRu ? 'Сделка закрыта — успех' : 'Deal closed — won')
-          : (isRu ? `Сделка проиграна: ${lostReason}` : `Deal lost: ${lostReason}`),
+          : (isRu ? `Сделка проиграна: ${finalReason}` : `Deal lost: ${finalReason}`),
         stage_from: currentStage,
         stage_to: mode === 'won' ? 'closed_won' : 'closed_lost',
       });
@@ -94,10 +109,32 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
               )}
             </>
           ) : (
-            <div>
+            <div className="space-y-3">
               <Label>{isRu ? 'Причина проигрыша' : 'Lost Reason'}</Label>
-              <Textarea value={lostReason} onChange={e => setLostReason(e.target.value)} rows={3}
-                placeholder={isRu ? 'Почему сделка не состоялась...' : 'Why did the deal fall through...'} />
+              <div className="flex flex-wrap gap-1.5">
+                {lostReasons.filter(r => r.is_active).map(r => (
+                  <button
+                    key={r.value}
+                    onClick={() => setSelectedReason(r.value)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                      selectedReason === r.value
+                        ? 'border-destructive bg-destructive/10 text-destructive'
+                        : 'border-border bg-card text-muted-foreground hover:border-foreground/30',
+                    )}
+                  >
+                    {isRu ? r.label_ru : r.label_en}
+                  </button>
+                ))}
+              </div>
+              {(selectedReason === 'other' || !lostReasons.length) && (
+                <Textarea
+                  value={lostReasonText}
+                  onChange={e => setLostReasonText(e.target.value)}
+                  rows={2}
+                  placeholder={isRu ? 'Опишите причину...' : 'Describe the reason...'}
+                />
+              )}
             </div>
           )}
         </div>
