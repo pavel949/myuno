@@ -1,90 +1,96 @@
 
 
-# Owner Portal: 5 Features Implementation
+# Owner Portal: Связывание данных и UX для создания портала
 
-## 1. Real-time Chat (Owner <-> MC)
+## Проблема
 
-**Database:** New `portal_messages` table with realtime enabled.
+Сейчас между CRM-контактом собственника (`crm_contacts` с `contact_type='owner'`) и его учётной записью в системе (`auth.users` / `profiles`) нет связи. Это означает:
+
+1. **Нет UUID-привязки** -- когда УК вносит собственника в CRM, у него нет аккаунта в системе
+2. **Портал "висит в воздухе"** -- `owner_portal_settings` требует `owner_user_id`, но его неоткуда взять из CRM
+3. **Нет единого UX** -- нет кнопки "Создать портал" на карточке собственника в PMS
+4. **Данные не связаны** -- объекты привязаны через `owner_contact_id`, но портал требует `owner_user_id`
+
+## Решение
+
+### 1. Добавить `linked_user_id` в `crm_contacts`
+
+Новое поле для связывания CRM-контакта с реальным пользователем системы:
 
 ```text
-portal_messages
-  id uuid PK
-  property_id uuid FK -> properties
-  sender_id uuid FK -> auth.users
-  sender_role text ('owner' | 'mc')
-  message text
-  is_read boolean DEFAULT false
-  created_at timestamptz
+crm_contacts
+  + linked_user_id UUID (nullable, FK -> auth.users)
 ```
 
-RLS: owner reads/writes own messages; MC members (via `management_company_members`) read/write for their properties.
+Это позволит:
+- Связать контакт с существующим пользователем (поиск по email)
+- Автоматически создать аккаунт при настройке портала
 
-**Frontend:**
-- New `usePortalChat(propertyId)` hook -- fetches messages, subscribes to realtime `postgres_changes`, sends messages
-- New `PortalChatTab` component replacing the placeholder in `OwnerPortalPropertyView.tsx` (tab "messages")
-- Simple message list + input UI (bubble layout, timestamps, read indicators)
-- MC side: add "Messages" section to `OwnerPortalSettingsPage` or property command center showing unread count
+### 2. Компонент "Create Owner Portal" на карточке собственника
 
-## 2. Owner Stays (Zero-Price Calendar Blocking)
+На странице `OwnerDetailPage` (/owner/owners/:id) добавить новый блок **"Портал владельца"**:
 
-**Logic:** Insert into existing `property_bookings` table with `source = 'owner_stay'`, `total_amount = 0`, `guest_name = 'Owner Stay'`.
+- Показывает статус: портал настроен / не настроен
+- Если у контакта есть email -- кнопка **"Создать портал"**:
+  1. Ищет пользователя по email в `profiles`
+  2. Если найден -- привязывает `linked_user_id`, создаёт `owner_portal_settings` для всех объектов этого собственника
+  3. Если не найден -- показывает сообщение "Собственник должен зарегистрироваться по email X, после чего портал активируется автоматически"
+- Кнопка "Настройки портала" для каждого объекта -- ведёт к `/owner/properties/:propertyId/portal-settings`
+- Показывает список объектов собственника с индикатором (портал включен / выключен)
 
-**Frontend:**
-- New `OwnerStaysTab` component replacing placeholder in `OwnerPortalPropertyView.tsx` (tab "stays")
-- Date range picker (check_in / check_out) with availability validation against existing bookings
-- List of upcoming and past owner stays with cancel option
-- Hook `useOwnerStays(propertyId)` -- queries `property_bookings` filtered by `source = 'owner_stay'`
+### 3. Автоматическая активация портала
 
-**No new table needed** -- reuses `property_bookings` with a distinguishing `source` value.
+Компонент `OwnerPortalActivator` -- при создании портала:
+1. Берёт email из `crm_contacts`
+2. Ищет совпадение в `profiles` по email
+3. Если найден:
+   - Записывает `linked_user_id` в `crm_contacts`
+   - Создаёт `owner_portal_settings` для каждого объекта (с дефолтными настройками)
+   - Создаёт `property_delegates` запись (role: `owner_readonly`, status: `active`)
+4. Если не найден:
+   - Создаёт `property_delegates` с `invited_email` и `status: 'pending'`
+   - Показывает ссылку-приглашение
 
-## 3. Utilities Tab (PEA/CAM Bills)
+### 4. Связь данных на OwnerDetailPage
 
-**Frontend:**
-- New `PortalUtilitiesTab` component replacing placeholder in `OwnerPortalPropertyView.tsx`
-- Reads from existing `property_financials` table, filtered by categories: `electricity`, `water`, `cam_fees`, `internet`
-- Displays grouped by month with amount, due date, status (paid/pending/overdue)
-- Uses existing `property_utility_schedules` for recurring schedule display
-- Read-only for owner; data entry remains on MC side
-
-## 4. Documents Tab (CRM Vault -> Portal)
-
-**Frontend:**
-- New `PortalDocumentsTab` component replacing placeholder in `OwnerPortalPropertyView.tsx`
-- Reads from existing `crm_documents` table filtered by `property_id`
-- Uses `getDocumentUrl()` from `useCrmDocuments.ts` for signed download URLs
-- Grouped by `document_type` with labels from `DOCUMENT_TYPE_LABELS`
-- Owner can view/download but not upload (read-only)
-- Respects `show_documents` toggle from portal settings
-
-## 5. "Portal Settings" Button on Property Card in PMS
-
-**Frontend:**
-- Add `Eye` icon button to `PropertyQuickActions.tsx` linking to `/owner/properties/${propertyId}/portal-settings`
-- Label: "Portal" / "Портал"
+На карточке собственника добавить секцию "Portal" (новый таб или блок в Overview):
+- Список объектов с быстрыми переключателями (портал вкл/выкл)
+- Ссылка на предпросмотр портала (как видит собственник)
+- Статус: "Активен" / "Ожидает регистрации" / "Не настроен"
 
 ---
 
-## Technical Summary
+## Технический план
 
-| Feature | New Table | New Components | Modified Files |
-|---------|-----------|----------------|----------------|
-| Chat | `portal_messages` | `PortalChatTab`, `usePortalChat` | `OwnerPortalPropertyView.tsx` |
-| Owner Stays | None (reuses `property_bookings`) | `OwnerStaysTab`, `useOwnerStays` | `OwnerPortalPropertyView.tsx` |
-| Utilities | None (reads `property_financials`) | `PortalUtilitiesTab` | `OwnerPortalPropertyView.tsx` |
-| Documents | None (reads `crm_documents`) | `PortalDocumentsTab` | `OwnerPortalPropertyView.tsx` |
-| Portal Button | None | -- | `PropertyQuickActions.tsx` |
+### Шаг 1: Миграция БД
+- Добавить `linked_user_id uuid REFERENCES auth.users(id)` в `crm_contacts`
+- Индекс на `linked_user_id` для быстрого поиска
 
-**Migration:** One SQL migration for `portal_messages` table + RLS + realtime publication.
+### Шаг 2: Компонент `OwnerPortalSetupCard`
+- Новый компонент в `src/components/owner/owners/OwnerPortalSetupCard.tsx`
+- Принимает `contactId`, `email`, `properties[]`
+- Логика: поиск пользователя, создание настроек, привязка
+- Интегрируется в `OwnerDetailPage` (в Overview tab или как отдельный таб "Portal")
 
-**Files to create:**
-- `src/hooks/usePortalChat.ts`
-- `src/hooks/useOwnerStays.ts`
-- `src/components/owner-portal/PortalChatTab.tsx`
-- `src/components/owner-portal/OwnerStaysTab.tsx`
-- `src/components/owner-portal/PortalUtilitiesTab.tsx`
-- `src/components/owner-portal/PortalDocumentsTab.tsx`
+### Шаг 3: Обновить `OwnerDetailPage`
+- Добавить таб "Portal" или карточку в Overview
+- Показывать `OwnerPortalSetupCard` с актуальным статусом
+- Для каждого объекта: кнопка настроек портала
 
-**Files to modify:**
-- `src/pages/owner-portal/OwnerPortalPropertyView.tsx` -- replace 4 placeholder tabs with real components
-- `src/components/owner/property-detail/PropertyQuickActions.tsx` -- add Portal Settings button
+### Шаг 4: Обновить `useOwnerAccounts`
+- Добавить `linked_user_id` в выборку
+- Добавить статус портала (есть ли `owner_portal_settings` для объектов)
 
+---
+
+## Файлы
+
+**Новые файлы:**
+- `src/components/owner/owners/OwnerPortalSetupCard.tsx` -- UI создания/управления порталом
+
+**Изменяемые файлы:**
+- `src/pages/owner/OwnerDetailPage.tsx` -- добавить Portal таб/блок
+- `src/hooks/useOwnerAccounts.ts` -- добавить `linked_user_id` и portal status в выборку
+
+**Миграция:**
+- Добавить `linked_user_id` в `crm_contacts`
