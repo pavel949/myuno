@@ -6,6 +6,7 @@ import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinanc
 import { useCompanyCategorySettings } from '@/hooks/useCompanyCategorySettings';
 import { getCategoryDefaults, type CategoryClass, type CategoryGroup, type AllocationMethod } from '@/lib/categoryDefaults';
 import { toast } from 'sonner';
+import { useMemo } from 'react';
 
 export interface FinancialCategory {
   code: string;
@@ -14,7 +15,6 @@ export interface FinancialCategory {
   icon?: string;
   color?: string;
   isCustom?: boolean;
-  // Classification metadata
   category_class: CategoryClass;
   category_group: CategoryGroup;
   affects_net_profit: boolean;
@@ -22,11 +22,6 @@ export interface FinancialCategory {
   allocation_method: AllocationMethod;
 }
 
-/**
- * Returns merged list of standard + custom categories for active MC,
- * filtered by company_category_settings (if configured),
- * enriched with classification metadata.
- */
 export function useFinancialCategories(type: 'expense' | 'income') {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
@@ -39,7 +34,7 @@ export function useFinancialCategories(type: 'expense' | 'income') {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('financial_categories' as any)
-        .select('*')
+        .select('code,name_en,name_ru,icon,color,category_class,category_group,affects_net_profit,is_tax_deductible,allocation_method')
         .eq('company_id', companyId)
         .eq('category_type', type)
         .eq('is_active', true)
@@ -63,62 +58,64 @@ export function useFinancialCategories(type: 'expense' | 'income') {
 
   const standardCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
-  // Build overrides map from company settings
-  const overridesMap = new Map<string, {
-    category_class?: string | null;
-    category_group?: string | null;
-    affects_net_profit?: boolean | null;
-    is_tax_deductible?: boolean | null;
-    allocation_method?: string | null;
-    custom_name_en?: string | null;
-    custom_name_ru?: string | null;
-  }>();
-  if (settings) {
-    for (const s of settings) {
-      overridesMap.set(s.category_code, s);
+  // Memoize the entire merge to avoid rebuilding on every render
+  const categories = useMemo<FinancialCategory[]>(() => {
+    // Build overrides map from company settings
+    const overridesMap = new Map<string, {
+      category_class?: string | null;
+      category_group?: string | null;
+      affects_net_profit?: boolean | null;
+      is_tax_deductible?: boolean | null;
+      allocation_method?: string | null;
+      custom_name_en?: string | null;
+      custom_name_ru?: string | null;
+    }>();
+    if (settings) {
+      for (const s of settings) {
+        overridesMap.set(s.category_code, s);
+      }
     }
-  }
 
-  // Filter standard categories by company settings (null = all enabled)
-  const filteredStandard = enabledCodes
-    ? standardCategories.filter(c => enabledCodes.has(c.value))
-    : standardCategories;
+    const filteredStandard = enabledCodes
+      ? standardCategories.filter(c => enabledCodes.has(c.value))
+      : standardCategories;
 
-  // Merge: filtered standard first, then custom (skip duplicates by code)
-  const standardCodes = new Set(filteredStandard.map(c => c.value));
-  const merged: FinancialCategory[] = [
-    ...filteredStandard.map(c => {
-      const defaults = getCategoryDefaults(c.value, type);
-      const override = overridesMap.get(c.value);
-      return {
-        code: c.value,
-        name_en: override?.custom_name_en || c.labelEn,
-        name_ru: override?.custom_name_ru || c.labelRu,
-        category_class: (override?.category_class as CategoryClass) || defaults.class,
-        category_group: (override?.category_group as CategoryGroup) || defaults.group,
-        affects_net_profit: override?.affects_net_profit ?? defaults.affectsProfit,
-        is_tax_deductible: override?.is_tax_deductible ?? defaults.taxDeductible,
-        allocation_method: (override?.allocation_method as AllocationMethod) || defaults.allocation,
-      };
-    }),
-    ...customCategories
-      .filter(c => !standardCodes.has(c.code))
-      .map(c => ({
-        code: c.code,
-        name_en: c.name_en,
-        name_ru: c.name_ru,
-        icon: c.icon || undefined,
-        color: c.color || undefined,
-        isCustom: true,
-        category_class: (c.category_class as CategoryClass) || 'variable',
-        category_group: (c.category_group as CategoryGroup) || 'other',
-        affects_net_profit: c.affects_net_profit ?? true,
-        is_tax_deductible: c.is_tax_deductible ?? false,
-        allocation_method: (c.allocation_method as AllocationMethod) || 'direct',
-      })),
-  ];
+    const standardCodes = new Set(filteredStandard.map(c => c.value));
 
-  return { categories: merged, isLoading };
+    return [
+      ...filteredStandard.map(c => {
+        const defaults = getCategoryDefaults(c.value, type);
+        const override = overridesMap.get(c.value);
+        return {
+          code: c.value,
+          name_en: override?.custom_name_en || c.labelEn,
+          name_ru: override?.custom_name_ru || c.labelRu,
+          category_class: (override?.category_class as CategoryClass) || defaults.class,
+          category_group: (override?.category_group as CategoryGroup) || defaults.group,
+          affects_net_profit: override?.affects_net_profit ?? defaults.affectsProfit,
+          is_tax_deductible: override?.is_tax_deductible ?? defaults.taxDeductible,
+          allocation_method: (override?.allocation_method as AllocationMethod) || defaults.allocation,
+        };
+      }),
+      ...customCategories
+        .filter(c => !standardCodes.has(c.code))
+        .map(c => ({
+          code: c.code,
+          name_en: c.name_en,
+          name_ru: c.name_ru,
+          icon: c.icon || undefined,
+          color: c.color || undefined,
+          isCustom: true as const,
+          category_class: (c.category_class as CategoryClass) || 'variable' as const,
+          category_group: (c.category_group as CategoryGroup) || 'other' as const,
+          affects_net_profit: c.affects_net_profit ?? true,
+          is_tax_deductible: c.is_tax_deductible ?? false,
+          allocation_method: (c.allocation_method as AllocationMethod) || 'direct' as const,
+        })),
+    ];
+  }, [standardCategories, enabledCodes, settings, customCategories, type]);
+
+  return { categories, isLoading };
 }
 
 export function useCreateFinancialCategory() {
