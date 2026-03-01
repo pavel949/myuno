@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import {
   Home,
+  Building2,
   MapPin,
   Bed,
   Bath,
@@ -69,6 +70,7 @@ export interface PropertyCardProps {
   variant?: PropertyCardVariant;
   mode?: PropertyCardMode;
   stats?: PropertyCardStats;
+  companyName?: string;
   onEdit?: (id: string) => void;
   onView?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -246,6 +248,7 @@ interface ListVariantProps {
   property: OwnerProperty | VendorProperty;
   mode: PropertyCardMode;
   isRu: boolean;
+  companyName?: string;
   showApprovalStatus: boolean;
   showInstantBadge: boolean;
   showProtectionBadge: boolean;
@@ -263,6 +266,7 @@ function ListVariant({
   property,
   mode,
   isRu,
+  companyName,
   showApprovalStatus,
   showInstantBadge,
   showProtectionBadge,
@@ -349,6 +353,14 @@ function ListVariant({
                   )}
                 </div>
               </div>
+
+              {/* Company name */}
+              {companyName && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                  <Building2 className="h-3 w-3 flex-shrink-0 text-primary/60" />
+                  <span className="truncate font-medium">{companyName}</span>
+                </div>
+              )}
 
               {/* Location */}
               {(cardProps.district || cardProps.address) && (
@@ -541,11 +553,12 @@ function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
 // ============= MAIN COMPONENT =============
 
 export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
-  ({
+   ({
     property,
     variant = 'list',
     mode = 'owner',
     stats,
+    companyName,
     onEdit,
     onView,
     onDelete,
@@ -593,6 +606,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
             cardProps={cardProps}
             property={property}
             mode={mode}
+            companyName={companyName}
             isRu={isRu}
             showApprovalStatus={showApprovalStatus}
             showInstantBadge={showInstantBadge}
