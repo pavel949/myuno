@@ -6,9 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import SalonMap, { SalonMarker } from '@/components/map/SalonMap';
 import { FilterChip } from '@/components/uno/FilterChip';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
-} from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
 import { useSalons } from '@/hooks/useSalons';
 
@@ -60,37 +58,43 @@ export default function BeautyMap() {
             <span className="font-medium">{language === 'ru' ? 'Назад' : 'Back'}</span>
           </button>
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта салонов' : 'Salon Map'}</h1>
-          <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon"><Sliders className="w-5 h-5" /></Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>{language === 'ru' ? 'Фильтры' : 'Filters'}</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                <div>
-                  <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : 'Distance'}</label>
-                  <div className="flex flex-wrap gap-2">
-                    {distanceOptions.map((opt) => (
-                      <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
-                    ))}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl bg-secondary/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : 'Your Location'}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : 'Detecting...'}
-                  </p>
-                </div>
-                <Button className="w-full" onClick={() => setIsFilterOpen(false)}>{language === 'ru' ? 'Применить' : 'Apply'}</Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)}>
+            <Sliders className="w-5 h-5" />
+          </Button>
         </div>
+
+        <ResponsiveModal
+          open={isFilterOpen}
+          onOpenChange={setIsFilterOpen}
+          title={language === 'ru' ? 'Фильтры' : 'Filters'}
+          icon={<Sliders className="h-5 w-5 text-primary" />}
+          size="sm"
+          footer={
+            <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
+              {language === 'ru' ? 'Применить' : 'Apply'}
+            </Button>
+          }
+        >
+          <div className="space-y-6">
+            <div>
+              <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : 'Distance'}</label>
+              <div className="flex flex-wrap gap-2">
+                {distanceOptions.map((opt) => (
+                  <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
+                ))}
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-secondary/50">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : 'Your Location'}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : 'Detecting...'}
+              </p>
+            </div>
+          </div>
+        </ResponsiveModal>
 
         <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 backdrop-blur-sm border-b border-border/30">
           {distanceOptions.map((opt) => (

@@ -6,14 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-} from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 export interface ProductFiltersState {
   priceRange: [number, number];
@@ -68,31 +61,38 @@ export function ProductFilters({
     setLocalFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const footer = (
+    <div className="flex gap-2 w-full">
+      <Button variant="outline" onClick={handleReset} className="flex-1">
+        {language === 'ru' ? 'Сбросить' : 'Reset'}
+      </Button>
+      <Button onClick={handleApply} className="flex-1">
+        {language === 'ru' ? 'Применить' : 'Apply Filters'}
+      </Button>
+    </div>
+  );
+
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <SlidersHorizontal className="w-4 h-4" />
-          {language === 'ru' ? 'Фильтры' : 'Filters'}
-          {activeCount > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
-              {activeCount}
-            </Badge>
-          )}
-        </Button>
-      </SheetTrigger>
+    <>
+      <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsOpen(true)}>
+        <SlidersHorizontal className="w-4 h-4" />
+        {language === 'ru' ? 'Фильтры' : 'Filters'}
+        {activeCount > 0 && (
+          <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+            {activeCount}
+          </Badge>
+        )}
+      </Button>
 
-      <SheetContent side="right" className="w-80">
-        <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
-            {language === 'ru' ? 'Фильтры' : 'Filters'}
-            <Button variant="ghost" size="sm" onClick={handleReset}>
-              {language === 'ru' ? 'Сбросить' : 'Reset'}
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
-
-        <div className="space-y-6 py-6">
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title={language === 'ru' ? 'Фильтры' : 'Filters'}
+        icon={<SlidersHorizontal className="h-5 w-5 text-primary" />}
+        size="md"
+        footer={footer}
+      >
+        <div className="space-y-6">
           {/* Price Range */}
           <div className="space-y-3">
             <Label>{language === 'ru' ? 'Цена' : 'Price'}</Label>
@@ -182,14 +182,8 @@ export function ProductFilters({
             </div>
           </div>
         </div>
-
-        <SheetFooter>
-          <Button onClick={handleApply} className="w-full">
-            {language === 'ru' ? 'Применить' : 'Apply Filters'}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModal>
+    </>
   );
 }
 

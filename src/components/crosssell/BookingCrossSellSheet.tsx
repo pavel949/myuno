@@ -1,12 +1,12 @@
 /**
- * BookingCrossSellSheet — Bottom sheet showing AI-generated cross-sell offers
+ * BookingCrossSellSheet — Modal showing AI-generated cross-sell offers
  * after a property booking is confirmed.
  */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -82,8 +82,6 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
 
     const fetchOffers = async () => {
       setLoading(true);
-
-      // First check if offers already exist
       const { data: existing } = await supabase
         .from('booking_cross_sell_offers')
         .select('*')
@@ -96,15 +94,12 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
         return;
       }
 
-      // Generate new offers via edge function
       try {
         const { data, error } = await supabase.functions.invoke('ai-cross-sell', {
           body: { booking_id: bookingId },
         });
-
         if (error) throw error;
         if (data?.offers) {
-          // Refetch from DB to get proper IDs
           const { data: freshOffers } = await supabase
             .from('booking_cross_sell_offers')
             .select('*')
@@ -136,101 +131,98 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
     navigate(path);
   };
 
+  const footer = (
+    <Button
+      variant="ghost"
+      className="w-full text-muted-foreground"
+      onClick={() => onOpenChange(false)}
+    >
+      {isRu ? 'Не сейчас' : 'Not now'}
+    </Button>
+  );
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
-        <SheetHeader className="text-left pb-2">
-          <SheetTitle className="text-lg">
-            {isRu ? '✨ Сделайте отдых незабываемым' : '✨ Make your stay unforgettable'}
-          </SheetTitle>
-          <p className="text-sm text-muted-foreground">
-            {isRu
-              ? 'Подобрано специально для вашего бронирования'
-              : 'Curated just for your booking'}
-          </p>
-        </SheetHeader>
-
-        <div className="space-y-3 pt-2 pb-4">
-          {loading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex gap-3 p-3">
-                <Skeleton className="w-12 h-12 rounded-xl" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isRu ? '✨ Сделайте отдых незабываемым' : '✨ Make your stay unforgettable'}
+      description={isRu ? 'Подобрано специально для вашего бронирования' : 'Curated just for your booking'}
+      icon={<Sparkles className="h-5 w-5 text-primary" />}
+      size="lg"
+      footer={footer}
+    >
+      <div className="space-y-3">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex gap-3 p-3">
+              <Skeleton className="w-12 h-12 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
               </div>
-            ))
-          ) : offers.length === 0 ? (
-            <p className="text-center text-muted-foreground text-sm py-6">
-              {isRu ? 'Нет доступных предложений' : 'No offers available'}
-            </p>
-          ) : (
-            <AnimatePresence>
-              {offers.map((offer, idx) => {
-                const Icon = SERVICE_ICONS[offer.service_type] || Compass;
-                const gradient = SERVICE_GRADIENTS[offer.service_type] || 'from-primary to-primary/80';
-                const currencySymbol = getCurrencySymbol(offer.currency || 'THB');
+            </div>
+          ))
+        ) : offers.length === 0 ? (
+          <p className="text-center text-muted-foreground text-sm py-6">
+            {isRu ? 'Нет доступных предложений' : 'No offers available'}
+          </p>
+        ) : (
+          <AnimatePresence>
+            {offers.map((offer, idx) => {
+              const Icon = SERVICE_ICONS[offer.service_type] || Compass;
+              const gradient = SERVICE_GRADIENTS[offer.service_type] || 'from-primary to-primary/80';
+              const currencySymbol = getCurrencySymbol(offer.currency || 'THB');
 
-                return (
-                  <motion.div
-                    key={offer.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex gap-3 p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors"
-                  >
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
-                      <Icon className="w-6 h-6 text-white" />
+              return (
+                <motion.div
+                  key={offer.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="flex gap-3 p-3 rounded-xl border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-medium text-sm truncate">{offer.service_name}</h4>
+                      {offer.suggested_price > 0 && (
+                        <Badge variant="secondary" className="text-xs flex-shrink-0">
+                          {isRu ? 'от' : 'from'} {currencySymbol}{offer.suggested_price.toLocaleString()}
+                        </Badge>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="font-medium text-sm truncate">{offer.service_name}</h4>
-                        {offer.suggested_price > 0 && (
-                          <Badge variant="secondary" className="text-xs flex-shrink-0">
-                            {isRu ? 'от' : 'from'} {currencySymbol}{offer.suggested_price.toLocaleString()}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {offer.reasoning}
-                      </p>
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="h-7 text-xs"
-                          onClick={() => handleAccept(offer)}
-                        >
-                          {isRu ? 'Подробнее' : 'Explore'}
-                          <ArrowRight className="w-3 h-3 ml-1" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs text-muted-foreground"
-                          onClick={() => handleDismiss(offer.id)}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                      {offer.reasoning}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        onClick={() => handleAccept(offer)}
+                      >
+                        {isRu ? 'Подробнее' : 'Explore'}
+                        <ArrowRight className="w-3 h-3 ml-1" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs text-muted-foreground"
+                        onClick={() => handleDismiss(offer.id)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          )}
-        </div>
-
-        <Button
-          variant="ghost"
-          className="w-full text-muted-foreground"
-          onClick={() => onOpenChange(false)}
-        >
-          {isRu ? 'Не сейчас' : 'Not now'}
-        </Button>
-      </SheetContent>
-    </Sheet>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
+      </div>
+    </ResponsiveModal>
   );
 }
