@@ -9,11 +9,12 @@ import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { DealSearchBar } from '@/components/owner/sales/DealSearchBar';
 import { PipelineSummary } from '@/components/owner/sales/PipelineSummary';
+import { PipelinePivotTable } from '@/components/owner/sales/PipelinePivotTable';
 import { BulkActions } from '@/components/owner/sales/BulkActions';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, LayoutList, Columns3, BarChart3, CheckSquare, Settings } from 'lucide-react';
+import { Plus, LayoutList, Columns3, BarChart3, CheckSquare, Settings, Table2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function SalesPipeline() {
@@ -31,7 +32,7 @@ export default function SalesPipeline() {
   const [filterStage, setFilterStage] = useState<string>('all');
   const [filterType, setFilterType] = useState<DealType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
-  const [view, setView] = useState<'list' | 'kanban'>('list');
+  const [view, setView] = useState<'list' | 'kanban' | 'pivot'>('list');
   const [search, setSearch] = useState('');
   const [agentFilter, setAgentFilter] = useState('all');
   const [selectMode, setSelectMode] = useState(false);
@@ -167,14 +168,23 @@ export default function SalesPipeline() {
             <button
               onClick={() => { setView('list'); setSelectMode(false); setSelectedIds([]); }}
               className={cn('p-2', view === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              title={isRu ? 'Список' : 'List'}
             >
               <LayoutList className="h-4 w-4" />
             </button>
             <button
               onClick={() => { setView('kanban'); setSelectMode(false); setSelectedIds([]); }}
               className={cn('p-2', view === 'kanban' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              title="Kanban"
             >
               <Columns3 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => { setView('pivot'); setSelectMode(false); setSelectedIds([]); }}
+              className={cn('p-2', view === 'pivot' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              title="Pivot"
+            >
+              <Table2 className="h-4 w-4" />
             </button>
           </div>
           <Button size="sm" onClick={() => setShowCreate(true)}>
@@ -232,7 +242,9 @@ export default function SalesPipeline() {
         <BulkActions selectedIds={selectedIds} onClear={() => { setSelectedIds([]); setSelectMode(false); }} />
       )}
 
-      {view === 'kanban' ? (
+      {view === 'pivot' ? (
+        <PipelinePivotTable deals={filtered} pipelineData={pipelineData} />
+      ) : view === 'kanban' ? (
         <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} onQuickCreate={() => setShowCreate(true)} />
       ) : (
         <>
