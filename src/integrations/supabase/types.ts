@@ -3061,6 +3061,44 @@ export type Database = {
         }
         Relationships: []
       }
+      company_category_settings: {
+        Row: {
+          category_code: string
+          category_type: string
+          company_id: string
+          created_at: string | null
+          id: string
+          is_enabled: boolean
+          sort_order: number | null
+        }
+        Insert: {
+          category_code: string
+          category_type: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean
+          sort_order?: number | null
+        }
+        Update: {
+          category_code?: string
+          category_type?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_category_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_storefronts: {
         Row: {
           allow_cross_sell: boolean

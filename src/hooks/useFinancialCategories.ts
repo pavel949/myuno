@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
+import { useCompanyCategorySettings } from '@/hooks/useCompanyCategorySettings';
 import { toast } from 'sonner';
 
 export interface FinancialCategory {
@@ -15,12 +16,14 @@ export interface FinancialCategory {
 }
 
 /**
- * Returns merged list of standard + custom categories for active MC
+ * Returns merged list of standard + custom categories for active MC,
+ * filtered by company_category_settings (if configured).
  */
 export function useFinancialCategories(type: 'expense' | 'income') {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
+  const { enabledCodes } = useCompanyCategorySettings(type);
 
   const { data: customCategories = [], isLoading } = useQuery({
     queryKey: ['financial-categories', companyId, type],
@@ -47,10 +50,15 @@ export function useFinancialCategories(type: 'expense' | 'income') {
 
   const standardCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
-  // Merge: standard first, then custom (skip duplicates by code)
-  const standardCodes = new Set(standardCategories.map(c => c.value));
+  // Filter standard categories by company settings (null = all enabled)
+  const filteredStandard = enabledCodes
+    ? standardCategories.filter(c => enabledCodes.has(c.value))
+    : standardCategories;
+
+  // Merge: filtered standard first, then custom (skip duplicates by code)
+  const standardCodes = new Set(filteredStandard.map(c => c.value));
   const merged: FinancialCategory[] = [
-    ...standardCategories.map(c => ({
+    ...filteredStandard.map(c => ({
       code: c.value,
       name_en: c.labelEn,
       name_ru: c.labelRu,

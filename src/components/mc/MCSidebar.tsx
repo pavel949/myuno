@@ -71,7 +71,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Assignment', titleRu: 'Распределение', path: '/mc/assignment', icon: Shuffle },
       { title: 'Reviews', titleRu: 'Отзывы', path: '/mc/reviews-management', icon: Star },
       { title: 'Marketing', titleRu: 'Маркетинг', path: '/mc/marketing', icon: Megaphone },
-      { title: 'CRM Settings', titleRu: 'Настройки CRM', path: '/mc/sales/settings', icon: Settings },
+      // CRM Settings moved to /mc/settings?tab=crm
     ],
   },
   {
@@ -130,7 +130,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   '/mc/companies': 'crm',
   '/mc/assignment': 'crm',
   '/mc/reviews-management': 'crm',
-  '/mc/sales/settings': 'crm',
+  '/mc/settings': 'crm',
   '/mc/marketing': 'crm',
   '/mc/tasks': 'tasks',
   '/mc/inventory': 'properties',
@@ -259,6 +259,20 @@ export function MCSidebar() {
             </SidebarGroup>
           </Collapsible>
         ))}
+
+        {/* Settings — standalone group at bottom */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {renderNavItem({
+                title: 'Settings',
+                titleRu: 'Настройки',
+                path: '/mc/settings',
+                icon: Settings,
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
