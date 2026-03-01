@@ -2,10 +2,11 @@
  * @module useActiveCompany
  * @description Context for active management company selection.
  * Persists to localStorage so the choice survives page refreshes.
+ * On company switch, invalidates ALL React Query cache to prevent data leaks.
  */
 
-import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import React from 'react';
@@ -23,7 +24,7 @@ interface ActiveCompanyContextValue {
   companies: UserCompanyMembership[];
   /** Currently selected company (or first available) */
   activeCompany: UserCompanyMembership | null;
-  /** Switch to a different company */
+  /** Switch to a different company — invalidates all cached data */
   setActiveCompanyId: (id: string) => void;
   isLoading: boolean;
 }
@@ -37,8 +38,12 @@ const ActiveCompanyContext = createContext<ActiveCompanyContextValue>({
 
 const STORAGE_KEY = 'uno-active-company-id';
 
+/** Query keys that are NOT company-scoped and should survive a switch */
+const PRESERVED_KEY_PREFIXES = ['user-companies', 'user-roles', 'user-context', 'profile'];
+
 export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
   });
@@ -70,10 +75,22 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
     return found || companies[0];
   }, [companies, selectedId]);
 
-  const setActiveCompanyId = (id: string) => {
+  const setActiveCompanyId = useCallback((id: string) => {
+    if (id === selectedId) return; // no-op if same company
+    
     setSelectedId(id);
     try { localStorage.setItem(STORAGE_KEY, id); } catch {}
-  };
+
+    // Invalidate all company-scoped queries to prevent stale data from another MC
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        if (!Array.isArray(key) || key.length === 0) return true;
+        const prefix = String(key[0]);
+        return !PRESERVED_KEY_PREFIXES.includes(prefix);
+      },
+    });
+  }, [selectedId, queryClient]);
 
   // Sync if the stored id doesn't match any company
   useEffect(() => {
