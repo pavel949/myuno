@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Trash2, CheckCircle2, Clock, Play, MessageSquareMore } from 'lucide-react';
+import { Trash2, CheckCircle2, Clock, Play, MessageSquareMore, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
 import { TaskComments } from '@/components/owner/tasks/TaskComments';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
@@ -137,15 +137,28 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
   const memberName = members.find(m => m.user_id === task.assigned_to)?.name;
   const propertyTitle = properties.find(p => p.property_id === task.property_id)?.title;
 
+  const footer = (
+    <div className="flex gap-2 w-full">
+      <Button onClick={handleSave} className="flex-1">
+        {t('Save', 'Сохранить')}
+      </Button>
+      <Button variant="destructive" size="icon" onClick={() => setConfirmDelete(true)}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>{t('Task Details', 'Детали задачи')}</SheetTitle>
-          </SheetHeader>
-
-          <div className="space-y-5 mt-4">
+      <ResponsiveModal
+        open={open}
+        onOpenChange={onOpenChange}
+        title={t('Task Details', 'Детали задачи')}
+        icon={<ClipboardList className="h-5 w-5 text-primary" />}
+        size="lg"
+        footer={footer}
+      >
+          <div className="space-y-5">
             {/* Source badge */}
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
@@ -270,19 +283,8 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
                 {t('Request Status Update', 'Запросить статус')}
               </Button>
             )}
-
-            {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSave} className="flex-1">
-                {t('Save', 'Сохранить')}
-              </Button>
-              <Button variant="destructive" size="icon" onClick={() => setConfirmDelete(true)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
-        </SheetContent>
-      </Sheet>
+      </ResponsiveModal>
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>

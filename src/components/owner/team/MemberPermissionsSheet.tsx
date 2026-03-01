@@ -14,13 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { ShieldCheck, ChevronDown, Briefcase, Zap } from 'lucide-react';
 import { useUpdateStaffMember } from '@/hooks/useStaffMembers';
 
@@ -139,15 +133,14 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="mb-4">
-          <SheetTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            {t('Permissions', 'Права доступа')}
-          </SheetTitle>
-          <SheetDescription>{userName}</SheetDescription>
-        </SheetHeader>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('Permissions', 'Права доступа')}
+      description={userName}
+      icon={<ShieldCheck className="h-5 w-5 text-primary" />}
+      size="lg"
+    >
 
         {/* Custom title */}
         {staffId && (
@@ -285,7 +278,6 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
             })}
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+    </ResponsiveModal>
   );
 }

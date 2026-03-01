@@ -1,12 +1,12 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { VendorDocumentsTab } from './VendorDocumentsTab';
 import { VENDOR_CATEGORIES, type OwnerVendor } from '@/hooks/useOwnerVendors';
-import { Phone, Mail, MessageCircle, Star, MapPin, Heart, HeartOff } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Star, MapPin, Heart, HeartOff, UserCircle } from 'lucide-react';
 
 interface VendorDetailSheetProps {
   vendor: OwnerVendor | null;
@@ -25,11 +25,13 @@ export function VendorDetailSheet({ vendor, open, onOpenChange, onEdit, onToggle
   const initials = vendor.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="mb-4">
-          <SheetTitle className="sr-only">{vendor.name}</SheetTitle>
-        </SheetHeader>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isRu && vendor.name_ru ? vendor.name_ru : vendor.name}
+      icon={<UserCircle className="h-5 w-5 text-primary" />}
+      size="lg"
+    >
 
         {/* Header */}
         <div className="flex items-start gap-4 mb-6">
@@ -111,8 +113,7 @@ export function VendorDetailSheet({ vendor, open, onOpenChange, onEdit, onToggle
           <TabsContent value="docs" className="mt-4">
             <VendorDocumentsTab vendorId={vendor.id} />
           </TabsContent>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
+      </Tabs>
+    </ResponsiveModal>
   );
 }
