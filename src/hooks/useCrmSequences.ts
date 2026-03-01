@@ -57,7 +57,7 @@ export function useCrmSequences(companyId: string | undefined) {
         .order('created_at', { ascending: false });
       if (error) throw error;
 
-      const ids = (seqs || []).map((s: any) => s.id);
+      const ids = (seqs || []).map((s: { id: string }) => s.id);
       if (ids.length === 0) return [];
 
       const { data: steps, error: sErr } = await from('crm_sequence_steps')
@@ -80,7 +80,7 @@ export function useCrmSequences(companyId: string | undefined) {
       }
 
       const countMap = new Map<string, number>();
-      for (const e of (enrollments || []) as any[]) {
+      for (const e of (enrollments || []) as { sequence_id: string; status: string }[]) {
         countMap.set(e.sequence_id, (countMap.get(e.sequence_id) || 0) + 1);
       }
 

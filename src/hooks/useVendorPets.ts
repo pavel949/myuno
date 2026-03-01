@@ -20,7 +20,7 @@ export interface VendorPetService {
   website?: string;
   cover_image?: string;
   images?: string[];
-  working_hours?: any;
+  working_hours?: Record<string, unknown>;
   has_pickup?: boolean;
   is_active?: boolean;
   is_featured?: boolean;

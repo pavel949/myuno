@@ -13,7 +13,7 @@ export interface CrmCustomField {
   label_en: string;
   label_ru: string;
   field_type: string;
-  options: any[] | null;
+  options: unknown[] | null;
   is_required: boolean;
   is_filterable: boolean;
   sort_order: number;
@@ -24,7 +24,7 @@ export interface CrmCustomFieldValue {
   id: string;
   field_id: string;
   entity_id: string;
-  value: any;
+  value: unknown;
   updated_at: string;
 }
 
@@ -110,7 +110,7 @@ export function useDeleteCustomField() {
 export function useUpsertCustomFieldValue() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ field_id, entity_id, value }: { field_id: string; entity_id: string; value: any }) => {
+    mutationFn: async ({ field_id, entity_id, value }: { field_id: string; entity_id: string; value: unknown }) => {
       const { error } = await from('crm_custom_field_values')
         .upsert({ field_id, entity_id, value, updated_at: new Date().toISOString() }, { onConflict: 'field_id,entity_id' });
       if (error) throw error;

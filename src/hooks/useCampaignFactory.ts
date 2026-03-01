@@ -15,6 +15,7 @@ import type {
 } from '@/types/marketing';
 
 // Transform database row to Campaign type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transformCampaign = (row: any): Campaign => ({
   id: row.id,
   name: row.name,
@@ -122,8 +123,7 @@ export function useCreateCampaign() {
       queryClient.invalidateQueries({ queryKey: ['mcc-campaigns'] });
       toast.success('Campaign created successfully');
     },
-    onError: (error) => {
-      console.error('Failed to create campaign:', error);
+    onError: () => {
       toast.error('Failed to create campaign');
     },
   });
@@ -162,8 +162,7 @@ export function useUpdateCampaign() {
       queryClient.invalidateQueries({ queryKey: ['mcc-campaign', variables.id] });
       toast.success('Campaign updated successfully');
     },
-    onError: (error) => {
-      console.error('Failed to update campaign:', error);
+    onError: () => {
       toast.error('Failed to update campaign');
     },
   });
@@ -198,7 +197,6 @@ export function useDeleteCampaign() {
       toast.success('Campaign deleted');
     },
     onError: (error) => {
-      console.error('Failed to delete campaign:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
     },
   });
@@ -249,8 +247,7 @@ export function useDuplicateCampaign() {
       queryClient.invalidateQueries({ queryKey: ['mcc-campaigns'] });
       toast.success('Campaign duplicated');
     },
-    onError: (error) => {
-      console.error('Failed to duplicate campaign:', error);
+    onError: () => {
       toast.error('Failed to duplicate campaign');
     },
   });
@@ -285,8 +282,7 @@ export function useUpdateCampaignStatus() {
       };
       toast.success(messages[variables.status]);
     },
-    onError: (error) => {
-      console.error('Failed to update campaign status:', error);
+    onError: () => {
       toast.error('Failed to update campaign status');
     },
   });

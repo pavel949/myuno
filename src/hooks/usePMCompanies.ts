@@ -39,6 +39,7 @@ export interface PMCompany {
 export type PMCompanyInsert = Omit<PMCompany, 'id' | 'slug' | 'created_at' | 'updated_at' | 'verified_at' | 'review_count' | 'properties_managed'>;
 export type PMCompanyUpdate = Partial<PMCompanyInsert>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRow(row: any): PMCompany {
   return {
     id: row.id,
@@ -130,6 +131,7 @@ export function usePMCompanies() {
       dbData.name_ru = company.name_ru || company.name;
       const { data, error } = await supabase
         .from('management_companies')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert(dbData as any)
         .select()
         .single();
@@ -142,8 +144,7 @@ export function usePMCompanies() {
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК создана');
     },
-    onError: (error) => {
-      console.error('Error creating PM company:', error);
+    onError: () => {
       toast.error('Ошибка при создании УК');
     },
   });
@@ -153,6 +154,7 @@ export function usePMCompanies() {
       const dbData = mapToDb(data);
       const { data: result, error } = await supabase
         .from('management_companies')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(dbData as any)
         .eq('id', id)
         .select()
@@ -166,8 +168,7 @@ export function usePMCompanies() {
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК обновлена');
     },
-    onError: (error) => {
-      console.error('Error updating PM company:', error);
+    onError: () => {
       toast.error('Ошибка при обновлении УК');
     },
   });
@@ -186,8 +187,7 @@ export function usePMCompanies() {
       queryClient.invalidateQueries({ queryKey: ['management-companies'] });
       toast.success('УК удалена');
     },
-    onError: (error) => {
-      console.error('Error deleting PM company:', error);
+    onError: () => {
       toast.error('Ошибка при удалении УК');
     },
   });
