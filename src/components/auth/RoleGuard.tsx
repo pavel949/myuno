@@ -83,11 +83,22 @@ export function withRoleGuard<P extends object>(
 }
 
 /**
- * Admin route guard - requires admin, staff, or uno_team role
+ * Admin route guard - requires admin or uno_team role (platform-level access)
  */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['admin', 'staff', 'uno_team']} fallbackPath="/">
+    <RoleGuard allowedRoles={['admin', 'uno_team']} fallbackPath="/">
+      {children}
+    </RoleGuard>
+  );
+}
+
+/**
+ * Staff route guard - requires staff, admin, or uno_team role (MC employees)
+ */
+export function StaffGuard({ children }: { children: React.ReactNode }) {
+  return (
+    <RoleGuard allowedRoles={['staff', 'admin', 'uno_team']} fallbackPath="/">
       {children}
     </RoleGuard>
   );
