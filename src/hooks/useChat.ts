@@ -71,8 +71,7 @@ export const useChat = (bookingId?: string) => {
           setMessages(formattedMessages);
         }
       }
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+    } catch {
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -96,8 +95,7 @@ export const useChat = (bookingId?: string) => {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('Error sending message:', error);
+    } catch {
       return false;
     }
   }, [user, bookingId, fetchMessages]);

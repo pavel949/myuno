@@ -124,7 +124,7 @@ export function useProviderDetails(providerId: string | null) {
         .order('created_at', { ascending: false });
 
       if (!servicesError) {
-        setServices((servicesData || []).map((s: any) => ({ ...s, is_featured: false, rating: null, review_count: null })));
+        setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
       }
 
       // Fetch products (if provider is linked to marketplace vendor)
@@ -138,7 +138,7 @@ export function useProviderDetails(providerId: string | null) {
           .limit(50);
 
         if (!productsError) {
-          setProducts((productsData || []).map((p: any) => ({ ...p, stock_quantity: 0 })));
+          setProducts((productsData || []).map((p) => ({ ...p, stock_quantity: 0 })));
         }
       } else {
         setProducts([]);
@@ -174,7 +174,8 @@ export function useProviderDetails(providerId: string | null) {
 
       if (!bookingsError) {
         setBookings(
-          (bookingsData || []).map((b: any) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (bookingsData || []).map((b: Record<string, any>) => ({
             id: b.id,
             status: b.status,
             total_amount: b.total_amount,
@@ -185,9 +186,8 @@ export function useProviderDetails(providerId: string | null) {
           }))
         );
       }
-    } catch (err: any) {
-      console.error('Error fetching provider details:', err);
-      setError(err.message || 'Failed to fetch provider details');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch provider details');
     } finally {
       setIsLoading(false);
     }

@@ -104,8 +104,7 @@ export function useMinOrderValidation() {
       });
 
       setProviderMinOrders(newMinOrders);
-    } catch (error) {
-      console.error('Error fetching min order amounts:', error);
+    } catch {
     } finally {
       setIsLoading(false);
     }

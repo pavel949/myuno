@@ -112,8 +112,7 @@ export function useCreateDeveloper() {
       queryClient.invalidateQueries({ queryKey: ['admin-developers'] });
       toast.success('Developer created');
     },
-    onError: (error) => {
-      console.error('Create error:', error);
+    onError: () => {
       toast.error('Failed to create developer');
     },
   });
@@ -143,8 +142,7 @@ export function useUpdateDeveloper() {
       queryClient.invalidateQueries({ queryKey: ['developer', data.id] });
       toast.success('Developer updated');
     },
-    onError: (error) => {
-      console.error('Update error:', error);
+    onError: () => {
       toast.error('Failed to update developer');
     },
   });
@@ -167,8 +165,7 @@ export function useDeleteDeveloper() {
       queryClient.invalidateQueries({ queryKey: ['admin-developers'] });
       toast.success('Developer deleted');
     },
-    onError: (error) => {
-      console.error('Delete error:', error);
+    onError: () => {
       toast.error('Failed to delete developer');
     },
   });

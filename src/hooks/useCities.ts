@@ -20,8 +20,7 @@ export interface City {
   is_coming_soon: boolean;
   sort_order: number;
   launch_date: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapbox_bounds: any | null;
+  mapbox_bounds: unknown;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -160,21 +161,21 @@ export function useTeamMessages(channelSlug: string) {
     }: {
       content: string;
       replyTo?: string;
-      attachments?: any[];
+      attachments?: Record<string, unknown>[];
       mentionedUsers?: string[];
     }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
       const { error } = await supabase
         .from('team_messages')
-        .insert({
+        .insert([{
           sender_id: user.id,
           channel: channelSlug,
           content,
           reply_to: replyTo || null,
-          attachments,
+          attachments: attachments as unknown as Json,
           mentioned_users: mentionedUsers,
-        });
+        }]);
 
       if (error) throw error;
     },

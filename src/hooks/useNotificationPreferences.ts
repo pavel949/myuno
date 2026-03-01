@@ -75,8 +75,7 @@ export function useNotificationPreferences() {
       queryClient.invalidateQueries({ queryKey: ['notification-preferences', user?.id] });
       toast.success('Настройки сохранены');
     },
-    onError: (error) => {
-      console.error('Notification preferences update error:', error);
+    onError: () => {
       toast.error('Ошибка сохранения');
     },
   });

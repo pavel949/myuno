@@ -107,7 +107,6 @@ export function useAvailabilityCheck() {
       return result;
 
     } catch (error) {
-      console.error('Availability check error:', error);
       const result: AvailabilityResult = {
         available: true, // Default to available on error to not block bookings
         error: error instanceof Error ? error.message : 'Unknown error',

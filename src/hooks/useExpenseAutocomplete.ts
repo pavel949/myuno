@@ -32,10 +32,7 @@ export function useExpenseAutocomplete(): AutocompleteData {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        console.error('Error fetching expense history:', error);
-        return [];
-      }
+      if (error) return [];
 
       return data || [];
     },

@@ -71,8 +71,7 @@ export function useNearby({
       if (isMounted.current) {
         setNearbyItems((data as NearbyItem[]) || []);
       }
-    } catch (err) {
-      console.error('Error fetching nearby items:', err);
+    } catch {
       if (isMounted.current) {
         setError('Failed to fetch nearby locations');
         setNearbyItems([]);
