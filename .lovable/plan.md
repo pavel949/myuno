@@ -1,124 +1,90 @@
 
 
-# Расширенная настройка модуля "Команда" — гранулярные права и должности
+# Owner Portal: 5 Features Implementation
 
-## Обзор
+## 1. Real-time Chat (Owner <-> MC)
 
-Сейчас система прав ограничена 7 модулями с переключателями "Просмотр / Редактирование / Экспорт". Нужно создать полноценную систему, где владелец может:
-- Назначать произвольные должности (не только из фиксированного списка)
-- Настраивать детальные права доступа внутри каждого модуля — какие разделы, поля и действия доступны работнику
-
-## Что изменится
-
-### 1. Расширение должностей (Custom Job Titles)
-
-Добавить поле `custom_title` в таблицу `staff_members`, чтобы владелец мог ввести любую должность (например, "Старший горничный", "Координатор бронирований", "Бухгалтер"). Базовая роль (`role`) останется для системной логики, а `custom_title` — для отображения в интерфейсе.
-
-### 2. Гранулярные права внутри модулей
-
-Расширить таблицу `team_member_permissions` полем `sub_permissions` (JSONB), которое хранит детальные настройки для каждого модуля. Пример структуры:
+**Database:** New `portal_messages` table with realtime enabled.
 
 ```text
-Модуль "Объекты":
-  - Просмотр карточки объекта
-  - Редактирование описания
-  - Редактирование цен
-  - Управление фотографиями
-  - Просмотр финансов объекта
-
-Модуль "Бронирования":
-  - Просмотр бронирований
-  - Создание бронирований
-  - Отмена бронирований
-  - Редактирование цен бронирования
-
-Модуль "Финансы":
-  - Просмотр отчётов
-  - Создание расходов
-  - Подтверждение выплат
-
-Модуль "CRM":
-  - Просмотр контактов
-  - Редактирование контактов
-  - Просмотр телефонов (без маскирования)
-
-Модуль "Задачи":
-  - Просмотр задач
-  - Создание задач
-  - Назначение задач другим
-
-Модуль "Команда":
-  - Просмотр сотрудников
-  - Редактирование сотрудников
-  - Управление правами
-
-Модуль "Отчёты":
-  - Просмотр отчётов
-  - Генерация отчётов
+portal_messages
+  id uuid PK
+  property_id uuid FK -> properties
+  sender_id uuid FK -> auth.users
+  sender_role text ('owner' | 'mc')
+  message text
+  is_read boolean DEFAULT false
+  created_at timestamptz
 ```
 
-### 3. Новый UI: расширенный MemberPermissionsSheet
+RLS: owner reads/writes own messages; MC members (via `management_company_members`) read/write for their properties.
 
-Переработка боковой панели прав в полноценный конфигуратор:
+**Frontend:**
+- New `usePortalChat(propertyId)` hook -- fetches messages, subscribes to realtime `postgres_changes`, sends messages
+- New `PortalChatTab` component replacing the placeholder in `OwnerPortalPropertyView.tsx` (tab "messages")
+- Simple message list + input UI (bubble layout, timestamps, read indicators)
+- MC side: add "Messages" section to `OwnerPortalSettingsPage` or property command center showing unread count
 
-```text
-+--------------------------------------+
-| Права доступа — Юлия Петрова         |
-|--------------------------------------|
-| Должность: [Координатор бронирований]|
-|--------------------------------------|
-| Объекты                    [v] [>]   |
-|   ☑ Просмотр карточки                |
-|   ☑ Редактирование описания          |
-|   ☐ Редактирование цен               |
-|   ☑ Управление фото                  |
-|   ☐ Просмотр финансов объекта        |
-|--------------------------------------|
-| Бронирования               [v] [>]  |
-|   ☑ Просмотр бронирований            |
-|   ☑ Создание бронирований            |
-|   ☐ Отмена бронирований              |
-|--------------------------------------|
-| Финансы                    [☐]       |
-|   (все подпункты отключены)          |
-+--------------------------------------+
-```
+## 2. Owner Stays (Zero-Price Calendar Blocking)
 
-Каждый модуль — collapsible-секция. Главный переключатель "Вкл/Выкл" для всего модуля, и внутри — чекбоксы для детальных прав.
+**Logic:** Insert into existing `property_bookings` table with `source = 'owner_stay'`, `total_amount = 0`, `guest_name = 'Owner Stay'`.
 
-### 4. Шаблоны ролей (Role Presets)
+**Frontend:**
+- New `OwnerStaysTab` component replacing placeholder in `OwnerPortalPropertyView.tsx` (tab "stays")
+- Date range picker (check_in / check_out) with availability validation against existing bookings
+- List of upcoming and past owner stays with cancel option
+- Hook `useOwnerStays(propertyId)` -- queries `property_bookings` filtered by `source = 'owner_stay'`
 
-Предустановленные шаблоны для быстрой настройки:
-- **Уборщик** — только задачи (просмотр своих), объекты (просмотр)
-- **Управляющий** — всё кроме финансов и экспорта
-- **Бухгалтер** — финансы + отчёты + экспорт
-- **Полный доступ** — все права
+**No new table needed** -- reuses `property_bookings` with a distinguishing `source` value.
 
-Выбор шаблона мгновенно заполняет чекбоксы, но владелец может потом скорректировать.
+## 3. Utilities Tab (PEA/CAM Bills)
+
+**Frontend:**
+- New `PortalUtilitiesTab` component replacing placeholder in `OwnerPortalPropertyView.tsx`
+- Reads from existing `property_financials` table, filtered by categories: `electricity`, `water`, `cam_fees`, `internet`
+- Displays grouped by month with amount, due date, status (paid/pending/overdue)
+- Uses existing `property_utility_schedules` for recurring schedule display
+- Read-only for owner; data entry remains on MC side
+
+## 4. Documents Tab (CRM Vault -> Portal)
+
+**Frontend:**
+- New `PortalDocumentsTab` component replacing placeholder in `OwnerPortalPropertyView.tsx`
+- Reads from existing `crm_documents` table filtered by `property_id`
+- Uses `getDocumentUrl()` from `useCrmDocuments.ts` for signed download URLs
+- Grouped by `document_type` with labels from `DOCUMENT_TYPE_LABELS`
+- Owner can view/download but not upload (read-only)
+- Respects `show_documents` toggle from portal settings
+
+## 5. "Portal Settings" Button on Property Card in PMS
+
+**Frontend:**
+- Add `Eye` icon button to `PropertyQuickActions.tsx` linking to `/owner/properties/${propertyId}/portal-settings`
+- Label: "Portal" / "Портал"
 
 ---
 
-## Технические детали
+## Technical Summary
 
-### База данных
+| Feature | New Table | New Components | Modified Files |
+|---------|-----------|----------------|----------------|
+| Chat | `portal_messages` | `PortalChatTab`, `usePortalChat` | `OwnerPortalPropertyView.tsx` |
+| Owner Stays | None (reuses `property_bookings`) | `OwnerStaysTab`, `useOwnerStays` | `OwnerPortalPropertyView.tsx` |
+| Utilities | None (reads `property_financials`) | `PortalUtilitiesTab` | `OwnerPortalPropertyView.tsx` |
+| Documents | None (reads `crm_documents`) | `PortalDocumentsTab` | `OwnerPortalPropertyView.tsx` |
+| Portal Button | None | -- | `PropertyQuickActions.tsx` |
 
-Одна миграция:
-- `ALTER TABLE staff_members ADD COLUMN custom_title TEXT;`
-- `ALTER TABLE team_member_permissions ADD COLUMN sub_permissions JSONB DEFAULT '{}';`
+**Migration:** One SQL migration for `portal_messages` table + RLS + realtime publication.
 
-### Файлы для изменений
+**Files to create:**
+- `src/hooks/usePortalChat.ts`
+- `src/hooks/useOwnerStays.ts`
+- `src/components/owner-portal/PortalChatTab.tsx`
+- `src/components/owner-portal/OwnerStaysTab.tsx`
+- `src/components/owner-portal/PortalUtilitiesTab.tsx`
+- `src/components/owner-portal/PortalDocumentsTab.tsx`
 
-| Файл | Что меняется |
-|---|---|
-| `supabase/migrations/...` | Добавление `custom_title` и `sub_permissions` |
-| `src/hooks/useTeamPermissions.ts` | Расширение типов, добавление `SUB_PERMISSIONS` конфигурации, обновление мутации |
-| `src/components/owner/team/MemberPermissionsSheet.tsx` | Полная переработка — collapsible модули, чекбоксы, шаблоны, поле должности |
-| `src/pages/owner/StaffPage.tsx` | Добавить `custom_title` в форму и карточку сотрудника |
-| `src/hooks/useStaffMembers.ts` | Добавить `custom_title` в тип `StaffMember` |
-
-### Новые файлы
-
-| Файл | Описание |
-|---|---|
-| `src/lib/permissionPresets.ts` | Шаблоны ролей (cleaner, manager, accountant, full_access) с предзаполненными sub_permissions |
+**Files to modify:**
+- `src/pages/owner-portal/OwnerPortalPropertyView.tsx` -- replace 4 placeholder tabs with real components
+- `src/components/owner/property-detail/PropertyQuickActions.tsx` -- add Portal Settings button
 
