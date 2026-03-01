@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 
-export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management' | 'owner_statement' | 'pnl';
+export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management' | 'owner_statement' | 'pnl' | 'per_booking';
 export type ReportStatus = 'generating' | 'draft' | 'ready' | 'sent' | 'viewed' | 'error';
 
 export interface ReportData {
