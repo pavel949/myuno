@@ -50,10 +50,10 @@ export default function FinanceOverview() {
 
   // Quick navigation cards
   const quickLinks = [
-    { icon: Receipt, label: isRu ? 'Транзакции' : 'Transactions', path: '/owner/financials', color: 'text-primary' },
-    { icon: FileText, label: isRu ? 'Отчёты' : 'Reports', path: '/owner/reports', color: 'text-info' },
-    { icon: Target, label: isRu ? 'Бюджет' : 'Budget', path: '/owner/budget', color: 'text-warning' },
-    { icon: Receipt, label: isRu ? 'Инвойсы' : 'Invoices', path: '/owner/invoices', color: 'text-muted-foreground' },
+    { icon: Receipt, label: isRu ? 'Транзакции' : 'Transactions', path: '/mc/financials', color: 'text-primary' },
+    { icon: FileText, label: isRu ? 'Отчёты' : 'Reports', path: '/mc/reports', color: 'text-info' },
+    { icon: Target, label: isRu ? 'Бюджет' : 'Budget', path: '/mc/budget', color: 'text-warning' },
+    { icon: Receipt, label: isRu ? 'Инвойсы' : 'Invoices', path: '/mc/invoices', color: 'text-muted-foreground' },
   ];
 
   return (

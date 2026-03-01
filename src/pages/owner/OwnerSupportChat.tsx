@@ -41,7 +41,7 @@ export default function OwnerSupportChat() {
         title={isRu ? 'AI-Ассистент' : 'AI Assistant'}
         subtitle={isRu ? 'Помощь с управлением и вопросами' : 'Help with management and questions'}
         showBack
-        fallbackPath="/owner/messages"
+        fallbackPath="/mc/messages"
       />
 
       {/* Quick Actions - WhatsApp for live support */}

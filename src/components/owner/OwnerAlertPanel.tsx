@@ -58,7 +58,7 @@ export function OwnerAlertPanel({
       title: 'Check-ins Today',
       titleRu: 'Заезды сегодня',
       count: todayCheckIns,
-      href: '/owner/calendar',
+      href: '/mc/calendar',
     },
     {
       id: 'check-outs',
@@ -67,7 +67,7 @@ export function OwnerAlertPanel({
       title: 'Check-outs Today',
       titleRu: 'Выезды сегодня',
       count: todayCheckOuts,
-      href: '/owner/calendar',
+      href: '/mc/calendar',
     },
     {
       id: 'messages',
@@ -76,7 +76,7 @@ export function OwnerAlertPanel({
       title: 'Unread Messages',
       titleRu: 'Непрочитанные',
       count: unreadMessages,
-      href: '/owner/messages',
+      href: '/mc/messages',
     },
     {
       id: 'requests',

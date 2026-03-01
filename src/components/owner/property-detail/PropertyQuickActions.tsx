@@ -11,13 +11,13 @@ export function PropertyQuickActions({ propertyId, isRu }: PropertyQuickActionsP
   const navigate = useNavigate();
 
   const actions = [
-    { icon: Settings, label: isRu ? 'Редактировать' : 'Manage Listing', path: `/owner/properties/${propertyId}/manage` },
-    { icon: Calendar, label: isRu ? 'Календарь' : 'Calendar', path: `/owner/properties/${propertyId}/manage?section=calendar`, variant: 'outline' as const },
-    { icon: DollarSign, label: isRu ? 'Цены' : 'Pricing', path: `/owner/properties/${propertyId}/manage?section=pricing`, variant: 'outline' as const },
-    { icon: BookOpen, label: isRu ? 'Гайдбук' : 'Guidebook', path: `/owner/properties/${propertyId}/guidebook`, variant: 'outline' as const },
-    { icon: Wrench, label: isRu ? 'Услуга' : 'Service', path: `/owner/service-request?property=${propertyId}`, variant: 'outline' as const },
-    { icon: ClipboardList, label: isRu ? 'Инспекция' : 'Inspection', path: `/owner/inspection?property=${propertyId}`, variant: 'outline' as const },
-    { icon: Eye, label: isRu ? 'Портал' : 'Portal', path: `/owner/properties/${propertyId}/portal-settings`, variant: 'outline' as const },
+    { icon: Settings, label: isRu ? 'Редактировать' : 'Manage Listing', path: `/mc/properties/${propertyId}/manage` },
+    { icon: Calendar, label: isRu ? 'Календарь' : 'Calendar', path: `/mc/properties/${propertyId}/manage?section=calendar`, variant: 'outline' as const },
+    { icon: DollarSign, label: isRu ? 'Цены' : 'Pricing', path: `/mc/properties/${propertyId}/manage?section=pricing`, variant: 'outline' as const },
+    { icon: BookOpen, label: isRu ? 'Гайдбук' : 'Guidebook', path: `/mc/properties/${propertyId}/guidebook`, variant: 'outline' as const },
+    { icon: Wrench, label: isRu ? 'Услуга' : 'Service', path: `/mc/service-request?property=${propertyId}`, variant: 'outline' as const },
+    { icon: ClipboardList, label: isRu ? 'Инспекция' : 'Inspection', path: `/mc/inspection?property=${propertyId}`, variant: 'outline' as const },
+    { icon: Eye, label: isRu ? 'Портал' : 'Portal', path: `/mc/properties/${propertyId}/portal-settings`, variant: 'outline' as const },
   ];
 
   return (

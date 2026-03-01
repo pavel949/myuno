@@ -153,7 +153,7 @@ export default function OwnerFinancialForm() {
 
   return (
     <PageContainer>
-      <BackButton fallbackPath="/owner/financials" />
+      <BackButton fallbackPath="/mc/financials" />
       <PageHeader 
         title={isEditing 
           ? (isRu ? 'Редактировать транзакцию' : 'Edit Transaction')

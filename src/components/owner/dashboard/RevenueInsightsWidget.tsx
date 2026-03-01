@@ -162,7 +162,7 @@ export function RevenueInsightsWidget() {
           variant="ghost"
           size="sm"
           className="w-full text-xs"
-          onClick={() => navigate('/owner/pricing')}
+          onClick={() => navigate('/mc/rates')}
         >
           {isRu ? 'Все рекомендации' : 'All recommendations'}
           <ArrowRight className="w-3 h-3 ml-1" />
