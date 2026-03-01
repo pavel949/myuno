@@ -2,7 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isPast, isToday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUSES, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
+import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
+import { useDynamicPipelineStages } from '@/hooks/useDynamicPipelineStages';
 import { DealCard } from '@/components/owner/sales/DealCard';
 import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
@@ -10,6 +11,7 @@ import { DealSearchBar } from '@/components/owner/sales/DealSearchBar';
 import { PipelineSummary } from '@/components/owner/sales/PipelineSummary';
 import { BulkActions } from '@/components/owner/sales/BulkActions';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, LayoutList, Columns3, BarChart3, CheckSquare, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,8 +24,11 @@ export default function SalesPipeline() {
   const { data: dealsResult, isLoading } = useAgentDeals(membership?.company_id);
   const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(membership?.company_id);
+  const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const pipelineData = useDynamicPipelineStages(membership?.company_id, selectedPipelineId);
+  const { stages, activeStages, pipelines, getLabel } = pipelineData;
   const [showCreate, setShowCreate] = useState(false);
-  const [filterStage, setFilterStage] = useState<DealStage | 'all' | 'follow_up'>('all');
+  const [filterStage, setFilterStage] = useState<string>('all');
   const [filterType, setFilterType] = useState<DealType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
   const [view, setView] = useState<'list' | 'kanban'>('list');
@@ -36,14 +41,20 @@ export default function SalesPipeline() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   }, []);
 
+  const wonLostKeys = useMemo(() => {
+    const won = stages.filter(s => s.isWon).map(s => s.key);
+    const lost = stages.filter(s => s.isLost).map(s => s.key);
+    return { won, lost, closed: [...won, ...lost] };
+  }, [stages]);
+
   const overdueCount = useMemo(() => {
     return deals.filter(d => {
-      if (d.stage === 'closed_won' || d.stage === 'closed_lost') return false;
+      if (wonLostKeys.closed.includes(d.stage)) return false;
       if (!d.next_action_date) return false;
       const nd = new Date(d.next_action_date);
       return isPast(nd) || isToday(nd);
     }).length;
-  }, [deals]);
+  }, [deals, wonLostKeys]);
 
   const filtered = useMemo(() => {
     let result = deals;
@@ -66,7 +77,7 @@ export default function SalesPipeline() {
     // Stage filter
     if (filterStage === 'follow_up') {
       result = result.filter(d => {
-        if (d.stage === 'closed_won' || d.stage === 'closed_lost') return false;
+        if (wonLostKeys.closed.includes(d.stage)) return false;
         if (!d.next_action_date) return false;
         const nd = new Date(d.next_action_date);
         return isPast(nd) || isToday(nd);
@@ -87,7 +98,7 @@ export default function SalesPipeline() {
     }
 
     return result;
-  }, [deals, filterStage, filterType, filterStatus, search, agentFilter]);
+  }, [deals, filterStage, filterType, filterStatus, search, agentFilter, wonLostKeys]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -114,13 +125,27 @@ export default function SalesPipeline() {
     );
   }
 
-  const activeStages = DEAL_STAGES.filter(s => s !== 'closed_won' && s !== 'closed_lost');
-
   return (
     <div className={cn('pt-6 pb-24 md:pb-8 space-y-4 px-4 md:px-6 lg:px-8 max-w-[1536px] mx-auto w-full')}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{isRu ? 'Воронка продаж' : 'Sales Pipeline'}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold">{isRu ? 'Воронка продаж' : 'Sales Pipeline'}</h1>
+          {pipelines.length > 1 && (
+            <Select value={selectedPipelineId || ''} onValueChange={v => setSelectedPipelineId(v || null)}>
+              <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectValue placeholder={isRu ? 'Воронка' : 'Pipeline'} />
+              </SelectTrigger>
+              <SelectContent>
+                {pipelines.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {isRu ? p.name_ru : p.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
             <Settings className="h-4 w-4" />
@@ -191,7 +216,7 @@ export default function SalesPipeline() {
       </div>
 
       {/* Pipeline Summary */}
-      <PipelineSummary deals={filtered} />
+      <PipelineSummary deals={filtered} pipelineData={pipelineData} />
 
       {/* Search + Agent Filter */}
       <DealSearchBar
@@ -208,7 +233,7 @@ export default function SalesPipeline() {
       )}
 
       {view === 'kanban' ? (
-        <KanbanBoard deals={filtered} members={members} />
+        <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} />
       ) : (
         <>
           {/* Stage filter */}
@@ -235,14 +260,14 @@ export default function SalesPipeline() {
             )}
             {activeStages.map(stage => (
               <button
-                key={stage}
-                onClick={() => setFilterStage(stage)}
+                key={stage.key}
+                onClick={() => setFilterStage(stage.key)}
                 className={cn(
                   'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                  filterStage === stage ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+                  filterStage === stage.key ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
                 )}
               >
-                {isRu ? DEAL_STAGE_LABELS[stage].ru : DEAL_STAGE_LABELS[stage].en} ({stageCounts[stage] || 0})
+                {isRu ? stage.nameRu : stage.nameEn} ({stageCounts[stage.key] || 0})
               </button>
             ))}
           </div>

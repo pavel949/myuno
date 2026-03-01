@@ -1,27 +1,31 @@
 import { useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AgentDeal, STAGE_PROBABILITIES, DealStage, formatValue } from '@/hooks/useAgentDeals';
+import { AgentDeal, formatValue } from '@/hooks/useAgentDeals';
+import { DynamicPipelineResult } from '@/hooks/useDynamicPipelineStages';
 import { TrendingUp, Target, DollarSign } from 'lucide-react';
 
 interface Props {
   deals: AgentDeal[];
+  pipelineData: DynamicPipelineResult;
 }
 
-export function PipelineSummary({ deals }: Props) {
+export function PipelineSummary({ deals, pipelineData }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
   const stats = useMemo(() => {
-    const active = deals.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost');
+    const closedKeys = pipelineData.stages.filter(s => s.isWon || s.isLost).map(s => s.key);
+    const wonKeys = pipelineData.stages.filter(s => s.isWon).map(s => s.key);
+    const active = deals.filter(d => !closedKeys.includes(d.stage));
     const totalPipeline = active.reduce((s, d) => s + Number(d.deal_value || d.budget_max || 0), 0);
     const weighted = active.reduce((s, d) => {
       const val = Number(d.deal_value || d.budget_max || 0);
-      return s + val * (STAGE_PROBABILITIES[d.stage as DealStage] || 0);
+      return s + val * pipelineData.getProbability(d.stage);
     }, 0);
-    const won = deals.filter(d => d.stage === 'closed_won');
+    const won = deals.filter(d => wonKeys.includes(d.stage));
     const wonTotal = won.reduce((s, d) => s + Number(d.deal_value || 0), 0);
     return { activeCount: active.length, totalPipeline, weighted, wonTotal, wonCount: won.length };
-  }, [deals]);
+  }, [deals, pipelineData]);
 
   if (deals.length === 0) return null;
 

@@ -26824,6 +26824,10 @@ export type Database = {
         Returns: string
       }
       purge_simulation_run: { Args: { p_run_id: string }; Returns: Json }
+      recalculate_contact_score: {
+        Args: { p_contact_id: string }
+        Returns: number
+      }
       recalculate_user_segment: {
         Args: { p_user_id: string }
         Returns: undefined
