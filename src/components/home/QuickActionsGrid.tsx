@@ -59,7 +59,7 @@ const RESIDENT_ACTIONS: QuickAction[] = [
 
 const OWNER_ACTIONS: QuickAction[] = [
   { id: 'my-properties', icon: Key, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-success/15' },
-  { id: 'owner-crm', icon: Users, label: 'CRM', labelRu: 'CRM', path: '/owner/crm', tint: 'bg-primary/15', requiresFullAccess: true },
+  { id: 'owner-crm', icon: Users, label: 'CRM', labelRu: 'CRM', path: '/owner/crm-dashboard', tint: 'bg-primary/15', requiresFullAccess: true },
   { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar', tint: 'bg-info/15', requiresFullAccess: true },
   { id: 'owner-finance', icon: BarChart3, label: 'Finance', labelRu: 'Финансы', path: '/owner/finance', tint: 'bg-success/15', requiresFullAccess: true },
   { id: 'owner-tasks', icon: ClipboardList, label: 'Tasks', labelRu: 'Задачи', path: '/owner/tasks', tint: 'bg-warning/15', requiresFullAccess: true },
