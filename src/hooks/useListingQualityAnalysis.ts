@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { ContentType } from './useContentModeration';
+type ContentType = 'review' | 'photo' | 'listing' | 'comment';
 
 export interface QualityIssue {
   severity: 'critical' | 'warning' | 'info';
