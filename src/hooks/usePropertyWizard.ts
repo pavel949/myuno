@@ -51,6 +51,8 @@ export interface PropertyFormData {
   rental_platforms: string[];
   custom_platform: string;
   project_id?: string;
+  complex_id?: string;
+  video_url?: string;
   floor?: number;
   unit_number: string;
   total_floors?: number;
@@ -114,6 +116,8 @@ const initialFormData: PropertyFormData = {
   rental_platforms: [],
   custom_platform: '',
   project_id: undefined,
+  complex_id: undefined,
+  video_url: '',
   floor: undefined,
   unit_number: '',
   total_floors: undefined,

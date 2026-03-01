@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info, Building2, Video } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
@@ -14,6 +14,7 @@ import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
+import { usePropertyComplexes } from '@/hooks/usePropertyComplexes';
 
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
 
@@ -24,6 +25,42 @@ interface BasicInfoStepProps {
   setSelectedProject: (project: PropertyProject | null) => void;
   ownershipData?: OwnershipData;
   updateOwnershipData?: (updates: Partial<OwnershipData>) => void;
+}
+
+function ComplexSelector({ value, onChange }: { value?: string; onChange: (id?: string) => void }) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const { data: complexes } = usePropertyComplexes();
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Building2 className="h-4 w-4" />
+          {isRu ? 'Жилой комплекс' : 'Property Complex'}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Select value={value || '__none__'} onValueChange={v => onChange(v === '__none__' ? undefined : v)}>
+          <SelectTrigger>
+            <SelectValue placeholder={isRu ? 'Не выбран' : 'None'} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">{isRu ? 'Не выбран' : 'None'}</SelectItem>
+            {(complexes || []).map(c => (
+              <SelectItem key={c.id} value={c.id}>
+                {isRu ? (c.name_ru || c.name) : c.name}
+                {c.district ? ` — ${c.district}` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground mt-1.5">
+          {isRu ? 'Удобства комплекса автоматически наследуются объектом' : 'Complex amenities are automatically inherited by the property'}
+        </p>
+      </CardContent>
+    </Card>
+  );
 }
 
 interface OwnershipOption {
@@ -358,6 +395,12 @@ function BasicInfoStepInner({
         </CardContent>
       </Card>
 
+      {/* Complex Assignment */}
+      <ComplexSelector
+        value={formData.complex_id}
+        onChange={(complex_id) => updateFormData({ complex_id })}
+      />
+
       {/* Unit Fields — always shown after type is selected */}
       <UnitFields
         propertyType={formData.property_type}
@@ -392,6 +435,26 @@ function BasicInfoStepInner({
       />
 
       {/* Management Type & Terms — hidden, management_type defaults to 'full' in usePropertyWizard */}
+
+      {/* YouTube Video */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Video className="h-4 w-4" />
+            {isRu ? 'Видео объекта' : 'Property Video'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label className="text-sm text-muted-foreground mb-1.5 block">
+            {isRu ? 'Ссылка на YouTube' : 'YouTube URL'}
+          </Label>
+          <Input
+            value={formData.video_url || ''}
+            onChange={e => updateFormData({ video_url: e.target.value })}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

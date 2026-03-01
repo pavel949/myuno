@@ -14185,6 +14185,7 @@ export type Database = {
           updated_at: string
           verified_at: string | null
           verified_by: string | null
+          video_url: string | null
           view_type: string | null
           water_included: boolean | null
           water_meter_id: string | null
@@ -14388,6 +14389,7 @@ export type Database = {
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          video_url?: string | null
           view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
@@ -14591,6 +14593,7 @@ export type Database = {
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
+          video_url?: string | null
           view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
@@ -15424,6 +15427,7 @@ export type Database = {
           total_floors: number | null
           total_units: number | null
           updated_at: string
+          video_url: string | null
           year_built: number | null
         }
         Insert: {
@@ -15457,6 +15461,7 @@ export type Database = {
           total_floors?: number | null
           total_units?: number | null
           updated_at?: string
+          video_url?: string | null
           year_built?: number | null
         }
         Update: {
@@ -15490,6 +15495,7 @@ export type Database = {
           total_floors?: number | null
           total_units?: number | null
           updated_at?: string
+          video_url?: string | null
           year_built?: number | null
         }
         Relationships: [

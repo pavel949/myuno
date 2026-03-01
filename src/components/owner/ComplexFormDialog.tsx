@@ -34,6 +34,7 @@ const emptyForm: ComplexFormData = {
   security_features: [],
   infrastructure: [],
   images: [],
+  video_url: '',
 };
 
 export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDialogProps) {
@@ -71,6 +72,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
         juristic_person_name: complex.juristic_person_name || '',
         juristic_phone: complex.juristic_phone || '',
         juristic_email: complex.juristic_email || '',
+        video_url: complex.video_url || '',
       });
     } else {
       setForm(emptyForm);
@@ -256,6 +258,14 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
                   onChange={v => setField('images', Array.isArray(v) ? v : [v])}
                   folder="complexes/gallery"
                   maxItems={20}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{isRu ? 'Видео YouTube' : 'YouTube Video'}</Label>
+                <Input
+                  value={form.video_url || ''}
+                  onChange={e => setField('video_url', e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
                 />
               </div>
             </TabsContent>

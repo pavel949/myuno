@@ -71,6 +71,7 @@ export interface PropertyCardProps {
   mode?: PropertyCardMode;
   stats?: PropertyCardStats;
   companyName?: string;
+  complexName?: string;
   onEdit?: (id: string) => void;
   onView?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -249,6 +250,7 @@ interface ListVariantProps {
   mode: PropertyCardMode;
   isRu: boolean;
   companyName?: string;
+  complexName?: string;
   showApprovalStatus: boolean;
   showInstantBadge: boolean;
   showProtectionBadge: boolean;
@@ -267,6 +269,7 @@ function ListVariant({
   mode,
   isRu,
   companyName,
+  complexName,
   showApprovalStatus,
   showInstantBadge,
   showProtectionBadge,
@@ -361,8 +364,14 @@ function ListVariant({
                   <span className="truncate font-medium">{companyName}</span>
                 </div>
               )}
+              {/* Complex name */}
+              {complexName && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                  <Building2 className="h-3 w-3 flex-shrink-0 text-accent-foreground/60" />
+                  <span className="truncate">{complexName}</span>
+                </div>
+              )}
 
-              {/* Location */}
               {(cardProps.district || cardProps.address) && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                   <MapPin className="h-3 w-3 flex-shrink-0" />
@@ -559,6 +568,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
     mode = 'owner',
     stats,
     companyName,
+    complexName,
     onEdit,
     onView,
     onDelete,
@@ -607,6 +617,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
             property={property}
             mode={mode}
             companyName={companyName}
+            complexName={complexName}
             isRu={isRu}
             showApprovalStatus={showApprovalStatus}
             showInstantBadge={showInstantBadge}
