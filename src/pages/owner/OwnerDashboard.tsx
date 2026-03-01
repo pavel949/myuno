@@ -38,6 +38,7 @@ import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertySta
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
 import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
+import { CollapsibleWidget } from '@/components/owner/dashboard/CollapsibleWidget';
 import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
 
@@ -247,6 +248,18 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
   }
 }
 
+/** Widgets that can be collapsed on mobile to reduce scroll */
+const COLLAPSIBLE_WIDGETS: Partial<Record<DashboardWidgetKey, { en: string; ru: string; defaultOpen: boolean }>> = {
+  operations: { en: 'Operations', ru: 'Операции', defaultOpen: true },
+  cleaning_dashboard: { en: 'Cleaning', ru: 'Уборки', defaultOpen: false },
+  crm_tasks: { en: 'Tasks', ru: 'Задачи', defaultOpen: true },
+  active_deals: { en: 'Deals', ru: 'Сделки', defaultOpen: false },
+  upcoming_payments: { en: 'Payments', ru: 'Платежи', defaultOpen: false },
+  maintenance_health: { en: 'Maintenance', ru: 'Обслуживание', defaultOpen: false },
+  properties: { en: 'Properties', ru: 'Объекты', defaultOpen: true },
+  myuno_services: { en: 'Services', ru: 'Услуги', defaultOpen: false },
+};
+
 /**
  * Widgets that should render side-by-side in 2-column grid on desktop.
  */
@@ -305,14 +318,16 @@ export default function OwnerDashboard() {
           <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
         </motion.div>
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <RoleQuickActions role={role} onQuickTask={() => setQuickTaskOpen(true)} />
-        </motion.div>
+        {/* Quick Actions — desktop only (mobile uses + button in bottom nav) */}
+        {isDesktop && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <RoleQuickActions role={role} onQuickTask={() => setQuickTaskOpen(true)} />
+          </motion.div>
+        )}
 
         <QuickTaskDialog open={quickTaskOpen} onOpenChange={setQuickTaskOpen} />
 
@@ -343,7 +358,21 @@ export default function OwnerDashboard() {
                 className={isFullWidth ? 'md:col-span-2' : ''}
               >
                 <WidgetErrorBoundary widgetName={widgetKey}>
-                  <DashboardWidget widgetKey={widgetKey} role={role} />
+                  {(() => {
+                    const collapsible = COLLAPSIBLE_WIDGETS[widgetKey];
+                    const widget = <DashboardWidget widgetKey={widgetKey} role={role} />;
+                    if (collapsible) {
+                      return (
+                        <CollapsibleWidget
+                          title={isRu ? collapsible.ru : collapsible.en}
+                          defaultOpen={collapsible.defaultOpen}
+                        >
+                          {widget}
+                        </CollapsibleWidget>
+                      );
+                    }
+                    return widget;
+                  })()}
                 </WidgetErrorBoundary>
               </motion.div>
             );
