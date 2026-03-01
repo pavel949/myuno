@@ -107,6 +107,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Staff & Access', titleRu: 'Сотрудники', path: '/mc/staff', icon: Users },
       { title: 'Subscription', titleRu: 'Подписка', path: '/mc/subscription', icon: CreditCard },
+      { title: 'Help Center', titleRu: 'Справочник', path: '/mc/help', icon: BookOpen },
     ],
   },
 ];
