@@ -29,6 +29,7 @@ export interface OwnerAccount {
   avatar_url: string | null;
   tags: string[] | null;
   created_at: string;
+  linked_user_id: string | null;
   properties_count: number;
   properties: OwnerProperty[];
   total_revenue: number;
@@ -163,6 +164,7 @@ export function useOwnerAccounts() {
 
         return {
           id: c.id,
+          linked_user_id: (c as any).linked_user_id ?? null,
           first_name: c.first_name,
           last_name: c.last_name,
           email: c.email,
