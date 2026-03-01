@@ -28,7 +28,9 @@ import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
+import { TodayEventsFeed } from '@/components/home/TodayEventsFeed';
 import { useIsDesktop } from '@/hooks/use-desktop';
+import { useAuth } from '@/contexts/AuthContext';
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 
 // Lazy load secondary components
@@ -37,8 +39,10 @@ const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').t
 const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 
+
 const Index = () => {
   const { activeCode } = useLifeSituationContext();
+  const { user } = useAuth();
   const isDesktop = useIsDesktop();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -53,6 +57,7 @@ const Index = () => {
   }, []);
 
   const hasContext = !!activeCode;
+  const isLoggedIn = !!user;
 
   return (
     <AppLayout showFooter>
@@ -87,46 +92,45 @@ const Index = () => {
             <QuickActionsGrid />
           </RevealOnScroll>
 
-          {/* ─── SECTION 3: Content Grid — main + sidebar on desktop ─── */}
-          {isDesktop ? (
-            <div className="grid grid-cols-3 gap-8">
-              {/* Main column (2/3) */}
-              <div className="col-span-2 space-y-6">
+          {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
+          {isLoggedIn ? (
+            isDesktop ? (
+              <div className="grid grid-cols-3 gap-8">
+                <div className="col-span-2 space-y-6">
+                  <Suspense fallback={null}>
+                    <YourDayFeed compact />
+                  </Suspense>
+                </div>
+                <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
+                  <LifecycleSmartTip />
+                  {hasContext ? (
+                    <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
+                  ) : (
+                    <Suspense fallback={null}><ConciergeBanner /></Suspense>
+                  )}
+                  <PropertyTourBanner />
+                </div>
+              </div>
+            ) : (
+              <>
                 <Suspense fallback={null}>
                   <YourDayFeed compact />
                 </Suspense>
-              </div>
-              {/* Sidebar (1/3) */}
-              <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
                 <LifecycleSmartTip />
-                {hasContext ? (
-                  <Suspense fallback={null}>
-                    <LifeOSStatusBlock />
-                  </Suspense>
-                ) : (
-                  <Suspense fallback={null}>
-                    <ConciergeBanner />
-                  </Suspense>
-                )}
                 <PropertyTourBanner />
-              </div>
-            </div>
+                {hasContext ? (
+                  <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
+                ) : (
+                  <Suspense fallback={null}><ConciergeBanner /></Suspense>
+                )}
+              </>
+            )
           ) : (
             <>
-              <Suspense fallback={null}>
-                <YourDayFeed compact />
-              </Suspense>
-              <LifecycleSmartTip />
+              {/* Public: Today's Events feed — full width */}
+              <TodayEventsFeed compact />
+              {/* Property Tour — full width */}
               <PropertyTourBanner />
-              {hasContext ? (
-                <Suspense fallback={null}>
-                  <LifeOSStatusBlock />
-                </Suspense>
-              ) : (
-                <Suspense fallback={null}>
-                  <ConciergeBanner />
-                </Suspense>
-              )}
             </>
           )}
 
