@@ -10,7 +10,7 @@ export interface CrmWebForm {
   company_id: string;
   name: string;
   description: string | null;
-  fields_config: any[];
+  fields_config: Record<string, unknown>[];
   pipeline_id: string | null;
   default_stage_id: string | null;
   assign_rule_id: string | null;

@@ -115,8 +115,7 @@ export function usePinAuth() {
 
       if (error) throw error;
       setHasPin(!!data);
-    } catch (error) {
-      console.error('Error checking PIN:', error);
+    } catch {
       setHasPin(false);
     }
   }, [user]);

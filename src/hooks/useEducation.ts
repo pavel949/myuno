@@ -25,7 +25,8 @@ export interface EducationProvider {
   is_verified: boolean;
 }
 
-function transformEducation(raw: any): EducationProvider {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformEducation(raw: Record<string, any>): EducationProvider {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,

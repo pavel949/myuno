@@ -88,7 +88,7 @@ export function useLookupValues(lookupType?: LookupType) {
     const { data, error } = await query;
     
     if (error) {
-      console.error('Error fetching lookup values:', error);
+      
       toast.error('Failed to load lookup values');
     } else {
       setValues((data || []) as LookupValue[]);
@@ -196,7 +196,7 @@ export function useLookupOptions(lookupType: LookupType) {
         .order('sort_order', { ascending: true });
       
       setOptions(
-        (data || []).map((item: any) => ({
+        (data || []).map((item: { value_key: string; value_en: string; value_ru: string | null }) => ({
           value: item.value_key,
           label_en: item.value_en,
           label_ru: item.value_ru || item.value_en,

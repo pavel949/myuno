@@ -154,10 +154,11 @@ export interface AdminCatalogFilters {
 /**
  * Build Supabase filter query based on admin catalog filters
  */
-export function buildAdminCatalogQuery(
-  query: any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function buildAdminCatalogQuery<T extends { eq: (...args: any[]) => T }>(
+  query: T,
   filters: AdminCatalogFilters
-) {
+): T {
   let result = query;
 
   if (filters.createdByAdmin !== undefined) {

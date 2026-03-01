@@ -36,7 +36,6 @@ export function usePropertyFilterOptions() {
         .order('sort_order', { ascending: true });
 
       if (error) {
-        console.error('Error fetching filter options:', error);
         setIsLoading(false);
         return;
       }
@@ -53,7 +52,7 @@ export function usePropertyFilterOptions() {
       const amens: FilterOption[] = [];
       const highs: FilterOption[] = [];
 
-      (data || []).forEach((item: any) => {
+      (data || []).forEach((item) => {
         const option = toFilterOption(item as LookupValue);
         switch (item.lookup_type) {
           case 'property_type':

@@ -81,7 +81,8 @@ interface ClinicsFilters {
   searchQuery?: string;
 }
 
-function transformClinic(raw: any): Clinic {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformClinic(raw: Record<string, any>): Clinic {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,
@@ -168,7 +169,7 @@ export function useClinics(filters?: ClinicsFilters) {
       setClinics(result);
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching clinics:', err);
+      
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +209,7 @@ export function useClinic(id: string | undefined) {
         if (isMounted) setClinic(data ? transformClinic(data) : null);
       } catch (err) {
         if (isMounted) setError(err as Error);
-        console.error('Error fetching clinic:', err);
+        
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -256,7 +257,7 @@ export function useDoctors(clinicId: string | undefined, specialty?: string) {
         if (isMounted) setDoctors((data || []) as Doctor[]);
       } catch (err) {
         if (isMounted) setError(err as Error);
-        console.error('Error fetching doctors:', err);
+        
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -305,7 +306,7 @@ export function useMedicalServices(clinicId: string | undefined, category?: stri
         if (isMounted) setServices((data || []) as MedicalService[]);
       } catch (err) {
         if (isMounted) setError(err as Error);
-        console.error('Error fetching medical services:', err);
+        
       } finally {
         if (isMounted) setIsLoading(false);
       }

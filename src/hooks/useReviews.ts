@@ -80,8 +80,7 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
         });
         setStats({ average, total, distribution });
       }
-    } catch (err) {
-      console.error('Error fetching reviews:', err);
+    } catch {
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -135,7 +134,6 @@ export const useCreateReview = () => {
       if (error) throw error;
       return { success: true };
     } catch (err) {
-      console.error('Error creating review:', err);
       throw err;
     } finally {
       if (isMountedRef.current) setIsSubmitting(false);
@@ -175,8 +173,7 @@ export const useTrustBadges = (providerId?: string) => {
             .order('sort_order');
           if (isMounted) setBadges(data || []);
         }
-      } catch (err) {
-        console.error('Error fetching badges:', err);
+      } catch {
       } finally {
         if (isMounted) setIsLoading(false);
       }

@@ -94,8 +94,7 @@ export function useMessageTemplates() {
       queryClient.invalidateQueries({ queryKey });
       toast.success('Template created');
     },
-    onError: (error) => {
-      console.error('Error creating template:', error);
+    onError: () => {
       toast.error('Failed to create template');
     },
   });
@@ -116,8 +115,7 @@ export function useMessageTemplates() {
       queryClient.invalidateQueries({ queryKey });
       toast.success('Template updated');
     },
-    onError: (error) => {
-      console.error('Error updating template:', error);
+    onError: () => {
       toast.error('Failed to update template');
     },
   });
@@ -135,8 +133,7 @@ export function useMessageTemplates() {
       queryClient.invalidateQueries({ queryKey });
       toast.success('Template deleted');
     },
-    onError: (error) => {
-      console.error('Error deleting template:', error);
+    onError: () => {
       toast.error('Failed to delete template');
     },
   });

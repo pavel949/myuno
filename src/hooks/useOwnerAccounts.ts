@@ -110,31 +110,31 @@ export function useOwnerAccounts() {
         const docTypes = ownerDocs.map(d => d.document_type);
 
         // Financial aggregation
-        const ownerFinancials = allFinancials.filter((f: any) => ownerPropIds.includes(f.property_id));
+        const ownerFinancials = allFinancials.filter((f) => ownerPropIds.includes(f.property_id));
         const totalRevenue = ownerFinancials
-          .filter((f: any) => f.transaction_type === 'income')
-          .reduce((s: number, f: any) => s + (f.amount || 0), 0);
+          .filter((f) => f.transaction_type === 'income')
+          .reduce((s: number, f) => s + (f.amount || 0), 0);
         const totalExpenses = ownerFinancials
-          .filter((f: any) => f.transaction_type === 'expense')
-          .reduce((s: number, f: any) => s + (f.amount || 0), 0);
+          .filter((f) => f.transaction_type === 'expense')
+          .reduce((s: number, f) => s + (f.amount || 0), 0);
 
         // Commission from terms
         const totalCommission = ownerProps.reduce((sum, p) => {
-          const t = terms.find((tm: any) => tm.property_id === p.id);
+          const t = terms.find((tm) => tm.property_id === p.id);
           if (!t?.commission_rate) return sum;
           // Rough estimate: commission_rate% of revenue for this property
           const propRevenue = allFinancials
-            .filter((f: any) => f.property_id === p.id && f.transaction_type === 'income')
-            .reduce((s: number, f: any) => s + (f.amount || 0), 0);
+            .filter((f) => f.property_id === p.id && f.transaction_type === 'income')
+            .reduce((s: number, f) => s + (f.amount || 0), 0);
           return sum + (propRevenue * (t.commission_rate / 100));
         }, 0);
 
         // Occupancy calculation (last 90 days)
         const now = new Date();
         const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        const ownerBookings = allBookings.filter((b: any) => ownerPropIds.includes(b.property_id));
+        const ownerBookings = allBookings.filter((b) => ownerPropIds.includes(b.property_id));
         let totalBookedNights = 0;
-        ownerBookings.forEach((b: any) => {
+        ownerBookings.forEach((b) => {
           if (!b.check_in || !b.check_out) return;
           const ci = parseISO(b.check_in);
           const co = parseISO(b.check_out);
@@ -149,7 +149,7 @@ export function useOwnerAccounts() {
           : 0;
 
         const propsWithTerms: OwnerProperty[] = ownerProps.map(p => {
-          const t = terms.find((tm: any) => tm.property_id === p.id);
+          const t = terms.find((tm) => tm.property_id === p.id);
           return {
             id: p.id,
             name: p.title_en || p.title_ru || 'Unnamed',

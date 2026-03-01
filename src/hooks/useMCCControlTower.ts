@@ -47,10 +47,10 @@ export function usePulseKPIs(period: 'today' | '7d' | 'mtd' = '7d') {
       const secondActionRate = completed > 0 ? (secondAction / completed) * 100 : 0;
 
       const stateDistribution: Record<string, number> = {};
-      (states || []).forEach((s: any) => {
+      (states || []).forEach((s) => {
         stateDistribution[s.state] = (stateDistribution[s.state] || 0) + 1;
       });
-      const activeUsers = (states || []).filter((s: any) => 
+      const activeUsers = (states || []).filter((s) => 
         !['dormant', 'churned', 'anonymous'].includes(s.state)
       ).length;
 
@@ -101,7 +101,7 @@ export function useLandingFunnelBoard(period: 'today' | '7d' | 'mtd' = '7d') {
         views: number; clicks: number; intents: number; completed: number; secondAction: number; revenue: number;
       }> = {};
 
-      (events || []).forEach((e: any) => {
+      (events || []).forEach((e) => {
         const lid = e.landing_id || 'unknown';
         if (!funnelMap[lid]) {
           funnelMap[lid] = { views: 0, clicks: 0, intents: 0, completed: 0, secondAction: 0, revenue: 0 };
@@ -112,13 +112,13 @@ export function useLandingFunnelBoard(period: 'today' | '7d' | 'mtd' = '7d') {
           case 'intent_started': funnelMap[lid].intents++; break;
           case 'first_service_completed':
             funnelMap[lid].completed++;
-            funnelMap[lid].revenue += (e.payload as any)?.amount || 0;
+            funnelMap[lid].revenue += (e.payload as Record<string, unknown>)?.amount as number || 0;
             break;
           case 'second_service_started': funnelMap[lid].secondAction++; break;
         }
       });
 
-      return (landings || []).map((l: any) => ({
+      return (landings || []).map((l) => ({
         landing_id: l.landing_id,
         name_en: l.name_en,
         name_ru: l.name_ru,

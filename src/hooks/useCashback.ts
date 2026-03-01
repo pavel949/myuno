@@ -23,8 +23,7 @@ export function useCashback() {
 
       if (error) throw error;
       if (checkMounted()) setSettings(data || []);
-    } catch (error) {
-      console.error('Error fetching cashback settings:', error);
+    } catch {
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
