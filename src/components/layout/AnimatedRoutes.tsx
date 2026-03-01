@@ -10,7 +10,7 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard } from '@/components/auth';
+import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard, StaffGuard } from '@/components/auth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { OwnerLayout } from '@/components/owner/OwnerLayout';
@@ -468,7 +468,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
         
         {/* ── Staff ── */}
-        <Route path="/staff" element={<AdminGuard><StaffLayout /></AdminGuard>}>
+        <Route path="/staff" element={<StaffGuard><StaffLayout /></StaffGuard>}>
           <Route index element={<LazyPage><Pages.StaffDashboard /></LazyPage>} />
         </Route>
         
