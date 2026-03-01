@@ -8798,14 +8798,19 @@ export type Database = {
       management_companies: {
         Row: {
           address: string | null
+          backup_settings: Json | null
+          bank_account: string | null
+          bank_name: string | null
           cover_image: string | null
           created_at: string
           created_by: string | null
+          dbd_card_url: string | null
           default_commission_rate: number | null
           description_en: string | null
           description_ru: string | null
           director_name: string | null
           district: string | null
+          documents: Json | null
           email: string | null
           founded_year: number | null
           has_24_7_support: boolean | null
@@ -8815,6 +8820,8 @@ export type Database = {
           is_featured: boolean | null
           is_verified: boolean | null
           languages: string[] | null
+          legal_address: string | null
+          legal_name: string | null
           license_number: string | null
           logo: string | null
           min_contract_months: number | null
@@ -8826,6 +8833,7 @@ export type Database = {
           properties_managed: number | null
           provider_id: string | null
           rating: number | null
+          registration_number: string | null
           review_count: number | null
           service_districts: string[] | null
           service_types: string[] | null
@@ -8833,6 +8841,7 @@ export type Database = {
           slug: string
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
+          swift_code: string | null
           tax_id: string | null
           updated_at: string
           verified_at: string | null
@@ -8842,14 +8851,19 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          backup_settings?: Json | null
+          bank_account?: string | null
+          bank_name?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
+          dbd_card_url?: string | null
           default_commission_rate?: number | null
           description_en?: string | null
           description_ru?: string | null
           director_name?: string | null
           district?: string | null
+          documents?: Json | null
           email?: string | null
           founded_year?: number | null
           has_24_7_support?: boolean | null
@@ -8859,6 +8873,8 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          legal_address?: string | null
+          legal_name?: string | null
           license_number?: string | null
           logo?: string | null
           min_contract_months?: number | null
@@ -8870,6 +8886,7 @@ export type Database = {
           properties_managed?: number | null
           provider_id?: string | null
           rating?: number | null
+          registration_number?: string | null
           review_count?: number | null
           service_districts?: string[] | null
           service_types?: string[] | null
@@ -8877,6 +8894,7 @@ export type Database = {
           slug: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          swift_code?: string | null
           tax_id?: string | null
           updated_at?: string
           verified_at?: string | null
@@ -8886,14 +8904,19 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          backup_settings?: Json | null
+          bank_account?: string | null
+          bank_name?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
+          dbd_card_url?: string | null
           default_commission_rate?: number | null
           description_en?: string | null
           description_ru?: string | null
           director_name?: string | null
           district?: string | null
+          documents?: Json | null
           email?: string | null
           founded_year?: number | null
           has_24_7_support?: boolean | null
@@ -8903,6 +8926,8 @@ export type Database = {
           is_featured?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
+          legal_address?: string | null
+          legal_name?: string | null
           license_number?: string | null
           logo?: string | null
           min_contract_months?: number | null
@@ -8914,6 +8939,7 @@ export type Database = {
           properties_managed?: number | null
           provider_id?: string | null
           rating?: number | null
+          registration_number?: string | null
           review_count?: number | null
           service_districts?: string[] | null
           service_types?: string[] | null
@@ -8921,6 +8947,7 @@ export type Database = {
           slug?: string
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
+          swift_code?: string | null
           tax_id?: string | null
           updated_at?: string
           verified_at?: string | null

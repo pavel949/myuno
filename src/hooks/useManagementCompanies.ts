@@ -29,6 +29,16 @@ export interface ManagementCompany {
   is_active: boolean | null;
   is_featured: boolean | null;
   created_at: string;
+  // Extended fields
+  legal_name: string | null;
+  registration_number: string | null;
+  legal_address: string | null;
+  bank_name: string | null;
+  bank_account: string | null;
+  swift_code: string | null;
+  dbd_card_url: string | null;
+  documents: unknown[];
+  backup_settings: Record<string, unknown> | null;
 }
 
 export function useManagementCompanies() {

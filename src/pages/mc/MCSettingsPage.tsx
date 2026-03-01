@@ -3,7 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FinanceCategorySettings } from '@/components/mc/settings/FinanceCategorySettings';
 import { CompanyProfileSettings } from '@/components/mc/settings/CompanyProfileSettings';
-import { Settings, DollarSign, Target, Wrench, Building2 } from 'lucide-react';
+import { DataBackupSettings } from '@/components/mc/settings/DataBackupSettings';
+import { Settings, DollarSign, Target, Wrench, Building2, HardDrive } from 'lucide-react';
 import React, { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
@@ -55,6 +56,10 @@ export default function MCSettingsPage() {
             <Wrench className="h-3.5 w-3.5" />
             {isRu ? 'Операции' : 'Operations'}
           </TabsTrigger>
+          <TabsTrigger value="data" className="gap-1.5">
+            <HardDrive className="h-3.5 w-3.5" />
+            {isRu ? 'Данные' : 'Data'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -84,6 +89,10 @@ export default function MCSettingsPage() {
                 : 'Checklist templates, task settings — coming soon.'}
             </p>
           </div>
+        </TabsContent>
+
+        <TabsContent value="data">
+          <DataBackupSettings />
         </TabsContent>
       </Tabs>
     </div>
