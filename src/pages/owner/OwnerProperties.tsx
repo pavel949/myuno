@@ -329,6 +329,7 @@ export default function OwnerProperties() {
                 property={property as any}
                 variant="list"
                 mode="owner"
+                complexName={property.complex_id ? (isRu ? complexNames[property.complex_id]?.name_ru : null) || complexNames[property.complex_id]?.name : undefined}
                 onView={() => handleView(property.property_id)}
                 onEdit={() => handleEdit(property.property_id)}
                 onDuplicate={() => handleDuplicate(property.property_id)}

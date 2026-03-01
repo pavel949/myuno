@@ -25,6 +25,7 @@ export interface PropertyComplex {
   // Media
   cover_image?: string;
   images?: string[];
+  video_url?: string;
   // Amenities & Services
   amenities?: string[];
   services?: string[];
