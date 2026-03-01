@@ -216,8 +216,12 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
     prefetchRoute(path, queryClient);
   }, [queryClient]);
 
+  // Stable key that changes when actions change, forcing re-animation
+  const actionsKey = useMemo(() => quickActions.map(a => a.id).join(','), [quickActions]);
+
   return (
     <motion.div
+      key={actionsKey}
       className={cn(
         "grid grid-cols-4 gap-y-3 gap-x-2",
         "lg:flex lg:items-start lg:justify-evenly lg:gap-3"

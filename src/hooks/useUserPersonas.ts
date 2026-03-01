@@ -110,6 +110,7 @@ export function useUserPersonas() {
       return { persona, wasActive: isActive };
     },
     onMutate: async (persona) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey });
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
       
@@ -127,7 +128,9 @@ export function useUserPersonas() {
         queryClient.setQueryData(queryKey, context.previousPersonas);
       }
     },
-    onSettled: () => {
+    onSuccess: () => {
+      // Only invalidate on success — not onSettled — to avoid refetch after errors
+      // that already rolled back via onError
       queryClient.invalidateQueries({ queryKey });
     },
   });
