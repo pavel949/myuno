@@ -28,8 +28,8 @@ export function usePWATracking() {
         device_info: deviceInfo,
         source,
       });
-    } catch (error) {
-      console.error('Failed to track PWA install:', error);
+    } catch {
+      // PWA tracking is non-critical
     }
   };
 

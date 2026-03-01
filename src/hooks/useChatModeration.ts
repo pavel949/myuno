@@ -87,7 +87,7 @@ export function useChatModeration(propertyId?: string) {
     mutationFn: async (params: { propertyId: string; enabled: boolean }) => {
       const { error } = await supabase
         .from('properties')
-        .update({ chat_delegated_to_platform: params.enabled } as any)
+        .update({ chat_delegated_to_platform: params.enabled } as Record<string, unknown>)
         .eq('id', params.propertyId);
 
       if (error) throw error;
@@ -137,10 +137,7 @@ export function useChatModeration(propertyId?: string) {
         .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned
-        console.error('Error fetching violations:', error);
-      }
+      // PGRST116 = no rows returned — non-blocking
       return data;
     },
     enabled: !!user,

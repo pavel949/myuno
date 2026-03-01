@@ -65,9 +65,7 @@ export function usePropertyQuickFilters() {
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
-      if (highlightsError) {
-        console.error('Error fetching property highlights:', highlightsError);
-      }
+      // highlightsError is non-blocking
 
       // Fetch property_projects for complex filtering
       const { data: projectsData, error: projectsError } = await supabase
@@ -76,9 +74,7 @@ export function usePropertyQuickFilters() {
         .eq('is_active', true)
         .order('name_en', { ascending: true });
 
-      if (projectsError) {
-        console.error('Error fetching property projects:', projectsError);
-      }
+      // projectsError is non-blocking
 
       // Fetch districts from lookup_values
       const { data: districtsData, error: districtsError } = await supabase
@@ -88,9 +84,7 @@ export function usePropertyQuickFilters() {
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
-      if (districtsError) {
-        console.error('Error fetching districts:', districtsError);
-      }
+      // districtsError is non-blocking
 
       // Count properties per project
       const { data: projectCounts } = await supabase

@@ -227,8 +227,7 @@ export function useCreateProspect() {
       queryClient.invalidateQueries({ queryKey: ['vendor-prospects'] });
       toast.success('Проспект добавлен');
     },
-    onError: (error) => {
-      console.error('Failed to create prospect:', error);
+    onError: () => {
       toast.error('Ошибка создания проспекта');
     },
   });
@@ -254,8 +253,7 @@ export function useUpdateProspect() {
       queryClient.invalidateQueries({ queryKey: ['vendor-prospects'] });
       queryClient.invalidateQueries({ queryKey: ['vendor-prospect', data.id] });
     },
-    onError: (error) => {
-      console.error('Failed to update prospect:', error);
+    onError: () => {
       toast.error('Ошибка обновления');
     },
   });
@@ -279,8 +277,7 @@ export function useScoreProspect() {
       queryClient.invalidateQueries({ queryKey: ['vendor-prospect', prospectId] });
       toast.success('AI-анализ завершён');
     },
-    onError: (error) => {
-      console.error('Failed to score prospect:', error);
+    onError: () => {
       toast.error('Ошибка AI-анализа');
     },
   });
@@ -303,8 +300,7 @@ export function useGenerateOutreach() {
       if (error) throw error;
       return data;
     },
-    onError: (error) => {
-      console.error('Failed to generate outreach:', error);
+    onError: () => {
       toast.error('Ошибка генерации сообщения');
     },
   });
@@ -330,8 +326,7 @@ export function useBatchImport() {
       queryClient.invalidateQueries({ queryKey: ['vendor-prospects'] });
       toast.success(`Импортировано: ${data.data?.imported || 0}`);
     },
-    onError: (error) => {
-      console.error('Failed to batch import:', error);
+    onError: () => {
       toast.error('Ошибка импорта');
     },
   });
@@ -348,8 +343,7 @@ export function useAnalyzeUrl() {
       if (error) throw error;
       return data;
     },
-    onError: (error) => {
-      console.error('Failed to analyze URL:', error);
+    onError: () => {
       toast.error('Ошибка анализа URL');
     },
   });

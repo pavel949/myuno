@@ -38,10 +38,7 @@ export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?
           p_check_out: checkOut,
         });
 
-      if (error) {
-        console.error('Error checking availability:', error);
-        return { isAvailable: true, message: '' };
-      }
+      if (error) return { isAvailable: true, message: '' };
 
       return {
         isAvailable: data as boolean,

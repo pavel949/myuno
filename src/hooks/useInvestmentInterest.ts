@@ -142,8 +142,7 @@ export function useInvestmentInterest(projectId?: string) {
           : 'Request submitted! We\'ll get back to you shortly.'
       );
     },
-    onError: (error) => {
-      console.error('Failed to create interest:', error);
+    onError: () => {
       toast.error('Failed to submit interest. Please try again.');
     },
   });

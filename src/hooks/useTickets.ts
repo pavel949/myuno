@@ -130,8 +130,7 @@ export function useTickets() {
       });
       queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
     },
-    onError: (error) => {
-      console.error('Error creating ticket:', error);
+    onError: () => {
       toast({
         title: 'Ошибка',
         description: 'Не удалось создать обращение',
@@ -158,8 +157,7 @@ export function useTickets() {
 
       if (error) throw error;
       return data as unknown as SupportTicket;
-    } catch (error) {
-      console.error('Error fetching ticket:', error);
+    } catch {
       return null;
     }
   };
@@ -174,8 +172,7 @@ export function useTickets() {
 
       if (error) throw error;
       return (data as unknown as TicketMessage[]) || [];
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+    } catch {
       return [];
     }
   };
@@ -201,8 +198,7 @@ export function useTickets() {
       });
 
       return true;
-    } catch (error) {
-      console.error('Error adding message:', error);
+    } catch {
       toast({
         title: 'Ошибка',
         description: 'Не удалось отправить сообщение',

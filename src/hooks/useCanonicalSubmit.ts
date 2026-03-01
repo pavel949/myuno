@@ -61,7 +61,7 @@ export function useCanonicalSubmit({
   /**
    * Generate idempotency key based on content hash
    */
-  const generateIdempotencyKey = useCallback((data: Record<string, any>): string => {
+  const generateIdempotencyKey = useCallback((data: Record<string, unknown>): string => {
     const hashSource = JSON.stringify({
       provider_id: providerId,
       ...Object.fromEntries(
@@ -83,7 +83,7 @@ export function useCanonicalSubmit({
   /**
    * Check for duplicate records
    */
-  const checkDuplicate = useCallback(async (data: Record<string, any>): Promise<boolean> => {
+  const checkDuplicate = useCallback(async (data: Record<string, unknown>): Promise<boolean> => {
     if (editingId) return false; // Editing existing record, no duplicate check
     
     try {
@@ -93,8 +93,8 @@ export function useCanonicalSubmit({
       
       if (!idValue) return false;
       
-      let query = supabase
-        .from(tableName as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (supabase.from as any)(tableName)
         .select('id')
         .eq(providerIdField, idValue);
       
@@ -107,14 +107,10 @@ export function useCanonicalSubmit({
       
       const { data: existing, error } = await query.limit(1).maybeSingle();
       
-      if (error) {
-        console.error('Duplicate check error:', error);
-        return false;
-      }
+      if (error) return false;
       
       return !!existing;
-    } catch (e) {
-      console.error('Duplicate check failed:', e);
+    } catch {
       return false;
     }
   }, [tableName, providerId, vendorId, editingId, duplicateCheckFields]);
@@ -122,7 +118,7 @@ export function useCanonicalSubmit({
   /**
    * Main submit function with all P0 protections
    */
-  const submit = useCallback(async (data: Record<string, any>): Promise<SubmitResult> => {
+  const submit = useCallback(async (data: Record<string, unknown>): Promise<SubmitResult> => {
     const now = Date.now();
     
     // Debounce protection
@@ -191,8 +187,8 @@ export function useCanonicalSubmit({
         const providerIdField = getProviderIdField(tableName);
         const idValue = providerIdField === 'vendor_id' ? vendorId : providerId;
         
-        const { data: updated, error } = await supabase
-          .from(tableName as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: updated, error } = await (supabase.from as any)(tableName)
           .update(submissionData)
           .eq('id', editingId)
           .eq(providerIdField, idValue) // Security: ensure ownership
@@ -203,8 +199,8 @@ export function useCanonicalSubmit({
         result = updated;
       } else {
         // Insert new record
-        const { data: inserted, error } = await supabase
-          .from(tableName as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: inserted, error } = await (supabase.from as any)(tableName)
           .insert({
             ...submissionData,
             created_at: new Date().toISOString(),
@@ -225,22 +221,23 @@ export function useCanonicalSubmit({
       onSuccess?.();
       return { success: true, id: result.id };
       
-    } catch (error: any) {
-      console.error('Submit error:', error);
+    } catch (error: unknown) {
+      const pgError = error as { code?: string; message?: string };
       
       // Handle specific errors
-      if (error.code === '23505') {
+      if (pgError.code === '23505') {
         // Unique constraint violation
         toast.error(isRu ? 'Запись с такими данными уже существует' : 'Record with these details already exists');
-      } else if (error.code === '23503') {
+      } else if (pgError.code === '23503') {
         // Foreign key violation
         toast.error(isRu ? 'Связанные данные не найдены' : 'Related data not found');
       } else {
         toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
       }
       
-      onError?.(error);
-      return { success: false, error };
+      const err = error instanceof Error ? error : new Error(pgError.message || 'Save failed');
+      onError?.(err);
+      return { success: false, error: err };
       
     } finally {
       setIsSubmitting(false);

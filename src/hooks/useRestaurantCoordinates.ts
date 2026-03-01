@@ -23,14 +23,11 @@ export function useRestaurantCoordinates() {
         .eq('vertical', 'restaurant')
         .eq('is_active', true);
 
-      if (error) {
-        console.error('Error fetching restaurant coordinates:', error);
-        return {};
-      }
+      if (error) return {};
 
       const coordsMap: Record<string, { lat: number; lng: number }> = {};
       data?.forEach((r) => {
-        const attrs = (r.attributes || {}) as Record<string, any>;
+        const attrs = (r.attributes || {}) as Record<string, unknown>;
         const lat = attrs.lat as number | undefined;
         const lng = attrs.lng as number | undefined;
         if (lat && lng) {

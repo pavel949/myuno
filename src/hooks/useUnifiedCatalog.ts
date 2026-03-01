@@ -61,7 +61,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (servicesError) throw servicesError;
 
         allItems.push(
-          ...(services || []).map((s: any) => ({
+          ...(services || []).map((s) => ({
             id: s.id,
             type: 'service' as CatalogItemType,
             name_en: s.name_en,
@@ -96,7 +96,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (productsError) throw productsError;
 
         allItems.push(
-          ...(products || []).map((p: any) => ({
+          ...(products || []).map((p) => ({
             id: p.id,
             type: 'product' as CatalogItemType,
             name_en: p.name_en,
@@ -133,7 +133,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (propertiesError) throw propertiesError;
 
         allItems.push(
-          ...(properties || []).map((p: any) => ({
+          ...(properties || []).map((p) => ({
             id: p.id,
             type: 'property' as CatalogItemType,
             name_en: p.title_en,
@@ -153,9 +153,8 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
       allItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setItems(allItems);
-    } catch (err: any) {
-      console.error('Error fetching unified catalog:', err);
-      setError(err.message || 'Failed to fetch catalog items');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch catalog items');
     } finally {
       setIsLoading(false);
     }

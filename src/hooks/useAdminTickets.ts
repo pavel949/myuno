@@ -315,8 +315,7 @@ export function useAdminTickets() {
 
       toast({ title: isInternal ? 'Заметка добавлена' : 'Ответ отправлен' });
       return true;
-    } catch (error) {
-      console.error('Error adding message:', error);
+    } catch {
       toast({
         title: 'Ошибка',
         description: 'Не удалось отправить сообщение',
@@ -336,8 +335,7 @@ export function useAdminTickets() {
 
       if (error) throw error;
       return (data as unknown as TicketMessage[]) || [];
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+    } catch {
       return [];
     }
   };
