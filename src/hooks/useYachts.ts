@@ -49,7 +49,10 @@ export interface Yacht {
   balance_due_hours?: number | null;
 }
 
-function transformYacht(raw: any): Yacht {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ListingRow = Record<string, any>;
+
+function transformYacht(raw: ListingRow): Yacht {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,

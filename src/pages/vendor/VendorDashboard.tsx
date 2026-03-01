@@ -329,8 +329,7 @@ const VendorDashboard = () => {
         onOpenChange={setShowBulkImport}
         vertical={bulkImportVertical}
         onImport={async (rows) => {
-          // TODO: Implement bulk import
-          console.log('Importing rows:', rows);
+          // TODO: Implement bulk import via edge function
           return { success: rows.length, failed: 0 };
         }}
       />

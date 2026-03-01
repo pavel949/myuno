@@ -72,6 +72,7 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
     additionalFilters.push({ column: 'attributes->>experience_type', value: experienceType });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { items: rawItems, isLoading, create, update, remove, refetch } = useSupabaseCRUD<any>({
     table: 'listings',
     providerId,
@@ -83,6 +84,7 @@ export function useAdminExperiences(options: UseAdminExperiencesOptions = {}) {
   });
 
   // Transform raw listings to AdminExperience shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const experiences: AdminExperience[] = (rawItems || []).map((raw: any) => {
     const attrs = raw.attributes || {};
     return {
