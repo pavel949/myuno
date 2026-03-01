@@ -58,7 +58,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           className
         )}
       >
-        <div className="flex items-center justify-between h-12 lg:h-[68px] px-3 sm:px-4 lg:px-8 max-w-[1536px] mx-auto gap-1">
+        <div className="flex items-center justify-between h-12 lg:h-16 xl:h-[72px] px-3 sm:px-4 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-1">
           {/* Logo with hover animation */}
           <Link
             to="/"

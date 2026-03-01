@@ -210,47 +210,50 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Global word-break for Russian long words */
     overflow-wrap: break-word;
     word-break: break-word;
   }
 
   @media (min-width: 1024px) {
     body {
-      font-size: 15px;
-    }
-    p {
-      @apply text-base;
+      font-size: 16px;
+      line-height: 1.6;
     }
   }
 
-  /* Typography Scale - optimized for Russian text (longer words) */
+  @media (min-width: 1536px) {
+    body {
+      font-size: 17px;
+    }
+  }
+
+  /* Typography Scale — desktop-aware */
   h1 {
-    @apply font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight leading-tight;
+    @apply font-display text-xl sm:text-2xl lg:text-4xl xl:text-[2.5rem] font-bold tracking-tight leading-tight;
     overflow-wrap: break-word;
   }
   
   h2 {
-    @apply font-display text-lg sm:text-xl md:text-2xl font-semibold tracking-tight leading-snug;
+    @apply font-display text-lg sm:text-xl lg:text-2xl xl:text-[1.75rem] font-semibold tracking-tight leading-snug;
     overflow-wrap: break-word;
   }
   
   h3 {
-    @apply font-display text-base sm:text-lg font-semibold tracking-tight leading-snug;
+    @apply font-display text-base sm:text-lg lg:text-xl font-semibold tracking-tight leading-snug;
     overflow-wrap: break-word;
   }
   
   h4, h5, h6 {
-    @apply font-display text-sm sm:text-base font-semibold tracking-tight leading-snug;
+    @apply font-display text-sm sm:text-base lg:text-lg font-semibold tracking-tight leading-snug;
     overflow-wrap: break-word;
   }
 
   p {
-    @apply text-sm leading-relaxed;
+    @apply text-sm lg:text-base leading-relaxed;
   }
 
   small {
-    @apply text-xs leading-normal;
+    @apply text-xs lg:text-sm leading-normal;
   }
 
   /* ============ Mobile normalization ============ */

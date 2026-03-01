@@ -77,12 +77,12 @@ const Index = () => {
       <ActiveSituationBanner />
 
       {/* ─── PWA Install Banner ─── */}
-      <div className="px-4 md:px-6 lg:px-8 pt-3 w-full max-w-[1536px] mx-auto">
+      <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-3 w-full max-w-[1536px] mx-auto">
         <InstallBanner />
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 lg:px-8 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-16">
+        <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10 xl:space-y-14">
           
           {/* ─── SECTION 1: Hero (full width) ─── */}
           <HeroBlock />

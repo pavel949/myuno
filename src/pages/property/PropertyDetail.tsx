@@ -294,18 +294,18 @@ export default function PropertyDetail() {
         </div>
 
         {/* Main Content with Sidebar Layout for Desktop */}
-        <div className="px-4 py-6">
-          <div className="grid lg:grid-cols-[1fr,380px] gap-8">
+        <div className="px-4 lg:px-8 xl:px-12 py-6 lg:py-10">
+          <div className="grid lg:grid-cols-[1fr,420px] xl:grid-cols-[1fr,460px] gap-8 lg:gap-12">
             {/* Main Content Column */}
             <div className="space-y-6">
           {/* Title Section - Airbnb Style */}
           <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground leading-tight">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
               {isRu ? property.title_ru : property.title_en}
             </h1>
             
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
               {property.rating && (
                 <>
                   <div className="flex items-center gap-1">
@@ -402,17 +402,17 @@ export default function PropertyDetail() {
           <Separator />
 
           {/* Specs Grid - Compact */}
-          <div className="grid grid-cols-2 xs:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 lg:gap-4">
             {[
               { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : 'Beds' },
               { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },
               { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
               { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
             ].map((spec, i) => (
-              <div key={i} className="flex flex-col items-center p-3 rounded-xl bg-muted/50">
-                <spec.icon className="w-5 h-5 text-muted-foreground mb-1" />
-                <span className="text-lg font-bold">{spec.value}</span>
-                <span className="text-xs text-muted-foreground">{spec.label}</span>
+              <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-xl bg-muted/50">
+                <spec.icon className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground mb-1" />
+                <span className="text-lg lg:text-xl font-bold">{spec.value}</span>
+                <span className="text-xs lg:text-sm text-muted-foreground">{spec.label}</span>
               </div>
             ))}
           </div>
@@ -449,10 +449,10 @@ export default function PropertyDetail() {
 
           {/* Description */}
           <div>
-            <h2 className="text-xl font-semibold mb-3">
+            <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
               {isRu ? 'Об этом жилье' : 'About this place'}
             </h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
               {isRu ? property.description_ru : property.description_en}
             </p>
           </div>
@@ -554,10 +554,10 @@ export default function PropertyDetail() {
             <>
               <Separator />
               <div>
-                <h2 className="text-xl font-semibold mb-4">
+                <h2 className="text-xl lg:text-2xl font-semibold mb-4">
                   {isRu ? 'Что есть в жилье' : 'What this place offers'}
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
                   {amenities.slice(0, 8).map((amenity, i) => {
                     const amenityId = typeof amenity === 'string' ? amenity : amenity;
                     const normalizedId = normalizeAmenityId(amenityId);
@@ -847,7 +847,7 @@ export default function PropertyDetail() {
       </div>
 
       {/* Cross-sell */}
-      <div className="px-4">
+      <div className="px-4 lg:px-8 xl:px-12">
         <RelatedServicesSection currentVertical="property" />
       </div>
 
