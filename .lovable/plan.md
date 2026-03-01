@@ -1,64 +1,102 @@
 
-# Нативное мобильное приложение: PWA + Capacitor
 
-## Что уже готово (PWA)
+# Аудит кода myUNO SuperApp
 
-Ваш проект уже имеет хорошо настроенный PWA:
-- Service Worker с кэшированием и офлайн-режимом
-- Manifest с иконками (72, 192, 512px)
-- Мета-теги для iOS (standalone, status bar)
-- Автоматическое обновление при новых версиях
+## Масштаб проекта
 
-## Что нужно улучшить в PWA
+Это крупный SuperApp: 300+ страниц, 250+ хуков, 100+ Edge Functions, 60+ компонентных папок. При таком масштабе codebase в целом организован хорошо, но есть системные проблемы.
 
-### 1. Добавить `navigateFallbackDenylist` для OAuth
-Критически важно: маршрут `/~oauth` не должен кэшироваться service worker-ом. В `sw.ts` уже есть `/~oauth` в denylist навигации, но в конфигурации `vite.config.ts` это отсутствует.
+---
 
-### 2. Добавить недостающие размеры иконок для Apple
-Сейчас есть только 72, 192 и 512px. Для полноценного iOS-опыта нужны:
-- `icon-120x120.png` (iPhone)
-- `icon-152x152.png` (iPad)
-- `icon-180x180.png` (iPhone Retina)
+## Результаты аудита
 
-### 3. Добавить splash-скрины для iOS
-Apple требует splash-скрины для красивого запуска приложения. Добавим meta-теги `apple-touch-startup-image`.
+### 1. Безопасность — Нет критических проблем
 
-## Настройка Capacitor (нативное приложение)
+- Автоматический сканер безопасности и линтер БД: **0 найденных проблем**
+- `dangerouslySetInnerHTML` используется только в `chart.tsx` (shadcn компонент) — безопасно
+- Auth guard (`MCGuard`, `requireAuth`) реализованы корректно
+- Edge Functions используют rate limiting и auth проверки
+- XSS: не обнаружено вставки пользовательского HTML
 
-### 4. Установка Capacitor
-Установить пакеты:
-- `@capacitor/core`
-- `@capacitor/cli` (dev)
-- `@capacitor/ios`
-- `@capacitor/android`
+### 2. Типизация — Требует внимания
 
-### 5. Создать конфигурацию Capacitor
-Файл `capacitor.config.ts`:
-- appId: `app.lovable.dcc2b02476274ad9a915a3df3dd839f0`
-- appName: `myUNO`
-- Server URL для hot-reload из sandbox
+| Проблема | Масштаб |
+|----------|---------|
+| Использование `: any` | **1827 совпадений в 193 файлах** |
+| `catch (e: any)` / `catch (e)` без типизации | 180+ мест |
 
-### 6. Добавить нативные плагины (по необходимости)
-В будущем можно добавить:
-- `@capacitor/push-notifications` -- настоящие пуш-уведомления
-- `@capacitor/camera` -- доступ к камере
-- `@capacitor/geolocation` -- GPS
-- `@capacitor/haptics` -- вибрация
+**Самые проблемные зоны:**
+- `useAdminExperiences.ts` — `(raw: any)`
+- `useVendorRestaurants.ts` — `working_hours?: any`
+- `OwnerFinanceTab.tsx` — несколько `(f: any)` в фильтрах
+- `AdminQATestRunner.tsx` — `(run: any)` в рендере
+- `VendorEvents.tsx` — `data: any` при создании объекта
 
-## Файлы
+**Рекомендация:** Заменять `any` на конкретные типы поэтапно, начиная с хуков данных (`use*.ts`), затем страницы.
 
-| Действие | Файл | Описание |
-|----------|------|----------|
-| Обновить | `vite.config.ts` | Добавить `navigateFallbackDenylist` для `/~oauth` |
-| Обновить | `index.html` | Добавить splash-screen meta-теги для iOS |
-| Создать | `capacitor.config.ts` | Конфигурация Capacitor с hot-reload |
-| Установить | NPM-пакеты | `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android` |
+### 3. Мёртвый код и TODO
 
-## После реализации: ваши шаги
+| Проблема | Масштаб |
+|----------|---------|
+| `TODO/FIXME` комментарии | **195 в 30 файлах** |
+| `console.log/warn/error` в продакшене | **1109 в 139 файлах** |
 
-Чтобы запустить приложение на телефоне:
-1. Перенести проект на GitHub через кнопку "Export to GitHub"
-2. Склонировать проект и выполнить `npm install`
-3. Добавить платформы: `npx cap add ios` и/или `npx cap add android`
-4. Собрать: `npm run build && npx cap sync`
-5. Запустить: `npx cap run ios` (нужен Mac + Xcode) или `npx cap run android` (Android Studio)
+**Примеры незакрытых TODO:**
+- `TeamSupportPage.tsx` — "Replace with DB query - tickets should come from support_tickets table" (моковые данные)
+- `TeamModerationPage.tsx` — "Replace with DB query - moderation items should come from moderation_queue table"
+- `TripChecklist.tsx` — "navigate to arrival card assistance order flow"
+- `VendorDashboard.tsx` — `console.log('Importing rows:', rows)` вместо реальной логики импорта
+
+### 4. Архитектура — Хорошо, но есть перегруз
+
+**Сильные стороны:**
+- Чёткое разделение по вертикалям (property, yachts, restaurants и т.д.)
+- Barrel exports в компонентных папках
+- Единый паттерн билингвальности (`isRu`)
+- Provider tree задокументирован
+- Shared модули для Edge Functions (`_shared/`)
+- `CONVENTIONS.md` поддерживается в актуальном состоянии
+
+**Потенциальные проблемы:**
+- **13 провайдеров** в корневом дереве `App.tsx` — потенциальный каскад ре-рендеров
+- **250+ хуков** — часть может быть неиспользуемой или дублирующей
+- **100+ Edge Functions** — нет единого паттерна обработки ошибок (часть использует `createServiceClient`, часть создаёт клиент вручную)
+
+### 5. Конвенции — Соблюдаются в целом
+
+- Файловые паттерны (`XxxPage.tsx`, `useXxx.ts`) — соблюдаются
+- shadcn/ui + lucide — соблюдается, прямых Radix импортов нет
+- `cn()` для классов — используется повсеместно
+- Семантические токены Tailwind — в основном соблюдаются
+
+---
+
+## План исправлений (по приоритету)
+
+### Приоритет 1 — Быстрые исправления (low-risk)
+
+1. **Удалить `console.log` из продакшн-кода** — заменить на `createErrorHandler()` из `src/lib/errorHandler.ts` в критичных местах, убрать отладочные логи
+2. **Закрыть моковые TODO** — `TeamSupportPage.tsx` и `TeamModerationPage.tsx` подключить к реальным таблицам БД
+
+### Приоритет 2 — Типизация
+
+3. **Типизировать хуки данных** — заменить `any` на типы из `src/integrations/supabase/types.ts` в 20 самых используемых хуках
+4. **Типизировать catch-блоки** — использовать `catch (error: unknown)` + type guard
+
+### Приоритет 3 — Архитектура
+
+5. **Аудит неиспользуемых хуков** — проверить все 250+ хуков на предмет import usage, удалить мёртвые
+6. **Унифицировать Edge Functions** — все функции должны использовать `createServiceClient()` из `_shared/supabase.ts` вместо ручного `createClient()`
+
+---
+
+## Резюме
+
+| Категория | Оценка | Комментарий |
+|-----------|--------|-------------|
+| Безопасность | Хорошо | Нет критических проблем |
+| Типизация | Слабо | 1800+ `any`, требует планомерной работы |
+| Чистота кода | Средне | 1100+ console.log, 195 TODO |
+| Архитектура | Хорошо | Структурировано, но много провайдеров |
+| Конвенции | Хорошо | Соблюдаются в целом |
+
