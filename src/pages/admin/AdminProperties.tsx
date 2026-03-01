@@ -50,6 +50,7 @@ export default function AdminProperties() {
   
   // Auto-detect if filter ID is an MC to search both provider_id and management_company_id
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
+  const { data: mcs } = useManagementCompanies();
   
   // Redirect to unified property creation wizard instead of opening dialog
   React.useEffect(() => {
@@ -492,19 +493,25 @@ export default function AdminProperties() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {filteredProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                variant="list"
-                mode="admin"
-                onView={() => openEditSheet(property)}
-                onEdit={() => openEditSheet(property)}
-                onDelete={() => setDeleteConfirmId(property.id)}
-                showApprovalStatus
-                showInstantBadge
-              />
-            ))}
+            {filteredProperties.map((property) => {
+              const mcId = (property as any).management_company_id;
+              const mc = mcId ? (mcs || []).find(c => c.id === mcId) : null;
+              const mcName = mc ? (isRussian ? mc.name_ru : mc.name_en) : null;
+              return (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  variant="list"
+                  mode="admin"
+                  companyName={mcName || undefined}
+                  onView={() => openEditSheet(property)}
+                  onEdit={() => openEditSheet(property)}
+                  onDelete={() => setDeleteConfirmId(property.id)}
+                  showApprovalStatus
+                  showInstantBadge
+                />
+              );
+            })}
           </div>
         )}
 
