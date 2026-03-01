@@ -114,7 +114,6 @@ export function useYachtPriceForDate(yachtId?: string, date?: Date, charterType:
       });
 
       if (error) {
-        console.error('Error getting yacht price:', error);
         return null;
       }
 

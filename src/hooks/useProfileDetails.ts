@@ -127,8 +127,7 @@ export function useProfileDetails() {
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
       toast.success('Данные сохранены');
     },
-    onError: (error) => {
-      console.error('Profile details update error:', error);
+    onError: () => {
       toast.error('Ошибка сохранения');
     },
   });

@@ -30,7 +30,6 @@ export function useYachtAvailability(yachtId?: string) {
         .order('date', { ascending: true });
 
       if (error) {
-        console.error('Error fetching yacht availability:', error);
         return [];
       }
 
@@ -127,7 +126,6 @@ export function useCheckYachtAvailability(yachtId?: string, startDate?: Date, en
       });
 
       if (error) {
-        console.error('Error checking yacht availability:', error);
         return { isAvailable: true, blockedDates: [] };
       }
 

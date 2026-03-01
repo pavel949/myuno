@@ -30,8 +30,7 @@ export function useAutoTranslate() {
         translated: data?.translated || '', 
         success: true 
       };
-    } catch (error) {
-      console.error('Translation error:', error);
+    } catch {
       toast.error(targetLang === 'ru' 
         ? 'Ошибка перевода' 
         : 'Translation error'

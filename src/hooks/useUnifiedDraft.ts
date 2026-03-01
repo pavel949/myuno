@@ -93,8 +93,8 @@ export function useUnifiedDraft<T extends object>({
           };
         }
       }
-    } catch (e) {
-      console.warn('Failed to load unified draft:', e);
+    } catch {
+      // Silent fail for draft loading
     }
     
     // Try legacy keys
@@ -141,8 +141,8 @@ export function useUnifiedDraft<T extends object>({
             return migrated;
           }
         }
-      } catch (e) {
-        console.warn('Failed to migrate legacy draft:', e);
+      } catch {
+        // Silent fail for legacy draft migration
       }
     }
     
@@ -200,8 +200,8 @@ export function useUnifiedDraft<T extends object>({
       setLastSaved(new Date());
       setDraftMetadata(draftData.metadata);
       lastSavedDataRef.current = JSON.stringify(dataRef.current);
-    } catch (e) {
-      console.error('Failed to save draft:', e);
+    } catch {
+      // Silent fail for draft saving
     }
     
     // Clear saving indicator after brief delay
@@ -263,8 +263,8 @@ export function useUnifiedDraft<T extends object>({
             },
           };
           localStorage.setItem(storageKey, JSON.stringify(draftData));
-        } catch (e) {
-          console.warn('Failed to save draft on unmount:', e);
+        } catch {
+          // Silent fail for unmount draft save
         }
       }
     };

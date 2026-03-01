@@ -197,8 +197,9 @@ export function useGenerateReport() {
       const allowedIncomeCategories = input.incomeCategories;
       const allowedExpenseCategories = input.expenseCategories;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (financials || []).forEach((f: any) => {
-        const cat = f.category || 'other';
+        const cat = (f.category as string) || 'other';
         if (f.transaction_type === 'income' && shouldIncludeIncome) {
           if (allowedIncomeCategories && !allowedIncomeCategories.includes(cat)) return;
           income.total += Number(f.amount);
@@ -231,6 +232,7 @@ export function useGenerateReport() {
       const totalNights = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
       let nightsBooked = 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (bookings || []).forEach((b: any) => {
         const checkIn = new Date(b.check_in_date);
         const checkOut = new Date(b.check_out_date);
@@ -252,6 +254,7 @@ export function useGenerateReport() {
           rate: totalNights > 0 ? Math.round((nightsBooked / totalNights) * 100) : 0,
           bookings_count: bookings?.length || 0,
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bookings: (bookings || []).map((b: any) => ({
           id: b.id,
           guest_name: b.guest_name || 'Guest',

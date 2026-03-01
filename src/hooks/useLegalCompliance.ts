@@ -45,12 +45,12 @@ export function useLegalCompliance() {
 
       // Build set of accepted doc_key+version
       const acceptedSet = new Set(
-        (acceptances || []).map((a: any) => `${a.doc_key}::${a.version}`)
+        (acceptances || []).map((a: { doc_key: string; version: string }) => `${a.doc_key}::${a.version}`)
       );
 
       // Filter to pending (not yet accepted)
       const pendingDocs = activeDocs.filter(
-        (doc: any) => !acceptedSet.has(`${doc.doc_key}::${doc.version}`)
+        (doc: { doc_key: string; version: string }) => !acceptedSet.has(`${doc.doc_key}::${doc.version}`)
       ) as LegalDocument[];
 
       return {

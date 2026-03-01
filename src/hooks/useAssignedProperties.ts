@@ -76,7 +76,6 @@ export function useAssignedProperties() {
         .eq('is_active', true);
 
       if (assignError) {
-        console.error('Error fetching assignments:', assignError);
         throw assignError;
       }
 

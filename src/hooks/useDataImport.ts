@@ -7,7 +7,7 @@ import { autoMapColumn, getTargetFields, importTargets } from '@/lib/importTempl
 
 export interface ParsedData {
   headers: string[];
-  rows: Record<string, any>[];
+  rows: Record<string, unknown>[];
   fileName: string;
 }
 
@@ -26,19 +26,19 @@ export interface ImportResult {
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 // Sanitize parsed values to prevent prototype pollution
-function sanitizeValue(value: any): any {
+function sanitizeValue(value: unknown): unknown {
   if (value === null || value === undefined) return '';
   if (typeof value === 'object') {
     // Prevent prototype pollution by not allowing __proto__, constructor, prototype keys
     if (Array.isArray(value)) {
       return value.map(sanitizeValue);
     }
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, unknown> = {};
     for (const key of Object.keys(value)) {
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
         continue;
       }
-      sanitized[key] = sanitizeValue(value[key]);
+      sanitized[key] = sanitizeValue((value as Record<string, unknown>)[key]);
     }
     return sanitized;
   }
@@ -46,17 +46,14 @@ function sanitizeValue(value: any): any {
 }
 
 // Parse CSV file using Papa Parse (safe, well-maintained library)
-async function parseCSV(file: File): Promise<{ headers: string[]; rows: Record<string, any>[] }> {
+async function parseCSV(file: File): Promise<{ headers: string[]; rows: Record<string, unknown>[] }> {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        if (results.errors.length > 0) {
-          console.warn('CSV parse warnings:', results.errors);
-        }
         const headers = results.meta.fields || [];
-        const rows = (results.data as Record<string, any>[]).map(row => sanitizeValue(row));
+        const rows = (results.data as Record<string, unknown>[]).map(row => sanitizeValue(row) as Record<string, unknown>);
         resolve({ headers, rows });
       },
       error: (error) => {
@@ -67,7 +64,7 @@ async function parseCSV(file: File): Promise<{ headers: string[]; rows: Record<s
 }
 
 // Parse Excel file using ExcelJS (safer than xlsx)
-async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record<string, any>[] }> {
+async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record<string, unknown>[] }> {
   const arrayBuffer = await file.arrayBuffer();
   const workbook = new ExcelJS.Workbook();
   
@@ -88,7 +85,7 @@ async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record
   }
   
   const headers: string[] = [];
-  const rows: Record<string, any>[] = [];
+  const rows: Record<string, unknown>[] = [];
   
   // Get headers from first row
   const headerRow = worksheet.getRow(1);
@@ -99,7 +96,7 @@ async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record
   // Get data rows
   for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
     const row = worksheet.getRow(rowIndex);
-    const rowData: Record<string, any> = {};
+    const rowData: Record<string, unknown> = {};
     let hasData = false;
     
     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
@@ -146,7 +143,7 @@ export function useDataImport() {
       
       const extension = file.name.toLowerCase().split('.').pop();
       let headers: string[];
-      let rows: Record<string, any>[];
+      let rows: Record<string, unknown>[];
       
       if (extension === 'csv') {
         const result = await parseCSV(file);
@@ -203,22 +200,22 @@ export function useDataImport() {
   }, []);
 
   // Transform parsed data according to mappings
-  const transformData = useCallback((data: ParsedData, mappings: FieldMapping[]): Record<string, any>[] => {
+  const transformData = useCallback((data: ParsedData, mappings: FieldMapping[]): Record<string, unknown>[] => {
     const activeMappings = mappings.filter(m => m.targetField);
     
     return data.rows.map(row => {
-      const transformed: Record<string, any> = {};
+      const transformed: Record<string, unknown> = {};
       
       for (const mapping of activeMappings) {
         const value = row[mapping.sourceColumn];
         if (value !== undefined && value !== '') {
           // Type conversions
           if (mapping.targetField?.includes('price') || mapping.targetField?.includes('rating')) {
-            transformed[mapping.targetField] = parseFloat(value) || 0;
+            transformed[mapping.targetField] = parseFloat(String(value)) || 0;
           } else if (mapping.targetField?.startsWith('is_') || mapping.targetField?.includes('stock')) {
             transformed[mapping.targetField] = Boolean(value) || value === 'true' || value === '1' || value === 'yes';
           } else if (mapping.targetField?.includes('quantity')) {
-            transformed[mapping.targetField] = parseInt(value, 10) || 0;
+            transformed[mapping.targetField] = parseInt(String(value), 10) || 0;
           } else {
             transformed[mapping.targetField] = String(value);
           }
@@ -232,7 +229,7 @@ export function useDataImport() {
   // Import data to database
   const importData = useCallback(async (
     targetId: string, 
-    data: Record<string, any>[], 
+    data: Record<string, unknown>[], 
     selectedIndices?: number[]
   ): Promise<ImportResult> => {
     setIsLoading(true);
@@ -250,7 +247,7 @@ export function useDataImport() {
         : data;
       
       // Validate required fields
-      const validRecords: Record<string, any>[] = [];
+      const validRecords: Record<string, unknown>[] = [];
       for (let i = 0; i < recordsToImport.length; i++) {
         const record = recordsToImport[i];
         const missingFields = target.requiredFields.filter(f => !record[f]);
