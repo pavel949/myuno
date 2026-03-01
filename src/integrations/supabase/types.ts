@@ -15090,38 +15090,112 @@ export type Database = {
       property_complexes: {
         Row: {
           address: string | null
+          amenities: string[] | null
+          cam_fee_per_sqm: number | null
+          cam_includes: string[] | null
+          complex_type: string | null
+          cover_image: string | null
           created_at: string
           description: string | null
+          description_en: string | null
+          description_ru: string | null
           district: string | null
           id: string
+          images: string[] | null
+          infrastructure: string[] | null
+          is_active: boolean | null
+          juristic_email: string | null
+          juristic_person_name: string | null
+          juristic_phone: string | null
+          lat: number | null
+          lng: number | null
+          management_company_id: string | null
           name: string
           name_ru: string | null
           owner_id: string
+          security_features: string[] | null
+          services: string[] | null
+          total_buildings: number | null
+          total_floors: number | null
+          total_units: number | null
           updated_at: string
+          year_built: number | null
         }
         Insert: {
           address?: string | null
+          amenities?: string[] | null
+          cam_fee_per_sqm?: number | null
+          cam_includes?: string[] | null
+          complex_type?: string | null
+          cover_image?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
+          description_ru?: string | null
           district?: string | null
           id?: string
+          images?: string[] | null
+          infrastructure?: string[] | null
+          is_active?: boolean | null
+          juristic_email?: string | null
+          juristic_person_name?: string | null
+          juristic_phone?: string | null
+          lat?: number | null
+          lng?: number | null
+          management_company_id?: string | null
           name: string
           name_ru?: string | null
           owner_id: string
+          security_features?: string[] | null
+          services?: string[] | null
+          total_buildings?: number | null
+          total_floors?: number | null
+          total_units?: number | null
           updated_at?: string
+          year_built?: number | null
         }
         Update: {
           address?: string | null
+          amenities?: string[] | null
+          cam_fee_per_sqm?: number | null
+          cam_includes?: string[] | null
+          complex_type?: string | null
+          cover_image?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
+          description_ru?: string | null
           district?: string | null
           id?: string
+          images?: string[] | null
+          infrastructure?: string[] | null
+          is_active?: boolean | null
+          juristic_email?: string | null
+          juristic_person_name?: string | null
+          juristic_phone?: string | null
+          lat?: number | null
+          lng?: number | null
+          management_company_id?: string | null
           name?: string
           name_ru?: string | null
           owner_id?: string
+          security_features?: string[] | null
+          services?: string[] | null
+          total_buildings?: number | null
+          total_floors?: number | null
+          total_units?: number | null
           updated_at?: string
+          year_built?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "property_complexes_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_delegates: {
         Row: {

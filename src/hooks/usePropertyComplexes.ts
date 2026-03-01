@@ -9,12 +9,42 @@ export interface PropertyComplex {
   name: string;
   name_ru?: string;
   description?: string;
+  description_en?: string;
+  description_ru?: string;
   address?: string;
   district?: string;
+  // Classification
+  complex_type?: string;
+  total_units?: number;
+  total_buildings?: number;
+  year_built?: number;
+  total_floors?: number;
+  // Location
+  lat?: number;
+  lng?: number;
+  // Media
+  cover_image?: string;
+  images?: string[];
+  // Amenities & Services
+  amenities?: string[];
+  services?: string[];
+  security_features?: string[];
+  infrastructure?: string[];
+  // Management
+  management_company_id?: string;
+  cam_fee_per_sqm?: number;
+  cam_includes?: string[];
+  juristic_person_name?: string;
+  juristic_phone?: string;
+  juristic_email?: string;
+  // Status
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
 }
-// Type-safe: property_complexes exists in Database schema
+
+export type ComplexFormData = Omit<PropertyComplex, 'id' | 'owner_id' | 'created_at' | 'updated_at'>;
+
 const db = supabase;
 
 export function usePropertyComplexes() {
@@ -39,11 +69,11 @@ export function useCreateComplex() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: Omit<PropertyComplex, 'id' | 'owner_id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (payload: ComplexFormData) => {
       if (!user) throw new Error('Not authenticated');
       const { data, error } = await db
         .from('property_complexes')
-        .insert({ ...payload, owner_id: user.id })
+        .insert({ ...payload, owner_id: user.id } as any)
         .select()
         .single();
       if (error) throw error;
@@ -51,6 +81,7 @@ export function useCreateComplex() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-complexes'] });
+      toast.success('Комплекс создан');
     },
   });
 }
@@ -62,7 +93,7 @@ export function useUpdateComplex() {
     mutationFn: async ({ id, ...updates }: Partial<PropertyComplex> & { id: string }) => {
       const { data, error } = await db
         .from('property_complexes')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
@@ -71,6 +102,7 @@ export function useUpdateComplex() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-complexes'] });
+      toast.success('Комплекс обновлён');
     },
   });
 }
@@ -93,7 +125,6 @@ export function useDeleteComplex() {
   });
 }
 
-/** Assign property to complex (or remove — pass null) */
 export function useAssignPropertyToComplex() {
   const queryClient = useQueryClient();
 
@@ -109,5 +140,23 @@ export function useAssignPropertyToComplex() {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['property-complexes'] });
     },
+  });
+}
+
+/** Hook to get amenities inherited from a property's complex */
+export function useComplexAmenities(complexId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['complex-amenities', complexId],
+    enabled: !!complexId,
+    queryFn: async () => {
+      const { data, error } = await db
+        .from('property_complexes')
+        .select('amenities, services, security_features, infrastructure, name, name_ru')
+        .eq('id', complexId!)
+        .single();
+      if (error) throw error;
+      return data as Pick<PropertyComplex, 'amenities' | 'services' | 'security_features' | 'infrastructure' | 'name' | 'name_ru'>;
+    },
+    staleTime: 10 * 60 * 1000,
   });
 }
