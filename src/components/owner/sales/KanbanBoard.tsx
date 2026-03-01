@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AgentDeal, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, STAGE_PROBABILITIES, useUpdateDeal, daysSince, formatValue } from '@/hooks/useAgentDeals';
+import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, useUpdateDeal, daysSince, formatValue } from '@/hooks/useAgentDeals';
+import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -22,25 +23,7 @@ import {
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
 
-const stageColors: Record<DealStage, string> = {
-  new: 'border-t-primary',
-  contacted: 'border-t-info',
-  showing: 'border-t-warning',
-  negotiation: 'border-t-warning/70',
-  contract: 'border-t-accent-foreground',
-  closed_won: 'border-t-success',
-  closed_lost: 'border-t-destructive',
-};
-
-const stageBarColors: Record<DealStage, string> = {
-  new: 'bg-primary',
-  contacted: 'bg-info',
-  showing: 'bg-warning',
-  negotiation: 'bg-warning/70',
-  contract: 'bg-accent-foreground',
-  closed_won: 'bg-success',
-  closed_lost: 'bg-destructive',
-};
+// Colors are now derived from DynamicStage
 
 const dealTypeBadgeColors: Record<string, string> = {
   sale: 'bg-primary/15 text-primary border-primary/30',
@@ -158,11 +141,11 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
   );
 }
 
-function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DealStage; deals: AgentDeal[]; maxValue: number; agentMap: Map<string, string> }) {
+function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DynamicStage; deals: AgentDeal[]; maxValue: number; agentMap: Map<string, string> }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { setNodeRef, isOver } = useDroppable({ id: stage });
-  const label = isRu ? DEAL_STAGE_LABELS[stage].ru : DEAL_STAGE_LABELS[stage].en;
+  const { setNodeRef, isOver } = useDroppable({ id: stage.key });
+  const label = isRu ? stage.nameRu : stage.nameEn;
 
   const totalValue = deals.reduce((s, d) => s + (Number(d.deal_value || d.budget_max || 0)), 0);
   const barWidth = maxValue > 0 ? Math.max((totalValue / maxValue) * 100, 2) : 0;
@@ -172,7 +155,7 @@ function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DealStage; 
       ref={setNodeRef}
       className={cn(
         'flex-shrink-0 w-[220px] lg:w-[260px] xl:min-w-[240px] xl:flex-1 rounded-xl border border-t-4 bg-muted/30 flex flex-col',
-        stageColors[stage],
+        stage.borderColor,
         isOver && 'ring-2 ring-primary/50',
       )}
     >
@@ -186,7 +169,7 @@ function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DealStage; 
         <div className="mt-1.5">
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
             <div
-              className={cn('h-full rounded-full transition-all', stageBarColors[stage])}
+              className={cn('h-full rounded-full transition-all', stage.barColor)}
               style={{ width: `${barWidth}%` }}
             />
           </div>
@@ -208,9 +191,10 @@ function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DealStage; 
 interface Props {
   deals: AgentDeal[];
   members?: { user_id: string; name: string }[];
+  pipelineData: DynamicPipelineResult;
 }
 
-export function KanbanBoard({ deals, members = [] }: Props) {
+export function KanbanBoard({ deals, members = [], pipelineData }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -230,23 +214,28 @@ export function KanbanBoard({ deals, members = [] }: Props) {
   }, [members]);
 
   const dealsByStage = useMemo(() => {
-    const map: Record<DealStage, AgentDeal[]> = {} as any;
-    for (const s of DEAL_STAGES) map[s] = [];
+    const map: Record<string, AgentDeal[]> = {};
+    for (const s of pipelineData.stages) map[s.key] = [];
     for (const d of deals) {
-      if (map[d.stage as DealStage]) map[d.stage as DealStage].push(d);
+      if (map[d.stage]) map[d.stage].push(d);
+      else {
+        // Deal stage doesn't match any dynamic stage, put in first
+        const first = pipelineData.stages[0];
+        if (first) (map[first.key] = map[first.key] || []).push(d);
+      }
     }
     return map;
-  }, [deals]);
+  }, [deals, pipelineData.stages]);
 
   // Max column value for proportional bars
   const maxValue = useMemo(() => {
     let max = 0;
-    for (const s of DEAL_STAGES) {
-      const total = dealsByStage[s].reduce((sum, d) => sum + Number(d.deal_value || d.budget_max || 0), 0);
+    for (const s of pipelineData.stages) {
+      const total = (dealsByStage[s.key] || []).reduce((sum, d) => sum + Number(d.deal_value || d.budget_max || 0), 0);
       if (total > max) max = total;
     }
     return max;
-  }, [dealsByStage]);
+  }, [dealsByStage, pipelineData.stages]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const deal = deals.find(d => d.id === event.active.id);
@@ -264,16 +253,19 @@ export function KanbanBoard({ deals, members = [] }: Props) {
     if (!deal || deal.stage === newStage) return;
 
     try {
+      const oldLabel = pipelineData.getLabel(deal.stage, false);
+      const newLabel = pipelineData.getLabel(newStage, false);
+      const wonStage = pipelineData.stages.find(s => s.isWon);
       await updateDeal.mutateAsync({
         id: dealId,
         stage: newStage,
-        ...(newStage === 'closed_won' ? { closed_at: new Date().toISOString() } : {}),
+        ...(wonStage && newStage === wonStage.key ? { closed_at: new Date().toISOString() } : {}),
       });
       await addActivity.mutateAsync({
         deal_id: dealId,
         user_id: user!.id,
         activity_type: 'stage_change',
-        description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
+        description: `${oldLabel} → ${newLabel}`,
         stage_from: deal.stage,
         stage_to: newStage,
       });
@@ -285,8 +277,8 @@ export function KanbanBoard({ deals, members = [] }: Props) {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
-        {DEAL_STAGES.filter(s => s !== 'closed_lost').map(stage => (
-          <KanbanColumn key={stage} stage={stage} deals={dealsByStage[stage]} maxValue={maxValue} agentMap={agentMap} />
+        {pipelineData.activeStages.map(stage => (
+          <KanbanColumn key={stage.key} stage={stage} deals={dealsByStage[stage.key] || []} maxValue={maxValue} agentMap={agentMap} />
         ))}
       </div>
       <DragOverlay>
