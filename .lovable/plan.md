@@ -1,108 +1,168 @@
 
-# Онбординг-флоу для новой Управляющей Компании
+# Комплексный аудит и усиление RLS платформы myUNO
 
-## Обзор
+## Обнаруженные проблемы
 
-Создаём полноценный пошаговый мастер регистрации УК, доступный по маршруту `/mc/onboarding`. Флоу состоит из 4 шагов:
+### КРИТИЧЕСКИЕ (Privilege Escalation)
 
-1. **Регистрация УК** -- название, контакты, описание
-2. **Загрузка логотипа** -- брендирование
-3. **Приглашение первых сотрудников** -- email + роль
-4. **Добавление первого объекта** -- переход к существующему визарду
+**1. `profiles.user_type` используется в 25 RLS-политиках для проверки прав**
+Пользователь может сам обновить своё поле `user_type` через политику `Users can update own profile` (USING auth.uid() = id, без ограничения колонок). Это значит: любой пользователь может сделать себя admin, изменив user_type.
 
-## Архитектура
+Затронутые таблицы: `ai_agents`, `ai_agent_knowledge`, `ai_agent_logs`, `airport_bookings`, `airport_passengers`, `airport_suppliers`, `cohort_analytics`, `event_occurrences`, `experience_media`, `experience_pricing`, `funnel_analytics`, `orders`, `page_views`, `platform_events`, `platform_news` и другие (25 политик).
 
-### Backend (Edge Function)
+**2. `management_companies` UPDATE-политика содержит баг**
+Политика `Company members can update their company` сравнивает `management_company_members.company_id = management_company_members.id` (колонку с самой собой), вместо `management_company_members.company_id = management_companies.id`. Результат: никто не может обновить компанию через эту политику.
 
-**Новая Edge Function `register-mc/index.ts`:**
-- Принимает данные формы (name_en, name_ru, slug, email, phone, address, description)
-- Создаёт запись в `management_companies` (is_active=true, created_by=user.id)
-- Автоматически добавляет текущего пользователя в `management_company_members` с ролью `director`
-- Добавляет роль `property_manager` в `user_roles` (если отсутствует)
-- Возвращает `company_id`
+**3. Дублированные UPDATE-политики на `profiles`**
+Две идентичные политики: `Users can update own profile` и `Users can update their own profile`. Обе без ограничения колонок -- пользователь может менять любые поля, включая `user_type`.
 
-**Миграция:**
-- RLS-политика на `management_companies` для INSERT: authenticated users могут создавать (created_by = auth.uid())
-- Альтернативно, используем Edge Function с service role ключом, что безопаснее
+### ВЫСОКИЕ (Отсутствие защиты)
 
-### Frontend
+**4. 5 таблиц с RLS без политик (полная блокировка данных)**
+- `booking_notifications_log`
+- `inventory_inspections`
+- `property_documents`
+- `property_management_terms`
+- `property_meters`
 
-**1. Новая страница `src/pages/mc/MCOnboarding.tsx`**
+Данные в этих таблицах полностью недоступны через клиент (RLS включена, но нет ни одной политики).
 
-4-шаговый визард внутри `OnboardingLayout`:
+**5. `crm_web_form_submissions` -- INSERT с `WITH CHECK (true)`**
+Любой аутентифицированный пользователь может вставить произвольные данные в формы любой компании.
 
-- **Шаг 1: О компании** -- форма с полями name_en, name_ru, slug (авто-генерация из name_en), email, phone, address, description. Валидация обязательных полей.
-- **Шаг 2: Логотип** -- загрузка логотипа в storage bucket, превью. Можно пропустить.
-- **Шаг 3: Команда** -- мини-форма для приглашения до 3 сотрудников (email + роль). Использует существующую Edge Function `invite-team-member`. Можно пропустить.
-- **Шаг 4: Первый объект** -- кнопка перехода к `/mc/properties/new` или summary + "Начать работу"
+**6. `management_company_members` -- публичный SELECT**
+Политика `Anyone can view company memberships` позволяет видеть всех сотрудников всех УК (при is_active=true). Утечка организационной структуры.
 
-**2. Регистрация маршрута**
+**7. CRM INSERT-политики без проверки company_id**
+`crm_contacts`, `crm_contact_notes`, `crm_companies` -- INSERT-политики не проверяют, что пользователь является членом компании, в которую вставляет данные.
 
-- `pageRegistry.ts` -- добавить `MCOnboarding` lazy import
-- `AnimatedRoutes.tsx` -- добавить маршрут `/mc/onboarding` (вне MCGuard, но с проверкой auth)
+### СРЕДНИЕ (Несогласованность)
 
-**3. Точки входа**
+**8. Три разных подхода к проверке админских прав**
+- `profiles.user_type` (25 политик) -- НЕБЕЗОПАСНО
+- `user_roles` напрямую (61 политика)
+- `is_admin_or_uno_team()` helper (35 политик)
+- `has_role()` helper (99 политик)
 
-- Кнопка "Зарегистрировать УК" на `/owner` dashboard (в SetupPromptBanner или отдельный баннер)
-- MCGuard: если user авторизован но нет компаний -- показывать кнопку "Создать УК" вместо AccessDenied
-- CompanySwitcher: добавить кнопку "+ Создать УК" внизу списка
+Нужна единая точка входа.
 
-## Технические детали
+**9. MC-член без разграничения прав по модулям в RLS**
+Таблица `team_member_permissions` существует и заполняется, но RLS-политики на CRM, bookings и других MC-данных не используют её. Все проверяют только `is_company_member()` без учёта `can_view`/`can_edit`.
 
-### Edge Function `register-mc`
+**10. Bookings -- MC-менеджеры не видят бронирования своих объектов**
+Политики на `bookings` не включают проверку `is_mc_member_for_property()`. Менеджер УК не видит бронирования по своим объектам через RLS.
+
+---
+
+## План исправления
+
+### Фаза 1: Устранение критических уязвимостей
+
+**1.1 Заблокировать изменение `user_type` через профиль**
+- Создать триггер `BEFORE UPDATE ON profiles`, который запрещает изменение колонки `user_type` (только service role / admin может менять).
+- Удалить дублированную политику `Users can update their own profile`.
+
+**1.2 Мигрировать все 25 политик с `profiles.user_type` на `has_role()` / `is_admin_or_uno_team()`**
+Единый паттерн: вместо `profiles.user_type = 'admin'` использовать `is_admin_or_uno_team()` (security definer, без рекурсии).
+
+Таблицы для миграции: ai_agent_knowledge, ai_agent_logs, ai_agents, airport_booking_addons, airport_bookings, airport_passengers, airport_suppliers, cohort_analytics, event_occurrences, experience_media, experience_pricing, funnel_analytics, orders, page_views, platform_events, platform_news и остальные.
+
+**1.3 Исправить баг в `management_companies` UPDATE-политике**
+Заменить `management_company_members.company_id = management_company_members.id` на `management_company_members.company_id = management_companies.id`.
+
+### Фаза 2: Добавление недостающих политик
+
+**2.1 Таблицы без политик -- добавить корректные правила:**
+
+| Таблица | SELECT | INSERT | UPDATE | DELETE |
+|---------|--------|--------|--------|--------|
+| `booking_notifications_log` | MC-member по property | System only (service role) | -- | -- |
+| `inventory_inspections` | MC-member по property | MC-member | MC-member | MC-admin |
+| `property_documents` | Owner + MC-member + assigned manager | MC-member / owner | MC-admin / owner | MC-admin / owner |
+| `property_management_terms` | MC-director + owner + admin | MC-director | MC-director | Admin only |
+| `property_meters` | MC-member по property | MC-member | MC-member | MC-admin |
+
+**2.2 Закрыть CRM INSERT-политики проверкой компании**
+Добавить `WITH CHECK (is_company_member(auth.uid(), company_id))` для `crm_contacts`, `crm_contact_notes`, `crm_companies`, `crm_web_form_submissions`.
+
+**2.3 Ограничить публичную видимость членства в УК**
+Заменить `Anyone can view company memberships` на `Members can view their company colleagues` (company_id IN (SELECT...)).
+
+### Фаза 3: MC-иерархия и модульные права
+
+**3.1 Создать helper-функцию `mc_can_access()`**
 
 ```text
-POST /register-mc
-Body: { name_en, name_ru, slug, email, phone, address, description_en, description_ru }
-Auth: Bearer token (required)
-Response: { company_id, slug }
-```
+mc_can_access(user_id, company_id, module, action) -> boolean
 
 Логика:
-1. Проверить auth
-2. Генерировать slug если не передан (slugify name_en)
-3. INSERT в management_companies
-4. INSERT в management_company_members (role: director)
-5. UPSERT в user_roles (role: property_manager) если нет
-6. Вернуть company_id
+1. Если role = 'director' или 'admin' -> true (полный доступ)
+2. Иначе -> проверить team_member_permissions для module + action
+3. Если нет записи в permissions -> false (deny by default)
+```
 
-### Файлы для создания/изменения
+**3.2 Применить модульные проверки к CRM-таблицам**
+Заменить простые `is_company_member()` на `mc_can_access(auth.uid(), company_id, 'crm', 'view')` для SELECT и `mc_can_access(auth.uid(), company_id, 'crm', 'edit')` для INSERT/UPDATE/DELETE.
 
-| Файл | Действие |
-|------|----------|
-| `supabase/functions/register-mc/index.ts` | Создать -- Edge Function регистрации УК |
-| `src/pages/mc/MCOnboarding.tsx` | Создать -- 4-шаговый визард |
-| `src/components/layout/pageRegistry.ts` | Добавить MCOnboarding |
-| `src/components/layout/AnimatedRoutes.tsx` | Добавить маршрут /mc/onboarding |
-| `src/components/auth/MCGuard.tsx` | Заменить AccessDenied на кнопку "Создать УК" |
-| `src/components/owner/CompanySwitcher.tsx` | Добавить "+ Создать УК" внизу |
+Аналогично для модулей: finance, tasks, bookings, reports, staff.
 
-### Шаг 1: Форма регистрации
+**3.3 Bookings -- добавить MC-менеджерам доступ к бронированиям**
+Добавить SELECT-политику: `MC members can view property bookings` через `is_mc_member_for_property()`.
 
-Поля:
-- name_en (required) -- название на английском
-- name_ru (required) -- название на русском
-- email -- контактный email
-- phone -- телефон
-- address -- адрес офиса
-- description_en / description_ru -- краткое описание
+### Фаза 4: Единый стандарт и роли пользователя
 
-Slug генерируется автоматически из name_en (латиница, lowercase, дефисы).
+**4.1 Стандартизировать helper-функции**
 
-### Шаг 3: Приглашение команды
+| Функция | Назначение | Security |
+|---------|-----------|----------|
+| `has_role(user_id, role)` | Проверка app_role в user_roles | DEFINER |
+| `is_admin_or_uno_team()` | Платформенный админ | DEFINER |
+| `is_company_member(user_id, company_id)` | Членство в УК | DEFINER |
+| `is_mc_admin(user_id, company_id)` | Директор/админ УК | DEFINER |
+| `mc_can_access(user_id, company_id, module, action)` | Модульный доступ | DEFINER |
+| `is_mc_member_for_property(user_id, property_id)` | Доступ к объекту через УК | DEFINER |
 
-Переиспользуем существующую Edge Function `invite-team-member`. Показываем мини-форму: email + роль (manager/staff/accountant). До 3 приглашений. Каждое отправляется отдельным запросом. Шаг можно пропустить.
+**4.2 Профиль пользователя -- отображение ролей и прав**
+- На странице профиля вывести: platform roles (из user_roles), MC memberships (из management_company_members с ролью), module permissions (из team_member_permissions).
+- Роли и права read-only в профиле; изменения только через admin или MC-директора.
 
-### Интеграция с ActiveCompanyProvider
+### Фаза 5: Бизнес-логика принятия условий платформы
 
-После успешной регистрации:
-1. Инвалидируем query `user-companies`
-2. Устанавливаем новую компанию как activeCompanyId
-3. Перенаправляем на следующий шаг визарда
+**5.1 Только директор/владелец УК принимает Terms of Service**
+- Добавить RLS на `management_terms_activity`: INSERT только если `get_company_member_role(auth.uid(), company_id) = 'director'`.
+- Сотрудники УК при регистрации НЕ принимают условия платформы -- это делает только тот, кто создал/владеет УК.
 
-### UX
+---
 
-- Двуязычный интерфейс (ru/en) как во всём проекте
-- Используем существующий `OnboardingLayout` с прогресс-баром
-- Анимации через framer-motion (как в OwnerSetupWizard)
-- Mobile-first дизайн
+## Технический план миграций
+
+### Миграция 1: Критические исправления (Фаза 1)
+- Триггер на profiles для блокировки user_type
+- DROP + CREATE 25 политик (profiles.user_type -> has_role/is_admin_or_uno_team)
+- Исправление management_companies UPDATE-политики
+- Удаление дублированной profiles UPDATE-политики
+
+### Миграция 2: Недостающие политики (Фаза 2)
+- 5 таблиц без политик + CRM INSERT-ограничения + членство УК
+
+### Миграция 3: Модульные права (Фаза 3)
+- Функция mc_can_access() + обновление CRM/finance/booking политик
+
+### Миграция 4: Terms и профиль (Фазы 4-5)
+- Terms activity RLS + стандартизация
+
+### Фронтенд
+- Компонент отображения ролей и прав в профиле пользователя
+- Индикация текущего контекста (клиент vs директор УК) в UI
+
+---
+
+## Итого
+
+- **25 политик** мигрируются с profiles.user_type на user_roles (устранение privilege escalation)
+- **5 таблиц** получают недостающие политики
+- **1 критический баг** в management_companies исправляется
+- **Новая функция** mc_can_access() подключает модульные права к RLS
+- **CRM INSERT** закрываются проверкой членства
+- **Terms of Service** ограничиваются директорами УК
+- **Профиль** показывает роли и доступы пользователя
