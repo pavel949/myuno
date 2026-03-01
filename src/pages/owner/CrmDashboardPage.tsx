@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import {
   TrendingUp, Target, Users, ListTodo, Mail, ChevronRight,
   AlertTriangle, CheckCircle, Plus, ContactRound, BarChart3,
+  Percent, DollarSign, Activity,
 } from 'lucide-react';
-import { isToday, isPast, formatDistanceToNow } from 'date-fns';
+import { isToday, isPast } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function CrmDashboardPage() {
@@ -23,7 +24,6 @@ export default function CrmDashboardPage() {
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
 
-  // Data
   const { data: pipelines = [] } = useCrmPipelines(companyId);
   const { data: contactsResult } = useCrmContacts(companyId, 0, 1);
   const { data: todayCount = 0 } = useTodayTasksCount();
@@ -34,34 +34,36 @@ export default function CrmDashboardPage() {
   const deals = dealsResult?.data || [];
   const activeDeals = deals.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost');
   const wonDeals = deals.filter(d => d.stage === 'closed_won');
+  const lostDeals = deals.filter(d => d.stage === 'closed_lost');
+  const closedDeals = wonDeals.length + lostDeals.length;
+  const winRate = closedDeals > 0 ? Math.round((wonDeals.length / closedDeals) * 100) : 0;
+  const totalRevenue = wonDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
+  const weightedPipeline = activeDeals.reduce((sum, d) => {
+    const prob = { new: 0.1, contacted: 0.2, showing: 0.4, negotiation: 0.6, contract: 0.8 }[d.stage] || 0.1;
+    return sum + (d.deal_value || 0) * prob;
+  }, 0);
 
   const overdueCount = (overdueTasks || []).filter(
     t => t.due_date && isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date))
   ).length;
 
-  // Stage distribution for active deals
   const stageCounts: Partial<Record<DealStage, number>> = {};
   for (const d of activeDeals) {
     stageCounts[d.stage] = (stageCounts[d.stage] || 0) + 1;
   }
 
   const stats = [
-    {
-      labelEn: 'Contacts', labelRu: 'Контакты', value: totalContacts,
-      icon: ContactRound, color: 'text-primary', path: '/owner/contacts',
-    },
-    {
-      labelEn: 'Active Deals', labelRu: 'Активные сделки', value: activeDeals.length,
-      icon: TrendingUp, color: 'text-success', path: '/owner/sales',
-    },
-    {
-      labelEn: "Today's Tasks", labelRu: 'Задачи сегодня', value: todayCount,
-      icon: ListTodo, color: 'text-warning', path: '/owner/tasks',
-    },
-    {
-      labelEn: 'Overdue', labelRu: 'Просрочено', value: overdueCount,
-      icon: AlertTriangle, color: 'text-destructive', path: '/owner/tasks',
-    },
+    { labelEn: 'Contacts', labelRu: 'Контакты', value: totalContacts, icon: ContactRound, color: 'text-primary', path: '/owner/contacts' },
+    { labelEn: 'Active Deals', labelRu: 'Активные сделки', value: activeDeals.length, icon: TrendingUp, color: 'text-success', path: '/owner/sales' },
+    { labelEn: "Today's Tasks", labelRu: 'Задачи сегодня', value: todayCount, icon: ListTodo, color: 'text-warning', path: '/owner/tasks' },
+    { labelEn: 'Overdue', labelRu: 'Просрочено', value: overdueCount, icon: AlertTriangle, color: 'text-destructive', path: '/owner/tasks' },
+  ];
+
+  const kpi2 = [
+    { labelEn: 'Win Rate', labelRu: 'Конверсия', value: `${winRate}%`, icon: Percent, color: 'text-success' },
+    { labelEn: 'Won Revenue', labelRu: 'Выиграно', value: totalRevenue > 0 ? `${(totalRevenue / 1e6).toFixed(1)}M` : '0', icon: DollarSign, color: 'text-primary' },
+    { labelEn: 'Weighted Pipeline', labelRu: 'Взвеш. воронка', value: weightedPipeline > 0 ? `${(weightedPipeline / 1e6).toFixed(1)}M` : '0', icon: Activity, color: 'text-warning' },
+    { labelEn: 'Won Deals', labelRu: 'Выигранных', value: wonDeals.length, icon: CheckCircle, color: 'text-success' },
   ];
 
   const quickLinks = [
@@ -73,23 +75,14 @@ export default function CrmDashboardPage() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'CRM Обзор' : 'CRM Overview'}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Продажи, контакты и задачи' : 'Sales, contacts, and tasks'}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{isRu ? 'Продажи, контакты и задачи' : 'Sales, contacts, and tasks'}</p>
         </div>
         <div className="flex gap-2">
           {quickLinks.map(link => (
-            <Button
-              key={link.path + link.labelEn}
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={() => navigate(link.path)}
-            >
+            <Button key={link.path + link.labelEn} variant="outline" size="sm" className="text-xs" onClick={() => navigate(link.path)}>
               <link.icon className="h-3 w-3 mr-1" />
               {isRu ? link.labelRu : link.labelEn}
             </Button>
@@ -97,20 +90,31 @@ export default function CrmDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Primary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((stat) => (
-          <Card
-            key={stat.labelEn}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(stat.path)}
-          >
+        {stats.map(stat => (
+          <Card key={stat.labelEn} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(stat.path)}>
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-1.5">
                 <stat.icon className={cn('h-4 w-4', stat.color)} />
                 <span className="text-xs text-muted-foreground">{isRu ? stat.labelRu : stat.labelEn}</span>
               </div>
               <p className="text-2xl font-bold">{stat.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Secondary KPIs — conversion, revenue */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {kpi2.map(k => (
+          <Card key={k.labelEn}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <k.icon className={cn('h-4 w-4', k.color)} />
+                <span className="text-xs text-muted-foreground">{isRu ? k.labelRu : k.labelEn}</span>
+              </div>
+              <p className="text-2xl font-bold">{k.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -123,17 +127,14 @@ export default function CrmDashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-sm">{isRu ? 'Воронка продаж' : 'Sales Funnel'}</h3>
+                <h3 className="font-semibold text-sm">{isRu ? 'Конверсионная воронка' : 'Conversion Funnel'}</h3>
               </div>
               <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/sales')}>
                 {isRu ? 'Открыть' : 'Open'} <ChevronRight className="h-3 w-3 ml-0.5" />
               </Button>
             </div>
-
             {activeDeals.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {isRu ? 'Нет активных сделок' : 'No active deals'}
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет активных сделок' : 'No active deals'}</p>
             ) : (
               <div className="space-y-2">
                 {(Object.entries(stageCounts) as [DealStage, number][]).map(([stage, count]) => {
@@ -152,12 +153,12 @@ export default function CrmDashboardPage() {
                 })}
               </div>
             )}
-
             {wonDeals.length > 0 && (
               <div className="flex items-center gap-2 pt-2 border-t">
                 <CheckCircle className="h-3.5 w-3.5 text-success" />
                 <span className="text-xs text-muted-foreground">
                   {isRu ? `${wonDeals.length} закрытых сделок` : `${wonDeals.length} won deals`}
+                  {lostDeals.length > 0 && ` · ${lostDeals.length} ${isRu ? 'проиграно' : 'lost'}`}
                 </span>
               </div>
             )}
@@ -171,41 +172,25 @@ export default function CrmDashboardPage() {
               <div className="flex items-center gap-2">
                 <ListTodo className="h-4 w-4 text-warning" />
                 <h3 className="font-semibold text-sm">{isRu ? 'Срочные задачи' : 'Urgent Tasks'}</h3>
-                {overdueCount > 0 && (
-                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{overdueCount}</Badge>
-                )}
+                {overdueCount > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{overdueCount}</Badge>}
               </div>
               <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/tasks')}>
                 {isRu ? 'Все' : 'All'} <ChevronRight className="h-3 w-3 ml-0.5" />
               </Button>
             </div>
-
             {(() => {
               const urgent = (overdueTasks || [])
                 .filter(t => t.due_date && (isToday(new Date(t.due_date)) || isPast(new Date(t.due_date))))
                 .slice(0, 5);
-
               if (urgent.length === 0) {
-                return (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    {isRu ? 'Нет срочных задач ✓' : 'No urgent tasks ✓'}
-                  </p>
-                );
+                return <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет срочных задач ✓' : 'No urgent tasks ✓'}</p>;
               }
-
               return (
                 <div className="space-y-1.5">
                   {urgent.map(task => {
                     const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
                     return (
-                      <div
-                        key={task.id}
-                        className={cn(
-                          'flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer hover:bg-muted/80',
-                          isOverdue ? 'bg-destructive/5' : 'bg-muted/50'
-                        )}
-                        onClick={() => navigate('/owner/tasks')}
-                      >
+                      <div key={task.id} className={cn('flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer hover:bg-muted/80', isOverdue ? 'bg-destructive/5' : 'bg-muted/50')} onClick={() => navigate('/owner/tasks')}>
                         <span className="flex-1 truncate">{task.title}</span>
                         {isOverdue && <Badge variant="destructive" className="text-[10px] px-1 py-0">!</Badge>}
                       </div>
@@ -230,11 +215,8 @@ export default function CrmDashboardPage() {
               {isRu ? 'Настройки' : 'Settings'} <ChevronRight className="h-3 w-3 ml-0.5" />
             </Button>
           </div>
-
           {pipelines.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              {isRu ? 'Нет воронок' : 'No pipelines'}
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет воронок' : 'No pipelines'}</p>
           ) : (
             <div className="space-y-3">
               {pipelines.map(pipeline => (

@@ -5,9 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
+import { useCrmActivities, ACTIVITY_TYPE_CONFIG } from '@/hooks/useCrmActivities';
+import { useCrmTasks, useUpdateCrmTask } from '@/hooks/useCrmTasks';
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { CrmDocumentsSection } from '@/components/owner/contacts/CrmDocumentsSection';
+import { LifecycleStageBar } from '@/components/owner/contacts/LifecycleStageBar';
+import { CrmAiAssistantPanel } from '@/components/owner/contacts/CrmAiAssistantPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +22,7 @@ import {
   ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon,
   Clock, Pencil, Trash2, ChevronRight, Plus, Cake, Users, Heart,
   Briefcase, Globe, Star, SendHorizonal, FileText, DollarSign, MapPin,
+  ListTodo, CheckCircle, Sparkles,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow, format, differenceInYears } from 'date-fns';
@@ -65,16 +70,22 @@ export default function ContactDetail() {
   const { data: contact, isLoading } = useCrmContact(id);
   const { data: notes = [] } = useContactNotes(id);
   const { data: deals = [] } = useContactDeals(id);
+  const { data: activities = [] } = useCrmActivities(id);
+  const { data: allTasks = [] } = useCrmTasks({ status: 'pending' });
   const updateContact = useUpdateContact();
   const deleteContact = useDeleteContact();
   const addNote = useAddContactNote();
   const deleteNote = useDeleteContactNote();
+  const updateTask = useUpdateCrmTask();
   const { data: membership } = useMyCompanyId();
 
   const [showEdit, setShowEdit] = useState(false);
   const [showCreateDeal, setShowCreateDeal] = useState(false);
   const [noteType, setNoteType] = useState('note');
   const [noteText, setNoteText] = useState('');
+
+  // Filter tasks for this contact
+  const contactTasks = allTasks.filter(t => t.contact_id === id);
 
   if (isLoading) {
     return (
@@ -135,6 +146,20 @@ export default function ContactDetail() {
       : [...contact.tags, tag];
     await updateContact.mutateAsync({ id: contact.id, tags: newTags });
   };
+
+  const handleLifecycleChange = async (stage: string) => {
+    await updateContact.mutateAsync({ id: contact.id, lifecycle_stage: stage } as any);
+  };
+
+  const handleCompleteTask = async (taskId: string) => {
+    await updateTask.mutateAsync({ id: taskId, status: 'completed', completed_at: new Date().toISOString() });
+  };
+
+  // Merge activities and notes into a unified timeline
+  const timelineItems = [
+    ...notes.map(n => ({ type: 'note' as const, date: n.created_at, data: n })),
+    ...activities.map(a => ({ type: 'activity' as const, date: a.activity_date, data: a })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto space-y-6">
@@ -215,8 +240,16 @@ export default function ContactDetail() {
             </div>
           </div>
 
+          {/* Lifecycle Stage Bar */}
+          <div className="mt-4">
+            <LifecycleStageBar
+              currentStage={(contact as any).lifecycle_stage || 'lead'}
+              onChange={handleLifecycleChange}
+            />
+          </div>
+
           {/* Quick action chips */}
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-3">
             {contact.phone && (
               <a href={`tel:${contact.phone}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
                 <Phone className="h-3.5 w-3.5 text-primary" />{contact.phone}
@@ -243,12 +276,16 @@ export default function ContactDetail() {
 
       {/* Tabs layout */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-0">
+        <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-0 overflow-x-auto">
           <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
             {isRu ? 'Обзор' : 'Overview'}
           </TabsTrigger>
           <TabsTrigger value="deals" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
             {isRu ? 'Сделки' : 'Deals'} {deals.length > 0 && `(${deals.length})`}
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
+            <ListTodo className="h-3.5 w-3.5 mr-1.5" />
+            {isRu ? 'Задачи' : 'Tasks'} {contactTasks.length > 0 && `(${contactTasks.length})`}
           </TabsTrigger>
           <TabsTrigger value="documents" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
             <FileText className="h-3.5 w-3.5 mr-1.5" />
@@ -256,6 +293,10 @@ export default function ContactDetail() {
           </TabsTrigger>
           <TabsTrigger value="timeline" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
             {isRu ? 'Хронология' : 'Timeline'}
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5 text-sm">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            AI
           </TabsTrigger>
         </TabsList>
 
@@ -396,6 +437,40 @@ export default function ContactDetail() {
           )}
         </TabsContent>
 
+        {/* ===== TASKS ===== */}
+        <TabsContent value="tasks" className="mt-4 space-y-4">
+          {contactTasks.length === 0 ? (
+            <div className="text-center py-12 rounded-xl border bg-card">
+              <ListTodo className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-sm text-muted-foreground">{isRu ? 'Нет задач для этого контакта' : 'No tasks for this contact'}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {contactTasks.map(task => (
+                <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl border bg-card">
+                  <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
+                    <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{task.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="outline" className="text-[10px]">{task.task_type}</Badge>
+                      {task.due_date && (
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(task.due_date), 'd MMM', { locale })}
+                        </span>
+                      )}
+                      <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px]">
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         {/* ===== DOCUMENTS ===== */}
         <TabsContent value="documents" className="mt-4">
           {membership?.company_id ? (
@@ -412,7 +487,7 @@ export default function ContactDetail() {
           )}
         </TabsContent>
 
-        {/* ===== TIMELINE ===== */}
+        {/* ===== TIMELINE (unified: notes + activities) ===== */}
         <TabsContent value="timeline" className="mt-4 space-y-4">
           {/* Add note */}
           <div className="flex gap-2">
@@ -438,32 +513,60 @@ export default function ContactDetail() {
             </Button>
           </div>
 
-          {notes.length === 0 ? (
+          {timelineItems.length === 0 ? (
             <div className="text-center py-12 rounded-xl border bg-card">
               <Clock className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
-              <p className="text-sm text-muted-foreground">{isRu ? 'Нет заметок' : 'No notes yet'}</p>
+              <p className="text-sm text-muted-foreground">{isRu ? 'Нет активности' : 'No activity yet'}</p>
             </div>
           ) : (
             <div className="space-y-1">
-              {notes.map(note => (
-                <div key={note.id} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
-                  <span className="text-lg mt-0.5 shrink-0">{noteTypeIcons[note.note_type] || '📝'}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">{note.content}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {formatDistanceToNow(new Date(note.created_at), { addSuffix: true, locale })}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0 self-center"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ))}
+              {timelineItems.map((item, idx) => {
+                if (item.type === 'note') {
+                  const note = item.data as any;
+                  return (
+                    <div key={`note-${note.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
+                      <span className="text-lg mt-0.5 shrink-0">{noteTypeIcons[note.note_type] || '📝'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">{note.content}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {formatDistanceToNow(new Date(note.created_at), { addSuffix: true, locale })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0 self-center"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                } else {
+                  const activity = item.data as any;
+                  const config = ACTIVITY_TYPE_CONFIG[activity.activity_type];
+                  return (
+                    <div key={`act-${activity.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
+                      <span className={cn('text-sm mt-0.5 shrink-0 font-medium', config?.color || 'text-muted-foreground')}>
+                        {config ? (isRu ? config.labelRu : config.labelEn) : activity.activity_type}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {activity.subject && <p className="text-sm font-medium">{activity.subject}</p>}
+                        {activity.description && <p className="text-xs text-muted-foreground">{activity.description}</p>}
+                        {activity.outcome && <Badge variant="outline" className="text-[10px] mt-1">{activity.outcome}</Badge>}
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true, locale })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+              })}
             </div>
           )}
+        </TabsContent>
+
+        {/* ===== AI ASSISTANT ===== */}
+        <TabsContent value="ai" className="mt-4">
+          <CrmAiAssistantPanel contactId={contact.id} companyId={contact.company_id} />
         </TabsContent>
       </Tabs>
 
