@@ -12101,6 +12101,117 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_portal_settings: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          custom_welcome_message: string | null
+          custom_welcome_message_ru: string | null
+          id: string
+          owner_user_id: string
+          property_id: string
+          show_booking_calendar: boolean
+          show_booking_prices: boolean
+          show_deposits: boolean
+          show_documents: boolean
+          show_expenses_detail: boolean
+          show_financial_statements: boolean
+          show_guest_names: boolean
+          show_maintenance: boolean
+          show_mc_commission: boolean
+          show_occupancy_stats: boolean
+          show_owner_stays: boolean
+          show_payouts: boolean
+          show_utilities: boolean
+          statement_start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          custom_welcome_message?: string | null
+          custom_welcome_message_ru?: string | null
+          id?: string
+          owner_user_id: string
+          property_id: string
+          show_booking_calendar?: boolean
+          show_booking_prices?: boolean
+          show_deposits?: boolean
+          show_documents?: boolean
+          show_expenses_detail?: boolean
+          show_financial_statements?: boolean
+          show_guest_names?: boolean
+          show_maintenance?: boolean
+          show_mc_commission?: boolean
+          show_occupancy_stats?: boolean
+          show_owner_stays?: boolean
+          show_payouts?: boolean
+          show_utilities?: boolean
+          statement_start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          custom_welcome_message?: string | null
+          custom_welcome_message_ru?: string | null
+          id?: string
+          owner_user_id?: string
+          property_id?: string
+          show_booking_calendar?: boolean
+          show_booking_prices?: boolean
+          show_deposits?: boolean
+          show_documents?: boolean
+          show_expenses_detail?: boolean
+          show_financial_statements?: boolean
+          show_guest_names?: boolean
+          show_maintenance?: boolean
+          show_mc_commission?: boolean
+          show_occupancy_stats?: boolean
+          show_owner_stays?: boolean
+          show_payouts?: boolean
+          show_utilities?: boolean
+          statement_start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_portal_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_reports: {
         Row: {
           company_id: string | null

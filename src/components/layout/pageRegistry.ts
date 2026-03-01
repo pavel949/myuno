@@ -416,6 +416,11 @@ export const CrmCompaniesPage = lazy(() => import('@/pages/owner/CrmCompaniesPag
 export const CrmWebFormsPage = lazy(() => import('@/pages/owner/CrmWebFormsPage'));
 export const CrmAssignmentRulesPage = lazy(() => import('@/pages/owner/CrmAssignmentRulesPage'));
 export const OwnerModulesPage = lazy(() => import('@/pages/owner/OwnerModulesPage'));
+export const OwnerPortalSettingsPage = lazy(() => import('@/pages/owner/OwnerPortalSettingsPage'));
+
+// ── Owner Portal (property owner side) ──
+export const OwnerPortalDashboard = lazy(() => import('@/pages/owner-portal/OwnerPortalDashboard'));
+export const OwnerPortalPropertyView = lazy(() => import('@/pages/owner-portal/OwnerPortalPropertyView'));
 
 // ── Staff ──
 export const StaffDashboard = lazy(() => import('@/pages/staff/StaffDashboard'));
