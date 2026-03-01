@@ -82,8 +82,8 @@ export function useUserTracking() {
             utm_medium: new URLSearchParams(window.location.search).get('utm_medium'),
             utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign'),
           }, { onConflict: 'id' });
-      } catch (error) {
-        console.error('Session tracking error:', error);
+      } catch {
+        // Silent fail for tracking
       }
     };
 
@@ -96,8 +96,8 @@ export function useUserTracking() {
           .from('user_sessions')
           .update({ last_activity_at: new Date().toISOString() })
           .eq('id', sessionId);
-      } catch (error) {
-        console.error('Session update error:', error);
+      } catch {
+        // Silent fail for tracking
       }
     }, 60000); // Every minute
 
@@ -144,8 +144,8 @@ export function useUserTracking() {
           time_on_page: timeSpent,
           referrer_path: currentPage,
         })
-        .then(({ error }) => {
-          if (error) console.error('Page view tracking error:', error);
+        .then(() => {
+          // Page view tracked
         });
     }
 
@@ -175,8 +175,8 @@ export function useUserTracking() {
           page_path: location.pathname,
           session_id: sessionIdRef.current,
         }]);
-    } catch (error) {
-      console.error('Event tracking error:', error);
+    } catch {
+      // Silent fail for tracking
     }
   }, [location.pathname]);
 

@@ -174,9 +174,9 @@ export function useDataImport() {
       
       setParsedData(result);
       return result;
-    } catch (err: any) {
-      console.error('Parse error:', err);
-      toast.error(err.message || 'Failed to parse file');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to parse file';
+      toast.error(message);
       return null;
     } finally {
       setIsLoading(false);
@@ -296,10 +296,10 @@ export function useDataImport() {
       }
       
       return result;
-    } catch (err: any) {
-      console.error('Import error:', err);
-      toast.error(`Import failed: ${err.message}`);
-      result.errors.push(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Import failed';
+      toast.error(`Import failed: ${message}`);
+      result.errors.push(message);
       return result;
     } finally {
       setIsLoading(false);

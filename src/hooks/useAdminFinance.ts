@@ -99,7 +99,7 @@ export function useAdminFinance(days: number = 30) {
         .rpc('get_subscription_revenue', { p_days: days });
 
       if (subError) {
-        console.error('Subscription revenue error:', subError);
+        // Silently handle — subscriptionRevenue will default to 0
       }
 
       // Extract monthly revenue from RPC result
