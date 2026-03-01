@@ -46,11 +46,11 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { id: 'photo', icon: Camera, labelEn: 'Photo / Inspect', labelRu: 'Фото / Инспекция', path: '/mc/inspection', color: 'bg-blue-500' },
-  { id: 'booking', icon: BedDouble, labelEn: 'Add Booking', labelRu: 'Добавить бронь', path: '/mc/bookings/new', color: 'bg-emerald-500' },
+  { id: 'booking', icon: BedDouble, labelEn: 'Add Booking', labelRu: 'Добавить бронь', path: '/mc/calendar', color: 'bg-emerald-500' },
   { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Записать расход', path: '/mc/quick-expense', color: 'bg-amber-500' },
-  { id: 'task', icon: CalendarPlus, labelEn: 'Create Task', labelRu: 'Создать задачу', path: '/mc/tasks?action=new', color: 'bg-purple-500' },
-  { id: 'message', icon: Phone, labelEn: 'Message Guest', labelRu: 'Написать гостю', path: '/mc/guest-messages', color: 'bg-pink-500' },
+  { id: 'task', icon: CalendarPlus, labelEn: 'Create Task', labelRu: 'Создать задачу', path: '/mc/tasks', color: 'bg-purple-500' },
+  { id: 'photo', icon: Camera, labelEn: 'Inspection', labelRu: 'Инспекция', path: '/mc/inspection', color: 'bg-blue-500' },
+  { id: 'message', icon: Phone, labelEn: 'Messages', labelRu: 'Сообщения', path: '/mc/messages', color: 'bg-pink-500' },
   { id: 'note', icon: StickyNote, labelEn: 'Quick Note', labelRu: 'Заметка', path: '/mc/tasks?type=note', color: 'bg-teal-500' },
 ];
 
