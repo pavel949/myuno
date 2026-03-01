@@ -17,6 +17,7 @@ interface GeneratePdfOptions {
 const translations = {
   en: {
     title: 'Property Report',
+    perBookingTitle: 'Per-Booking Report',
     managementTitle: 'Management Report',
     ownerStatementTitle: 'Owner Statement',
     pnlTitle: 'Profit & Loss Report',
@@ -65,6 +66,7 @@ const translations = {
   },
   ru: {
     title: 'Отчёт по объекту',
+    perBookingTitle: 'Отчёт по заездам',
     managementTitle: 'Управленческий отчёт',
     ownerStatementTitle: 'Отчёт собственнику',
     pnlTitle: 'Отчёт о прибылях и убытках',
@@ -166,6 +168,7 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
   const isManagement = reportType === 'management' || options.isManagement;
   const isOwnerStatement = reportType === 'owner_statement';
   const isPnl = reportType === 'pnl';
+  const isPerBooking = reportType === 'per_booking';
   const t = translations[language];
   const catLabels = categoryLabels[language];
 
@@ -175,7 +178,8 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
   let yPosition = 20;
 
   // Header
-  const titleText = isOwnerStatement ? t.ownerStatementTitle
+  const titleText = isPerBooking ? t.perBookingTitle
+    : isOwnerStatement ? t.ownerStatementTitle
     : isPnl ? t.pnlTitle
     : isManagement ? t.managementTitle
     : t.title;
@@ -508,6 +512,69 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     doc.setTextColor(22, 163, 74);
     doc.text(`${t.netPayout}: ${formatCurrency(payout, currency)}`, 25, yPosition + 8);
     yPosition += 35;
+  }
+
+  // ---- Per-Booking Report Section ----
+  if (isPerBooking && data.bookings.length > 0) {
+    if (yPosition > 200) { doc.addPage(); yPosition = 20; }
+
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text(t.perBookingTitle, 20, yPosition);
+    yPosition += 10;
+
+    // Per-booking economics table
+    const perBookingRows = data.bookings.map(b => {
+      // Find expenses related to this booking period
+      const bookingExpenses = data.expenses.transactions
+        .filter(tr => tr.date >= b.check_in && tr.date <= b.check_out)
+        .reduce((sum, tr) => sum + tr.amount, 0);
+      const net = b.total_amount - bookingExpenses;
+      return [
+        b.guest_name,
+        b.source || '-',
+        formatDate(b.check_in),
+        formatDate(b.check_out),
+        formatCurrency(b.total_amount, currency),
+        formatCurrency(bookingExpenses, currency),
+        formatCurrency(net, currency),
+      ];
+    });
+
+    const perBookingLabels = language === 'ru'
+      ? [t.guestName, t.source, t.checkIn, t.checkOut, t.income, t.expenses, t.netIncome]
+      : [t.guestName, t.source, t.checkIn, t.checkOut, 'Revenue', 'Expenses', 'Net'];
+
+    autoTable(doc, {
+      startY: yPosition,
+      head: [perBookingLabels],
+      body: perBookingRows,
+      theme: 'striped',
+      headStyles: { fillColor: [99, 102, 241] },
+      margin: { left: 15, right: 15 },
+      styles: { fontSize: 8, ...fontStyles },
+      columnStyles: {
+        4: { halign: 'right' },
+        5: { halign: 'right' },
+        6: { halign: 'right', fontStyle: 'bold' },
+      },
+    });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 15;
+
+    // Per-booking totals
+    const totalRevenue = data.bookings.reduce((s, b) => s + b.total_amount, 0);
+    const avgPerBooking = data.bookings.length > 0 ? totalRevenue / data.bookings.length : 0;
+
+    if (yPosition > 250) { doc.addPage(); yPosition = 20; }
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, yPosition - 5, 180, 30, 3, 3, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`${language === 'ru' ? 'Всего заездов' : 'Total stays'}: ${data.bookings.length}`, 25, yPosition + 5);
+    doc.text(`${language === 'ru' ? 'Общий доход' : 'Total revenue'}: ${formatCurrency(totalRevenue, currency)}`, 25, yPosition + 15);
+    doc.text(`${language === 'ru' ? 'Средний чек' : 'Avg per booking'}: ${formatCurrency(avgPerBooking, currency)}`, 110, yPosition + 15);
+    yPosition += 40;
   }
 
   const pageCount = doc.getNumberOfPages();

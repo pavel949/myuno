@@ -76,6 +76,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { exportReportExcel } from '@/utils/exportFinancialsExcel';
 import { ReportSettingsSheet, ReportConfig } from '@/components/owner/reports/ReportSettingsSheet';
+import { ReportWizard } from '@/components/owner/reports/ReportWizard';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -401,6 +402,7 @@ export default function ReportsPage() {
       management: { en: 'Management', ru: 'Управленческий' },
       owner_statement: { en: 'Owner Statement', ru: 'Отчёт собственнику' },
       pnl: { en: 'P&L Report', ru: 'Отчёт P&L' },
+      per_booking: { en: 'Per Booking', ru: 'По заездам' },
     };
     return labels[type]?.[isRu ? 'ru' : 'en'] || type;
   };
@@ -553,259 +555,57 @@ export default function ReportsPage() {
               </Button>
             </DialogTrigger>
           </div>
-          <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{isRu ? 'Создать новый отчёт' : 'Generate New Report'}</DialogTitle>
+              <DialogTitle>{isRu ? 'Создать отчёт' : 'Generate Report'}</DialogTitle>
               <DialogDescription>
-                {isRu ? 'Выберите объект и период для генерации отчёта' : 'Select a property and period to generate a report'}
+                {isRu ? 'Мастер поможет настроить отчёт под ваши задачи' : 'The wizard will help you configure the report'}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              {/* Scope selector */}
-              <div className="space-y-2">
-                <Label>{isRu ? 'Область отчёта' : 'Report Scope'}</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { value: 'property' as ReportScope, icon: Home, label: isRu ? 'Объект' : 'Property' },
-                    { value: 'complex' as ReportScope, icon: Layers, label: isRu ? 'Комплекс' : 'Complex' },
-                    { value: 'owner' as ReportScope, icon: Users, label: isRu ? 'Собственник' : 'Owner' },
-                    { value: 'portfolio' as ReportScope, icon: Briefcase, label: isRu ? 'Весь портфель' : 'Full Portfolio' },
-                  ] as const).map(scope => {
-                    const Icon = scope.icon;
-                    return (
-                      <button
-                        key={scope.value}
-                        onClick={() => setGenerateScope(scope.value)}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm font-medium transition-colors ${
-                          generateScope === scope.value
-                            ? 'bg-primary/10 border-primary/30 text-primary'
-                            : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {scope.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            <ReportWizard
+              properties={allSelectableProperties.map((p: any) => ({
+                id: p.id || p.property_id,
+                title: p.title || p.title_en || '',
+                title_ru: p.title_ru,
+                complex_id: p.complex_id,
+              }))}
+              complexes={(complexes || []).map((c: any) => ({ id: c.id, name: c.name || c.name_en, name_ru: c.name_ru }))}
+              ownerContacts={(ownerContacts || []).map((o: any) => ({
+                id: o.id,
+                first_name: o.first_name,
+                last_name: o.last_name || '',
+                propertyIds: o.propertyIds || [],
+              }))}
+              onCancel={() => setShowGenerateDialog(false)}
+              onComplete={async (result) => {
+                const ids = result.propertyIds;
+                if (ids.length === 0) return;
+                setIsBatchGenerating(true);
+                try {
+                  for (const propId of ids) {
+                    await generateReport.mutateAsync({
+                      property_id: propId,
+                      report_type: result.reportType,
+                      period_start: result.periodStart,
+                      period_end: result.periodEnd,
+                      includeIncome: result.includeIncome,
+                      includeExpenses: result.includeExpenses,
+                    });
+                  }
+                  setShowGenerateDialog(false);
+                } finally {
+                  setIsBatchGenerating(false);
+                }
+              }}
+            />
+
+            {isBatchGenerating && (
+              <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {isRu ? 'Генерация отчётов...' : 'Generating reports...'}
               </div>
-
-              {/* Property selector (single property scope) */}
-              {generateScope === 'property' && (
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Объект' : 'Property'}</Label>
-                  <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allSelectableProperties.map((p: any) => (
-                        <SelectItem key={p.id || p.property_id} value={p.id || p.property_id}>
-                          {isRu ? p.title_ru || p.title : p.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Complex selector */}
-              {generateScope === 'complex' && (
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Комплекс' : 'Complex'}</Label>
-                  <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isRu ? 'Выберите комплекс' : 'Select complex'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(complexes || []).map((c: PropertyComplex) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {isRu ? c.name_ru || c.name : c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedComplexId && (
-                    <p className="text-xs text-muted-foreground">
-                      {isRu ? `${scopePropertyIds.length} объект(ов) в комплексе` : `${scopePropertyIds.length} properties in complex`}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Owner selector */}
-              {generateScope === 'owner' && (
-                <div className="space-y-2">
-                  <Label>{isRu ? 'Собственник' : 'Owner'}</Label>
-                  <Select value={selectedOwnerId} onValueChange={setSelectedOwnerId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isRu ? 'Выберите собственника' : 'Select owner'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(ownerContacts || []).map((o: any) => (
-                        <SelectItem key={o.id} value={o.id}>
-                          {o.first_name} {o.last_name}
-                          {o.propertyIds?.length > 0 && (
-                            <span className="text-muted-foreground ml-1">({o.propertyIds.length})</span>
-                          )}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedOwnerId && (
-                    <p className="text-xs text-muted-foreground">
-                      {isRu ? `${scopePropertyIds.length} объект(ов) собственника` : `${scopePropertyIds.length} owner properties`}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Portfolio summary */}
-              {generateScope === 'portfolio' && (
-                <div className="rounded-lg border bg-muted/30 p-3">
-                  <p className="text-sm text-muted-foreground">
-                    {isRu
-                      ? `Отчёт будет создан для всех ${scopePropertyIds.length} объектов в портфеле`
-                      : `Report will be generated for all ${scopePropertyIds.length} properties in portfolio`}
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>{isRu ? 'Тип отчёта' : 'Report Type'}</Label>
-                <Select value={selectedReportType} onValueChange={(v) => setSelectedReportType(v as ReportType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">{isRu ? 'Ежемесячный (прошлый месяц)' : 'Monthly (last month)'}</SelectItem>
-                    <SelectItem value="quarterly">{isRu ? 'Квартальный (прошлый квартал)' : 'Quarterly (last quarter)'}</SelectItem>
-                    <SelectItem value="annual">{isRu ? 'Годовой (прошлый год)' : 'Annual (last year)'}</SelectItem>
-                    <SelectItem value="owner_statement">{isRu ? 'Отчёт собственнику (Owner Statement)' : 'Owner Statement'}</SelectItem>
-                    <SelectItem value="pnl">{isRu ? 'Прибыль и убытки (P&L)' : 'Profit & Loss (P&L)'}</SelectItem>
-                    <SelectItem value="management">{isRu ? 'Управленческий отчёт (УК)' : 'Management Report'}</SelectItem>
-                    <SelectItem value="custom">{isRu ? 'Произвольный период' : 'Custom period'}</SelectItem>
-                  </SelectContent>
-                </Select>
-                {selectedReportType === 'management' && (
-                  <p className="text-xs text-muted-foreground">
-                    {isRu
-                      ? 'Включает заполняемость, комиссию УК, обслуживание и чистый доход собственника'
-                      : 'Includes occupancy, mgmt commission, maintenance and owner net income'}
-                  </p>
-                )}
-                {selectedReportType === 'owner_statement' && (
-                  <p className="text-xs text-muted-foreground">
-                    {isRu
-                      ? 'Ежемесячный отчёт собственнику: доходы, расходы, комиссия, итого к выплате'
-                      : 'Monthly owner report: income, expenses, commission, net payout'}
-                  </p>
-                )}
-                {selectedReportType === 'pnl' && (
-                  <p className="text-xs text-muted-foreground">
-                    {isRu
-                      ? 'Прибыль и убытки: валовая прибыль, операционные расходы, чистый доход, коэффициент расходов'
-                      : 'Profit & Loss: gross profit, operating expenses, net income, expense ratio'}
-                  </p>
-                )}
-              </div>
-
-              {selectedReportType === 'custom' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRu ? 'Начало' : 'Start'}</Label>
-                    <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRu ? 'Конец' : 'End'}</Label>
-                    <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              {/* Advanced: Income/Expense category configuration */}
-              <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Settings2 className="h-4 w-4" />
-                      {isRu ? 'Настроить категории' : 'Configure categories'}
-                    </span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-2">
-                  {/* Income toggle + categories */}
-                  <div className="space-y-2 rounded-lg border p-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-success">
-                        {isRu ? 'Доходы' : 'Income'}
-                      </Label>
-                      <Switch checked={includeIncome} onCheckedChange={setIncludeIncome} />
-                    </div>
-                    {includeIncome && (
-                      <div className="grid grid-cols-2 gap-2 pt-2">
-                        {INCOME_CATEGORIES.map(cat => (
-                          <label key={cat.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                            <Checkbox
-                              checked={selectedIncomeCategories.includes(cat.value)}
-                              onCheckedChange={(checked) => {
-                                setSelectedIncomeCategories(prev =>
-                                  checked
-                                    ? [...prev, cat.value]
-                                    : prev.filter(c => c !== cat.value)
-                                );
-                              }}
-                            />
-                            {isRu ? cat.labelRu : cat.labelEn}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Expense toggle + categories */}
-                  <div className="space-y-2 rounded-lg border p-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium text-destructive">
-                        {isRu ? 'Расходы' : 'Expenses'}
-                      </Label>
-                      <Switch checked={includeExpenses} onCheckedChange={setIncludeExpenses} />
-                    </div>
-                    {includeExpenses && (
-                      <div className="grid grid-cols-2 gap-2 pt-2">
-                        {EXPENSE_CATEGORIES.map(cat => (
-                          <label key={cat.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                            <Checkbox
-                              checked={selectedExpenseCategories.includes(cat.value)}
-                              onCheckedChange={(checked) => {
-                                setSelectedExpenseCategories(prev =>
-                                  checked
-                                    ? [...prev, cat.value]
-                                    : prev.filter(c => c !== cat.value)
-                                );
-                              }}
-                            />
-                            {isRu ? cat.labelRu : cat.labelEn}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Button
-                onClick={handleGenerate}
-                className="w-full"
-                disabled={scopePropertyIds.length === 0 || generateReport.isPending || isBatchGenerating}
-              >
-                {(generateReport.isPending || isBatchGenerating)
-                  ? (isRu ? `Генерация... ${scopePropertyIds.length > 1 ? `(${scopePropertyIds.length} объектов)` : ''}` : `Generating... ${scopePropertyIds.length > 1 ? `(${scopePropertyIds.length} properties)` : ''}`)
-                  : scopePropertyIds.length > 1
-                    ? (isRu ? `Создать ${scopePropertyIds.length} отчётов` : `Generate ${scopePropertyIds.length} Reports`)
-                    : (isRu ? 'Создать отчёт' : 'Generate Report')}
-              </Button>
-            </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
