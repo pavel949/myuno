@@ -55,7 +55,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: String(ops?.openTasks ?? 0),
       icon: ClipboardList,
       iconColor: 'text-primary',
-      href: '/owner/operations',
+      href: '/mc/operations',
       badge: ops && ops.openTasks > 5 ? alertBadge(ops.openTasks) : undefined,
     },
     deals: {
@@ -63,28 +63,28 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: ops ? `${ops.activeDeals} / ฿${fmt(ops.dealsPipelineValue)}` : '0',
       icon: Handshake,
       iconColor: 'text-accent-foreground',
-      href: '/owner/sales',
+      href: '/mc/sales',
     },
     bookings: {
       title: isRu ? 'Брони' : 'Bookings',
       value: String(ops?.upcomingBookings ?? 0),
       icon: BedDouble,
       iconColor: 'text-success',
-      href: '/owner/bookings',
+      href: '/mc/calendar',
     },
     staff: {
       title: isRu ? 'Персонал' : 'Staff',
       value: String(ops?.staffCount ?? 0),
       icon: Users,
       iconColor: 'text-primary',
-      href: '/owner/staff',
+      href: '/mc/staff',
     },
     service: {
       title: isRu ? 'Заявки' : 'Requests',
       value: String(ops?.openServiceRequests ?? 0),
       icon: Wrench,
       iconColor: 'text-warning',
-      href: '/owner/operations',
+      href: '/mc/operations',
       badge: ops && ops.openServiceRequests > 3 ? alertBadge(ops.openServiceRequests) : undefined,
     },
     inventory: {
@@ -92,7 +92,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: ops?.lowStockItems ? `!${ops.lowStockItems}` : '✓',
       icon: PackageOpen,
       iconColor: ops?.lowStockItems ? 'text-destructive' : 'text-success',
-      href: '/owner/inventory',
+      href: '/mc/inventory',
       badge: ops?.lowStockItems ? alertBadge(ops.lowStockItems) : undefined,
     },
   };
@@ -109,7 +109,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           change={revChange}
           trend={revChange >= 0 ? 'up' : 'down'}
           changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href="/owner/financials"
+          href="/mc/financials"
           loading={loading}
         />
         <OwnerKPICard
@@ -120,7 +120,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           change={expChange}
           trend={expChange <= 0 ? 'up' : 'down'}
           changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href="/owner/financials"
+          href="/mc/financials"
           loading={loading}
         />
         <OwnerKPICard
@@ -129,7 +129,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={Percent}
           iconColor="text-primary"
           trend={data && data.margin >= 30 ? 'up' : data && data.margin >= 0 ? 'neutral' : 'down'}
-          href="/owner/financials"
+          href="/mc/financials"
           loading={loading}
         />
         <OwnerKPICard
@@ -138,7 +138,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={CalendarCheck}
           iconColor="text-accent-foreground"
           trend={data && data.occupancyRate >= 70 ? 'up' : data && data.occupancyRate >= 40 ? 'neutral' : 'down'}
-          href="/owner/calendar"
+          href="/mc/calendar"
           loading={loading}
         />
         <OwnerKPICard

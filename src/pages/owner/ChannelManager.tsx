@@ -226,7 +226,7 @@ export default function ChannelManager() {
                     <p className="text-muted-foreground mb-4">
                       {isRu ? 'Нет подключённых каналов. Добавьте iCal-ссылку с вашего OTA.' : 'No connected channels. Add an iCal link from your OTA.'}
                     </p>
-                    <Button onClick={() => navigate('/owner/calendar')}>
+                    <Button onClick={() => navigate('/mc/calendar')}>
                       <Plus className="h-4 w-4 mr-2" />
                       {isRu ? 'Подключить канал' : 'Connect Channel'}
                     </Button>
@@ -282,7 +282,7 @@ export default function ChannelManager() {
                     <ExportLinkCard key={property.id} propertyId={property.id} propertyName={isRu ? property.title_ru || property.title : property.title} isRu={isRu} />
                   ))}
                   {properties.length > 3 && (
-                    <Button variant="ghost" className="w-full" onClick={() => navigate('/owner/calendar')}>
+                    <Button variant="ghost" className="w-full" onClick={() => navigate('/mc/calendar')}>
                       {isRu ? `Ещё ${properties.length - 3} объектов...` : `${properties.length - 3} more properties...`}
                     </Button>
                   )}

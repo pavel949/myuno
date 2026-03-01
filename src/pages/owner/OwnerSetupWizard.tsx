@@ -169,7 +169,7 @@ export default function OwnerSetupWizard() {
                 isRu={isRu}
                 hasProperties={hasProperties}
                 count={properties?.length || 0}
-                onAdd={() => navigate('/owner/properties/new')}
+                onAdd={() => navigate('/mc/properties/new')}
               />
             )}
             {currentStep === 2 && (
@@ -177,20 +177,20 @@ export default function OwnerSetupWizard() {
                 isRu={isRu}
                 hasChannels={hasChannels}
                 count={calendars?.length || 0}
-                onConnect={() => navigate('/owner/channels')}
+                onConnect={() => navigate('/mc/channels')}
               />
             )}
             {currentStep === 3 && (
               <PricingStep
                 isRu={isRu}
                 hasProperties={hasProperties}
-                onSetup={() => firstPropertyId && navigate(`/owner/properties/${firstPropertyId}/setup`)}
+                onSetup={() => firstPropertyId && navigate(`/mc/properties/${firstPropertyId}/setup`)}
               />
             )}
             {currentStep === 4 && (
               <MessagingStep
                 isRu={isRu}
-                onSetup={() => navigate('/owner/auto-messaging')}
+                onSetup={() => navigate('/mc/auto-messaging')}
               />
             )}
           </motion.div>

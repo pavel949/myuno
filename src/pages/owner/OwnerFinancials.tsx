@@ -143,11 +143,11 @@ export default function OwnerFinancials() {
           <p className="text-sm text-muted-foreground">{isRu ? 'Доходы и расходы по недвижимости' : 'Property income and expenses'}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/owner/budget')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/mc/budget')}>
             <Target className="h-4 w-4 mr-1" />
             {isRu ? 'Бюджет' : 'Budget'}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/owner/reports')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/mc/reports')}>
             <BarChart3 className="h-4 w-4 mr-1" />
             {isRu ? 'Отчёты' : 'Reports'}
           </Button>
@@ -188,17 +188,17 @@ export default function OwnerFinancials() {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <Button variant="default" className="flex-1 min-w-0" onClick={() => navigate('/owner/expenses/quick')}>
+        <Button variant="default" className="flex-1 min-w-0" onClick={() => navigate('/mc/expenses/quick')}>
           <Zap className="h-4 w-4 mr-2" />{isRu ? 'Расход' : 'Expense'}
         </Button>
         <Button
           variant="outline"
           className="flex-1 min-w-0 border-success text-success hover:bg-success/10"
-          onClick={() => navigate(`/owner/income/quick${selectedProperty !== 'all' ? `?propertyId=${selectedProperty}` : ''}`)}
+          onClick={() => navigate(`/mc/income/quick${selectedProperty !== 'all' ? `?propertyId=${selectedProperty}` : ''}`)}
         >
           <TrendingUp className="h-4 w-4 mr-2" />{isRu ? 'Доход' : 'Income'}
         </Button>
-        <Button variant="outline" className="flex-1 min-w-0" onClick={() => navigate('/owner/financials/new')}>
+        <Button variant="outline" className="flex-1 min-w-0" onClick={() => navigate('/mc/financials/new')}>
           <Plus className="h-4 w-4 mr-2" />{isRu ? 'Ещё' : 'More'}
         </Button>
         {selectedProperty !== 'all' && (

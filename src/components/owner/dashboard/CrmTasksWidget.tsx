@@ -65,7 +65,7 @@ export function CrmTasksWidget() {
             {urgentTasks.length}
           </Badge>
         </div>
-        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/tasks')}>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/tasks')}>
           {isRu ? 'Все' : 'All'} <ChevronRight className="h-3 w-3 ml-0.5" />
         </Button>
       </div>

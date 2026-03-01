@@ -138,7 +138,7 @@ export default function OwnerFinancialForm() {
       } else {
         await createFinancial.mutateAsync(payload);
       }
-      navigate('/owner/financials');
+      navigate('/mc/financials');
     } catch (error) {
       console.error('Error saving financial:', error);
     }

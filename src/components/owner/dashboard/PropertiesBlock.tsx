@@ -51,7 +51,7 @@ export function PropertiesBlock() {
             <p className="text-xs text-muted-foreground mb-3">
               {isRu ? 'Добавьте первый объект' : isTh ? 'เพิ่มอสังหาฯ แรก' : 'Add your first property'}
             </p>
-            <Button size="sm" onClick={() => navigate('/owner/properties/new')}>
+            <Button size="sm" onClick={() => navigate('/mc/properties/new')}>
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               {isRu ? 'Добавить' : isTh ? 'เพิ่ม' : 'Add property'}
             </Button>
@@ -74,7 +74,7 @@ export function PropertiesBlock() {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
-      onClick={() => navigate('/owner/properties')}
+      onClick={() => navigate('/mc/properties')}
     >
       <CardContent className="p-3">
         {/* Header */}
@@ -119,7 +119,7 @@ export function PropertiesBlock() {
                 className="relative shrink-0 group snap-start touch-manipulation"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/owner/properties/${property.id}`);
+                  navigate(`/mc/properties/${property.id}`);
                 }}
               >
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted">
@@ -157,7 +157,7 @@ export function PropertiesBlock() {
             className="w-14 h-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center shrink-0 snap-start touch-manipulation hover:border-primary/50 hover:bg-muted/50 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
-              navigate('/owner/properties/new');
+              navigate('/mc/properties/new');
             }}
           >
             <Plus className="h-5 w-5 text-muted-foreground" />

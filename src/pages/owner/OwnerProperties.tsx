@@ -182,11 +182,11 @@ export default function OwnerProperties() {
 
       {/* Action buttons */}
       <div className="flex gap-3 mb-4">
-        <Button className="flex-1" onClick={() => navigate('/owner/properties/new')}>
+        <Button className="flex-1" onClick={() => navigate('/mc/properties/new')}>
           <Plus className="h-4 w-4 mr-2" />
           {isRu ? 'Добавить объект' : 'Add Property'}
         </Button>
-        <Button variant="outline" onClick={() => navigate('/owner/properties/import')}>
+        <Button variant="outline" onClick={() => navigate('/mc/properties/import')}>
           <Download className="h-4 w-4 mr-2" />
           {isRu ? 'Импорт' : 'Import'}
         </Button>
@@ -298,7 +298,7 @@ export default function OwnerProperties() {
             <p className="text-muted-foreground mb-4">
               {isRu ? 'Добавьте вашу первую недвижимость для управления' : 'Add your first property to manage'}
             </p>
-            <Button onClick={() => navigate('/owner/properties/new')}>
+            <Button onClick={() => navigate('/mc/properties/new')}>
               <Plus className="h-4 w-4 mr-2" />
               {isRu ? 'Добавить' : 'Add Property'}
             </Button>

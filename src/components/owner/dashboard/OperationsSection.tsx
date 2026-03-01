@@ -56,7 +56,7 @@ export function OperationsSection() {
           <h2 className="font-semibold text-base">
             {isRu ? 'Операции' : isTh ? 'การดำเนินงาน' : 'Operations'}
           </h2>
-          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/operations')}>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/mc/operations')}>
             {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
             <ChevronRight className="h-3 w-3 ml-1" />
           </Button>
@@ -92,7 +92,7 @@ export function OperationsSection() {
             {pendingTasks.length} {isRu ? 'задач' : isTh ? 'งาน' : 'tasks'}
           </span>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/operations')}>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/mc/operations')}>
           {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
@@ -115,7 +115,7 @@ export function OperationsSection() {
                 type === 'check_out' ? 'border-l-warning' :
                 'border-l-info'
               )}
-              onClick={() => navigate(`/owner/operations?type=${type}`)}
+              onClick={() => navigate(`/mc/operations?type=${type}`)}
             >
               <div className="flex items-center gap-2">
                 <div className={cn("p-1.5 rounded-lg", config.bgColor)}>
