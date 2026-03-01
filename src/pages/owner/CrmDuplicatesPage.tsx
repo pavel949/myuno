@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useDetectDuplicates, DuplicateGroup } from '@/hooks/useCrmDuplicates';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,33 @@ export default function CrmDuplicatesPage() {
         if (dup.email && !keepContact.email) mergeFields.email = dup.email;
         if (dup.phone && !keepContact.phone) mergeFields.phone = dup.phone;
         if (dup.company_name && !keepContact.company_name) mergeFields.company_name = dup.company_name;
+      }
+
+      // Reassign deals from duplicate contacts to the kept contact
+      const dupIds = toDelete.map(d => d.id);
+      if (dupIds.length > 0) {
+        await supabase
+          .from('agent_deals')
+          .update({ contact_id: keepContact.id } as any)
+          .in('contact_id', dupIds);
+        
+        // Reassign CRM tasks
+        await supabase
+          .from('crm_tasks')
+          .update({ contact_id: keepContact.id } as any)
+          .in('contact_id', dupIds);
+        
+        // Reassign CRM notes
+        await (supabase as any)
+          .from('crm_contact_notes')
+          .update({ contact_id: keepContact.id })
+          .in('contact_id', dupIds);
+        
+        // Reassign CRM activities
+        await (supabase as any)
+          .from('crm_activities')
+          .update({ contact_id: keepContact.id })
+          .in('contact_id', dupIds);
       }
 
       if (Object.keys(mergeFields).length > 0) {

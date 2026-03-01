@@ -602,6 +602,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="automations" element={<LazyPage><Pages.CrmWorkflowsPage /></LazyPage>} />
           <Route path="crm-templates" element={<LazyPage><Pages.CrmTemplatesPage /></LazyPage>} />
           <Route path="duplicates" element={<LazyPage><Pages.CrmDuplicatesPage /></LazyPage>} />
+          <Route path="companies" element={<LazyPage><Pages.CrmCompaniesPage /></LazyPage>} />
           <Route path="forms" element={<LazyPage><Pages.CrmWebFormsPage /></LazyPage>} />
           <Route path="assignment" element={<LazyPage><Pages.CrmAssignmentRulesPage /></LazyPage>} />
           <Route path="vendors" element={<LazyPage><Pages.VendorDirectoryPage /></LazyPage>} />
