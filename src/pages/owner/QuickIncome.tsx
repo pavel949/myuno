@@ -4,7 +4,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { useMyDelegations } from '@/hooks/usePropertyDelegates';
-import { useCreateFinancial, INCOME_CATEGORIES, PAYMENT_METHODS } from '@/hooks/usePropertyFinancials';
+import { useCreateFinancial } from '@/hooks/usePropertyFinancials';
+import { QuickCategoryGrid } from '@/components/owner/QuickCategoryGrid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,13 +30,6 @@ const QUICK_PAYMENT_METHODS = [
   { value: 'card', icon: CreditCard, labelRu: 'Карта', labelEn: 'Card' },
 ];
 
-const INCOME_ICONS: Record<string, string> = {
-  rent: '🏠',
-  deposit: '🔐',
-  cleaning_fee: '🧹',
-  late_fee: '⏰',
-  other_income: '💰',
-};
 
 export default function QuickIncome() {
   const { language } = useLanguage();
@@ -195,25 +189,11 @@ export default function QuickIncome() {
           <Label className="text-xs text-muted-foreground mb-2 block">
             {isRu ? 'Категория' : 'Category'}
           </Label>
-          <div className="grid grid-cols-2 gap-2">
-            {INCOME_CATEGORIES.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setCategory(cat.value)}
-                className={cn(
-                  'flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-sm',
-                  category === cat.value
-                    ? 'border-success bg-success/10 text-success font-medium'
-                    : 'border-border bg-card hover:border-success/50'
-                )}
-              >
-                <span className="text-lg">{INCOME_ICONS[cat.value] || '💵'}</span>
-                <span className="text-xs leading-tight">
-                  {isRu ? cat.labelRu : cat.labelEn}
-                </span>
-              </button>
-            ))}
-          </div>
+          <QuickCategoryGrid
+            selectedCategory={category}
+            onSelect={setCategory}
+            type="income"
+          />
         </div>
 
         {/* Payment Method */}
