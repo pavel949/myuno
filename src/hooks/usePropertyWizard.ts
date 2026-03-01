@@ -8,6 +8,9 @@ import { useFormDraft } from '@/hooks/useFormDraft';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { supabase } from '@/integrations/supabase/client';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const untypedFrom = (table: string) => (supabase as any).from(table);
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 
 const errorLog = createErrorHandler('usePropertyWizard');
@@ -373,7 +376,7 @@ export function usePropertyWizard() {
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        const { data: newContact } = await supabase.from('crm_contacts').insert({
+        const { data: newContact } = await untypedFrom('crm_contacts').insert({
           company_id: activeOrgId,
           contact_type: 'owner',
           first_name: firstName,
@@ -383,15 +386,15 @@ export function usePropertyWizard() {
           source: 'property_wizard',
           lifecycle_stage: 'customer',
           created_by: userId,
-        } as any).select('id').single();
+        }).select('id').single();
 
         // Link owner contact to property
         if (newContact?.id) {
-          await supabase.from('properties').update({
+          await untypedFrom('properties').update({
             owner_contact_id: newContact.id,
-          } as any).eq('id', property.id);
+          }).eq('id', property.id);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         // Non-blocking — property is already saved
         errorLog.silent(error, 'auto_create_owner_contact');
       }
