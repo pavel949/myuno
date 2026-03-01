@@ -20,6 +20,7 @@ export function HomeProductsSection() {
   const expatProducts = useMemo(() => {
     return allProducts
       .filter(p => p.subcategory && EXPAT_CATEGORIES.includes(p.subcategory))
+      .filter(p => !!p.cover_image) // Only show products with photos
       .slice(0, 8);
   }, [allProducts]);
 
