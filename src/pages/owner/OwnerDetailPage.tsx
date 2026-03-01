@@ -85,10 +85,10 @@ export default function OwnerDetailPage() {
 
   // Financial aggregations
   const revenue = (detail?.financials || [])
-    .filter(f => (f as any).type === 'income')
+    .filter(f => (f as any).transaction_type === 'income')
     .reduce((s, f) => s + ((f as any).amount || 0), 0);
   const expenses = (detail?.financials || [])
-    .filter(f => (f as any).type === 'expense')
+    .filter(f => (f as any).transaction_type === 'expense')
     .reduce((s, f) => s + ((f as any).amount || 0), 0);
 
   const handleCreateReminder = async () => {
@@ -405,11 +405,11 @@ export default function OwnerDetailPage() {
                           <div>
                             <p className="text-sm font-medium">{f.description || f.category}</p>
                             <p className="text-xs text-muted-foreground">
-                              {f.date && format(parseISO(f.date), 'dd.MM.yyyy')}
+                              {f.transaction_date && format(parseISO(f.transaction_date), 'dd.MM.yyyy')}
                             </p>
                           </div>
-                          <span className={`text-sm font-semibold ${f.type === 'income' ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {f.type === 'income' ? '+' : '-'}฿{Math.abs(f.amount || 0).toLocaleString()}
+                          <span className={`text-sm font-semibold ${f.transaction_type === 'income' ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {f.transaction_type === 'income' ? '+' : '-'}฿{Math.abs(f.amount || 0).toLocaleString()}
                           </span>
                         </div>
                       ))}

@@ -12,8 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -22,7 +20,6 @@ import {
   UserCheck,
   UserX,
   Loader2,
-  ExternalLink,
   Zap,
   Building2,
 } from 'lucide-react';
