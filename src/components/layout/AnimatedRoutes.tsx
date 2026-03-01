@@ -617,7 +617,12 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
           <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
           <Route path="owner-reports" element={<Navigate to="/owner/reports" replace />} />
+          <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
         </Route>
+        
+        {/* ── Owner Portal (property owner read-only) ── */}
+        <Route path="/my-property" element={<AuthGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></AuthGuard>} />
+        <Route path="/my-property/:propertyId" element={<AuthGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></AuthGuard>} />
         
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
