@@ -1,0 +1,1 @@
+ALTER TABLE public.management_companies ADD COLUMN IF NOT EXISTS free_slots integer NOT NULL DEFAULT 0;

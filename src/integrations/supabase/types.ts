@@ -8813,6 +8813,7 @@ export type Database = {
           documents: Json | null
           email: string | null
           founded_year: number | null
+          free_slots: number
           has_24_7_support: boolean | null
           has_emergency_service: boolean | null
           id: string
@@ -8866,6 +8867,7 @@ export type Database = {
           documents?: Json | null
           email?: string | null
           founded_year?: number | null
+          free_slots?: number
           has_24_7_support?: boolean | null
           has_emergency_service?: boolean | null
           id?: string
@@ -8919,6 +8921,7 @@ export type Database = {
           documents?: Json | null
           email?: string | null
           founded_year?: number | null
+          free_slots?: number
           has_24_7_support?: boolean | null
           has_emergency_service?: boolean | null
           id?: string
