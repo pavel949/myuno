@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFinancialCategories, useCreateFinancialCategory } from '@/hooks/useFinancialCategories';
+import { CLASS_LABELS, CLASS_COLORS, type CategoryClass } from '@/lib/categoryDefaults';
 import type { LucideIcon } from 'lucide-react';
 import { 
   Brush, Wrench, Lightbulb, Droplet, Package, 
   Sofa, Plug, FileText, ShoppingBag, Shield, DollarSign,
-  Wifi, Heart, Scale, Megaphone, Building, CreditCard,
-  Calculator, Truck, PiggyBank, Plus, Loader2
+  Wifi, Scale, Megaphone, Building, CreditCard,
+  Calculator, PiggyBank, Plus, Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -45,7 +46,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   advertising: Megaphone,
   other: FileText,
   other_expense: FileText,
-  // income
   rent: Building,
   deposit: Shield,
   cleaning_fee: Brush,
@@ -71,7 +71,6 @@ const COLOR_MAP: Record<string, string> = {
   utilities: 'text-accent-cyan bg-accent-cyan/10',
   legal: 'text-info bg-info/10',
   advertising: 'text-accent-purple bg-accent-purple/10',
-  // income
   rent: 'text-success bg-success/10',
   deposit: 'text-info bg-info/10',
   cleaning_fee: 'text-info bg-info/10',
@@ -140,6 +139,15 @@ export function QuickCategoryGrid({
               )}>
                 {isRu ? cat.name_ru : cat.name_en}
               </span>
+              {/* Classification badge */}
+              {!isSelected && (
+                <span className={cn(
+                  'text-[8px] leading-none px-1 py-0.5 rounded font-medium border',
+                  CLASS_COLORS[cat.category_class] || 'text-muted-foreground bg-muted'
+                )}>
+                  {isRu ? CLASS_LABELS[cat.category_class]?.ru?.charAt(0) : CLASS_LABELS[cat.category_class]?.en?.charAt(0)}
+                </span>
+              )}
               {cat.isCustom && (
                 <span className="w-1 h-1 rounded-full bg-primary" />
               )}

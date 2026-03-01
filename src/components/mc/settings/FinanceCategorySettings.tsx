@@ -1,16 +1,204 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
-import { useCompanyCategorySettings, useToggleCategorySetting, useInitCategorySettings } from '@/hooks/useCompanyCategorySettings';
+import { useCompanyCategorySettings, useToggleCategorySetting, useInitCategorySettings, useUpdateCategoryOverrides } from '@/hooks/useCompanyCategorySettings';
 import { useFinancialCategories, useCreateFinancialCategory } from '@/hooks/useFinancialCategories';
+import {
+  getCategoryDefaults, CLASS_LABELS, GROUP_LABELS, ALLOCATION_LABELS, CLASS_COLORS, GROUP_ORDER,
+  type CategoryClass, type CategoryGroup, type AllocationMethod,
+} from '@/lib/categoryDefaults';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Plus, Check, X } from 'lucide-react';
+import { Loader2, Plus, Check, X, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
+// ─── Category Row with expandable classification editor ──────────────────
+function CategoryRow({
+  code, labelEn, labelRu, isEnabled, type, isRu, isPending,
+  onToggle, overrides,
+}: {
+  code: string; labelEn: string; labelRu: string;
+  isEnabled: boolean; type: 'expense' | 'income';
+  isRu: boolean; isPending: boolean;
+  onToggle: () => void;
+  overrides: ReturnType<typeof useCompanyCategorySettings>['settings'] extends (infer T)[] | null ? T | undefined : never;
+}) {
+  const [open, setOpen] = useState(false);
+  const updateOverrides = useUpdateCategoryOverrides();
+  const defaults = getCategoryDefaults(code, type);
+
+  const effectiveClass = (overrides as any)?.category_class || defaults.class;
+  const effectiveGroup = (overrides as any)?.category_group || defaults.group;
+  const effectiveProfit = (overrides as any)?.affects_net_profit ?? defaults.affectsProfit;
+  const effectiveTax = (overrides as any)?.is_tax_deductible ?? defaults.taxDeductible;
+  const effectiveAlloc = (overrides as any)?.allocation_method || defaults.allocation;
+
+  const handleOverride = (field: string, value: any) => {
+    updateOverrides.mutate({
+      category_type: type,
+      category_code: code,
+      [field]: value,
+    });
+  };
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className={cn(
+        'rounded-lg transition-colors border border-transparent',
+        open && 'border-border bg-muted/30',
+        !isEnabled && 'opacity-40',
+      )}>
+        <div className="flex items-center gap-2 py-1.5 px-2.5 hover:bg-muted/50 rounded-lg">
+          <CollapsibleTrigger asChild>
+            <button type="button" className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
+              {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            </button>
+          </CollapsibleTrigger>
+
+          <span className="text-sm text-foreground truncate flex-1 mr-1">
+            {isRu ? labelRu : labelEn}
+          </span>
+
+          {/* Classification chips */}
+          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
+            {isRu ? CLASS_LABELS[effectiveClass as CategoryClass]?.ru : CLASS_LABELS[effectiveClass as CategoryClass]?.en}
+          </Badge>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
+            {isRu ? GROUP_LABELS[effectiveGroup as CategoryGroup]?.ru : GROUP_LABELS[effectiveGroup as CategoryGroup]?.en}
+          </Badge>
+
+          <Switch
+            checked={isEnabled}
+            onCheckedChange={onToggle}
+            disabled={isPending}
+            className="shrink-0"
+          />
+        </div>
+
+        <CollapsibleContent>
+          <div className="px-3 pb-3 pt-1 grid grid-cols-2 gap-3">
+            {/* Class */}
+            <div>
+              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+              <Select value={effectiveClass} onValueChange={v => handleOverride('category_class', v)}>
+                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
+                    <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Group */}
+            <div>
+              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
+              <Select value={effectiveGroup} onValueChange={v => handleOverride('category_group', v)}>
+                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {GROUP_ORDER.map(k => (
+                    <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Allocation */}
+            <div>
+              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
+              <Select value={effectiveAlloc} onValueChange={v => handleOverride('allocation_method', v)}>
+                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(ALLOCATION_LABELS) as AllocationMethod[]).map(k => (
+                    <SelectItem key={k} value={k} className="text-xs">{isRu ? ALLOCATION_LABELS[k].ru : ALLOCATION_LABELS[k].en}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Toggles */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+                <Switch checked={effectiveProfit} onCheckedChange={v => handleOverride('affects_net_profit', v)} className="scale-75" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+                <Switch checked={effectiveTax} onCheckedChange={v => handleOverride('is_tax_deductible', v)} className="scale-75" />
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+// ─── Group header ────────────────────────────────────────────────────────
+function GroupSection({
+  group, cats, type, isRu, enabledCodes, settings, isPending, onToggle, onBulkToggle,
+}: {
+  group: CategoryGroup;
+  cats: { value: string; labelEn: string; labelRu: string }[];
+  type: 'expense' | 'income';
+  isRu: boolean;
+  enabledCodes: Set<string> | null;
+  settings: any[] | null;
+  isPending: boolean;
+  onToggle: (code: string, enabled: boolean) => void;
+  onBulkToggle: (codes: string[], enable: boolean) => void;
+}) {
+  const enabledInGroup = cats.filter(c => enabledCodes ? enabledCodes.has(c.value) : true).length;
+  const settingsMap = new Map((settings || []).map((s: any) => [s.category_code, s]));
+
+  return (
+    <div className="space-y-0.5">
+      <div className="flex items-center justify-between py-1.5 px-1">
+        <div className="flex items-center gap-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            {isRu ? GROUP_LABELS[group].ru : GROUP_LABELS[group].en}
+          </h4>
+          <span className="text-[10px] text-muted-foreground/60">{enabledInGroup}/{cats.length}</span>
+        </div>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
+            onClick={() => onBulkToggle(cats.map(c => c.value), true)} disabled={isPending}>
+            <Check className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Все' : 'All'}
+          </Button>
+          <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
+            onClick={() => onBulkToggle(cats.map(c => c.value), false)} disabled={isPending}>
+            <X className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Нет' : 'None'}
+          </Button>
+        </div>
+      </div>
+      {cats.map(cat => {
+        const isEnabled = enabledCodes ? enabledCodes.has(cat.value) : true;
+        return (
+          <CategoryRow
+            key={cat.value}
+            code={cat.value}
+            labelEn={cat.labelEn}
+            labelRu={cat.labelRu}
+            isEnabled={isEnabled}
+            type={type}
+            isRu={isRu}
+            isPending={isPending}
+            onToggle={() => onToggle(cat.value, isEnabled)}
+            overrides={settingsMap.get(cat.value)}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Main section per type ──────────────────────────────────────────────
 function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -24,26 +212,22 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const [showAdd, setShowAdd] = useState(false);
   const [newNameEn, setNewNameEn] = useState('');
   const [newNameRu, setNewNameRu] = useState('');
+  const [newClass, setNewClass] = useState<CategoryClass>('variable');
+  const [newGroup, setNewGroup] = useState<CategoryGroup>('operations');
+  const [newAffectsProfit, setNewAffectsProfit] = useState(true);
+  const [newTaxDeductible, setNewTaxDeductible] = useState(false);
 
   const handleInit = () => initMutation.mutate(type);
 
   const handleToggle = (code: string, currentEnabled: boolean) => {
-    toggleMutation.mutate({
-      category_type: type,
-      category_code: code,
-      is_enabled: !currentEnabled,
-    });
+    toggleMutation.mutate({ category_type: type, category_code: code, is_enabled: !currentEnabled });
   };
 
-  const handleBulkToggle = (enable: boolean) => {
-    standardCategories.forEach(cat => {
-      const isEnabled = enabledCodes ? enabledCodes.has(cat.value) : true;
+  const handleBulkToggle = (codes: string[], enable: boolean) => {
+    codes.forEach(code => {
+      const isEnabled = enabledCodes ? enabledCodes.has(code) : true;
       if (isEnabled !== enable) {
-        toggleMutation.mutate({
-          category_type: type,
-          category_code: cat.value,
-          is_enabled: enable,
-        });
+        toggleMutation.mutate({ category_type: type, category_code: code, is_enabled: enable });
       }
     });
   };
@@ -56,36 +240,67 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
       code,
       name_en: newNameEn.trim(),
       name_ru: newNameRu.trim() || newNameEn.trim(),
+      category_class: newClass,
+      category_group: newGroup,
+      affects_net_profit: newAffectsProfit,
+      is_tax_deductible: newTaxDeductible,
     });
     setShowAdd(false);
     setNewNameEn('');
     setNewNameRu('');
+    setNewClass('variable');
+    setNewGroup('operations');
+    setNewAffectsProfit(true);
+    setNewTaxDeductible(false);
   };
 
   if (isLoading) {
     return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {isRu ? 'Загрузка...' : 'Loading...'}</div>;
   }
 
-  const customCategories = categories.filter(c => c.isCustom);
+  // Group standard categories by their default group
+  const groupedCategories = new Map<CategoryGroup, typeof standardCategories>();
+  for (const cat of standardCategories) {
+    const defaults = getCategoryDefaults(cat.value, type);
+    const grp = defaults.group;
+    if (!groupedCategories.has(grp)) groupedCategories.set(grp, []);
+    groupedCategories.get(grp)!.push(cat);
+  }
+
   const enabledCount = enabledCodes ? enabledCodes.size : standardCategories.length;
+  const customCats = categories.filter(c => c.isCustom);
+
+  // Count by class for summary
+  const classCount: Record<string, number> = {};
+  for (const cat of standardCategories) {
+    const d = getCategoryDefaults(cat.value, type);
+    const isEnabled = enabledCodes ? enabledCodes.has(cat.value) : true;
+    if (isEnabled) classCount[d.class] = (classCount[d.class] || 0) + 1;
+  }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Settings2 className="h-4 w-4 text-muted-foreground" />
             {type === 'expense'
-              ? (isRu ? 'Категории расходов' : 'Expense Categories')
-              : (isRu ? 'Категории доходов' : 'Income Categories')
+              ? (isRu ? 'Статьи расходов' : 'Expense Categories')
+              : (isRu ? 'Статьи доходов' : 'Income Categories')
             }
           </h3>
           {hasSettings && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isRu
-                ? `${enabledCount} из ${standardCategories.length} активных`
-                : `${enabledCount} of ${standardCategories.length} active`
-              }
-            </p>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <span className="text-xs text-muted-foreground">
+                {isRu ? `${enabledCount} из ${standardCategories.length} активных` : `${enabledCount} of ${standardCategories.length} active`}
+              </span>
+              <span className="text-muted-foreground/30">•</span>
+              {Object.entries(classCount).map(([cls, count]) => (
+                <Badge key={cls} variant="outline" className={cn('text-[10px] px-1.5 py-0 h-4 font-normal border', CLASS_COLORS[cls as CategoryClass] || '')}>
+                  {count} {isRu ? CLASS_LABELS[cls as CategoryClass]?.ru?.toLowerCase() : CLASS_LABELS[cls as CategoryClass]?.en?.toLowerCase()}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
         {!hasSettings && (
@@ -98,79 +313,46 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
       {!hasSettings && (
         <p className="text-xs text-muted-foreground">
           {isRu
-            ? 'Все категории активны по умолчанию. Нажмите "Настроить", чтобы выбрать нужные.'
-            : 'All categories are active by default. Click "Configure" to customize.'}
+            ? 'Все категории активны по умолчанию. Нажмите "Настроить", чтобы выбрать нужные и настроить классификацию.'
+            : 'All categories are active by default. Click "Configure" to customize selection and classification.'}
         </p>
       )}
 
       {hasSettings && (
-        <>
-          {/* Bulk actions */}
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs px-2 text-muted-foreground"
-              onClick={() => handleBulkToggle(true)}
-              disabled={toggleMutation.isPending}
-            >
-              <Check className="h-3 w-3 mr-1" />
-              {isRu ? 'Все вкл' : 'Enable all'}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs px-2 text-muted-foreground"
-              onClick={() => handleBulkToggle(false)}
-              disabled={toggleMutation.isPending}
-            >
-              <X className="h-3 w-3 mr-1" />
-              {isRu ? 'Все выкл' : 'Disable all'}
-            </Button>
-          </div>
-
-          {/* 2-column grid on desktop, 1-column on mobile */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5">
-            {standardCategories.map(cat => {
-              const isEnabled = enabledCodes ? enabledCodes.has(cat.value) : true;
-              return (
-                <div
-                  key={cat.value}
-                  className={cn(
-                    "flex items-center justify-between py-1.5 px-2.5 rounded-lg transition-colors",
-                    "hover:bg-muted/50",
-                    !isEnabled && "opacity-50"
-                  )}
-                >
-                  <span className="text-sm text-foreground truncate mr-2">
-                    {isRu ? cat.labelRu : cat.labelEn}
-                  </span>
-                  <Switch
-                    checked={isEnabled}
-                    onCheckedChange={() => handleToggle(cat.value, isEnabled)}
-                    disabled={toggleMutation.isPending}
-                    className="shrink-0"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </>
+        <div className="space-y-4">
+          {GROUP_ORDER.filter(g => groupedCategories.has(g)).map(group => (
+            <GroupSection
+              key={group}
+              group={group}
+              cats={groupedCategories.get(group)!}
+              type={type}
+              isRu={isRu}
+              enabledCodes={enabledCodes}
+              settings={settings}
+              isPending={toggleMutation.isPending}
+              onToggle={handleToggle}
+              onBulkToggle={handleBulkToggle}
+            />
+          ))}
+        </div>
       )}
 
       {/* Custom categories */}
-      {customCategories.length > 0 && (
+      {customCats.length > 0 && (
         <div className="pt-2 border-t border-border">
-          <h4 className="text-xs font-medium text-muted-foreground mb-1.5">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
             {isRu ? 'Кастомные категории' : 'Custom Categories'}
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5">
-            {customCategories.map(cat => (
+          <div className="space-y-0.5">
+            {customCats.map(cat => (
               <div key={cat.code} className="flex items-center justify-between py-1.5 px-2.5 rounded-lg hover:bg-muted/50">
-                <span className="text-sm text-foreground truncate">
-                  {isRu ? cat.name_ru : cat.name_en}
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                <span className="text-sm text-foreground truncate">{isRu ? cat.name_ru : cat.name_en}</span>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[cat.category_class] || '')}>
+                    {isRu ? CLASS_LABELS[cat.category_class]?.ru : CLASS_LABELS[cat.category_class]?.en}
+                  </Badge>
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                </div>
               </div>
             ))}
           </div>
@@ -182,8 +364,9 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         {isRu ? 'Добавить свою' : 'Add custom'}
       </Button>
 
+      {/* Enhanced Add custom dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent className="sm:max-w-[360px]">
+        <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
             <DialogTitle>
               {isRu
@@ -192,13 +375,47 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <div>
-              <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
-              <Input value={newNameEn} onChange={e => setNewNameEn(e.target.value)} placeholder="e.g. Pool Maintenance" className="h-9 mt-1" />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
+                <Input value={newNameEn} onChange={e => setNewNameEn(e.target.value)} placeholder="e.g. Pool Maintenance" className="h-9 mt-1" />
+              </div>
+              <div>
+                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
+                <Input value={newNameRu} onChange={e => setNewNameRu(e.target.value)} placeholder="напр. Обслуживание бассейна" className="h-9 mt-1" />
+              </div>
             </div>
-            <div>
-              <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
-              <Input value={newNameRu} onChange={e => setNewNameRu(e.target.value)} placeholder="напр. Обслуживание бассейна" className="h-9 mt-1" />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Select value={newClass} onValueChange={v => setNewClass(v as CategoryClass)}>
+                  <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">{isRu ? 'Группа' : 'Group'}</Label>
+                <Select value={newGroup} onValueChange={v => setNewGroup(v as CategoryGroup)}>
+                  <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {GROUP_ORDER.map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <Label className="text-xs">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+              <Switch checked={newAffectsProfit} onCheckedChange={setNewAffectsProfit} />
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <Label className="text-xs">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+              <Switch checked={newTaxDeductible} onCheckedChange={setNewTaxDeductible} />
             </div>
           </div>
           <DialogFooter>
