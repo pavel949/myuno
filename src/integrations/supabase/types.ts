@@ -6185,6 +6185,59 @@ export type Database = {
           },
         ]
       }
+      financial_categories: {
+        Row: {
+          category_type: string
+          code: string
+          color: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name_en: string
+          name_ru: string
+          sort_order: number
+        }
+        Insert: {
+          category_type: string
+          code: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en: string
+          name_ru: string
+          sort_order?: number
+        }
+        Update: {
+          category_type?: string
+          code?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en?: string
+          name_ru?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flower_addons: {
         Row: {
           created_at: string
