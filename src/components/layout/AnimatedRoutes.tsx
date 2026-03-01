@@ -6,6 +6,7 @@
  */
 import React, { Suspense } from 'react';
 import { Routes, Route, useLocation, Navigate, Outlet, useParams } from 'react-router-dom';
+import { ActiveCompanyProvider } from '@/hooks/useActiveCompany';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
@@ -538,7 +539,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/mc/onboarding" element={<LazyPage><AuthGuard><Pages.MCOnboarding /></AuthGuard></LazyPage>} />
         
         {/* ── MC (Management Company) Workspace ── */}
-        <Route path="/mc" element={<MCGuard><MCLayout /></MCGuard>}>
+        <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><MCLayout /></MCGuard></ActiveCompanyProvider>}>
           <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
           <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
           <Route path="properties" element={<LazyPage><Pages.OwnerProperties /></LazyPage>} />
