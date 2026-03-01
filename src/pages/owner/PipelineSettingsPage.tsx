@@ -360,7 +360,7 @@ export default function PipelineSettingsPage() {
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 md:pb-8 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/owner/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <button onClick={() => navigate('/mc/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" />
           {isRu ? 'Назад' : 'Back'}
         </button>

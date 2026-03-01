@@ -73,7 +73,7 @@ export default function OwnerChatRoom() {
         title={title}
         subtitle={subtitle}
         showBack
-        fallbackPath="/owner/messages"
+        fallbackPath="/mc/messages"
       />
 
       <div className="flex-1 mt-4 min-h-0">

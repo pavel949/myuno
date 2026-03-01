@@ -124,7 +124,7 @@ export default function InspectionRequest() {
               ? 'Чтобы заказать инспекцию, нужно добавить недвижимость' 
               : 'To order inspection, you need to add a property'}
           </p>
-          <Button onClick={() => navigate('/owner/properties/new')}>
+          <Button onClick={() => navigate('/mc/properties/new')}>
             {isRu ? 'Добавить объект' : 'Add Property'}
           </Button>
         </div>

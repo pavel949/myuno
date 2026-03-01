@@ -54,7 +54,7 @@ export default function AdminProperties() {
   // Redirect to unified property creation wizard instead of opening dialog
   React.useEffect(() => {
     if (searchParams.get('action') === 'new') {
-      navigate('/owner/properties/new?context=admin&return=/admin/properties');
+      navigate('/mc/properties/new?context=admin&return=/admin/properties');
     }
   }, [searchParams, navigate]);
   

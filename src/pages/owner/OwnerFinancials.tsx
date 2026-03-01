@@ -251,7 +251,7 @@ export default function OwnerFinancials() {
                   item={item}
                   isRu={isRu}
                   getCategoryLabel={getCategoryLabel}
-                  onEdit={() => navigate(`/owner/financials/${item.id}`)}
+                  onEdit={() => navigate(`/mc/financials/${item.id}`)}
                   onDelete={() => setDeleteId(item.id)}
                   onViewReceipt={item.receipt_url ? () => setViewReceiptUrl(item.receipt_url!) : undefined}
                 />

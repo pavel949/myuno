@@ -173,7 +173,7 @@ export function OwnerHeader() {
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={() => navigate('/owner/support-chat')}
+          onClick={() => navigate('/mc/support-chat')}
           title={isRussian ? 'Поддержка' : 'Support'}
         >
           <HelpCircle className="h-4 w-4" />

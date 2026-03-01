@@ -51,7 +51,7 @@ export function BookingSearchBar() {
   const handleSelect = (bookingId: string, propertyId: string) => {
     setQuery('');
     setIsFocused(false);
-    navigate(`/owner/properties/${propertyId}?booking=${bookingId}`);
+    navigate(`/mc/properties/${propertyId}?booking=${bookingId}`);
   };
 
   const getStatusColor = (status?: string) => {

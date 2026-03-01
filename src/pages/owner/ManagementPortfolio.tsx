@@ -122,7 +122,7 @@ function TermsMobileCard({
             <div className="flex items-center gap-2 mb-1">
               {isExpired && <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />}
               <button
-                onClick={() => onNavigate(`/owner/properties/${terms.property_id}`)}
+                onClick={() => onNavigate(`/mc/properties/${terms.property_id}`)}
                 className="font-semibold text-sm truncate text-left hover:text-primary transition-colors hover:underline"
               >
                 {title}
@@ -386,7 +386,7 @@ export default function ManagementPortfolio() {
                         )}
                         <div>
                           <button
-                            onClick={() => navigate(`/owner/properties/${terms.property_id}`)}
+                            onClick={() => navigate(`/mc/properties/${terms.property_id}`)}
                             className="font-medium text-sm line-clamp-1 text-left hover:text-primary hover:underline transition-colors"
                           >
                             {title}
@@ -462,7 +462,7 @@ export default function ManagementPortfolio() {
         <div className="text-center mt-4">
           <Button
             variant="outline"
-            onClick={() => navigate('/owner/properties')}
+            onClick={() => navigate('/mc/properties')}
           >
             <Plus className="h-4 w-4 mr-2" />
             {isRu ? 'Перейти к объектам' : 'Go to properties'}

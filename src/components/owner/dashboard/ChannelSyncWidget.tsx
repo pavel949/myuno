@@ -68,7 +68,7 @@ export function ChannelSyncWidget() {
           <p className="text-sm text-muted-foreground mb-3">
             {isRu ? 'Подключите OTA-каналы для синхронизации' : 'Connect OTA channels to sync'}
           </p>
-          <Button size="sm" variant="outline" onClick={() => navigate('/owner/channels')}>
+          <Button size="sm" variant="outline" onClick={() => navigate('/mc/channels')}>
             {isRu ? 'Подключить' : 'Connect'}
           </Button>
         </CardContent>
@@ -105,7 +105,7 @@ export function ChannelSyncWidget() {
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              onClick={() => navigate('/owner/channels')}
+              onClick={() => navigate('/mc/channels')}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -160,7 +160,7 @@ export function ChannelSyncWidget() {
           })}
           {channels.length > 5 && (
             <button
-              onClick={() => navigate('/owner/channels')}
+              onClick={() => navigate('/mc/channels')}
               className="text-xs text-primary hover:underline w-full text-left py-1"
             >
               {isRu ? `Ещё ${channels.length - 5} каналов...` : `${channels.length - 5} more channels...`}

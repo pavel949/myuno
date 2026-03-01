@@ -68,7 +68,7 @@ export function CommunicationsSection() {
             </span>
           )}
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/messages')}>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/mc/messages')}>
           {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'View all'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
@@ -83,7 +83,7 @@ export function CommunicationsSection() {
               "p-3 cursor-pointer hover:shadow-md transition-all",
               chat.unreadCount > 0 && "border-primary/30 bg-primary/5"
             )}
-            onClick={() => navigate(`/owner/messages/${chat.id}`)}
+            onClick={() => navigate(`/mc/messages/${chat.id}`)}
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">

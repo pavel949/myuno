@@ -115,7 +115,7 @@ export default function ServiceRequest() {
               ? 'Чтобы создать заявку, нужно добавить недвижимость' 
               : 'To create a request, you need to add a property'}
           </p>
-          <Button onClick={() => navigate('/owner/properties/new')}>
+          <Button onClick={() => navigate('/mc/properties/new')}>
             {isRu ? 'Добавить объект' : 'Add Property'}
           </Button>
         </div>

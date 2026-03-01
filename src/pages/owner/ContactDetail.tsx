@@ -102,7 +102,7 @@ export default function ContactDetail() {
     return (
       <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Контакт не найден' : 'Contact not found'}</p>
-        <Button variant="link" onClick={() => navigate('/owner/contacts')}>{isRu ? 'Назад' : 'Back'}</Button>
+        <Button variant="link" onClick={() => navigate('/mc/contacts')}>{isRu ? 'Назад' : 'Back'}</Button>
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function ContactDetail() {
     try {
       await deleteContact.mutateAsync(contact.id);
       toast({ title: isRu ? 'Контакт удалён' : 'Contact deleted' });
-      navigate('/owner/contacts');
+      navigate('/mc/contacts');
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
@@ -165,7 +165,7 @@ export default function ContactDetail() {
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto space-y-6">
       {/* Back */}
-      <button onClick={() => navigate('/owner/contacts')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <button onClick={() => navigate('/mc/contacts')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="h-4 w-4" />
         {isRu ? 'Контакты' : 'Contacts'}
       </button>
@@ -419,7 +419,7 @@ export default function ContactDetail() {
                 return (
                   <button
                     key={d.id}
-                    onClick={() => navigate(`/owner/sales/${d.id}`)}
+                    onClick={() => navigate(`/mc/sales/${d.id}`)}
                     className="w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
                   >
                     <div className={cn('h-3 w-3 rounded-full shrink-0', stageDotColors[stage] || 'bg-muted')} />

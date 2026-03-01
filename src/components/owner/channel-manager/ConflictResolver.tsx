@@ -73,7 +73,7 @@ export function ConflictResolver({ propertyId, propertyName }: ConflictResolverP
           conflict={conflict}
           isRu={isRu}
           locale={locale}
-          onNavigate={(bookingId) => navigate(`/owner/bookings/${bookingId}`)}
+          onNavigate={(bookingId) => navigate(`/mc/bookings/${bookingId}`)}
         />
       ))}
     </div>
@@ -204,7 +204,7 @@ export function ConflictAlert({
       <Badge 
         variant="destructive" 
         className="cursor-pointer"
-        onClick={() => navigate(`/owner/properties/${propertyId}/calendar`)}
+        onClick={() => navigate(`/mc/properties/${propertyId}/calendar`)}
       >
         <AlertTriangle className="h-3 w-3 mr-1" />
         {conflicts.length}
@@ -228,7 +228,7 @@ export function ConflictAlert({
           <Button 
             size="sm" 
             variant="destructive"
-            onClick={() => navigate(`/owner/properties/${propertyId}/calendar`)}
+            onClick={() => navigate(`/mc/properties/${propertyId}/calendar`)}
           >
             {isRu ? 'Исправить' : 'Resolve'}
           </Button>

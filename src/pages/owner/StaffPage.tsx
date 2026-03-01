@@ -679,7 +679,7 @@ export default function StaffPage() {
               onDeactivate={() => setDeactivateTarget(s)}
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
-              onViewTasks={() => navigate(`/owner/tasks?assignee=${s.id}`)}
+              onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
               onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
               onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
             />

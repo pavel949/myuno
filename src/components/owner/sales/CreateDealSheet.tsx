@@ -175,7 +175,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
               {duplicates.map(d => (
                 <button
                   key={d.id}
-                  onClick={() => { onOpenChange(false); navigate(`/owner/sales/${d.id}`); }}
+                  onClick={() => { onOpenChange(false); navigate(`/mc/sales/${d.id}`); }}
                   className="block text-xs text-primary hover:underline"
                 >
                   {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})

@@ -68,7 +68,7 @@ export function ActivityBlock() {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
-      onClick={() => navigate('/owner/operations?tab=completed')}
+      onClick={() => navigate('/mc/operations?tab=completed')}
     >
       <CardContent className="p-3">
         {/* Header */}

@@ -75,7 +75,7 @@ export const PropertyHeroCard = forwardRef<HTMLDivElement, PropertyHeroCardProps
       <Card 
         ref={ref}
         className="overflow-hidden cursor-pointer hover:shadow-lg transition-all group"
-        onClick={() => navigate(`/owner/properties/${property.id}`)}
+        onClick={() => navigate(`/mc/properties/${property.id}`)}
       >
         {/* Image */}
         <div className="relative aspect-[16/9] bg-muted overflow-hidden">

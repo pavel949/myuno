@@ -43,7 +43,7 @@ export function PropertySlotGate({ propertyId, children }: PropertySlotGateProps
             {isRu ? 'Активировать объект' : 'Activate Property'}
           </Button>
         ) : (
-          <Button onClick={() => navigate('/owner/subscription')} variant="outline" className="gap-2">
+          <Button onClick={() => navigate('/mc/subscription')} variant="outline" className="gap-2">
             {paidSlots === 0
               ? (isRu ? 'Купить подписку' : 'Buy Subscription')
               : (isRu ? 'Докупить слоты' : 'Buy More Slots')}

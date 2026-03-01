@@ -274,7 +274,7 @@ export default function OwnerPortfolio() {
                 <div 
                   key={property.id}
                   className="p-3 rounded-xl border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/owner/properties/${property.id}`)}
+                  onClick={() => navigate(`/mc/properties/${property.id}`)}
                 >
                   <div className="flex items-start gap-3">
                     {property.coverImage ? (

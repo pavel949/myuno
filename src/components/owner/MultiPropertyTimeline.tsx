@@ -273,7 +273,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                     )}
                     <div
                       className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
-                      onClick={() => navigate(`/owner/properties/${property.property_id}`)}
+                      onClick={() => navigate(`/mc/properties/${property.property_id}`)}
                       title={isRu ? 'Открыть объект' : 'View property'}
                     >
                       <Avatar className="h-8 w-8 flex-shrink-0">

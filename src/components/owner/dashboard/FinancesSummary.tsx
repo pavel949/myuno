@@ -45,7 +45,7 @@ export function FinancesSummary() {
         <h2 className="font-semibold text-base">
           {isRu ? 'Финансы' : isTh ? 'การเงิน' : 'Finances'}
         </h2>
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/financials')}>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/mc/financials')}>
           {isRu ? 'Подробнее' : isTh ? 'รายละเอียด' : 'Details'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
@@ -106,7 +106,7 @@ export function FinancesSummary() {
           variant="outline" 
           size="sm" 
           className="h-8"
-          onClick={() => navigate('/owner/quick-expense')}
+          onClick={() => navigate('/mc/quick-expense')}
         >
           {isRu ? '+ Расход' : isTh ? '+ รายจ่าย' : '+ Expense'}
         </Button>

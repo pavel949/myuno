@@ -196,7 +196,7 @@ export function PropertySubmissionSuccess({
           <Button 
             className="w-full" 
             size="lg"
-            onClick={() => navigate('/owner/properties')}
+            onClick={() => navigate('/mc/properties')}
           >
             <Home className="h-4 w-4 mr-2" />
             {isRu ? 'Мои объекты' : 'My Properties'}
@@ -205,7 +205,7 @@ export function PropertySubmissionSuccess({
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => navigate('/owner/properties/new')}
+            onClick={() => navigate('/mc/properties/new')}
           >
             {isRu ? 'Добавить ещё объект' : 'Add another property'}
             <ArrowRight className="h-4 w-4 ml-2" />

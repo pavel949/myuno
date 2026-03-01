@@ -139,11 +139,11 @@ export default function OwnerPropertyDetail() {
       </div>
 
       <div className="flex gap-2 mb-6">
-        <Button className="flex-1" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
+        <Button className="flex-1" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
           <Settings className="h-4 w-4 mr-2" />
           {isRu ? 'Редактировать объект' : 'Edit Property'}
         </Button>
-        <Button variant="outline" onClick={() => navigate(`/owner/properties/${id}/guidebook`)}>
+        <Button variant="outline" onClick={() => navigate(`/mc/properties/${id}/guidebook`)}>
           {isRu ? 'Гайдбук' : 'Guidebook'}
         </Button>
       </div>
@@ -249,7 +249,7 @@ export default function OwnerPropertyDetail() {
 
           {/* Quick actions grid */}
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate(`/owner/properties/${id}/editor`)}>
+            <Button variant="outline" size="sm" className="h-auto py-3 flex-col gap-1" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
               <Calendar className="h-4 w-4" />
               <span className="text-xs">{isRu ? 'Календарь' : 'Calendar'}</span>
             </Button>
