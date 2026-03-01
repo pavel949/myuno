@@ -194,7 +194,7 @@ export default function SalesPipeline() {
         </div>
       </div>
 
-      {/* Deal Status + Type filters */}
+      {/* Status + Type filters */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {/* Status tabs */}
         {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
@@ -206,23 +206,27 @@ export default function SalesPipeline() {
               filterStatus === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
             )}
           >
-            {s === 'all' ? (isRu ? 'Все' : 'All') : (isRu ? DEAL_STATUS_LABELS[s].ru : DEAL_STATUS_LABELS[s].en)}
+            {s === 'all' ? (isRu ? 'Все статусы' : 'All statuses') : (isRu ? DEAL_STATUS_LABELS[s].ru : DEAL_STATUS_LABELS[s].en)}
           </button>
         ))}
-        <span className="w-px bg-border shrink-0" />
-        {/* Type tabs */}
-        {(['all', ...DEAL_TYPES] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setFilterType(t === 'all' ? 'all' : t)}
-            className={cn(
-              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-              filterType === t ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
-            )}
-          >
-            {t === 'all' ? (isRu ? 'Все типы' : 'All types') : (isRu ? DEAL_TYPE_LABELS[t].ru : DEAL_TYPE_LABELS[t].en)}
-          </button>
-        ))}
+        {DEAL_TYPES.length > 1 && (
+          <>
+            <span className="w-px bg-border shrink-0" />
+            {/* Type tabs */}
+            {(['all', ...DEAL_TYPES] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setFilterType(t === 'all' ? 'all' : t)}
+                className={cn(
+                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  filterType === t ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+                )}
+              >
+                {t === 'all' ? (isRu ? 'Все типы' : 'All types') : (isRu ? DEAL_TYPE_LABELS[t].ru : DEAL_TYPE_LABELS[t].en)}
+              </button>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Pipeline Summary */}
@@ -270,7 +274,7 @@ export default function SalesPipeline() {
                 🔔 Follow-up ({overdueCount})
               </button>
             )}
-            {activeStages.map(stage => (
+            {stages.map(stage => (
               <button
                 key={stage.key}
                 onClick={() => setFilterStage(stage.key)}
