@@ -1,6 +1,6 @@
 // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
-import { createClient } from "../_shared/supabase.ts";
+import { createAnonClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
@@ -23,10 +23,7 @@ Deno.serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    const supabaseClient = createAnonClient();
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
