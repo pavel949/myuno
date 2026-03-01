@@ -35,7 +35,7 @@ export function MessagesBlock() {
     return (
       <Card 
         className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-        onClick={() => navigate('/owner/messages')}
+        onClick={() => navigate('/mc/messages')}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export function MessagesBlock() {
   return (
     <Card 
       className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-      onClick={() => navigate('/owner/messages')}
+      onClick={() => navigate('/mc/messages')}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">

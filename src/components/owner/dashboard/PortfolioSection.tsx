@@ -38,7 +38,7 @@ export function PortfolioSection() {
         
         <div 
           className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
-          onClick={() => navigate('/owner/properties/new')}
+          onClick={() => navigate('/mc/properties/new')}
         >
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <Home className="h-6 w-6 text-primary" />
@@ -71,7 +71,7 @@ export function PortfolioSection() {
             ({properties.length})
           </span>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/owner/properties')}>
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => navigate('/mc/properties')}>
           {isRu ? 'Все' : 'View all'}
           <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
@@ -92,7 +92,7 @@ export function PortfolioSection() {
           {/* Add new card */}
           <div 
             className="border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center p-6 cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
-            onClick={() => navigate('/owner/properties/new')}
+            onClick={() => navigate('/mc/properties/new')}
           >
             <Plus className="h-8 w-8 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ export function PortfolioSection() {
           {/* Add new card */}
           <button 
             className="w-[85vw] max-w-[280px] flex-shrink-0 snap-start touch-manipulation border-2 border-dashed border-muted-foreground/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors min-h-[200px]"
-            onClick={() => navigate('/owner/properties/new')}
+            onClick={() => navigate('/mc/properties/new')}
           >
             <Plus className="h-8 w-8 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground">

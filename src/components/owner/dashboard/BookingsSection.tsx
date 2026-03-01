@@ -29,7 +29,7 @@ export function BookingsSection({ activeOrders, upcomingOrders }: BookingsSectio
             variant="ghost" 
             size="sm"
             className="h-7 text-xs"
-            onClick={() => navigate('/owner/channels')}
+            onClick={() => navigate('/mc/channels')}
           >
             <Link2 className="h-3.5 w-3.5 mr-1" />
             {isRu ? 'Каналы' : 'Channels'}
@@ -38,7 +38,7 @@ export function BookingsSection({ activeOrders, upcomingOrders }: BookingsSectio
             variant="ghost" 
             size="sm"
             className="h-7 text-xs"
-            onClick={() => navigate('/owner/calendar')}
+            onClick={() => navigate('/mc/calendar')}
           >
             <CalendarDays className="h-3.5 w-3.5 mr-1" />
             {isRu ? 'Календарь' : 'Calendar'}

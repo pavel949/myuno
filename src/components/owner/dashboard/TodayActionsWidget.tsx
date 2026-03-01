@@ -40,7 +40,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.overdueTasks} задач требуют внимания` : `${ops.overdueTasks} tasks need attention`,
         count: ops.overdueTasks,
         priority: 'urgent',
-        href: '/owner/operations',
+        href: '/mc/operations',
       });
     }
 
@@ -52,7 +52,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.openServiceRequests} в работе` : `${ops.openServiceRequests} in progress`,
         count: ops.openServiceRequests,
         priority: ops.openServiceRequests > 3 ? 'high' : 'normal',
-        href: '/owner/operations',
+        href: '/mc/operations',
       });
     }
 
@@ -64,7 +64,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.lowStockItems} позиций нужно пополнить` : `${ops.lowStockItems} items need restocking`,
         count: ops.lowStockItems,
         priority: 'high',
-        href: '/owner/inventory',
+        href: '/mc/inventory',
       });
     }
 
@@ -76,7 +76,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.unreadMessages} новых сообщений` : `${ops.unreadMessages} new messages`,
         count: ops.unreadMessages,
         priority: 'normal',
-        href: '/owner/messages',
+        href: '/mc/messages',
       });
     }
 
@@ -88,7 +88,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.pendingInvoices} неоплаченных` : `${ops.pendingInvoices} unpaid`,
         count: ops.pendingInvoices,
         priority: ops.pendingInvoices > 2 ? 'high' : 'normal',
-        href: '/owner/invoices',
+        href: '/mc/invoices',
       });
     }
 

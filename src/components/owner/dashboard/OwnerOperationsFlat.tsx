@@ -50,7 +50,7 @@ export function OwnerOperationsFlat() {
           </span>
         </h3>
         <button
-          onClick={() => navigate('/owner/operations')}
+          onClick={() => navigate('/mc/operations')}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {isRu ? 'Все' : 'View all'}
@@ -69,7 +69,7 @@ export function OwnerOperationsFlat() {
           return (
             <button
               key={task.id}
-              onClick={() => navigate(`/owner/operations?task=${task.id}`)}
+              onClick={() => navigate(`/mc/operations?task=${task.id}`)}
               className="w-full flex items-center gap-4 py-4 text-left hover:opacity-70 transition-opacity"
             >
               <div className={cn("w-2.5 h-2.5 rounded-full flex-shrink-0", dotColor)} />

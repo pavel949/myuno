@@ -29,39 +29,25 @@ interface NavItem {
 
 const PM_NAV: NavItem[] = [
   { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
-  { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
-  { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: '/owner/tasks' },
-  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
-];
-
-const SALES_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
-  { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
-  { id: 'messages', icon: MessageSquare, labelEn: 'Chat', labelRu: 'Чат', path: '/owner/messages' },
-  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
+  { id: 'finance', icon: DollarSign, labelEn: 'Finance', labelRu: 'Финансы', path: '/owner/finance' },
+  { id: 'mc', icon: Grid3X3, labelEn: 'MC', labelRu: 'УК', path: '/mc' },
 ];
 
 const DEFAULT_NAV: NavItem[] = [
   { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
-  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/owner/properties' },
-  { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/owner/calendar' },
   { id: 'finance', icon: DollarSign, labelEn: 'Finance', labelRu: 'Финансы', path: '/owner/finance' },
-  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/owner/modules' },
+  { id: 'mc', icon: Grid3X3, labelEn: 'MC', labelRu: 'УК', path: '/mc' },
 ];
 
 const NAV_BY_ROLE: Record<string, NavItem[]> = {
   property_manager: PM_NAV,
-  sales_agent: SALES_NAV,
+  sales_agent: PM_NAV,
   service_provider: PM_NAV,
   general: DEFAULT_NAV,
 };
 
 const QUICK_ACTIONS = [
-  { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/owner/finance', color: 'bg-destructive/15 text-destructive' },
-  { id: 'task', icon: ListTodo, labelEn: 'Task', labelRu: 'Задача', path: '/owner/tasks', color: 'bg-primary/15 text-primary' },
-  { id: 'meeting', icon: CalendarPlus, labelEn: 'Meeting', labelRu: 'Встреча', path: '/owner/calendar', color: 'bg-accent/15 text-accent-foreground' },
+  { id: 'mc', icon: Receipt, labelEn: 'MC Panel', labelRu: 'Панель УК', path: '/mc', color: 'bg-primary/15 text-primary' },
   { id: 'services', icon: ShoppingBag, labelEn: 'myUNO', labelRu: 'myUNO', path: '/', color: 'bg-success/15 text-success' },
 ];
 
@@ -133,7 +119,7 @@ export function OwnerMobileNav() {
 
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.08)]">
-        <div className="grid grid-cols-5 h-[68px] px-1">
+        <div className="grid grid-cols-3 h-[68px] px-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);

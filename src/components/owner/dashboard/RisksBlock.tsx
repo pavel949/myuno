@@ -70,7 +70,7 @@ export function RisksBlock() {
         "overflow-hidden cursor-pointer hover:shadow-md transition-all",
         urgentTasks.length > 0 && "border-destructive/30 bg-gradient-to-br from-destructive/5 to-transparent"
       )}
-      onClick={() => navigate('/owner/operations?tab=maintenance')}
+      onClick={() => navigate('/mc/operations?tab=maintenance')}
     >
       <CardContent className="p-3">
         {/* Header */}

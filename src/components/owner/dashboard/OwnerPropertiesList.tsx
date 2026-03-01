@@ -28,7 +28,7 @@ export function OwnerPropertiesList() {
             {isRu ? 'Ваши объявления' : 'Your listings'}
           </h3>
         <button
-          onClick={() => navigate('/owner/properties/new')}
+          onClick={() => navigate('/mc/properties/new')}
           className="w-full flex items-center gap-4 py-4 hover:opacity-70 transition-opacity"
         >
           <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -51,7 +51,7 @@ export function OwnerPropertiesList() {
     return (
       <button
         key={`${property.source}-${property.property_id}`}
-        onClick={() => navigate(`/owner/properties/${property.property_id}/manage`)}
+        onClick={() => navigate(`/mc/properties/${property.property_id}/manage`)}
         className="w-full flex items-center gap-4 py-4 md:py-3 text-left hover:opacity-70 transition-opacity md:rounded-xl md:border md:border-border md:p-3 md:hover:shadow-sm"
       >
         <div className="relative w-[72px] h-[72px] md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
@@ -110,7 +110,7 @@ export function OwnerPropertiesList() {
               )}
             </div>
             <button
-              onClick={() => navigate('/owner/properties')}
+              onClick={() => navigate('/mc/properties')}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {isRu ? 'Все' : 'View all'}
@@ -149,7 +149,7 @@ export function OwnerPropertiesList() {
       {/* Add new listing */}
       {
         <button
-          onClick={() => navigate('/owner/properties/new')}
+          onClick={() => navigate('/mc/properties/new')}
           className="w-full flex items-center gap-4 py-3 hover:opacity-70 transition-opacity"
         >
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">

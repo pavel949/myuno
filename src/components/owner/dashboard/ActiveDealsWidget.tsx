@@ -23,7 +23,7 @@ export function ActiveDealsWidget() {
   return (
     <div>
       <button
-        onClick={() => navigate('/owner/sales')}
+        onClick={() => navigate('/mc/sales')}
         className="w-full text-left"
       >
         <div className="flex items-center justify-between mb-3">

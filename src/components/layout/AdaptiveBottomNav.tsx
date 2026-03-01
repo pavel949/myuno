@@ -43,10 +43,10 @@ const guestNavItems: NavItem[] = [
 
 // Owner/Host navigation — 4 tabs (Profile accessible via header)
 const ownerNavItems: NavItem[] = [
-  { path: '/owner', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/owner/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
-  { path: '/owner/calendar', icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: '/owner/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
+  { path: '/mc', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: '/mc/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
+  { path: '/mc/calendar', icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
+  { path: '/mc/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
 ];
 
 // Vendor navigation
