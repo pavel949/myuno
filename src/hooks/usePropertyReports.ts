@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { getAccessiblePropertyIds } from '@/hooks/usePropertyFinancials';
+import { getAccessiblePropertyIds } from '@/lib/getAccessiblePropertyIds';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export type ReportType = 'monthly' | 'quarterly' | 'annual' | 'custom' | 'management' | 'owner_statement' | 'pnl';
 export type ReportStatus = 'generating' | 'draft' | 'ready' | 'sent' | 'viewed' | 'error';
@@ -112,9 +113,10 @@ export interface GenerateReportInput {
 // Fetch reports for a property (owners + delegates with financials permission)
 export function usePropertyReports(propertyId?: string) {
   const { user } = useAuth();
-
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
   return useQuery({
-    queryKey: ['property-reports', user?.id, propertyId],
+    queryKey: ['property-reports', user?.id, propertyId, activeCompanyId],
     queryFn: async () => {
       if (!user) return [];
 
@@ -129,10 +131,10 @@ export function usePropertyReports(propertyId?: string) {
       if (propertyId) {
         query = query.eq('property_id', propertyId);
       } else {
-        // Load all accessible property IDs (owned + managed)
-        const ids = await getAccessiblePropertyIds(user.id);
-        if (ids.length === 0) return [];
-        query = query.in('property_id', ids);
+        // Load all accessible property IDs (owned + managed + MC company)
+        const { allIds } = await getAccessiblePropertyIds({ userId: user.id, activeCompanyId });
+        if (allIds.length === 0) return [];
+        query = query.in('property_id', allIds);
       }
 
       const { data, error } = await query;

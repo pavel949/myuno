@@ -531,30 +531,29 @@ export default function ReportsPage() {
     <PageContainer>
       <BackButton fallbackPath="/owner" />
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">{isRu ? 'Отчёты' : 'Reports'}</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground hidden sm:block">
             {isRu ? 'Финансовые отчёты по вашим объектам' : 'Financial reports for your properties'}
           </p>
         </div>
         <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowOwnerInvite(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              {isRu ? 'Доступ' : 'Access'}
+            <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setShowOwnerInvite(true)}>
+              <UserPlus className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => setShowSettings(true)}>
+            <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setShowSettings(true)}>
               <Settings2 className="h-4 w-4" />
             </Button>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-1.5" />
                 {isRu ? 'Создать' : 'Create'}
               </Button>
             </DialogTrigger>
           </div>
-          <DialogContent>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{isRu ? 'Создать новый отчёт' : 'Generate New Report'}</DialogTitle>
               <DialogDescription>
