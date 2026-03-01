@@ -1,17 +1,20 @@
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, ChevronsUpDown, Search } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 export function CompanySwitcher() {
   const { companies, activeCompany, setActiveCompanyId } = useActiveCompany();
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -107,6 +110,15 @@ export function CompanySwitcher() {
             })}
           </div>
         </ScrollArea>
+
+        <Separator className="my-1" />
+        <button
+          onClick={() => { navigate('/mc/onboarding'); setOpen(false); }}
+          className="flex items-center gap-2 w-full rounded-md px-2 py-2 text-sm text-primary hover:bg-muted transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          {isRu ? 'Создать УК' : 'Create Company'}
+        </button>
       </PopoverContent>
     </Popover>
   );

@@ -4,12 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useUserContext } from '@/hooks/useUserContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
-import { AccessDenied } from './AccessDenied';
 
 /**
  * MC workspace guard — allows access only to users who are members
  * of at least one management_company (via management_company_members).
  * Admins always pass through.
+ * If no companies — redirects to MC onboarding.
  */
 export function MCGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -34,14 +34,9 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // Must be a member of at least one MC
+  // No companies — redirect to onboarding
   if (companies.length === 0) {
-    return (
-      <AccessDenied
-        requiredRoles={['property_manager']}
-        currentPath={location.pathname}
-      />
-    );
+    return <Navigate to="/mc/onboarding" replace />;
   }
 
   return <>{children}</>;
