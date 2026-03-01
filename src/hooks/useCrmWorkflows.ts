@@ -10,7 +10,7 @@ export interface CrmWorkflow {
   company_id: string;
   name: string;
   trigger_type: string;
-  trigger_config: any;
+  trigger_config: Record<string, unknown>;
   is_active: boolean;
   created_by: string;
   created_at: string;
@@ -21,7 +21,7 @@ export interface CrmWorkflowAction {
   workflow_id: string;
   action_order: number;
   action_type: string;
-  action_config: any;
+  action_config: Record<string, unknown>;
   delay_minutes: number;
 }
 
@@ -61,7 +61,7 @@ export function useCrmWorkflows(companyId: string | undefined) {
         .order('created_at', { ascending: false });
       if (error) throw error;
 
-      const ids = (workflows || []).map((w: any) => w.id);
+      const ids = (workflows || []).map((w: { id: string }) => w.id);
       if (ids.length === 0) return [];
 
       const { data: actions, error: aErr } = await from('crm_workflow_actions')

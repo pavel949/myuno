@@ -137,8 +137,7 @@ export function useCreateAgent() {
       queryClient.invalidateQueries({ queryKey: ['ai-agents'] });
       toast.success('Агент создан');
     },
-    onError: (error) => {
-      console.error('Failed to create agent:', error);
+    onError: () => {
       toast.error('Ошибка создания агента');
     },
   });
@@ -165,8 +164,7 @@ export function useUpdateAgent() {
       queryClient.invalidateQueries({ queryKey: ['ai-agent', data.id] });
       toast.success('Агент обновлён');
     },
-    onError: (error) => {
-      console.error('Failed to update agent:', error);
+    onError: () => {
       toast.error('Ошибка обновления агента');
     },
   });
@@ -189,8 +187,7 @@ export function useDeleteAgent() {
       queryClient.invalidateQueries({ queryKey: ['ai-agents'] });
       toast.success('Агент удалён');
     },
-    onError: (error) => {
-      console.error('Failed to delete agent:', error);
+    onError: () => {
       toast.error('Ошибка удаления агента');
     },
   });
@@ -246,8 +243,7 @@ export function useSaveKnowledge() {
       queryClient.invalidateQueries({ queryKey: ['ai-agent', data.agent_id] });
       toast.success(data.is_published ? 'База знаний опубликована' : 'Черновик сохранён');
     },
-    onError: (error) => {
-      console.error('Failed to save knowledge:', error);
+    onError: () => {
       toast.error('Ошибка сохранения');
     },
   });
@@ -283,8 +279,7 @@ export function usePublishKnowledge() {
       queryClient.invalidateQueries({ queryKey: ['ai-agent', data.agent_id] });
       toast.success(`Версия ${data.version} опубликована`);
     },
-    onError: (error) => {
-      console.error('Failed to publish knowledge:', error);
+    onError: () => {
       toast.error('Ошибка публикации');
     },
   });

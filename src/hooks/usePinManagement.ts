@@ -46,9 +46,9 @@ export function usePinManagement() {
       
       await checkHasPin();
       return { success: true };
-    } catch (error: any) {
-      console.error('Error setting up PIN:', error);
-      return { success: false, error: error.message || 'Failed to set up PIN' };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to set up PIN';
+      return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }
@@ -85,9 +85,9 @@ export function usePinManagement() {
       }
 
       return { success: true };
-    } catch (error: any) {
-      console.error('Error changing PIN:', error);
-      return { success: false, error: error.message || 'Failed to change PIN' };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to change PIN';
+      return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }
@@ -129,9 +129,9 @@ export function usePinManagement() {
 
       await checkHasPin();
       return { success: true };
-    } catch (error: any) {
-      console.error('Error resetting PIN:', error);
-      return { success: false, error: error.message || 'Failed to reset PIN' };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to reset PIN';
+      return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }
@@ -156,9 +156,9 @@ export function usePinManagement() {
       await checkHasPin();
       
       return { success: true };
-    } catch (error: any) {
-      console.error('Error disabling PIN:', error);
-      return { success: false, error: error.message || 'Failed to disable PIN' };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to disable PIN';
+      return { success: false, error: msg };
     } finally {
       setIsLoading(false);
     }

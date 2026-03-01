@@ -81,10 +81,11 @@ export function useTaxonomyDefinitions() {
 
       // Count values per type
       const countMap: Record<string, number> = {};
-      (counts || []).forEach((item: any) => {
+      (counts || []).forEach((item: { lookup_type: string }) => {
         countMap[item.lookup_type] = (countMap[item.lookup_type] || 0) + 1;
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (definitions || []).map((def: any) => ({
         ...def,
         value_count: countMap[def.type_key] || 0,

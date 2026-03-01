@@ -139,8 +139,7 @@ export function useCreatePropertyProject() {
       queryClient.invalidateQueries({ queryKey: ['property-projects'] });
       toast.success('Project created successfully');
     },
-    onError: (error) => {
-      console.error('Error creating project:', error);
+    onError: () => {
       toast.error('Failed to create project');
     },
   });
@@ -166,8 +165,7 @@ export function useUpdatePropertyProject() {
       queryClient.invalidateQueries({ queryKey: ['property-project', data.id] });
       toast.success('Project updated successfully');
     },
-    onError: (error) => {
-      console.error('Error updating project:', error);
+    onError: () => {
       toast.error('Failed to update project');
     },
   });

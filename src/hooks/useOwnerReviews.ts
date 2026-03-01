@@ -163,8 +163,7 @@ export function useOwnerReviews() {
       queryClient.invalidateQueries({ queryKey });
       toast.success('Response saved');
     },
-    onError: (error) => {
-      console.error('Error responding to review:', error);
+    onError: () => {
       toast.error('Failed to save response');
     },
   });
@@ -207,8 +206,7 @@ export function useOwnerReviews() {
       queryClient.invalidateQueries({ queryKey });
       toast.success('Response deleted');
     },
-    onError: (error) => {
-      console.error('Error deleting response:', error);
+    onError: () => {
       toast.error('Failed to delete response');
     },
   });
