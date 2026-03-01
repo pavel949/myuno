@@ -232,9 +232,31 @@ export const APP_ROUTES = {
   VENDOR_SERVICES: '/vendor/services',
   VENDOR_SETTINGS: '/vendor/settings',
 
-  // ── Owner Portal ──
+  // ── Management Company (MC) Workspace ──
+  MC: '/mc',
+  MC_PROPERTIES: '/mc/properties',
+  MC_CALENDAR: '/mc/calendar',
+  MC_CONTACTS: '/mc/contacts',
+  MC_SALES: '/mc/sales',
+  MC_TASKS: '/mc/tasks',
+  MC_FINANCE: '/mc/finance',
+  MC_FINANCIALS: '/mc/financials',
+  MC_STAFF: '/mc/staff',
+  MC_REPORTS: '/mc/reports',
+  MC_BUDGET: '/mc/budget',
+  MC_INVOICES: '/mc/invoices',
+  MC_OWNERS: '/mc/owners',
+  MC_CRM_DASHBOARD: '/mc/crm-dashboard',
+  MC_CHANNELS: '/mc/channels',
+  MC_INVENTORY: '/mc/inventory',
+  MC_VENDORS: '/mc/vendors',
+  MC_MARKETING: '/mc/marketing',
+  MC_MESSAGES: '/mc/messages',
+  MC_SUBSCRIPTION: '/mc/subscription',
+
+  // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
-  OWNER_LANDING: '/owner', // deprecated, redirects to /owner
+  OWNER_LANDING: '/owner',
   OWNER_GUIDE: '/owner/guide',
 
   // ── Provider Onboarding ──
@@ -307,6 +329,7 @@ export const ROUTE_OWNERSHIP = {
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],
+  MC: ['/mc'],
   OWNER: ['/owner'],
   ADMIN: ['/admin'],
   TEAM: ['/team'],
