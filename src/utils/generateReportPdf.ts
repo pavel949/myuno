@@ -63,6 +63,22 @@ const translations = {
     deductions: 'Deductions',
     netPayout: 'Net Payout to Owner',
     payoutSummary: 'Payout Summary',
+    // Deposits
+    bookingDeposits: 'Booking Deposits (Prepayments)',
+    expected: 'Expected',
+    received: 'Received',
+    unpaid: 'Unpaid',
+    securityDeposits: 'Security Deposits (Refundable)',
+    totalReceived: 'Total Received',
+    totalReturned: 'Total Returned',
+    totalHeld: 'Currently Held',
+    depositDeductions: 'Deductions from Deposits',
+    depositGuest: 'Guest',
+    depositReceived: 'Received',
+    depositReturned: 'Returned',
+    depositDeducted: 'Deducted',
+    depositStatus: 'Status',
+    deposit: 'Deposit',
   },
   ru: {
     title: 'Отчёт по объекту',
@@ -112,6 +128,22 @@ const translations = {
     deductions: 'Удержания',
     netPayout: 'К выплате собственнику',
     payoutSummary: 'Итоги выплаты',
+    // Deposits
+    bookingDeposits: 'Депозиты бронирования (предоплаты)',
+    expected: 'Ожидается',
+    received: 'Получено',
+    unpaid: 'Не оплачено',
+    securityDeposits: 'Возвратные залоги',
+    totalReceived: 'Всего получено',
+    totalReturned: 'Возвращено',
+    totalHeld: 'Удерживается',
+    depositDeductions: 'Удержания из залогов',
+    depositGuest: 'Гость',
+    depositReceived: 'Получено',
+    depositReturned: 'Возвращено',
+    depositDeducted: 'Удержано',
+    depositStatus: 'Статус',
+    deposit: 'Депозит',
   },
 };
 
@@ -317,6 +349,103 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
     });
     
     yPosition = (doc as any).lastAutoTable.finalY + 15;
+  }
+
+  // ---- Booking Deposits (Prepayments) ----
+  if (data.booking_deposits && data.booking_deposits.total_expected > 0) {
+    if (yPosition > 230) { doc.addPage(); yPosition = 20; }
+
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text(t.bookingDeposits, 20, yPosition);
+    yPosition += 8;
+
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, yPosition - 5, 180, 30, 3, 3, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`${t.expected}: ${formatCurrency(data.booking_deposits.total_expected, currency)}`, 25, yPosition + 5);
+    doc.setTextColor(22, 163, 74);
+    doc.text(`${t.received}: ${formatCurrency(data.booking_deposits.total_paid, currency)}`, 25, yPosition + 15);
+    doc.setTextColor(220, 38, 38);
+    const unpaidAmt = data.booking_deposits.total_expected - data.booking_deposits.total_paid;
+    doc.text(`${t.unpaid}: ${formatCurrency(unpaidAmt, currency)} (${data.booking_deposits.unpaid_count})`, 110, yPosition + 15);
+    yPosition += 40;
+
+    // Per-booking deposit column in bookings table
+    if (data.bookings.some(b => (b.deposit_amount || 0) > 0)) {
+      const depositBookingRows = data.bookings
+        .filter(b => (b.deposit_amount || 0) > 0)
+        .map(b => [
+          b.guest_name,
+          formatCurrency(b.total_amount, currency),
+          formatCurrency(b.deposit_amount || 0, currency),
+          b.deposit_paid ? '✓' : '✗',
+          formatCurrency(b.total_amount - (b.deposit_paid ? (b.deposit_amount || 0) : 0), currency),
+        ]);
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [[t.depositGuest, t.amount, t.deposit, t.depositStatus, language === 'ru' ? 'Остаток' : 'Balance']],
+        body: depositBookingRows,
+        theme: 'striped',
+        headStyles: { fillColor: [234, 179, 8] },
+        margin: { left: 20, right: 20 },
+        styles: { fontSize: 9, ...fontStyles },
+        columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 4: { halign: 'right' } },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
+  }
+
+  // ---- Security Deposits (Refundable) ----
+  if (data.security_deposits && data.security_deposits.total_received > 0) {
+    if (yPosition > 200) { doc.addPage(); yPosition = 20; }
+
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text(t.securityDeposits, 20, yPosition);
+    yPosition += 8;
+
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, yPosition - 5, 180, 35, 3, 3, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`${t.totalReceived}: ${formatCurrency(data.security_deposits.total_received, currency)}`, 25, yPosition + 5);
+    doc.setTextColor(22, 163, 74);
+    doc.text(`${t.totalReturned}: ${formatCurrency(data.security_deposits.total_returned, currency)}`, 25, yPosition + 15);
+    doc.setTextColor(234, 179, 8);
+    doc.text(`${t.totalHeld}: ${formatCurrency(data.security_deposits.total_held, currency)}`, 110, yPosition + 5);
+    doc.setTextColor(220, 38, 38);
+    doc.text(`${t.depositDeductions}: ${formatCurrency(data.security_deposits.deductions, currency)}`, 110, yPosition + 15);
+    yPosition += 45;
+
+    // Security deposit detail table
+    if (data.security_deposits.items.length > 0) {
+      const secRows = data.security_deposits.items.map(item => [
+        item.guest_name,
+        formatCurrency(item.received, currency),
+        formatCurrency(item.returned, currency),
+        formatCurrency(item.deducted, currency),
+        item.status === 'returned' ? (language === 'ru' ? 'Возвращён' : 'Returned')
+          : item.status === 'held' ? (language === 'ru' ? 'Удержан' : 'Held')
+          : (language === 'ru' ? 'Частично' : 'Partial'),
+      ]);
+
+      autoTable(doc, {
+        startY: yPosition,
+        head: [[t.depositGuest, t.depositReceived, t.depositReturned, t.depositDeducted, t.depositStatus]],
+        body: secRows,
+        theme: 'striped',
+        headStyles: { fillColor: [107, 114, 128] },
+        margin: { left: 20, right: 20 },
+        styles: { fontSize: 9, ...fontStyles },
+        columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+    }
   }
 
   // Expense transactions
