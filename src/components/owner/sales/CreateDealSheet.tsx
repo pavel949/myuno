@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Handshake } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
@@ -15,6 +14,7 @@ import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInp
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
   open: boolean;
@@ -33,7 +33,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   const createContact = useCreateContact();
   const [selectedContact, setSelectedContact] = useState<CrmContact | null>(prefilledContact || null);
 
-  // Pre-fill form when prefilledContact is provided
   useEffect(() => {
     if (prefilledContact && open) {
       setSelectedContact(prefilledContact);
@@ -99,7 +98,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       const clientPhone = selectedContact ? selectedContact.phone : (form.client_phone || null);
       const clientEmail = selectedContact ? selectedContact.email : (form.client_email || null);
 
-      // Auto-create contact if not selected
       if (!contactId && (form.client_phone || form.client_email)) {
         try {
           const nameParts = form.client_name.trim().split(' ');
@@ -159,180 +157,180 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
-        <SheetHeader>
-          <SheetTitle>{isRu ? 'Новая сделка' : 'New Deal'}</SheetTitle>
-        </SheetHeader>
-        <div className="space-y-4 mt-4">
-          {/* Duplicate warning */}
-          {duplicates.length > 0 && (
-            <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
-              <div className="flex items-center gap-2 text-warning font-medium mb-1">
-                <AlertCircle className="h-4 w-4" />
-                {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
-              </div>
-              {duplicates.map(d => (
-                <button
-                  key={d.id}
-                  onClick={() => { onOpenChange(false); navigate(`/mc/sales/${d.id}`); }}
-                  className="block text-xs text-primary hover:underline"
-                >
-                  {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Contact search */}
-          <div>
-            <Label>{isRu ? 'Привязать контакт' : 'Link Contact'}</Label>
-            <ContactSearchInput
-              companyId={companyId}
-              selectedContact={selectedContact}
-              onSelect={(c) => {
-                setSelectedContact(c);
-                setForm(f => ({
-                  ...f,
-                  client_name: `${c.first_name} ${c.last_name}`.trim(),
-                  client_phone: c.phone || '',
-                  client_email: c.email || '',
-                }));
-              }}
-              onClear={() => setSelectedContact(null)}
-              isRu={isRu}
-            />
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isRu ? 'Новая сделка' : 'New Deal'}
+      icon={<Handshake className="w-5 h-5 text-primary" />}
+      size="lg"
+      footer={
+        <Button onClick={handleSubmit} disabled={createDeal.isPending} className="w-full sm:w-auto min-w-[200px]">
+          {createDeal.isPending ? '...' : (isRu ? 'Создать сделку' : 'Create Deal')}
+        </Button>
+      }
+    >
+      {/* Duplicate warning */}
+      {duplicates.length > 0 && (
+        <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
+          <div className="flex items-center gap-2 text-warning font-medium mb-1">
+            <AlertCircle className="h-4 w-4" />
+            {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
           </div>
-
-          {/* Deal Type */}
-          <div>
-            <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
-            <div className="flex gap-1.5 mt-1">
-              {DEAL_TYPES.map(dt => (
-                <button
-                  key={dt}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                    form.deal_type === dt
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                  )}
-                >
-                  {isRu ? DEAL_TYPE_LABELS[dt].ru : DEAL_TYPE_LABELS[dt].en}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
-            <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
-              <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Источник' : 'Source'}</Label>
-              <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CLIENT_SOURCES.map(s => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
-              <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
-              <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label>
-              <Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Спален от' : 'Beds Min'}</Label>
-              <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} placeholder="1" />
-            </div>
-          </div>
-
-          {/* Property Types */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Типы недвижимости' : 'Property Types'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PROPERTY_TYPES.map(t => (
-                <button
-                  key={t}
-                  onClick={() => toggleType(t)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    form.preferred_types.includes(t)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                  )}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Districts */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PHUKET_DISTRICTS.map(d => (
-                <button
-                  key={d}
-                  onClick={() => toggleDistrict(d)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    form.preferred_districts.includes(d)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                  )}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
-            <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
-          </div>
-          <Button onClick={handleSubmit} disabled={createDeal.isPending} className="w-full">
-            {createDeal.isPending ? '...' : (isRu ? 'Создать сделку' : 'Create Deal')}
-          </Button>
+          {duplicates.map(d => (
+            <button
+              key={d.id}
+              onClick={() => { onOpenChange(false); navigate(`/mc/sales/${d.id}`); }}
+              className="block text-xs text-primary hover:underline"
+            >
+              {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})
+            </button>
+          ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      )}
+
+      {/* Contact search */}
+      <div>
+        <Label>{isRu ? 'Привязать контакт' : 'Link Contact'}</Label>
+        <ContactSearchInput
+          companyId={companyId}
+          selectedContact={selectedContact}
+          onSelect={(c) => {
+            setSelectedContact(c);
+            setForm(f => ({
+              ...f,
+              client_name: `${c.first_name} ${c.last_name}`.trim(),
+              client_phone: c.phone || '',
+              client_email: c.email || '',
+            }));
+          }}
+          onClear={() => setSelectedContact(null)}
+          isRu={isRu}
+        />
+      </div>
+
+      {/* Deal Type */}
+      <div>
+        <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
+        <div className="flex gap-1.5 mt-1">
+          {DEAL_TYPES.map(dt => (
+            <button
+              key={dt}
+              type="button"
+              onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                form.deal_type === dt
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+              )}
+            >
+              {isRu ? DEAL_TYPE_LABELS[dt].ru : DEAL_TYPE_LABELS[dt].en}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
+        <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
+          <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Email</Label>
+          <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Источник' : 'Source'}</Label>
+          <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CLIENT_SOURCES.map(s => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
+          <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
+          <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label>
+          <Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Спален от' : 'Beds Min'}</Label>
+          <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} placeholder="1" />
+        </div>
+      </div>
+
+      {/* Property Types */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Типы недвижимости' : 'Property Types'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PROPERTY_TYPES.map(t => (
+            <button
+              key={t}
+              onClick={() => toggleType(t)}
+              className={cn(
+                'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.preferred_types.includes(t)
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Districts */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PHUKET_DISTRICTS.map(d => (
+            <button
+              key={d}
+              onClick={() => toggleDistrict(d)}
+              className={cn(
+                'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.preferred_districts.includes(d)
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+              )}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
+        <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
+      </div>
+    </ResponsiveModal>
   );
 }
 
-// Helper for displaying stage labels in duplicate warning
 const DEAL_STAGE_LABELS_LOOKUP: Record<string, { en: string; ru: string }> = {
   new: { en: 'New', ru: 'Новый' },
   contacted: { en: 'Contacted', ru: 'Контакт' },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Users, Phone, User, CheckCircle, MapPin, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface PropertyTourLeadFormProps {
   open: boolean;
@@ -37,8 +37,8 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
     setIsSubmitting(true);
     try {
-      const preferredDates = formData.preferredDate 
-        ? [{ date: formData.preferredDate, time: '' }] 
+      const preferredDates = formData.preferredDate
+        ? [{ date: formData.preferredDate, time: '' }]
         : null;
 
       const { data, error } = await supabase.from('consultation_requests').insert({
@@ -57,7 +57,6 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
 
       if (error) throw error;
 
-      // Send email notification to admin
       if (data) {
         supabase.functions.invoke('notify-admin-order', {
           body: {
@@ -94,128 +93,115 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[90vh] overflow-y-auto">
-        {isSuccess ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold text-foreground">
-              {isRu ? 'Спасибо за заявку!' : 'Thank you!'}
-            </h3>
-            <p className="text-muted-foreground max-w-sm">
-              {isRu
-                ? 'Мы свяжемся с вами в WhatsApp в течение часа для согласования деталей тура.'
-                : 'We\'ll contact you via WhatsApp within an hour to arrange tour details.'}
-            </p>
-            <Button onClick={handleClose} className="mt-2">
-              {isRu ? 'Закрыть' : 'Close'}
-            </Button>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={handleClose}
+      title={isRu ? 'Бесплатный тур по недвижимости' : 'Free Property Tour'}
+      description={isRu
+        ? 'Заполните форму — мы организуем индивидуальный тур'
+        : "Fill the form — we'll organize a personalized tour"}
+      icon={<Gift className="w-5 h-5 text-primary" />}
+      size="md"
+    >
+      {isSuccess ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-primary" />
           </div>
-        ) : (
-          <>
-            <SheetHeader className="pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <SheetTitle className="text-left">
-                    {isRu ? 'Бесплатный тур по недвижимости' : 'Free Property Tour'}
-                  </SheetTitle>
-                  <SheetDescription className="text-left">
-                    {isRu
-                      ? 'Заполните форму — мы организуем индивидуальный тур'
-                      : 'Fill the form — we\'ll organize a personalized tour'}
-                  </SheetDescription>
-                </div>
-              </div>
-            </SheetHeader>
+          <h3 className="text-xl font-bold text-foreground">
+            {isRu ? 'Спасибо за заявку!' : 'Thank you!'}
+          </h3>
+          <p className="text-muted-foreground max-w-sm">
+            {isRu
+              ? 'Мы свяжемся с вами в WhatsApp в течение часа для согласования деталей тура.'
+              : "We'll contact you via WhatsApp within an hour to arrange tour details."}
+          </p>
+          <Button onClick={handleClose} className="mt-2">
+            {isRu ? 'Закрыть' : 'Close'}
+          </Button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" />
+              {isRu ? 'Имя' : 'Name'} *
+            </Label>
+            <Input
+              required
+              placeholder={isRu ? 'Ваше имя' : 'Your name'}
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            />
+          </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" />
-                  {isRu ? 'Имя' : 'Name'} *
-                </Label>
-                <Input
-                  required
-                  placeholder={isRu ? 'Ваше имя' : 'Your name'}
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5" />
+              {isRu ? 'Телефон / WhatsApp' : 'Phone / WhatsApp'} *
+            </Label>
+            <Input
+              required
+              type="tel"
+              placeholder="+66..."
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5" />
-                  {isRu ? 'Телефон / WhatsApp' : 'Phone / WhatsApp'} *
-                </Label>
-                <Input
-                  required
-                  type="tel"
-                  placeholder="+66..."
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                />
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5" />
+                {isRu ? 'Желаемая дата' : 'Preferred date'}
+              </Label>
+              <Input
+                type="date"
+                value={formData.preferredDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                {isRu ? 'Гостей' : 'Guests'}
+              </Label>
+              <Input
+                type="number"
+                min="1"
+                max="10"
+                value={formData.guests}
+                onChange={(e) => setFormData(prev => ({ ...prev, guests: e.target.value }))}
+              />
+            </div>
+          </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {isRu ? 'Желаемая дата' : 'Preferred date'}
-                  </Label>
-                  <Input
-                    type="date"
-                    value={formData.preferredDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    {isRu ? 'Гостей' : 'Guests'}
-                  </Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={formData.guests}
-                    onChange={(e) => setFormData(prev => ({ ...prev, guests: e.target.value }))}
-                  />
-                </div>
-              </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              {isRu ? 'Пожелания (район, тип, бюджет)' : 'Preferences (area, type, budget)'}
+            </Label>
+            <Textarea
+              placeholder={isRu ? 'Например: виллы в Банг Тао, бюджет до 10М ฿' : 'E.g.: villas in Bang Tao, budget up to 10M ฿'}
+              rows={3}
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {isRu ? 'Пожелания (район, тип, бюджет)' : 'Preferences (area, type, budget)'}
-                </Label>
-                <Textarea
-                  placeholder={isRu ? 'Например: виллы в Банг Тао, бюджет до 10М ฿' : 'E.g.: villas in Bang Tao, budget up to 10M ฿'}
-                  rows={3}
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                />
-              </div>
+          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            {isSubmitting
+              ? (isRu ? 'Отправка...' : 'Submitting...')
+              : (isRu ? 'Записаться на тур' : 'Book a Free Tour')}
+          </Button>
 
-              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isSubmitting
-                  ? (isRu ? 'Отправка...' : 'Submitting...')
-                  : (isRu ? 'Записаться на тур' : 'Book a Free Tour')}
-              </Button>
-
-              <p className="text-[11px] text-muted-foreground text-center">
-                {isRu
-                  ? 'Нажимая кнопку, вы соглашаетесь на обработку данных'
-                  : 'By clicking, you agree to data processing'}
-              </p>
-            </form>
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+          <p className="text-[11px] text-muted-foreground text-center">
+            {isRu
+              ? 'Нажимая кнопку, вы соглашаетесь на обработку данных'
+              : 'By clicking, you agree to data processing'}
+          </p>
+        </form>
+      )}
+    </ResponsiveModal>
   );
 }

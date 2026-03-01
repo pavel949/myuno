@@ -1,23 +1,11 @@
 import React, { useState, forwardRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GuestPropertyChat } from './GuestPropertyChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface MessageHostButtonProps {
   propertyId: string;
@@ -47,7 +35,6 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const isRu = language === 'ru';
 
   const title = isRu ? propertyTitleRu || propertyTitle : propertyTitle;
@@ -55,22 +42,11 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
 
   const handleClick = () => {
     if (!user) {
-      // Redirect to auth with return URL
       navigate(`/auth?redirect=/property/${propertyId}`);
       return;
     }
     setIsOpen(true);
   };
-
-  const chatContent = (
-    <GuestPropertyChat
-      propertyId={propertyId}
-      propertyTitle={title}
-      ownerName={ownerName}
-      compact={isMobile}
-      onClose={() => setIsOpen(false)}
-    />
-  );
 
   return (
     <>
@@ -86,29 +62,24 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
         {showLabel && <span className="ml-2">{buttonLabel}</span>}
       </Button>
 
-      {/* Mobile: Use Sheet (bottom drawer) */}
-      {isMobile ? (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetContent side="bottom" className="h-[85vh] p-0 rounded-t-xl">
-            <SheetHeader className="sr-only">
-              <SheetTitle>{buttonLabel}</SheetTitle>
-            </SheetHeader>
-            <div className="h-full">
-              {chatContent}
-            </div>
-          </SheetContent>
-        </Sheet>
-      ) : (
-        /* Desktop: Use Dialog */
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="max-w-md p-0 overflow-hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle>{buttonLabel}</DialogTitle>
-            </DialogHeader>
-            {chatContent}
-          </DialogContent>
-        </Dialog>
-      )}
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title={buttonLabel}
+        icon={<MessageCircle className="w-5 h-5 text-primary" />}
+        size="md"
+        mobileHeight="max-h-[85vh]"
+      >
+        <div className="min-h-[300px]">
+          <GuestPropertyChat
+            propertyId={propertyId}
+            propertyTitle={title}
+            ownerName={ownerName}
+            compact={false}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
+      </ResponsiveModal>
     </>
   );
 });
