@@ -3652,6 +3652,7 @@ export type Database = {
           lead_temperature: string | null
           lifecycle_stage: string | null
           line_id: string | null
+          linked_user_id: string | null
           nationality: string | null
           notes: string | null
           phone: string | null
@@ -3695,6 +3696,7 @@ export type Database = {
           lead_temperature?: string | null
           lifecycle_stage?: string | null
           line_id?: string | null
+          linked_user_id?: string | null
           nationality?: string | null
           notes?: string | null
           phone?: string | null
@@ -3738,6 +3740,7 @@ export type Database = {
           lead_temperature?: string | null
           lifecycle_stage?: string | null
           line_id?: string | null
+          linked_user_id?: string | null
           nationality?: string | null
           notes?: string | null
           phone?: string | null

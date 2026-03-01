@@ -2,6 +2,7 @@
  * Owner Account Detail — full profile with tabs
  */
 import React, { useMemo } from 'react';
+import OwnerPortalSetupCard from '@/components/owner/owners/OwnerPortalSetupCard';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerAccounts, useOwnerAccountDetail } from '@/hooks/useOwnerAccounts';
@@ -217,6 +218,7 @@ export default function OwnerDetailPage() {
           <TabsTrigger value="properties">{isRu ? 'Объекты' : 'Properties'}</TabsTrigger>
           <TabsTrigger value="finance">{isRu ? 'Финансы' : 'Finance'}</TabsTrigger>
           <TabsTrigger value="documents">{isRu ? 'Документы' : 'Documents'}</TabsTrigger>
+          <TabsTrigger value="portal">{isRu ? 'Портал' : 'Portal'}</TabsTrigger>
           <TabsTrigger value="activity">{isRu ? 'Активность' : 'Activity'}</TabsTrigger>
         </TabsList>
 
@@ -491,6 +493,16 @@ export default function OwnerDetailPage() {
               </Card>
             ))
           )}
+        </TabsContent>
+
+        {/* PORTAL TAB */}
+        <TabsContent value="portal" className="mt-4">
+          <OwnerPortalSetupCard
+            contactId={owner.id}
+            email={owner.email}
+            linkedUserId={owner.linked_user_id}
+            properties={owner.properties.map(p => ({ id: p.id, name: p.name }))}
+          />
         </TabsContent>
 
         {/* ACTIVITY TAB */}
