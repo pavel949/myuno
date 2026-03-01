@@ -60,6 +60,7 @@ const navigationItems: CmdItem[] = [
   { id: 'pm-companies', titleEn: 'PM Companies', titleRu: 'УК (справочник)', path: '/admin/pm-companies', icon: Building, group: 'business', keywords: ['management company'] },
   { id: 'mc-dashboard', titleEn: 'MC Dashboard', titleRu: 'УК — Обзор', path: '/admin/mc-dashboard', icon: Building2, group: 'business', keywords: ['management overview'] },
   { id: 'contracts', titleEn: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText, group: 'business', keywords: ['agreement', 'deal'] },
+  { id: 'crm', titleEn: 'CRM Hub', titleRu: 'CRM', path: '/admin/crm', icon: Target, group: 'business', keywords: ['crm', 'leads', 'acquisition', 'prospects', 'funnel'] },
   { id: 'vendor-prospects', titleEn: 'Vendor Prospects', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target, group: 'business', keywords: ['acquisition', 'lead'] },
   { id: 'marketing', titleEn: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone, group: 'business', keywords: ['mcc', 'campaign'] },
 

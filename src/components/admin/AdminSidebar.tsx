@@ -86,6 +86,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'PM Companies', titleRu: 'УК (справочник)', path: '/admin/pm-companies', icon: Building },
       { title: 'MC Dashboard', titleRu: 'УК — Обзор', path: '/admin/mc-dashboard', icon: Building2 },
       { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
+      { title: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: Target },
       { title: 'Vendor Prospects', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
       { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
     ],
