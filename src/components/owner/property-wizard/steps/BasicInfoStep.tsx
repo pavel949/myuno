@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { ProjectSelector } from '@/components/property/ProjectSelector';
@@ -14,6 +14,8 @@ import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
+
+const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
 
 interface BasicInfoStepProps {
   formData: PropertyFormData;
@@ -73,8 +75,28 @@ function BasicInfoStepInner({
   const isRu = language === 'ru';
   const { options: propertyTypes } = useTaxonomy('property_type');
   
+  // Hint about auto-creating CRM contact
+  const [hintDismissed, setHintDismissed] = useState(() => 
+    localStorage.getItem(DISMISS_KEY) === '1'
+  );
+  const [showHint, setShowHint] = useState(false);
 
+  // Show hint when user starts typing owner data
+  const hasOwnerInput = ownershipData && 
+    ownershipData.ownership_type !== 'own' && 
+    (ownershipData.actual_owner_name.trim() || ownershipData.actual_owner_email.trim() || ownershipData.actual_owner_phone.trim());
 
+  useEffect(() => {
+    if (hasOwnerInput && !hintDismissed) {
+      setShowHint(true);
+    }
+  }, [hasOwnerInput, hintDismissed]);
+
+  const handleDismissForever = useCallback(() => {
+    localStorage.setItem(DISMISS_KEY, '1');
+    setHintDismissed(true);
+    setShowHint(false);
+  }, []);
   return (
     <div className="space-y-6">
       {/* Ownership Type Selection (Compact) */}
@@ -111,8 +133,36 @@ function BasicInfoStepInner({
                   </p>
                 </button>
               ))}
-            </div>
-            
+                </div>
+
+                {/* Auto-create contact hint */}
+                {showHint && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm">
+                    <UserPlus className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <p className="text-foreground font-medium">
+                        {isRu 
+                          ? 'Контакт собственника будет создан автоматически' 
+                          : 'Owner contact will be created automatically'}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {isRu 
+                          ? 'После сохранения объекта в CRM появится карточка собственника с указанными данными. Вы сможете дополнить её позже.'
+                          : 'After saving, a CRM contact card will be created with this data. You can fill in more details later.'}
+                      </p>
+                      <button 
+                        type="button" 
+                        onClick={handleDismissForever}
+                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                      >
+                        {isRu ? 'Больше не показывать' : "Don't show again"}
+                      </button>
+                    </div>
+                    <button type="button" onClick={() => setShowHint(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
             {/* Quick owner contact for verbal/management */}
             {ownershipData.ownership_type !== 'own' && (
               <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-3">

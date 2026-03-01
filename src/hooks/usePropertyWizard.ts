@@ -364,6 +364,39 @@ export function usePropertyWizard() {
       }
     }
 
+    // Auto-create CRM owner contact when managing on behalf
+    if (isOnBehalf && property?.id && ownershipData.actual_owner_name.trim()) {
+      try {
+        const userId = (await supabase.auth.getUser()).data.user?.id;
+        // Split name into first/last
+        const nameParts = ownershipData.actual_owner_name.trim().split(/\s+/);
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const { data: newContact } = await supabase.from('crm_contacts').insert({
+          company_id: activeOrgId,
+          contact_type: 'owner',
+          first_name: firstName,
+          last_name: lastName,
+          email: ownershipData.actual_owner_email || null,
+          phone: ownershipData.actual_owner_phone || null,
+          source: 'property_wizard',
+          lifecycle_stage: 'customer',
+          created_by: userId,
+        } as any).select('id').single();
+
+        // Link owner contact to property
+        if (newContact?.id) {
+          await supabase.from('properties').update({
+            owner_contact_id: newContact.id,
+          } as any).eq('id', property.id);
+        }
+      } catch (error) {
+        // Non-blocking — property is already saved
+        errorLog.silent(error, 'auto_create_owner_contact');
+      }
+    }
+
     // Send invite if needed
     if (isOnBehalf && ownershipData.send_invite_immediately && property?.id) {
       try {
