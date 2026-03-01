@@ -117,8 +117,8 @@ Deno.serve(async (req) => {
       subscription_data: {
         metadata: { company_id, user_id: user.id, type: "mc_subscription" },
       },
-      success_url: `${origin}/owner/subscription?success=true`,
-      cancel_url: `${origin}/owner/subscription?cancelled=true`,
+      success_url: `${origin}/mc/subscription?success=true`,
+      cancel_url: `${origin}/mc/subscription?cancelled=true`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });

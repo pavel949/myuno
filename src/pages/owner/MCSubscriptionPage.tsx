@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import {
   CreditCard, Plus, Minus, Building2, CheckCircle, AlertCircle,
   ExternalLink, Zap, Crown, Shield, ToggleLeft, ToggleRight, Sparkles,
+  MessageCircle, Star,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const PRICE_PER_SLOT = 25;
+const WHATSAPP_NUMBER = '022407355';
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 interface Plan {
   id: string;
@@ -36,6 +39,21 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
+    id: 'basic',
+    slots: 1,
+    labelEn: 'Basic',
+    labelRu: 'Базовый',
+    descEn: 'For a single property',
+    descRu: 'Для одного объекта',
+    icon: Star,
+    features: [
+      { en: '1 property', ru: '1 объект' },
+      { en: 'Calendar & Bookings', ru: 'Календарь и бронирования' },
+      { en: 'Basic financial tracking', ru: 'Базовый финансовый учёт' },
+      { en: 'Task management', ru: 'Управление задачами' },
+    ],
+  },
+  {
     id: 'starter',
     slots: 5,
     labelEn: 'Starter',
@@ -45,9 +63,9 @@ const PLANS: Plan[] = [
     icon: Zap,
     features: [
       { en: 'Up to 5 properties', ru: 'До 5 объектов' },
-      { en: 'Calendar & Bookings', ru: 'Календарь и бронирования' },
-      { en: 'Basic financial reports', ru: 'Базовые финансовые отчёты' },
-      { en: 'Task management', ru: 'Управление задачами' },
+      { en: 'Everything in Basic', ru: 'Всё из Базового' },
+      { en: 'Owner reports', ru: 'Отчёты для собственников' },
+      { en: 'Team access (up to 3)', ru: 'Доступ команды (до 3)' },
     ],
   },
   {
@@ -63,7 +81,7 @@ const PLANS: Plan[] = [
       { en: 'Up to 15 properties', ru: 'До 15 объектов' },
       { en: 'Full CRM & Sales pipeline', ru: 'Полный CRM и воронка продаж' },
       { en: 'Advanced analytics', ru: 'Расширенная аналитика' },
-      { en: 'Team permissions', ru: 'Управление доступами команды' },
+      { en: 'Unlimited team members', ru: 'Неограниченно сотрудников' },
       { en: 'Owner portal', ru: 'Портал собственника' },
     ],
   },
@@ -237,7 +255,7 @@ export default function MCSubscriptionPage() {
               ? (isRu ? 'Изменить план' : 'Change Plan')
               : (isRu ? 'Выберите план' : 'Choose a Plan')}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PLANS.map(plan => {
               const PlanIcon = plan.icon;
               const isCurrentPlan = isActive && currentPlanTier.id === plan.id;
@@ -280,7 +298,7 @@ export default function MCSubscriptionPage() {
                       <span className="text-3xl font-bold">${price}</span>
                       <span className="text-muted-foreground text-sm">/{isRu ? 'мес' : 'mo'}</span>
                       <p className="text-xs text-muted-foreground">
-                        ${PRICE_PER_SLOT} × {plan.slots} {isRu ? 'объектов' : 'properties'}
+                        ${PRICE_PER_SLOT} × {plan.slots} {isRu ? (plan.slots === 1 ? 'объект' : 'объектов') : (plan.slots === 1 ? 'property' : 'properties')}
                       </p>
                     </div>
 
@@ -303,9 +321,10 @@ export default function MCSubscriptionPage() {
                         variant={plan.popular ? 'default' : 'outline'}
                         className="w-full text-xs"
                       >
+                        <CreditCard className="h-3.5 w-3.5 mr-1" />
                         {isActive
                           ? (isRu ? 'Переключить' : 'Switch')
-                          : (isRu ? 'Подключить' : 'Subscribe')}
+                          : (isRu ? 'Оплатить онлайн' : 'Pay Online')}
                       </Button>
                     )}
                   </CardContent>
@@ -313,6 +332,37 @@ export default function MCSubscriptionPage() {
               );
             })}
           </div>
+
+          {/* Offline payment option */}
+          <Card className="border-dashed bg-muted/30">
+            <CardContent className="flex flex-col sm:flex-row items-center gap-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center shrink-0">
+                <MessageCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-sm font-medium">
+                  {isRu ? 'Предпочитаете оплату оффлайн?' : 'Prefer offline payment?'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {isRu
+                    ? 'Свяжитесь с нами через WhatsApp для оплаты банковским переводом или наличными'
+                    : 'Contact us via WhatsApp for bank transfer or cash payment'}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="gap-2 shrink-0"
+                onClick={() => window.open(`${WHATSAPP_LINK}?text=${encodeURIComponent(
+                  isRu
+                    ? `Здравствуйте! Хочу оформить подписку PMS для управляющей компании "${companyName}". Подскажите варианты оплаты.`
+                    : `Hello! I'd like to subscribe to PMS for management company "${companyName}". Please share payment options.`
+                )}`, '_blank')}
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Custom quantity */}
@@ -467,6 +517,11 @@ export default function MCSubscriptionPage() {
                   {isRu
                     ? `Вы платите $${PRICE_PER_SLOT}/мес за каждый активный объект. Оплата списывается ежемесячно через Stripe. Вы можете включать и отключать объекты в любой момент — стоимость пересчитывается автоматически.`
                     : `You pay $${PRICE_PER_SLOT}/mo per active property. Billing is charged monthly via Stripe. You can enable/disable properties anytime — cost adjusts automatically.`}
+                </p>
+                <p>
+                  {isRu
+                    ? 'Для оффлайн оплаты (банковский перевод, наличные) — свяжитесь с нами через WhatsApp.'
+                    : 'For offline payment (bank transfer, cash) — contact us via WhatsApp.'}
                 </p>
                 <p>
                   {isRu
