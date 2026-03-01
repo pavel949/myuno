@@ -126,7 +126,7 @@ export function useMyPortalSettings() {
         .select('*, properties:property_id(id, title, title_ru, cover_image, address)')
         .eq('owner_user_id', user.id);
       if (error) throw error;
-      return (data || []) as (OwnerPortalSettings & { properties: any })[];
+      return (data || []) as (OwnerPortalSettings & { properties: { id: string; title?: string; title_ru?: string; cover_image?: string; address?: string } | null })[];
     },
     enabled: !!user?.id,
   });

@@ -24,7 +24,8 @@ export interface Babysitter {
   is_verified: boolean;
 }
 
-function transformBabysitter(raw: any): Babysitter {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformBabysitter(raw: Record<string, any>): Babysitter {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,

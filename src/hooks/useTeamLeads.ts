@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,7 +28,7 @@ export interface Lead {
   budget_max: number | null;
   bedrooms_min: number | null;
   bedrooms_max: number | null;
-  preferred_dates: any;
+  preferred_dates: Json | null;
   guests_count: number | null;
   children_count: number | null;
   purpose: string | null;

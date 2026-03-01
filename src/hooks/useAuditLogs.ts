@@ -55,11 +55,12 @@ export function useAuditLogs(options: UseAuditLogsOptions = {}) {
 
       if (error) throw error;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const logs = (data || []).map((log: any) => ({
         ...log,
         admin_email: log.profiles?.email,
         admin_name: log.profiles?.full_name,
-      }));
+      })) as AuditLog[];
 
       return { logs, total: count || 0 };
     },

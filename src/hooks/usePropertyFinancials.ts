@@ -121,7 +121,11 @@ export function usePropertyFinancialsFull(propertyId?: string) {
       if (error) throw error;
       
       // Map title_en to title for backward compat
-      return (data || []).map((item: any) => ({
+      interface RawFinancialRow {
+        property?: { id: string; title_en: string; title_ru?: string } | null;
+        [key: string]: unknown;
+      }
+      return (data || []).map((item: RawFinancialRow) => ({
         ...item,
         property: item.property ? {
           id: item.property.id,
@@ -187,7 +191,11 @@ export function usePropertyFinancialsPaginated(propertyId?: string, pageSize = 5
       const { data, error } = await query;
       if (error) throw error;
 
-      const items = (data || []).map((item: any) => ({
+      interface RawPaginatedRow {
+        property?: { id: string; title_en: string; title_ru?: string } | null;
+        [key: string]: unknown;
+      }
+      const items = (data || []).map((item: RawPaginatedRow) => ({
         ...item,
         property: item.property ? { id: item.property.id, title: item.property.title_en, title_ru: item.property.title_ru } : undefined,
       })) as PropertyFinancialFull[];
@@ -323,6 +331,7 @@ export function useCreateFinancial() {
           ...data, 
           owner_id: user.id,
           transaction_date: data.transaction_date || new Date().toISOString().split('T')[0]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .select()
         .single();
@@ -350,6 +359,7 @@ export function useUpdateFinancial() {
     mutationFn: async ({ id, ...data }: Partial<PropertyFinancialFull> & { id: string }) => {
       const { data: result, error } = await supabase
         .from('property_financials')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(data as any)
         .eq('id', id)
         .select()

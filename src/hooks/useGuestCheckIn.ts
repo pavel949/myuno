@@ -56,7 +56,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
 
   // Notify property owner when guest submits check-in
-  const notifyOwnerOfCheckIn = async (propertyId: string, checkInRecord: any) => {
+  const notifyOwnerOfCheckIn = async (propertyId: string, checkInRecord: { id: string; full_name?: string | null }) => {
     try {
       // Get owner_id from the property
       const { data: property } = await supabase

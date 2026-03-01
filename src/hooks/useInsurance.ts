@@ -154,7 +154,7 @@ export function useInsurancePlans(providerId?: string, insuranceType?: string) {
       if (isMounted) {
         if (!error && data) {
           setPlans(
-            data.map((p: any) => ({
+            data.map((p: Record<string, unknown>) => ({
               ...p,
               features: p.features || null,
               exclusions: p.exclusions || null,

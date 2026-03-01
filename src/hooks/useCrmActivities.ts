@@ -15,7 +15,7 @@ export interface CrmActivity {
   description: string | null;
   duration_minutes: number | null;
   outcome: string | null;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
   logged_by: string;
   activity_date: string;
   created_at: string;
