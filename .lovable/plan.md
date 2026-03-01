@@ -1,80 +1,86 @@
 
+# Аудит и улучшения: Профиль УК, Команда, Подписка, Бэкап
 
-# Платформенная CRM в Админ-панели
+## Обнаруженные проблемы
 
-## Проблема сейчас
+### 1. Профиль компании (CompanyProfileSettings)
+- **Нет документов**: отсутствует возможность прикрепить документы компании (лицензии, сертификаты, регистрацию)
+- **Нет DBD карточки**: нет поля для загрузки DBD карточки (Department of Business Development — регистрация в Таиланде)
+- **Неполные реквизиты**: нет полей для регистрационного номера компании, юридического адреса (отдельно от фактического), банковских реквизитов
+- **Нет cover image upload**: поле cover_image есть в БД, но загрузчик для него не реализован
 
-Инструменты привлечения разбросаны по 3+ местам:
-- **Vendor Prospects** (`/admin/vendor-prospects`) — привлечение поставщиков (B2B), Kanban + таблица
-- **MCC Lead Hub** (`/admin/marketing`) — привлечение пользователей (B2C), спрятан внутри Marketing
-- **Owner Prospects** — таблица есть в базе, но UI не реализован
-- **MC CRM** (`/mc/*`) — полноценная CRM, но привязана к конкретной Управляющей Компании
+### 2. Команда (StaffPage)
+- **Все работает**: создание сотрудников, отправка учётных данных по email через `invite-team-member`, делегирование прав по модулям, назначение на объекты — реализовано и функционально
+- **Нет проблем с иерархией**: director > admin > manager > staff/cleaner/maintenance — структура ролей корректная
 
-Нет единого места, где видно: "сколько всего лидов, кто с кем работает, какая конверсия".
+### 3. Подписка (MCSubscriptionPage)
+- **Нет даты активации** у объектов в списке — видно только Active/Off, но не когда был активирован
+- **Нет бэкапа данных**: полностью отсутствует функционал экспорта/бэкапа
 
-## Решение: Admin CRM Hub (`/admin/crm`)
+---
 
-Единая страница с табами, объединяющая все потоки привлечения:
+## План реализации
 
-```text
-/admin/crm
-  |-- Dashboard (сводная аналитика по всем потокам)
-  |-- Vendors   (переиспользует VendorProspects pipeline)
-  |-- Users     (B2C лиды из mcc_leads + consultation_requests)
-  |-- Owners    (привлечение собственников)
-  |-- Activity  (единый таймлайн всех действий)
-```
+### Шаг 1: Расширение профиля компании
 
-### Таб 1: Dashboard
-- Общие KPI-карточки: всего лидов, конверсия, активных в работе
-- Разбивка по каналам (Vendors / Users / Owners)
-- Воронка конверсии (визуализация через Recharts)
-- Топ-5 горячих лидов из всех потоков
+**Миграция БД** — добавить колонки в `management_companies`:
+- `legal_name` (text) — юридическое название
+- `registration_number` (text) — номер регистрации
+- `legal_address` (text) — юридический адрес
+- `bank_name` (text) — название банка
+- `bank_account` (text) — номер счёта
+- `swift_code` (text) — SWIFT код
+- `dbd_card_url` (text) — URL DBD-карточки
+- `documents` (jsonb, default '[]') — массив документов [{name, url, type, uploaded_at}]
 
-### Таб 2: Vendors (B2B)
-- Переиспользует существующий `VendorProspectsPipeline`, `VendorProspectsTable`, `VendorProspectsStats`
-- Без дублирования кода — просто импорт компонентов
+**Обновить CompanyProfileSettings.tsx**:
+- Добавить секцию "Юридические данные" с новыми полями (legal_name, registration_number, legal_address)
+- Добавить секцию "Банковские реквизиты" (bank_name, bank_account, swift_code)
+- Добавить загрузчик DBD-карточки (UnifiedMediaUploader mode="single")
+- Добавить загрузчик Cover Image
+- Добавить секцию "Документы компании" (UnifiedMediaUploader mode="document") для лицензий, сертификатов и т.д.
+- Все новые секции — компактные, в Accordion или Card формате
 
-### Таб 3: Users (B2C)
-- Переиспользует `MCCLeadsTab` из Marketing
-- Данные из `mcc_leads` + `consultation_requests`
+### Шаг 2: Дата активации в подписке
 
-### Таб 4: Owners
-- Новый компонент для работы с `owner_prospects`
-- Простая таблица + статусы (new, contacted, interested, converted, lost)
+**Обновить MCSubscriptionPage.tsx**:
+- В списке объектов показать дату активации из `mc_property_slots.activated_at`
+- Добавить badge с датой рядом со статусом Active
 
-### Таб 5: Activity Log
-- Единый таймлайн действий по всем типам лидов
-- Фильтр по типу (vendor/user/owner)
+### Шаг 3: Бэкап данных УК
 
-## Навигация
+**Новый компонент** `src/components/mc/settings/DataBackupSettings.tsx`:
+- Кнопки экспорта по категориям: Объекты, CRM-контакты, Финансы, Отчёты
+- Формат экспорта: JSON (структурированный) или CSV
+- Данные формируются на клиенте из уже доступных Supabase-запросов
 
-- Добавить `/admin/crm` в сайдбар в группу **BUSINESS** (между Contracts и Vendor Prospects)
-- `/admin/vendor-prospects` остается рабочим как прямой доступ
-- Command Palette обновляется с ключевыми словами "crm", "leads", "acquisition"
+**Новая Edge Function** `export-mc-data`:
+- Принимает company_id + export_type (properties/crm/finance/reports/all)
+- Возвращает JSON с данными
+- Проверка авторизации: только director/admin
 
-## Технический план
+**Автобэкап**: настройка в UI (ежемесячный/еженедельный)
+- Сохранять настройку в `management_companies.backup_settings` (jsonb)
+- Cron-задача для генерации и сохранения в Storage бакет `mc-backups`
+
+**Добавить таб "Data" в MCSettingsPage**:
+- Интегрировать DataBackupSettings в настройки
+
+---
+
+## Технические детали
 
 ### Новые файлы
-1. **`src/pages/admin/AdminCRM.tsx`** — главная страница с табами (Dashboard, Vendors, Users, Owners, Activity)
-2. **`src/components/admin/crm/AdminCrmDashboard.tsx`** — сводные KPI и воронка
-3. **`src/components/admin/crm/AdminOwnerProspects.tsx`** — таблица для owner_prospects
-4. **`src/components/admin/crm/AdminCrmActivityLog.tsx`** — единый таймлайн
-5. **`src/hooks/useOwnerProspects.ts`** — CRUD-хук для owner_prospects (заменяет untypedTables)
-6. **`src/hooks/useAdminCrmStats.ts`** — агрегированная статистика по всем потокам
+1. `src/components/mc/settings/DataBackupSettings.tsx` — UI бэкапа
+2. `supabase/functions/export-mc-data/index.ts` — Edge Function экспорта
+3. Миграция БД — новые колонки для management_companies
 
-### Изменения в существующих файлах
-7. **`AnimatedRoutes.tsx`** — добавить Route `/admin/crm`
-8. **`AdminSidebar.tsx`** — добавить пункт "CRM" в группу Business
-9. **`AdminCommandPalette.tsx`** — добавить команду CRM
-10. **`AdminMobileBottomNav.tsx`** — добавить CRM в "More" drawer
+### Изменяемые файлы
+4. `src/components/mc/settings/CompanyProfileSettings.tsx` — расширенный профиль
+5. `src/pages/mc/MCSettingsPage.tsx` — новый таб "Data/Данные"
+6. `src/pages/owner/MCSubscriptionPage.tsx` — дата активации слотов
+7. `src/hooks/useManagementCompanies.ts` — обновить интерфейс ManagementCompany
 
-### База данных
-- Новых таблиц **не нужно** — `vendor_prospects`, `mcc_leads`, `consultation_requests`, `owner_prospects` уже существуют
-- Возможно потребуется миграция для добавления недостающих колонок в `owner_prospects` (проверим при реализации)
-
-### Переиспользование кода
-- `VendorProspectsPipeline` / `VendorProspectsTable` / `VendorProspectsStats` — импортируются напрямую
-- `MCCLeadsTab` — импортируется напрямую
-- `useLeadHub` / `useVendorAcquisition` — используются как есть
-
+### Безопасность
+- Edge Function проверяет JWT + membership в компании с ролью director/admin
+- Storage бакет `mc-backups` с RLS: доступ только участникам компании
