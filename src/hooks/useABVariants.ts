@@ -189,8 +189,8 @@ export function useVariantPerformance(landingId?: string) {
       // Group by variant_id in payload
       const byVariant: Record<string, { views: number; cta: number; completed: number }> = {};
 
-      (data || []).forEach((e: any) => {
-        const vid = (e.payload as any)?.variant_id || 'none';
+      (data || []).forEach((e) => {
+        const vid = (e.payload as Record<string, unknown>)?.variant_id as string || 'none';
         if (!byVariant[vid]) byVariant[vid] = { views: 0, cta: 0, completed: 0 };
         switch (e.event_name) {
           case 'landing_view': byVariant[vid].views++; break;

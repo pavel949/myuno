@@ -95,8 +95,7 @@ export function useAdminBouquets() {
 
       if (error) throw error;
       setItems((data as unknown as AdminBouquet[]) || []);
-    } catch (err) {
-      console.error('Error fetching bouquets:', err);
+    } catch {
       setItems([]);
     } finally {
       setIsLoading(false);
@@ -116,7 +115,6 @@ export function useAdminBouquets() {
       if (error) throw error;
       await fetchItems();
     } catch (err) {
-      console.error('Error creating bouquet:', err);
       throw err;
     }
   };
@@ -132,7 +130,6 @@ export function useAdminBouquets() {
       if (error) throw error;
       await fetchItems();
     } catch (err) {
-      console.error('Error updating bouquet:', err);
       throw err;
     }
   };
@@ -147,7 +144,6 @@ export function useAdminBouquets() {
       if (error) throw error;
       await fetchItems();
     } catch (err) {
-      console.error('Error deleting bouquet:', err);
       throw err;
     }
   };

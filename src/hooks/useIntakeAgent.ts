@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
 
 export interface ExtractedField {
-  value: any;
+  value: unknown;
   confidence: number;
   source: 'text' | 'scraped' | 'image' | 'inferred';
 }
@@ -91,7 +91,6 @@ export function useIntakeAgent() {
             .upload(filePath, fileItem.file);
             
           if (uploadError) {
-            console.error('Upload error:', uploadError);
             throw new Error(`Failed to upload ${fileItem.file.name}: ${uploadError.message}`);
           }
           
@@ -193,7 +192,7 @@ export function useIntakeAgent() {
     
     try {
       // Transform extracted fields to flat object
-      const fields: Record<string, any> = {};
+      const fields: Record<string, unknown> = {};
       for (const [key, field] of Object.entries(item.extractedFields)) {
         fields[key] = field.value;
       }

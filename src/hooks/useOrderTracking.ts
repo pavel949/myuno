@@ -157,7 +157,6 @@ export function useRestaurantAvailability(
       });
 
       if (error) {
-        console.error('Restaurant availability check error:', error);
         return { available: true, spots_remaining: 30 };
       }
 

@@ -540,25 +540,25 @@ export default function OwnerPropertyImport() {
                     {fields.bedrooms?.value && (
                       <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                         <Bed className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{fields.bedrooms.value} {isRu ? 'спален' : 'bed'}</span>
+                        <span className="text-sm">{String(fields.bedrooms.value)} {isRu ? 'спален' : 'bed'}</span>
                       </div>
                     )}
                     {fields.bathrooms?.value && (
                       <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                         <Bath className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{fields.bathrooms.value} {isRu ? 'ванных' : 'bath'}</span>
+                        <span className="text-sm">{String(fields.bathrooms.value)} {isRu ? 'ванных' : 'bath'}</span>
                       </div>
                     )}
                     {fields.max_guests?.value && (
                       <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                         <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{fields.max_guests.value} {isRu ? 'гостей' : 'guests'}</span>
+                        <span className="text-sm">{String(fields.max_guests.value)} {isRu ? 'гостей' : 'guests'}</span>
                       </div>
                     )}
                     {fields.price_per_night?.value && (
                       <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{fields.price_per_night.value} {isRu ? '/ночь' : '/night'}</span>
+                        <span className="text-sm">{String(fields.price_per_night.value)} {isRu ? '/ночь' : '/night'}</span>
                       </div>
                     )}
                   </div>
@@ -576,7 +576,7 @@ export default function OwnerPropertyImport() {
                   {(fields.district?.value || fields.address?.value) && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4" />
-                      {fields.district?.value}{fields.address?.value ? `, ${fields.address.value}` : ''}
+                      {String(fields.district?.value || '')}{fields.address?.value ? `, ${String(fields.address.value)}` : ''}
                     </div>
                   )}
 
