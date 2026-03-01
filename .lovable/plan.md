@@ -1,96 +1,122 @@
 
+# Разделение рабочих пространств: myUNO Admin vs УК (Management Company)
 
-# Owner Portal: Связывание данных и UX для создания портала
+## Текущая проблема
 
-## Проблема
+Сейчас **все** функции УК (CRM, бронирования, финансы, команда, объекты) и функции индивидуальных собственников живут под одним префиксом `/owner`. Это создает путаницу:
 
-Сейчас между CRM-контактом собственника (`crm_contacts` с `contact_type='owner'`) и его учётной записью в системе (`auth.users` / `profiles`) нет связи. Это означает:
+- УК-менеджер и простой собственник видят один и тот же URL `/owner`
+- Нет четкой границы между платформой myUNO (`/admin`) и рабочим пространством УК
+- Сотрудники УК теоретически могут попасть в admin-интерфейс
 
-1. **Нет UUID-привязки** -- когда УК вносит собственника в CRM, у него нет аккаунта в системе
-2. **Портал "висит в воздухе"** -- `owner_portal_settings` требует `owner_user_id`, но его неоткуда взять из CRM
-3. **Нет единого UX** -- нет кнопки "Создать портал" на карточке собственника в PMS
-4. **Данные не связаны** -- объекты привязаны через `owner_contact_id`, но портал требует `owner_user_id`
-
-## Решение
-
-### 1. Добавить `linked_user_id` в `crm_contacts`
-
-Новое поле для связывания CRM-контакта с реальным пользователем системы:
+## Предлагаемая архитектура
 
 ```text
-crm_contacts
-  + linked_user_id UUID (nullable, FK -> auth.users)
+/admin/*          -- myUNO Platform (admin, uno_team ONLY)
+/mc/*             -- Management Company workspace (MC members)
+/my-property/*    -- Owner Portal (read-only для собственников)
+/staff/*          -- Staff dashboard
+/vendor/*         -- Vendor portal
 ```
 
-Это позволит:
-- Связать контакт с существующим пользователем (поиск по email)
-- Автоматически создать аккаунт при настройке портала
+### Почему `/mc` а не `/mc/:slug`?
 
-### 2. Компонент "Create Owner Portal" на карточке собственника
+Slug в URL добавляет сложность (каждая ссылка должна знать slug). Компания уже определяется через `useActiveCompany` (из membership в БД). Если пользователь состоит в нескольких УК -- он переключается через селектор в хедере, а не через URL. Это проще и безопаснее.
 
-На странице `OwnerDetailPage` (/owner/owners/:id) добавить новый блок **"Портал владельца"**:
+## План реализации (3 фазы)
 
-- Показывает статус: портал настроен / не настроен
-- Если у контакта есть email -- кнопка **"Создать портал"**:
-  1. Ищет пользователя по email в `profiles`
-  2. Если найден -- привязывает `linked_user_id`, создаёт `owner_portal_settings` для всех объектов этого собственника
-  3. Если не найден -- показывает сообщение "Собственник должен зарегистрироваться по email X, после чего портал активируется автоматически"
-- Кнопка "Настройки портала" для каждого объекта -- ведёт к `/owner/properties/:propertyId/portal-settings`
-- Показывает список объектов собственника с индикатором (портал включен / выключен)
-
-### 3. Автоматическая активация портала
-
-Компонент `OwnerPortalActivator` -- при создании портала:
-1. Берёт email из `crm_contacts`
-2. Ищет совпадение в `profiles` по email
-3. Если найден:
-   - Записывает `linked_user_id` в `crm_contacts`
-   - Создаёт `owner_portal_settings` для каждого объекта (с дефолтными настройками)
-   - Создаёт `property_delegates` запись (role: `owner_readonly`, status: `active`)
-4. Если не найден:
-   - Создаёт `property_delegates` с `invited_email` и `status: 'pending'`
-   - Показывает ссылку-приглашение
-
-### 4. Связь данных на OwnerDetailPage
-
-На карточке собственника добавить секцию "Portal" (новый таб или блок в Overview):
-- Список объектов с быстрыми переключателями (портал вкл/выкл)
-- Ссылка на предпросмотр портала (как видит собственник)
-- Статус: "Активен" / "Ожидает регистрации" / "Не настроен"
-
----
-
-## Технический план
-
-### Шаг 1: Миграция БД
-- Добавить `linked_user_id uuid REFERENCES auth.users(id)` в `crm_contacts`
-- Индекс на `linked_user_id` для быстрого поиска
-
-### Шаг 2: Компонент `OwnerPortalSetupCard`
-- Новый компонент в `src/components/owner/owners/OwnerPortalSetupCard.tsx`
-- Принимает `contactId`, `email`, `properties[]`
-- Логика: поиск пользователя, создание настроек, привязка
-- Интегрируется в `OwnerDetailPage` (в Overview tab или как отдельный таб "Portal")
-
-### Шаг 3: Обновить `OwnerDetailPage`
-- Добавить таб "Portal" или карточку в Overview
-- Показывать `OwnerPortalSetupCard` с актуальным статусом
-- Для каждого объекта: кнопка настроек портала
-
-### Шаг 4: Обновить `useOwnerAccounts`
-- Добавить `linked_user_id` в выборку
-- Добавить статус портала (есть ли `owner_portal_settings` для объектов)
-
----
-
-## Файлы
+### Фаза 1: Создание MC Layout и Guard
 
 **Новые файлы:**
-- `src/components/owner/owners/OwnerPortalSetupCard.tsx` -- UI создания/управления порталом
+- `src/components/mc/MCLayout.tsx` -- Layout для MC workspace (копия OwnerLayout, адаптированная для MC)
+- `src/components/mc/MCSidebar.tsx` -- Sidebar с MC-модулями (CRM, Properties, Calendar, Finance, Staff, Operations)
+- `src/components/mc/MCHeader.tsx` -- Header с названием компании и company switcher
+- `src/components/auth/MCGuard.tsx` -- Guard: проверяет membership в `management_company_members`
 
-**Изменяемые файлы:**
-- `src/pages/owner/OwnerDetailPage.tsx` -- добавить Portal таб/блок
-- `src/hooks/useOwnerAccounts.ts` -- добавить `linked_user_id` и portal status в выборку
+**MCGuard логика:**
+- Проверяет, что пользователь является участником хотя бы одной `management_company`
+- Если нет -- показывает "Access Denied" или редирект на `/owner/setup`
+- Не проверяет admin/uno_team роли (они работают через AdminGuard)
 
-**Миграция:**
-- Добавить `linked_user_id` в `crm_contacts`
+### Фаза 2: Перенос маршрутов из /owner в /mc
+
+**Маршруты, переносимые в `/mc`** (PMS-функционал УК):
+- `/mc/properties`, `/mc/properties/new`, `/mc/properties/:id/*`
+- `/mc/calendar`, `/mc/bookings`
+- `/mc/financials`, `/mc/budget`, `/mc/quick-expense`, `/mc/income/quick`
+- `/mc/contacts`, `/mc/contacts/:id`, `/mc/contacts/import`
+- `/mc/sales`, `/mc/sales/*`
+- `/mc/tasks`, `/mc/crm-dashboard`, `/mc/sequences`, `/mc/quotes`
+- `/mc/meetings`, `/mc/crm-emails`, `/mc/automations`
+- `/mc/staff`, `/mc/team`
+- `/mc/operations`, `/mc/maintenance-plan`
+- `/mc/channels`, `/mc/rates`, `/mc/reviews-management`
+- `/mc/inventory`, `/mc/documents`, `/mc/vault`
+- `/mc/vendors`, `/mc/marketing`
+- `/mc/invoices`, `/mc/reports`
+- `/mc/owners`, `/mc/owners/:id`
+- `/mc/subscription`
+- `/mc/properties/:id/portal-settings`
+- `/mc/messages`, `/mc/auto-messaging`, `/mc/chat/:type/:id`
+- `/mc/support-chat`, `/mc/message-templates`
+- `/mc/management-terms`, `/mc/insurance`
+
+**Маршруты, остающиеся на `/owner`** (для индивидуальных собственников):
+- `/owner` -- Dashboard (Transparency)
+- `/owner/setup` -- Wizard настройки
+- `/owner/portfolio` -- Портфолио объектов
+- `/owner/finance` -- Финансовый обзор (read-only)
+- `/owner/superhost` -- Superhost рейтинг
+- `/owner/guide` -- Гид
+- `/owner/service-request`, `/owner/inspection`, `/owner/full-management`
+
+**Редиректы:** Все старые `/owner/contacts`, `/owner/sales`, `/owner/tasks` и т.д. получат `<Navigate to="/mc/..." replace />` для обратной совместимости.
+
+### Фаза 3: Обновление внутренних ссылок
+
+**87 файлов** содержат hardcoded `/owner/...` пути. Для каждого:
+- MC-компоненты (в `src/components/owner/`) -- обновить на `/mc/...`
+- Страницы (в `src/pages/owner/`) -- обновить на `/mc/...`
+- Утилиты и хуки -- обновить навигацию
+
+**Обновить `APP_ROUTES` в `routes.ts`:**
+```text
+MC: '/mc'
+MC_PROPERTIES: '/mc/properties'
+MC_CALENDAR: '/mc/calendar'
+MC_CONTACTS: '/mc/contacts'
+MC_SALES: '/mc/sales'
+MC_TASKS: '/mc/tasks'
+MC_FINANCE: '/mc/financials'
+MC_STAFF: '/mc/staff'
+...
+OWNER: '/owner'           -- (для индивидуальных собственников)
+OWNER_PORTAL: '/my-property'  -- (read-only портал)
+```
+
+## Итоговая матрица доступа
+
+```text
+Роль               | /admin | /mc   | /owner | /my-property | /staff
+--------------------|--------|-------|--------|--------------|-------
+admin               |   OK   |  OK   |   OK   |     OK       |  OK
+uno_team            |   OK   |  --   |   --   |     --       |  OK
+MC director/manager |   --   |  OK   |   OK   |     --       |  --
+MC accountant       |   --   |  OK   |   --   |     --       |  --
+Property owner      |   --   |  --   |   OK   |     OK       |  --
+staff               |   --   |  --   |   --   |     --       |  OK
+vendor              |   --   |  --   |   --   |     --       |  --
+```
+
+## Технический объем
+
+| Компонент | Действие | Файлы |
+|-----------|----------|-------|
+| MCLayout, MCSidebar, MCHeader | Создать | 3 новых |
+| MCGuard | Создать | 1 новый |
+| AnimatedRoutes.tsx | Разделить /owner на /mc + /owner | 1 |
+| routes.ts | Добавить MC_* константы | 1 |
+| Внутренние ссылки | Обновить navigate/Link | ~60-80 файлов |
+| Redirect-слой | /owner/* -> /mc/* для MC-маршрутов | в AnimatedRoutes |
+
+**Риск:** Большой объем изменений. Рекомендую делать пофазно с тестированием после каждой фазы.
