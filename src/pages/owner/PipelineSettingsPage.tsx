@@ -354,6 +354,7 @@ export default function PipelineSettingsPage() {
     { value: 'lead_source', label: isRu ? 'Источники лидов' : 'Lead Sources' },
     { value: 'deal_type', label: isRu ? 'Типы сделок' : 'Deal Types' },
     { value: 'task_type', label: isRu ? 'Типы задач' : 'Task Types' },
+    { value: 'lost_reason', label: isRu ? 'Причины проигрыша' : 'Lost Reasons' },
   ];
 
   return (
@@ -403,6 +404,10 @@ export default function PipelineSettingsPage() {
 
         <TabsContent value="task_type" className="mt-4">
           <OptionListEditor companyId={membership.company_id} category="task_type" isRu={isRu} />
+        </TabsContent>
+
+        <TabsContent value="lost_reason" className="mt-4">
+          <OptionListEditor companyId={membership.company_id} category="lost_reason" isRu={isRu} />
         </TabsContent>
       </Tabs>
     </div>
