@@ -229,7 +229,6 @@ export function useBooking() {
       };
 
     } catch (error) {
-      console.error('Booking error:', error);
       toast({ title: t('booking.error'), variant: 'destructive' });
       return { success: false, error: error instanceof Error ? error.message : 'unknown' };
     }
@@ -245,7 +244,6 @@ export function useBooking() {
       }
       return result;
     } catch (error) {
-      console.error('Cancel error:', error);
       toast({ 
         title: language === 'ru' ? 'Ошибка отмены' : 'Cancel failed', 
         variant: 'destructive' 

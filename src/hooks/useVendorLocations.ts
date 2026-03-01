@@ -77,7 +77,6 @@ export function useVendorLocations() {
       setLocations((data as VendorLocation[]) || []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching locations:', err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -110,7 +109,6 @@ export function useVendorLocations() {
       await fetchLocations();
       return { data: data as VendorLocation, error: null };
     } catch (err) {
-      console.error('Error creating location:', err);
       return { data: null, error: err as Error };
     }
   };
@@ -132,7 +130,6 @@ export function useVendorLocations() {
       await fetchLocations();
       return { data: data as VendorLocation, error: null };
     } catch (err) {
-      console.error('Error updating location:', err);
       return { data: null, error: err as Error };
     }
   };
@@ -149,7 +146,6 @@ export function useVendorLocations() {
       await fetchLocations();
       return { error: null };
     } catch (err) {
-      console.error('Error deleting location:', err);
       return { error: err as Error };
     }
   };
@@ -169,7 +165,6 @@ export function useVendorLocations() {
       await fetchLocations();
       return { error: null };
     } catch (err) {
-      console.error('Error submitting for moderation:', err);
       return { error: err as Error };
     }
   };
@@ -188,7 +183,6 @@ export function useVendorLocations() {
       if (error) throw error;
       return { data, error: null };
     } catch (err) {
-      console.error('Error fetching location services:', err);
       return { data: null, error: err as Error };
     }
   };
@@ -209,7 +203,6 @@ export function useVendorLocations() {
       if (error) throw error;
       return { error: null };
     } catch (err) {
-      console.error('Error adding services to location:', err);
       return { error: err as Error };
     }
   };
@@ -226,7 +219,6 @@ export function useVendorLocations() {
       if (error) throw error;
       return { error: null };
     } catch (err) {
-      console.error('Error removing service from location:', err);
       return { error: err as Error };
     }
   };
@@ -269,9 +261,9 @@ export function useAdminVendorLocations() {
       const { data, error } = await query;
 
       if (error) throw error;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setLocations((data as any[]) || []);
-    } catch (err) {
-      console.error('Error fetching all locations:', err);
+    } catch {
     } finally {
       setIsLoading(false);
     }
