@@ -89,8 +89,7 @@ export function useUserAddresses() {
       queryClient.invalidateQueries({ queryKey: ['user-addresses', user?.id] });
       toast.success(language === 'ru' ? 'Адрес сохранён' : 'Address saved');
     },
-    onError: (error) => {
-      console.error('Create address error:', error);
+    onError: () => {
       toast.error(language === 'ru' ? 'Ошибка сохранения адреса' : 'Failed to save address');
     },
   });
@@ -115,8 +114,7 @@ export function useUserAddresses() {
       queryClient.invalidateQueries({ queryKey: ['user-addresses', user?.id] });
       toast.success(language === 'ru' ? 'Адрес обновлён' : 'Address updated');
     },
-    onError: (error) => {
-      console.error('Update address error:', error);
+    onError: () => {
       toast.error(language === 'ru' ? 'Ошибка обновления адреса' : 'Failed to update address');
     },
   });
@@ -138,8 +136,7 @@ export function useUserAddresses() {
       queryClient.invalidateQueries({ queryKey: ['user-addresses', user?.id] });
       toast.success(language === 'ru' ? 'Адрес удалён' : 'Address deleted');
     },
-    onError: (error) => {
-      console.error('Delete address error:', error);
+    onError: () => {
       toast.error(language === 'ru' ? 'Ошибка удаления адреса' : 'Failed to delete address');
     },
   });

@@ -19,7 +19,7 @@ export interface VendorLegalService {
   website?: string;
   cover_image?: string;
   images?: string[];
-  working_hours?: any;
+  working_hours?: Record<string, unknown>;
   is_active?: boolean;
   is_featured?: boolean;
   is_verified?: boolean;

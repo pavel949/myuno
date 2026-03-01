@@ -58,6 +58,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
         .eq('is_active', true);
       if (error) throw error;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (data || []).map((m: any) => ({
         company_id: m.company_id,
         role: m.role,

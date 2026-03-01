@@ -92,8 +92,7 @@ export function usePayoutMethods() {
       queryClient.invalidateQueries({ queryKey: ['payout-methods', providerId] });
       toast.success('Реквизиты добавлены');
     },
-    onError: (error) => {
-      console.error('Add payout method error:', error);
+    onError: () => {
       toast.error('Ошибка добавления реквизитов');
     },
   });
@@ -121,8 +120,7 @@ export function usePayoutMethods() {
       queryClient.invalidateQueries({ queryKey: ['payout-methods', providerId] });
       toast.success('Основные реквизиты изменены');
     },
-    onError: (error) => {
-      console.error('Set default method error:', error);
+    onError: () => {
       toast.error('Ошибка изменения реквизитов');
     },
   });
@@ -143,8 +141,7 @@ export function usePayoutMethods() {
       queryClient.invalidateQueries({ queryKey: ['payout-methods', providerId] });
       toast.success('Реквизиты удалены');
     },
-    onError: (error) => {
-      console.error('Delete payout method error:', error);
+    onError: () => {
       toast.error('Ошибка удаления реквизитов');
     },
   });

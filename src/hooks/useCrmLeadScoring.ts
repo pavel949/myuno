@@ -10,7 +10,7 @@ export interface CrmScoringRule {
   company_id: string;
   rule_name: string;
   condition_type: string;
-  condition_config: any;
+  condition_config: Record<string, unknown>;
   points: number;
   is_active: boolean;
   sort_order: number;

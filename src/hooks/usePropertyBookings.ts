@@ -53,9 +53,10 @@ export interface CreateBookingInput {
 /**
  * Maps an order row to PropertyBooking interface for backward compatibility
  */
-function mapOrderToBooking(order: any, propertyId: string): PropertyBooking {
-  const guestParticipant = order.order_participants?.find((p: any) => p.role === 'guest');
-  const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapOrderToBooking(order: Record<string, any>, propertyId: string): PropertyBooking {
+  const guestParticipant = order.order_participants?.find((p: { role: string }) => p.role === 'guest');
+  const propertyItem = order.order_items?.find((i: { item_type: string }) => i.item_type === 'property');
   
   // Property ID is stored in order_items.metadata.property_id (not resource_id due to FK constraint)
   const itemPropertyId = propertyItem?.metadata?.property_id || propertyItem?.resource_id;
@@ -238,14 +239,14 @@ export function usePropertyBookings(propertyId?: string) {
       if (!user?.id) throw new Error('Not authenticated');
       
       // Update the order
-      const orderUpdates: any = {};
+      const orderUpdates: Record<string, string | number> = {};
       if (updates.check_in) {
         // Preserve custom check-in time from metadata if available
-        const checkInTime = (updates as any).check_in_time || '14:00';
+        const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
         orderUpdates.start_at = `${updates.check_in}T${checkInTime}:00Z`;
       }
       if (updates.check_out) {
-        const checkOutTime = (updates as any).check_out_time || '12:00';
+        const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
         orderUpdates.end_at = `${updates.check_out}T${checkOutTime}:00Z`;
       }
       if (updates.total_amount !== undefined) orderUpdates.total_amount = updates.total_amount;
@@ -424,6 +425,7 @@ export function useAllPropertyBookings() {
           .select('id, title_en, title_ru, address, cover_image')
           .in('id', resourceIds);
         
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         propertiesMap = (props || []).reduce((acc, prop: any) => {
           acc[prop.id] = { ...prop, title: prop.title_en };
           return acc;

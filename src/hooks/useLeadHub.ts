@@ -102,6 +102,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
         if (mccError) {
           errorLog.silent(mccError, 'fetch_mcc_leads');
         } else if (mccLeads) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           mccLeads.forEach((lead: any) => {
             unifiedLeads.push({
               id: lead.id,
@@ -141,6 +142,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
         if (consultationsError) {
           errorLog.silent(consultationsError, 'fetch_consultations');
         } else if (consultations) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           consultations.forEach((consultation: any) => {
             const mappedPriority = mapAiPriorityToLeadPriority(consultation.ai_priority);
             const mappedStatus = mapConsultationStatus(consultation.status);
@@ -316,6 +318,7 @@ export function useRecentLeads(limit: number = 5) {
         .limit(limit);
 
       const combined = [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(mccLeads || []).map((l: any) => ({
           id: l.id,
           name: l.name || l.email?.split('@')[0] || 'Unknown',
@@ -324,6 +327,7 @@ export function useRecentLeads(limit: number = 5) {
           created_at: l.created_at,
           source_table: 'mcc_leads' as const,
         })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(consultations || []).map((c: any) => ({
           id: c.id,
           name: c.name || c.email?.split('@')[0] || 'Unknown',

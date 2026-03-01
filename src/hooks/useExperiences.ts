@@ -218,7 +218,7 @@ const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experie
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data || []).map((item: any) => transformExperience(item as Record<string, unknown>));
+  return (data || []).map((item) => transformExperience(item as Record<string, unknown>));
 };
 
 const fetchExperienceById = async (id: string): Promise<Experience | null> => {
