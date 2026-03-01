@@ -151,19 +151,19 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
         </DialogHeader>
 
         <Tabs defaultValue="general" className="flex-1">
-          <div className="px-6">
-            <TabsList className="w-full grid grid-cols-5 h-9">
-              <TabsTrigger value="general" className="text-xs">{isRu ? 'Основное' : 'General'}</TabsTrigger>
-              <TabsTrigger value="location" className="text-xs">{isRu ? 'Локация' : 'Location'}</TabsTrigger>
-              <TabsTrigger value="media" className="text-xs">{isRu ? 'Фото' : 'Media'}</TabsTrigger>
-              <TabsTrigger value="amenities" className="text-xs">{isRu ? 'Удобства' : 'Amenities'}</TabsTrigger>
-              <TabsTrigger value="management" className="text-xs">{isRu ? 'Управление' : 'Mgmt'}</TabsTrigger>
+          <div className="px-6 overflow-x-auto">
+            <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5 h-auto gap-1">
+              <TabsTrigger value="general" className="text-xs py-1.5">{isRu ? 'Основное' : 'General'}</TabsTrigger>
+              <TabsTrigger value="location" className="text-xs py-1.5">{isRu ? 'Локация' : 'Location'}</TabsTrigger>
+              <TabsTrigger value="media" className="text-xs py-1.5">{isRu ? 'Фото' : 'Media'}</TabsTrigger>
+              <TabsTrigger value="amenities" className="text-xs py-1.5">{isRu ? 'Удобства' : 'Amenities'}</TabsTrigger>
+              <TabsTrigger value="management" className="text-xs py-1.5">{isRu ? 'Управл.' : 'Mgmt'}</TabsTrigger>
             </TabsList>
           </div>
 
           <ScrollArea className="h-[55vh] px-6 py-4">
             <TabsContent value="general" className="space-y-4 mt-0">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
                   <Input value={form.name} onChange={e => setField('name', e.target.value)} placeholder="Palm Garden Residence" />
@@ -186,7 +186,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
                 </Select>
               </div>
 
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1.5">
                   <Label>{isRu ? 'Юнитов' : 'Units'}</Label>
                   <Input type="number" value={form.total_units || ''} onChange={e => setField('total_units', e.target.value ? Number(e.target.value) : undefined)} />
@@ -205,7 +205,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
                   <Textarea value={form.description_en || ''} onChange={e => setField('description_en', e.target.value)} rows={3} />
@@ -226,7 +226,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
                 <Label>{isRu ? 'Район' : 'District'}</Label>
                 <Input value={form.district || ''} onChange={e => setField('district', e.target.value)} placeholder="Bang Tao" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Latitude</Label>
                   <Input type="number" step="any" value={form.lat || ''} onChange={e => setField('lat', e.target.value ? Number(e.target.value) : undefined)} />
@@ -268,24 +268,22 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
             </TabsContent>
 
             <TabsContent value="management" className="space-y-4 mt-0">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>CAM Fee (฿/m²)</Label>
-                  <Input type="number" value={form.cam_fee_per_sqm || ''} onChange={e => setField('cam_fee_per_sqm', e.target.value ? Number(e.target.value) : undefined)} />
-                </div>
+              <div className="space-y-1.5">
+                <Label>CAM Fee (฿/m²)</Label>
+                <Input type="number" className="max-w-xs" value={form.cam_fee_per_sqm || ''} onChange={e => setField('cam_fee_per_sqm', e.target.value ? Number(e.target.value) : undefined)} />
               </div>
               <div className="space-y-1.5">
                 <Label>{isRu ? 'Юридическое лицо' : 'Juristic Person'}</Label>
                 <Input value={form.juristic_person_name || ''} onChange={e => setField('juristic_person_name', e.target.value)} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>{isRu ? 'Телефон юрлица' : 'Juristic Phone'}</Label>
                   <Input value={form.juristic_phone || ''} onChange={e => setField('juristic_phone', e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Email</Label>
-                  <Input value={form.juristic_email || ''} onChange={e => setField('juristic_email', e.target.value)} />
+                  <Input type="email" value={form.juristic_email || ''} onChange={e => setField('juristic_email', e.target.value)} />
                 </div>
               </div>
             </TabsContent>

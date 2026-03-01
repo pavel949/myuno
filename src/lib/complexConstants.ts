@@ -14,6 +14,7 @@ export const COMPLEX_TYPES = [
 
 export const COMPLEX_AMENITIES = [
   { value: 'swimming_pool', labelEn: 'Swimming Pool', labelRu: 'Бассейн', icon: '🏊' },
+  { value: 'kids_pool', labelEn: 'Kids Pool', labelRu: 'Детский бассейн', icon: '🧒' },
   { value: 'gym', labelEn: 'Fitness Center', labelRu: 'Фитнес-центр', icon: '🏋️' },
   { value: 'sauna', labelEn: 'Sauna', labelRu: 'Сауна', icon: '🧖' },
   { value: 'steam_room', labelEn: 'Steam Room', labelRu: 'Хамам', icon: '♨️' },
@@ -27,6 +28,8 @@ export const COMPLEX_AMENITIES = [
   { value: 'tennis_court', labelEn: 'Tennis Court', labelRu: 'Теннисный корт', icon: '🎾' },
   { value: 'yoga_room', labelEn: 'Yoga Room', labelRu: 'Зал для йоги', icon: '🧘' },
   { value: 'library', labelEn: 'Library', labelRu: 'Библиотека', icon: '📚' },
+  { value: 'beach_access', labelEn: 'Beach Access', labelRu: 'Доступ к пляжу', icon: '🏖️' },
+  { value: 'communal_kitchen', labelEn: 'Communal Kitchen', labelRu: 'Общая кухня', icon: '🍳' },
 ] as const;
 
 export const COMPLEX_SERVICES = [
