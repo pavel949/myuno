@@ -136,7 +136,7 @@ export function useDashboardMetrics() {
       ]);
 
       // KPI calculations
-      const sum = (rows: any[] | null) => (rows || []).reduce((s: number, r: any) => s + Number(r.amount || 0), 0);
+      const sum = (rows: { amount: number }[] | null) => (rows || []).reduce((s: number, r) => s + Number(r.amount || 0), 0);
       const revenue = sum(incomeRes.data);
       const expenses = sum(expenseRes.data);
       const revenuePrev = sum(incomePrevRes.data);
@@ -152,7 +152,7 @@ export function useDashboardMetrics() {
         const co = new Date(Math.min(new Date(b.check_out).getTime(), new Date(endOfMonth).getTime()));
         const nights = Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / (1000 * 60 * 60 * 24)));
         bookedNights += nights;
-        bookingRevenue += Number((b as any).total_amount || 0);
+        bookingRevenue += Number(b.total_amount || 0);
       }
       const totalNights = Math.max(1, totalPropertyCount) * daysInMonth;
       const occupancyRate = Math.min(100, Math.round((bookedNights / totalNights) * 100));
@@ -165,21 +165,23 @@ export function useDashboardMetrics() {
       };
 
       // Ops calculations
-      const dealsData = (dealsRes as any).data || [];
-      const inventoryItems = (inventoryRes as any).data || [];
+      type CountResult = { count?: number | null; data?: unknown[]; error: unknown };
+      const getCount = (res: CountResult) => res.count || 0;
+      const dealsData = ((dealsRes as { data?: { id: string; deal_value: number | null }[] }).data || []);
+      const inventoryItems = ((inventoryRes as { data?: { id: string; quantity: number | null; min_quantity: number | null }[] }).data || []);
       const ops: DashboardOps = {
-        openTasks: (crmTasksRes as any).count || 0,
-        overdueTasks: (overdueCrmRes as any).count || 0,
-        activeDeals: (dealsRes as any).count || dealsData.length,
-        dealsPipelineValue: dealsData.reduce((s: number, d: any) => s + Number(d.deal_value || 0), 0),
-        upcomingBookings: (upcomingBookingsRes as any).count || 0,
-        staffCount: (staffRes as any).count || 0,
-        openServiceRequests: (serviceReqRes as any).count || 0,
-        lowStockItems: inventoryItems.filter((i: any) =>
+        openTasks: getCount(crmTasksRes as CountResult),
+        overdueTasks: getCount(overdueCrmRes as CountResult),
+        activeDeals: getCount(dealsRes as CountResult) || dealsData.length,
+        dealsPipelineValue: dealsData.reduce((s, d) => s + Number(d.deal_value || 0), 0),
+        upcomingBookings: getCount(upcomingBookingsRes as CountResult),
+        staffCount: getCount(staffRes as CountResult),
+        openServiceRequests: getCount(serviceReqRes as CountResult),
+        lowStockItems: inventoryItems.filter(i =>
           i.min_quantity != null && i.quantity != null && i.quantity < i.min_quantity
         ).length,
-        unreadMessages: (unreadRes as any).count || 0,
-        pendingInvoices: (pendingInvRes as any).count || 0,
+        unreadMessages: getCount(unreadRes as CountResult),
+        pendingInvoices: getCount(pendingInvRes as CountResult),
       };
 
       return { kpi, ops };

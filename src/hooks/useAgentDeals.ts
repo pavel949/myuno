@@ -136,12 +136,13 @@ export function useCompanyMembers(companyId: string | undefined) {
         .eq('is_active', true);
       if (error) throw error;
       // Fetch profile names separately to avoid join issues
-      const userIds = (data || []).map((m: any) => m.user_id);
+      const members = data || [];
+      const userIds = members.map(m => m.user_id);
       const { data: profiles } = userIds.length > 0
         ? await supabase.from('profiles').select('id, full_name').in('id', userIds)
-        : { data: [] };
-      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.full_name]));
-      return (data || []).map((m: any) => ({
+        : { data: [] as { id: string; full_name: string | null }[] };
+      const profileMap = new Map((profiles || []).map(p => [p.id, p.full_name]));
+      return members.map(m => ({
         user_id: m.user_id,
         role: m.role,
         name: profileMap.get(m.user_id) || m.user_id.slice(0, 8),

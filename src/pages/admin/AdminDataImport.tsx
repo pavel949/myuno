@@ -256,8 +256,8 @@ export default function AdminDataImport() {
                 
                 <TabsContent value="scanner">
                   <BusinessCardScanner 
-                    onProviderCreated={(id) => {
-                      console.log('Provider created:', id);
+                    onProviderCreated={() => {
+                      // Provider created successfully
                     }}
                   />
                 </TabsContent>

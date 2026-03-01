@@ -58,10 +58,26 @@ export function useMultiPropertyBookings(
 
       if (error) throw error;
 
-      return (orders || []).map((order: any) => {
-        const guestParticipant = order.order_participants?.find((p: any) => p.role === 'guest');
-        const propertyItem = order.order_items?.find((i: any) => i.item_type === 'property');
-        const itemPropertyId = propertyItem?.metadata?.property_id || propertyItem?.resource_id;
+      interface OrderRow {
+        id: string;
+        start_at: string | null;
+        end_at: string | null;
+        total_amount: number | null;
+        currency: string | null;
+        status: string;
+        notes: string | null;
+        provider_org_id: string | null;
+        metadata: Record<string, unknown> | null;
+        created_at: string;
+        updated_at: string;
+        order_items?: { id: string; resource_id: string | null; item_type: string; item_name: string | null; unit_price: number | null; amount: number | null; metadata: Record<string, unknown> | null }[];
+        order_participants?: { id: string; role: string; name: string | null; phone: string | null; email: string | null }[];
+      }
+
+      return ((orders || []) as OrderRow[]).map((order) => {
+        const guestParticipant = order.order_participants?.find(p => p.role === 'guest');
+        const propertyItem = order.order_items?.find(i => i.item_type === 'property');
+        const itemPropertyId = (propertyItem?.metadata as Record<string, unknown>)?.property_id as string || propertyItem?.resource_id;
 
         return {
           id: order.id,
@@ -73,11 +89,11 @@ export function useMultiPropertyBookings(
           guest_email: guestParticipant?.email,
           check_in: order.start_at?.split('T')[0] || '',
           check_out: order.end_at?.split('T')[0] || '',
-          guests_count: order.metadata?.guests_count,
+          guests_count: (order.metadata as Record<string, unknown>)?.guests_count as number | undefined,
           total_amount: order.total_amount,
           currency: order.currency,
-          source: order.metadata?.source,
-          external_id: order.metadata?.external_id,
+          source: (order.metadata as Record<string, unknown>)?.source as string | undefined,
+          external_id: (order.metadata as Record<string, unknown>)?.external_id as string | undefined,
           status: order.status,
           notes: order.notes,
           created_at: order.created_at,

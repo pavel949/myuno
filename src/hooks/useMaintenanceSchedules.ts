@@ -73,7 +73,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
       toast.success('Schedule added');
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const markCompleted = useMutation({
@@ -88,7 +88,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
       toast.success('Marked as completed');
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const updateSchedule = useMutation({
@@ -112,7 +112,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
       toast.success('Schedule updated');
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteSchedule = useMutation({
@@ -127,7 +127,7 @@ export function useMaintenanceSchedules(propertyId?: string) {
       qc.invalidateQueries({ queryKey: ['maintenance-schedules'] });
       toast.success('Schedule removed');
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return { ...query, addSchedule, markCompleted, updateSchedule, deleteSchedule };

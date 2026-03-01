@@ -20,8 +20,6 @@ export const CrossSellCard = memo(function CrossSellCard({
   const { language } = useLanguage();
 
   const handleClick = () => {
-    // Track cross-sell click (can be expanded with analytics)
-    console.log(`Cross-sell: ${fromVertical} → ${link.id}`);
     navigate(link.path);
   };
 
