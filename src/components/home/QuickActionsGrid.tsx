@@ -167,7 +167,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const { personas } = useUserPersonas();
+  const { personas, isLoading: personasLoading } = useUserPersonas();
   const { activeRole, isLoading: roleLoading } = useUserContext();
   const { hasFullAccess } = useOwnerAccess();
   const queryClient = useQueryClient();
@@ -178,19 +178,18 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const quickActions = useMemo(() => {
     let userActions: QuickAction[];
-    if (personas.length > 0) {
-      // Personas from hero switcher drive home screen content
+
+    // Home quick actions are primarily driven by selected persona
+    if (!personasLoading && personas.length > 0) {
       userActions = getActionsForPersonas(personas);
     } else if (!roleLoading && activeRole && activeRole !== 'user') {
-      // Fallback: use active role when no personas selected
       userActions = getActionsForRole(activeRole);
     } else {
-      // Default actions for unauthenticated or plain users
       userActions = DEFAULT_ACTIONS;
     }
     const moreAction = getMoreAction(contentMode);
     return [...userActions.slice(0, 7), moreAction];
-  }, [activeRole, roleLoading, personas, contentMode]);
+  }, [activeRole, roleLoading, personas, personasLoading, contentMode]);
 
   const handleClick = useCallback((action: QuickAction, e: React.MouseEvent<HTMLButtonElement>) => {
     triggerRipple(e);

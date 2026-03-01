@@ -162,6 +162,17 @@ export function useUserPersonas() {
       
       return newPersonas;
     },
+    onMutate: async (newPersonas) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
+      queryClient.setQueryData<UserPersona[]>(queryKey, newPersonas);
+      return { previousPersonas };
+    },
+    onError: (_err, _newPersonas, context) => {
+      if (context?.previousPersonas) {
+        queryClient.setQueryData(queryKey, context.previousPersonas);
+      }
+    },
     onSuccess: (newPersonas) => {
       queryClient.setQueryData(queryKey, newPersonas);
     },

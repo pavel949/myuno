@@ -142,8 +142,31 @@ export function useUserContext() {
       if (error) throw error;
       return data as UserActiveContext;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-active-context', user?.id] });
+    onMutate: async ({ role, orgId }) => {
+      const contextKey = ['user-active-context', user?.id] as const;
+      await queryClient.cancelQueries({ queryKey: contextKey });
+      const previousContext = queryClient.getQueryData<UserActiveContext | null>(contextKey);
+
+      queryClient.setQueryData<UserActiveContext | null>(contextKey, (old) => ({
+        id: old?.id ?? `temp-${user?.id ?? 'user'}`,
+        user_id: user?.id ?? old?.user_id ?? '',
+        active_role: role,
+        active_org_id: orgId || null,
+        updated_at: new Date().toISOString(),
+      }));
+
+      return { previousContext };
+    },
+    onError: (_error, _variables, context) => {
+      const contextKey = ['user-active-context', user?.id] as const;
+      if (context?.previousContext !== undefined) {
+        queryClient.setQueryData(contextKey, context.previousContext);
+      }
+    },
+    onSuccess: (data) => {
+      const contextKey = ['user-active-context', user?.id] as const;
+      queryClient.setQueryData(contextKey, data);
+      queryClient.invalidateQueries({ queryKey: contextKey });
     },
   });
 
