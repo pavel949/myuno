@@ -46,12 +46,12 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { id: 'photo', icon: Camera, labelEn: 'Take Photo', labelRu: 'Сделать фото', path: '/mc/inspection', color: 'bg-blue-500' },
+  { id: 'photo', icon: Camera, labelEn: 'Photo / Inspect', labelRu: 'Фото / Инспекция', path: '/mc/inspection', color: 'bg-blue-500' },
   { id: 'booking', icon: BedDouble, labelEn: 'Add Booking', labelRu: 'Добавить бронь', path: '/mc/bookings/new', color: 'bg-emerald-500' },
-  { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Добавить расход', path: '/mc/quick-expense', color: 'bg-amber-500' },
-  { id: 'meeting', icon: CalendarPlus, labelEn: 'Schedule Meeting', labelRu: 'Назначить встречу', path: '/mc/tasks?type=meeting', color: 'bg-purple-500' },
-  { id: 'call', icon: Phone, labelEn: 'Call', labelRu: 'Созвониться', path: '/mc/tasks?type=call', color: 'bg-pink-500' },
-  { id: 'note', icon: StickyNote, labelEn: 'Note', labelRu: 'Заметка', path: '/mc/tasks?type=note', color: 'bg-teal-500' },
+  { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Записать расход', path: '/mc/quick-expense', color: 'bg-amber-500' },
+  { id: 'task', icon: CalendarPlus, labelEn: 'Create Task', labelRu: 'Создать задачу', path: '/mc/tasks?action=new', color: 'bg-purple-500' },
+  { id: 'message', icon: Phone, labelEn: 'Message Guest', labelRu: 'Написать гостю', path: '/mc/guest-messages', color: 'bg-pink-500' },
+  { id: 'note', icon: StickyNote, labelEn: 'Quick Note', labelRu: 'Заметка', path: '/mc/tasks?type=note', color: 'bg-teal-500' },
 ];
 
 export function OwnerMobileNav() {
