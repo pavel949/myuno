@@ -167,3 +167,12 @@ verify_jwt = false
 
 [functions.submit-web-form]
 verify_jwt = false
+
+[functions.firecrawl-map]
+verify_jwt = false
+
+[functions.firecrawl-scrape]
+verify_jwt = false
+
+[functions.scrape-phuket-insider]
+verify_jwt = false
