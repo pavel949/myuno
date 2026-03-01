@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useBusinessRole } from '@/hooks/useBusinessRole';
 import { 
   LayoutDashboard, 
   DollarSign,
   Grid3X3,
   Plus,
-  X,
   Camera,
   CalendarPlus,
   Receipt,
   Phone,
   StickyNote,
   BedDouble,
+  Building2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -32,8 +31,8 @@ const NAV_LEFT: NavItem[] = [
 ];
 
 const NAV_RIGHT: NavItem[] = [
+  { id: 'properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', path: '/mc/properties' },
   { id: 'mc', icon: Grid3X3, labelEn: 'MC', labelRu: 'УК', path: '/mc' },
-  { id: 'tasks', icon: StickyNote, labelEn: 'Tasks', labelRu: 'Задачи', path: '/mc/tasks' },
 ];
 
 interface QuickAction {
