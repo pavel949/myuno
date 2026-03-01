@@ -533,6 +533,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/settings" element={<Pages.VendorSettingsPage />} />
         </Route>
         
+        {/* ── MC Onboarding (outside MCGuard, but requires auth) ── */}
+        <Route path="/mc/onboarding" element={<LazyPage><AuthGuard><Pages.MCOnboarding /></AuthGuard></LazyPage>} />
+        
         {/* ── MC (Management Company) Workspace ── */}
         <Route path="/mc" element={<MCGuard><MCLayout /></MCGuard>}>
           <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
