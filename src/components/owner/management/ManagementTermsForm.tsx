@@ -712,8 +712,10 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge variant="secondary" className="text-xs">
-                    {rule.recipient_type === 'coagent' ? (isRu ? 'Со-агент' : 'Co-agent')
+                   {rule.recipient_type === 'coagent' ? (isRu ? 'Со-агент' : 'Co-agent')
                       : rule.recipient_type === 'staff' ? (isRu ? 'Сотрудник' : 'Staff')
+                      : rule.recipient_type === 'broker' ? (isRu ? 'Брокер' : 'Broker')
+                      : rule.recipient_type === 'ota' ? (isRu ? 'OTA' : 'OTA')
                       : (isRu ? 'Партнёр' : 'Partner')}
                   </Badge>
                   <span className="text-sm font-medium truncate">{rule.recipient_name || '—'}</span>
@@ -743,6 +745,8 @@ export function ManagementTermsForm({ propertyId, existing, onSaved, compact = f
                     <SelectItem value="coagent">{isRu ? 'Со-агент' : 'Co-agent'}</SelectItem>
                     <SelectItem value="staff">{isRu ? 'Сотрудник' : 'Staff'}</SelectItem>
                     <SelectItem value="partner">{isRu ? 'Партнёр' : 'Partner'}</SelectItem>
+                    <SelectItem value="broker">{isRu ? 'Брокер' : 'Broker'}</SelectItem>
+                    <SelectItem value="ota">{isRu ? 'OTA-платформа' : 'OTA Platform'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
