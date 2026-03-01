@@ -144,6 +144,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
       // Build parallel queries based on role
       // Helper: wrap supabase query builder into a proper Promise
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const q = (builder: any) => Promise.resolve(builder);
       const queries: Promise<any>[] = [];
       const queryLabels: string[] = [];

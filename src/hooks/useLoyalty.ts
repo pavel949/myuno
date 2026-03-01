@@ -148,7 +148,6 @@ export const useLoyalty = () => {
         amountToNextTier,
       });
     } catch (err) {
-      console.error('Error loading loyalty data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load loyalty data');
     } finally {
       setIsLoading(false);

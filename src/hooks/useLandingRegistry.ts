@@ -13,7 +13,7 @@ export interface LandingRegistryItem {
   cta_variant: string;
   cta_label_en: string | null;
   cta_label_ru: string | null;
-  next_actions: any[];
+  next_actions: Record<string, unknown>[];
   forbidden_elements: string[];
   created_at: string;
   updated_at: string;

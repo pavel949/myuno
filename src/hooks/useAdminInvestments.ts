@@ -81,8 +81,7 @@ export function useCreateInvestmentProject() {
       queryClient.invalidateQueries({ queryKey: ['investment-projects'] });
       toast.success('Investment project created');
     },
-    onError: (error) => {
-      console.error('Create error:', error);
+    onError: () => {
       toast.error('Failed to create project');
     },
   });
@@ -113,8 +112,7 @@ export function useUpdateInvestmentProject() {
       queryClient.invalidateQueries({ queryKey: ['investment-project', data.id] });
       toast.success('Investment project updated');
     },
-    onError: (error) => {
-      console.error('Update error:', error);
+    onError: () => {
       toast.error('Failed to update project');
     },
   });
@@ -138,8 +136,7 @@ export function useDeleteInvestmentProject() {
       queryClient.invalidateQueries({ queryKey: ['investment-projects'] });
       toast.success('Investment project deleted');
     },
-    onError: (error) => {
-      console.error('Delete error:', error);
+    onError: () => {
       toast.error('Failed to delete project');
     },
   });

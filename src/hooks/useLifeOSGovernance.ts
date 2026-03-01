@@ -90,7 +90,6 @@ export function useGovernanceConfig() {
         .select('key, value');
 
       if (error) {
-        console.warn('Could not load governance config, using defaults:', error);
         return DEFAULT_GOVERNANCE;
       }
 
@@ -383,7 +382,7 @@ export async function logGovernanceAction(
       new_data: JSON.parse(JSON.stringify(details)),
       admin_id: user?.id || '00000000-0000-0000-0000-000000000000',
     }]);
-  } catch (e) {
-    console.warn('Failed to log governance action:', e);
+  } catch {
+    // governance logging is non-critical
   }
 }

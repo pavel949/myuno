@@ -98,8 +98,7 @@ export function useAdminNotifications() {
       toast.success(`Проверка завершена: отправлено ${data?.sent || 0} напоминаний`);
       onSuccess?.();
       return true;
-    } catch (error) {
-      console.error('Error triggering reminders:', error);
+    } catch {
       toast.error('Не удалось запустить проверку напоминаний');
       return false;
     }
@@ -129,8 +128,7 @@ export function useAdminNotifications() {
       toast.success(`Акция отправлена ${data?.sent || 0} пользователям`);
       onSuccess?.();
       return data;
-    } catch (error) {
-      console.error('Error sending promotion:', error);
+    } catch {
       toast.error('Не удалось отправить акцию');
       return null;
     }

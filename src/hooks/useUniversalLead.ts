@@ -91,9 +91,7 @@ export function useUniversalLead() {
       if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
         supabase.functions.invoke('notify-lead-whatsapp', {
           body: { leadId: data.id },
-        }).catch(err => {
-          console.error('Failed to send WhatsApp notification:', err);
-        });
+        }).catch(() => { /* fire & forget */ });
       }
 
       // Notify admin about new lead via email (fire & forget)
@@ -110,7 +108,7 @@ export function useUniversalLead() {
             customer_phone: input.phone,
             notes: input.notes || `Lead: ${input.request_type} via ${input.entry_point}`,
           },
-        }).catch(err => console.error('Failed to send lead admin notification:', err));
+        }).catch(() => { /* fire & forget */ });
       }
       
       return data;
@@ -129,8 +127,7 @@ export function useUniversalLead() {
           : `Request sent! We will contact you shortly.`
       );
     },
-    onError: (error) => {
-      console.error('Failed to submit lead:', error);
+    onError: () => {
       const isRu = language === 'ru';
       toast.error(
         isRu 
