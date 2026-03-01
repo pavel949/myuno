@@ -27043,6 +27043,15 @@ export type Database = {
         }
         Returns: string
       }
+      mc_can_access: {
+        Args: {
+          _action?: string
+          _company_id: string
+          _module: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       mcc_check_inactivity: { Args: never; Returns: undefined }
       mcc_derive_user_state: {
         Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }

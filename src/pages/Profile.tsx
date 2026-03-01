@@ -13,6 +13,7 @@ import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBa
 import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
 import { ActiveRoleBadge } from '@/components/profile/ActiveRoleBadge';
 import { BecomePartnerCTA } from '@/components/profile/BecomePartnerCTA';
+import { UserRolesPermissions } from '@/components/profile/UserRolesPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -140,6 +141,9 @@ export default function Profile() {
         
         {/* CTA to become owner/vendor for regular users */}
         <BecomePartnerCTA />
+
+        {/* User roles and permissions (read-only) */}
+        <UserRolesPermissions />
 
         {/* Referral program */}
         <ReferralCard variant="compact" />
