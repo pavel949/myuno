@@ -17,15 +17,15 @@ import {
   FileText,
   Building,
   FolderTree,
-  TrendingUp,
-  HardHat,
   Sparkles,
-  Home,
-  Anchor,
-  Car,
-  Flower2,
-  Scissors,
-  Stethoscope,
+  MapPin,
+  BookOpen,
+  Languages,
+  FileEdit,
+  Scale,
+  Database,
+  Users,
+  TestTube,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -62,49 +62,53 @@ interface NavGroup {
 }
 
 // Storage key for group states
-const SIDEBAR_GROUPS_KEY = 'myuno_admin_sidebar_groups';
+const SIDEBAR_GROUPS_KEY = 'myuno_admin_sidebar_groups_v2';
 
-// Grouped navigation items
+// Reorganized navigation: 5 groups
 const navigationGroups: NavGroup[] = [
   {
-    id: 'main',
-    title: 'Main',
-    titleRu: 'Главное',
+    id: 'core',
+    title: 'Core',
+    titleRu: 'Ядро',
     items: [
       { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
-      { title: 'Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
+      { title: 'Unified Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
       { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
       { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
     ],
   },
   {
-    id: 'verticals',
-    title: 'Verticals',
-    titleRu: 'Вертикали',
+    id: 'business',
+    title: 'Business',
+    titleRu: 'Бизнес',
     items: [
-      { title: 'Properties', titleRu: 'Недвижимость', path: '/admin/properties', icon: Home },
-      { title: 'Yachts', titleRu: 'Яхты', path: '/admin/yachts', icon: Anchor },
-      { title: 'Transport', titleRu: 'Транспорт', path: '/admin/transport', icon: Car },
-      { title: 'Flowers', titleRu: 'Цветы', path: '/admin/flowers', icon: Flower2 },
-      { title: 'Beauty', titleRu: 'Красота', path: '/admin/beauty', icon: Scissors },
-      { title: 'Medical', titleRu: 'Медицина', path: '/admin/medical', icon: Stethoscope },
-      { title: 'Projects', titleRu: 'Проекты / ЖК', path: '/admin/projects', icon: Building2 },
-      { title: 'Investments', titleRu: 'Инвестиции', path: '/admin/investments', icon: TrendingUp },
-      { title: 'Developers', titleRu: 'Застройщики', path: '/admin/developers', icon: HardHat },
+      { title: 'Providers', titleRu: 'Провайдеры', path: '/admin/providers', icon: Users },
       { title: 'PM Companies', titleRu: 'УК (справочник)', path: '/admin/pm-companies', icon: Building },
       { title: 'MC Dashboard', titleRu: 'УК — Обзор', path: '/admin/mc-dashboard', icon: Building2 },
+      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
+      { title: 'Vendor Prospects', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
+      { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
     ],
   },
   {
-    id: 'operations',
-    title: 'Operations',
-    titleRu: 'Операции',
+    id: 'content',
+    title: 'Content',
+    titleRu: 'Контент',
+    items: [
+      { title: 'Cities & Locations', titleRu: 'Города', path: '/admin/cities', icon: MapPin },
+      { title: 'Location Knowledge', titleRu: 'База знаний', path: '/admin/location-knowledge', icon: BookOpen },
+      { title: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Languages },
+      { title: 'Vendor Content', titleRu: 'Контент вендоров', path: '/admin/vendor-content', icon: FileEdit },
+      { title: 'Legal Documents', titleRu: 'Юр. документы', path: '/admin/legal-documents', icon: Scale },
+    ],
+  },
+  {
+    id: 'ai',
+    title: 'AI & Automation',
+    titleRu: 'AI и автоматизация',
     items: [
       { title: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain },
       { title: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot },
-      { title: 'Acquisition', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
-      { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
-      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
     ],
   },
   {
@@ -112,9 +116,12 @@ const navigationGroups: NavGroup[] = [
     title: 'System',
     titleRu: 'Система',
     items: [
-      { title: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree },
+      { title: 'Control Center', titleRu: 'Управление', path: '/admin/control', icon: Cog },
       { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
-      { title: 'Control', titleRu: 'Управление', path: '/admin/control', icon: Cog },
+      { title: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree },
+      { title: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database },
+      { title: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users },
+      { title: 'QA Test Runner', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube },
     ],
   },
 ];
@@ -133,8 +140,8 @@ export function AdminSidebar() {
       const stored = localStorage.getItem(SIDEBAR_GROUPS_KEY);
       if (stored) return JSON.parse(stored);
     } catch {}
-    // Default: all groups open
-    return { main: true, verticals: false, operations: true, system: true };
+    // Default: core and business open, rest collapsed
+    return { core: true, business: true, content: false, ai: false, system: false };
   });
 
   // Save group states to localStorage
@@ -142,8 +149,6 @@ export function AdminSidebar() {
     localStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify(openGroups));
   }, [openGroups]);
 
-  // On mobile, always show full content when sidebar is open
-  // On desktop, respect the collapsed state
   const isCollapsed = isMobile ? false : state === 'collapsed';
 
   const isActive = (path: string) => {
@@ -171,6 +176,8 @@ export function AdminSidebar() {
     navigate(path);
     if (isMobile) setOpenMobile(false);
   };
+
+  const lastGroupId = navigationGroups[navigationGroups.length - 1].id;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -252,7 +259,7 @@ export function AdminSidebar() {
             )}
 
             {/* Divider between groups */}
-            {!isCollapsed && group.id !== 'system' && (
+            {!isCollapsed && group.id !== lastGroupId && (
               <div className="my-3 mx-3 h-px bg-sidebar-border/50" />
             )}
           </Collapsible>
