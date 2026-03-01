@@ -46,6 +46,7 @@ const moreSections: NavSection[] = [
       { icon: Building, label: 'PM Companies', labelRu: 'УК', path: '/admin/pm-companies' },
       { icon: Building2, label: 'MC Dashboard', labelRu: 'УК Обзор', path: '/admin/mc-dashboard' },
       { icon: FileText, label: 'Contracts', labelRu: 'Контракты', path: '/admin/contracts' },
+      { icon: Target, label: 'CRM', labelRu: 'CRM', path: '/admin/crm' },
       { icon: Target, label: 'Prospects', labelRu: 'Привлечение', path: '/admin/vendor-prospects' },
       { icon: Megaphone, label: 'Marketing', labelRu: 'Маркетинг', path: '/admin/marketing' },
     ],
