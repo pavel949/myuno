@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { format } from 'date-fns';
 import {
   CreditCard, Plus, Minus, Building2, CheckCircle, AlertCircle,
   ExternalLink, Zap, Crown, Shield, ToggleLeft, ToggleRight, Sparkles,
@@ -125,6 +126,7 @@ export default function MCSubscriptionPage() {
         ...p,
         slotActive: slot?.is_active ?? false,
         hasSlot: !!slot,
+        activatedAt: slot?.activated_at || null,
       };
     });
   }, [properties, slots]);
@@ -420,11 +422,18 @@ export default function MCSubscriptionPage() {
                         )}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {property.slotActive ? (
-                        <Badge variant="default" className="text-[10px] bg-primary/15 text-primary border-0">
-                          {isRu ? 'Активен' : 'Active'}
-                        </Badge>
+                        <>
+                          <Badge variant="default" className="text-[10px] bg-primary/15 text-primary border-0">
+                            {isRu ? 'Активен' : 'Active'}
+                          </Badge>
+                          {property.activatedAt && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {format(new Date(property.activatedAt), 'dd.MM.yyyy')}
+                            </span>
+                          )}
+                        </>
                       ) : (
                         <Badge variant="outline" className="text-[10px]">
                           {isRu ? 'Выкл' : 'Off'}
