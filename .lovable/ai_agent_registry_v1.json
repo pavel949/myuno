@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generated": "2026-01-30",
+  "generated": "2026-03-01",
   "registry_type": "PRODUCTION",
-  "total_agents": 8,
+  "total_agents": 9,
   "agents": {
     "active": [
       {
@@ -125,6 +125,23 @@
         "model": "google/gemini-3-flash-preview (text) / google/gemini-2.5-flash (photo)",
         "streaming": false,
         "tool_calling": true
+      },
+      {
+        "agent_id": "legal-assistant",
+        "canonical_role": "Legal Assistant for Phuket Rentals",
+        "location": "ai_agents table + ai-legal-assistant edge function",
+        "status": "ACTIVE",
+        "priority": "TIER_2_SPECIALIST",
+        "read_tables": ["ai_agents", "ai_agent_knowledge"],
+        "write_tables": ["ai_agent_logs"],
+        "trigger_events": ["user.documents.legal_chat.opened"],
+        "forbidden_actions": [
+          "CREATE/UPDATE/DELETE on any business tables",
+          "Sign contracts on behalf of users"
+        ],
+        "expected_value": "Reduce legal document preparation time, ensure compliance",
+        "model": "google/gemini-3-flash-preview",
+        "streaming": true
       },
       {
         "agent_id": "ai-personalize-home",
