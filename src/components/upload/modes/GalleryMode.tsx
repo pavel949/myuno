@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,8 @@ function SortableImageItem({
   onRemove,
   onEdit,
   isFirst,
-  isDragging 
+  isDragging,
+  coverLabel,
 }: { 
   url: string; 
   index: number;
@@ -81,6 +83,7 @@ function SortableImageItem({
   onEdit: () => void;
   isFirst: boolean;
   isDragging?: boolean;
+  coverLabel?: string;
 }) {
   const {
     attributes,
@@ -117,7 +120,7 @@ function SortableImageItem({
       <div className={cn("aspect-square", isFirst && "aspect-auto h-full")}>
         <img 
           src={url} 
-          alt={`Фото ${index + 1}`}
+          alt={`Photo ${index + 1}`}
           className="w-full h-full object-cover pointer-events-none"
           loading="lazy"
           draggable={false}
@@ -127,7 +130,7 @@ function SortableImageItem({
       {isFirst && (
         <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-20">
           <Star className="h-3 w-3" fill="currentColor" />
-          Обложка
+          {coverLabel || 'Cover'}
         </div>
       )}
       
@@ -167,14 +170,14 @@ function UploadingImageItem({ image }: { image: UploadingImage }) {
     <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-primary/50 bg-muted">
       <img 
         src={image.preview} 
-        alt="Загрузка"
+        alt="Uploading"
         className="w-full h-full object-cover opacity-50"
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
         {image.status === 'compressing' && (
           <>
             <Loader2 className="h-8 w-8 text-white animate-spin mb-2" />
-            <span className="text-white text-xs font-medium">Сжатие...</span>
+            <span className="text-white text-xs font-medium">Compressing...</span>
           </>
         )}
         {image.status === 'uploading' && (
@@ -219,6 +222,8 @@ export function GalleryMode({
   className = '',
   disabled = false,
 }: GalleryModeProps) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { user } = useAuth();
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -269,7 +274,7 @@ export function GalleryMode({
         onChange(newValue);
         
         if (oldIndex !== 0 && newIndex === 0) {
-          toast.success('Обложка изменена');
+          toast.success(isRu ? 'Обложка изменена' : 'Cover changed');
         }
       }
     }
@@ -279,14 +284,14 @@ export function GalleryMode({
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic'];
     if (!allowedTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.heic')) {
       setUploadingImages(prev => prev.map(img => 
-        img.id === id ? { ...img, status: 'error' as const, error: 'Неподдерживаемый формат' } : img
+        img.id === id ? { ...img, status: 'error' as const, error: isRu ? 'Неподдерживаемый формат' : 'Unsupported format' } : img
       ));
       return null;
     }
 
     if (file.size > 20 * 1024 * 1024) {
       setUploadingImages(prev => prev.map(img => 
-        img.id === id ? { ...img, status: 'error' as const, error: 'Файл > 20MB' } : img
+        img.id === id ? { ...img, status: 'error' as const, error: isRu ? 'Файл > 20MB' : 'File > 20MB' } : img
       ));
       return null;
     }
@@ -343,7 +348,7 @@ export function GalleryMode({
     } catch (error) {
       console.error('Upload error:', error);
       setUploadingImages(prev => prev.map(img => 
-        img.id === id ? { ...img, status: 'error' as const, error: 'Ошибка загрузки' } : img
+        img.id === id ? { ...img, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : img
       ));
       return null;
     }
@@ -351,13 +356,13 @@ export function GalleryMode({
 
   const handleFiles = useCallback(async (files: File[]) => {
     if (!user) {
-      toast.error('Необходимо авторизоваться');
+      toast.error(isRu ? 'Необходимо авторизоваться' : 'Please sign in');
       return;
     }
 
     const remainingSlots = maxItems - value.length;
     if (remainingSlots <= 0) {
-      toast.error(`Максимум ${maxItems} фото`);
+      toast.error(isRu ? `Максимум ${maxItems} фото` : `Maximum ${maxItems} photos`);
       return;
     }
 
@@ -389,13 +394,13 @@ export function GalleryMode({
           setUploadingImages(prev => prev.filter(img => img.status !== 'done'));
         }
       }, 1000);
-      toast.success(`Загружено ${results.length} фото`);
+      toast.success(isRu ? `Загружено ${results.length} фото` : `${results.length} photos uploaded`);
     }
   }, [user, value, onChange, maxItems, processFile]);
 
   const handleExternalImages = useCallback(async (images: ExternalImageResult[]) => {
     if (!user) {
-      toast.error('Необходимо авторизоваться');
+      toast.error(isRu ? 'Необходимо авторизоваться' : 'Please sign in');
       return;
     }
 
@@ -459,7 +464,7 @@ export function GalleryMode({
       } catch (error) {
         console.error('External upload error:', error);
         setUploadingImages(prev => prev.map(u => 
-          u.id === uploadingId ? { ...u, status: 'error' as const, error: 'Ошибка загрузки' } : u
+          u.id === uploadingId ? { ...u, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : u
         ));
       }
     }
@@ -471,7 +476,7 @@ export function GalleryMode({
           setUploadingImages(prev => prev.filter(img => img.status !== 'done'));
         }
       }, 1000);
-      toast.success(`Загружено ${results.length} фото`);
+      toast.success(isRu ? `Загружено ${results.length} фото` : `${results.length} photos uploaded`);
     }
   }, [user, value, onChange, maxItems, folder, bucket, compressionOptions]);
 
@@ -507,27 +512,27 @@ export function GalleryMode({
     <div className={cn("space-y-4", className)}>
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h3 className="font-medium">Фотографии</h3>
+          <h3 className="font-medium">{isRu ? 'Фотографии' : 'Photos'}</h3>
           <p className="text-sm text-muted-foreground">
-            {value.length} из {maxItems} • Перетащите для изменения порядка
+            {value.length} {isRu ? 'из' : 'of'} {maxItems} • {isRu ? 'Перетащите для изменения порядка' : 'Drag to reorder'}
           </p>
         </div>
         <div className="flex gap-2">
           {enableCloudImport && (
             <Button type="button" variant="outline" size="sm" onClick={() => setShowCloudPicker(true)} disabled={disabled || remainingSlots <= 0}>
               <Cloud className="h-4 w-4 mr-2" />
-              Облако
+              {isRu ? 'Облако' : 'Cloud'}
             </Button>
           )}
           {enableUrlImport && (
             <Button type="button" variant="outline" size="sm" onClick={() => setShowUrlPicker(true)} disabled={disabled || remainingSlots <= 0}>
               <Globe className="h-4 w-4 mr-2" />
-              С сайта
+              {isRu ? 'С сайта' : 'From URL'}
             </Button>
           )}
           <Button type="button" variant="default" size="sm" onClick={() => fileInputRef.current?.click()} disabled={disabled || remainingSlots <= 0}>
             <Plus className="h-4 w-4 mr-2" />
-            Добавить
+            {isRu ? 'Добавить' : 'Add'}
           </Button>
         </div>
       </div>
@@ -565,6 +570,7 @@ export function GalleryMode({
                   onRemove={() => handleRemove(index)}
                   onEdit={() => enableEditing && handleEdit(url, index)}
                   isDragging={!!activeId}
+                  coverLabel={isRu ? 'Обложка' : 'Cover'}
                 />
               ))}
 
@@ -580,7 +586,7 @@ export function GalleryMode({
                   className="aspect-square rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 flex flex-col items-center justify-center gap-2 transition-colors bg-muted/30 hover:bg-muted/50"
                 >
                   <Plus className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Ещё</span>
+                  <span className="text-xs text-muted-foreground">{isRu ? 'Ещё' : 'More'}</span>
                 </button>
               )}
             </div>
@@ -589,7 +595,7 @@ export function GalleryMode({
           <DragOverlay>
             {activeImage && (
               <div className="aspect-square rounded-xl overflow-hidden border-2 border-primary shadow-2xl scale-110 rotate-3">
-                <img src={activeImage} alt="Перетаскивание" className="w-full h-full object-cover" />
+                <img src={activeImage} alt="Dragging" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-primary/20" />
               </div>
             )}
@@ -610,8 +616,10 @@ export function GalleryMode({
               <Upload className="h-8 w-8 text-primary" />
             </div>
             <div className="text-center">
-              <p className="font-medium">Перетащите фото сюда</p>
-              <p className="text-sm text-muted-foreground mt-1">или нажмите для выбора • до {maxItems} фото</p>
+              <p className="font-medium">{isRu ? 'Перетащите фото сюда' : 'Drag photos here'}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isRu ? `или нажмите для выбора • до ${maxItems} фото` : `or click to select • up to ${maxItems} photos`}
+              </p>
             </div>
             <div className="flex gap-2 text-xs text-muted-foreground">
               <span>JPG</span><span>•</span><span>PNG</span><span>•</span><span>WebP</span><span>•</span><span>HEIC</span>
@@ -622,7 +630,7 @@ export function GalleryMode({
         {isDragOver && value.length > 0 && (
           <div className="absolute inset-0 bg-primary/10 rounded-xl flex items-center justify-center pointer-events-none">
             <div className="bg-background/90 backdrop-blur-sm px-6 py-4 rounded-xl shadow-lg">
-              <p className="font-medium text-primary">Отпустите для загрузки</p>
+              <p className="font-medium text-primary">{isRu ? 'Отпустите для загрузки' : 'Drop to upload'}</p>
             </div>
           </div>
         )}
