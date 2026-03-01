@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export type UserPersona = 'tourist' | 'resident' | 'property_owner' | 'investor';
 
 const GUEST_PERSONAS_KEY = 'myuno-guest-personas';
+const GUEST_PERSONAS_CHANGED_EVENT = 'myuno-guest-personas-changed';
 
 interface UserPersonaRecord {
   id: string;
@@ -15,30 +16,55 @@ interface UserPersonaRecord {
   created_at: string;
 }
 
+function readGuestPersonas(): UserPersona[] {
+  try {
+    const saved = localStorage.getItem(GUEST_PERSONAS_KEY);
+    return saved ? (JSON.parse(saved) as UserPersona[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistGuestPersonas(next: UserPersona[]) {
+  localStorage.setItem(GUEST_PERSONAS_KEY, JSON.stringify(next));
+  window.dispatchEvent(new Event(GUEST_PERSONAS_CHANGED_EVENT));
+}
+
 // Guest personas hook (localStorage-based)
 function useGuestPersonas() {
-  const [personas, setPersonas] = useState<UserPersona[]>(() => {
-    try {
-      const saved = localStorage.getItem(GUEST_PERSONAS_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [personas, setPersonas] = useState<UserPersona[]>(() => readGuestPersonas());
+
+  useEffect(() => {
+    const syncFromStorage = () => setPersonas(readGuestPersonas());
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === GUEST_PERSONAS_KEY) syncFromStorage();
+    };
+
+    const handlePersonasChanged = () => syncFromStorage();
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(GUEST_PERSONAS_CHANGED_EVENT, handlePersonasChanged);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(GUEST_PERSONAS_CHANGED_EVENT, handlePersonasChanged);
+    };
+  }, []);
 
   const togglePersona = useCallback((persona: UserPersona) => {
     setPersonas(prev => {
       const newPersonas = prev.includes(persona)
         ? prev.filter(p => p !== persona)
         : [...prev, persona];
-      localStorage.setItem(GUEST_PERSONAS_KEY, JSON.stringify(newPersonas));
+      persistGuestPersonas(newPersonas);
       return newPersonas;
     });
   }, []);
 
   const setPersonasAll = useCallback((newPersonas: UserPersona[]) => {
     setPersonas(newPersonas);
-    localStorage.setItem(GUEST_PERSONAS_KEY, JSON.stringify(newPersonas));
+    persistGuestPersonas(newPersonas);
   }, []);
 
   return {
