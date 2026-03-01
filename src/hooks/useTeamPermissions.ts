@@ -23,6 +23,7 @@ export interface TeamPermission {
   can_view: boolean;
   can_edit: boolean;
   can_export: boolean;
+  sub_permissions: Record<string, boolean>;
   granted_by: string | null;
   updated_at: string;
 }
@@ -86,7 +87,7 @@ export function useUpdateMemberPermission() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (args: { userId: string; module: string; can_view: boolean; can_edit: boolean; can_export?: boolean }) => {
+    mutationFn: async (args: { userId: string; module: string; can_view: boolean; can_edit: boolean; can_export?: boolean; sub_permissions?: Record<string, boolean> }) => {
       const companyId = activeCompany?.company_id;
       if (!companyId || !user) throw new Error('No company');
       
@@ -99,6 +100,7 @@ export function useUpdateMemberPermission() {
           can_view: args.can_view,
           can_edit: args.can_edit,
           can_export: args.can_export ?? false,
+          sub_permissions: args.sub_permissions ?? {},
           granted_by: user.id,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'company_id,user_id,module' });

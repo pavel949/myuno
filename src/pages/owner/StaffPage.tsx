@@ -133,6 +133,7 @@ function getInitials(name: string) {
 interface StaffFormState {
   name: string;
   role: StaffRole;
+  custom_title: string;
   phone: string;
   email: string;
   notes: string;
@@ -148,6 +149,7 @@ interface StaffFormState {
 const DEFAULT_FORM: StaffFormState = {
   name: '',
   role: 'staff',
+  custom_title: '',
   phone: '',
   email: '',
   notes: '',
@@ -164,6 +166,7 @@ function staffToForm(s: StaffMember): StaffFormState {
   return {
     name: s.name,
     role: s.role,
+    custom_title: s.custom_title ?? '',
     phone: s.phone ?? '',
     email: s.email ?? '',
     notes: s.notes ?? '',
@@ -309,7 +312,7 @@ function StaffCard({
             <div className="flex items-center gap-2 mb-3">
               <Badge variant="outline" className={`text-xs gap-1 ${colorClass} border-transparent`}>
                 {ROLE_ICONS[staff.role]}
-                {roleLabel}
+                {staff.custom_title || roleLabel}
               </Badge>
               {payLabel && (
                 <Badge variant="outline" className="text-xs gap-1">
@@ -465,7 +468,7 @@ export default function StaffPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
   const [addMemberOpen, setAddMemberOpen] = useState(false);
-  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string } | null>(null);
+  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string; staffId: string; customTitle?: string } | null>(null);
   const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
@@ -496,6 +499,7 @@ export default function StaffPage() {
     const payload: StaffMemberInsert = {
       name: form.name,
       role: form.role,
+      custom_title: form.custom_title || undefined,
       phone: form.phone || undefined,
       email: form.email || undefined,
       notes: form.notes || undefined,
@@ -676,7 +680,7 @@ export default function StaffPage() {
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
               onViewTasks={() => navigate(`/owner/tasks?assignee=${s.id}`)}
-              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name })}
+              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
               onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
             />
           ))}
@@ -733,6 +737,16 @@ export default function StaffPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Custom job title */}
+              <div>
+                <Label className="mb-1.5 block">{t('Job Title', 'Должность')}</Label>
+                <Input
+                  value={form.custom_title}
+                  onChange={e => setForm(f => ({ ...f, custom_title: e.target.value }))}
+                  placeholder={t('e.g. Booking Coordinator', 'напр. Координатор бронирований')}
+                />
               </div>
 
               {/* Active toggle for editing */}
@@ -936,6 +950,8 @@ export default function StaffPage() {
         onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
         userId={permissionsTarget?.userId ?? null}
         userName={permissionsTarget?.name ?? ''}
+        customTitle={permissionsTarget?.customTitle}
+        staffId={permissionsTarget?.staffId}
       />
 
       {/* Member Activity Sheet */}

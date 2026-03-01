@@ -12,6 +12,7 @@ export interface StaffMember {
   owner_id: string;
   name: string;
   role: StaffRole;
+  custom_title?: string;
   phone?: string;
   email?: string;
   notes?: string;

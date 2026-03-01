@@ -19411,6 +19411,7 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string
+          custom_title: string | null
           daily_rate: number | null
           date_of_birth: string | null
           email: string | null
@@ -19430,6 +19431,7 @@ export type Database = {
         Insert: {
           company_id?: string | null
           created_at?: string
+          custom_title?: string | null
           daily_rate?: number | null
           date_of_birth?: string | null
           email?: string | null
@@ -19449,6 +19451,7 @@ export type Database = {
         Update: {
           company_id?: string | null
           created_at?: string
+          custom_title?: string | null
           daily_rate?: number | null
           date_of_birth?: string | null
           email?: string | null
@@ -20493,6 +20496,7 @@ export type Database = {
           granted_by: string | null
           id: string
           module: string
+          sub_permissions: Json | null
           updated_at: string
           user_id: string
         }
@@ -20504,6 +20508,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           module: string
+          sub_permissions?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -20515,6 +20520,7 @@ export type Database = {
           granted_by?: string | null
           id?: string
           module?: string
+          sub_permissions?: Json | null
           updated_at?: string
           user_id?: string
         }
