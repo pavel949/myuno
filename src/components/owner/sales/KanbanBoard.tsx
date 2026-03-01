@@ -7,10 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
-import { Phone, Calendar, MessageCircle, Clock, Star, User } from 'lucide-react';
+import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DndContext,
   DragEndEvent,
@@ -23,14 +24,16 @@ import {
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
 
-// Colors are now derived from DynamicStage
-
 const dealTypeBadgeColors: Record<string, string> = {
   sale: 'bg-primary/15 text-primary border-primary/30',
   rent: 'bg-info/15 text-info border-info/30',
   investment: 'bg-warning/15 text-warning border-warning/30',
   management: 'bg-accent/15 text-accent-foreground border-accent/30',
 };
+
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
 
 function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }) {
   const navigate = useNavigate();
@@ -42,6 +45,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
 
   const nextDate = deal.next_action_date ? new Date(deal.next_action_date) : null;
   const isOverdue = nextDate ? isPast(nextDate) && !isToday(nextDate) : false;
+  const isScheduled = nextDate && !isOverdue;
 
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -54,7 +58,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md',
+        'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group',
         isDragging && 'opacity-50 shadow-lg z-50',
         isOverdue && 'border-l-2 border-l-destructive',
         !isOverdue && age > 30 && 'border-l-2 border-l-destructive',
@@ -83,12 +87,12 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
 
       {/* Agent name */}
       {agentName && (
-        <p className="text-[11px] text-muted-foreground mt-1 truncate flex items-center gap-1">
-          <User className="h-3 w-3 shrink-0" />{agentName}
+        <p className="text-[11px] text-muted-foreground mt-1 truncate">
+          {agentName}
         </p>
       )}
 
-      {/* Deal type badges */}
+      {/* Deal type badges + tags */}
       <div className="flex flex-wrap gap-1 mt-2">
         {deal.deal_type && (
           <Badge variant="outline" className={cn('text-[9px] h-4 px-1.5 border uppercase font-bold', dealTypeBadgeColors[deal.deal_type] || '')}>
@@ -98,7 +102,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
         {deal.tags?.length > 0 && <DealTagsDisplay tags={deal.tags} />}
       </div>
 
-      {/* Bottom row: priority stars + phone + date + age */}
+      {/* Bottom row: priority stars + activity icons + avatar */}
       <div className="flex items-center justify-between mt-2 gap-1">
         <div className="flex items-center gap-1.5">
           {/* Priority stars */}
@@ -110,6 +114,14 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
               />
             ))}
           </div>
+
+          {/* Activity status icons */}
+          {isOverdue && (
+            <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+          )}
+          {isScheduled && (
+            <Calendar className="h-3.5 w-3.5 text-primary" />
+          )}
           {deal.client_phone && (
             <a
               href={`https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}`}
@@ -121,19 +133,27 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
               <MessageCircle className="h-3.5 w-3.5" />
             </a>
           )}
+          {isOverdue && <CheckCircle2 className="h-3.5 w-3.5 text-destructive" />}
         </div>
+
         <div className="flex items-center gap-1.5">
           {deal.next_action_date && (
             <p className={cn('flex items-center gap-0.5 text-[10px]', isOverdue ? 'text-destructive font-medium' : 'text-primary')}>
-              <Calendar className="h-3 w-3" />
               {format(new Date(deal.next_action_date), 'dd.MM')}
             </p>
           )}
-          {isOverdue && <span className="text-destructive">✓</span>}
           {age > 7 && (
             <p className={cn('flex items-center gap-0.5 text-[10px]', age > 30 ? 'text-destructive' : age > 14 ? 'text-warning' : 'text-muted-foreground')}>
               <Clock className="h-2.5 w-2.5" />{age}d
             </p>
+          )}
+          {/* Agent avatar */}
+          {agentName && (
+            <Avatar className="h-6 w-6 border border-border">
+              <AvatarFallback className="text-[9px] bg-muted font-medium">
+                {getInitials(agentName)}
+              </AvatarFallback>
+            </Avatar>
           )}
         </div>
       </div>
@@ -141,7 +161,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
   );
 }
 
-function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DynamicStage; deals: AgentDeal[]; maxValue: number; agentMap: Map<string, string> }) {
+function KanbanColumn({ stage, deals, maxValue, agentMap, onQuickCreate }: { stage: DynamicStage; deals: AgentDeal[]; maxValue: number; agentMap: Map<string, string>; onQuickCreate: (stageKey: string) => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { setNodeRef, isOver } = useDroppable({ id: stage.key });
@@ -162,8 +182,17 @@ function KanbanColumn({ stage, deals, maxValue, agentMap }: { stage: DynamicStag
       {/* Column header */}
       <div className="p-3 pb-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold">{label}</span>
-          <Badge variant="secondary" className="text-[10px] h-5">{deals.length}</Badge>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold">{label}</span>
+            <Badge variant="secondary" className="text-[10px] h-5">{deals.length}</Badge>
+          </div>
+          <button
+            onClick={() => onQuickCreate(stage.key)}
+            className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            title={isRu ? 'Добавить сделку' : 'Add deal'}
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
         </div>
         {/* Odoo-style value bar */}
         <div className="mt-1.5">
@@ -192,9 +221,10 @@ interface Props {
   deals: AgentDeal[];
   members?: { user_id: string; name: string }[];
   pipelineData: DynamicPipelineResult;
+  onQuickCreate?: (stageKey: string) => void;
 }
 
-export function KanbanBoard({ deals, members = [], pipelineData }: Props) {
+export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { language } = useLanguage();
@@ -219,7 +249,6 @@ export function KanbanBoard({ deals, members = [], pipelineData }: Props) {
     for (const d of deals) {
       if (map[d.stage]) map[d.stage].push(d);
       else {
-        // Deal stage doesn't match any dynamic stage, put in first
         const first = pipelineData.stages[0];
         if (first) (map[first.key] = map[first.key] || []).push(d);
       }
@@ -227,7 +256,6 @@ export function KanbanBoard({ deals, members = [], pipelineData }: Props) {
     return map;
   }, [deals, pipelineData.stages]);
 
-  // Max column value for proportional bars
   const maxValue = useMemo(() => {
     let max = 0;
     for (const s of pipelineData.stages) {
@@ -274,11 +302,22 @@ export function KanbanBoard({ deals, members = [], pipelineData }: Props) {
     }
   };
 
+  const handleQuickCreate = (stageKey: string) => {
+    onQuickCreate?.(stageKey);
+  };
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 xl:mx-0 xl:px-0">
         {pipelineData.activeStages.map(stage => (
-          <KanbanColumn key={stage.key} stage={stage} deals={dealsByStage[stage.key] || []} maxValue={maxValue} agentMap={agentMap} />
+          <KanbanColumn
+            key={stage.key}
+            stage={stage}
+            deals={dealsByStage[stage.key] || []}
+            maxValue={maxValue}
+            agentMap={agentMap}
+            onQuickCreate={handleQuickCreate}
+          />
         ))}
       </div>
       <DragOverlay>

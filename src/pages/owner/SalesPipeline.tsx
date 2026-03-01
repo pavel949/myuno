@@ -233,7 +233,7 @@ export default function SalesPipeline() {
       )}
 
       {view === 'kanban' ? (
-        <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} />
+        <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} onQuickCreate={() => setShowCreate(true)} />
       ) : (
         <>
           {/* Stage filter */}
