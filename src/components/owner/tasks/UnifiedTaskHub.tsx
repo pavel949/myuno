@@ -18,8 +18,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Plus, CheckCircle2, Clock, AlertTriangle, Wrench, Briefcase } from 'lucide-react';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { Plus, CheckCircle2, Clock, AlertTriangle, Wrench, Briefcase, ClipboardPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, isToday, isPast, isTomorrow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -262,18 +262,24 @@ export function UnifiedTaskHub() {
           </TabsList>
         </Tabs>
 
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-1" />
-              {t('New', 'Новая')}
+        <Button size="sm" onClick={() => setSheetOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          {t('New', 'Новая')}
+        </Button>
+
+        <ResponsiveModal
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          title={t('New Task', 'Новая задача')}
+          icon={<ClipboardPlus className="w-5 h-5 text-primary" />}
+          size="lg"
+          footer={
+            <Button className="w-full sm:w-auto min-w-[200px]" onClick={handleCreate} disabled={createCrmTask.isPending}>
+              {t('Create Task', 'Создать задачу')}
             </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t('New Task', 'Новая задача')}</SheetTitle>
-            </SheetHeader>
-            <div className="space-y-4 mt-4">
+          }
+        >
+            <div className="space-y-4">
               {/* Category toggle */}
               <div className="flex gap-2">
                 <button
@@ -400,13 +406,8 @@ export function UnifiedTaskHub() {
                   </Select>
                 </div>
               )}
-
-              <Button className="w-full" onClick={handleCreate} disabled={createCrmTask.isPending}>
-                {t('Create Task', 'Создать задачу')}
-              </Button>
             </div>
-          </SheetContent>
-        </Sheet>
+        </ResponsiveModal>
       </div>
 
       {/* Status filter */}
