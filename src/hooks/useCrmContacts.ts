@@ -56,18 +56,23 @@ export function useCrmContacts(
   companyId: string | undefined,
   page = 0,
   pageSize = 20,
-  filters?: { search?: string; contactType?: string; tag?: string; showArchived?: boolean }
+  filters?: { search?: string; contactType?: string; tag?: string; showArchived?: boolean; source?: string; lifecycleStage?: string; sortBy?: string }
 ) {
   return useQuery({
     queryKey: ['crm-contacts', companyId, page, pageSize, filters],
     queryFn: async (): Promise<{ data: CrmContact[]; count: number }> => {
       const from = page * pageSize;
       const to = from + pageSize - 1;
+
+      // Determine sort
+      const sortField = filters?.sortBy || 'updated_at';
+      const ascending = sortField === 'first_name'; // name ascending, rest descending
+
       let q = supabase
         .from('crm_contacts')
         .select('*, agent_deals(id)', { count: 'exact' })
         .eq('company_id', companyId!)
-        .order('updated_at', { ascending: false })
+        .order(sortField, { ascending })
         .range(from, to);
 
       // Server-side archived filter (default: hide archived)
@@ -84,6 +89,16 @@ export function useCrmContacts(
       // Server-side type filter
       if (filters?.contactType) {
         q = q.eq('contact_type', filters.contactType);
+      }
+
+      // Server-side source filter
+      if (filters?.source) {
+        q = q.eq('source', filters.source);
+      }
+
+      // Server-side lifecycle stage filter
+      if (filters?.lifecycleStage) {
+        q = q.eq('lifecycle_stage', filters.lifecycleStage);
       }
 
       // Server-side tag filter
