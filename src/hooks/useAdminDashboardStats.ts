@@ -51,7 +51,7 @@ export function useAdminDashboardStats() {
       // Count by vertical from listings
       const verticalCounts: Record<string, number> = {};
       if (!listingsError && listingCounts) {
-        listingCounts.forEach((row: any) => {
+        listingCounts.forEach((row) => {
           const v = row.vertical;
           verticalCounts[v] = (verticalCounts[v] || 0) + 1;
         });

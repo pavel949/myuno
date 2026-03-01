@@ -16,7 +16,7 @@ export interface VendorBabysitter {
   price_per_hour?: number;
   price_per_day?: number;
   currency?: string;
-  availability?: any;
+  availability?: Record<string, unknown>;
   can_cook?: boolean;
   can_drive?: boolean;
   first_aid_certified?: boolean;

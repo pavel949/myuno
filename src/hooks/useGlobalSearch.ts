@@ -174,8 +174,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
       if (controller.signal.aborted) return;
 
       if (categoryData) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        categoryData.forEach((cat: any) => {
+        categoryData.forEach((cat) => {
           let path = `/${cat.slug}`;
           if (cat.mini_app_type) {
             const typePathMap: Record<string, string> = {
@@ -232,8 +231,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         if (controller.signal.aborted) return;
 
         if (listingsData) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          listingsData.forEach((item: any) => {
+          listingsData.forEach((item) => {
             const pathPrefix = LISTING_VERTICAL_PATHS[item.vertical] || `/${item.vertical}/`;
             allResults.push({
               id: item.id,
@@ -249,8 +247,8 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             });
           });
         }
-      } catch (err) {
-        console.warn('Search: listings query failed:', err);
+      } catch {
+        // Listings query failed silently
       }
 
       // 4. Non-migrated entity tables in parallel
@@ -267,8 +265,8 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
           // Build OR filter — always search title fields, plus extra fields for some tables
           const orParts = [`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`];
 
-          let queryBuilder = supabase
-            .from(config.table as any)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let queryBuilder = (supabase.from as any)(config.table)
             .select(uniqueFields.join(','))
             .eq('is_active', true)
             .or(orParts.join(','))
@@ -280,14 +278,11 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           const { data, error } = await queryBuilder;
           
-          if (error) {
-            console.warn(`Search: ${config.table} query failed:`, error.message);
-            return [];
-          }
+          if (error) return [];
           if (!data) return [];
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return data.map((item: any) => ({
+          return data.map((item: Record<string, any>) => ({
             id: item[config.idField],
             type: config.type,
             titleEn: item[config.titleEn] || '',
@@ -299,8 +294,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
             rating: config.rating ? item[config.rating] : null,
             path: `${config.pathPrefix}${item[config.idField]}`,
           }));
-        } catch (err) {
-          console.warn(`Search: ${config.table} error:`, err);
+        } catch {
           return [];
         }
       });
@@ -327,8 +321,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         setResults(finalResults);
         setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch {
       if (!controller.signal.aborted) {
         setResults([]);
         setIsLoading(false);

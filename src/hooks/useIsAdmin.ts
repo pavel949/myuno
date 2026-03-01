@@ -50,8 +50,7 @@ export function useIsAdmin(): UseIsAdminResult {
         adminCache.set(user.id, adminStatus);
         
         if (isMounted) setIsAdmin(adminStatus);
-      } catch (err) {
-        console.error('Error checking admin status:', err);
+      } catch {
         if (isMounted) setIsAdmin(false);
       } finally {
         if (isMounted) setIsLoading(false);

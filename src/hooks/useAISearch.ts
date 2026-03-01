@@ -75,7 +75,6 @@ export function useAISearch(
         setAiResponse(data);
       }
     } catch (err) {
-      console.error('AI search error:', err);
       setAiError(err instanceof Error ? err.message : 'AI search failed');
       setAiResponse(null);
       lastAIQueryRef.current = '';

@@ -53,8 +53,7 @@ export function useTranslationsAdmin(): UseTranslationsAdminReturn {
           .filter((c): c is string => !!c)
       )].sort();
       setCategories(uniqueCategories);
-    } catch (err) {
-      console.error('Failed to fetch translations:', err);
+    } catch {
       setError('Failed to load translations');
     } finally {
       setIsLoading(false);
@@ -96,8 +95,7 @@ export function useTranslationsAdmin(): UseTranslationsAdminReturn {
       
       toast.success('Перевод обновлён');
       return true;
-    } catch (err) {
-      console.error('Failed to update translation:', err);
+    } catch {
       toast.error('Ошибка обновления');
       return false;
     }
@@ -118,8 +116,7 @@ export function useTranslationsAdmin(): UseTranslationsAdminReturn {
       
       toast.success('Перевод создан');
       return true;
-    } catch (err) {
-      console.error('Failed to create translation:', err);
+    } catch {
       toast.error('Ошибка создания');
       return false;
     }
@@ -136,8 +133,7 @@ export function useTranslationsAdmin(): UseTranslationsAdminReturn {
       
       toast.success('Перевод удалён');
       return true;
-    } catch (err) {
-      console.error('Failed to delete translation:', err);
+    } catch {
       toast.error('Ошибка удаления');
       return false;
     }
@@ -162,8 +158,7 @@ export function useTranslationsAdmin(): UseTranslationsAdminReturn {
       toast.success(`Импортировано ${items.length} переводов`);
       await fetchTranslations();
       return true;
-    } catch (err) {
-      console.error('Failed to import translations:', err);
+    } catch {
       toast.error('Ошибка импорта');
       return false;
     }
