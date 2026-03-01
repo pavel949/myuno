@@ -45,6 +45,8 @@ export interface ReportData {
     check_out: string;
     total_amount: number;
     source: string;
+    deposit_amount?: number;
+    deposit_paid?: boolean;
   }>;
   maintenance: Array<{
     id: string;
@@ -70,6 +72,26 @@ export interface ReportData {
   deductions?: Array<{ category: string; amount: number; description: string }>;
   deposit_held?: number;
   deposit_returned?: number;
+  // Deposit tracking
+  booking_deposits: {
+    total_expected: number;
+    total_paid: number;
+    unpaid_count: number;
+  };
+  security_deposits: {
+    total_received: number;
+    total_returned: number;
+    total_held: number;
+    deductions: number;
+    items: Array<{
+      booking_id: string;
+      guest_name: string;
+      received: number;
+      returned: number;
+      deducted: number;
+      status: string;
+    }>;
+  };
 }
 
 export interface PropertyReport {
@@ -163,7 +185,8 @@ export function useGenerateReport() {
       if (propError) throw propError;
       const ownerId = prop.owner_id;
 
-      // Fetch financial data for the period
+      // Fetch financial data, bookings, and security deposit operations for the period
+      const bookingIds: string[] = [];
       const [{ data: financials, error: finError }, { data: bookings, error: bookError }] = await Promise.all([
         supabase
           .from('property_financials')
@@ -175,11 +198,23 @@ export function useGenerateReport() {
           .from('property_bookings')
           .select('*')
           .eq('property_id', input.property_id)
-          .or(`check_in_date.gte.${input.period_start},check_out_date.lte.${input.period_end}`),
+          .or(`check_in.gte.${input.period_start},check_out.lte.${input.period_end}`),
       ]);
 
       if (finError) throw finError;
       if (bookError) throw bookError;
+
+      // Fetch booking_operations for security deposits
+      const bIds = (bookings || []).map((b: any) => b.id);
+      let operations: any[] = [];
+      if (bIds.length > 0) {
+        const { data: ops } = await supabase
+          .from('booking_operations')
+          .select('booking_id, deposit_amount, deposit_received_at, deposit_returned_amount, deposit_returned_at, deposit_deduction_amount, deposit_return_status')
+          .in('booking_id', bIds);
+        operations = ops || [];
+      }
+      const opsMap = new Map(operations.map((o: any) => [o.booking_id, o]));
 
       // Calculate report data
       const income = {
@@ -236,8 +271,8 @@ export function useGenerateReport() {
       let nightsBooked = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (bookings || []).forEach((b: any) => {
-        const checkIn = new Date(b.check_in_date);
-        const checkOut = new Date(b.check_out_date);
+        const checkIn = new Date(b.check_in);
+        const checkOut = new Date(b.check_out);
         const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
         nightsBooked += nights;
       });
@@ -246,6 +281,47 @@ export function useGenerateReport() {
       const mgmtCommission = expenses.transactions
         .filter(t => t.category === 'management_fee' || t.category === 'commission')
         .reduce((sum, t) => sum + t.amount, 0);
+
+      // Calculate booking deposit (prepayment) tracking
+      let depositExpected = 0;
+      let depositPaid = 0;
+      let depositUnpaidCount = 0;
+      (bookings || []).forEach((b: any) => {
+        const dep = Number(b.deposit_amount || 0);
+        if (dep > 0) {
+          depositExpected += dep;
+          if (b.deposit_paid_at) {
+            depositPaid += dep;
+          } else {
+            depositUnpaidCount++;
+          }
+        }
+      });
+
+      // Calculate security deposit tracking from booking_operations
+      let secTotalReceived = 0;
+      let secTotalReturned = 0;
+      let secTotalDeductions = 0;
+      const securityDepositItems: ReportData['security_deposits']['items'] = [];
+      (bookings || []).forEach((b: any) => {
+        const op = opsMap.get(b.id);
+        if (!op) return;
+        const received = Number(op.deposit_amount || 0);
+        const returned = Number(op.deposit_returned_amount || 0);
+        const deducted = Number(op.deposit_deduction_amount || 0);
+        if (received === 0) return;
+        secTotalReceived += received;
+        secTotalReturned += returned;
+        secTotalDeductions += deducted;
+        securityDepositItems.push({
+          booking_id: b.id,
+          guest_name: b.guest_name || 'Guest',
+          received,
+          returned,
+          deducted,
+          status: op.deposit_return_status || (op.deposit_returned_at ? 'returned' : 'held'),
+        });
+      });
 
       const reportData: ReportData = {
         income,
@@ -260,10 +336,12 @@ export function useGenerateReport() {
         bookings: (bookings || []).map((b: any) => ({
           id: b.id,
           guest_name: b.guest_name || 'Guest',
-          check_in: b.check_in_date,
-          check_out: b.check_out_date,
+          check_in: b.check_in,
+          check_out: b.check_out,
           total_amount: Number(b.total_amount || 0),
           source: b.source || 'direct',
+          deposit_amount: Number(b.deposit_amount || 0),
+          deposit_paid: !!b.deposit_paid_at,
         })),
         maintenance: expenses.transactions
           .filter(t => t.category === 'maintenance' || t.category === 'repair')
@@ -293,6 +371,19 @@ export function useGenerateReport() {
           amount: amount as number,
           description: cat.replace(/_/g, ' '),
         })),
+        // Deposit tracking
+        booking_deposits: {
+          total_expected: depositExpected,
+          total_paid: depositPaid,
+          unpaid_count: depositUnpaidCount,
+        },
+        security_deposits: {
+          total_received: secTotalReceived,
+          total_returned: secTotalReturned,
+          total_held: secTotalReceived - secTotalReturned - secTotalDeductions,
+          deductions: secTotalDeductions,
+          items: securityDepositItems,
+        },
       };
 
       // Create the report
