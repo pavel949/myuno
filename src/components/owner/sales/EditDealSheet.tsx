@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +11,8 @@ import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Pencil } from 'lucide-react';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
   open: boolean;
@@ -107,7 +108,6 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         tags: form.tags,
       };
 
-      // Log field changes
       const changes = diffDealFields(deal as any, updates, TRACKED_DEAL_FIELDS);
       if (changes.length > 0) {
         await logChanges.mutateAsync({ dealId: deal.id, changes });
@@ -122,136 +122,137 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
-        <SheetHeader>
-          <SheetTitle>{isRu ? 'Редактировать сделку' : 'Edit Deal'}</SheetTitle>
-        </SheetHeader>
-        <div className="space-y-4 mt-4">
-          {/* Deal Type */}
-          <div>
-            <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
-            <div className="flex gap-1.5 mt-1">
-              {DEAL_TYPES.map(dt => (
-                <button
-                  key={dt}
-                  type="button"
-                  onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                    form.deal_type === dt
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                  )}
-                >
-                  {isRu ? DEAL_TYPE_LABELS[dt as DealType].ru : DEAL_TYPE_LABELS[dt as DealType].en}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
-            <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
-              <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Источник' : 'Source'}</Label>
-              <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CLIENT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
-              <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
-              <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label>
-              <Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Спален от' : 'Beds Min'}</Label>
-              <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} />
-            </div>
-          </div>
-
-          {/* Property Types */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Типы недвижимости' : 'Property Types'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PROPERTY_TYPES.map(t => (
-                <button key={t} onClick={() => toggleType(t)} className={cn(
-                  'px-2.5 py-1 rounded-full text-xs border transition-colors',
-                  form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                )}>{t}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Districts */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PHUKET_DISTRICTS.map(d => (
-                <button key={d} onClick={() => toggleDistrict(d)} className={cn(
-                  'px-2.5 py-1 rounded-full text-xs border transition-colors',
-                  form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
-                )}>{d}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Следующий шаг' : 'Next Action'}</Label>
-            <Input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))} placeholder={isRu ? 'Напр.: Позвонить...' : 'e.g.: Call...'} />
-          </div>
-          <div>
-            <Label>{isRu ? 'Дата следующего шага' : 'Next Action Date'}</Label>
-            <Input type="date" value={form.next_action_date} onChange={e => setForm(f => ({ ...f, next_action_date: e.target.value }))} />
-          </div>
-          <div>
-            <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
-            <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
-          </div>
-          {/* Priority */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Приоритет' : 'Priority'}</Label>
-            <DealPriorityStars priority={form.priority} onChange={p => setForm(f => ({ ...f, priority: p }))} size="md" />
-          </div>
-          {/* Tags */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
-            <DealTagsInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
-          </div>
-          <Button onClick={handleSubmit} disabled={updateDeal.isPending} className="w-full">
-            {updateDeal.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
-          </Button>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isRu ? 'Редактировать сделку' : 'Edit Deal'}
+      icon={<Pencil className="w-5 h-5 text-primary" />}
+      size="lg"
+      footer={
+        <Button onClick={handleSubmit} disabled={updateDeal.isPending} className="w-full sm:w-auto min-w-[200px]">
+          {updateDeal.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
+        </Button>
+      }
+    >
+      {/* Deal Type */}
+      <div>
+        <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
+        <div className="flex gap-1.5 mt-1">
+          {DEAL_TYPES.map(dt => (
+            <button
+              key={dt}
+              type="button"
+              onClick={() => setForm(f => ({ ...f, deal_type: dt }))}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                form.deal_type === dt
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+              )}
+            >
+              {isRu ? DEAL_TYPE_LABELS[dt as DealType].ru : DEAL_TYPE_LABELS[dt as DealType].en}
+            </button>
+          ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
+        <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
+          <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
+        </div>
+        <div>
+          <Label>Email</Label>
+          <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Источник' : 'Source'}</Label>
+          <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CLIENT_SOURCES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
+          <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
+          <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label>
+          <Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Спален от' : 'Beds Min'}</Label>
+          <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} />
+        </div>
+      </div>
+
+      {/* Property Types */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Типы недвижимости' : 'Property Types'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PROPERTY_TYPES.map(t => (
+            <button key={t} onClick={() => toggleType(t)} className={cn(
+              'px-2.5 py-1 rounded-full text-xs border transition-colors',
+              form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+            )}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Districts */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PHUKET_DISTRICTS.map(d => (
+            <button key={d} onClick={() => toggleDistrict(d)} className={cn(
+              'px-2.5 py-1 rounded-full text-xs border transition-colors',
+              form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/50',
+            )}>{d}</button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Следующий шаг' : 'Next Action'}</Label>
+        <Input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))} placeholder={isRu ? 'Напр.: Позвонить...' : 'e.g.: Call...'} />
+      </div>
+      <div>
+        <Label>{isRu ? 'Дата следующего шага' : 'Next Action Date'}</Label>
+        <Input type="date" value={form.next_action_date} onChange={e => setForm(f => ({ ...f, next_action_date: e.target.value }))} />
+      </div>
+      <div>
+        <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
+        <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
+      </div>
+      {/* Priority */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Приоритет' : 'Priority'}</Label>
+        <DealPriorityStars priority={form.priority} onChange={p => setForm(f => ({ ...f, priority: p }))} size="md" />
+      </div>
+      {/* Tags */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
+        <DealTagsInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
+      </div>
+    </ResponsiveModal>
   );
 }

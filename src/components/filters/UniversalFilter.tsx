@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Filter, X, Check, ChevronDown, RotateCcw, type LucideIcon } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -9,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { InlineIcon } from '@/components/ui/IconBadge';
 import { Bed } from 'lucide-react';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 // ====== UNIVERSAL FILTER TYPES ======
 
@@ -16,8 +16,8 @@ export interface FilterOption {
   id: string;
   labelEn: string;
   labelRu: string;
-  icon?: string | LucideIcon; // emoji string OR Lucide icon component
-  count?: number; // optional count of items
+  icon?: string | LucideIcon;
+  count?: number;
 }
 
 export interface FilterSection {
@@ -43,97 +43,66 @@ export interface UniversalFilterProps {
   onChange: (values: FilterValues) => void;
   activeCount?: number;
   className?: string;
-  children?: React.ReactNode; // Custom trigger
+  children?: React.ReactNode;
 }
 
 // ====== PRICE LEVEL COMPONENT ======
 
-interface PriceLevelSelectProps {
-  value: string | null;
-  onChange: (value: string | null) => void;
-  maxLevel?: number;
-}
-
-function PriceLevelSelect({ value, onChange, maxLevel = 4 }: PriceLevelSelectProps) {
-  const { language } = useLanguage();
-  const levels = Array.from({ length: maxLevel }, (_, i) => i + 1);
-  
-  const labels: Record<number, { en: string; ru: string }> = {
-    1: { en: 'Budget', ru: 'Бюджетно' },
-    2: { en: 'Moderate', ru: 'Средне' },
-    3: { en: 'Upscale', ru: 'Дорого' },
-    4: { en: 'Luxury', ru: 'Премиум' },
-  };
+function PriceLevelSelect({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const levels = [
+    { id: '1', label: '฿' },
+    { id: '2', label: '฿฿' },
+    { id: '3', label: '฿฿฿' },
+    { id: '4', label: '฿฿฿฿' },
+  ];
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex gap-2">
       {levels.map((level) => (
         <button
-          key={level}
-          onClick={() => onChange(value === String(level) ? null : String(level))}
+          key={level.id}
+          onClick={() => onChange(value === level.id ? null : level.id)}
           className={cn(
-            "flex items-center justify-between p-3 rounded-xl border-2 transition-all",
-            value === String(level)
-              ? "border-primary bg-primary/10"
-              : "border-border hover:border-primary/50"
+            "flex-1 py-2 rounded-lg text-sm font-medium border transition-colors",
+            value === level.id
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border text-muted-foreground hover:border-primary/50"
           )}
         >
-          <span className="text-sm font-medium">
-            {'฿'.repeat(level)}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {language === 'ru' ? labels[level]?.ru : labels[level]?.en}
-          </span>
+          {level.label}
         </button>
       ))}
     </div>
   );
 }
 
-// ====== BEDROOM SELECT (Airbnb style) ======
+// ====== SINGLE SELECT ======
 
-interface BedroomSelectProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-}
-
-const BEDROOM_OPTIONS = [
-  { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
-  { id: '1', labelEn: '1', labelRu: '1' },
-  { id: '2', labelEn: '2', labelRu: '2' },
-  { id: '3', labelEn: '3', labelRu: '3' },
-  { id: '4', labelEn: '4', labelRu: '4' },
-  { id: '5+', labelEn: '5+', labelRu: '5+' },
-];
-
-function BedroomSelect({ value, onChange }: BedroomSelectProps) {
+function SingleSelectList({ options, value, onChange }: {
+  options: FilterOption[];
+  value: string | null;
+  onChange: (v: string | null) => void;
+}) {
   const { language } = useLanguage();
-
-  const toggleOption = (optionId: string) => {
-    if (value.includes(optionId)) {
-      onChange(value.filter(v => v !== optionId));
-    } else {
-      onChange([...value, optionId]);
-    }
-  };
 
   return (
     <div className="flex flex-wrap gap-2">
-      {BEDROOM_OPTIONS.map((option) => {
-        const isActive = value.includes(option.id);
+      {options.map((option) => {
+        const isActive = value === option.id;
         return (
           <button
             key={option.id}
-            onClick={() => toggleOption(option.id)}
+            onClick={() => onChange(isActive ? null : option.id)}
             className={cn(
-              "inline-flex items-center justify-center min-w-[48px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
-              "border-2",
+              "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-all",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                : "bg-card border-border text-foreground hover:border-primary/50"
             )}
           >
-            {language === 'ru' ? option.labelRu : option.labelEn}
+            {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
+            <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
+            {isActive && <Check className="w-3.5 h-3.5 ml-1" />}
           </button>
         );
       })}
@@ -143,21 +112,19 @@ function BedroomSelect({ value, onChange }: BedroomSelectProps) {
 
 // ====== MULTI SELECT CHIPS ======
 
-interface MultiSelectChipsProps {
+function MultiSelectChips({ options, value, onChange }: {
   options: FilterOption[];
   value: string[];
-  onChange: (value: string[]) => void;
-}
-
-function MultiSelectChips({ options, value, onChange }: MultiSelectChipsProps) {
+  onChange: (v: string[]) => void;
+}) {
   const { language } = useLanguage();
 
-  const toggleOption = (optionId: string) => {
-    if (value.includes(optionId)) {
-      onChange(value.filter(v => v !== optionId));
-    } else {
-      onChange([...value, optionId]);
-    }
+  const toggle = (id: string) => {
+    onChange(
+      value.includes(id)
+        ? value.filter((v) => v !== id)
+        : [...value, id]
+    );
   };
 
   return (
@@ -167,18 +134,20 @@ function MultiSelectChips({ options, value, onChange }: MultiSelectChipsProps) {
         return (
           <button
             key={option.id}
-            onClick={() => toggleOption(option.id)}
+            onClick={() => toggle(option.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all",
-              "border-2",
+              "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-all",
               isActive
                 ? "bg-primary text-primary-foreground border-primary"
-                : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
+                : "bg-card border-border text-foreground hover:border-primary/50"
             )}
           >
-            {option.icon && <InlineIcon icon={option.icon} size="sm" />}
+            {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
             <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
-            {isActive && <Check className="w-3.5 h-3.5" />}
+            {option.count !== undefined && (
+              <span className="text-xs opacity-60">({option.count})</span>
+            )}
+            {isActive && <Check className="w-3.5 h-3.5 ml-1" />}
           </button>
         );
       })}
@@ -186,42 +155,43 @@ function MultiSelectChips({ options, value, onChange }: MultiSelectChipsProps) {
   );
 }
 
-// ====== SINGLE SELECT LIST ======
+// ====== BEDROOM SELECT ======
 
-interface SingleSelectListProps {
-  options: FilterOption[];
-  value: string | null;
-  onChange: (value: string | null) => void;
-}
-
-function SingleSelectList({ options, value, onChange }: SingleSelectListProps) {
+function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { language } = useLanguage();
+  const options = [
+    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+    { id: '1', labelEn: '1', labelRu: '1' },
+    { id: '2', labelEn: '2', labelRu: '2' },
+    { id: '3', labelEn: '3', labelRu: '3' },
+    { id: '4', labelEn: '4+', labelRu: '4+' },
+  ];
+
+  const toggle = (id: string) => {
+    onChange(
+      value.includes(id)
+        ? value.filter((v) => v !== id)
+        : [...value, id]
+    );
+  };
 
   return (
-    <div className="space-y-1">
+    <div className="flex gap-2">
       {options.map((option) => {
-        const isActive = value === option.id;
+        const isActive = value.includes(option.id);
         return (
           <button
             key={option.id}
-            onClick={() => onChange(isActive ? null : option.id)}
+            onClick={() => toggle(option.id)}
             className={cn(
-              "w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left",
+              "flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors flex items-center justify-center gap-1",
               isActive
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary hover:bg-secondary/80"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border text-foreground hover:border-primary/50"
             )}
           >
-            {option.icon && <InlineIcon icon={option.icon} size="lg" />}
-            <span className="flex-1 font-medium">
-              {language === 'ru' ? option.labelRu : option.labelEn}
-            </span>
-            {option.count !== undefined && (
-              <Badge variant="secondary" className="text-xs">
-                {option.count}
-              </Badge>
-            )}
-            {isActive && <Check className="w-4 h-4" />}
+            {option.id !== 'studio' && <Bed className="w-3.5 h-3.5" />}
+            {language === 'ru' ? option.labelRu : option.labelEn}
           </button>
         );
       })}
@@ -229,26 +199,29 @@ function SingleSelectList({ options, value, onChange }: SingleSelectListProps) {
   );
 }
 
-// ====== MAIN UNIVERSAL FILTER COMPONENT ======
+// ====== MAIN COMPONENT ======
 
-export function UniversalFilter({ 
-  config, 
-  values, 
+export function UniversalFilter({
+  config,
+  values,
   onChange,
   activeCount = 0,
   className,
-  children
+  children,
 }: UniversalFilterProps) {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [localValues, setLocalValues] = useState<FilterValues>(values);
 
-  // Reset local values when sheet opens
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setLocalValues(values);
     }
     setIsOpen(open);
+  };
+
+  const updateSectionValue = (sectionId: string, value: string | string[] | null) => {
+    setLocalValues((prev) => ({ ...prev, [sectionId]: value }));
   };
 
   const handleApply = () => {
@@ -258,35 +231,23 @@ export function UniversalFilter({
 
   const handleReset = () => {
     const resetValues: FilterValues = {};
-    config.sections.forEach(section => {
+    config.sections.forEach((section) => {
       resetValues[section.id] = section.type === 'multi' ? [] : null;
     });
     setLocalValues(resetValues);
   };
 
-  const updateSectionValue = (sectionId: string, value: string | string[] | null) => {
-    setLocalValues(prev => ({ ...prev, [sectionId]: value }));
-  };
-
   const localActiveCount = useMemo(() => {
     let count = 0;
-    Object.entries(localValues).forEach(([_, value]) => {
-      if (Array.isArray(value)) {
-        count += value.length;
-      } else if (value) {
-        count += 1;
-      }
+    Object.entries(localValues).forEach(([, val]) => {
+      if (Array.isArray(val) && val.length > 0) count++;
+      else if (val && typeof val === 'string') count++;
     });
     return count;
   }, [localValues]);
 
-  // Default trigger if children not provided
   const trigger = children || (
-    <Button
-      variant="outline"
-      size="sm"
-      className={cn("gap-2", className)}
-    >
+    <Button variant="outline" size="sm" className={cn("gap-2", className)} onClick={() => setIsOpen(true)}>
       <Filter className="w-4 h-4" />
       {language === 'ru' ? 'Фильтры' : 'Filters'}
       {activeCount > 0 && (
@@ -298,17 +259,19 @@ export function UniversalFilter({
   );
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
+    <>
+      <div onClick={() => setIsOpen(true)} className="cursor-pointer">
         {trigger}
-      </SheetTrigger>
-      
-      <SheetContent side="bottom" className="h-[80vh] sm:h-[85vh] rounded-t-3xl">
-        <SheetHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle>
-              {language === 'ru' ? 'Фильтры' : 'Filters'}
-            </SheetTitle>
+      </div>
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        title={language === 'ru' ? 'Фильтры' : 'Filters'}
+        icon={<Filter className="w-5 h-5 text-primary" />}
+        size="lg"
+        mobileHeight="max-h-[85vh]"
+        footer={
+          <div className="flex items-center justify-between w-full gap-3">
             {localActiveCount > 0 && (
               <Button
                 variant="ghost"
@@ -320,64 +283,57 @@ export function UniversalFilter({
                 {language === 'ru' ? 'Сбросить' : 'Reset'}
               </Button>
             )}
+            <Button onClick={handleApply} className="flex-1 max-w-xs ml-auto h-11 text-base" size="lg">
+              {language === 'ru'
+                ? `Применить${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`
+                : `Apply${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`}
+            </Button>
           </div>
-        </SheetHeader>
+        }
+      >
+        <div className="space-y-6">
+          {config.sections.map((section, index) => (
+            <div key={section.id}>
+              {index > 0 && <Separator className="mb-6" />}
 
-        <ScrollArea className="h-[calc(80vh-140px)] sm:h-[calc(85vh-140px)] pr-4">
-          {/* pb-24 ensures content scrolls above the fixed Apply button */}
-          <div className="space-y-5 sm:space-y-6 pb-24">
-            {config.sections.map((section, index) => (
-              <div key={section.id}>
-                {index > 0 && <Separator className="mb-6" />}
-                
-                <h3 className="font-semibold mb-4">
-                  {language === 'ru' ? section.titleRu : section.titleEn}
-                </h3>
+              <h3 className="font-semibold text-base mb-4">
+                {language === 'ru' ? section.titleRu : section.titleEn}
+              </h3>
 
-                {section.type === 'price-level' && (
-                  <PriceLevelSelect
-                    value={localValues[section.id] as string | null}
+              {section.type === 'price-level' && (
+                <PriceLevelSelect
+                  value={localValues[section.id] as string | null}
+                  onChange={(value) => updateSectionValue(section.id, value)}
+                />
+              )}
+
+              {section.type === 'single' && (
+                <SingleSelectList
+                  options={section.options}
+                  value={localValues[section.id] as string | null}
+                  onChange={(value) => updateSectionValue(section.id, value)}
+                />
+              )}
+
+              {section.type === 'multi' && (
+                section.id === 'bedrooms' ? (
+                  <BedroomSelect
+                    value={(localValues[section.id] as string[]) || []}
                     onChange={(value) => updateSectionValue(section.id, value)}
                   />
-                )}
-
-                {section.type === 'single' && (
-                  <SingleSelectList
-                    options={section.options}
-                    value={localValues[section.id] as string | null}
-                    onChange={(value) => updateSectionValue(section.id, value)}
-                  />
-                )}
-
-                {section.type === 'multi' && (
-                  section.id === 'bedrooms' ? (
-                    <BedroomSelect
-                      value={(localValues[section.id] as string[]) || []}
-                      onChange={(value) => updateSectionValue(section.id, value)}
-                    />
-                  ) : (
+                ) : (
                   <MultiSelectChips
                     options={section.options}
                     value={(localValues[section.id] as string[]) || []}
                     onChange={(value) => updateSectionValue(section.id, value)}
                   />
-                  )
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-
-        {/* Apply Button */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border pb-safe">
-          <Button onClick={handleApply} className="w-full h-12 text-base touch-manipulation" size="lg">
-            {language === 'ru' 
-              ? `Применить${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`
-              : `Apply${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`}
-          </Button>
+                )
+              )}
+            </div>
+          ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      </ResponsiveModal>
+    </>
   );
 }
 
@@ -428,12 +384,12 @@ interface ActiveFiltersProps {
   className?: string;
 }
 
-export function ActiveFilters({ 
-  config, 
-  values, 
-  onRemove, 
+export function ActiveFilters({
+  config,
+  values,
+  onRemove,
   onClearAll,
-  className 
+  className,
 }: ActiveFiltersProps) {
   const { language } = useLanguage();
 
@@ -441,7 +397,7 @@ export function ActiveFilters({
 
   config.sections.forEach(section => {
     const sectionValue = values[section.id];
-    
+
     if (section.type === 'multi' && Array.isArray(sectionValue)) {
       sectionValue.forEach(optionId => {
         const option = section.options.find(o => o.id === optionId);
@@ -487,7 +443,7 @@ export function ActiveFilters({
           <X className="w-3 h-3 flex-shrink-0" />
         </button>
       ))}
-      
+
       {activeFilters.length > 1 && (
         <button
           onClick={onClearAll}

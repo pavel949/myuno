@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,8 +12,9 @@ import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDe
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { X, UserCog } from 'lucide-react';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 const COMMON_INTERESTS = [
   'golf', 'diving', 'yoga', 'fitness', 'sailing', 'travel', 'wine', 'cooking',
@@ -149,190 +149,189 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
-        <SheetHeader>
-          <SheetTitle>{isRu ? 'Редактировать контакт' : 'Edit Contact'}</SheetTitle>
-        </SheetHeader>
-        <div className="space-y-4 mt-4">
-          {/* Basic info */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
-              <Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Фамилия' : 'Last Name'}</Label>
-              <Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
-            <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} /></div>
-            <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label>{isRu ? 'Тип' : 'Type'}</Label>
-              <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isRu ? 'Источник' : 'Source'}</Label>
-              <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{leadSources.map(s => <SelectItem key={s.value} value={s.value}>{isRu ? s.label_ru : s.label_en}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
-          </div>
-
-          <Separator />
-
-          {/* Personal section */}
-          <p className="text-sm font-medium text-muted-foreground">{isRu ? '👤 Персональное' : '👤 Personal'}</p>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'День рождения' : 'Birthday'}</Label>
-              <Input type="date" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Язык' : 'Language'}</Label>
-              <Input placeholder={isRu ? 'RU, EN, TH...' : 'EN, RU, TH...'} value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} />
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Семья' : 'Family'}</Label>
-            <Textarea
-              placeholder={isRu ? 'Жена Анна, дочь 5 лет, сын 3 года...' : 'Wife Anna, daughter 5 y.o., son 3 y.o...'}
-              value={form.family_info}
-              onChange={e => setForm(f => ({ ...f, family_info: e.target.value }))}
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Интересы' : 'Interests'}</Label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {COMMON_INTERESTS.map(i => (
-                <button key={i} onClick={() => toggleArray('interests', i)}
-                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    form.interests.includes(i) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
-                  )}>{i}</button>
-              ))}
-            </div>
-            {/* Custom interests */}
-            {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).map(i => (
-                  <Badge key={i} variant="secondary" className="gap-1 text-xs">
-                    {i}
-                    <button onClick={() => toggleArray('interests', i)}><X className="h-3 w-3" /></button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-            <div className="flex gap-2">
-              <Input
-                placeholder={isRu ? 'Добавить свой...' : 'Add custom...'}
-                value={customInterest}
-                onChange={e => setCustomInterest(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomInterest())}
-                className="flex-1"
-              />
-              <Button variant="outline" size="sm" onClick={addCustomInterest} disabled={!customInterest.trim()}>+</Button>
-            </div>
-          </div>
-
-          <div>
-            <Label>{isRu ? 'Скоринг (0-100)' : 'Scoring (0-100)'}</Label>
-            <Input type="number" min={0} max={100} value={form.scoring} onChange={e => setForm(f => ({ ...f, scoring: e.target.value }))} />
-          </div>
-
-          <Separator />
-
-          {/* Professional section */}
-          <p className="text-sm font-medium text-muted-foreground">{isRu ? '💼 Профессиональное' : '💼 Professional'}</p>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Должность' : 'Job Title'}</Label>
-              <Input placeholder="CEO, Manager..." value={form.job_title} onChange={e => setForm(f => ({ ...f, job_title: e.target.value }))} />
-            </div>
-            <div>
-              <Label>{isRu ? 'Компания' : 'Company'}</Label>
-              <Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Preferences */}
-          <p className="text-sm font-medium text-muted-foreground">{isRu ? '🏠 Предпочтения' : '🏠 Preferences'}</p>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
-            <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
-            <div>
-              <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
-              <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Типы' : 'Types'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PROPERTY_TYPES.map(t => (
-                <button key={t} onClick={() => toggleArray('preferred_types', t)}
-                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
-                  )}>{t}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PHUKET_DISTRICTS.map(d => (
-                <button key={d} onClick={() => toggleArray('preferred_districts', d)}
-                  className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
-                    form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
-                  )}>{d}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
-            <ContactTagPicker
-              companyId={contact.company_id}
-              selectedTags={form.tags}
-              onToggle={(tag) => setForm(f => ({
-                ...f,
-                tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag],
-              }))}
-            />
-          </div>
-
-          <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
-
-          <Button onClick={handleSubmit} disabled={updateContact.isPending} className="w-full">
-            {updateContact.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
-          </Button>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isRu ? 'Редактировать контакт' : 'Edit Contact'}
+      icon={<UserCog className="w-5 h-5 text-primary" />}
+      size="lg"
+      footer={
+        <Button onClick={handleSubmit} disabled={updateContact.isPending} className="w-full sm:w-auto min-w-[200px]">
+          {updateContact.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
+        </Button>
+      }
+    >
+      {/* Basic info */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
+          <Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} />
         </div>
-      </SheetContent>
-    </Sheet>
+        <div>
+          <Label>{isRu ? 'Фамилия' : 'Last Name'}</Label>
+          <Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+        <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} /></div>
+        <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <Label>{isRu ? 'Тип' : 'Type'}</Label>
+          <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>{isRu ? 'Источник' : 'Source'}</Label>
+          <Select value={form.source} onValueChange={v => setForm(f => ({ ...f, source: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{leadSources.map(s => <SelectItem key={s.value} value={s.value}>{isRu ? s.label_ru : s.label_en}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
+      </div>
+
+      <Separator />
+
+      {/* Personal section */}
+      <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Персональное' : 'Personal'}</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'День рождения' : 'Birthday'}</Label>
+          <Input type="date" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Язык' : 'Language'}</Label>
+          <Input placeholder={isRu ? 'RU, EN, TH...' : 'EN, RU, TH...'} value={form.language} onChange={e => setForm(f => ({ ...f, language: e.target.value }))} />
+        </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Семья' : 'Family'}</Label>
+        <Textarea
+          placeholder={isRu ? 'Жена Анна, дочь 5 лет, сын 3 года...' : 'Wife Anna, daughter 5 y.o., son 3 y.o...'}
+          value={form.family_info}
+          onChange={e => setForm(f => ({ ...f, family_info: e.target.value }))}
+          rows={2}
+        />
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Интересы' : 'Interests'}</Label>
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {COMMON_INTERESTS.map(i => (
+            <button key={i} onClick={() => toggleArray('interests', i)}
+              className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.interests.includes(i) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+              )}>{i}</button>
+          ))}
+        </div>
+        {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {form.interests.filter(i => !COMMON_INTERESTS.includes(i)).map(i => (
+              <Badge key={i} variant="secondary" className="gap-1 text-xs">
+                {i}
+                <button onClick={() => toggleArray('interests', i)}><X className="h-3 w-3" /></button>
+              </Badge>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Input
+            placeholder={isRu ? 'Добавить свой...' : 'Add custom...'}
+            value={customInterest}
+            onChange={e => setCustomInterest(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomInterest())}
+            className="flex-1"
+          />
+          <Button variant="outline" size="sm" onClick={addCustomInterest} disabled={!customInterest.trim()}>+</Button>
+        </div>
+      </div>
+
+      <div>
+        <Label>{isRu ? 'Скоринг (0-100)' : 'Scoring (0-100)'}</Label>
+        <Input type="number" min={0} max={100} value={form.scoring} onChange={e => setForm(f => ({ ...f, scoring: e.target.value }))} />
+      </div>
+
+      <Separator />
+
+      {/* Professional section */}
+      <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Профессиональное' : 'Professional'}</p>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{isRu ? 'Должность' : 'Job Title'}</Label>
+          <Input placeholder="CEO, Manager..." value={form.job_title} onChange={e => setForm(f => ({ ...f, job_title: e.target.value }))} />
+        </div>
+        <div>
+          <Label>{isRu ? 'Компания' : 'Company'}</Label>
+          <Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Preferences */}
+      <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Предпочтения' : 'Preferences'}</p>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
+        <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
+        <div>
+          <Label>{isRu ? 'Валюта' : 'Currency'}</Label>
+          <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Типы' : 'Types'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PROPERTY_TYPES.map(t => (
+            <button key={t} onClick={() => toggleArray('preferred_types', t)}
+              className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.preferred_types.includes(t) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+              )}>{t}</button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Районы' : 'Districts'}</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {PHUKET_DISTRICTS.map(d => (
+            <button key={d} onClick={() => toggleArray('preferred_districts', d)}
+              className={cn('px-2.5 py-1 rounded-full text-xs border transition-colors',
+                form.preferred_districts.includes(d) ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground'
+              )}>{d}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div>
+        <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
+        <ContactTagPicker
+          companyId={contact.company_id}
+          selectedTags={form.tags}
+          onToggle={(tag) => setForm(f => ({
+            ...f,
+            tags: f.tags.includes(tag) ? f.tags.filter(t => t !== tag) : [...f.tags, tag],
+          }))}
+        />
+      </div>
+
+      <div><Label>{isRu ? 'Заметки' : 'Notes'}</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} /></div>
+    </ResponsiveModal>
   );
 }
