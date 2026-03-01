@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-export type RecipientType = 'coagent' | 'staff' | 'partner';
+export type RecipientType = 'coagent' | 'staff' | 'partner' | 'broker' | 'ota';
 export type CommissionType = 'percent_net' | 'percent_gross' | 'fixed' | 'per_booking';
 export type PayoutFrequency = 'per_booking' | 'monthly' | 'quarterly';
 
