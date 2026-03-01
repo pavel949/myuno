@@ -46,21 +46,22 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 
 /** Compact 2×2 persona switcher with multi-select */
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
-  const { personas, togglePersona } = useUserPersonas();
+  const { personas, setPersonas, isSetting } = useUserPersonas();
 
-  const activePersonas = useMemo(() => {
-    return personas.length > 0 ? personas : ['tourist' as UserPersona];
+  const activePersona = useMemo(() => {
+    return personas[0] ?? ('tourist' as UserPersona);
   }, [personas]);
 
   return (
     <div className="grid grid-cols-2 gap-2">
       {PERSONA_OPTIONS.map((p) => {
         const info = PERSONA_INFO[p];
-        const isActive = activePersonas.includes(p);
+        const isActive = activePersona === p;
         return (
           <button
             key={p}
-            onClick={() => togglePersona(p)}
+            onClick={() => setPersonas([p])}
+            disabled={isSetting}
             className={cn(
               "relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all",
               "focus-visible:ring-2 focus-visible:ring-primary/50",
