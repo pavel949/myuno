@@ -342,6 +342,8 @@ export function useCreateFinancial() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-financials'] });
       queryClient.invalidateQueries({ queryKey: ['property-financials-full'] });
+      queryClient.invalidateQueries({ queryKey: ['property-financials-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['property-financials-count'] });
       queryClient.invalidateQueries({ queryKey: ['financial-stats'] });
       queryClient.invalidateQueries({ queryKey: ['property-care-stats'] });
       toast.success('Транзакция добавлена!');
