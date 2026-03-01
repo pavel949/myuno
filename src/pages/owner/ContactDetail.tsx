@@ -6,7 +6,8 @@ import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCr
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
 import { useCrmActivities, ACTIVITY_TYPE_CONFIG } from '@/hooks/useCrmActivities';
-import { useCrmTasks, useUpdateCrmTask } from '@/hooks/useCrmTasks';
+import { useCrmTasks, useUpdateCrmTask, useCreateCrmTask } from '@/hooks/useCrmTasks';
+import { InlineTaskCreator } from '@/components/owner/contacts/InlineTaskCreator';
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { CrmDocumentsSection } from '@/components/owner/contacts/CrmDocumentsSection';
@@ -439,6 +440,11 @@ export default function ContactDetail() {
 
         {/* ===== TASKS ===== */}
         <TabsContent value="tasks" className="mt-4 space-y-4">
+          {/* Inline task creator */}
+          {membership?.company_id && (
+            <InlineTaskCreator companyId={membership.company_id} contactId={contact.id} />
+          )}
+
           {contactTasks.length === 0 ? (
             <div className="text-center py-12 rounded-xl border bg-card">
               <ListTodo className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
@@ -519,14 +525,20 @@ export default function ContactDetail() {
               <p className="text-sm text-muted-foreground">{isRu ? 'Нет активности' : 'No activity yet'}</p>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="relative">
+              {/* Timeline vertical line */}
+              <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-border" />
               {timelineItems.map((item, idx) => {
                 if (item.type === 'note') {
                   const note = item.data as any;
                   return (
-                    <div key={`note-${note.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
-                      <span className="text-lg mt-0.5 shrink-0">{noteTypeIcons[note.note_type] || '📝'}</span>
-                      <div className="flex-1 min-w-0">
+                    <div key={`note-${note.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group relative">
+                      <div className="relative z-10 shrink-0 mt-1">
+                        <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-card border-2 border-border text-sm">
+                          {noteTypeIcons[note.note_type] || '📝'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-sm">{note.content}</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {formatDistanceToNow(new Date(note.created_at), { addSuffix: true, locale })}
@@ -543,14 +555,25 @@ export default function ContactDetail() {
                 } else {
                   const activity = item.data as any;
                   const config = ACTIVITY_TYPE_CONFIG[activity.activity_type];
+                  const activityIcon = activity.activity_type === 'stage_change' ? '🔄' :
+                    activity.activity_type === 'workflow_executed' ? '⚡' :
+                    activity.activity_type === 'notification' ? '🔔' : '📋';
                   return (
-                    <div key={`act-${activity.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors">
-                      <span className={cn('text-sm mt-0.5 shrink-0 font-medium', config?.color || 'text-muted-foreground')}>
-                        {config ? (isRu ? config.labelRu : config.labelEn) : activity.activity_type}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        {activity.subject && <p className="text-sm font-medium">{activity.subject}</p>}
-                        {activity.description && <p className="text-xs text-muted-foreground">{activity.description}</p>}
+                    <div key={`act-${activity.id}`} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors relative">
+                      <div className="relative z-10 shrink-0 mt-1">
+                        <span className={cn(
+                          'flex h-[30px] w-[30px] items-center justify-center rounded-full bg-card border-2 text-sm',
+                          config?.color ? 'border-primary' : 'border-border'
+                        )}>
+                          {activityIcon}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <span className={cn('text-xs font-medium', config?.color || 'text-muted-foreground')}>
+                          {config ? (isRu ? config.labelRu : config.labelEn) : activity.activity_type}
+                        </span>
+                        {activity.subject && <p className="text-sm font-medium mt-0.5">{activity.subject}</p>}
+                        {activity.description && <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>}
                         {activity.outcome && <Badge variant="outline" className="text-[10px] mt-1">{activity.outcome}</Badge>}
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true, locale })}

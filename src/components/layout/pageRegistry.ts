@@ -412,6 +412,7 @@ export const CrmEmailsPage = lazy(() => import('@/pages/owner/CrmEmailsPage'));
 export const CrmWorkflowsPage = lazy(() => import('@/pages/owner/CrmWorkflowsPage'));
 export const CrmTemplatesPage = lazy(() => import('@/pages/owner/CrmTemplatesPage'));
 export const CrmDuplicatesPage = lazy(() => import('@/pages/owner/CrmDuplicatesPage'));
+export const CrmCompaniesPage = lazy(() => import('@/pages/owner/CrmCompaniesPage'));
 export const CrmWebFormsPage = lazy(() => import('@/pages/owner/CrmWebFormsPage'));
 export const CrmAssignmentRulesPage = lazy(() => import('@/pages/owner/CrmAssignmentRulesPage'));
 export const OwnerModulesPage = lazy(() => import('@/pages/owner/OwnerModulesPage'));

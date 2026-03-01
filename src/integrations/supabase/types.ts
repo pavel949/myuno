@@ -3513,6 +3513,80 @@ export type Database = {
           },
         ]
       }
+      crm_companies: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_id: string
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          domain: string | null
+          email: string | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          phone: string | null
+          size: string | null
+          tags: string[] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          size?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          size?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contact_notes: {
         Row: {
           contact_id: string
@@ -3555,6 +3629,7 @@ export type Database = {
           birthday: string | null
           budget_max: number | null
           budget_min: number | null
+          company_entity_id: string | null
           company_id: string
           company_name: string | null
           contact_type: string | null
@@ -3597,6 +3672,7 @@ export type Database = {
           birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          company_entity_id?: string | null
           company_id: string
           company_name?: string | null
           contact_type?: string | null
@@ -3639,6 +3715,7 @@ export type Database = {
           birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          company_entity_id?: string | null
           company_id?: string
           company_name?: string | null
           contact_type?: string | null
@@ -3676,6 +3753,13 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_contacts_company_entity_id_fkey"
+            columns: ["company_entity_id"]
+            isOneToOne: false
+            referencedRelation: "crm_companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_contacts_company_id_fkey"
             columns: ["company_id"]
