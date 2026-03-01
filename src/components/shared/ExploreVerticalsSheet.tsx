@@ -5,14 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { VERTICALS } from '@/lib/verticals';
 import { resolveIcon } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerDescription,
-} from '@/components/ui/drawer';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { IconBadge } from '@/components/ui/IconBadge';
 
 const VERTICAL_GRADIENTS: Record<string, string> = {
@@ -39,9 +32,7 @@ const VERTICAL_GRADIENTS: Record<string, string> = {
 interface ExploreVerticalsSheetProps {
   trigger?: ReactNode;
   className?: string;
-  /** Controlled open state (optional) */
   open?: boolean;
-  /** Controlled open change handler (optional) */
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -55,7 +46,6 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  // Support both controlled and uncontrolled modes
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
@@ -67,64 +57,67 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
     navigate(`/${plural}`);
   };
 
-  // When used as controlled (no trigger), render only the drawer content
-  const drawerTrigger = trigger !== undefined || !isControlled ? (
-    <DrawerTrigger asChild className={className}>
-      {trigger || (
-        <button className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95">
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-            <LayoutGrid className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <span className="text-[10px] font-medium text-muted-foreground">
-            {language === 'ru' ? 'Ещё' : 'More'}
-          </span>
-        </button>
+  const defaultTrigger = (
+    <button 
+      onClick={() => setOpen(true)}
+      className={cn(
+        "flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted/50 active:bg-muted transition-all duration-200 touch-manipulation active:scale-95",
+        className
       )}
-    </DrawerTrigger>
-  ) : null;
+    >
+      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+        <LayoutGrid className="w-5 h-5 text-muted-foreground" />
+      </div>
+      <span className="text-[10px] font-medium text-muted-foreground">
+        {language === 'ru' ? 'Ещё' : 'More'}
+      </span>
+    </button>
+  );
+
+  const triggerElement = trigger ? (
+    <div onClick={() => setOpen(true)} className={className}>
+      {trigger}
+    </div>
+  ) : defaultTrigger;
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      {drawerTrigger}
-      <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="pb-2">
-          <DrawerTitle>
-            {language === 'ru' ? 'Все услуги' : 'All Services'}
-          </DrawerTitle>
-          <DrawerDescription className="sr-only">
-            Browse all available service categories
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="px-4 pb-6 overflow-y-auto">
-          <div className="grid grid-cols-4 gap-2">
-            {allVerticals.map((v) => {
-              const gradient = VERTICAL_GRADIENTS[v.id] || 'from-primary to-accent';
-              return (
-                <button
-                  key={v.id}
-                  onClick={() => handleNavigate(v.plural)}
-                  className={cn(
-                    'flex flex-col items-center gap-1.5 p-2 rounded-xl',
-                    'hover:bg-muted/50 active:bg-muted transition-all duration-200',
-                    'touch-manipulation active:scale-95'
-                  )}
-                >
-                  <IconBadge
-                    icon={v.icon}
-                    size="lg"
-                    variant="gradient"
-                    gradient={gradient}
-                    className="shadow-md"
-                  />
-                  <span className="text-[10px] font-medium text-center text-muted-foreground leading-tight line-clamp-2">
-                    {language === 'ru' ? v.labelRu : v.labelEn}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+    <>
+      {triggerElement}
+      <ResponsiveModal
+        open={open}
+        onOpenChange={setOpen}
+        title={language === 'ru' ? 'Все услуги' : 'All Services'}
+        icon={<LayoutGrid className="h-5 w-5 text-primary" />}
+        size="lg"
+      >
+        <div className="grid grid-cols-4 gap-2">
+          {allVerticals.map((v) => {
+            const gradient = VERTICAL_GRADIENTS[v.id] || 'from-primary to-accent';
+            return (
+              <button
+                key={v.id}
+                onClick={() => handleNavigate(v.plural)}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 p-2 rounded-xl',
+                  'hover:bg-muted/50 active:bg-muted transition-all duration-200',
+                  'touch-manipulation active:scale-95'
+                )}
+              >
+                <IconBadge
+                  icon={v.icon}
+                  size="lg"
+                  variant="gradient"
+                  gradient={gradient}
+                  className="shadow-md"
+                />
+                <span className="text-[10px] font-medium text-center text-muted-foreground leading-tight line-clamp-2">
+                  {language === 'ru' ? v.labelRu : v.labelEn}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </DrawerContent>
-    </Drawer>
+      </ResponsiveModal>
+    </>
   );
 });

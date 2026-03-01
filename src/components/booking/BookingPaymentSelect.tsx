@@ -6,14 +6,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/config/currencies';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 export type PaymentMethod = 'cash' | 'card' | 'wallet' | 'online' | 'promptpay' | 'concierge_advance';
+
+interface PaymentMethodData {
+  id: string;
+  brand: string | null;
+  last4: string;
+  exp_month: number | null;
+  exp_year: number | null;
+  is_default: boolean;
+}
+
+interface PaymentMethodsHook {
+  paymentMethods: PaymentMethodData[];
+  isLoading: boolean;
+  defaultMethod: PaymentMethodData | null;
+}
 
 interface PaymentOption {
   id: PaymentMethod;
@@ -75,10 +85,8 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
 
   useEffect(() => {
     if (!showWallet || !user) return;
-    
     let isMounted = true;
     setLoadingWallet(true);
-    
     supabase
       .from('wallets')
       .select('balance')
@@ -90,13 +98,9 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
           setLoadingWallet(false);
         }
       });
-    
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [user, showWallet]);
 
-  // Auto-select default card when online is selected
   useEffect(() => {
     if (selected === 'online' && defaultMethod && !selectedCardId && onCardSelect) {
       onCardSelect(defaultMethod.id);
@@ -105,11 +109,8 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
 
   const currencySymbol = getCurrencySymbol(currency);
   const canUseWallet = walletBalance !== null && walletBalance >= amount;
-  
   const selectedCard = paymentMethods.find(c => c.id === selectedCardId);
   const hasCards = paymentMethods.length > 0;
-
-  // Only show PromptPay for THB currency
   const canShowPromptPay = showPromptPay && currency.toUpperCase() === 'THB';
   
   const paymentOptions: PaymentOption[] = [
@@ -194,7 +195,6 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
                   {language === 'ru' ? 'Недостаточно средств' : 'Insufficient balance'}
                 </p>
               )}
-              {/* Show selected card info */}
               {option.id === 'online' && selected === 'online' && selectedCard && (
                 <p className="text-xs text-muted-foreground">
                   •••• {selectedCard.last4}
@@ -211,7 +211,6 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
                 {option.badge}
               </span>
             )}
-            {/* Show card selector arrow for online */}
             {option.id === 'online' && hasCards && selected === 'online' ? (
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             ) : (
@@ -232,73 +231,70 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
         ))}
       </div>
 
-      {/* Card Selection Sheet */}
-      <Sheet open={showCardSheet} onOpenChange={setShowCardSheet}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader className="mb-4">
-            <SheetTitle>
-              {language === 'ru' ? 'Выберите карту' : 'Select Card'}
-            </SheetTitle>
-          </SheetHeader>
-
-          <div className="space-y-2">
-            {paymentMethods.map((card) => {
-              const brand = card.brand?.toLowerCase() || 'default';
-              const gradientClass = brandColors[brand] || brandColors.default;
-              
-              return (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={() => handleCardSelect(card.id)}
-                  className={cn(
-                    "w-full flex items-center justify-between p-3 rounded-xl border transition-colors",
-                    selectedCardId === card.id
-                      ? "border-primary bg-primary/5"
-                      : "hover:bg-accent/50"
+      {/* Card Selection Modal */}
+      <ResponsiveModal
+        open={showCardSheet}
+        onOpenChange={setShowCardSheet}
+        title={language === 'ru' ? 'Выберите карту' : 'Select Card'}
+        icon={<CreditCard className="h-5 w-5 text-primary" />}
+        size="sm"
+      >
+        <div className="space-y-2">
+          {paymentMethods.map((card) => {
+            const brand = card.brand?.toLowerCase() || 'default';
+            const gradientClass = brandColors[brand] || brandColors.default;
+            
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => handleCardSelect(card.id)}
+                className={cn(
+                  "w-full flex items-center justify-between p-3 rounded-xl border transition-colors",
+                  selectedCardId === card.id
+                    ? "border-primary bg-primary/5"
+                    : "hover:bg-accent/50"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    'w-10 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r',
+                    gradientClass
+                  )}>
+                    {brandLogos[brand] || <CreditCard className="w-4 h-4" />}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium">•••• {card.last4}</p>
+                    {card.exp_month && card.exp_year && (
+                      <p className="text-xs text-muted-foreground">
+                        {String(card.exp_month).padStart(2, '0')}/{String(card.exp_year).slice(-2)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {card.is_default && (
+                    <Star className="w-4 h-4 fill-warning text-warning" />
                   )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      'w-10 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-r',
-                      gradientClass
-                    )}>
-                      {brandLogos[brand] || <CreditCard className="w-4 h-4" />}
+                  {selectedCardId === card.id && (
+                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white" />
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium">•••• {card.last4}</p>
-                      {card.exp_month && card.exp_year && (
-                        <p className="text-xs text-muted-foreground">
-                          {String(card.exp_month).padStart(2, '0')}/{String(card.exp_year).slice(-2)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {card.is_default && (
-                      <Star className="w-4 h-4 fill-warning text-warning" />
-                    )}
-                    {selectedCardId === card.id && (
-                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                  )}
+                </div>
+              </button>
+            );
+          })}
 
-            {/* Add new card link */}
-            <button
-              type="button"
-              onClick={() => window.location.href = '/wallet/cards'}
-              className="w-full p-3 rounded-xl border border-dashed text-center text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-            >
-              {language === 'ru' ? '+ Добавить новую карту' : '+ Add new card'}
-            </button>
-          </div>
-        </SheetContent>
-      </Sheet>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/wallet/cards'}
+            className="w-full p-3 rounded-xl border border-dashed text-center text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+          >
+            {language === 'ru' ? '+ Добавить новую карту' : '+ Add new card'}
+          </button>
+        </div>
+      </ResponsiveModal>
     </>
   );
 });

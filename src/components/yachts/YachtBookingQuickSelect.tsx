@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, addDays } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { Calendar, Clock, Users, ShoppingCart, Zap, Check, Anchor, Sun, Moon, Sunset, Shield } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -124,6 +124,20 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
   const fromPrice = Math.min(...charterOptions.map(o => o.price).filter(p => p > 0)) || 0;
   const fromLabel = charterOptions.find(o => o.price === fromPrice);
 
+  const footer = (
+    <div className="flex gap-3 w-full">
+      <Button variant="outline" className="flex-1 h-12 gap-2" disabled={!canProceed || isInCart} onClick={handleAddToCart}>
+        {isInCart ? (<><Check className="w-4 h-4" />{language === 'ru' ? 'В корзине' : 'In Cart'}</>) : (<><ShoppingCart className="w-4 h-4" />{language === 'ru' ? 'В корзину' : 'Add to Cart'}</>)}
+      </Button>
+      <Button className="flex-1 h-12 gap-2" disabled={!canProceed} onClick={handleBookNow}>
+        <Zap className="w-4 h-4" />
+        {yacht.booking_flow === 'instant'
+          ? (language === 'ru' ? 'Забронировать' : 'Book Now')
+          : (language === 'ru' ? 'Отправить заявку' : 'Send Request')}
+      </Button>
+    </div>
+  );
+
   return (
     <>
       {/* Fixed Bottom Bar */}
@@ -139,221 +153,200 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
             </p>
           </div>
           
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" className="shrink-0">
-                  <ShoppingCart className="w-4 h-4" />
-                </Button>
-                <Button className="gap-2">
-                  <Zap className="w-4 h-4" />
-                  {language === 'ru' ? 'Выбрать дату' : 'Choose Date'}
-                </Button>
-              </div>
-            </SheetTrigger>
-            
-            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl flex flex-col overflow-hidden !p-0">
-              <SheetHeader className="text-left pb-4 border-b px-6 pt-6 shrink-0">
-                <SheetTitle className="flex items-center gap-2">
-                  <Anchor className="w-5 h-5 text-primary" />
-                  {language === 'ru' ? 'Спланируйте морской день' : 'Plan Your Sea Day'}
-                </SheetTitle>
-                <p className="text-sm text-muted-foreground">{yachtName}</p>
-              </SheetHeader>
-              
-              <div className="overflow-y-auto flex-1 min-h-0 px-6 py-4 space-y-6 pb-32">
-                {/* Charter Type Selection */}
-                <div>
-                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    {language === 'ru' ? 'Какой формат?' : 'What experience?'}
-                  </h4>
-                  <div className={cn("grid gap-2", charterOptions.length <= 2 ? "grid-cols-2" : "grid-cols-2")}>
-                    {charterOptions.map((option) => {
-                      const Icon = option.icon;
-                      return (
-                        <button
-                          key={option.type}
-                          onClick={() => setCharterType(option.type)}
-                          className={cn(
-                            "p-3 rounded-xl border-2 text-left transition-all",
-                            charterType === option.type
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
-                          )}
-                        >
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                            <p className="font-medium text-sm">
-                              {language === 'ru' ? option.labelRu : option.labelEn}
-                            </p>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{language === 'ru' ? option.descRu : option.descEn}</p>
-                          <p className="text-primary font-semibold mt-1">
-                            {currencySymbol}{option.price.toLocaleString()}
-                          </p>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Date Selection */}
-                <div>
-                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    {language === 'ru' ? 'Когда?' : 'When?'}
-                  </h4>
-                  
-                  {!showCalendar ? (
-                    <div className="flex gap-2 flex-wrap">
-                      {quickDates.map((qd) => (
-                        <button
-                          key={qd.label}
-                          onClick={() => setSelectedDate(qd.date)}
-                          className={cn(
-                            "px-4 py-2 rounded-full border transition-all text-sm",
-                            selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd')
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border hover:border-primary"
-                          )}
-                        >
-                          {qd.label}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setShowCalendar(true)}
-                        className={cn(
-                          "px-4 py-2 rounded-full border transition-all text-sm",
-                          selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border hover:border-primary"
-                        )}
-                      >
-                        {selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
-                          ? format(selectedDate, 'd MMM', { locale: language === 'ru' ? ru : enUS })
-                          : (language === 'ru' ? 'Другая дата' : 'Other date')}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <CalendarComponent
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
-                        disabled={(date) => date < today}
-                        locale={language === 'ru' ? ru : enUS}
-                        className="rounded-xl border p-3 pointer-events-auto"
-                      />
-                      <Button variant="ghost" size="sm" onClick={() => setShowCalendar(false)} className="w-full">
-                        {language === 'ru' ? 'Назад' : 'Back'}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Time Selection */}
-                {selectedDate && (
-                  <div>
-                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      {language === 'ru' ? 'Время отправления' : 'Departure Time'}
-                    </h4>
-                    <div className="flex gap-2 flex-wrap">
-                      {availableTimes.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className={cn(
-                            "px-4 py-2 rounded-full border transition-all text-sm",
-                            selectedTime === time
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border hover:border-primary"
-                          )}
-                        >
-                          {time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Guests Selection */}
-                {selectedDate && selectedTime && (
-                  <div>
-                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      {language === 'ru' ? 'Сколько гостей?' : 'How many guests?'}
-                    </h4>
-                    <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-3">
-                      <button
-                        onClick={() => setGuests(Math.max(1, guests - 1))}
-                        disabled={guests <= 1}
-                        className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
-                      >−</button>
-                      <div className="flex-1 text-center">
-                        <span className="text-2xl font-bold">{guests}</span>
-                        <p className="text-xs text-muted-foreground">
-                          {language === 'ru' ? `макс. ${yacht.capacity}` : `max ${yacht.capacity}`}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setGuests(Math.min(yacht.capacity || 12, guests + 1))}
-                        disabled={guests >= (yacht.capacity || 12)}
-                        className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
-                      >+</button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Summary */}
-                {canProceed && (
-                  <div className="p-4 bg-muted/50 rounded-xl space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {selectedOption ? (language === 'ru' ? `Аренда (${selectedOption.labelRu.toLowerCase()})` : `Charter (${selectedOption.labelEn.toLowerCase()})`) : ''}
-                      </span>
-                      <span>{currencySymbol}{basePrice.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between font-semibold pt-2 border-t">
-                      <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
-                      <span className="text-primary text-lg">{currencySymbol}{totalPrice.toLocaleString()}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Trust banner */}
-                <div className="flex items-center gap-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
-                  <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
-                      {language === 'ru' ? 'Защищено myUNO' : 'Protected by myUNO'}
-                    </p>
-                    <p className="text-[11px] text-emerald-700/70 dark:text-emerald-400/60">
-                      {language === 'ru' ? 'Проверенный оператор • Экипаж • Страховка' : 'Verified operator • Crew • Insurance'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons — intent-based CTA */}
-              <div className="shrink-0 px-6 py-4 bg-background border-t">
-                <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1 h-12 gap-2" disabled={!canProceed || isInCart} onClick={handleAddToCart}>
-                    {isInCart ? (<><Check className="w-4 h-4" />{language === 'ru' ? 'В корзине' : 'In Cart'}</>) : (<><ShoppingCart className="w-4 h-4" />{language === 'ru' ? 'В корзину' : 'Add to Cart'}</>)}
-                  </Button>
-                  <Button className="flex-1 h-12 gap-2" disabled={!canProceed} onClick={handleBookNow}>
-                    <Zap className="w-4 h-4" />
-                    {yacht.booking_flow === 'instant'
-                      ? (language === 'ru' ? 'Забронировать' : 'Book Now')
-                      : (language === 'ru' ? 'Отправить заявку' : 'Send Request')}
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" className="shrink-0">
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+            <Button className="gap-2" onClick={() => setIsOpen(true)}>
+              <Zap className="w-4 h-4" />
+              {language === 'ru' ? 'Выбрать дату' : 'Choose Date'}
+            </Button>
+          </div>
         </div>
       </div>
+
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title={language === 'ru' ? 'Спланируйте морской день' : 'Plan Your Sea Day'}
+        description={yachtName}
+        icon={<Anchor className="w-5 h-5 text-primary" />}
+        size="lg"
+        footer={footer}
+      >
+        {/* Charter Type Selection */}
+        <div>
+          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            {language === 'ru' ? 'Какой формат?' : 'What experience?'}
+          </h4>
+          <div className={cn("grid gap-2", charterOptions.length <= 2 ? "grid-cols-2" : "grid-cols-2")}>
+            {charterOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <button
+                  key={option.type}
+                  onClick={() => setCharterType(option.type)}
+                  className={cn(
+                    "p-3 rounded-xl border-2 text-left transition-all",
+                    charterType === option.type
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                    <p className="font-medium text-sm">
+                      {language === 'ru' ? option.labelRu : option.labelEn}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{language === 'ru' ? option.descRu : option.descEn}</p>
+                  <p className="text-primary font-semibold mt-1">
+                    {currencySymbol}{option.price.toLocaleString()}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Date Selection */}
+        <div>
+          <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            {language === 'ru' ? 'Когда?' : 'When?'}
+          </h4>
+          
+          {!showCalendar ? (
+            <div className="flex gap-2 flex-wrap">
+              {quickDates.map((qd) => (
+                <button
+                  key={qd.label}
+                  onClick={() => setSelectedDate(qd.date)}
+                  className={cn(
+                    "px-4 py-2 rounded-full border transition-all text-sm",
+                    selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd')
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:border-primary"
+                  )}
+                >
+                  {qd.label}
+                </button>
+              ))}
+              <button
+                onClick={() => setShowCalendar(true)}
+                className={cn(
+                  "px-4 py-2 rounded-full border transition-all text-sm",
+                  selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border hover:border-primary"
+                )}
+              >
+                {selectedDate && !quickDates.some(qd => format(selectedDate, 'yyyy-MM-dd') === format(qd.date, 'yyyy-MM-dd'))
+                  ? format(selectedDate, 'd MMM', { locale: language === 'ru' ? ru : enUS })
+                  : (language === 'ru' ? 'Другая дата' : 'Other date')}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }}
+                disabled={(date) => date < today}
+                locale={language === 'ru' ? ru : enUS}
+                className="rounded-xl border p-3 pointer-events-auto"
+              />
+              <Button variant="ghost" size="sm" onClick={() => setShowCalendar(false)} className="w-full">
+                {language === 'ru' ? 'Назад' : 'Back'}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Time Selection */}
+        {selectedDate && (
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              {language === 'ru' ? 'Время отправления' : 'Departure Time'}
+            </h4>
+            <div className="flex gap-2 flex-wrap">
+              {availableTimes.map((time) => (
+                <button
+                  key={time}
+                  onClick={() => setSelectedTime(time)}
+                  className={cn(
+                    "px-4 py-2 rounded-full border transition-all text-sm",
+                    selectedTime === time
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:border-primary"
+                  )}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Guests Selection */}
+        {selectedDate && selectedTime && (
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              {language === 'ru' ? 'Сколько гостей?' : 'How many guests?'}
+            </h4>
+            <div className="flex items-center gap-4 bg-muted/50 rounded-xl p-3">
+              <button
+                onClick={() => setGuests(Math.max(1, guests - 1))}
+                disabled={guests <= 1}
+                className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
+              >−</button>
+              <div className="flex-1 text-center">
+                <span className="text-2xl font-bold">{guests}</span>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'ru' ? `макс. ${yacht.capacity}` : `max ${yacht.capacity}`}
+                </p>
+              </div>
+              <button
+                onClick={() => setGuests(Math.min(yacht.capacity || 12, guests + 1))}
+                disabled={guests >= (yacht.capacity || 12)}
+                className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
+              >+</button>
+            </div>
+          </div>
+        )}
+
+        {/* Summary */}
+        {canProceed && (
+          <div className="p-4 bg-muted/50 rounded-xl space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">
+                {selectedOption ? (language === 'ru' ? `Аренда (${selectedOption.labelRu.toLowerCase()})` : `Charter (${selectedOption.labelEn.toLowerCase()})`) : ''}
+              </span>
+              <span>{currencySymbol}{basePrice.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between font-semibold pt-2 border-t">
+              <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+              <span className="text-primary text-lg">{currencySymbol}{totalPrice.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Trust banner */}
+        <div className="flex items-center gap-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/50 dark:border-emerald-800/30">
+          <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <div>
+            <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+              {language === 'ru' ? 'Защищено myUNO' : 'Protected by myUNO'}
+            </p>
+            <p className="text-[11px] text-emerald-700/70 dark:text-emerald-400/60">
+              {language === 'ru' ? 'Проверенный оператор • Экипаж • Страховка' : 'Verified operator • Crew • Insurance'}
+            </p>
+          </div>
+        </div>
+      </ResponsiveModal>
     </>
   );
 }
