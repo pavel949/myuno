@@ -261,7 +261,7 @@ export default function PropertyDetail() {
                 <img
                   src={images[activeImage] || images[0]}
                   alt={isRu ? property.title_ru : property.title_en}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain bg-muted"
                 />
               </div>
               {images.length > 1 && (
