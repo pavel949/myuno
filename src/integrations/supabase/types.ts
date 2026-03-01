@@ -14647,6 +14647,121 @@ export type Database = {
           },
         ]
       }
+      property_accounting_policies: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          created_by: string
+          default_period: string
+          default_report_type: string
+          expense_categories: string[] | null
+          id: string
+          include_booking_source: boolean
+          include_commission: boolean
+          include_expenses: boolean
+          include_guest_details: boolean
+          include_income: boolean
+          include_maintenance: boolean
+          include_occupancy: boolean
+          income_categories: string[] | null
+          notes: string | null
+          owner_contact_id: string | null
+          policy_name: string | null
+          property_id: string
+          report_grouping: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          created_by: string
+          default_period?: string
+          default_report_type?: string
+          expense_categories?: string[] | null
+          id?: string
+          include_booking_source?: boolean
+          include_commission?: boolean
+          include_expenses?: boolean
+          include_guest_details?: boolean
+          include_income?: boolean
+          include_maintenance?: boolean
+          include_occupancy?: boolean
+          income_categories?: string[] | null
+          notes?: string | null
+          owner_contact_id?: string | null
+          policy_name?: string | null
+          property_id: string
+          report_grouping?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          created_by?: string
+          default_period?: string
+          default_report_type?: string
+          expense_categories?: string[] | null
+          id?: string
+          include_booking_source?: boolean
+          include_commission?: boolean
+          include_expenses?: boolean
+          include_guest_details?: boolean
+          include_income?: boolean
+          include_maintenance?: boolean
+          include_occupancy?: boolean
+          income_categories?: string[] | null
+          notes?: string | null
+          owner_contact_id?: string | null
+          policy_name?: string | null
+          property_id?: string
+          report_grouping?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_accounting_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_owner_contact_id_fkey"
+            columns: ["owner_contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_activity_log: {
         Row: {
           action: string

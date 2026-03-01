@@ -78,6 +78,8 @@ import { useQuery } from '@tanstack/react-query';
 import { exportReportExcel } from '@/utils/exportFinancialsExcel';
 import { ReportSettingsSheet, ReportConfig } from '@/components/owner/reports/ReportSettingsSheet';
 import { ReportWizard } from '@/components/owner/reports/ReportWizard';
+import { AccountingPolicyEditor } from '@/components/owner/reports/AccountingPolicyEditor';
+import { useAccountingPolicies, useAccountingPolicyForProperty } from '@/hooks/useAccountingPolicies';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -193,6 +195,7 @@ export default function ReportsPage() {
   const generatePdf = useGeneratePdf();
   const sendReportEmail = useSendReportEmail();
   const markViewed = useMarkReportViewed();
+  const { data: accountingPolicies } = useAccountingPolicies();
 
   const [activeTab, setActiveTab] = useState<'all' | 'portfolio'>('all');
   const [createMode, setCreateMode] = useState<'wizard' | 'manual'>('wizard');
@@ -208,6 +211,7 @@ export default function ReportsPage() {
   const [customEnd, setCustomEnd] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [showOwnerInvite, setShowOwnerInvite] = useState(false);
+  const [policyEditorPropertyId, setPolicyEditorPropertyId] = useState<string | null>(null);
 
   // Report scope state
   const [generateScope, setGenerateScope] = useState<ReportScope>('property');
@@ -291,6 +295,17 @@ export default function ReportsPage() {
       setIncludeExpenses(cfg.sections.expenses);
     }
   }, []);
+
+  // Auto-fill from accounting policy when property selected in manual mode
+  useEffect(() => {
+    if (createMode !== 'manual' || !selectedPropertyId || !accountingPolicies) return;
+    const policy = accountingPolicies.find(p => p.property_id === selectedPropertyId);
+    if (policy) {
+      setSelectedReportType(policy.default_report_type as ReportType);
+      setIncludeIncome(policy.include_income);
+      setIncludeExpenses(policy.include_expenses);
+    }
+  }, [selectedPropertyId, createMode, accountingPolicies]);
 
   const isManager = (managedProperties || []).length > 0;
 
@@ -670,6 +685,32 @@ export default function ReportsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* Policy indicator */}
+                    {selectedPropertyId && (() => {
+                      const policy = (accountingPolicies || []).find((p: any) => p.property_id === selectedPropertyId);
+                      return (
+                        <div className="flex items-center justify-between">
+                          {policy ? (
+                            <Badge variant="secondary" className="text-xs">
+                              <FileText className="h-3 w-3 mr-1" />
+                              {policy.policy_name || (isRu ? 'Политика настроена' : 'Policy set')}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              {isRu ? 'Нет учётной политики' : 'No accounting policy'}
+                            </span>
+                          )}
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs"
+                            onClick={() => setPolicyEditorPropertyId(selectedPropertyId)}
+                          >
+                            {policy ? (isRu ? 'Изменить' : 'Edit') : (isRu ? 'Настроить' : 'Set up')}
+                          </Button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -1110,6 +1151,22 @@ export default function ReportsPage() {
 
       {/* Owner Access Invite */}
       <OwnerAccessInviteDialog open={showOwnerInvite} onOpenChange={setShowOwnerInvite} />
+
+      {/* Accounting Policy Editor */}
+      {policyEditorPropertyId && (
+        <AccountingPolicyEditor
+          open={!!policyEditorPropertyId}
+          onOpenChange={(open) => { if (!open) setPolicyEditorPropertyId(null); }}
+          propertyId={policyEditorPropertyId}
+          propertyTitle={
+            (() => {
+              const p = allSelectableProperties.find((pr: any) => (pr.id || pr.property_id) === policyEditorPropertyId);
+              return p ? (isRu ? p.title_ru || p.title : p.title) || '' : '';
+            })()
+          }
+          existing={(accountingPolicies || []).find((p: any) => p.property_id === policyEditorPropertyId) || null}
+        />
+      )}
     </PageContainer>
   );
 }
