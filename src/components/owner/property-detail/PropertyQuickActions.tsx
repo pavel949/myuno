@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Settings, Calendar, DollarSign, BookOpen, Wrench, ClipboardList } from 'lucide-react';
+import { Settings, Calendar, DollarSign, BookOpen, Wrench, ClipboardList, Eye } from 'lucide-react';
 
 interface PropertyQuickActionsProps {
   propertyId: string;
@@ -17,6 +17,7 @@ export function PropertyQuickActions({ propertyId, isRu }: PropertyQuickActionsP
     { icon: BookOpen, label: isRu ? 'Гайдбук' : 'Guidebook', path: `/owner/properties/${propertyId}/guidebook`, variant: 'outline' as const },
     { icon: Wrench, label: isRu ? 'Услуга' : 'Service', path: `/owner/service-request?property=${propertyId}`, variant: 'outline' as const },
     { icon: ClipboardList, label: isRu ? 'Инспекция' : 'Inspection', path: `/owner/inspection?property=${propertyId}`, variant: 'outline' as const },
+    { icon: Eye, label: isRu ? 'Портал' : 'Portal', path: `/owner/properties/${propertyId}/portal-settings`, variant: 'outline' as const },
   ];
 
   return (

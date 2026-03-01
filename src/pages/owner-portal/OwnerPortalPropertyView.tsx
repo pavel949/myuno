@@ -18,6 +18,10 @@ import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab
 import { OwnerBookingsTab } from '@/components/owner/transparency/OwnerBookingsTab';
 import { OwnerTermsTab } from '@/components/owner/transparency/OwnerTermsTab';
 import { ActivityFeed } from '@/components/owner/transparency/ActivityFeed';
+import { PortalChatTab } from '@/components/owner-portal/PortalChatTab';
+import { OwnerStaysTab } from '@/components/owner-portal/OwnerStaysTab';
+import { PortalUtilitiesTab } from '@/components/owner-portal/PortalUtilitiesTab';
+import { PortalDocumentsTab } from '@/components/owner-portal/PortalDocumentsTab';
 
 export default function OwnerPortalPropertyView() {
   const { propertyId } = useParams<{ propertyId: string }>();
@@ -155,35 +159,19 @@ export default function OwnerPortalPropertyView() {
         </TabsContent>
 
         <TabsContent value="utilities">
-          <div className="py-8 text-center text-muted-foreground text-sm">
-            <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            {isRu ? 'Коммунальные платежи' : 'Utility Payments'}
-            <p className="text-xs mt-1">{isRu ? 'CAM, электричество, вода' : 'CAM fees, electricity, water'}</p>
-          </div>
+          <PortalUtilitiesTab propertyId={propertyId!} />
         </TabsContent>
 
         <TabsContent value="documents">
-          <div className="py-8 text-center text-muted-foreground text-sm">
-            <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            {isRu ? 'Документы и отчёты' : 'Documents & Reports'}
-            <p className="text-xs mt-1">{isRu ? 'Договоры, акты, P&L' : 'Contracts, reports, P&L'}</p>
-          </div>
+          <PortalDocumentsTab propertyId={propertyId!} />
         </TabsContent>
 
         <TabsContent value="messages">
-          <div className="py-8 text-center text-muted-foreground text-sm">
-            <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            {isRu ? 'Чат с управляющей компанией' : 'Chat with Management Company'}
-            <p className="text-xs mt-1">{isRu ? 'Задайте вопрос или оставьте заявку' : 'Ask questions or submit requests'}</p>
-          </div>
+          <PortalChatTab propertyId={propertyId!} senderRole="owner" />
         </TabsContent>
 
         <TabsContent value="stays">
-          <div className="py-8 text-center text-muted-foreground text-sm">
-            <Home className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            {isRu ? 'Забронировать свой объект' : 'Book your property'}
-            <p className="text-xs mt-1">{isRu ? 'Выберите даты для личного проживания' : 'Select dates for personal stay'}</p>
-          </div>
+          <OwnerStaysTab propertyId={propertyId!} />
         </TabsContent>
       </Tabs>
 
