@@ -484,11 +484,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/team/leads" element={<LazyPage><TeamGuard><Pages.TeamLeadsPage /></TeamGuard></LazyPage>} />
         <Route path="/team/moderation" element={<LazyPage><TeamGuard><Pages.TeamModerationPage /></TeamGuard></LazyPage>} />
         
-        {/* ── Manager → Owner Redirects ── */}
-        <Route path="/manager" element={<Navigate to="/owner" replace />} />
-        <Route path="/manager/properties" element={<Navigate to="/owner/properties" replace />} />
-        <Route path="/manager/properties/:id" element={<Navigate to="/owner/properties" replace />} />
-        <Route path="/manager/calendar" element={<Navigate to="/owner/calendar" replace />} />
+        {/* ── Manager → MC Redirects ── */}
+        <Route path="/manager" element={<Navigate to="/mc" replace />} />
+        <Route path="/manager/properties" element={<Navigate to="/mc/properties" replace />} />
+        <Route path="/manager/properties/:id" element={<Navigate to="/mc/properties" replace />} />
+        <Route path="/manager/calendar" element={<Navigate to="/mc/calendar" replace />} />
         
         {/* ── Guest ── */}
         <Route element={<GuestRouteLayout />}>

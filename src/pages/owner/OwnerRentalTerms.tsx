@@ -437,7 +437,7 @@ export default function OwnerRentalTerms() {
       <PageHeader
         title={isRu ? 'Условия аренды' : 'Rental Terms'}
         showBack
-        fallbackPath={`/owner/properties/${id}`}
+        fallbackPath={`/mc/properties/${id}`}
       />
 
       <form onSubmit={handleSubmit} className="mt-4 pb-24">

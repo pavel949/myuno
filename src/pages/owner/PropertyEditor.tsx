@@ -359,7 +359,7 @@ export default function PropertyEditor() {
   if (isLoading) {
     return (
       <PageContainer>
-        <PageHeader title={isRu ? 'Редактирование' : 'Edit Property'} showBack fallbackPath="/owner/properties" />
+        <PageHeader title={isRu ? 'Редактирование' : 'Edit Property'} showBack fallbackPath="/mc/properties" />
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
             <Card key={i}><CardContent className="p-6"><Skeleton className="h-8 w-1/3 mb-4" /><Skeleton className="h-10 w-full" /></CardContent></Card>
@@ -372,7 +372,7 @@ export default function PropertyEditor() {
   if (!property) {
     return (
       <PageContainer>
-        <PageHeader title={isRu ? 'Объект не найден' : 'Property Not Found'} showBack fallbackPath="/owner/properties" />
+        <PageHeader title={isRu ? 'Объект не найден' : 'Property Not Found'} showBack fallbackPath="/mc/properties" />
       </PageContainer>
     );
   }
@@ -384,7 +384,7 @@ export default function PropertyEditor() {
       <PageHeader
         title={isRu ? 'Редактировать объект' : 'Edit Property'}
         showBack
-        fallbackPath={`/owner/properties/${id}`}
+        fallbackPath={`/mc/properties/${id}`}
         subtitle={property.title}
         actions={
           <div className="flex items-center gap-2">

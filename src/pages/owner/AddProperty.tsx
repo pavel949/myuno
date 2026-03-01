@@ -112,7 +112,7 @@ export default function AddProperty() {
         <PageHeader 
           title={isRu ? 'Добавить объект' : 'Add Property'}
           showBack
-          fallbackPath="/owner/properties"
+          fallbackPath="/mc/properties"
         />
         <div className="space-y-4">
           <Skeleton className="h-32 w-full" />
@@ -128,7 +128,7 @@ export default function AddProperty() {
         title={isRu ? 'Добавить объект' : 'Add Property'}
         subtitle={isRu ? 'Заполните информацию о вашей недвижимости' : 'Fill in your property information'}
         showBack
-        fallbackPath="/owner/properties"
+        fallbackPath="/mc/properties"
       />
 
       {/* Draft Restoration Banner */}

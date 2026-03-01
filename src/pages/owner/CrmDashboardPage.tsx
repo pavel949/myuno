@@ -53,10 +53,10 @@ export default function CrmDashboardPage() {
   }
 
   const stats = [
-    { labelEn: 'Contacts', labelRu: 'Контакты', value: totalContacts, icon: ContactRound, color: 'text-primary', path: '/owner/contacts' },
-    { labelEn: 'Active Deals', labelRu: 'Активные сделки', value: activeDeals.length, icon: TrendingUp, color: 'text-success', path: '/owner/sales' },
-    { labelEn: "Today's Tasks", labelRu: 'Задачи сегодня', value: todayCount, icon: ListTodo, color: 'text-warning', path: '/owner/tasks' },
-    { labelEn: 'Overdue', labelRu: 'Просрочено', value: overdueCount, icon: AlertTriangle, color: 'text-destructive', path: '/owner/tasks' },
+    { labelEn: 'Contacts', labelRu: 'Контакты', value: totalContacts, icon: ContactRound, color: 'text-primary', path: '/mc/contacts' },
+    { labelEn: 'Active Deals', labelRu: 'Активные сделки', value: activeDeals.length, icon: TrendingUp, color: 'text-success', path: '/mc/sales' },
+    { labelEn: "Today's Tasks", labelRu: 'Задачи сегодня', value: todayCount, icon: ListTodo, color: 'text-warning', path: '/mc/tasks' },
+    { labelEn: 'Overdue', labelRu: 'Просрочено', value: overdueCount, icon: AlertTriangle, color: 'text-destructive', path: '/mc/tasks' },
   ];
 
   const kpi2 = [
@@ -67,10 +67,10 @@ export default function CrmDashboardPage() {
   ];
 
   const quickLinks = [
-    { labelEn: 'New Contact', labelRu: 'Новый контакт', path: '/owner/contacts', icon: Plus },
-    { labelEn: 'New Deal', labelRu: 'Новая сделка', path: '/owner/sales/new', icon: Plus },
-    { labelEn: 'Duplicates', labelRu: 'Дубликаты', path: '/owner/duplicates', icon: Users },
-    { labelEn: 'Web Forms', labelRu: 'Веб-формы', path: '/owner/forms', icon: Mail },
+    { labelEn: 'New Contact', labelRu: 'Новый контакт', path: '/mc/contacts', icon: Plus },
+    { labelEn: 'New Deal', labelRu: 'Новая сделка', path: '/mc/sales/new', icon: Plus },
+    { labelEn: 'Duplicates', labelRu: 'Дубликаты', path: '/mc/duplicates', icon: Users },
+    { labelEn: 'Web Forms', labelRu: 'Веб-формы', path: '/mc/forms', icon: Mail },
   ];
 
   return (

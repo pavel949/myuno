@@ -114,7 +114,7 @@ export default function OwnerVaultPage() {
   const handleShare = async (file: VaultFile) => {
     try {
       const token = await shareMut.mutateAsync({ fileId: file.id });
-      const shareUrl = `${window.location.origin}/owner/vault/shared/${token}`;
+      const shareUrl = `${window.location.origin}/mc/vault/shared/${token}`;
       await navigator.clipboard.writeText(shareUrl);
       setCopiedToken(file.id);
       toast.success(isRu ? 'Ссылка скопирована (7 дней)' : 'Share link copied (7 days)');

@@ -12,7 +12,8 @@ const tabOrder: Record<string, number> = {
   '/mc': 0,
   '/mc/properties': 1,
   '/mc/calendar': 2,
-  '/mc/messages': 3,
+  '/mc/tasks': 3,
+  '/mc/modules': 4,
   // Owner tabs
   '/owner': 0,
   // Vendor tabs
