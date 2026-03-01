@@ -193,7 +193,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
           {/* Child equipment - shown when children friendly */}
           {formData.children_friendly && (
             <div className="ml-13 pl-4 border-l-2 border-blue-500/20 space-y-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 <label className="flex items-center gap-2 text-sm">
                   <Switch
                     checked={formData.has_crib || false}

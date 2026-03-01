@@ -70,7 +70,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {ownershipOptions.map((option) => (
               <button
                 key={option.value}
@@ -101,7 +101,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}</Label>
               <Input
@@ -124,7 +124,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -151,7 +151,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Заезд' : 'Check-in'}</Label>
               <Input

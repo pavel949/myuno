@@ -99,6 +99,75 @@ function BasicInfoStepInner({
   }, []);
   return (
     <div className="space-y-6">
+      {/* Basic Info — Title FIRST (most important) */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            {isRu ? 'Основная информация' : 'Basic Information'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <TranslatableInput
+            label={isRu ? 'Название' : 'Title'}
+            value={isRu ? formData.title_ru : formData.title}
+            translatedValue={isRu ? formData.title : formData.title_ru}
+            onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
+            onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
+            placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
+            translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
+          />
+
+          <div className="space-y-2">
+            <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
+            <Input
+              value={formData.internal_name || ''}
+              onChange={(e) => updateFormData({ internal_name: e.target.value })}
+              placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Bed className="h-3 w-3" />
+                {isRu ? 'Спальни' : 'Bedrooms'}
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={formData.bedrooms}
+                onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Bath className="h-3 w-3" />
+                {isRu ? 'Ванные' : 'Bathrooms'}
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={formData.bathrooms}
+                onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
+              />
+            </div>
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <Label className="flex items-center gap-1">
+                <SquareStack className="h-3 w-3" />
+                {isRu ? 'Площадь (м²)' : 'Area (m²)'}
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={formData.area_sqm}
+                onChange={(e) => updateFormData({ area_sqm: e.target.value })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Ownership Type Selection (Compact) */}
       {ownershipData && updateOwnershipData && (
         <Card>
@@ -109,7 +178,7 @@ function BasicInfoStepInner({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {ownershipOptions.map((option) => (
                 <button
                   key={option.id}
@@ -321,75 +390,6 @@ function BasicInfoStepInner({
         highlights={formData.highlights}
         onChange={(highlights) => updateFormData({ highlights })}
       />
-
-      {/* Basic Info */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            {isRu ? 'Основная информация' : 'Basic Information'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <TranslatableInput
-            label={isRu ? 'Название' : 'Title'}
-            value={isRu ? formData.title_ru : formData.title}
-            translatedValue={isRu ? formData.title : formData.title_ru}
-            onChange={(val) => updateFormData({ [isRu ? 'title_ru' : 'title']: val })}
-            onTranslatedChange={(val) => updateFormData({ [isRu ? 'title' : 'title_ru']: val })}
-            placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
-            translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
-          />
-
-          <div className="space-y-2">
-            <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
-            <Input
-              value={formData.internal_name || ''}
-              onChange={(e) => updateFormData({ internal_name: e.target.value })}
-              placeholder={isRu ? 'Только для вас (не публикуется)' : 'Private note (not published)'}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Bed className="h-3 w-3" />
-                {isRu ? 'Спальни' : 'Bedrooms'}
-              </Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.bedrooms}
-                onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Bath className="h-3 w-3" />
-                {isRu ? 'Ванные' : 'Bathrooms'}
-              </Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.bathrooms}
-                onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <SquareStack className="h-3 w-3" />
-                {isRu ? 'Площадь (м²)' : 'Area (m²)'}
-              </Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.area_sqm}
-                onChange={(e) => updateFormData({ area_sqm: e.target.value })}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Management Type & Terms — hidden, management_type defaults to 'full' in usePropertyWizard */}
     </div>
