@@ -15,9 +15,10 @@ import { toast } from 'sonner';
 import { 
   Plus, FileText, Key, Copy, Eye, EyeOff, Trash2, Upload, 
   Calendar, AlertTriangle, CheckCircle, Lock, Wifi, 
-  CreditCard, KeyRound, Radio, Shield, Building2
+  CreditCard, KeyRound, Radio, Shield, Building2, Scale
 } from 'lucide-react';
 import { format, isPast, addDays, isBefore } from 'date-fns';
+import { AILegalAssistant } from './documents/AILegalAssistant';
 
 interface PropertyDocumentsTabProps {
   propertyId: string;
@@ -221,6 +222,10 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
             <TabsTrigger value="access">
               {isRu ? 'Доступы' : 'Access'} ({accessCodes?.length || 0})
             </TabsTrigger>
+            <TabsTrigger value="ai-legal" className="gap-1">
+              <Scale className="h-3 w-3" />
+              {isRu ? 'AI Юрист' : 'AI Legal'}
+            </TabsTrigger>
           </TabsList>
 
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -364,6 +369,12 @@ export function PropertyDocumentsTab({ propertyId }: PropertyDocumentsTabProps) 
             isRu={isRu}
             onDelete={handleDelete}
             isDeleting={isDeleting}
+          />
+        </TabsContent>
+
+        <TabsContent value="ai-legal" className="mt-0">
+          <AILegalAssistant
+            propertyContext={{ title: propertyId }}
           />
         </TabsContent>
       </Tabs>
