@@ -5,7 +5,6 @@ import { MCSidebar } from './MCSidebar';
 import { MCHeader } from './MCHeader';
 import { MCMobileNav } from './MCMobileNav';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ActiveCompanyProvider } from '@/hooks/useActiveCompany';
 
 interface MCLayoutProps {
   children?: React.ReactNode;
@@ -27,26 +26,24 @@ export function MCLayout({ children }: MCLayoutProps) {
   }, []);
 
   return (
-    <ActiveCompanyProvider>
-      <SidebarProvider defaultOpen={!isMobile}>
-        <div className="min-h-screen flex w-full bg-background overflow-x-hidden max-w-[100vw]">
-          <MCSidebar />
-          <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full">
-            <MCHeader />
-            <main
-              className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4 max-w-full scroll-smooth"
-              style={{
-                WebkitOverflowScrolling: 'touch',
-                touchAction: 'pan-x pan-y pinch-zoom',
-                paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
-              }}
-            >
-              {children || <Outlet />}
-            </main>
-          </SidebarInset>
-          <MCMobileNav />
-        </div>
-      </SidebarProvider>
-    </ActiveCompanyProvider>
+    <SidebarProvider defaultOpen={!isMobile}>
+      <div className="min-h-screen flex w-full bg-background overflow-x-hidden max-w-[100vw]">
+        <MCSidebar />
+        <SidebarInset className="flex-1 flex flex-col min-w-0 max-w-full">
+          <MCHeader />
+          <main
+            className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-4 max-w-full scroll-smooth"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x pan-y pinch-zoom',
+              paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
+            }}
+          >
+            {children || <Outlet />}
+          </main>
+        </SidebarInset>
+        <MCMobileNav />
+      </div>
+    </SidebarProvider>
   );
 }
