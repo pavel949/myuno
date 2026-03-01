@@ -360,6 +360,79 @@ Tenant: ___________________          Date: ____________`,
 Собственник/Управляющий: ___________________  Дата: ____________
 Арендатор: ___________________                 Дата: ____________`,
   },
+  {
+    id: 'booking_confirmation',
+    nameEn: 'Booking Confirmation',
+    nameRu: 'Подтверждение бронирования',
+    descEn: 'Confirmation letter after deposit payment',
+    descRu: 'Письмо-подтверждение после оплаты депозита',
+    category: 'rental',
+    variables: ['guest_name', 'property_address', 'start_date', 'end_date', 'total_amount', 'deposit_amount', 'currency', 'guest_email', 'booking_ref'],
+    bodyEn: `BOOKING CONFIRMATION
+
+Booking Reference: {{booking_ref}}
+
+Dear {{guest_name}},
+
+We are pleased to confirm your reservation at the following property:
+
+Property: {{property_address}}
+Check-in: {{start_date}}
+Check-out: {{end_date}}
+
+PAYMENT DETAILS:
+Total Amount: {{total_amount}} {{currency}}
+Deposit Paid: {{deposit_amount}} {{currency}}
+Balance Due on Check-in: Remaining amount
+
+IMPORTANT INFORMATION:
+1. Check-in time: 14:00 (2:00 PM)
+2. Check-out time: 12:00 (noon)
+3. A refundable security deposit may be required upon check-in
+4. Valid passport/ID required for all guests
+5. Cancellation policy: As per rental agreement terms
+
+Please retain this confirmation for your records.
+
+For any questions, please contact us.
+
+Best regards,
+Property Management
+
+Confirmation Date: ____________`,
+    bodyRu: `ПОДТВЕРЖДЕНИЕ БРОНИРОВАНИЯ
+
+Номер бронирования: {{booking_ref}}
+
+Уважаемый(ая) {{guest_name}},
+
+Рады подтвердить Вашу бронь на следующий объект:
+
+Объект: {{property_address}}
+Заезд: {{start_date}}
+Выезд: {{end_date}}
+
+ДЕТАЛИ ОПЛАТЫ:
+Общая сумма: {{total_amount}} {{currency}}
+Оплаченный депозит: {{deposit_amount}} {{currency}}
+Остаток при заезде: Оставшаяся сумма
+
+ВАЖНАЯ ИНФОРМАЦИЯ:
+1. Время заезда: 14:00
+2. Время выезда: 12:00
+3. При заезде может потребоваться возвратный залог
+4. Необходим действующий паспорт/ID для всех гостей
+5. Условия отмены: Согласно договору аренды
+
+Сохраните данное подтверждение для Ваших записей.
+
+По любым вопросам свяжитесь с нами.
+
+С уважением,
+Управляющая компания
+
+Дата подтверждения: ____________`,
+  },
 ];
 
 const VARIABLE_LABELS: Record<string, { en: string; ru: string }> = {
@@ -390,6 +463,10 @@ const VARIABLE_LABELS: Record<string, { en: string; ru: string }> = {
   deductions_details: { en: 'Deductions Details', ru: 'Детали удержаний' },
   refund_amount: { en: 'Refund Amount', ru: 'Сумма возврата' },
   return_date: { en: 'Return Date', ru: 'Дата возврата' },
+  guest_name: { en: 'Guest Name', ru: 'Имя гостя' },
+  guest_email: { en: 'Guest Email', ru: 'Email гостя' },
+  booking_ref: { en: 'Booking Reference', ru: 'Номер бронирования' },
+  total_amount: { en: 'Total Amount', ru: 'Общая сумма' },
 };
 
 const CATEGORY_LABELS: Record<string, { en: string; ru: string }> = {
