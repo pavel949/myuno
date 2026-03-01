@@ -140,7 +140,6 @@ function validatePath(path: string): string {
   // Check if path starts with a valid prefix
   const isValid = VALID_ROUTE_PREFIXES.some(prefix => path.startsWith(prefix));
   if (!isValid) {
-    console.warn(`Invalid catalog path: ${path}, falling back to /discover`);
     return '/discover';
   }
   return path;

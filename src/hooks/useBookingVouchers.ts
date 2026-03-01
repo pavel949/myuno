@@ -63,8 +63,7 @@ export function useBookingVouchers() {
         title: language === 'ru' ? 'Ваучер создан' : 'Voucher generated',
       });
     },
-    onError: (error) => {
-      console.error('Voucher generation error:', error);
+    onError: () => {
       toast({
         title: language === 'ru' ? 'Ошибка создания ваучера' : 'Failed to generate voucher',
         variant: 'destructive',

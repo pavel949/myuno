@@ -39,7 +39,7 @@ export interface ConflictInfo {
 }
 
 // Determine channel status based on sync state
-function getChannelStatus(calendar: any): ChannelStatus {
+function getChannelStatus(calendar: { sync_error: string | null; is_active: boolean; last_synced_at: string | null }): ChannelStatus {
   if (calendar.sync_error) return 'error';
   if (!calendar.is_active) return 'unknown';
   
@@ -90,7 +90,7 @@ export function useChannelHealth(propertyId?: string) {
         .order('synced_at', { ascending: false });
 
       // Get latest log per calendar
-      const latestLogMap = new Map<string, any>();
+      const latestLogMap = new Map<string, { events_added: number; events_updated: number; events_removed: number }>();
       (latestLogs || []).forEach(log => {
         if (!latestLogMap.has(log.calendar_id)) {
           latestLogMap.set(log.calendar_id, log);
@@ -112,7 +112,7 @@ export function useChannelHealth(propertyId?: string) {
 
       return (calendars || []).map((cal): ChannelHealth => {
         const latestLog = latestLogMap.get(cal.id);
-        const property = cal.properties as any;
+        const property = cal.properties as { title_en?: string } | null;
         
         return {
           id: cal.id,
@@ -151,7 +151,7 @@ export function useChannelHealth(propertyId?: string) {
       priority?: number; 
       syncIntervalMinutes?: number;
     }) => {
-      const updates: any = {};
+      const updates: Record<string, unknown> = {};
       if (autoSync !== undefined) updates.auto_sync = autoSync;
       if (priority !== undefined) updates.priority = priority;
       if (syncIntervalMinutes !== undefined) updates.sync_interval_minutes = syncIntervalMinutes;
@@ -203,6 +203,7 @@ export function useBookingConflicts(propertyId?: string) {
 
       if (error) throw error;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (data || []).map((c: any): ConflictInfo => ({
         bookingId1: c.booking_id_1,
         bookingId2: c.booking_id_2,
@@ -249,6 +250,7 @@ export function useAllBookingConflicts() {
         });
 
         if (data) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           allConflicts.push(...data.map((c: any) => ({
             propertyId: prop.id,
             bookingId1: c.booking_id_1,

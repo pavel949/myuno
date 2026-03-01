@@ -89,9 +89,8 @@ export function useMapbox(options: UseMapboxOptions = {}): UseMapboxReturn {
         } else {
           throw new Error('No token received');
         }
-      } catch (err) {
+      } catch {
         if (isMounted) {
-          console.error('Failed to fetch Mapbox token:', err);
           setError('Failed to load map');
         }
       } finally {

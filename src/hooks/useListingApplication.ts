@@ -73,8 +73,8 @@ export function useListingApplication(): UseListingApplicationReturn {
       if (saved) {
         return JSON.parse(saved);
       }
-    } catch (e) {
-      console.error('Failed to load draft:', e);
+    } catch {
+      // Silent fail for draft loading
     }
     return { listing_type: 'property', currency: 'THB' };
   };
@@ -148,8 +148,7 @@ export function useListingApplication(): UseListingApplicationReturn {
       
       // Clear localStorage after saving to DB
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-    } catch (error) {
-      console.error('Failed to save draft:', error);
+    } catch {
       toast.error('Failed to save draft');
     } finally {
       setIsSaving(false);
@@ -212,8 +211,7 @@ export function useListingApplication(): UseListingApplicationReturn {
       
       toast.success('Application submitted! We\'ll review it shortly.');
       return true;
-    } catch (error) {
-      console.error('Failed to submit application:', error);
+    } catch {
       toast.error('Failed to submit application');
       return false;
     } finally {

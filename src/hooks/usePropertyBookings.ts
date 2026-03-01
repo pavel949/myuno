@@ -425,8 +425,7 @@ export function useAllPropertyBookings() {
           .select('id, title_en, title_ru, address, cover_image')
           .in('id', resourceIds);
         
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        propertiesMap = (props || []).reduce((acc, prop: any) => {
+        propertiesMap = (props || []).reduce((acc, prop) => {
           acc[prop.id] = { ...prop, title: prop.title_en };
           return acc;
         }, {} as typeof propertiesMap);
@@ -513,7 +512,7 @@ export function useGuestPropertyBookings() {
           .select('id, title_en, title_ru, address, cover_image, check_in_time, check_out_time')
           .in('id', resourceIds);
         
-        propertiesMap = (props || []).reduce((acc, prop: any) => {
+        propertiesMap = (props || []).reduce((acc, prop) => {
           acc[prop.id] = { ...prop, title: prop.title_en };
           return acc;
         }, {} as typeof propertiesMap);

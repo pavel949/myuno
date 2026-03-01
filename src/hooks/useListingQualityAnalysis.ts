@@ -80,7 +80,6 @@ export function useListingQualityAnalysis() {
       });
 
       if (error) {
-        console.error('[QUALITY] Analysis failed:', error);
         toast({
           title: 'Analysis Failed',
           description: error.message || 'Could not analyze listing',
@@ -114,7 +113,6 @@ export function useListingQualityAnalysis() {
 
       return data as AnalysisResult;
     } catch (error) {
-      console.error('[QUALITY] Analysis error:', error);
       toast({
         title: 'Error',
         description: 'Failed to analyze listing quality',
@@ -175,7 +173,6 @@ export function useListingQualityAnalysis() {
         .maybeSingle();
 
       if (error) {
-        console.error('[QUALITY] Fetch artifact error:', error);
         return null;
       }
 
@@ -189,8 +186,7 @@ export function useListingQualityAnalysis() {
       }
 
       return null;
-    } catch (error) {
-      console.error('[QUALITY] Fetch error:', error);
+    } catch {
       return null;
     }
   }, []);
@@ -213,7 +209,6 @@ export function useListingQualityAnalysis() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[QUALITY] Fetch artifacts error:', error);
         return;
       }
 
@@ -228,8 +223,8 @@ export function useListingQualityAnalysis() {
         }
         setAnalysisResults(prev => ({ ...prev, ...results }));
       }
-    } catch (error) {
-      console.error('[QUALITY] Batch fetch error:', error);
+    } catch {
+      // Silently fail for batch artifact fetching
     }
   }, []);
 
@@ -252,7 +247,6 @@ export function useListingQualityAnalysis() {
         .eq('id', artifactId);
 
       if (error) {
-        console.error('[QUALITY] Update artifact error:', error);
         toast({
           title: 'Error',
           description: 'Failed to update artifact',
@@ -267,8 +261,7 @@ export function useListingQualityAnalysis() {
       });
 
       return true;
-    } catch (error) {
-      console.error('[QUALITY] Update error:', error);
+    } catch {
       return false;
     }
   }, [toast]);

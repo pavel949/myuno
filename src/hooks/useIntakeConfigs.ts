@@ -49,19 +49,16 @@ export function useIntakeConfigs() {
           .order('sort_order');
 
         if (error) {
-          console.warn('Failed to fetch intake configs from DB, using fallback:', error.message);
           return INTAKE_VERTICALS;
         }
 
         if (!data || data.length === 0) {
-          console.info('No intake configs in DB, using static fallback');
           return INTAKE_VERTICALS;
         }
 
         // Map DB rows to VerticalConfig interface
         return data.map(row => mapDbToVerticalConfig(row as unknown as DbIntakeConfig));
-      } catch (err) {
-        console.error('Error fetching intake configs:', err);
+      } catch {
         return INTAKE_VERTICALS;
       }
     },

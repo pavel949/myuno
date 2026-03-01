@@ -104,7 +104,6 @@ export function useUserAnalyticsDashboard(days: number = 30) {
           setRealtimeStats(realtimeRes as RealtimeStats | null);
         }
       } catch (err: unknown) {
-        console.error('Error fetching user analytics:', err);
         if (isMounted) setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         if (isMounted) setIsLoading(false);
@@ -332,8 +331,8 @@ export function useUserSegments() {
             last_active: activityMap.get(p.id) || null,
           }))
         );
-      } catch (err) {
-        console.error('Error fetching user segments:', err);
+      } catch {
+        // Silent fail for segments
       } finally {
         setIsLoading(false);
       }
@@ -382,8 +381,8 @@ export function useCohortAnalysis() {
             periods,
           }))
         );
-      } catch (err) {
-        console.error('Error fetching cohorts:', err);
+      } catch {
+        // Silent fail for cohorts
       } finally {
         setIsLoading(false);
       }
@@ -437,8 +436,8 @@ export function useFunnelAnalysis(funnelName?: string) {
             overallConversion: Number(f.overall_conversion) || 0,
           }))
         );
-      } catch (err) {
-        console.error('Error fetching funnels:', err);
+      } catch {
+        // Silent fail for funnels
       } finally {
         setIsLoading(false);
       }

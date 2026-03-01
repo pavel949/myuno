@@ -165,7 +165,7 @@ export function useOwnerAIChat(context?: OwnerContext) {
         // Request was cancelled
         return;
       }
-      console.error('AI chat error:', error);
+      // AI chat error — user sees toast
       toast.error('Не удалось получить ответ. Попробуйте снова.');
     } finally {
       setIsLoading(false);

@@ -79,7 +79,6 @@ export function useAirportServices(airportCode: string = 'HKT', supplierId?: str
       if (fetchError) throw fetchError;
       setServices((data || []) as unknown as AirportService[]);
     } catch (err) {
-      console.error('Error fetching airport services:', err);
       setError(err as Error);
     } finally {
       setIsLoading(false);

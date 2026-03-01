@@ -58,8 +58,8 @@ export function useCanonicalDraft<T extends object>({
           return { ...initialData, ...parsed.data };
         }
       }
-    } catch (e) {
-      console.warn('Failed to load draft:', e);
+    } catch {
+      // Silent fail for draft loading
     }
     return null;
   }, [storageKey, initialData]);
@@ -95,8 +95,8 @@ export function useCanonicalDraft<T extends object>({
       setHasDraft(true);
       setLastSaved(new Date());
       lastSavedDataRef.current = JSON.stringify(data);
-    } catch (e) {
-      console.error('Failed to save draft:', e);
+    } catch {
+      // Silent fail for draft saving
     }
     // Cleanup-safe visual feedback handled by ref
   }, [data, storageKey]);
@@ -184,8 +184,8 @@ export function useCanonicalDraft<T extends object>({
             version: 1,
           };
           localStorage.setItem(storageKey, JSON.stringify(draftData));
-        } catch (e) {
-          console.warn('Failed to save draft on unmount:', e);
+        } catch {
+          // Silent fail for unmount draft save
         }
       }
     };

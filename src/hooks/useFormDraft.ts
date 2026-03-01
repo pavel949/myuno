@@ -25,8 +25,8 @@ export function useFormDraft<T extends object>({
         const parsed = JSON.parse(saved);
         return { ...initialData, ...parsed };
       }
-    } catch (e) {
-      console.warn('Failed to load draft:', e);
+    } catch {
+      // Silent fail for draft loading
     }
     return initialData;
   }, [storageKey, initialData]);
@@ -47,8 +47,8 @@ export function useFormDraft<T extends object>({
         localStorage.setItem(storageKey, JSON.stringify(formData));
         setHasDraft(true);
         setLastSaved(new Date());
-      } catch (e) {
-        console.warn('Failed to save draft:', e);
+      } catch {
+        // Silent fail for draft saving
       }
     }, debounceMs);
 
