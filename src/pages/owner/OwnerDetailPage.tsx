@@ -65,7 +65,7 @@ export default function OwnerDetailPage() {
     return (
       <div className="p-6 text-center text-muted-foreground">
         <p>{isRu ? 'Собственник не найден' : 'Owner not found'}</p>
-        <Button variant="link" onClick={() => navigate('/owner/owners')}>
+        <Button variant="link" onClick={() => navigate('/mc/owners')}>
           {isRu ? '← Назад к списку' : '← Back to list'}
         </Button>
       </div>
@@ -123,7 +123,7 @@ export default function OwnerDetailPage() {
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-5xl mx-auto">
       {/* Back button */}
-      <Button variant="ghost" size="sm" onClick={() => navigate('/owner/owners')} className="-ml-2">
+      <Button variant="ghost" size="sm" onClick={() => navigate('/mc/owners')} className="-ml-2">
         <ArrowLeft className="h-4 w-4 mr-1" />
         {isRu ? 'Собственники' : 'Owners'}
       </Button>
@@ -202,7 +202,7 @@ export default function OwnerDetailPage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => navigate('/owner/reports')}
+              onClick={() => navigate('/mc/reports')}
             >
               <FileOutput className="h-4 w-4 mr-1" />
               {isRu ? 'Отчёт' : 'Report'}
@@ -349,7 +349,7 @@ export default function OwnerDetailPage() {
               <Card
                 key={prop.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate(`/owner/properties/${prop.id}`)}
+                onClick={() => navigate(`/mc/properties/${prop.id}`)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">

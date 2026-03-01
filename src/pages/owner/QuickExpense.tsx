@@ -109,7 +109,7 @@ export default function QuickExpense() {
       });
 
       setIsSuccess(true);
-      setTimeout(() => navigate('/owner/financials'), 1500);
+      setTimeout(() => navigate('/mc/financials'), 1500);
     } catch (error) {
       errorHandler.error(error, {
         toastTitleRu: 'Ошибка при сохранении расхода',

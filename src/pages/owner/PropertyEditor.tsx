@@ -309,7 +309,7 @@ export default function PropertyEditor() {
         title: isRu ? 'Сохранено' : 'Saved',
         description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully',
       });
-      navigate(`/owner/properties/${id}`);
+      navigate(`/mc/properties/${id}`);
     } catch (error) {
       errorLog.error(error, 'save_property');
     }
@@ -456,7 +456,7 @@ export default function PropertyEditor() {
               initialData={mapPropertyToInitialData(property)}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              onCancel={() => navigate(`/owner/properties/${id}`)}
+              onCancel={() => navigate(`/mc/properties/${id}`)}
               propertyId={id}
               extraTabs={extraTabs}
               controlledFormData={formData}

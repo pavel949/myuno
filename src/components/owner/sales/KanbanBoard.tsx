@@ -69,7 +69,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       onPointerUp={(e) => {
         if (!dragRef.current) {
           e.stopPropagation();
-          navigate(`/owner/sales/${deal.id}`);
+          navigate(`/mc/sales/${deal.id}`);
         }
       }}
     >

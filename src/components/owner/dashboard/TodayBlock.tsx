@@ -45,7 +45,7 @@ export function TodayBlock() {
     return (
       <Card 
         className="overflow-hidden border-success/20 bg-success/5 cursor-pointer hover:shadow-md transition-all"
-        onClick={() => navigate('/owner/operations')}
+        onClick={() => navigate('/mc/operations')}
       >
         <CardContent className="p-3">
           <div className="flex items-center justify-between mb-2">
@@ -72,7 +72,7 @@ export function TodayBlock() {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
-      onClick={() => navigate('/owner/operations')}
+      onClick={() => navigate('/mc/operations')}
     >
       <CardContent className="p-3">
         {/* Header */}

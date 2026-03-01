@@ -386,7 +386,7 @@ export default function OwnerRentalTerms() {
         description: isRu ? 'Условия аренды обновлены' : 'Rental terms updated',
       });
 
-      navigate(`/owner/properties/${id}`);
+      navigate(`/mc/properties/${id}`);
     } catch (error) {
       errorLog.error(error, 'save_rental_terms');
     }

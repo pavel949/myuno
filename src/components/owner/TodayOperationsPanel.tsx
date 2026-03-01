@@ -73,7 +73,7 @@ export function TodayOperationsPanel() {
           {isRu ? 'Задачи на сегодня' : "Today's Tasks"}
           <Badge variant="secondary" className="ml-1">{pendingTasks.length}</Badge>
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={() => navigate('/owner/operations')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/mc/operations')}>
           {isRu ? 'Все' : 'All'}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
@@ -117,7 +117,7 @@ export function TodayOperationsPanel() {
           <Button 
             variant="ghost" 
             className="w-full text-muted-foreground"
-            onClick={() => navigate('/owner/operations')}
+            onClick={() => navigate('/mc/operations')}
           >
             {isRu ? `Ещё ${pendingTasks.length - 5} задач` : `${pendingTasks.length - 5} more tasks`}
           </Button>

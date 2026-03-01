@@ -54,7 +54,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         />
       )}
       <button
-        onClick={() => navigate(`/owner/sales/${deal.id}`)}
+        onClick={() => navigate(`/mc/sales/${deal.id}`)}
         className="flex-1 text-left min-w-0"
       >
         <div className="flex items-start justify-between gap-2">

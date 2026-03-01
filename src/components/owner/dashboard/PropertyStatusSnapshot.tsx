@@ -80,7 +80,7 @@ export function PropertyStatusSnapshot() {
               key={prop.property_id}
               variant="interactive"
               className="cursor-pointer"
-              onClick={() => navigate(`/owner/properties/${prop.property_id}/manage`)}
+              onClick={() => navigate(`/mc/properties/${prop.property_id}/manage`)}
             >
               <CardContent className="p-3">
                 <div className="flex items-start justify-between gap-2">

@@ -11,7 +11,7 @@ export default function NewDealPage() {
 
   useEffect(() => {
     if (!open) {
-      navigate('/owner/sales');
+      navigate('/mc/sales');
     }
   }, [open, navigate]);
 

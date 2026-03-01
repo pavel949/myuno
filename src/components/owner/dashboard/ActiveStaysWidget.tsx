@@ -107,7 +107,7 @@ export function ActiveStaysWidget() {
           <Card 
             key={stay.bookingId}
             className="shrink-0 w-[85vw] max-w-[288px] snap-start touch-manipulation overflow-hidden cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-success"
-            onClick={() => navigate(`/owner/bookings/${stay.bookingId}`)}
+            onClick={() => navigate(`/mc/bookings/${stay.bookingId}`)}
           >
             <CardContent className="p-0">
               <div className="flex gap-3 p-3">

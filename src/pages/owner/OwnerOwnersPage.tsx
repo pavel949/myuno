@@ -76,7 +76,7 @@ export default function OwnerOwnersPage() {
             {isRu ? 'Управление отношениями с собственниками' : 'Owner relationship management'}
           </p>
         </div>
-        <Button size="sm" onClick={() => navigate('/owner/contacts')} variant="outline">
+        <Button size="sm" onClick={() => navigate('/mc/contacts')} variant="outline">
           <Plus className="h-4 w-4 mr-1" />
           {isRu ? 'Добавить' : 'Add'}
         </Button>
@@ -138,7 +138,7 @@ export default function OwnerOwnersPage() {
                   key={o.id}
                   variant="secondary"
                   className="cursor-pointer hover:bg-secondary/80"
-                  onClick={() => navigate(`/owner/owners/${o.id}`)}
+                  onClick={() => navigate(`/mc/owners/${o.id}`)}
                 >
                   {o.first_name} {o.last_name} —{' '}
                   {o.daysUntilBirthday === 0
@@ -191,7 +191,7 @@ export default function OwnerOwnersPage() {
             <Card
               key={owner.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/owner/owners/${owner.id}`)}
+              onClick={() => navigate(`/mc/owners/${owner.id}`)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">

@@ -193,7 +193,7 @@ export function MarketplaceStatusCard({ propertyId, approvalStatus, rejectionRea
                 </p>
               </div>
             </div>
-            <Button size="sm" onClick={() => navigate(`/owner/properties/${propertyId}/editor`)}>
+            <Button size="sm" onClick={() => navigate(`/mc/properties/${propertyId}/editor`)}>
               <Settings className="h-4 w-4 mr-1" />
               {isRu ? 'Редактировать' : 'Edit'}
             </Button>

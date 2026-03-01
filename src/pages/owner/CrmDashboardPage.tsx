@@ -129,7 +129,7 @@ export default function CrmDashboardPage() {
                 <BarChart3 className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-sm">{isRu ? 'Конверсионная воронка' : 'Conversion Funnel'}</h3>
               </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/sales')}>
+              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/sales')}>
                 {isRu ? 'Открыть' : 'Open'} <ChevronRight className="h-3 w-3 ml-0.5" />
               </Button>
             </div>
@@ -174,7 +174,7 @@ export default function CrmDashboardPage() {
                 <h3 className="font-semibold text-sm">{isRu ? 'Срочные задачи' : 'Urgent Tasks'}</h3>
                 {overdueCount > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{overdueCount}</Badge>}
               </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/tasks')}>
+              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/tasks')}>
                 {isRu ? 'Все' : 'All'} <ChevronRight className="h-3 w-3 ml-0.5" />
               </Button>
             </div>
@@ -190,7 +190,7 @@ export default function CrmDashboardPage() {
                   {urgent.map(task => {
                     const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
                     return (
-                      <div key={task.id} className={cn('flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer hover:bg-muted/80', isOverdue ? 'bg-destructive/5' : 'bg-muted/50')} onClick={() => navigate('/owner/tasks')}>
+                      <div key={task.id} className={cn('flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer hover:bg-muted/80', isOverdue ? 'bg-destructive/5' : 'bg-muted/50')} onClick={() => navigate('/mc/tasks')}>
                         <span className="flex-1 truncate">{task.title}</span>
                         {isOverdue && <Badge variant="destructive" className="text-[10px] px-1 py-0">!</Badge>}
                       </div>
@@ -211,7 +211,7 @@ export default function CrmDashboardPage() {
               <Target className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-sm">{isRu ? 'Воронки' : 'Pipelines'}</h3>
             </div>
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/owner/sales/settings')}>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/sales/settings')}>
               {isRu ? 'Настройки' : 'Settings'} <ChevronRight className="h-3 w-3 ml-0.5" />
             </Button>
           </div>

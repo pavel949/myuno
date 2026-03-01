@@ -152,7 +152,7 @@ export function TodayBriefingWidget() {
           'cursor-pointer hover:shadow-md transition-shadow border-l-4',
           cfg.border
         )}
-        onClick={() => navigate(`/owner/bookings/${event.bookingId}`)}
+        onClick={() => navigate(`/mc/bookings/${event.bookingId}`)}
       >
         <CardContent className="p-3 flex items-center gap-3">
           <div className={cn('p-2 rounded-lg shrink-0', cfg.bg)}>

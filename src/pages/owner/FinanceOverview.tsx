@@ -132,7 +132,7 @@ export default function FinanceOverview() {
         <Button
           className="flex-1"
           variant="default"
-          onClick={() => navigate('/owner/quick-expense')}
+          onClick={() => navigate('/mc/quick-expense')}
         >
           <Minus className="h-4 w-4 mr-2" />
           {isRu ? 'Расход' : 'Expense'}
@@ -140,7 +140,7 @@ export default function FinanceOverview() {
         <Button
           className="flex-1 border-success text-success hover:bg-success/10"
           variant="outline"
-          onClick={() => navigate('/owner/income/quick')}
+          onClick={() => navigate('/mc/income/quick')}
         >
           <Plus className="h-4 w-4 mr-2" />
           {isRu ? 'Доход' : 'Income'}

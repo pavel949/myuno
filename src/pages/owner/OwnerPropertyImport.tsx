@@ -168,7 +168,7 @@ export default function OwnerPropertyImport() {
     const item = intakeSession.items[0];
     const fields = item.extractedFields;
     
-    navigate('/owner/properties/new', {
+    navigate('/mc/properties/new', {
       state: {
         prefillData: {
           name_en: item.suggestedTitle?.en || fields.name_en?.value,
@@ -238,7 +238,7 @@ export default function OwnerPropertyImport() {
     try {
       // For now, we'll navigate to property creation with prefilled data
       // In the future, this could directly create the property
-      navigate('/owner/properties/new', {
+      navigate('/mc/properties/new', {
         state: {
           prefillData: {
             title: syncedListing.title,
@@ -660,7 +660,7 @@ export default function OwnerPropertyImport() {
             <CardContent className="space-y-4">
               <div className="grid gap-4">
                 <Button 
-                  onClick={() => navigate('/owner/properties/new')}
+                  onClick={() => navigate('/mc/properties/new')}
                   className="w-full justify-start h-auto py-4"
                   variant="outline"
                 >
@@ -996,7 +996,7 @@ export default function OwnerPropertyImport() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 {isRu ? 'Новый импорт' : 'New Import'}
               </Button>
-              <Button onClick={() => navigate('/owner/properties')}>
+              <Button onClick={() => navigate('/mc/properties')}>
                 {isRu ? 'К объектам' : 'View Properties'}
               </Button>
             </div>

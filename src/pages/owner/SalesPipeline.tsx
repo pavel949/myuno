@@ -148,10 +148,10 @@ export default function SalesPipeline() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
             <Settings className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/owner/sales/analytics')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/analytics')}>
             <BarChart3 className="h-4 w-4" />
           </Button>
           {view === 'list' && (

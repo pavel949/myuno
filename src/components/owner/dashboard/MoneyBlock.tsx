@@ -48,7 +48,7 @@ export function MoneyBlock() {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
-      onClick={() => navigate('/owner/financials')}
+      onClick={() => navigate('/mc/financials')}
     >
       <CardContent className="p-3">
         <div className="flex items-center justify-between mb-1">

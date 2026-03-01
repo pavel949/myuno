@@ -280,7 +280,7 @@ export default function PropertyManage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(`/owner/properties/${id}`)}
+              onClick={() => navigate(`/mc/properties/${id}`)}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>

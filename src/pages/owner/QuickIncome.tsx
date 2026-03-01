@@ -96,7 +96,7 @@ export default function QuickIncome() {
 
       setIsSuccess(true);
       setTimeout(() => {
-        navigate('/owner/financials');
+        navigate('/mc/financials');
       }, 1500);
     } catch (error) {
       errorHandler.error(error, {

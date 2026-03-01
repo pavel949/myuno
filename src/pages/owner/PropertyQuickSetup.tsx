@@ -139,7 +139,7 @@ export default function PropertyQuickSetup() {
 
   const handleFinish = async () => {
     await handleSave();
-    navigate(`/owner/properties/${id}`);
+    navigate(`/mc/properties/${id}`);
   };
 
   if (isLoading) {

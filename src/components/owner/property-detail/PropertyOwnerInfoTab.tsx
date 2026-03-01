@@ -145,7 +145,7 @@ export function PropertyOwnerInfoTab({ propertyId, property }: PropertyOwnerInfo
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => navigate(`/owner/owners/${linkedContact.id}`)}
+                onClick={() => navigate(`/mc/owners/${linkedContact.id}`)}
                 className="text-xs"
               >
                 <ExternalLink className="h-3 w-3 mr-1" />

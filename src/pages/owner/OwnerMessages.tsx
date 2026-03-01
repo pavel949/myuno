@@ -88,7 +88,7 @@ export default function OwnerMessages() {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => navigate('/owner/message-templates')}
+            onClick={() => navigate('/mc/message-templates')}
           >
             <FileText className="h-4 w-4 mr-2" />
             {isRu ? 'Шаблоны' : 'Templates'}
@@ -142,7 +142,7 @@ export default function OwnerMessages() {
                 ? 'Напишите нам, если у вас есть вопросы по управлению недвижимостью'
                 : 'Contact us if you have questions about property management'}
             </p>
-            <Button onClick={() => navigate('/owner/support-chat')}>
+            <Button onClick={() => navigate('/mc/support-chat')}>
               {isRu ? 'Открыть чат' : 'Open Chat'}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
@@ -181,8 +181,8 @@ export default function OwnerMessages() {
               isRu={isRu}
               onClick={() => navigate(
                 chat.type === 'booking' 
-                  ? `/owner/chat/booking/${chat.bookingId}`
-                  : `/owner/chat/property/${chat.propertyId}`
+                  ? `/mc/chat/booking/${chat.bookingId}`
+                  : `/mc/chat/property/${chat.propertyId}`
               )}
             />
           ))}

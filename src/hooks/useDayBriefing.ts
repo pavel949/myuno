@@ -313,7 +313,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `bday-contact-${c.id}`, type: 'birthday', sectionOrder: ORDER.birthday,
             title: `${c.first_name} ${c.last_name}`,
             subtitle: isToday_ ? undefined : `через ${dayIdx} дн.`,
-            href: `/owner/crm/contacts/${c.id}`,
+            href: `/mc/contacts/${c.id}`,
             meta: { contactType: c.contact_type, daysUntil: dayIdx, avatarUrl: c.avatar_url },
           });
         }
@@ -327,7 +327,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `bday-staff-${s.id}`, type: 'birthday', sectionOrder: ORDER.birthday,
             title: s.name,
             subtitle: isToday_ ? undefined : `через ${dayIdx} дн.`,
-            href: '/owner/staff',
+            href: '/mc/staff',
             meta: { contactType: 'staff', daysUntil: dayIdx, avatarUrl: s.photo_url },
           });
         }
@@ -343,13 +343,13 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             items.push({
               id: `ci-${b.id}`, type: 'check_in', sectionOrder: ORDER.schedule,
               title: b.guest_name || 'Гость', subtitle: pName,
-              href: `/owner/bookings/${b.id}`, meta: { propertyName: pName },
+              href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           } else if (isTomorrow(ci)) {
             items.push({
               id: `ci-tm-${b.id}`, type: 'check_in_tomorrow', sectionOrder: ORDER.tomorrow,
               title: b.guest_name || 'Гость', subtitle: pName,
-              href: `/owner/bookings/${b.id}`, meta: { propertyName: pName },
+              href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           }
 
@@ -357,13 +357,13 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             items.push({
               id: `co-${b.id}`, type: 'check_out', sectionOrder: ORDER.schedule,
               title: b.guest_name || 'Гость', subtitle: pName,
-              href: `/owner/bookings/${b.id}`, meta: { propertyName: pName },
+              href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           } else if (isTomorrow(co)) {
             items.push({
               id: `co-tm-${b.id}`, type: 'check_out_tomorrow', sectionOrder: ORDER.tomorrow,
               title: b.guest_name || 'Гость', subtitle: pName,
-              href: `/owner/bookings/${b.id}`, meta: { propertyName: pName },
+              href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           }
         }
@@ -375,7 +375,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `act-${a.id}`, type: 'crm_activity',
             sectionOrder: isToday_ ? ORDER.schedule : ORDER.tomorrow,
             title: a.summary,
-            href: `/owner/crm/deals/${a.deal_id}`,
+            href: `/mc/sales/${a.deal_id}`,
             meta: { dueTime: a.due_time || undefined },
           });
         }
@@ -387,7 +387,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `task-${t.id}`,
             type: isOverdue ? 'overdue_task' : 'crm_task',
             sectionOrder: isOverdue ? ORDER.overdue : ORDER.tasks,
-            title: t.title, href: '/owner/tasks',
+            title: t.title, href: '/mc/tasks',
             meta: { priority: t.priority },
           });
         }

@@ -62,11 +62,11 @@ export function HostListingsPanel() {
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/owner/properties/${id}/editor`);
+    navigate(`/mc/properties/${id}/editor`);
   };
 
   const handleView = (id: string) => {
-    navigate(`/owner/properties/${id}`);
+    navigate(`/mc/properties/${id}`);
   };
 
   if (isLoading) {
@@ -97,7 +97,7 @@ export function HostListingsPanel() {
         </CardTitle>
         <Button 
           size="sm" 
-          onClick={() => navigate('/owner/properties/new')}
+          onClick={() => navigate('/mc/properties/new')}
           className="gap-1"
         >
           <Plus className="h-4 w-4" />
@@ -147,7 +147,7 @@ export function HostListingsPanel() {
                   ? 'Добавьте вашу первую недвижимость и начните получать бронирования' 
                   : 'Add your first property and start receiving bookings'}
                 action={
-                  <Button onClick={() => navigate('/owner/properties/new')}>
+                  <Button onClick={() => navigate('/mc/properties/new')}>
                     <Plus className="h-4 w-4 mr-2" />
                     {isRu ? 'Добавить объект' : 'Add Property'}
                   </Button>
@@ -170,7 +170,7 @@ export function HostListingsPanel() {
                   <Button 
                     variant="ghost" 
                     className="w-full" 
-                    onClick={() => navigate('/owner/properties')}
+                    onClick={() => navigate('/mc/properties')}
                   >
                     {isRu ? 'Показать все' : 'View all'}
                     <ArrowRight className="h-4 w-4 ml-1" />

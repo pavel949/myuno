@@ -236,7 +236,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
                           variant="ghost"
                           size="sm"
                           className="h-7 w-7 p-0"
-                          onClick={() => navigate(`/owner/properties/${prop.id}/portal-settings`)}
+                          onClick={() => navigate(`/mc/properties/${prop.id}/portal-settings`)}
                         >
                           <Settings className="h-3.5 w-3.5" />
                         </Button>

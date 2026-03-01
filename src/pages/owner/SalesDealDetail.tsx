@@ -79,7 +79,7 @@ export default function SalesDealDetail() {
     return (
       <div className="p-4 text-center pt-20 max-w-lg mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Сделка не найдена' : 'Deal not found'}</p>
-        <Button variant="link" onClick={() => navigate('/owner/sales')}>{isRu ? 'Назад' : 'Back'}</Button>
+        <Button variant="link" onClick={() => navigate('/mc/sales')}>{isRu ? 'Назад' : 'Back'}</Button>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function SalesDealDetail() {
     try {
       await deleteDeal.mutateAsync(deal.id);
       toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
-      navigate('/owner/sales');
+      navigate('/mc/sales');
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
@@ -156,7 +156,7 @@ export default function SalesDealDetail() {
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
       {/* Back */}
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/owner/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <button onClick={() => navigate('/mc/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" />
           {isRu ? 'Назад' : 'Back'}
         </button>
@@ -208,7 +208,7 @@ export default function SalesDealDetail() {
 
         {deal.contact_id && (
           <button
-            onClick={() => navigate(`/owner/contacts/${deal.contact_id}`)}
+            onClick={() => navigate(`/mc/contacts/${deal.contact_id}`)}
             className="flex items-center gap-1.5 mt-2 text-xs text-primary hover:text-primary/80 transition-colors"
           >
             <ContactRound className="h-3.5 w-3.5" />

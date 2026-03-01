@@ -340,7 +340,7 @@ export default function ContactsList() {
               key={contact.id}
               contact={contact}
               isOwnerOrAdmin={isOwnerOrAdmin}
-              onClick={() => navigate(`/owner/contacts/${contact.id}`)}
+              onClick={() => navigate(`/mc/contacts/${contact.id}`)}
             />
           ))}
         </div>

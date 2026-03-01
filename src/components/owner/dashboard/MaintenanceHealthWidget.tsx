@@ -27,7 +27,7 @@ export function MaintenanceHealthWidget() {
     <Card
       variant="interactive"
       className="cursor-pointer"
-      onClick={() => navigate('/owner/maintenance-plan')}
+      onClick={() => navigate('/mc/maintenance-plan')}
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">

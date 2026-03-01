@@ -136,9 +136,9 @@ export default function OwnerProperties() {
   };
 
   // --- handlers ---
-  const handleView = (id: string) => navigate(`/owner/properties/${id}`);
-  const handleEdit = (id: string) => navigate(`/owner/properties/${id}/editor`);
-  const handleDuplicate = (id: string) => navigate(`/owner/properties/new?cloneFrom=${id}`);
+  const handleView = (id: string) => navigate(`/mc/properties/${id}`);
+  const handleEdit = (id: string) => navigate(`/mc/properties/${id}/editor`);
+  const handleDuplicate = (id: string) => navigate(`/mc/properties/new?cloneFrom=${id}`);
 
   const handleToggleActive = async (id: string, activate: boolean) => {
     const { error } = await supabase.from('properties').update({ is_active: activate }).eq('id', id);

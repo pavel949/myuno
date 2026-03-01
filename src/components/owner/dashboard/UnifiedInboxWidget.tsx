@@ -61,7 +61,7 @@ export function UnifiedInboxWidget() {
           <p className="text-sm text-muted-foreground mb-3">
             {isRu ? 'Нет сообщений от гостей' : 'No guest messages'}
           </p>
-          <Button size="sm" variant="outline" onClick={() => navigate('/owner/messages')}>
+          <Button size="sm" variant="outline" onClick={() => navigate('/mc/messages')}>
             {isRu ? 'Открыть Inbox' : 'Open Inbox'}
           </Button>
         </CardContent>
@@ -91,7 +91,7 @@ export function UnifiedInboxWidget() {
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              onClick={() => navigate('/owner/messages')}
+              onClick={() => navigate('/mc/messages')}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -110,8 +110,8 @@ export function UnifiedInboxWidget() {
                 key={`${chat.type}-${chat.id}`}
                 onClick={() => navigate(
                   chat.type === 'booking'
-                    ? `/owner/chat/booking/${chat.bookingId}`
-                    : `/owner/chat/property/${chat.propertyId}`
+                    ? `/mc/chat/booking/${chat.bookingId}`
+                    : `/mc/chat/property/${chat.propertyId}`
                 )}
                 className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
               >
@@ -173,8 +173,8 @@ export function UnifiedInboxWidget() {
                     if (unreadChat) {
                       navigate(
                         unreadChat.type === 'booking'
-                          ? `/owner/chat/booking/${unreadChat.bookingId}`
-                          : `/owner/chat/property/${unreadChat.propertyId}`
+                          ? `/mc/chat/booking/${unreadChat.bookingId}`
+                          : `/mc/chat/property/${unreadChat.propertyId}`
                       );
                     }
                   }}
@@ -188,7 +188,7 @@ export function UnifiedInboxWidget() {
 
         {(chats?.length || 0) > 4 && (
           <button
-            onClick={() => navigate('/owner/messages')}
+            onClick={() => navigate('/mc/messages')}
             className="text-xs text-primary hover:underline w-full text-center py-2 mt-1"
           >
             {isRu ? `Все сообщения (${chats?.length})` : `All messages (${chats?.length})`}
