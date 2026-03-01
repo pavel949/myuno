@@ -4,20 +4,19 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useBusinessRole } from '@/hooks/useBusinessRole';
 import { 
   LayoutDashboard, 
-  Home, 
-  Calendar, 
-  ClipboardList,
-  MessageSquare,
-  Grid3X3,
   DollarSign,
+  Grid3X3,
   Plus,
   X,
-  Receipt,
+  Camera,
   CalendarPlus,
-  ShoppingBag,
-  ListTodo,
+  Receipt,
+  Phone,
+  StickyNote,
+  BedDouble,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface NavItem {
   id: string;
@@ -27,134 +26,147 @@ interface NavItem {
   path: string;
 }
 
-const PM_NAV: NavItem[] = [
+const NAV_LEFT: NavItem[] = [
   { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
   { id: 'finance', icon: DollarSign, labelEn: 'Finance', labelRu: 'Финансы', path: '/owner/finance' },
-  { id: 'mc', icon: Grid3X3, labelEn: 'MC', labelRu: 'УК', path: '/mc' },
 ];
 
-const DEFAULT_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/owner' },
-  { id: 'finance', icon: DollarSign, labelEn: 'Finance', labelRu: 'Финансы', path: '/owner/finance' },
+const NAV_RIGHT: NavItem[] = [
   { id: 'mc', icon: Grid3X3, labelEn: 'MC', labelRu: 'УК', path: '/mc' },
+  { id: 'tasks', icon: StickyNote, labelEn: 'Tasks', labelRu: 'Задачи', path: '/mc/tasks' },
 ];
 
-const NAV_BY_ROLE: Record<string, NavItem[]> = {
-  property_manager: PM_NAV,
-  sales_agent: PM_NAV,
-  service_provider: PM_NAV,
-  general: DEFAULT_NAV,
-};
+interface QuickAction {
+  id: string;
+  icon: React.ElementType;
+  labelEn: string;
+  labelRu: string;
+  path: string;
+  color: string;
+}
 
-const QUICK_ACTIONS = [
-  { id: 'mc', icon: Receipt, labelEn: 'MC Panel', labelRu: 'Панель УК', path: '/mc', color: 'bg-primary/15 text-primary' },
-  { id: 'services', icon: ShoppingBag, labelEn: 'myUNO', labelRu: 'myUNO', path: '/', color: 'bg-success/15 text-success' },
+const QUICK_ACTIONS: QuickAction[] = [
+  { id: 'photo', icon: Camera, labelEn: 'Take Photo', labelRu: 'Сделать фото', path: '/mc/inspection', color: 'bg-blue-500' },
+  { id: 'booking', icon: BedDouble, labelEn: 'Add Booking', labelRu: 'Добавить бронь', path: '/mc/bookings/new', color: 'bg-emerald-500' },
+  { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Добавить расход', path: '/mc/quick-expense', color: 'bg-amber-500' },
+  { id: 'meeting', icon: CalendarPlus, labelEn: 'Schedule Meeting', labelRu: 'Назначить встречу', path: '/mc/tasks?type=meeting', color: 'bg-purple-500' },
+  { id: 'call', icon: Phone, labelEn: 'Call', labelRu: 'Созвониться', path: '/mc/tasks?type=call', color: 'bg-pink-500' },
+  { id: 'note', icon: StickyNote, labelEn: 'Note', labelRu: 'Заметка', path: '/mc/tasks?type=note', color: 'bg-teal-500' },
 ];
 
 export function OwnerMobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { role } = useBusinessRole();
   const isRu = language === 'ru';
-  const [fabOpen, setFabOpen] = useState(false);
-
-  const navItems = NAV_BY_ROLE[role] || DEFAULT_NAV;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isActive = (path: string) => {
-    if (path === '/owner') {
-      return location.pathname === '/owner' || location.pathname === '/owner/';
-    }
+    if (path === '/owner') return location.pathname === '/owner' || location.pathname === '/owner/';
     return location.pathname.startsWith(path);
   };
 
-  const handleQuickAction = (path: string) => {
-    setFabOpen(false);
+  const handleAction = (path: string) => {
+    setMenuOpen(false);
     navigate(path);
+  };
+
+  const renderNavItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const active = isActive(item.path);
+    return (
+      <button
+        key={item.id}
+        onClick={() => navigate(item.path)}
+        className={cn(
+          "flex flex-col items-center justify-center h-full gap-0.5 transition-all flex-1",
+          active ? "text-primary" : "text-muted-foreground/70 active:text-foreground"
+        )}
+      >
+        <div className={cn(
+          "w-10 h-7 flex items-center justify-center rounded-full transition-all",
+          active ? "bg-primary/12 shadow-sm" : ""
+        )}>
+          <Icon className={cn("h-[22px] w-[22px] transition-transform", active && "scale-105")} strokeWidth={active ? 2.4 : 1.8} />
+        </div>
+        <span className={cn("text-[10px] leading-tight", active ? "font-bold" : "font-medium")}>
+          {isRu ? item.labelRu : item.labelEn}
+        </span>
+      </button>
+    );
   };
 
   return (
     <>
-      {/* FAB overlay */}
-      {fabOpen && (
-        <div 
-          className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden"
-          onClick={() => setFabOpen(false)}
-        >
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
-            {QUICK_ACTIONS.map((action, i) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  onClick={(e) => { e.stopPropagation(); handleQuickAction(action.path); }}
-                  className="flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in"
-                  style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
-                >
-                  <span className="text-sm font-semibold text-white bg-black/60 backdrop-blur rounded-full px-3 py-1.5 shadow-lg">
-                    {isRu ? action.labelRu : action.labelEn}
-                  </span>
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shadow-lg", action.color)}>
-                    <Icon className="h-5 w-5" strokeWidth={2.2} />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* FAB button */}
-      <button
-        onClick={() => setFabOpen(!fabOpen)}
-        className={cn(
-          "fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200",
-          fabOpen
-            ? "bg-foreground text-background rotate-45"
-            : "bg-primary text-primary-foreground"
-        )}
-      >
-        <Plus className="h-7 w-7" strokeWidth={2.5} />
-      </button>
-
-      {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.08)]">
-        <div className="grid grid-cols-3 h-[68px] px-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex flex-col items-center justify-center h-full gap-0.5 transition-all",
-                  active 
-                    ? "text-primary" 
-                    : "text-muted-foreground/70 active:text-foreground"
-                )}
-              >
-                <div className={cn(
-                  "w-10 h-7 flex items-center justify-center rounded-full transition-all",
-                  active 
-                    ? "bg-primary/12 shadow-sm" 
-                    : ""
-                )}>
-                  <Icon 
-                    className={cn("h-[22px] w-[22px] transition-transform", active && "scale-105")} 
-                    strokeWidth={active ? 2.4 : 1.8} 
-                  />
+      {/* Overlay + Quick Actions Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm md:hidden"
+            onClick={() => setMenuOpen(false)}
+          >
+            {/* Actions grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="absolute bottom-24 left-4 right-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-background rounded-2xl p-4 shadow-2xl border border-border/50">
+                <div className="grid grid-cols-3 gap-3">
+                  {QUICK_ACTIONS.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <button
+                        key={action.id}
+                        onClick={() => handleAction(action.path)}
+                        className="flex flex-col items-center gap-2 py-3 px-2 rounded-xl hover:bg-muted/50 active:scale-95 transition-all"
+                      >
+                        <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-white", action.color)}>
+                          <Icon className="h-5 w-5" strokeWidth={2} />
+                        </div>
+                        <span className="text-[11px] font-medium text-foreground text-center leading-tight">
+                          {isRu ? action.labelRu : action.labelEn}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-                <span className={cn(
-                  "text-[10px] leading-tight",
-                  active ? "font-bold" : "font-medium"
-                )}>
-                  {isRu ? item.labelRu : item.labelEn}
-                </span>
-              </button>
-            );
-          })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom nav bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center h-[68px] px-1">
+          {/* Left items */}
+          {NAV_LEFT.map(renderNavItem)}
+
+          {/* Center + button */}
+          <div className="flex-1 flex items-center justify-center">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className={cn(
+                "w-14 h-14 -mt-6 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 border-4 border-background",
+                menuOpen
+                  ? "bg-foreground text-background rotate-45"
+                  : "bg-primary text-primary-foreground"
+              )}
+            >
+              <Plus className="h-7 w-7" strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* Right items */}
+          {NAV_RIGHT.map(renderNavItem)}
         </div>
       </nav>
     </>
