@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useFinancialCategories, type FinancialCategory } from '@/hooks/useFinancialCategories';
 import type { CategoryClass, CategoryGroup } from '@/lib/categoryDefaults';
 
@@ -39,8 +39,7 @@ export function useCategoryClassification(type: 'expense' | 'income') {
     [categories]
   );
 
-  /** Sum amounts by class from a Record<categoryCode, amount> */
-  const totalsByClass = (amounts: Record<string, number>) => {
+  const totalsByClass = useCallback((amounts: Record<string, number>) => {
     const result: Record<string, number> = {};
     for (const cat of categories) {
       if (amounts[cat.code]) {
@@ -48,10 +47,9 @@ export function useCategoryClassification(type: 'expense' | 'income') {
       }
     }
     return result;
-  };
+  }, [categories]);
 
-  /** Sum amounts by group */
-  const totalsByGroup = (amounts: Record<string, number>) => {
+  const totalsByGroup = useCallback((amounts: Record<string, number>) => {
     const result: Record<string, number> = {};
     for (const cat of categories) {
       if (amounts[cat.code]) {
@@ -59,15 +57,17 @@ export function useCategoryClassification(type: 'expense' | 'income') {
       }
     }
     return result;
-  };
+  }, [categories]);
 
-  /** Get codes that match a specific class */
-  const codesForClass = (cls: CategoryClass) =>
-    categories.filter(c => c.category_class === cls).map(c => c.code);
+  const codesForClass = useCallback((cls: CategoryClass) =>
+    categories.filter(c => c.category_class === cls).map(c => c.code),
+    [categories]
+  );
 
-  /** Get codes that match a specific group */
-  const codesForGroup = (grp: CategoryGroup) =>
-    categories.filter(c => c.category_group === grp).map(c => c.code);
+  const codesForGroup = useCallback((grp: CategoryGroup) =>
+    categories.filter(c => c.category_group === grp).map(c => c.code),
+    [categories]
+  );
 
   return {
     categories,

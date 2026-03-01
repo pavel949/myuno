@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
 import { toast } from 'sonner';
+import { useMemo } from 'react';
 
 export interface CategorySetting {
   id: string;
@@ -11,7 +12,6 @@ export interface CategorySetting {
   category_type: string;
   is_enabled: boolean;
   sort_order: number;
-  // Classification overrides (null = use default)
   category_class: string | null;
   category_group: string | null;
   affects_net_profit: boolean | null;
@@ -43,9 +43,11 @@ export function useCompanyCategorySettings(type: 'expense' | 'income') {
 
   const hasSettings = settings !== null && settings !== undefined && settings.length > 0;
 
-  const enabledCodes: Set<string> | null = hasSettings
-    ? new Set(settings!.filter(s => s.is_enabled).map(s => s.category_code))
-    : null;
+  // Memoize Set to avoid new reference on every render
+  const enabledCodes = useMemo<Set<string> | null>(() => {
+    if (!hasSettings || !settings) return null;
+    return new Set(settings.filter(s => s.is_enabled).map(s => s.category_code));
+  }, [settings, hasSettings]);
 
   return { settings, enabledCodes, hasSettings, isLoading };
 }
@@ -75,6 +77,43 @@ export function useToggleCategorySetting() {
           } as any,
           { onConflict: 'company_id,category_type,category_code' }
         );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company-category-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-categories'] });
+    },
+    onError: (err: Error) => {
+      toast.error('Ошибка: ' + err.message);
+    },
+  });
+}
+
+/** Batch toggle multiple categories in one DB call */
+export function useBulkToggleCategorySettings() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+
+  return useMutation({
+    mutationFn: async (data: {
+      category_type: 'expense' | 'income';
+      codes: string[];
+      is_enabled: boolean;
+    }) => {
+      if (!user || !activeCompany) throw new Error('Not authenticated');
+      const companyId = activeCompany.company_id;
+
+      const rows = data.codes.map(code => ({
+        company_id: companyId,
+        category_type: data.category_type,
+        category_code: code,
+        is_enabled: data.is_enabled,
+      }));
+
+      const { error } = await supabase
+        .from('company_category_settings' as any)
+        .upsert(rows as any, { onConflict: 'company_id,category_type,category_code' });
       if (error) throw error;
     },
     onSuccess: () => {

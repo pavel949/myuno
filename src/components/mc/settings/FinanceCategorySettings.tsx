@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
-import { useCompanyCategorySettings, useToggleCategorySetting, useInitCategorySettings, useUpdateCategoryOverrides } from '@/hooks/useCompanyCategorySettings';
+import { useCompanyCategorySettings, useToggleCategorySetting, useInitCategorySettings, useUpdateCategoryOverrides, useBulkToggleCategorySettings } from '@/hooks/useCompanyCategorySettings';
 import { useFinancialCategories, useCreateFinancialCategory } from '@/hooks/useFinancialCategories';
 import {
   getCategoryDefaults, CLASS_LABELS, GROUP_LABELS, ALLOCATION_LABELS, CLASS_COLORS, GROUP_ORDER,
@@ -15,37 +15,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Loader2, Plus, Check, X, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
+import type { CategorySetting } from '@/hooks/useCompanyCategorySettings';
 
-// ─── Category Row with expandable classification editor ──────────────────
-function CategoryRow({
+// ─── Category Row (memoized) ─────────────────────────────────────────────
+const CategoryRow = memo(function CategoryRow({
   code, labelEn, labelRu, isEnabled, type, isRu, isPending,
-  onToggle, overrides,
+  onToggle, overrides, onOverride,
 }: {
   code: string; labelEn: string; labelRu: string;
   isEnabled: boolean; type: 'expense' | 'income';
   isRu: boolean; isPending: boolean;
   onToggle: () => void;
-  overrides: ReturnType<typeof useCompanyCategorySettings>['settings'] extends (infer T)[] | null ? T | undefined : never;
+  overrides: CategorySetting | undefined;
+  onOverride: (code: string, field: string, value: unknown) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const updateOverrides = useUpdateCategoryOverrides();
   const defaults = getCategoryDefaults(code, type);
 
-  const effectiveClass = (overrides as any)?.category_class || defaults.class;
-  const effectiveGroup = (overrides as any)?.category_group || defaults.group;
-  const effectiveProfit = (overrides as any)?.affects_net_profit ?? defaults.affectsProfit;
-  const effectiveTax = (overrides as any)?.is_tax_deductible ?? defaults.taxDeductible;
-  const effectiveAlloc = (overrides as any)?.allocation_method || defaults.allocation;
-
-  const handleOverride = (field: string, value: any) => {
-    updateOverrides.mutate({
-      category_type: type,
-      category_code: code,
-      [field]: value,
-    });
-  };
+  const effectiveClass = overrides?.category_class || defaults.class;
+  const effectiveGroup = overrides?.category_group || defaults.group;
+  const effectiveProfit = overrides?.affects_net_profit ?? defaults.affectsProfit;
+  const effectiveTax = overrides?.is_tax_deductible ?? defaults.taxDeductible;
+  const effectiveAlloc = overrides?.allocation_method || defaults.allocation;
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -65,7 +58,6 @@ function CategoryRow({
             {isRu ? labelRu : labelEn}
           </span>
 
-          {/* Classification chips */}
           <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
             {isRu ? CLASS_LABELS[effectiveClass as CategoryClass]?.ru : CLASS_LABELS[effectiveClass as CategoryClass]?.en}
           </Badge>
@@ -83,10 +75,9 @@ function CategoryRow({
 
         <CollapsibleContent>
           <div className="px-3 pb-3 pt-1 grid grid-cols-2 gap-3">
-            {/* Class */}
             <div>
               <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
-              <Select value={effectiveClass} onValueChange={v => handleOverride('category_class', v)}>
+              <Select value={effectiveClass} onValueChange={v => onOverride(code, 'category_class', v)}>
                 <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
@@ -96,10 +87,9 @@ function CategoryRow({
               </Select>
             </div>
 
-            {/* Group */}
             <div>
               <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
-              <Select value={effectiveGroup} onValueChange={v => handleOverride('category_group', v)}>
+              <Select value={effectiveGroup} onValueChange={v => onOverride(code, 'category_group', v)}>
                 <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {GROUP_ORDER.map(k => (
@@ -109,10 +99,9 @@ function CategoryRow({
               </Select>
             </div>
 
-            {/* Allocation */}
             <div>
               <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
-              <Select value={effectiveAlloc} onValueChange={v => handleOverride('allocation_method', v)}>
+              <Select value={effectiveAlloc} onValueChange={v => onOverride(code, 'allocation_method', v)}>
                 <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(Object.keys(ALLOCATION_LABELS) as AllocationMethod[]).map(k => (
@@ -122,15 +111,14 @@ function CategoryRow({
               </Select>
             </div>
 
-            {/* Toggles */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
-                <Switch checked={effectiveProfit} onCheckedChange={v => handleOverride('affects_net_profit', v)} className="scale-75" />
+                <Switch checked={effectiveProfit} onCheckedChange={v => onOverride(code, 'affects_net_profit', v)} className="scale-75" />
               </div>
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
-                <Switch checked={effectiveTax} onCheckedChange={v => handleOverride('is_tax_deductible', v)} className="scale-75" />
+                <Switch checked={effectiveTax} onCheckedChange={v => onOverride(code, 'is_tax_deductible', v)} className="scale-75" />
               </div>
             </div>
           </div>
@@ -138,24 +126,24 @@ function CategoryRow({
       </div>
     </Collapsible>
   );
-}
+});
 
-// ─── Group header ────────────────────────────────────────────────────────
-function GroupSection({
-  group, cats, type, isRu, enabledCodes, settings, isPending, onToggle, onBulkToggle,
+// ─── Group header (memoized) ─────────────────────────────────────────────
+const GroupSection = memo(function GroupSection({
+  group, cats, type, isRu, enabledCodes, settingsMap, isPending, onToggle, onBulkToggle, onOverride,
 }: {
   group: CategoryGroup;
   cats: { value: string; labelEn: string; labelRu: string }[];
   type: 'expense' | 'income';
   isRu: boolean;
   enabledCodes: Set<string> | null;
-  settings: any[] | null;
+  settingsMap: Map<string, CategorySetting>;
   isPending: boolean;
   onToggle: (code: string, enabled: boolean) => void;
   onBulkToggle: (codes: string[], enable: boolean) => void;
+  onOverride: (code: string, field: string, value: unknown) => void;
 }) {
   const enabledInGroup = cats.filter(c => enabledCodes ? enabledCodes.has(c.value) : true).length;
-  const settingsMap = new Map((settings || []).map((s: any) => [s.category_code, s]));
 
   return (
     <div className="space-y-0.5">
@@ -191,12 +179,13 @@ function GroupSection({
             isPending={isPending}
             onToggle={() => onToggle(cat.value, isEnabled)}
             overrides={settingsMap.get(cat.value)}
+            onOverride={onOverride}
           />
         );
       })}
     </div>
   );
-}
+});
 
 // ─── Main section per type ──────────────────────────────────────────────
 function CategorySection({ type }: { type: 'expense' | 'income' }) {
@@ -205,6 +194,8 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const standardCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
   const { enabledCodes, hasSettings, isLoading, settings } = useCompanyCategorySettings(type);
   const toggleMutation = useToggleCategorySetting();
+  const bulkToggleMutation = useBulkToggleCategorySettings();
+  const updateOverrides = useUpdateCategoryOverrides();
   const initMutation = useInitCategorySettings();
   const { categories } = useFinancialCategories(type);
   const createCategory = useCreateFinancialCategory();
@@ -217,22 +208,32 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const [newAffectsProfit, setNewAffectsProfit] = useState(true);
   const [newTaxDeductible, setNewTaxDeductible] = useState(false);
 
-  const handleInit = () => initMutation.mutate(type);
+  const handleInit = useCallback(() => initMutation.mutate(type), [initMutation, type]);
 
-  const handleToggle = (code: string, currentEnabled: boolean) => {
+  const handleToggle = useCallback((code: string, currentEnabled: boolean) => {
     toggleMutation.mutate({ category_type: type, category_code: code, is_enabled: !currentEnabled });
-  };
+  }, [toggleMutation, type]);
 
-  const handleBulkToggle = (codes: string[], enable: boolean) => {
-    codes.forEach(code => {
+  // Single batched DB call instead of N individual mutations
+  const handleBulkToggle = useCallback((codes: string[], enable: boolean) => {
+    const codesToChange = codes.filter(code => {
       const isEnabled = enabledCodes ? enabledCodes.has(code) : true;
-      if (isEnabled !== enable) {
-        toggleMutation.mutate({ category_type: type, category_code: code, is_enabled: enable });
-      }
+      return isEnabled !== enable;
     });
-  };
+    if (codesToChange.length === 0) return;
+    bulkToggleMutation.mutate({ category_type: type, codes: codesToChange, is_enabled: enable });
+  }, [bulkToggleMutation, type, enabledCodes]);
 
-  const handleAddCustom = async () => {
+  // Single shared override handler lifted from CategoryRow
+  const handleOverride = useCallback((code: string, field: string, value: unknown) => {
+    updateOverrides.mutate({
+      category_type: type,
+      category_code: code,
+      [field]: value,
+    });
+  }, [updateOverrides, type]);
+
+  const handleAddCustom = useCallback(async () => {
     if (!newNameEn.trim()) return;
     const code = newNameEn.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
     await createCategory.mutateAsync({
@@ -252,31 +253,43 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
     setNewGroup('operations');
     setNewAffectsProfit(true);
     setNewTaxDeductible(false);
-  };
+  }, [newNameEn, newNameRu, newClass, newGroup, newAffectsProfit, newTaxDeductible, createCategory, type]);
+
+  // Memoize grouped categories (static computation based on constants)
+  const groupedCategories = useMemo(() => {
+    const map = new Map<CategoryGroup, typeof standardCategories>();
+    for (const cat of standardCategories) {
+      const defaults = getCategoryDefaults(cat.value, type);
+      const grp = defaults.group;
+      if (!map.has(grp)) map.set(grp, []);
+      map.get(grp)!.push(cat);
+    }
+    return map;
+  }, [standardCategories, type]);
+
+  // Memoize settings map to avoid rebuilding in each GroupSection
+  const settingsMap = useMemo(() => {
+    return new Map((settings || []).map(s => [s.category_code, s]));
+  }, [settings]);
+
+  const customCats = useMemo(() => categories.filter(c => c.isCustom), [categories]);
+
+  const { enabledCount, classCount } = useMemo(() => {
+    const count = enabledCodes ? enabledCodes.size : standardCategories.length;
+    const cc: Record<string, number> = {};
+    for (const cat of standardCategories) {
+      const d = getCategoryDefaults(cat.value, type);
+      const isOn = enabledCodes ? enabledCodes.has(cat.value) : true;
+      if (isOn) cc[d.class] = (cc[d.class] || 0) + 1;
+    }
+    return { enabledCount: count, classCount: cc };
+  }, [standardCategories, enabledCodes, type]);
 
   if (isLoading) {
     return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {isRu ? 'Загрузка...' : 'Loading...'}</div>;
   }
 
-  // Group standard categories by their default group
-  const groupedCategories = new Map<CategoryGroup, typeof standardCategories>();
-  for (const cat of standardCategories) {
-    const defaults = getCategoryDefaults(cat.value, type);
-    const grp = defaults.group;
-    if (!groupedCategories.has(grp)) groupedCategories.set(grp, []);
-    groupedCategories.get(grp)!.push(cat);
-  }
-
-  const enabledCount = enabledCodes ? enabledCodes.size : standardCategories.length;
-  const customCats = categories.filter(c => c.isCustom);
-
-  // Count by class for summary
-  const classCount: Record<string, number> = {};
-  for (const cat of standardCategories) {
-    const d = getCategoryDefaults(cat.value, type);
-    const isEnabled = enabledCodes ? enabledCodes.has(cat.value) : true;
-    if (isEnabled) classCount[d.class] = (classCount[d.class] || 0) + 1;
-  }
+  const isMutating = toggleMutation.isPending || bulkToggleMutation.isPending;
 
   return (
     <div className="space-y-4">
@@ -328,16 +341,16 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
               type={type}
               isRu={isRu}
               enabledCodes={enabledCodes}
-              settings={settings}
-              isPending={toggleMutation.isPending}
+              settingsMap={settingsMap}
+              isPending={isMutating}
               onToggle={handleToggle}
               onBulkToggle={handleBulkToggle}
+              onOverride={handleOverride}
             />
           ))}
         </div>
       )}
 
-      {/* Custom categories */}
       {customCats.length > 0 && (
         <div className="pt-2 border-t border-border">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
@@ -364,7 +377,6 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         {isRu ? 'Добавить свою' : 'Add custom'}
       </Button>
 
-      {/* Enhanced Add custom dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
