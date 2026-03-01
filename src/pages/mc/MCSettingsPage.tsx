@@ -2,7 +2,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FinanceCategorySettings } from '@/components/mc/settings/FinanceCategorySettings';
-import { Settings, DollarSign, Target, Wrench } from 'lucide-react';
+import { CompanyProfileSettings } from '@/components/mc/settings/CompanyProfileSettings';
+import { Settings, DollarSign, Target, Wrench, Building2 } from 'lucide-react';
 import React, { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
@@ -39,8 +40,8 @@ export default function MCSettingsPage() {
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="w-full">
           <TabsTrigger value="general" className="gap-1.5">
-            <Settings className="h-3.5 w-3.5" />
-            {isRu ? 'Общие' : 'General'}
+            <Building2 className="h-3.5 w-3.5" />
+            {isRu ? 'Профиль' : 'Profile'}
           </TabsTrigger>
           <TabsTrigger value="finance" className="gap-1.5">
             <DollarSign className="h-3.5 w-3.5" />
@@ -57,16 +58,7 @@ export default function MCSettingsPage() {
         </TabsList>
 
         <TabsContent value="general">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-base font-semibold text-foreground mb-4">
-              {isRu ? 'Общие настройки' : 'General Settings'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isRu
-                ? 'Валюта, язык отчётов, часовой пояс — скоро.'
-                : 'Currency, report language, timezone — coming soon.'}
-            </p>
-          </div>
+          <CompanyProfileSettings />
         </TabsContent>
 
         <TabsContent value="finance">
