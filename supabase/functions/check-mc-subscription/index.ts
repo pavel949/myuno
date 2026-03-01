@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     // Get company data
     const { data: company } = await supabase
       .from("management_companies")
-      .select("paid_slots, stripe_subscription_id, stripe_customer_id")
+      .select("paid_slots, free_slots, stripe_subscription_id, stripe_customer_id")
       .eq("id", company_id)
       .single();
 
@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
 
     const usedSlots = activeSlots || 0;
     const paidSlots = company.paid_slots || 0;
+    const freeSlots = company.free_slots || 0;
+    const totalSlots = paidSlots + freeSlots;
 
     // Check Stripe subscription status if exists
     let subscriptionStatus = "none";
@@ -78,9 +80,11 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         paid_slots: paidSlots,
+        free_slots: freeSlots,
+        total_slots: totalSlots,
         used_slots: usedSlots,
-        can_activate_more: usedSlots < paidSlots,
-        available_slots: Math.max(0, paidSlots - usedSlots),
+        can_activate_more: usedSlots < totalSlots,
+        available_slots: Math.max(0, totalSlots - usedSlots),
         subscription_status: subscriptionStatus,
         subscription_end: subscriptionEnd,
       }),

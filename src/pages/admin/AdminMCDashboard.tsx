@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AdminMCSubscriptions from '@/components/admin/mc/AdminMCSubscriptions';
 import {
   Sheet,
   SheetContent,
@@ -119,6 +120,7 @@ export default function AdminMCDashboard() {
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState('all');
   const [selectedMC, setSelectedMC] = useState<MCWithStats | null>(null);
+  const [pageTab, setPageTab] = useState('overview');
 
   const filtered = useMemo(() => {
     let list = companies;
@@ -167,70 +169,86 @@ export default function AdminMCDashboard() {
   return (
     <div className="p-4 md:p-6 space-y-5">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
-          {isRu ? 'Управляющие компании — Обзор' : 'Management Companies — Overview'}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {isRu ? 'Мониторинг всех подключённых УК' : 'Monitor all connected MCs'}
-        </p>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <KPICard icon={Building2} label={isRu ? 'Всего УК' : 'Total MCs'} value={stats.total} />
-        <KPICard icon={Zap} label={isRu ? 'Активных' : 'Active'} value={stats.active} accent />
-        <KPICard icon={CreditCard} label={isRu ? 'С подпиской' : 'Paid'} value={stats.paid} />
-        <KPICard icon={Home} label={isRu ? 'Объектов' : 'Properties'} value={stats.totalProperties} />
-        <KPICard icon={Activity} label={isRu ? 'Платных слотов' : 'Active Slots'} value={stats.totalSlots} />
-        <KPICard icon={Users} label={isRu ? 'Сотрудников' : 'Team Members'} value={stats.totalMembers} />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
-          <TabsList className="h-9">
-            <TabsTrigger value="all" className="text-xs">{isRu ? 'Все' : 'All'} ({companies.length})</TabsTrigger>
-            <TabsTrigger value="active" className="text-xs">{isRu ? 'Активные' : 'Active'}</TabsTrigger>
-            <TabsTrigger value="paid" className="text-xs">{isRu ? 'Платные' : 'Paid'}</TabsTrigger>
-            <TabsTrigger value="trial" className="text-xs">{isRu ? 'Триал' : 'Trial'}</TabsTrigger>
-            <TabsTrigger value="inactive" className="text-xs">{isRu ? 'Неакт.' : 'Inactive'}</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={isRu ? 'Поиск УК...' : 'Search MCs...'}
-            className="pl-9 h-9"
-          />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary" />
+            {isRu ? 'Управляющие компании' : 'Management Companies'}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {isRu ? 'Мониторинг всех подключённых УК' : 'Monitor all connected MCs'}
+          </p>
         </div>
       </div>
 
-      {/* Company List */}
-      {filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Building2 className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">{isRu ? 'Нет компаний' : 'No companies found'}</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map(mc => (
-            <MCRow key={mc.id} mc={mc} isRu={isRu} onClick={() => setSelectedMC(mc)} />
-          ))}
-        </div>
-      )}
+      {/* Page-level tabs */}
+      <Tabs value={pageTab} onValueChange={setPageTab}>
+        <TabsList>
+          <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
+          <TabsTrigger value="subscriptions">{isRu ? 'Подписки' : 'Subscriptions'}</TabsTrigger>
+        </TabsList>
 
-      {/* Detail Sheet */}
-      <Sheet open={!!selectedMC} onOpenChange={v => { if (!v) setSelectedMC(null); }}>
-        <SheetContent className="sm:max-w-lg overflow-y-auto">
-          {selectedMC && <MCDetail mc={selectedMC} isRu={isRu} />}
-        </SheetContent>
-      </Sheet>
+        <TabsContent value="overview" className="mt-4 space-y-5">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <KPICard icon={Building2} label={isRu ? 'Всего УК' : 'Total MCs'} value={stats.total} />
+            <KPICard icon={Zap} label={isRu ? 'Активных' : 'Active'} value={stats.active} accent />
+            <KPICard icon={CreditCard} label={isRu ? 'С подпиской' : 'Paid'} value={stats.paid} />
+            <KPICard icon={Home} label={isRu ? 'Объектов' : 'Properties'} value={stats.totalProperties} />
+            <KPICard icon={Activity} label={isRu ? 'Платных слотов' : 'Active Slots'} value={stats.totalSlots} />
+            <KPICard icon={Users} label={isRu ? 'Сотрудников' : 'Team Members'} value={stats.totalMembers} />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
+              <TabsList className="h-9">
+                <TabsTrigger value="all" className="text-xs">{isRu ? 'Все' : 'All'} ({companies.length})</TabsTrigger>
+                <TabsTrigger value="active" className="text-xs">{isRu ? 'Активные' : 'Active'}</TabsTrigger>
+                <TabsTrigger value="paid" className="text-xs">{isRu ? 'Платные' : 'Paid'}</TabsTrigger>
+                <TabsTrigger value="trial" className="text-xs">{isRu ? 'Триал' : 'Trial'}</TabsTrigger>
+                <TabsTrigger value="inactive" className="text-xs">{isRu ? 'Неакт.' : 'Inactive'}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder={isRu ? 'Поиск УК...' : 'Search MCs...'}
+                className="pl-9 h-9"
+              />
+            </div>
+          </div>
+
+          {/* Company List */}
+          {filtered.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Building2 className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
+                <p className="text-sm text-muted-foreground">{isRu ? 'Нет компаний' : 'No companies found'}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {filtered.map(mc => (
+                <MCRow key={mc.id} mc={mc} isRu={isRu} onClick={() => setSelectedMC(mc)} />
+              ))}
+            </div>
+          )}
+
+          {/* Detail Sheet */}
+          <Sheet open={!!selectedMC} onOpenChange={v => { if (!v) setSelectedMC(null); }}>
+            <SheetContent className="sm:max-w-lg overflow-y-auto">
+              {selectedMC && <MCDetail mc={selectedMC} isRu={isRu} />}
+            </SheetContent>
+          </Sheet>
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="mt-4">
+          <AdminMCSubscriptions />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
