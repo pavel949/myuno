@@ -164,7 +164,9 @@ export const HeroBlock = memo(function HeroBlock() {
           <div>
             <h1 className="text-2xl font-bold text-white leading-tight">{greeting}</h1>
             <p className="text-sm text-white/60 mt-1">
-              {isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?'}
+              {user 
+                ? (isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?')
+                : (isRu ? 'Всё для жизни на Пхукете в одном месте' : 'Everything for life in Phuket, in one place')}
             </p>
             
             {/* Loyalty + streak chips */}
