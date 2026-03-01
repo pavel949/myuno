@@ -174,6 +174,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
       if (controller.signal.aborted) return;
 
       if (categoryData) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         categoryData.forEach((cat: any) => {
           let path = `/${cat.slug}`;
           if (cat.mini_app_type) {
@@ -231,6 +232,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         if (controller.signal.aborted) return;
 
         if (listingsData) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           listingsData.forEach((item: any) => {
             const pathPrefix = LISTING_VERTICAL_PATHS[item.vertical] || `/${item.vertical}/`;
             allResults.push({
@@ -284,6 +286,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
           }
           if (!data) return [];
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return data.map((item: any) => ({
             id: item[config.idField],
             type: config.type,

@@ -49,7 +49,8 @@ export interface Vehicle {
   class_label: string | null;
 }
 
-function transformVehicle(raw: any): Vehicle {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformVehicle(raw: Record<string, any>): Vehicle {
   const attrs = raw.attributes || {};
   return {
     id: raw.id,

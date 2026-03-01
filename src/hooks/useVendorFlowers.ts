@@ -12,7 +12,7 @@ export interface VendorFlowerShop {
   email?: string;
   cover_image?: string;
   images?: string[];
-  working_hours?: any;
+  working_hours?: Record<string, unknown>;
   delivery_available?: boolean;
   delivery_fee?: number;
   min_order_amount?: number;

@@ -16,7 +16,7 @@ export interface VendorRestaurant {
   price_range?: number;
   cover_image?: string;
   images?: string[];
-  working_hours?: any;
+  working_hours?: Record<string, unknown>;
   delivery_available?: boolean;
   delivery_fee?: number;
   delivery_time?: string;
