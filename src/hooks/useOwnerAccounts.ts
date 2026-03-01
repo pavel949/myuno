@@ -91,7 +91,7 @@ export function useOwnerAccounts() {
           : Promise.resolve({ data: [] as any[] }),
         supabase.from('crm_documents').select('contact_id, document_type').eq('company_id', companyId).in('contact_id', contactIds),
         propertyIds.length > 0
-          ? supabase.from('property_financials').select('property_id, type, amount').in('property_id', propertyIds)
+          ? supabase.from('property_financials').select('property_id, transaction_type, amount').in('property_id', propertyIds)
           : Promise.resolve({ data: [] as any[] }),
         propertyIds.length > 0
           ? supabase.from('property_bookings').select('property_id, check_in, check_out, status').in('property_id', propertyIds).in('status', ['confirmed', 'completed', 'checked_in'])
@@ -112,10 +112,10 @@ export function useOwnerAccounts() {
         // Financial aggregation
         const ownerFinancials = allFinancials.filter((f: any) => ownerPropIds.includes(f.property_id));
         const totalRevenue = ownerFinancials
-          .filter((f: any) => f.type === 'income')
+          .filter((f: any) => f.transaction_type === 'income')
           .reduce((s: number, f: any) => s + (f.amount || 0), 0);
         const totalExpenses = ownerFinancials
-          .filter((f: any) => f.type === 'expense')
+          .filter((f: any) => f.transaction_type === 'expense')
           .reduce((s: number, f: any) => s + (f.amount || 0), 0);
 
         // Commission from terms
@@ -124,7 +124,7 @@ export function useOwnerAccounts() {
           if (!t?.commission_rate) return sum;
           // Rough estimate: commission_rate% of revenue for this property
           const propRevenue = allFinancials
-            .filter((f: any) => f.property_id === p.id && f.type === 'income')
+            .filter((f: any) => f.property_id === p.id && f.transaction_type === 'income')
             .reduce((s: number, f: any) => s + (f.amount || 0), 0);
           return sum + (propRevenue * (t.commission_rate / 100));
         }, 0);

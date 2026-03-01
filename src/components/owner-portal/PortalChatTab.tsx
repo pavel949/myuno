@@ -40,6 +40,7 @@ export function PortalChatTab({ propertyId, senderRole = 'owner' }: Props) {
     if (unread.length > 0) {
       markAsRead(unread.map(m => m.id));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, senderRole]);
 
   const handleSend = async () => {
