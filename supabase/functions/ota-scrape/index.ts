@@ -12,13 +12,31 @@ interface ListingData {
   bedrooms?: number;
   bathrooms?: number;
   max_guests?: number;
-  amenities?: string[];
+  area_sqm?: number;
+  floor?: number;
+  view_type?: string;
+  furnishing_level?: string;
+  equipment?: string[];
+  highlights?: string[];
+  amenities?: string[]; // legacy, mapped to equipment
   house_rules?: string;
+  pets_allowed?: boolean;
+  smoking_allowed?: boolean;
+  parties_allowed?: boolean;
+  children_friendly?: boolean;
+  check_in_time?: string;
+  check_out_time?: string;
   address?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
   photos?: Array<{ url: string; order?: number }>;
   cover_photo?: string;
   price_per_night?: number;
   currency?: string;
+  min_stay_nights?: number;
+  pool_type?: string;
+  parking_type?: string;
   rating?: number;
   review_count?: number;
 }
@@ -59,33 +77,79 @@ async function extractWithAI(markdown: string, platform: string, platformName: s
         messages: [
           {
             role: 'system',
-            content: `You are a property listing data extractor. Extract structured data from an OTA listing page.
+            content: `You are a property listing data extractor. Extract ALL available data from an OTA listing page.
 Context: ${hint}
 
 Return a JSON object with these fields (omit if not found):
+
+## Basic Info
 - title: string (property name/title)
 - description: string (main description, max 2000 chars)  
 - property_type: "apartment" | "villa" | "house" | "condo" | "studio" | "hotel_room" | "townhouse"
 - bedrooms: number
 - bathrooms: number
 - max_guests: number
-- amenities: string[] (standardized English names: wifi, kitchen, pool, air_conditioning, etc.)
-- house_rules: string
+- area_sqm: number (total area in square meters)
+- floor: number
+- view_type: "sea" | "mountain" | "pool" | "garden" | "city" | "ocean" | "lake" | "forest" | "none"
+- furnishing_level: "fully_furnished" | "partially_furnished" | "unfurnished"
+
+## Location
 - address: string (full address or area/district)
-- price_per_night: number (numeric only, no currency symbol)
+- district: string (neighborhood/area name)
+
+## Pricing
+- price_per_night: number (numeric only)
 - currency: "THB" | "USD" | "EUR" | "RUB" | "GBP" (detect from symbols ฿$€₽£)
+- min_stay_nights: number
 - rating: number (e.g. 4.8)
 - review_count: number
 
-IMPORTANT: Return ONLY valid JSON, no markdown code fences.`,
+## Equipment (CRITICAL — extract ALL amenities into this array using EXACTLY these IDs):
+### Essentials: wifi, ac, heating, hot_water, towels, bed_linens, extra_pillows, hangers, iron, closet
+### Kitchen: kitchen, kitchenette, fridge, freezer, microwave, oven, stove, induction, dishwasher, coffee_machine, kettle, toaster, blender, rice_cooker, dishes, cookware, wine_glasses, dining_table, bar_counter
+### Bathroom: bathtub, shower, rain_shower, hair_dryer, shampoo, body_soap, conditioner, bidet
+### Laundry: washer, dryer, washer_dryer, drying_rack, ironing_board, laundry_detergent
+### Entertainment: tv, smart_tv, netflix, youtube, cable_tv, sound_system, bluetooth_speaker, game_console, books, board_games
+### Workspace: desk, office_chair, monitor, printer, fast_wifi
+### Outdoor: balcony, terrace, patio, garden, rooftop, outdoor_furniture, bbq, outdoor_dining, sun_loungers, hammock
+### Pool & Spa: private_pool, infinity_pool, plunge_pool, heated_pool, jacuzzi, sauna, steam_room
+### Family: crib, high_chair, baby_bath, baby_monitor, kids_toys, kids_books, child_safety, pool_fence
+### Fitness: home_gym, yoga_mat, weights, exercise_bike, treadmill
+### Parking: free_parking, paid_parking, garage, covered_parking, ev_charger, bicycles, scooter
+### Safety: safe, smoke_detector, carbon_detector, fire_extinguisher, first_aid, security_cameras, smart_lock
+### Climate: ceiling_fan, portable_fan, dehumidifier, mosquito_net, blackout_curtains
+### Policies: smoking_allowed, pets_allowed, events_allowed, long_term_stays
+
+Return equipment as: equipment: string[] (array of matching IDs from the list above)
+
+## Pool type (separate field)
+- pool_type: "private" | "shared" | "rooftop" | "none"
+- parking_type: "free" | "paid" | "none"
+
+## House Rules
+- house_rules: string (summary of rules)
+- pets_allowed: boolean
+- smoking_allowed: boolean  
+- parties_allowed: boolean
+- children_friendly: boolean
+- check_in_time: string (e.g. "14:00")
+- check_out_time: string (e.g. "12:00")
+
+## Highlights (pick up to 8 most distinctive features using these IDs):
+sea_view, private_pool, beachfront, mountain_view, rooftop_terrace, infinity_pool, tropical_garden, walk_to_beach, panoramic_view, sunset_view, waterfront, lush_greenery, jacuzzi, smart_home, home_theater, wine_cellar, private_chef, concierge, gym, yoga_deck, pet_friendly, ev_charging, gated_community, cctv_24h, keyless_entry
+
+Return highlights as: highlights: string[]
+
+IMPORTANT: Return ONLY valid JSON, no markdown code fences. Extract as many fields as possible.`,
           },
           {
             role: 'user',
-            content: markdown.slice(0, 8000),
+            content: markdown.slice(0, 12000), // More context for better extraction
           },
         ],
         temperature: 0.1,
-        max_tokens: 1500,
+        max_tokens: 3000,
       }),
     });
 
@@ -107,9 +171,10 @@ IMPORTANT: Return ONLY valid JSON, no markdown code fences.`,
   }
 }
 
-// Fallback regex-based parser (multilingual)
+// Fallback regex-based parser (multilingual) — maps to equipment IDs
 function parseWithRegex(markdown: string): ListingData {
   const data: ListingData = {};
+  const lower = markdown.toLowerCase();
   
   // Title
   const titleMatch = markdown.match(/^#\s*(.+?)$/m) || markdown.match(/\*\*(.{10,80}?)\*\*/);
@@ -126,6 +191,14 @@ function parseWithRegex(markdown: string): ListingData {
   // Bathrooms
   const bathMatch = markdown.match(/(\d+\.?\d*)\s*(?:baths?|bathrooms?|ванн[а-яё]*|санузл[а-яё]*)/i);
   if (bathMatch) data.bathrooms = parseFloat(bathMatch[1]);
+  
+  // Area
+  const areaMatch = markdown.match(/(\d+)\s*(?:sq\.?\s*m|м²|кв\.?\s*м|square\s*met)/i);
+  if (areaMatch) data.area_sqm = parseInt(areaMatch[1]);
+  
+  // Floor
+  const floorMatch = markdown.match(/(\d+)\s*(?:floor|этаж)/i);
+  if (floorMatch) data.floor = parseInt(floorMatch[1]);
   
   // Price
   const pricePatterns = [
@@ -149,14 +222,58 @@ function parseWithRegex(markdown: string): ListingData {
   const descMatch = markdown.match(/(?:description|описание|about|о жилье|об этом)\s*\n+([\s\S]{50,2000}?)(?=\n#|\n\*\*|$)/i);
   if (descMatch) data.description = descMatch[1].trim().slice(0, 2000);
   
-  // Amenities
-  const amenityKeywords = [
-    'wifi', 'kitchen', 'pool', 'air conditioning', 'parking', 'washer', 'tv',
-    'balcony', 'gym', 'elevator', 'dishwasher', 'microwave',
-    'бассейн', 'кухня', 'кондиционер', 'парковка', 'лифт', 'балкон',
-  ];
-  const lower = markdown.toLowerCase();
-  data.amenities = amenityKeywords.filter(a => lower.includes(a));
+  // Equipment — map keywords to equipment IDs
+  const equipmentMap: Record<string, string[]> = {
+    'wifi': ['wifi'], 'wi-fi': ['wifi'], 'вай-фай': ['wifi'], 'интернет': ['wifi'],
+    'air conditioning': ['ac'], 'кондиционер': ['ac'], 'aircon': ['ac'],
+    'heating': ['heating'], 'отопление': ['heating'],
+    'hot water': ['hot_water'], 'горячая вода': ['hot_water'],
+    'kitchen': ['kitchen'], 'кухня': ['kitchen'], 'full kitchen': ['kitchen'],
+    'kitchenette': ['kitchenette'], 'мини-кухня': ['kitchenette'],
+    'refrigerator': ['fridge'], 'холодильник': ['fridge'], 'fridge': ['fridge'],
+    'microwave': ['microwave'], 'микроволнов': ['microwave'],
+    'oven': ['oven'], 'духовка': ['oven'],
+    'dishwasher': ['dishwasher'], 'посудомоечн': ['dishwasher'],
+    'coffee': ['coffee_machine'], 'кофемашин': ['coffee_machine'], 'кофеварк': ['coffee_machine'],
+    'kettle': ['kettle'], 'чайник': ['kettle'],
+    'washer': ['washer'], 'washing machine': ['washer'], 'стиральн': ['washer'],
+    'dryer': ['dryer'], 'сушильн': ['dryer'],
+    'iron': ['iron'], 'утюг': ['iron'],
+    'tv': ['tv'], 'телевизор': ['tv'], 'television': ['tv'],
+    'smart tv': ['smart_tv'],
+    'netflix': ['netflix'],
+    'balcony': ['balcony'], 'балкон': ['balcony'],
+    'terrace': ['terrace'], 'терраса': ['terrace'],
+    'pool': ['private_pool'], 'бассейн': ['private_pool'],
+    'jacuzzi': ['jacuzzi'], 'джакузи': ['jacuzzi'], 'hot tub': ['jacuzzi'],
+    'sauna': ['sauna'], 'сауна': ['sauna'],
+    'gym': ['home_gym'], 'спортзал': ['home_gym'], 'fitness': ['home_gym'],
+    'parking': ['free_parking'], 'парковка': ['free_parking'],
+    'safe': ['safe'], 'сейф': ['safe'],
+    'hair dryer': ['hair_dryer'], 'фен': ['hair_dryer'],
+    'bathtub': ['bathtub'], 'ванна': ['bathtub'],
+    'shower': ['shower'], 'душ': ['shower'],
+    'bbq': ['bbq'], 'гриль': ['bbq'], 'барбекю': ['bbq'],
+    'desk': ['desk'], 'рабочее место': ['desk'], 'workspace': ['desk'],
+    'elevator': ['elevator_access'], 'лифт': ['elevator_access'],
+    'fan': ['ceiling_fan'], 'вентилятор': ['ceiling_fan'],
+  };
+  
+  const foundEquipment = new Set<string>();
+  for (const [keyword, ids] of Object.entries(equipmentMap)) {
+    if (lower.includes(keyword)) {
+      ids.forEach(id => foundEquipment.add(id));
+    }
+  }
+  data.equipment = Array.from(foundEquipment);
+  
+  // Pool detection
+  if (lower.includes('private pool') || lower.includes('частный бассейн')) data.pool_type = 'private';
+  else if (lower.includes('pool') || lower.includes('бассейн')) data.pool_type = 'shared';
+  
+  // House rules detection
+  data.pets_allowed = lower.includes('pets allowed') || lower.includes('можно с животными') || lower.includes('pet-friendly');
+  data.children_friendly = !lower.includes('no children') && !lower.includes('adults only');
   
   return data;
 }

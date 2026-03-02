@@ -216,20 +216,61 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
     if (!listing) return;
     
     const extracted: Record<string, any> = {};
+    
+    // Basic info
     if (listing.title) extracted.title = listing.title;
     if (listing.description) extracted.description = listing.description;
     if (listing.bedrooms) extracted.bedrooms = listing.bedrooms;
     if (listing.bathrooms) extracted.bathrooms = listing.bathrooms;
     if (listing.maxGuests || listing.max_guests) extracted.max_guests = listing.maxGuests || listing.max_guests;
+    if (listing.area_sqm) extracted.area_sqm = listing.area_sqm;
+    
+    // Property type
+    if (listing.propertyType || listing.property_type) {
+      extracted.property_type = listing.propertyType || listing.property_type;
+    }
+    
+    // Location
+    if (listing.address) extracted.address = listing.address;
+    if (listing.district) extracted.district = listing.district;
+    if (listing.lat) extracted.lat = listing.lat;
+    if (listing.lng) extracted.lng = listing.lng;
+    
+    // Pricing
     if (listing.pricePerNight || listing.price_per_night) {
       extracted.price_per_night = String(listing.pricePerNight || listing.price_per_night);
     }
     if (listing.currency) extracted.currency = listing.currency;
-    if (listing.propertyType || listing.property_type) {
-      extracted.property_type = listing.propertyType || listing.property_type;
+    if (listing.min_stay_nights) extracted.min_stay_nights = listing.min_stay_nights;
+    
+    // Equipment (amenities mapped to equipment IDs)
+    const equipmentIds = listing.equipment || listing.amenities;
+    if (equipmentIds?.length > 0) {
+      extracted.equipment = equipmentIds;
     }
-    if (listing.address) extracted.address = listing.address;
-    if (listing.amenities) extracted.amenities = listing.amenities;
+    
+    // Highlights
+    if (listing.highlights?.length > 0) {
+      extracted.highlights = listing.highlights;
+    }
+    
+    // House rules
+    if (listing.house_rules) extracted.house_rules = listing.house_rules;
+    if (listing.pets_allowed !== undefined) extracted.pets_allowed = listing.pets_allowed;
+    if (listing.smoking_allowed !== undefined) extracted.smoking_allowed = listing.smoking_allowed;
+    if (listing.parties_allowed !== undefined) extracted.parties_allowed = listing.parties_allowed;
+    if (listing.children_friendly !== undefined) extracted.children_friendly = listing.children_friendly;
+    if (listing.check_in_time) extracted.check_in_time = listing.check_in_time;
+    if (listing.check_out_time) extracted.check_out_time = listing.check_out_time;
+    
+    // Physical attributes
+    if (listing.floor) extracted.floor = listing.floor;
+    if (listing.view_type) extracted.view_type = listing.view_type;
+    if (listing.furnishing_level) extracted.furnishing_level = listing.furnishing_level;
+    if (listing.pool_type) extracted.pool_type = listing.pool_type;
+    if (listing.parking_type) extracted.parking_type = listing.parking_type;
+    
+    // Photos
     if (listing.photos?.length > 0) {
       extracted.images = listing.photos.map((p: any) => typeof p === 'string' ? p : p.url);
     }
