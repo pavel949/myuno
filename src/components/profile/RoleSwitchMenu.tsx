@@ -35,8 +35,8 @@ export function RoleSwitchMenu({ compact = false, className }: RoleSwitchMenuPro
     {
       key: 'owner',
       icon: Building2,
-      labelEn: 'Hosting',
-      labelRu: 'Владелец',
+      labelEn: 'Management',
+      labelRu: 'Управление',
       path: '/owner',
       available: hasRole('owner') || hasRole('admin'),
       color: 'bg-accent-teal',
