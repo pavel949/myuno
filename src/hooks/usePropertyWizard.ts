@@ -548,7 +548,9 @@ export function usePropertyWizard() {
     title: formData.title,
     titleRu: formData.title_ru,
     coverImage: formData.cover_image,
-    images: formData.images,
+    images: formData.cover_image 
+      ? [formData.cover_image, ...formData.images] 
+      : formData.images,
     propertyType: formData.property_type,
     district: formData.district,
     address: formData.address,
@@ -558,6 +560,18 @@ export function usePropertyWizard() {
     areaSqm: formData.area_sqm,
     pricePerNight: formData.price_per_night,
     instantBooking: formData.instant_booking,
+    floor: formData.floor,
+    unitNumber: formData.unit_number,
+    totalFloors: formData.total_floors,
+    plotSizeSqm: formData.plot_size_sqm,
+    poolType: formData.pool_type,
+    gardenType: formData.garden_type,
+    parkingType: formData.parking_type,
+    viewType: formData.view_type,
+    furnishingLevel: formData.furnishing_level,
+    equipment: formData.equipment,
+    lat: formData.lat,
+    lng: formData.lng,
   }), [formData]);
 
   // Clear draft on successful submission
@@ -579,12 +593,13 @@ export function usePropertyWizard() {
         title, title_ru, description, description_ru,
         rental_platforms, custom_platform, platform_listed,
         is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
-        smoking_allowed,
+        smoking_allowed, seasonal_pricing,
         ...cleanData 
       } = formData;
 
       const draftPayload: any = {
         ...cleanData,
+        seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,
         area_sqm: area_sqm ? Number(area_sqm) : undefined,
         price_per_night: price_per_night ? Number(price_per_night) : undefined,
         deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,

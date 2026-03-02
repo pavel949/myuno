@@ -542,6 +542,12 @@ export default function OwnerProperties() {
                     {isRu ? 'В управлении' : 'Managed'}
                   </Badge>
                 )}
+                {!property.lat && !property.lng && (
+                  <Badge variant="outline" className="absolute top-2 right-2 z-10 text-[10px] bg-warning/10 text-warning border-warning/30">
+                    <Map className="h-3 w-3 mr-0.5" />
+                    {isRu ? 'Нет координат' : 'No coords'}
+                  </Badge>
+                )}
                 <PropertyCard
                   property={property as any}
                   variant="list"
