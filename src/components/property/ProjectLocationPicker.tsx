@@ -272,14 +272,14 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl h-[80vh] p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl h-[80vh] p-0 overflow-hidden flex flex-col">
           <DialogHeader className="p-4 pb-0">
             <DialogTitle>
               {isRu ? 'Выберите локацию проекта' : 'Select Project Location'}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col flex-1 min-h-0">
             {/* Search */}
             <div className="px-4 py-2 flex gap-2">
               <div className="flex-1 relative">
@@ -323,13 +323,13 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
             </div>
 
             {/* Map */}
-            <div className="flex-1 relative" style={{ minHeight: '350px' }}>
+            <div className="flex-1 relative min-h-0">
               {isLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+                <div ref={mapContainer} className="absolute inset-0" />
               )}
             </div>
 
