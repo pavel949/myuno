@@ -8801,6 +8801,7 @@ export type Database = {
           backup_settings: Json | null
           bank_account: string | null
           bank_name: string | null
+          brand_color: string | null
           cover_image: string | null
           created_at: string
           created_by: string | null
@@ -8855,6 +8856,7 @@ export type Database = {
           backup_settings?: Json | null
           bank_account?: string | null
           bank_name?: string | null
+          brand_color?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -8909,6 +8911,7 @@ export type Database = {
           backup_settings?: Json | null
           bank_account?: string | null
           bank_name?: string | null
+          brand_color?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
