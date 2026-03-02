@@ -10,6 +10,7 @@ import { DraftRestorationBanner } from '@/components/vendor/DraftIndicator';
 import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
 import { 
   AIIntakePanel,
+  OtaImportPanel,
   BasicInfoStep, 
   LocationStep, 
   PhotosStep, 
@@ -139,9 +140,12 @@ export default function AddProperty() {
         />
       )}
 
-      {/* AI Intake Panel */}
+      {/* Import Panels */}
       {!wizard.cloneFromId && (
-        <AIIntakePanel onDataExtracted={wizard.applyPrefillData} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <OtaImportPanel onDataExtracted={wizard.applyPrefillData} />
+          <AIIntakePanel onDataExtracted={wizard.applyPrefillData} />
+        </div>
       )}
 
       {/* Clone Notice */}
