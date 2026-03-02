@@ -5,14 +5,14 @@
  * Full 10-tab form for owner mode: Basic, Location, Photos, Pricing, Utilities, Services, Rules, Rooms, Calendar, Team
  * 4-tab form for vendor mode: Basic, Location, Photos, Pricing
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound } from 'lucide-react';
+import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound, Check } from 'lucide-react';
 
 // Import canonical step components from Owner Wizard
 import { 
@@ -447,6 +447,40 @@ export function CanonicalPropertyForm({
     });
   }
 
+  // Calculate completion status per tab
+  const tabCompletion = useMemo(() => {
+    const hasVal = (v: any) => v !== undefined && v !== null && v !== '' && v !== 0;
+    const basic = [formData.title, formData.property_type, formData.description, formData.bedrooms, formData.bathrooms, formData.area_sqm];
+    const location = [formData.address, formData.district, formData.lat, formData.lng];
+    const photos = [formData.cover_image, ...(formData.images || [])];
+    const pricing = [formData.price_per_night, formData.max_guests];
+    const utilities = [utilitiesData.electricity_included, utilitiesData.water_included, utilitiesData.internet_speed];
+    const services = [servicesData.cleaning_included, servicesData.cleaning_frequency];
+
+    const pct = (arr: any[]) => {
+      const filled = arr.filter(hasVal).length;
+      return Math.round((filled / arr.length) * 100);
+    };
+
+    return {
+      basic: pct(basic),
+      location: pct(location),
+      photos: pct(photos),
+      pricing: pct(pricing),
+      utilities: pct(utilities),
+      services: pct(services),
+      rules: formData.cancellation_policy ? 100 : 0,
+      admin: 50, // admin is always optional
+    } as Record<string, number>;
+  }, [formData, utilitiesData, servicesData]);
+
+  const getTabStatus = (tabId: string): 'empty' | 'partial' | 'complete' => {
+    const pct = tabCompletion[tabId] ?? 0;
+    if (pct >= 80) return 'complete';
+    if (pct > 0) return 'partial';
+    return 'empty';
+  };
+
   const colCount = tabs.length;
 
   return (
@@ -461,14 +495,44 @@ export function CanonicalPropertyForm({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
         <ScrollArea className="w-full pb-1">
           <TabsList className={`inline-flex w-full mb-4`} style={{ display: 'grid', gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5">
-                <tab.icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
-              </TabsTrigger>
-            ))}
+            {tabs.map((tab) => {
+              const status = getTabStatus(tab.id);
+              return (
+                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5 relative">
+                  <tab.icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
+                  {status === 'complete' && (
+                    <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="h-2 w-2 text-primary-foreground" />
+                    </span>
+                  )}
+                  {status === 'partial' && (
+                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-accent-foreground/50 border-2 border-background" />
+                  )}
+                  {status === 'empty' && (
+                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border-2 border-background" />
+                  )}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </ScrollArea>
+
+        {/* Completion legend */}
+        <div className="flex items-center gap-3 px-1 mb-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-primary inline-block" />
+            {isRu ? 'Заполнено' : 'Complete'}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-accent-foreground/50 inline-block" />
+            {isRu ? 'Частично' : 'Partial'}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-muted-foreground/20 inline-block" />
+            {isRu ? 'Пусто' : 'Empty'}
+          </span>
+        </div>
 
         <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(70vh - 200px)' }}>
           <TabsContent value="basic" className="mt-0">
