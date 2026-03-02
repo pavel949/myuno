@@ -1,99 +1,66 @@
 
 
-# Масштабирование Channel Manager: 25+ OTA-каналов
+# Настройка УК Show Property: Татьяна и Екатерина
 
-## Подход
+## Текущее состояние (результаты аудита)
 
-Текущая iCal-архитектура уже универсальна. Задача сводится к:
-1. Расширению реестра каналов (данные, не код) до 25+ OTA
-2. Улучшению UI для навигации по большому числу каналов
-3. Добавлению возможности подключить "любой другой" канал через Custom iCal URL
+### Компания
+- **Show Property Phuket** (ID: `017c9759-af23-4233-8bba-f379c819736a`)
+- Статус: активна
 
-## Каналы для добавления (20+ новых)
+### Участники компании (management_company_members)
 
-### Крупные OTA
-- Expedia / Hotels.com (общая iCal система)
-- Agoda
-- TripAdvisor / Viator Rentals
-- Hostelworld
-- Trivago (через iCal партнёров)
+| Пользователь | Email | Роль в УК | UUID |
+|---|---|---|---|
+| Татьяна Черевченко | smartpropertyphuket@gmail.com | **director** | `3a06f71a-...` |
+| Екатерина | katrin.gev278@gmail.com | **manager** | `7667f121-...` |
+| Pavel Ignatev | pavel@ignatevestate.com | director | `5cbbcd96-...` |
 
-### Vacation Rental специфичные
-- Marriott Homes & Villas
-- Holidu
-- Hometogo
-- Atraveo
-- Casamundo
-- Traum-Ferienwohnungen
-- FeWo-direkt (VRBO Germany)
-- Abritel (VRBO France)
+### Найденные проблемы
 
-### Азия / Таиланд
-- Agoda Homes
-- Traveloka
-- Trip.com
-- Ctrip / Qunar
+1. **Pavel Ignatev** записан как director в Show Property — вероятно, это ошибка (системный пользователь, который создал компанию). Нужно удалить или понизить.
 
-### Прочие
-- Wimdu
-- 9flats
-- HouseTrip
-- Homestay.com
-- Furnished Finder
-- Spotahome
-- Turno (для уборок)
-- iCal Custom (произвольная ссылка)
+2. **Татьяна** имеет лишние платформенные роли:
+   - `owner` — дублирует то, что и так вычисляется из MC membership
+   - `property_owner` — нужна только если она владеет объектами вне УК
+   - Это вызывает путаницу на странице профиля (секция "Роли на платформе")
 
-## Технические изменения
+3. **Екатерина** имеет роль `staff` в user_roles — корректно, дает доступ к рабочему пространству "Управление". Права доступа к модулям настроены (все 7 модулей: view + edit).
 
-### 1. Вынести данные каналов в расширяемый реестр
+4. **Профиль** показывает "сырые" платформенные роли (user, owner, property_owner, staff) — пользователи не понимают, что это значит. Нужно либо скрыть, либо показать понятные названия.
 
-**Файл: `src/components/owner/channel-manager/channelRegistry.ts`** (новый)
+5. **Домашний экран** (OwnerDashboard) корректно адаптируется:
+   - Татьяна (director) видит "General" — полный набор виджетов
+   - Екатерина (manager) видит "Property Manager" — операционный набор
 
-Единый реестр всех каналов с полной информацией:
-- id, name, icon/logo, color scheme
-- category (major_ota | vacation_rental | asia_pacific | other)
-- instructions (en/ru) для получения iCal-ссылки
-- helpUrl — ссылка на документацию OTA
-- urlPattern — regex для автоопределения источника по URL
+## План изменений
 
-Это data-driven подход: добавление нового канала = добавление одного объекта в массив, без изменения кода компонентов.
+### 1. Очистка данных в базе
+- Удалить Pavel Ignatev из Show Property (если подтвердите)
+- Удалить лишнюю роль `property_owner` у Татьяны из user_roles (роль `owner` уже вычисляется из MC membership автоматически)
 
-### 2. Обновить QuickConnectCards
+### 2. Улучшение отображения ролей в профиле
+- Скрыть технические роли (`user`, `staff`) из секции "Роли на платформе" — они не несут смысла для пользователя
+- Оставить только значимые роли (admin, vendor) если есть
+- Приоритет отображения: роль в УК (Director/Manager) в секции "Управляющие компании"
 
-**Файл: `src/components/owner/channel-manager/QuickConnectCards.tsx`** (редактирование)
+### 3. Проверка навигации
+- Татьяна (director): видит "Управление" в меню переключения, попадает на /owner, может настраивать права Екатерине через /mc/team
+- Екатерина (manager): видит "Управление" в меню, попадает на /owner с урезанным дашбордом, видит свои права в профиле (read-only)
 
-- Заменить хардкод `OTA_CHANNELS` на импорт из реестра
-- Добавить группировку по категориям (Major OTA / Vacation Rental / Asia / Other)
-- Показать 4-6 "рекомендуемых" каналов сверху, остальные — в раскрывающемся блоке "All channels"
-- Добавить поиск по названию канала
-- Добавить карточку "Custom / Other" для произвольного iCal URL
+---
 
-### 3. Обновить channelConfig.ts
+### Технические детали
 
-**Файл: `src/components/owner/channel-manager/channelConfig.ts`** (редактирование)
+**Файлы для изменения:**
 
-- Расширить `getChannelConfig()` для распознавания новых каналов по URL-паттернам
-- Добавить цветовые схемы и иконки для всех новых каналов
-- Улучшить автодетект: по URL определять канал при синхронизации
+1. **SQL миграция данных** — удалить `property_owner` из user_roles для Татьяны, опционально удалить Pavel из MC members
+2. **`src/components/profile/UserRolesPermissions.tsx`** — фильтровать технические роли (`user`, `staff`, `property_owner`) из отображения, показывать только значимые
+3. **`src/pages/Profile.tsx`** — без изменений (уже корректно показывает MC role и company name)
 
-### 4. Обновить ChannelHealthDashboard
-
-**Файл: `src/components/owner/channel-manager/ChannelHealthDashboard.tsx`** (редактирование)
-
-- Адаптировать сводку для большего числа каналов
-- Группировка подключённых каналов по категориям
-
-## Архитектура (без изменений в БД)
-
-Текущая таблица `property_external_calendars` уже универсальна — она хранит `ical_url` и `name`. Новые каналы не требуют миграций. Edge Function `ical-scheduled-sync` обрабатывает все каналы одинаково через iCal-протокол.
-
-## Итоговая структура файлов
-
-### Новые файлы
-1. `src/components/owner/channel-manager/channelRegistry.ts` — единый реестр 25+ каналов
-
-### Изменяемые файлы
-2. `src/components/owner/channel-manager/QuickConnectCards.tsx` — UI с категориями и поиском
-3. `src/components/owner/channel-manager/channelConfig.ts` — расширенный автодетект каналов
+**Что уже работает корректно:**
+- ActiveRoleBadge приоритизирует MC role (Директор/Менеджер)
+- OwnerDashboard адаптирует виджеты под MC role
+- Права доступа Екатерины к модулям настроены через team_member_permissions
+- Татьяна как director имеет полный доступ автоматически (canAccess всегда true)
 
