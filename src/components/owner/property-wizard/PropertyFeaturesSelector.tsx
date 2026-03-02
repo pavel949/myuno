@@ -13,14 +13,12 @@ import { Sparkles } from 'lucide-react';
 interface PropertyFeaturesSelectorProps {
   highlights: string[];
   onChange: (highlights: string[]) => void;
-  maxHighlights?: number;
   className?: string;
 }
 
 function PropertyFeaturesSelectorInner({
   highlights,
   onChange,
-  maxHighlights = 12,
   className,
 }: PropertyFeaturesSelectorProps) {
   const { language } = useLanguage();
@@ -29,7 +27,7 @@ function PropertyFeaturesSelectorInner({
   const toggle = (id: string) => {
     if (highlights.includes(id)) {
       onChange(highlights.filter(h => h !== id));
-    } else if (highlights.length < maxHighlights) {
+    } else {
       onChange([...highlights, id]);
     }
   };
@@ -43,8 +41,8 @@ function PropertyFeaturesSelectorInner({
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           {isRu
-            ? `Выберите до ${maxHighlights} (${highlights.length}/${maxHighlights})`
-            : `Select up to ${maxHighlights} (${highlights.length}/${maxHighlights})`}
+            ? `Выбрано: ${highlights.length}`
+            : `Selected: ${highlights.length}`}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -57,7 +55,7 @@ function PropertyFeaturesSelectorInner({
               {group.features.map((feat) => {
                 const Icon = feat.icon;
                 const isSelected = highlights.includes(feat.id);
-                const isDisabled = !isSelected && highlights.length >= maxHighlights;
+                const isDisabled = false;
 
                 return (
                   <Badge
