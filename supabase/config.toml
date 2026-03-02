@@ -176,3 +176,6 @@ verify_jwt = false
 
 [functions.scrape-phuket-insider]
 verify_jwt = false
+
+[functions.ota-scrape]
+verify_jwt = false
