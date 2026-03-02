@@ -300,6 +300,10 @@ export function usePropertyWizard() {
       if (prefillData.weekly_discount) updated.weekly_discount = prefillData.weekly_discount;
       if (prefillData.monthly_discount) updated.monthly_discount = prefillData.monthly_discount;
       
+      // Rental conditions
+      if (prefillData.cancellation_policy) updated.cancellation_policy = prefillData.cancellation_policy;
+      if (prefillData.instant_booking !== undefined) updated.instant_booking = prefillData.instant_booking;
+      
       // Equipment / Amenities — merge with existing
       if (prefillData.equipment?.length > 0) {
         const merged = new Set([...prev.equipment, ...prefillData.equipment]);
