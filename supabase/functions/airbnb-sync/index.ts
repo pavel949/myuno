@@ -157,26 +157,42 @@ function parseAirbnbListing(markdown: string, url: string): AirbnbListingData {
     }
   }
   
-  // ── Amenities (multilingual) ──
-  const amenityPatterns = [
-    'wifi', 'kitchen', 'pool', 'air conditioning', 'heating', 'washer', 'dryer',
-    'free parking', 'ev charger', 'gym', 'hot tub', 'bbq', 'patio', 'balcony',
-    'garden', 'beach access', 'waterfront', 'fireplace', 'workspace',
-    'tv', 'coffee maker', 'dishwasher', 'refrigerator', 'microwave', 'oven',
-    // Russian equivalents
-    'бассейн', 'кухня', 'кондиционер', 'отопление', 'стиральная', 'сушильная',
-    'парковка', 'спортзал', 'джакузи', 'балкон', 'сад', 'камин',
-    'телевизор', 'холодильник', 'микроволновая', 'духовка', 'посудомоечная',
-  ];
+  // ── Equipment (map amenities to standardized equipment IDs) ──
+  const equipmentMap: Record<string, string[]> = {
+    'wifi': ['wifi'], 'wi-fi': ['wifi'], 'вай-фай': ['wifi'], 'интернет': ['wifi'],
+    'air conditioning': ['ac'], 'кондиционер': ['ac'],
+    'heating': ['heating'], 'отопление': ['heating'],
+    'kitchen': ['kitchen'], 'кухня': ['kitchen'],
+    'refrigerator': ['fridge'], 'холодильник': ['fridge'],
+    'microwave': ['microwave'], 'микроволнов': ['microwave'],
+    'oven': ['oven'], 'духовка': ['oven'],
+    'dishwasher': ['dishwasher'], 'посудомоечн': ['dishwasher'],
+    'coffee maker': ['coffee_machine'], 'кофемашин': ['coffee_machine'], 'кофеварк': ['coffee_machine'],
+    'washer': ['washer'], 'стиральная': ['washer'],
+    'dryer': ['dryer'], 'сушильная': ['dryer'],
+    'free parking': ['free_parking'], 'парковка': ['free_parking'],
+    'ev charger': ['ev_charger'],
+    'gym': ['home_gym'], 'спортзал': ['home_gym'],
+    'hot tub': ['jacuzzi'], 'джакузи': ['jacuzzi'],
+    'pool': ['private_pool'], 'бассейн': ['private_pool'],
+    'bbq': ['bbq'], 'барбекю': ['bbq'], 'гриль': ['bbq'],
+    'patio': ['patio'],
+    'balcony': ['balcony'], 'балкон': ['balcony'],
+    'garden': ['garden'], 'сад': ['garden'],
+    'fireplace': ['heating'],
+    'workspace': ['desk'], 'рабочее место': ['desk'],
+    'tv': ['tv'], 'телевизор': ['tv'],
+    'beach access': ['private_pool'], // no exact match, best proxy
+  };
   
-  const foundAmenities: string[] = [];
+  const foundEquipment = new Set<string>();
   const lower = markdown.toLowerCase();
-  for (const amenity of amenityPatterns) {
-    if (lower.includes(amenity)) {
-      foundAmenities.push(amenity);
+  for (const [keyword, ids] of Object.entries(equipmentMap)) {
+    if (lower.includes(keyword)) {
+      ids.forEach(id => foundEquipment.add(id));
     }
   }
-  data.amenities = [...new Set(foundAmenities)];
+  data.amenities = Array.from(foundEquipment); // Store as amenities, will be mapped to equipment on frontend
   
   // ── House rules ──
   const rulesMatch = markdown.match(/(?:house rules|правила дома|правила проживания|things to know|что нужно знать)\s*\n+([\s\S]*?)(?=\n#|\n\*\*|safety|безопасность|cancellation|отмена)/i);
