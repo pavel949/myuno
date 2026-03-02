@@ -46,7 +46,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/mc', icon: LayoutDashboard },
       { title: 'Properties', titleRu: 'Объекты', path: '/mc/properties', icon: Building2 },
-      { title: 'Complexes', titleRu: 'Комплексы', path: '/mc/complexes', icon: Home },
+      
       { title: 'Calendar', titleRu: 'Календарь', path: '/mc/calendar', icon: CalendarDays },
       { title: 'Messages', titleRu: 'Сообщения', path: '/mc/messages', icon: MessageSquare, badgeKey: 'messages' },
     ],
