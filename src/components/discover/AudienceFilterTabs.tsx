@@ -22,7 +22,7 @@ const TABS: { id: AudienceFilter; label: string; labelRu: string; icon: React.El
   { id: 'all', label: 'All', labelRu: 'Все', icon: Layers },
   { id: 'tourists', label: 'Tourists', labelRu: 'Туристам', icon: Compass },
   { id: 'residents', label: 'Residents', labelRu: 'Резидентам', icon: Users },
-  { id: 'owners', label: 'Owners', labelRu: 'Владельцам', icon: Home },
+  { id: 'owners', label: 'Owners', labelRu: 'Собственникам', icon: Home },
 ];
 
 export const AudienceFilterTabs = memo(function AudienceFilterTabs({ 

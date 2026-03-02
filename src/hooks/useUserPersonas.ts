@@ -282,8 +282,8 @@ export const PERSONA_INFO: Record<UserPersona, {
     bgColor: 'bg-emerald-500/10',
   },
   property_owner: {
-    labelEn: 'Owner / MC',
-    labelRu: 'Владелец / УК',
+    labelEn: 'Property Owner',
+    labelRu: 'Собственник',
     descEn: 'Property management',
     descRu: 'Управление недвижимостью',
     icon: '🏢',

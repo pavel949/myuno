@@ -61,8 +61,8 @@ const ROLE_SWITCHER_CONFIG: Partial<Record<AppRole, {
     path: '/vendor',
   },
   owner: {
-    labelEn: 'Owner / MC',
-    labelRu: 'Владелец / УК',
+    labelEn: 'Property Owner',
+    labelRu: 'Собственник',
     icon: Building2,
     color: 'bg-teal',
     path: '/owner',

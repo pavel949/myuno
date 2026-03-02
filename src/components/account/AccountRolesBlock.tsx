@@ -45,7 +45,7 @@ const ROLE_CARDS: RoleCardConfig[] = [
   {
     key: 'owner',
     labelEn: 'Property Owner',
-    labelRu: 'Владелец недвижимости',
+    labelRu: 'Собственник',
     descEn: 'Manage rentals & bookings',
     descRu: 'Управление арендой',
     icon: Building2,

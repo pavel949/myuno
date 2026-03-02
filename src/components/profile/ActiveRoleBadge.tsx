@@ -101,15 +101,15 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
   },
   owner: {
     icon: Building2,
-    labelEn: 'Owner',
-    labelRu: 'Владелец',
+    labelEn: 'Property Owner',
+    labelRu: 'Собственник',
     color: 'text-teal',
     bgColor: 'bg-teal/10',
   },
   property_owner: {
     icon: Building2,
     labelEn: 'Property Owner',
-    labelRu: 'Владелец',
+    labelRu: 'Собственник',
     color: 'text-teal',
     bgColor: 'bg-teal/10',
   },

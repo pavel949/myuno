@@ -12,7 +12,7 @@ import { ChevronRight } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, { en: string; ru: string; color: string }> = {
   user: { en: 'Buyer', ru: 'Покупатель', color: 'bg-info/15 text-info' },
-  owner: { en: 'Owner', ru: 'Владелец', color: 'bg-accent-teal/15 text-accent-teal' },
+  owner: { en: 'Property Owner', ru: 'Собственник', color: 'bg-accent-teal/15 text-accent-teal' },
   vendor: { en: 'Provider', ru: 'Поставщик', color: 'bg-accent-purple/15 text-accent-purple' },
   admin: { en: 'Admin', ru: 'Админ', color: 'bg-destructive/15 text-destructive' },
   uno_team: { en: 'Team', ru: 'Команда', color: 'bg-success/15 text-success' },
