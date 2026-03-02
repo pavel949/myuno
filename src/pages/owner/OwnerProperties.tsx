@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useMyProperties } from '@/hooks/useMyProperties';
+import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -10,22 +10,27 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
-import { Home, Plus, Download, Building2, Users, Search, X, Filter } from 'lucide-react';
+import {
+  Home, Plus, Download, Building2, Users, Search, X, Filter,
+  CheckSquare, Trash2, ToggleLeft, ToggleRight, FileSpreadsheet, FolderSync, XCircle,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
@@ -65,6 +70,36 @@ function usePropertyLookups(complexIds: string[], projectIds: string[]) {
   };
 }
 
+/** Fetch all complexes and projects for reassignment */
+function useAllComplexesAndProjects() {
+  const complexes = useQuery({
+    queryKey: ['all-complexes-for-bulk'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('property_complexes')
+        .select('id, name, name_ru')
+        .order('name');
+      return data || [];
+    },
+  });
+
+  const projects = useQuery({
+    queryKey: ['all-projects-for-bulk'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('property_projects')
+        .select('id, name_en, name_ru')
+        .order('name_en');
+      return data || [];
+    },
+  });
+
+  return {
+    complexes: complexes.data || [],
+    projects: projects.data || [],
+  };
+}
+
 export default function OwnerProperties() {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -81,6 +116,15 @@ export default function OwnerProperties() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(true);
+
+  // Bulk selection
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkReassignOpen, setBulkReassignOpen] = useState(false);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [reassignType, setReassignType] = useState<'complex' | 'project'>('complex');
+  const [reassignTargetId, setReassignTargetId] = useState<string>('');
 
   const isPropertyManager = roles?.some(r => r.role === 'property_manager');
   const RoleIcon = isPropertyManager ? Users : Building2;
@@ -135,7 +179,123 @@ export default function OwnerProperties() {
     setSelectedType(null);
   };
 
-  // --- handlers ---
+  // --- Selection helpers ---
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.size === filteredProperties.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredProperties.map(p => p.property_id)));
+    }
+  }, [filteredProperties, selectedIds.size]);
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+    queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+    queryClient.invalidateQueries({ queryKey: ['company-properties'] });
+    queryClient.invalidateQueries({ queryKey: ['properties'] });
+  };
+
+  // --- Bulk handlers ---
+  const handleBulkToggleActive = async (activate: boolean) => {
+    setBulkProcessing(true);
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('properties').update({ is_active: activate }).in('id', ids);
+    setBulkProcessing(false);
+    if (error) {
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isRu ? `${ids.length} объектов ${activate ? 'активированы' : 'деактивированы'}` : `${ids.length} properties ${activate ? 'activated' : 'deactivated'}` });
+      invalidateAll();
+      exitSelectionMode();
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setBulkProcessing(true);
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('properties').delete().in('id', ids);
+    setBulkProcessing(false);
+    setBulkDeleteOpen(false);
+    if (error) {
+      toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isRu ? `${ids.length} объектов удалено` : `${ids.length} properties deleted` });
+      invalidateAll();
+      exitSelectionMode();
+    }
+  };
+
+  const handleBulkReassign = async () => {
+    if (!reassignTargetId) return;
+    setBulkProcessing(true);
+    const ids = Array.from(selectedIds);
+    const updatePayload = reassignType === 'complex'
+      ? { complex_id: reassignTargetId }
+      : { project_id: reassignTargetId };
+    const { error } = await supabase.from('properties').update(updatePayload).in('id', ids);
+    setBulkProcessing(false);
+    setBulkReassignOpen(false);
+    setReassignTargetId('');
+    if (error) {
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isRu ? `${ids.length} объектов обновлено` : `${ids.length} properties updated` });
+      invalidateAll();
+      queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
+      queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
+      exitSelectionMode();
+    }
+  };
+
+  const handleBulkExport = () => {
+    const selected = filteredProperties.filter(p => selectedIds.has(p.property_id));
+    const rows = selected.map(p => ({
+      ID: p.property_id,
+      Title: p.title,
+      'Title RU': p.title_ru,
+      District: p.district || '',
+      Type: p.property_type || '',
+      Bedrooms: p.bedrooms ?? '',
+      Bathrooms: p.bathrooms ?? '',
+      'Price/Night': p.price_per_night ?? '',
+      Currency: p.currency,
+      Active: p.is_active ? 'Yes' : 'No',
+      Source: p.source,
+    }));
+
+    const headers = Object.keys(rows[0] || {});
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => headers.map(h => {
+        const val = String((row as Record<string, unknown>)[h] ?? '');
+        return val.includes(',') ? `"${val}"` : val;
+      }).join(',')),
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `properties_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({ title: isRu ? `Экспорт ${selected.length} объектов` : `Exported ${selected.length} properties` });
+  };
+
+  // --- Single handlers ---
   const handleView = (id: string) => navigate(`/mc/properties/${id}`);
   const handleEdit = (id: string) => navigate(`/mc/properties/${id}/editor`);
   const handleDuplicate = (id: string) => navigate(`/mc/properties/new?cloneFrom=${id}`);
@@ -146,8 +306,7 @@ export default function OwnerProperties() {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     } else {
       toast({ title: activate ? (isRu ? 'Объект активирован' : 'Property activated') : (isRu ? 'Объект деактивирован' : 'Property deactivated') });
-      queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
-      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+      invalidateAll();
     }
   };
 
@@ -158,10 +317,7 @@ export default function OwnerProperties() {
       toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: isRu ? 'Объект удалён' : 'Property deleted' });
-      queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
-      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
-      queryClient.invalidateQueries({ queryKey: ['company-properties'] });
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      invalidateAll();
     }
     setDeleteTarget(null);
   };
@@ -183,8 +339,8 @@ export default function OwnerProperties() {
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 mb-4">
-        <Button className="flex-1" onClick={() => navigate('/mc/properties/new')}>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <Button className="flex-1 min-w-0" onClick={() => navigate('/mc/properties/new')}>
           <Plus className="h-4 w-4 mr-2" />
           {isRu ? 'Добавить объект' : 'Add Property'}
         </Button>
@@ -192,6 +348,15 @@ export default function OwnerProperties() {
           <Download className="h-4 w-4 mr-2" />
           {isRu ? 'Импорт' : 'Import'}
         </Button>
+        {allProperties && allProperties.length > 0 && (
+          <Button
+            variant={selectionMode ? 'default' : 'outline'}
+            onClick={() => selectionMode ? exitSelectionMode() : setSelectionMode(true)}
+          >
+            <CheckSquare className="h-4 w-4 mr-2" />
+            {selectionMode ? (isRu ? 'Отмена' : 'Cancel') : (isRu ? 'Выбрать' : 'Select')}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -225,7 +390,6 @@ export default function OwnerProperties() {
 
           {showFilters && (
             <div className="space-y-2">
-              {/* Districts */}
               {districts.length > 0 && (
                 <FilterRow label={isRu ? 'Район' : 'District'}>
                   {districts.map(d => (
@@ -233,8 +397,6 @@ export default function OwnerProperties() {
                   ))}
                 </FilterRow>
               )}
-
-              {/* Property Types */}
               {propertyTypes.length > 0 && (
                 <FilterRow label={isRu ? 'Тип' : 'Type'}>
                   {propertyTypes.map(t => (
@@ -242,8 +404,6 @@ export default function OwnerProperties() {
                   ))}
                 </FilterRow>
               )}
-
-              {/* Complexes */}
               {complexIds.length > 0 && (
                 <FilterRow label={isRu ? 'Комплекс' : 'Complex'}>
                   {complexIds.map(id => {
@@ -253,8 +413,6 @@ export default function OwnerProperties() {
                   })}
                 </FilterRow>
               )}
-
-              {/* Projects */}
               {projectIds.length > 0 && (
                 <FilterRow label={isRu ? 'Проект' : 'Project'}>
                   {projectIds.map(id => {
@@ -264,8 +422,6 @@ export default function OwnerProperties() {
                   })}
                 </FilterRow>
               )}
-
-              {/* Clear all */}
               {hasActiveFilters && (
                 <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
                   <X className="h-3 w-3" />
@@ -275,12 +431,26 @@ export default function OwnerProperties() {
             </div>
           )}
 
-          {/* Results count */}
           {hasActiveFilters && (
             <p className="text-xs text-muted-foreground">
               {isRu ? `Найдено: ${filteredProperties.length} из ${allProperties.length}` : `Found: ${filteredProperties.length} of ${allProperties.length}`}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Select all row */}
+      {selectionMode && filteredProperties.length > 0 && (
+        <div className="flex items-center gap-3 mb-3 px-1">
+          <Checkbox
+            checked={selectedIds.size === filteredProperties.length && filteredProperties.length > 0}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-sm text-muted-foreground">
+            {selectedIds.size > 0
+              ? (isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`)
+              : (isRu ? 'Выбрать все' : 'Select all')}
+          </span>
         </div>
       )}
 
@@ -319,35 +489,126 @@ export default function OwnerProperties() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-20">
           {filteredProperties.map((property) => (
-            <div key={property.id} className="relative">
-              {property.source === 'managed' && (
-                <Badge variant="secondary" className="absolute top-2 right-2 z-10 text-[10px]">
-                  {isRu ? 'В управлении' : 'Managed'}
-                </Badge>
+            <div key={property.id} className="relative flex items-start gap-2">
+              {selectionMode && (
+                <div className="pt-4 pl-1 shrink-0">
+                  <Checkbox
+                    checked={selectedIds.has(property.property_id)}
+                    onCheckedChange={() => toggleSelection(property.property_id)}
+                  />
+                </div>
               )}
-              <PropertyCard
-                property={property as any}
-                variant="list"
-                mode="owner"
-                complexName={property.complex_id ? (isRu ? complexNames[property.complex_id]?.name_ru : null) || complexNames[property.complex_id]?.name : undefined}
-                onView={() => handleView(property.property_id)}
-                onEdit={() => handleEdit(property.property_id)}
-                onDuplicate={() => handleDuplicate(property.property_id)}
-                onToggleActive={(_, activate) => handleToggleActive(property.property_id, activate)}
-                onDelete={() => setDeleteTarget(property.property_id)}
-                showApprovalStatus
-                showInstantBadge
-                showProtectionBadge
-                showMarketplaceBadge
-              />
+              <div className={cn('flex-1 min-w-0', selectionMode && 'pointer-events-none')}>
+                {property.source === 'managed' && (
+                  <Badge variant="secondary" className="absolute top-2 right-2 z-10 text-[10px]">
+                    {isRu ? 'В управлении' : 'Managed'}
+                  </Badge>
+                )}
+                <PropertyCard
+                  property={property as any}
+                  variant="list"
+                  mode="owner"
+                  complexName={property.complex_id ? (isRu ? complexNames[property.complex_id]?.name_ru : null) || complexNames[property.complex_id]?.name : undefined}
+                  onView={() => handleView(property.property_id)}
+                  onEdit={() => handleEdit(property.property_id)}
+                  onDuplicate={() => handleDuplicate(property.property_id)}
+                  onToggleActive={(_, activate) => handleToggleActive(property.property_id, activate)}
+                  onDelete={() => setDeleteTarget(property.property_id)}
+                  showApprovalStatus
+                  showInstantBadge
+                  showProtectionBadge
+                  showMarketplaceBadge
+                />
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Delete confirmation */}
+      {/* Floating Bulk Actions Bar */}
+      <AnimatePresence>
+        {selectionMode && selectedIds.size > 0 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 max-w-[95vw] overflow-x-auto"
+          >
+            <span className="text-sm font-medium text-foreground whitespace-nowrap mr-1">
+              {selectedIds.size}
+            </span>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs whitespace-nowrap"
+              onClick={() => handleBulkToggleActive(true)}
+              disabled={bulkProcessing}
+            >
+              <ToggleRight className="h-3.5 w-3.5" />
+              {isRu ? 'Вкл' : 'On'}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs whitespace-nowrap"
+              onClick={() => handleBulkToggleActive(false)}
+              disabled={bulkProcessing}
+            >
+              <ToggleLeft className="h-3.5 w-3.5" />
+              {isRu ? 'Выкл' : 'Off'}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs whitespace-nowrap"
+              onClick={() => setBulkReassignOpen(true)}
+              disabled={bulkProcessing}
+            >
+              <FolderSync className="h-3.5 w-3.5" />
+              {isRu ? 'Комплекс' : 'Assign'}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs whitespace-nowrap"
+              onClick={handleBulkExport}
+              disabled={bulkProcessing}
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              {isRu ? 'CSV' : 'CSV'}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              className="gap-1.5 text-xs whitespace-nowrap"
+              onClick={() => setBulkDeleteOpen(true)}
+              disabled={bulkProcessing}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {isRu ? 'Удалить' : 'Delete'}
+            </Button>
+
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 shrink-0"
+              onClick={exitSelectionMode}
+            >
+              <XCircle className="h-4 w-4" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete single confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -366,7 +627,122 @@ export default function OwnerProperties() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isRu ? `Удалить ${selectedIds.size} объектов?` : `Delete ${selectedIds.size} properties?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isRu
+                ? 'Это действие необратимо. Все данные выбранных объектов будут удалены безвозвратно.'
+                : 'This action cannot be undone. All data for selected properties will be permanently deleted.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={bulkProcessing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkProcessing ? (isRu ? 'Удаление...' : 'Deleting...') : (isRu ? 'Удалить' : 'Delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reassign complex/project dialog */}
+      <BulkReassignDialog
+        open={bulkReassignOpen}
+        onOpenChange={setBulkReassignOpen}
+        isRu={isRu}
+        count={selectedIds.size}
+        reassignType={reassignType}
+        setReassignType={setReassignType}
+        reassignTargetId={reassignTargetId}
+        setReassignTargetId={setReassignTargetId}
+        onConfirm={handleBulkReassign}
+        processing={bulkProcessing}
+      />
     </PageContainer>
+  );
+}
+
+// --- Bulk Reassign Dialog ---
+function BulkReassignDialog({
+  open, onOpenChange, isRu, count, reassignType, setReassignType,
+  reassignTargetId, setReassignTargetId, onConfirm, processing,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  isRu: boolean;
+  count: number;
+  reassignType: 'complex' | 'project';
+  setReassignType: (v: 'complex' | 'project') => void;
+  reassignTargetId: string;
+  setReassignTargetId: (v: string) => void;
+  onConfirm: () => void;
+  processing: boolean;
+}) {
+  const { complexes, projects } = useAllComplexesAndProjects();
+  const items = reassignType === 'complex' ? complexes : projects;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isRu ? `Назначить ${count} объектов` : `Assign ${count} properties`}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Button
+              variant={reassignType === 'complex' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => { setReassignType('complex'); setReassignTargetId(''); }}
+            >
+              {isRu ? 'Комплекс' : 'Complex'}
+            </Button>
+            <Button
+              variant={reassignType === 'project' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => { setReassignType('project'); setReassignTargetId(''); }}
+            >
+              {isRu ? 'Проект' : 'Project'}
+            </Button>
+          </div>
+
+          <Select value={reassignTargetId} onValueChange={setReassignTargetId}>
+            <SelectTrigger>
+              <SelectValue placeholder={isRu ? 'Выберите...' : 'Select...'} />
+            </SelectTrigger>
+            <SelectContent>
+              {items.map(item => (
+                <SelectItem key={item.id} value={item.id}>
+                  {reassignType === 'complex'
+                    ? (isRu && (item as any).name_ru ? (item as any).name_ru : (item as any).name)
+                    : (isRu ? (item as any).name_ru : (item as any).name_en)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={processing}>
+            {isRu ? 'Отмена' : 'Cancel'}
+          </Button>
+          <Button onClick={onConfirm} disabled={!reassignTargetId || processing}>
+            {processing ? (isRu ? 'Сохранение...' : 'Saving...') : (isRu ? 'Применить' : 'Apply')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
