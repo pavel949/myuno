@@ -66,11 +66,11 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(authHeader.replace('Bearer ', ''));
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    const { data: { user: callerUser }, error: userError } = await anonClient.auth.getUser();
+    if (userError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const callerId = claimsData.claims.sub as string;
+    const callerId = callerUser.id;
 
     const body = await req.json();
     const { company_id, full_name, email, phone, role } = body;
