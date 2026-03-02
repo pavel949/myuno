@@ -56,6 +56,7 @@ function mapPropertyToInitialData(property: any) {
     check_in_time: property.check_in_time || '14:00',
     check_out_time: property.check_out_time || '12:00',
     highlights: property.highlights || [],
+    platform_listed: property.listing_modes?.includes('platform') ?? false,
     project_id: property.project_id,
     floor: property.floor,
     unit_number: property.unit_number || '',
@@ -353,6 +354,12 @@ export default function PropertyEditor() {
         house_rules: formData.house_rules || null,
         house_rules_ru: formData.house_rules_ru || null,
         smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
+        // Platform listing modes
+        listing_modes: [
+          ...(formData.platform_listed ? ['platform'] : []),
+          ...(formData.is_for_sale ? ['sale'] : []),
+          ...(formData.price_per_night ? ['rent'] : []),
+        ],
       } as any);
 
       await syncAvailability(localAvailability);
