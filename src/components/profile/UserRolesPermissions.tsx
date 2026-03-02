@@ -61,7 +61,11 @@ export function UserRolesPermissions() {
     enabled: !!user?.id && memberships.length > 0,
   });
 
-  if (activeRoles.length === 0 && memberships.length === 0) return null;
+  // Hide technical/system roles that don't carry meaning for end users
+  const HIDDEN_ROLES: AppRole[] = ['user', 'staff', 'owner', 'property_owner'];
+  const visibleRoles = activeRoles.filter(r => !HIDDEN_ROLES.includes(r));
+
+  if (visibleRoles.length === 0 && memberships.length === 0) return null;
 
   const roleLabel = (role: AppRole) => {
     const cfg = ROLE_CONFIG[role];
@@ -82,7 +86,7 @@ export function UserRolesPermissions() {
   return (
     <div className="space-y-3">
       {/* Platform Roles */}
-      {activeRoles.length > 0 && (
+      {visibleRoles.length > 0 && (
         <SectionCard>
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-primary" />
@@ -91,7 +95,7 @@ export function UserRolesPermissions() {
             </h3>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {activeRoles.map((role) => (
+            {visibleRoles.map((role) => (
               <Badge key={role} variant="secondary" className="text-xs">
                 {roleLabel(role)}
               </Badge>
