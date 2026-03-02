@@ -160,6 +160,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         .from('properties')
         .select('*')
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
@@ -218,6 +219,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
         .from('properties')
         .select('*')
         .eq('is_active', true)
+        .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(limit);

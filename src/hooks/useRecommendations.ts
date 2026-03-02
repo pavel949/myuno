@@ -49,6 +49,7 @@ const fetchRecommendations = async (userId?: string): Promise<RecommendedItem[]>
       .from('properties')
       .select('id, title_en, title_ru, cover_image, rating, price, district')
       .eq('is_active', true)
+      .eq('approval_status', 'approved')
       .order('rating', { ascending: false })
       .limit(8),
     supabase
