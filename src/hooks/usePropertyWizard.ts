@@ -391,6 +391,7 @@ export function usePropertyWizard() {
 
   // Submit property
   const handleSubmit = useCallback(async () => {
+    try {
     const isOnBehalf = ownershipData.ownership_type !== 'own';
     
     // Strip fields that don't exist on the properties table
@@ -441,6 +442,11 @@ export function usePropertyWizard() {
       commercial_terms_redacted: ownershipData.commercial_terms_redacted,
       ownership_verification_status: isOnBehalf ? 'pending' : 'verified',
     };
+
+    // Clean undefined values to prevent DB errors
+    Object.keys(submitPayload).forEach(key => {
+      if (submitPayload[key] === undefined) delete submitPayload[key];
+    });
 
     const property = await createProperty.mutateAsync(submitPayload);
 
@@ -529,6 +535,11 @@ export function usePropertyWizard() {
     setCreatedPropertyId(property?.id);
     setCreatedPropertyTitle(formData.title || formData.title_ru);
     setShowSuccess(true);
+    } catch (error: unknown) {
+      errorLog.error(error, 'submit_property');
+      const msg = error instanceof Error ? error.message : String(error);
+      toast.error(isRu ? `Ошибка сохранения: ${msg}` : `Error saving: ${msg}`);
+    }
   }, [formData, ownershipData, createProperty, sendInvite, activeOrgId, isRu]);
 
   // Preview data for live preview

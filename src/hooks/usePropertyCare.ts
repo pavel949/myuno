@@ -186,8 +186,14 @@ export function useCreateOwnerProperty() {
 
       const { _companyId, title, title_ru, description, description_ru, ...restData } = data as any;
       
+      // Clean undefined values to prevent potential DB column mismatch
+      const cleanRest: Record<string, any> = {};
+      for (const [key, val] of Object.entries(restData)) {
+        if (val !== undefined) cleanRest[key] = val;
+      }
+      
       const insertData = { 
-        ...restData, 
+        ...cleanRest, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
         is_active: data.approval_status === 'draft' ? false : true,
@@ -206,7 +212,10 @@ export function useCreateOwnerProperty() {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('[useCreateOwnerProperty] Insert error:', error);
+        throw error;
+      }
       
       // Trigger email notification to admins (fire and forget)
       supabase.functions.invoke('notify-admin-property-submission', {

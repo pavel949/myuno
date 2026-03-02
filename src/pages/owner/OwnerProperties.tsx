@@ -12,8 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
 import {
-  Home, Plus, Download, Building2, Users, Search, X, Filter,
+  Home, Plus, Download, Building2, Users, Search, X, Filter, Map, List,
   CheckSquare, Trash2, ToggleLeft, ToggleRight, FileSpreadsheet, FolderSync, XCircle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -123,6 +124,8 @@ export default function OwnerProperties() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkReassignOpen, setBulkReassignOpen] = useState(false);
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
   const [reassignType, setReassignType] = useState<'complex' | 'project'>('complex');
   const [reassignTargetId, setReassignTargetId] = useState<string>('');
 
@@ -349,13 +352,23 @@ export default function OwnerProperties() {
           {isRu ? 'Импорт' : 'Import'}
         </Button>
         {allProperties && allProperties.length > 0 && (
-          <Button
-            variant={selectionMode ? 'default' : 'outline'}
-            onClick={() => selectionMode ? exitSelectionMode() : setSelectionMode(true)}
-          >
-            <CheckSquare className="h-4 w-4 mr-2" />
-            {selectionMode ? (isRu ? 'Отмена' : 'Cancel') : (isRu ? 'Выбрать' : 'Select')}
-          </Button>
+          <>
+            <Button
+              variant={selectionMode ? 'default' : 'outline'}
+              onClick={() => selectionMode ? exitSelectionMode() : setSelectionMode(true)}
+            >
+              <CheckSquare className="h-4 w-4 mr-2" />
+              {selectionMode ? (isRu ? 'Отмена' : 'Cancel') : (isRu ? 'Выбрать' : 'Select')}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+            >
+              {viewMode === 'list' ? <Map className="h-4 w-4" /> : <List className="h-4 w-4" />}
+            </Button>
+          </>
         )}
       </div>
 
@@ -488,6 +501,29 @@ export default function OwnerProperties() {
             </Button>
           </CardContent>
         </Card>
+      ) : viewMode === 'map' ? (
+        <div className="space-y-4 pb-20">
+          <PropertyMapView
+            properties={filteredProperties.map(p => ({
+              id: p.property_id,
+              lat: p.lat,
+              lng: p.lng,
+              price: p.price_per_night ?? 0,
+              title_en: p.title,
+            })) as any}
+            hoveredProperty={hoveredPropertyId}
+            onHover={setHoveredPropertyId}
+            mode="rent"
+            className="h-[500px] lg:h-[600px]"
+          />
+          {filteredProperties.filter(p => !p.lat || !p.lng).length > 0 && (
+            <p className="text-xs text-muted-foreground text-center">
+              {isRu
+                ? `${filteredProperties.filter(p => !p.lat || !p.lng).length} объектов без координат — не отображаются на карте`
+                : `${filteredProperties.filter(p => !p.lat || !p.lng).length} properties without coordinates — not shown on map`}
+            </p>
+          )}
+        </div>
       ) : (
         <div className="space-y-4 pb-20">
           {filteredProperties.map((property) => (
