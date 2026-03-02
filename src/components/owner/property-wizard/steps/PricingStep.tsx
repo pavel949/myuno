@@ -15,6 +15,8 @@ import { HouseRulesSection } from './HouseRulesSection';
 import { DiscountsSection } from './DiscountsSection';
 import { CancellationPolicySection } from './CancellationPolicySection';
 import { SeasonalPricing } from '@/components/property/SeasonalPricing';
+import { PricingRulesSection } from '@/components/property/PricingRulesSection';
+import { PaymentPolicySection } from '@/components/property/PaymentPolicySection';
 
 interface PricingStepProps {
   formData: PropertyFormData;
@@ -113,8 +115,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 placeholder="2500"
               />
             </div>
+            {/* Deposit moved to PaymentPolicySection */}
             <div className="space-y-2">
-              <Label>{isRu ? 'Депозит (THB)' : 'Deposit (THB)'}</Label>
+              <Label>{isRu ? 'Депозит (возвратный)' : 'Deposit (refundable)'}</Label>
               <Input
                 type="number"
                 min={0}
@@ -237,6 +240,12 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
         />
       )}
+
+      {/* Advanced Pricing Rules */}
+      <PricingRulesSection formData={formData} updateFormData={updateFormData} />
+
+      {/* Payment Schedule & Deposit */}
+      <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
 
       {/* Sale Option */}
       <Card>

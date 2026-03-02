@@ -5,6 +5,12 @@
 
 import type { Json } from '@/integrations/supabase/types';
 
+/** Typed custom length discount tier */
+export interface CustomLengthDiscount {
+  min_nights: number;
+  discount_percent: number;
+}
+
 /**
  * Base property interface with common fields
  */
@@ -218,6 +224,15 @@ export interface OwnerProperty extends BaseProperty {
   prepay_percent?: number;
   balance_due_days?: number;
   security_deposit_required?: boolean;
+  
+  // Advanced pricing rules
+  payment_policy?: string;
+  early_booking_discount?: number;
+  early_booking_days?: number;
+  last_minute_discount?: number;
+  last_minute_days?: number;
+  negotiation_enabled?: boolean;
+  custom_length_discounts?: Json;
   
   // Investment analysis fields
   purchase_price?: number;
