@@ -45,7 +45,7 @@ export default function PartnersPage() {
     {
       icon: Building2,
       title: isRu ? 'Property Owner' : 'Property Owner',
-      subtitle: isRu ? 'Владелец недвижимости' : 'Property Owner',
+      subtitle: isRu ? 'Собственник недвижимости' : 'Property Owner',
       description: isRu 
         ? 'Сдача вилл, кондо, апартаментов в краткосрочную и долгосрочную аренду'
         : 'Rent villas, condos, apartments for short and long term',

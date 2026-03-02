@@ -12,7 +12,7 @@ const roleConfigs = [
   { key: 'uno_team', label: 'myUNO Team', labelRu: 'Команда myUNO', icon: Headphones, color: 'bg-success' },
   { key: 'staff', label: 'Staff', labelRu: 'Сотрудник', icon: UserCog, color: 'bg-accent-amber' },
   { key: 'vendor', label: 'Service Provider', labelRu: 'Поставщик услуг', icon: Store, color: 'bg-accent-purple' },
-  { key: 'property_owner', label: 'Property Owner', labelRu: 'Владелец недвижимости', icon: Building2, color: 'bg-accent-teal' },
+  { key: 'property_owner', label: 'Property Owner', labelRu: 'Собственник недвижимости', icon: Building2, color: 'bg-accent-teal' },
   { key: 'user', label: 'User', labelRu: 'Пользователь', icon: Users, color: 'bg-info' },
 ];
 

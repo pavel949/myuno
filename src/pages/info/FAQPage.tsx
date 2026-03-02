@@ -128,7 +128,7 @@ export default function FAQPage() {
       ],
     },
     {
-      title: isRu ? 'Для владельцев недвижимости' : isTh ? 'สำหรับเจ้าของทรัพย์สิน' : 'For Property Owners',
+      title: isRu ? 'Для собственников недвижимости' : isTh ? 'สำหรับเจ้าของทรัพย์สิน' : 'For Property Owners',
       icon: Building2,
       items: [
         {

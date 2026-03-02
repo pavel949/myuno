@@ -77,7 +77,7 @@ export const ru: Record<string, string> = {
   'home.heroTitle': 'Дом там, где myUNO',
   'home.heroSubtitle': 'Всё для комфортной жизни зарубежом — проверенные сервисы, надёжные партнёры, прозрачные цены',
   'home.trustBadge': 'Надёжная инфраструктура',
-  'home.forOwners': 'Для владельцев',
+  'home.forOwners': 'Для собственников',
   'home.listProperty': 'Разместите и управляйте объектом',
   'home.listPropertyDesc': 'Бронирования, сервис, аналитика — всё в одном месте',
   'home.allServices': 'Все сервисы',

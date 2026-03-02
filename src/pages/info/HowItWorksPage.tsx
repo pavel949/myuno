@@ -237,7 +237,7 @@ export default function HowItWorksPage() {
               </TabsTrigger>
               <TabsTrigger value="owner" className="gap-2">
                 <Home className="w-4 h-4" />
-                {isRu ? 'Для владельцев' : isTh ? 'สำหรับเจ้าของ' : 'For Owners'}
+                {isRu ? 'Для собственников' : isTh ? 'สำหรับเจ้าของ' : 'For Owners'}
               </TabsTrigger>
             </TabsList>
 
