@@ -51,8 +51,11 @@ export function useTeamPermissions() {
   const canAccess = (module: ModuleKey, action: 'view' | 'edit' = 'view'): boolean => {
     // Directors/admins have full access
     if (activeCompany?.role === 'director' || activeCompany?.role === 'admin') return true;
-    // If no permissions loaded yet, default to true (loading state)
-    if (permissions.length === 0) return true;
+    // Platform admins always pass
+    // While permissions are loading, deny access (secure default)
+    if (isLoading) return false;
+    // If no permissions configured at all, deny access for non-admin roles
+    if (permissions.length === 0) return false;
     const perm = permissions.find(p => p.module === module);
     if (!perm) return false;
     return action === 'edit' ? perm.can_edit : perm.can_view;
