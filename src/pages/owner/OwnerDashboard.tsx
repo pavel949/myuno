@@ -274,7 +274,7 @@ export default function OwnerDashboard() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const isDesktop = useIsDesktop();
-  const { role, setRole, config } = useBusinessRole();
+  const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
   const { data: ownerProperties } = useOwnerProperties();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
 
@@ -314,7 +314,7 @@ export default function OwnerDashboard() {
           transition={{ duration: 0.3 }}
           className="space-y-4"
         >
-          <DashboardGreeting roleConfig={config} />
+          <DashboardGreeting roleConfig={config} mcRole={mcRole} mcRoleLabel={mcRoleLabel} />
           <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
         </motion.div>
 
