@@ -227,33 +227,33 @@ body {
     }
   }
 
-  /* Typography Scale — desktop-aware */
+  /* Typography Scale — editorial chic */
   h1 {
-    @apply font-display text-xl sm:text-2xl lg:text-4xl xl:text-[2.5rem] font-bold tracking-tight leading-tight;
+    @apply font-display text-xl sm:text-2xl lg:text-4xl xl:text-[2.5rem] font-bold tracking-[-0.025em] leading-[1.15];
     overflow-wrap: break-word;
   }
   
   h2 {
-    @apply font-display text-lg sm:text-xl lg:text-2xl xl:text-[1.75rem] font-semibold tracking-tight leading-snug;
+    @apply font-display text-lg sm:text-xl lg:text-2xl xl:text-[1.75rem] font-semibold tracking-[-0.02em] leading-[1.2];
     overflow-wrap: break-word;
   }
   
   h3 {
-    @apply font-display text-base sm:text-lg lg:text-xl font-semibold tracking-tight leading-snug;
+    @apply font-display text-base sm:text-lg lg:text-xl font-semibold tracking-[-0.015em] leading-[1.25];
     overflow-wrap: break-word;
   }
   
   h4, h5, h6 {
-    @apply font-display text-sm sm:text-base lg:text-lg font-semibold tracking-tight leading-snug;
+    @apply font-display text-sm sm:text-base lg:text-lg font-semibold tracking-[-0.01em] leading-[1.3];
     overflow-wrap: break-word;
   }
 
   p {
-    @apply text-sm lg:text-base leading-relaxed;
+    @apply text-sm lg:text-base leading-[1.65] tracking-[0.005em];
   }
 
   small {
-    @apply text-xs lg:text-sm leading-normal;
+    @apply text-xs lg:text-sm leading-normal tracking-[0.01em];
   }
 
   /* ============ Mobile normalization ============ */
