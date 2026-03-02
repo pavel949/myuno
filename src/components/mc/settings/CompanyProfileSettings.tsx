@@ -159,7 +159,7 @@ export function CompanyProfileSettings() {
 
   return (
     <div className="space-y-3">
-      <Accordion type="multiple" defaultValue={['branding', 'contacts']} className="space-y-3">
+      <Accordion type="multiple" defaultValue={[]} className="space-y-3">
         {/* Branding */}
         <AccordionItem value="branding" className="border rounded-xl px-4">
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
