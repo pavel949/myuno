@@ -649,6 +649,17 @@ export default function PropertyDetail() {
                 pricePerNight={pricePerNight}
                 rentalTerms={rentalTerms}
                 currency="THB"
+                earlyBookingDiscount={property?.early_booking_discount ?? undefined}
+                earlyBookingDays={property?.early_booking_days ?? undefined}
+                lastMinuteDiscount={property?.last_minute_discount ?? undefined}
+                lastMinuteDays={property?.last_minute_days ?? undefined}
+                paymentPolicy={property?.payment_policy ?? undefined}
+                prepayPercent={property?.prepay_percent ?? undefined}
+                depositAmount={property?.deposit_amount ?? undefined}
+                depositCurrency={property?.deposit_currency ?? undefined}
+                customLengthDiscounts={property?.custom_length_discounts as any ?? undefined}
+                negotiationEnabled={property?.negotiation_enabled ?? false}
+                seasonalPricing={rentalTerms?.seasonal_pricing as any ?? undefined}
               />
               {/* Message Host Button for Desktop */}
               <MessageHostButton

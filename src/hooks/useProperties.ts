@@ -45,6 +45,19 @@ export interface Property {
   highlights?: string[];
   monthly_discount?: number;
   weekly_discount?: number;
+  // Advanced pricing fields
+  early_booking_discount?: number;
+  early_booking_days?: number;
+  last_minute_discount?: number;
+  last_minute_days?: number;
+  payment_policy?: string;
+  prepay_percent?: number;
+  deposit_amount?: number;
+  deposit_currency?: string;
+  custom_length_discounts?: any;
+  negotiation_enabled?: boolean;
+  price_per_night?: number;
+  seasonal_pricing?: Record<string, unknown>;
 }
 
 export interface PropertyProject {
