@@ -22,23 +22,17 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useState } from 'react';
 
-const CHANNEL_ICONS: Record<string, string> = {
-  airbnb: '🏠',
-  booking: '🅱️',
-  vrbo: '🏡',
-  expedia: '✈️',
-  google: '📅',
-  other: '📆',
-};
+import { CHANNEL_REGISTRY } from './channelRegistry';
 
-const CHANNEL_COLORS: Record<string, string> = {
-  airbnb: 'bg-accent-coral/10',
-  booking: 'bg-info/10',
-  vrbo: 'bg-accent-cyan/10',
-  expedia: 'bg-warning/10',
-  google: 'bg-success/10',
-  other: 'bg-muted',
-};
+function getChannelIcon(type: string): string {
+  const entry = CHANNEL_REGISTRY.find(c => type.includes(c.id));
+  return entry?.icon || '📆';
+}
+
+function getChannelColor(type: string): string {
+  const entry = CHANNEL_REGISTRY.find(c => type.includes(c.id));
+  return entry ? entry.bgColor.split(' ')[0] : 'bg-muted';
+}
 
 export function ChannelHealthDashboard() {
   const { language } = useLanguage();
@@ -156,9 +150,9 @@ export function ChannelHealthDashboard() {
                 {/* Channel Icon */}
                 <div className={cn(
                   "w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0",
-                  CHANNEL_COLORS[channel.channelType] || CHANNEL_COLORS.other
+                  getChannelColor(channel.channelType)
                 )}>
-                  {CHANNEL_ICONS[channel.channelType] || CHANNEL_ICONS.other}
+                  {getChannelIcon(channel.channelType)}
                 </div>
 
                 {/* Info */}
