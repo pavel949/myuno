@@ -486,7 +486,7 @@ const GTrustPage = () => {
 
         {/* For Property Owners */}
         <SectionCard className="mb-6">
-          <SectionHeader icon={Home} title={isRu ? "Для владельцев недвижимости" : isTh ? "สำหรับเจ้าของทรัพย์สิน" : "For Property Owners"} />
+          <SectionHeader icon={Home} title={isRu ? "Для собственников недвижимости" : isTh ? "สำหรับเจ้าของทรัพย์สิน" : "For Property Owners"} />
           <div className="grid gap-3">
             {ownerGuarantees.map((item, index) => (
               <motion.div

@@ -5,7 +5,7 @@ import { MessageCircle, Mail, Phone, Clock, Globe, QrCode } from 'lucide-react';
 
 const steps = [
   { numRu: '1', numEn: '1', textRu: 'Зарегистрируйтесь в приложении UNO', textEn: 'Register in the UNO app' },
-  { numRu: '2', numEn: '2', textRu: 'Перейдите в раздел «Для владельцев»', textEn: 'Go to "For Owners" section' },
+  { numRu: '2', numEn: '2', textRu: 'Перейдите в раздел «Для собственников»', textEn: 'Go to "For Owners" section' },
   { numRu: '3', numEn: '3', textRu: 'Добавьте свой первый объект', textEn: 'Add your first property' },
   { numRu: '4', numEn: '4', textRu: 'Пройдите модерацию', textEn: 'Complete moderation' },
   { numRu: '5', numEn: '5', textRu: 'Настройте цены и календарь', textEn: 'Set up pricing and calendar' },

@@ -189,7 +189,7 @@ export function OwnerServiceRecommendations() {
           {isRu ? 'Сервисы myUNO' : 'myUNO Services'}
         </h3>
         <Badge variant="secondary" className="text-[10px]">
-          {isRu ? 'для владельцев' : 'for owners'}
+          {isRu ? 'для собственников' : 'for owners'}
         </Badge>
       </div>
 

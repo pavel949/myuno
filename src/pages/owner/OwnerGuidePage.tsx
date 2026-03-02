@@ -30,7 +30,7 @@ export default function OwnerGuidePage() {
       <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-border no-print">
         <div>
           <h1 className="text-lg font-semibold text-foreground">
-            {isRu ? 'Руководство для владельцев' : 'Owner Guide'}
+            {isRu ? 'Руководство для собственников' : 'Owner Guide'}
           </h1>
           <p className="text-xs text-muted-foreground">myUNO v2.0</p>
         </div>

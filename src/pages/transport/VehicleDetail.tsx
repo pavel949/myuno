@@ -189,7 +189,7 @@ export default function VehicleDetail() {
                   </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <TrustItem label={isRu ? 'Владелец проверен' : 'Owner verified'} />
+                  <TrustItem label={isRu ? 'Собственник проверен' : 'Owner verified'} />
                   <TrustItem label={isRu ? 'Страховка включена' : 'Insurance included'} />
                   <TrustItem label={isRu ? 'Залог прозрачен' : 'Deposit transparent'} />
                   <TrustItem label={isRu ? 'Отмена 24ч' : 'Free cancel 24h'} />
