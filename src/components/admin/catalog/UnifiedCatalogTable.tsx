@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedCatalog, CatalogItemType, UnifiedCatalogItem } from '@/hooks/useUnifiedCatalog';
 import { useBulkSelection } from '@/hooks/useBulkSelection';
 import { BulkActionsBar, useCatalogBulkActions } from '@/components/admin/BulkActionsBar';
@@ -20,7 +21,10 @@ import {
   Filter,
   ExternalLink,
   Star,
-  MoreHorizontal
+  MoreHorizontal,
+  Trash2,
+  Power,
+  PowerOff
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -344,6 +348,30 @@ export function UnifiedCatalogTable() {
                         <DropdownMenuItem onClick={() => navigate(getItemPath(item))}>
                           <ExternalLink className="h-4 w-4 mr-2" />
                           {isRussian ? 'Открыть' : 'Open'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={async () => {
+                            const table = item.type === 'service' ? 'services' : item.type === 'product' ? 'marketplace_products' : 'properties';
+                            const { error } = await supabase.from(table).update({ is_active: !item.is_active }).eq('id', item.id);
+                            if (!error) { refetch(); toast.success(isRussian ? 'Статус обновлён' : 'Status updated'); }
+                            else toast.error(error.message);
+                          }}
+                        >
+                          {item.is_active ? <PowerOff className="h-4 w-4 mr-2" /> : <Power className="h-4 w-4 mr-2" />}
+                          {item.is_active ? (isRussian ? 'Деактивировать' : 'Deactivate') : (isRussian ? 'Активировать' : 'Activate')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={async () => {
+                            if (!confirm(isRussian ? 'Удалить этот элемент?' : 'Delete this item?')) return;
+                            const table = item.type === 'service' ? 'services' : item.type === 'product' ? 'marketplace_products' : 'properties';
+                            const { error } = await supabase.from(table).delete().eq('id', item.id);
+                            if (!error) { refetch(); toast.success(isRussian ? 'Удалено' : 'Deleted'); }
+                            else toast.error(error.message);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {isRussian ? 'Удалить' : 'Delete'}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
