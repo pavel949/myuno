@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,16 +18,22 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { 
   Plus, 
   ExternalLink, 
-  Copy, 
   CheckCircle2,
-  Link2
+  Link2,
+  Search,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useExternalCalendars, CreateExternalCalendarInput } from '@/hooks/useExternalCalendars';
+import { useExternalCalendars } from '@/hooks/useExternalCalendars';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import {
   Select,
@@ -36,101 +42,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const OTA_CHANNELS = [
-  {
-    id: 'airbnb',
-    name: 'Airbnb',
-    icon: '🏠',
-    color: 'from-destructive to-destructive/80',
-    bgColor: 'bg-destructive/5 hover:bg-destructive/10',
-    borderColor: 'border-destructive/20',
-    instructions: {
-      en: [
-        'Go to your Airbnb listing',
-        'Click "Pricing and availability" → "Availability"',
-        'Scroll down to "Connect calendars"',
-        'Click "Export Calendar" and copy the iCal URL'
-      ],
-      ru: [
-        'Откройте ваш листинг на Airbnb',
-        'Нажмите "Цены и доступность" → "Доступность"',
-        'Прокрутите до "Подключить календари"',
-        'Нажмите "Экспорт календаря" и скопируйте iCal URL'
-      ]
-    },
-    helpUrl: 'https://www.airbnb.com/help/article/99'
-  },
-  {
-    id: 'booking',
-    name: 'Booking.com',
-    icon: '🅱️',
-    color: 'from-info to-primary',
-    bgColor: 'bg-info/5 hover:bg-info/10',
-    borderColor: 'border-info/20',
-    instructions: {
-      en: [
-        'Log in to Booking.com Extranet',
-        'Go to "Calendar" → "Sync calendars"',
-        'Click "Export your calendar"',
-        'Copy the iCal link provided'
-      ],
-      ru: [
-        'Войдите в Booking.com Extranet',
-        'Перейдите в "Календарь" → "Синхронизация календарей"',
-        'Нажмите "Экспортировать календарь"',
-        'Скопируйте предоставленную iCal-ссылку'
-      ]
-    },
-    helpUrl: 'https://partner.booking.com/en-gb/help/connectivity/how-do-i-sync-my-calendar-external-calendars'
-  },
-  {
-    id: 'vrbo',
-    name: 'VRBO / HomeAway',
-    icon: '🏡',
-    color: 'from-accent-cyan to-teal',
-    bgColor: 'bg-accent-cyan/5 hover:bg-accent-cyan/10',
-    borderColor: 'border-accent-cyan/20',
-    instructions: {
-      en: [
-        'Go to your VRBO dashboard',
-        'Select your property → "Calendar"',
-        'Click "Import/Export" tab',
-        'Copy the "Export calendar" link'
-      ],
-      ru: [
-        'Откройте панель управления VRBO',
-        'Выберите объект → "Календарь"',
-        'Нажмите на вкладку "Импорт/Экспорт"',
-        'Скопируйте ссылку "Экспортировать календарь"'
-      ]
-    },
-    helpUrl: 'https://help.vrbo.com/articles/How-do-I-sync-my-calendar-with-other-sites'
-  },
-  {
-    id: 'google',
-    name: 'Google Calendar',
-    icon: '📅',
-    color: 'from-success to-success/80',
-    bgColor: 'bg-success/5 hover:bg-success/10',
-    borderColor: 'border-success/20',
-    instructions: {
-      en: [
-        'Open Google Calendar settings',
-        'Select the calendar to share',
-        'Under "Integrate calendar", copy "Public address in iCal format"',
-        'Or use "Secret address in iCal format" for private calendars'
-      ],
-      ru: [
-        'Откройте настройки Google Календаря',
-        'Выберите календарь для синхронизации',
-        'В разделе "Интеграция" скопируйте "Публичный адрес в формате iCal"',
-        'Или используйте "Секретный адрес" для приватных календарей'
-      ]
-    },
-    helpUrl: 'https://support.google.com/calendar/answer/37648'
-  },
-];
+import {
+  type ChannelRegistryEntry,
+  getFeaturedChannels,
+  getChannelsByCategory,
+  CATEGORY_LABELS,
+  CHANNEL_REGISTRY,
+} from './channelRegistry';
 
 interface QuickConnectCardsProps {
   onConnected?: () => void;
@@ -140,18 +58,34 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const [selectedOta, setSelectedOta] = useState<typeof OTA_CHANNELS[0] | null>(null);
+  const [selectedOta, setSelectedOta] = useState<ChannelRegistryEntry | null>(null);
   const [icalUrl, setIcalUrl] = useState('');
   const [calendarName, setCalendarName] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAll, setShowAll] = useState(false);
 
   const { data: properties } = useOwnerProperties();
   const { createCalendar } = useExternalCalendars();
 
-  const handleOpenDialog = (ota: typeof OTA_CHANNELS[0]) => {
+  const featured = useMemo(() => getFeaturedChannels(), []);
+  const grouped = useMemo(() => getChannelsByCategory(), []);
+
+  const filteredGrouped = useMemo(() => {
+    if (!searchQuery.trim()) return grouped;
+    const q = searchQuery.toLowerCase();
+    return grouped
+      .map(g => ({
+        ...g,
+        channels: g.channels.filter(c => c.name.toLowerCase().includes(q) || c.id.includes(q)),
+      }))
+      .filter(g => g.channels.length > 0);
+  }, [grouped, searchQuery]);
+
+  const handleOpenDialog = (ota: ChannelRegistryEntry) => {
     setSelectedOta(ota);
-    setCalendarName(ota.name);
+    setCalendarName(ota.id === 'custom' ? '' : ota.name);
     setIcalUrl('');
     if (properties && properties.length === 1) {
       setSelectedPropertyId(properties[0].id);
@@ -165,8 +99,6 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
       toast.error(isRu ? 'Заполните все поля' : 'Fill all fields');
       return;
     }
-
-    // Basic URL validation
     if (!icalUrl.startsWith('http')) {
       toast.error(isRu ? 'Некорректный URL' : 'Invalid URL');
       return;
@@ -179,7 +111,6 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
         name: calendarName,
         ical_url: icalUrl,
       });
-      
       toast.success(isRu ? 'Канал подключён!' : 'Channel connected!');
       setSelectedOta(null);
       onConnected?.();
@@ -190,36 +121,76 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
     }
   };
 
+  const ChannelCard = ({ ota }: { ota: ChannelRegistryEntry }) => (
+    <Card
+      className={cn(
+        "cursor-pointer transition-all",
+        ota.bgColor,
+        ota.borderColor
+      )}
+      onClick={() => handleOpenDialog(ota)}
+    >
+      <CardContent className="p-3 text-center">
+        <div className="text-2xl mb-1">{ota.icon}</div>
+        <h3 className="font-medium text-xs leading-tight truncate">{ota.name}</h3>
+        <Plus className="h-3 w-3 mx-auto mt-1 text-muted-foreground" />
+      </CardContent>
+    </Card>
+  );
+
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {OTA_CHANNELS.map(ota => (
-          <Card 
-            key={ota.id}
-            className={cn(
-              "cursor-pointer transition-all",
-              ota.bgColor,
-              ota.borderColor
-            )}
-            onClick={() => handleOpenDialog(ota)}
-          >
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl mb-2">{ota.icon}</div>
-              <h3 className="font-medium text-sm">{ota.name}</h3>
-              <div className="mt-2">
-                <Plus className="h-4 w-4 mx-auto text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
+      {/* Featured channels */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+        {featured.map(ota => (
+          <ChannelCard key={ota.id} ota={ota} />
         ))}
       </div>
+
+      {/* All channels — collapsible */}
+      <Collapsible open={showAll} onOpenChange={setShowAll}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full mt-3 text-muted-foreground">
+            <ChevronDown className={cn("h-4 w-4 mr-1 transition-transform", showAll && "rotate-180")} />
+            {isRu
+              ? `Все каналы (${CHANNEL_REGISTRY.length - 2})`
+              : `All channels (${CHANNEL_REGISTRY.length - 2})`}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-3 space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={isRu ? 'Поиск канала...' : 'Search channel...'}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9 h-9"
+            />
+          </div>
+
+          {/* Grouped channels */}
+          {filteredGrouped.map(group => (
+            <div key={group.category}>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                {isRu ? CATEGORY_LABELS[group.category].ru : CATEGORY_LABELS[group.category].en}
+              </h4>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {group.channels.map(ota => (
+                  <ChannelCard key={ota.id} ota={ota} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Connect Dialog */}
       <Dialog open={!!selectedOta} onOpenChange={(open) => !open && setSelectedOta(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {(() => { const Icon = resolveIcon(selectedOta?.icon); return <Icon className="w-6 h-6" />; })()}
+              <span className="text-xl">{selectedOta?.icon}</span>
               {isRu ? 'Подключить' : 'Connect'} {selectedOta?.name}
             </DialogTitle>
             <DialogDescription>
@@ -231,31 +202,33 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
 
           <div className="space-y-4">
             {/* Instructions */}
-            <Accordion type="single" collapsible>
-              <AccordionItem value="instructions" className="border-none">
-                <AccordionTrigger className="py-2 text-sm">
-                  {isRu ? 'Как получить iCal-ссылку?' : 'How to get iCal link?'}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                    {selectedOta?.instructions[isRu ? 'ru' : 'en'].map((step, i) => (
-                      <li key={i}>{step}</li>
-                    ))}
-                  </ol>
-                  {selectedOta?.helpUrl && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="mt-2 h-auto p-0"
-                      onClick={() => window.open(selectedOta.helpUrl, '_blank')}
-                    >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      {isRu ? 'Подробная инструкция' : 'Detailed instructions'}
-                    </Button>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            {selectedOta?.instructions[isRu ? 'ru' : 'en'].length > 0 && (
+              <Accordion type="single" collapsible>
+                <AccordionItem value="instructions" className="border-none">
+                  <AccordionTrigger className="py-2 text-sm">
+                    {isRu ? 'Как получить iCal-ссылку?' : 'How to get iCal link?'}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                      {selectedOta?.instructions[isRu ? 'ru' : 'en'].map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                    {selectedOta?.helpUrl && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="mt-2 h-auto p-0"
+                        onClick={() => window.open(selectedOta.helpUrl, '_blank')}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        {isRu ? 'Подробная инструкция' : 'Detailed instructions'}
+                      </Button>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
 
             {/* Property Selection */}
             {properties && properties.length > 1 && (
