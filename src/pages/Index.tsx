@@ -95,22 +95,24 @@ const Index = () => {
           {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
           {isLoggedIn ? (
             isDesktop ? (
-              <div className="grid grid-cols-3 gap-8">
-                <div className="col-span-2 space-y-6">
-                  <Suspense fallback={null}>
-                    <YourDayFeed compact />
-                  </Suspense>
+              <>
+                <div className="grid grid-cols-3 gap-8">
+                  <div className="col-span-2 space-y-6">
+                    <Suspense fallback={null}>
+                      <YourDayFeed compact />
+                    </Suspense>
+                  </div>
+                  <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
+                    <LifecycleSmartTip />
+                    {hasContext ? (
+                      <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
+                    ) : (
+                      <Suspense fallback={null}><ConciergeBanner /></Suspense>
+                    )}
+                  </div>
                 </div>
-                <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
-                  <LifecycleSmartTip />
-                  {hasContext ? (
-                    <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
-                  ) : (
-                    <Suspense fallback={null}><ConciergeBanner /></Suspense>
-                  )}
-                  <PropertyTourBanner />
-                </div>
-              </div>
+                <PropertyTourBanner />
+              </>
             ) : (
               <>
                 <Suspense fallback={null}>
