@@ -15,14 +15,12 @@ interface HighlightsSectionProps {
   highlights: string[];
   onChange: (highlights: string[]) => void;
   className?: string;
-  maxHighlights?: number;
 }
 
 export function HighlightsSection({ 
   highlights, 
   onChange, 
   className,
-  maxHighlights = 12 
 }: HighlightsSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -30,7 +28,7 @@ export function HighlightsSection({
   const toggleHighlight = (id: string) => {
     if (highlights.includes(id)) {
       onChange(highlights.filter(h => h !== id));
-    } else if (highlights.length < maxHighlights) {
+    } else {
       onChange([...highlights, id]);
     }
   };
@@ -46,8 +44,8 @@ export function HighlightsSection({
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               {isRu 
-                ? `Выберите до ${maxHighlights} ключевых особенностей (${highlights.length}/${maxHighlights})` 
-                : `Select up to ${maxHighlights} key highlights (${highlights.length}/${maxHighlights})`}
+                ? `Выбрано: ${highlights.length}` 
+                : `Selected: ${highlights.length}`}
             </p>
           </div>
         </div>
@@ -92,7 +90,7 @@ export function HighlightsSection({
               {group.features.map((feat) => {
                 const Icon = feat.icon;
                 const isSelected = highlights.includes(feat.id);
-                const isDisabled = !isSelected && highlights.length >= maxHighlights;
+                const isDisabled = false;
                 
                 return (
                   <Badge
