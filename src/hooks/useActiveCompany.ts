@@ -65,7 +65,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
         name_en: m.management_companies.name_en,
         name_ru: m.management_companies.name_ru,
         logo: m.management_companies.logo,
-      }));
+      })).sort((a, b) => a.name_en.localeCompare(b.name_en));
     },
     enabled: !!user,
   });
