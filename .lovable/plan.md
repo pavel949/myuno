@@ -1,40 +1,106 @@
 
-# Унификация карточек объектов
+# Consolidation: Unified MC Workspace
 
-## Цель
-Обеспечить последовательное использование двух канонических карточек:
-- **PropertyCard** -- для УК, владельцев, админов (полная информация, статусы, действия)
-- **PropertyListingCard** -- для гостей и превью маркетплейса (Airbnb-стиль)
+## Current Problem
 
-## Что меняем
+The platform has two overlapping workspaces:
+- `/owner` -- A thin shell with only 6 real pages + **50+ redirects to /mc**
+- `/mc` -- The full MC workspace with all functionality
 
-### 1. PropertyEditor: превью через PropertyListingCard
-**Файл:** `src/pages/owner/PropertyEditor.tsx`
+This is confusing. The `/owner` workspace is essentially redundant -- it has its own Layout, Sidebar, Header, and MobileNav, all duplicating what `/mc` already provides.
 
-Сейчас используется `PropertyPreviewCard` -- кастомный компонент с собственным интерфейсом. Заменить на `PropertyListingCard`, чтобы превью в редакторе показывало точно ту же карточку, которую увидит гость на маркетплейсе.
+## Architecture After Changes
 
-Нужно собрать mock-объект типа `Property` из `formData` и передать в `PropertyListingCard`.
+```text
+/account          -- Personal page (profile, settings, account info)
+                     Entry point: "MC Workspace" button if user belongs to a company
 
-### 2. OwnerPropertiesList: использовать PropertyCard compact
-**Файл:** `src/components/owner/dashboard/OwnerPropertiesList.tsx`
+/mc               -- Unified MC workspace (role-filtered sidebar)
+  /mc             -- Dashboard
+  /mc/portfolio   -- Portfolio (moved from /owner)
+  /mc/guide       -- Guide (moved from /owner)
+  /mc/properties  -- Properties
+  /mc/calendar    -- Calendar
+  /mc/contacts    -- CRM Contacts
+  /mc/finance     -- Finance overview (moved from /owner/finance)
+  /mc/staff       -- Team
+  ...all existing /mc routes stay unchanged
 
-Сейчас в `renderProperty()` используется полностью кастомная inline-разметка (thumbnail + title + address + chevron). Заменить на `PropertyCard variant="compact"`, чтобы карточки на дашборде владельца были идентичны каноническому compact-варианту, который уже используется в других местах.
+/owner/*          -- All paths redirect to /mc equivalents
+```
 
-Потребуется маппинг `UnifiedProperty` в формат `OwnerProperty`, который принимает `PropertyCard`.
+## Step-by-Step Plan
 
-### 3. Убрать deprecated re-exports из PropertyCard.tsx
-**Файл:** `src/components/property/PropertyCard.tsx` (строки 697-721)
+### 1. Move /owner pages into /mc routes
 
-Убрать устаревшие обёртки `PropertyHeroCard`, `PropertyHeroCardSkeleton`, `PropertyListItem` -- они существуют только для обратной совместимости, но нигде не импортируются напрямую из этого файла.
+Add the 6 real pages from `/owner` as routes under `/mc` in `AnimatedRoutes.tsx`:
+- `/mc/portfolio` (OwnerPortfolio)
+- `/mc/guide` (OwnerGuidePage)
+- `/mc/setup` (OwnerSetupWizard)
+- `/mc/service-request` (ServiceRequest)
+- `/mc/inspection` (InspectionRequest)
+- `/mc/full-management` (FullManagement)
+- `/mc/finance` (FinanceOverview -- if not already there)
 
----
+### 2. Convert all /owner routes to redirects
 
-## Что НЕ меняем
-- Файлы `PropertyPreviewCard.tsx` и `dashboard/PropertyHeroCard.tsx` не удаляются
-- `PropertyListingCard` остаётся без изменений
-- Все остальные использования `PropertyCard` (AdminProperties, OwnerProperties, HostListingsPanel, PortfolioSection) уже корректны
+Replace the entire `/owner` route block with a single catch-all:
+- `/owner` -> `/mc`
+- `/owner/portfolio` -> `/mc/portfolio`
+- `/owner/finance` -> `/mc/finance`
+- `/owner/guide` -> `/mc/guide`
+- `/owner/*` -> `/mc` (fallback)
 
-## Итого: 3 файла для редактирования
-1. `src/pages/owner/PropertyEditor.tsx` -- замена PropertyPreviewCard на PropertyListingCard
-2. `src/components/owner/dashboard/OwnerPropertiesList.tsx` -- замена inline-карточки на PropertyCard compact
-3. `src/components/property/PropertyCard.tsx` -- удаление deprecated re-exports
+This eliminates OwnerLayout, OwnerGuard, and 50+ individual redirect routes.
+
+### 3. Update MCSidebar with role-aware navigation
+
+Add the missing items (Portfolio, Guide, Services) to `MCSidebar.tsx` navigation groups. The sidebar already has `canAccess()` filtering -- extend it:
+
+- **Director/Admin**: All groups visible (Main, CRM, Operations, Finance, Team + new Portfolio & Services)
+- **Manager**: Main + assigned modules
+- **Staff**: Only assigned modules
+- **Owner (no MC role)**: Dashboard, Portfolio, Finance, Guide, Services
+
+### 4. Add "MC Workspace" entry point to personal account
+
+In `UserAccountDashboard.tsx` or `AccountFlatMenu.tsx`, add a visible button/link to `/mc` for users who belong to a management company (using `useActiveCompany`).
+
+### 5. Fix hardcoded values in OwnerSidebar footer
+
+The current `OwnerSidebar` has `user?.user_metadata?.name` and `'Владелец'` hardcoded. Since we're removing OwnerSidebar entirely, this is resolved automatically. The `MCSidebar` already uses `useProfile()`.
+
+### 6. Clean up redundant files
+
+Delete or deprecate:
+- `src/components/owner/OwnerLayout.tsx`
+- `src/components/owner/OwnerSidebar.tsx`
+- `src/components/owner/OwnerHeader.tsx`
+- `src/components/owner/OwnerMobileNav.tsx`
+- `src/components/auth/OwnerGuard.tsx` (redirect to MCGuard)
+
+## Files to Modify
+
+| File | Action |
+|------|--------|
+| `src/components/layout/AnimatedRoutes.tsx` | Add /mc routes for portfolio/guide/etc, replace /owner block with redirects |
+| `src/components/mc/MCSidebar.tsx` | Add Portfolio, Guide, Services nav items with role filtering |
+| `src/pages/account/UserAccountDashboard.tsx` | Add "MC Workspace" entry button |
+| `src/components/account/AccountFlatMenu.tsx` | Add MC workspace link for company members |
+
+## Files to Delete
+
+| File | Reason |
+|------|--------|
+| `src/components/owner/OwnerLayout.tsx` | Replaced by MCLayout |
+| `src/components/owner/OwnerSidebar.tsx` | Merged into MCSidebar |
+| `src/components/owner/OwnerHeader.tsx` | MCHeader already exists |
+| `src/components/owner/OwnerMobileNav.tsx` | MCMobileNav already exists |
+
+## Result
+
+- One workspace (`/mc`) for all MC-related work
+- Sidebar adapts to user's role automatically
+- Personal account (`/account`) stays separate with an entry point to MC
+- All old `/owner` bookmarks continue to work via redirects
+- No database changes needed
