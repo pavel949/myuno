@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Plus, Settings, Search, TrendingUp, Target, Users,
   ListTodo, DollarSign, Percent, Filter, BarChart3,
+  Mail, Zap, FileText, Globe, Calendar, Building2, Copy, UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -223,6 +224,38 @@ export default function CrmDashboardPage() {
         pipelineData={pipelineData}
         onQuickCreate={() => setShowCreate(true)}
       />
+
+      {/* CRM Tools */}
+      <div className="pt-4 border-t">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          {isRu ? 'Инструменты CRM' : 'CRM Tools'}
+        </p>
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
+          {[
+            { icon: Mail, label: isRu ? 'Email' : 'Email', path: '/mc/crm-emails' },
+            { icon: Zap, label: isRu ? 'Автоматизации' : 'Automations', path: '/mc/automations' },
+            { icon: FileText, label: isRu ? 'Шаблоны' : 'Templates', path: '/mc/crm-templates' },
+            { icon: Globe, label: isRu ? 'Веб-формы' : 'Web Forms', path: '/mc/forms' },
+            { icon: Calendar, label: isRu ? 'Встречи' : 'Meetings', path: '/mc/meetings' },
+            { icon: Building2, label: isRu ? 'Компании' : 'Companies', path: '/mc/companies' },
+            { icon: Copy, label: isRu ? 'Дубликаты' : 'Duplicates', path: '/mc/duplicates' },
+            { icon: UserCog, label: isRu ? 'Назначение' : 'Assignment', path: '/mc/assignment' },
+          ].map(tool => (
+            <button
+              key={tool.path}
+              onClick={() => navigate(tool.path)}
+              className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-colors hover:bg-muted/50 group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                <tool.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.8} />
+              </div>
+              <span className="text-[10px] font-medium text-muted-foreground leading-tight text-center line-clamp-1">
+                {tool.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <CreateDealSheet open={showCreate} onOpenChange={setShowCreate} companyId={membership.company_id} />
     </div>
