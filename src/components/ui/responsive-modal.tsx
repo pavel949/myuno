@@ -125,7 +125,7 @@ export function ResponsiveModal({
       <SheetContent
         side="bottom"
         className={cn(
-          'rounded-t-2xl overflow-y-auto p-0',
+          'rounded-t-2xl p-0 flex flex-col overflow-hidden',
           mobileHeight,
           className,
         )}
@@ -149,10 +149,12 @@ export function ResponsiveModal({
           </SheetHeader>
         </div>
 
-        {/* Body */}
-        <div className="px-4 py-4 space-y-4">
-          {children}
-        </div>
+        {/* Scrollable body */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-4 py-4 space-y-4">
+            {children}
+          </div>
+        </ScrollArea>
 
         {/* Footer */}
         {footer && (
