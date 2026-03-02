@@ -1,73 +1,99 @@
 
 
-# Раздел управления подписками УК в админ-панели
+# Масштабирование Channel Manager: 25+ OTA-каналов
 
-## Текущее состояние
+## Подход
 
-Существует `AdminMCDashboard` (`/admin/mc-dashboard`) с обзором всех УК, KPI-карточками и деталями в Sheet. Однако **нет отдельного раздела для управления подписками** — только базовые badge-статусы (Subscribed/Trial) и Stripe ID в деталях компании. Администратор не может:
-- Видеть историю платежей и MRR
-- Управлять слотами компании вручную (добавить/убрать бесплатные слоты)
-- Приостановить или отменить подписку
-- Видеть сводную аналитику по доходам от подписок
+Текущая iCal-архитектура уже универсальна. Задача сводится к:
+1. Расширению реестра каналов (данные, не код) до 25+ OTA
+2. Улучшению UI для навигации по большому числу каналов
+3. Добавлению возможности подключить "любой другой" канал через Custom iCal URL
 
-## Что будет реализовано
+## Каналы для добавления (20+ новых)
 
-### 1. Новая вкладка "Subscriptions" в AdminMCDashboard
+### Крупные OTA
+- Expedia / Hotels.com (общая iCal система)
+- Agoda
+- TripAdvisor / Viator Rentals
+- Hostelworld
+- Trivago (через iCal партнёров)
 
-Добавить Tabs-навигацию в существующий `AdminMCDashboard.tsx` с двумя вкладками:
-- **Overview** (текущий контент) — список компаний с фильтрами
-- **Subscriptions** (новый) — сводка подписок и управление
+### Vacation Rental специфичные
+- Marriott Homes & Villas
+- Holidu
+- Hometogo
+- Atraveo
+- Casamundo
+- Traum-Ferienwohnungen
+- FeWo-direkt (VRBO Germany)
+- Abritel (VRBO France)
 
-### 2. Компонент AdminMCSubscriptions
+### Азия / Таиланд
+- Agoda Homes
+- Traveloka
+- Trip.com
+- Ctrip / Qunar
 
-Новый файл `src/components/admin/mc/AdminMCSubscriptions.tsx`:
+### Прочие
+- Wimdu
+- 9flats
+- HouseTrip
+- Homestay.com
+- Furnished Finder
+- Spotahome
+- Turno (для уборок)
+- iCal Custom (произвольная ссылка)
 
-**Блок KPI (верхняя полоса):**
-- MRR (Monthly Recurring Revenue) — сумма paid_slots x $25 по всем активным подпискам
-- Всего подписчиков / Пробный период / Отменённые
-- Средний чек / Средний размер портфолио
+## Технические изменения
 
-**Таблица подписок:**
-- Название УК, план (Starter/Professional/Enterprise/Custom), оплаченные слоты, использованные слоты, статус (Active/Trial/Cancelled/Past Due), дата начала, следующий платёж
-- Фильтры: All / Active / Trial / Cancelled / Past Due
-- Поиск по названию
+### 1. Вынести данные каналов в расширяемый реестр
 
-**Действия администратора (в строке или в Sheet):**
-- "Grant Free Slots" — добавить бесплатные слоты компании (обновление `paid_slots` напрямую в БД без Stripe)
-- "View in Stripe" — ссылка на Stripe Dashboard (для stripe_customer_id)
-- "Toggle Active" — приостановка/активация компании
+**Файл: `src/components/owner/channel-manager/channelRegistry.ts`** (новый)
 
-### 3. Миграция БД
+Единый реестр всех каналов с полной информацией:
+- id, name, icon/logo, color scheme
+- category (major_ota | vacation_rental | asia_pacific | other)
+- instructions (en/ru) для получения iCal-ссылки
+- helpUrl — ссылка на документацию OTA
+- urlPattern — regex для автоопределения источника по URL
 
-Добавить колонку `free_slots` (integer, default 0) в `management_companies` — для учёта бесплатных/промо-слотов, выданных администратором (отдельно от paid_slots через Stripe).
+Это data-driven подход: добавление нового канала = добавление одного объекта в массив, без изменения кода компонентов.
 
-### 4. Edge Function: admin-manage-mc-subscription
+### 2. Обновить QuickConnectCards
 
-Новый `supabase/functions/admin-manage-mc-subscription/index.ts`:
-- Принимает: `company_id`, `action` (grant_slots | revoke_slots | toggle_active)
-- Проверяет: JWT + роль admin через `has_role()`
-- Действия:
-  - `grant_slots`: обновляет `free_slots` в management_companies
-  - `toggle_active`: переключает `is_active`
-- Аудит: записывает действие в audit_logs
+**Файл: `src/components/owner/channel-manager/QuickConnectCards.tsx`** (редактирование)
 
----
+- Заменить хардкод `OTA_CHANNELS` на импорт из реестра
+- Добавить группировку по категориям (Major OTA / Vacation Rental / Asia / Other)
+- Показать 4-6 "рекомендуемых" каналов сверху, остальные — в раскрывающемся блоке "All channels"
+- Добавить поиск по названию канала
+- Добавить карточку "Custom / Other" для произвольного iCal URL
 
-## Технические детали
+### 3. Обновить channelConfig.ts
+
+**Файл: `src/components/owner/channel-manager/channelConfig.ts`** (редактирование)
+
+- Расширить `getChannelConfig()` для распознавания новых каналов по URL-паттернам
+- Добавить цветовые схемы и иконки для всех новых каналов
+- Улучшить автодетект: по URL определять канал при синхронизации
+
+### 4. Обновить ChannelHealthDashboard
+
+**Файл: `src/components/owner/channel-manager/ChannelHealthDashboard.tsx`** (редактирование)
+
+- Адаптировать сводку для большего числа каналов
+- Группировка подключённых каналов по категориям
+
+## Архитектура (без изменений в БД)
+
+Текущая таблица `property_external_calendars` уже универсальна — она хранит `ical_url` и `name`. Новые каналы не требуют миграций. Edge Function `ical-scheduled-sync` обрабатывает все каналы одинаково через iCal-протокол.
+
+## Итоговая структура файлов
 
 ### Новые файлы
-1. `src/components/admin/mc/AdminMCSubscriptions.tsx` — UI таблицы подписок с KPI
-2. `supabase/functions/admin-manage-mc-subscription/index.ts` — Edge Function для управления
+1. `src/components/owner/channel-manager/channelRegistry.ts` — единый реестр 25+ каналов
 
 ### Изменяемые файлы
-3. `src/pages/admin/AdminMCDashboard.tsx` — добавить Tabs (Overview / Subscriptions)
-4. `src/integrations/supabase/types.ts` — автообновление после миграции
-
-### Миграция
-- `ALTER TABLE management_companies ADD COLUMN free_slots integer NOT NULL DEFAULT 0;`
-- Обновить Edge Function `check-mc-subscription` чтобы учитывать `paid_slots + free_slots` как общее количество доступных слотов
-
-### Безопасность
-- Edge Function проверяет `has_role(user_id, 'admin')` перед любым действием
-- Все изменения логируются в `admin_audit_logs`
+2. `src/components/owner/channel-manager/QuickConnectCards.tsx` — UI с категориями и поиском
+3. `src/components/owner/channel-manager/channelConfig.ts` — расширенный автодетект каналов
 
