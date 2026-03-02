@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Plus, Check, X, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
+import { Loader2, Plus, Check, X, ChevronDown, ChevronRight, Settings2, Pencil } from 'lucide-react';
 import { useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { CategorySetting } from '@/hooks/useCompanyCategorySettings';
@@ -32,6 +32,9 @@ const CategoryRow = memo(function CategoryRow({
   onOverride: (code: string, field: string, value: unknown) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [editNameEn, setEditNameEn] = useState('');
+  const [editNameRu, setEditNameRu] = useState('');
   const defaults = getCategoryDefaults(code, type);
 
   const effectiveClass = overrides?.category_class || defaults.class;
@@ -39,6 +42,24 @@ const CategoryRow = memo(function CategoryRow({
   const effectiveProfit = overrides?.affects_net_profit ?? defaults.affectsProfit;
   const effectiveTax = overrides?.is_tax_deductible ?? defaults.taxDeductible;
   const effectiveAlloc = overrides?.allocation_method || defaults.allocation;
+
+  const displayEn = overrides?.custom_name_en || labelEn;
+  const displayRu = overrides?.custom_name_ru || labelRu;
+
+  const startEditName = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditNameEn(displayEn);
+    setEditNameRu(displayRu);
+    setEditingName(true);
+  };
+
+  const saveName = () => {
+    if (editNameEn.trim()) {
+      onOverride(code, 'custom_name_en', editNameEn.trim() === labelEn ? null : editNameEn.trim());
+      onOverride(code, 'custom_name_ru', editNameRu.trim() === labelRu ? null : editNameRu.trim());
+    }
+    setEditingName(false);
+  };
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -54,9 +75,36 @@ const CategoryRow = memo(function CategoryRow({
             </button>
           </CollapsibleTrigger>
 
-          <span className="text-sm text-foreground truncate flex-1 mr-1">
-            {isRu ? labelRu : labelEn}
-          </span>
+          {editingName ? (
+            <div className="flex items-center gap-1.5 flex-1 mr-1" onClick={e => e.stopPropagation()}>
+              <Input
+                value={isRu ? editNameRu : editNameEn}
+                onChange={e => isRu ? setEditNameRu(e.target.value) : setEditNameEn(e.target.value)}
+                className="h-7 text-sm px-2 flex-1"
+                autoFocus
+                onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
+              />
+              <button type="button" onClick={saveName} className="p-0.5 text-primary hover:text-primary/80">
+                <Check className="h-3.5 w-3.5" />
+              </button>
+              <button type="button" onClick={() => setEditingName(false)} className="p-0.5 text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 flex-1 mr-1 group/name">
+              <span className="text-sm text-foreground truncate">
+                {isRu ? displayRu : displayEn}
+              </span>
+              <button
+                type="button"
+                onClick={startEditName}
+                className="p-0.5 opacity-0 group-hover/name:opacity-100 text-muted-foreground hover:text-foreground transition-opacity shrink-0"
+              >
+                <Pencil className="h-3 w-3" />
+              </button>
+            </div>
+          )}
 
           <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
             {isRu ? CLASS_LABELS[effectiveClass as CategoryClass]?.ru : CLASS_LABELS[effectiveClass as CategoryClass]?.en}
@@ -74,57 +122,109 @@ const CategoryRow = memo(function CategoryRow({
         </div>
 
         <CollapsibleContent>
-          <div className="px-3 pb-3 pt-1 grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
-              <Select value={effectiveClass} onValueChange={v => onOverride(code, 'category_class', v)}>
-                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
-                    <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
-              <Select value={effectiveGroup} onValueChange={v => onOverride(code, 'category_group', v)}>
-                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {GROUP_ORDER.map(k => (
-                    <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
-              <Select value={effectiveAlloc} onValueChange={v => onOverride(code, 'allocation_method', v)}>
-                <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(ALLOCATION_LABELS) as AllocationMethod[]).map(k => (
-                    <SelectItem key={k} value={k} className="text-xs">{isRu ? ALLOCATION_LABELS[k].ru : ALLOCATION_LABELS[k].en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between">
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
-                <Switch checked={effectiveProfit} onCheckedChange={v => onOverride(code, 'affects_net_profit', v)} className="scale-75" />
+          <div className="px-3 pb-3 pt-1 space-y-3">
+            {/* Inline name edit for both languages */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[11px] text-muted-foreground">Name (EN)</Label>
+                <Input
+                  value={overrides?.custom_name_en || labelEn}
+                  onChange={e => onOverride(code, 'custom_name_en', e.target.value === labelEn ? null : e.target.value)}
+                  className="h-8 text-xs mt-1"
+                />
               </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
-                <Switch checked={effectiveTax} onCheckedChange={v => onOverride(code, 'is_tax_deductible', v)} className="scale-75" />
+              <div>
+                <Label className="text-[11px] text-muted-foreground">Название (RU)</Label>
+                <Input
+                  value={overrides?.custom_name_ru || labelRu}
+                  onChange={e => onOverride(code, 'custom_name_ru', e.target.value === labelRu ? null : e.target.value)}
+                  className="h-8 text-xs mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Select value={effectiveClass} onValueChange={v => onOverride(code, 'category_class', v)}>
+                  <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
+                <Select value={effectiveGroup} onValueChange={v => onOverride(code, 'category_group', v)}>
+                  <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {GROUP_ORDER.map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
+                <Select value={effectiveAlloc} onValueChange={v => onOverride(code, 'allocation_method', v)}>
+                  <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(Object.keys(ALLOCATION_LABELS) as AllocationMethod[]).map(k => (
+                      <SelectItem key={k} value={k} className="text-xs">{isRu ? ALLOCATION_LABELS[k].ru : ALLOCATION_LABELS[k].en}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+                  <Switch checked={effectiveProfit} onCheckedChange={v => onOverride(code, 'affects_net_profit', v)} className="scale-75" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+                  <Switch checked={effectiveTax} onCheckedChange={v => onOverride(code, 'is_tax_deductible', v)} className="scale-75" />
+                </div>
               </div>
             </div>
           </div>
         </CollapsibleContent>
       </div>
     </Collapsible>
+  );
+});
+
+// ─── Custom Category Row with edit ───────────────────────────────────────
+const CustomCategoryRow = memo(function CustomCategoryRow({
+  cat, isRu, onEdit,
+}: {
+  cat: { code: string; name_en: string; name_ru: string; category_class: string };
+  isRu: boolean;
+  onEdit: (cat: { code: string; name_en: string; name_ru: string }) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between py-1.5 px-2.5 rounded-lg hover:bg-muted/50 group/custom">
+      <div className="flex items-center gap-1 flex-1 truncate">
+        <span className="text-sm text-foreground truncate">{isRu ? cat.name_ru : cat.name_en}</span>
+        <button
+          type="button"
+          onClick={() => onEdit(cat)}
+          className="p-0.5 opacity-0 group-hover/custom:opacity-100 text-muted-foreground hover:text-foreground transition-opacity shrink-0"
+        >
+          <Pencil className="h-3 w-3" />
+        </button>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[cat.category_class as CategoryClass] || '')}>
+          {isRu ? CLASS_LABELS[cat.category_class as CategoryClass]?.ru : CLASS_LABELS[cat.category_class as CategoryClass]?.en}
+        </Badge>
+        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+      </div>
+    </div>
   );
 });
 
@@ -208,13 +308,17 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const [newAffectsProfit, setNewAffectsProfit] = useState(true);
   const [newTaxDeductible, setNewTaxDeductible] = useState(false);
 
+  // Edit custom category dialog
+  const [editCustom, setEditCustom] = useState<{ code: string; name_en: string; name_ru: string } | null>(null);
+  const [editCustomNameEn, setEditCustomNameEn] = useState('');
+  const [editCustomNameRu, setEditCustomNameRu] = useState('');
+
   const handleInit = useCallback(() => initMutation.mutate(type), [initMutation, type]);
 
   const handleToggle = useCallback((code: string, currentEnabled: boolean) => {
     toggleMutation.mutate({ category_type: type, category_code: code, is_enabled: !currentEnabled });
   }, [toggleMutation, type]);
 
-  // Single batched DB call instead of N individual mutations
   const handleBulkToggle = useCallback((codes: string[], enable: boolean) => {
     const codesToChange = codes.filter(code => {
       const isEnabled = enabledCodes ? enabledCodes.has(code) : true;
@@ -224,7 +328,6 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
     bulkToggleMutation.mutate({ category_type: type, codes: codesToChange, is_enabled: enable });
   }, [bulkToggleMutation, type, enabledCodes]);
 
-  // Single shared override handler lifted from CategoryRow
   const handleOverride = useCallback((code: string, field: string, value: unknown) => {
     updateOverrides.mutate({
       category_type: type,
@@ -255,7 +358,20 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
     setNewTaxDeductible(false);
   }, [newNameEn, newNameRu, newClass, newGroup, newAffectsProfit, newTaxDeductible, createCategory, type]);
 
-  // Memoize grouped categories (static computation based on constants)
+  const handleEditCustom = useCallback((cat: { code: string; name_en: string; name_ru: string }) => {
+    setEditCustom(cat);
+    setEditCustomNameEn(cat.name_en);
+    setEditCustomNameRu(cat.name_ru);
+  }, []);
+
+  const handleSaveCustomEdit = useCallback(async () => {
+    if (!editCustom || !editCustomNameEn.trim()) return;
+    // Use the overrides mechanism for custom categories too
+    handleOverride(editCustom.code, 'custom_name_en', editCustomNameEn.trim());
+    handleOverride(editCustom.code, 'custom_name_ru', editCustomNameRu.trim());
+    setEditCustom(null);
+  }, [editCustom, editCustomNameEn, editCustomNameRu, handleOverride]);
+
   const groupedCategories = useMemo(() => {
     const map = new Map<CategoryGroup, typeof standardCategories>();
     for (const cat of standardCategories) {
@@ -267,7 +383,6 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
     return map;
   }, [standardCategories, type]);
 
-  // Memoize settings map to avoid rebuilding in each GroupSection
   const settingsMap = useMemo(() => {
     return new Map((settings || []).map(s => [s.category_code, s]));
   }, [settings]);
@@ -358,15 +473,12 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
           </h4>
           <div className="space-y-0.5">
             {customCats.map(cat => (
-              <div key={cat.code} className="flex items-center justify-between py-1.5 px-2.5 rounded-lg hover:bg-muted/50">
-                <span className="text-sm text-foreground truncate">{isRu ? cat.name_ru : cat.name_en}</span>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[cat.category_class] || '')}>
-                    {isRu ? CLASS_LABELS[cat.category_class]?.ru : CLASS_LABELS[cat.category_class]?.en}
-                  </Badge>
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                </div>
-              </div>
+              <CustomCategoryRow
+                key={cat.code}
+                cat={cat}
+                isRu={isRu}
+                onEdit={handleEditCustom}
+              />
             ))}
           </div>
         </div>
@@ -377,6 +489,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         {isRu ? 'Добавить свою' : 'Add custom'}
       </Button>
 
+      {/* Add custom category dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
@@ -434,6 +547,31 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
             <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
             <Button size="sm" disabled={!newNameEn.trim() || createCategory.isPending} onClick={handleAddCustom}>
               {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRu ? 'Добавить' : 'Add')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit custom category dialog */}
+      <Dialog open={!!editCustom} onOpenChange={open => !open && setEditCustom(null)}>
+        <DialogContent className="sm:max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle>{isRu ? 'Редактировать категорию' : 'Edit category'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-xs">Name (EN)</Label>
+              <Input value={editCustomNameEn} onChange={e => setEditCustomNameEn(e.target.value)} className="h-9 mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Название (RU)</Label>
+              <Input value={editCustomNameRu} onChange={e => setEditCustomNameRu(e.target.value)} className="h-9 mt-1" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setEditCustom(null)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+            <Button size="sm" disabled={!editCustomNameEn.trim()} onClick={handleSaveCustomEdit}>
+              {isRu ? 'Сохранить' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>
