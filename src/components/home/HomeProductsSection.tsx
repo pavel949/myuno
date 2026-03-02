@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { ProductSection } from '@/components/market/ProductSection';
 import { QuickSolutionsGallery } from '@/components/home/QuickSolutionsGallery';
+import { Surface } from '@/components/ui/surface';
 
 // Expat-relevant food categories
 const EXPAT_CATEGORIES = [
@@ -25,7 +26,7 @@ export function HomeProductsSection() {
   }, [allProducts]);
 
   return (
-    <div className="space-y-5">
+    <Surface variant="page" bordered={false} padding="none" radius="none" className="space-y-5">
       {/* Quick Solutions Gallery */}
       <QuickSolutionsGallery />
 
@@ -43,6 +44,6 @@ export function HomeProductsSection() {
         />
       )}
 
-    </div>
+    </Surface>
   );
 }

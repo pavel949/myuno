@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { CalendarDays, MapPin, Clock, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { SectionHeader } from '@/components/ds';
 import { format, isToday, isTomorrow, parseISO } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
 import { motion } from 'framer-motion';
@@ -69,21 +70,14 @@ export const TodayEventsFeed = memo(function TodayEventsFeed({ compact }: TodayE
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-1">
-        <h3 className={cn('font-semibold flex items-center gap-2', compact ? 'text-sm' : 'text-[15px]')}>
-          <CalendarDays className="h-4 w-4 text-primary" />
-          {isRu ? 'События сегодня' : "Today's Events"}
-          <Badge variant="secondary" className="text-xs">{upcoming.length}</Badge>
-        </h3>
-        <button
-          onClick={() => navigate('/events')}
-          className="flex items-center gap-1 text-xs text-primary hover:underline"
-        >
-          {isRu ? 'Все события' : 'All events'}
-          <ArrowRight className="h-3 w-3" />
-        </button>
-      </div>
+      {/* DS2.0 SectionHeader */}
+      <SectionHeader
+        title={isRu ? 'События сегодня' : "Today's Events"}
+        subtitle={`${upcoming.length} ${isRu ? 'событий' : 'events'}`}
+        icon={CalendarDays}
+        size={compact ? 'sm' : 'md'}
+        action={{ label: isRu ? 'Все события' : 'All events', onClick: () => navigate('/events') }}
+      />
 
       {/* Events grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

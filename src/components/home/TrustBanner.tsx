@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Surface } from '@/components/ui/surface';
 
 interface TrustBannerProps {
   showEmergency?: boolean;
@@ -39,7 +40,7 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(fun
   ];
 
   return (
-    <div ref={ref} className="flex items-center justify-around py-4 rounded-2xl bg-card border border-border/50 shadow-[var(--shadow-card)]">
+    <Surface ref={ref} variant="card" padding="none" radius="2xl" className="flex items-center justify-around py-4">
       {stats.map((stat, i) => {
         const Icon = stat.icon;
         return (
@@ -79,7 +80,7 @@ export const TrustBanner = memo(forwardRef<HTMLDivElement, TrustBannerProps>(fun
           </Link>
         </>
       )}
-    </div>
+    </Surface>
   );
 }));
 
