@@ -114,49 +114,58 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken || !isOpen) return;
 
-    mapboxgl.accessToken = mapboxToken;
+    // Small delay to ensure dialog has rendered with dimensions
+    const timer = setTimeout(() => {
+      if (!mapContainer.current) return;
 
-    const center = value 
-      ? [value.lng, value.lat] as [number, number]
-      : [98.3923, 7.8804] as [number, number]; // Default Phuket
+      mapboxgl.accessToken = mapboxToken;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center,
-      zoom: value ? 15 : 12,
-    });
+      const center = value 
+        ? [value.lng, value.lat] as [number, number]
+        : [98.3923, 7.8804] as [number, number]; // Default Phuket
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({ visualizePitch: false }),
-      'top-right'
-    );
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center,
+        zoom: value ? 15 : 12,
+      });
 
-    // Handle map click
-    map.current.on('click', async (e) => {
-      const { lng, lat } = e.lngLat;
-      updateMarker(lng, lat);
-      
-      const address = await reverseGeocode(lng, lat);
-      if (address) {
-        setSelectedLocation({ address, lat, lng });
-      }
-    });
+      map.current.addControl(
+        new mapboxgl.NavigationControl({ visualizePitch: false }),
+        'top-right'
+      );
 
-    // Set initial marker
-    map.current.on('load', async () => {
-      if (value) {
-        updateMarker(value.lng, value.lat);
-        if (!value.address) {
-          const address = await reverseGeocode(value.lng, value.lat);
-          if (address) {
-            setSelectedLocation({ address, lat: value.lat, lng: value.lng });
+      // Handle map click
+      map.current.on('click', async (e) => {
+        const { lng, lat } = e.lngLat;
+        updateMarker(lng, lat);
+        
+        const address = await reverseGeocode(lng, lat);
+        if (address) {
+          setSelectedLocation({ address, lat, lng });
+        }
+      });
+
+      // Set initial marker
+      map.current.on('load', async () => {
+        // Ensure map fills container
+        map.current?.resize();
+
+        if (value) {
+          updateMarker(value.lng, value.lat);
+          if (!value.address) {
+            const address = await reverseGeocode(value.lng, value.lat);
+            if (address) {
+              setSelectedLocation({ address, lat: value.lat, lng: value.lng });
+            }
           }
         }
-      }
-    });
+      });
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (markerRef.current) {
         markerRef.current.remove();
         markerRef.current = null;
