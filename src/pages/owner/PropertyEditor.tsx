@@ -12,6 +12,7 @@ import { PropertyCalendar, AvailabilityEntry } from '@/components/property/Prope
 import { SeasonalPricing, SeasonalPrice } from '@/components/property/SeasonalPricing';
 import { PropertyTeamTab } from '@/components/owner/PropertyTeamTab';
 import { CanonicalPropertyForm, ExtraTab } from '@/components/property/canonical-form/CanonicalPropertyForm';
+import { AIIntakePanel } from '@/components/owner/property-wizard/AIIntakePanel';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -235,6 +236,63 @@ export default function PropertyEditor() {
 
   const clearEditorDraft = () => localStorage.removeItem(`vendor_draft_${draftKey}`);
 
+  // AI Intake merge: only fills empty/missing fields, never overwrites existing data
+  const handleAIMerge = useCallback((extracted: Record<string, any>) => {
+    if (!formData) return;
+
+    const fieldMap: Record<string, keyof PropertyFormData> = {
+      title: 'title',
+      title_ru: 'title_ru',
+      description: 'description',
+      description_ru: 'description_ru',
+      address: 'address',
+      district: 'district',
+      property_type: 'property_type',
+      bedrooms: 'bedrooms',
+      bathrooms: 'bathrooms',
+      area_sqm: 'area_sqm',
+      price_per_night: 'price_per_night',
+      max_guests: 'max_guests',
+      deposit_amount: 'deposit_amount',
+    };
+
+    const updates: Partial<PropertyFormData> = {};
+    let filled = 0;
+
+    for (const [extractedKey, formKey] of Object.entries(fieldMap)) {
+      const extractedVal = extracted[extractedKey];
+      if (extractedVal == null || extractedVal === '') continue;
+
+      const currentVal = formData[formKey];
+      // Only fill if current value is empty/falsy (but keep 0 as valid)
+      const isEmpty = currentVal === '' || currentVal === null || currentVal === undefined;
+      if (isEmpty) {
+        (updates as any)[formKey] = typeof extractedVal === 'number' ? String(extractedVal) : extractedVal;
+        filled++;
+      }
+    }
+
+    // Merge images: append new ones
+    if (extracted.images?.length && formData.images) {
+      const existingSet = new Set(formData.images);
+      const newImages = extracted.images.filter((img: string) => !existingSet.has(img));
+      if (newImages.length > 0) {
+        (updates as any).images = [...formData.images, ...newImages];
+        filled += newImages.length;
+      }
+    }
+    if (extracted.cover_image && !formData.cover_image) {
+      (updates as any).cover_image = extracted.cover_image;
+      filled++;
+    }
+
+    if (filled > 0) {
+      setFormData(prev => prev ? { ...prev, ...updates } : prev);
+    }
+
+    return filled;
+  }, [formData]);
+
   const handleSubmit = async () => {
     if (!id || !formData) return;
     try {
@@ -447,6 +505,9 @@ export default function PropertyEditor() {
           </div>
         </div>
       )}
+
+      {/* AI Intake - merge mode for existing property */}
+      <AIIntakePanel onDataExtracted={handleAIMerge} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
         <div>
