@@ -36,6 +36,8 @@ export interface UserActiveContext {
   user_id: string;
   active_role: string;
   active_org_id: string | null;
+  mode: string;
+  entity_id: string | null;
   updated_at: string;
 }
 
@@ -150,12 +152,21 @@ export function useUserContext() {
     mutationFn: async ({ role, orgId }: { role: AppRole; orgId?: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
+      // Derive mode from role
+      const modeMap: Record<string, string> = {
+        admin: 'admin', uno_team: 'team', vendor: 'vendor',
+        owner: 'owner', property_owner: 'owner', property_manager: 'mc',
+        staff: 'mc', investor: 'investor',
+      };
+
       const { data, error } = await supabase
         .from('user_active_context')
         .upsert({
           user_id: user.id,
           active_role: role,
           active_org_id: orgId || null,
+          mode: modeMap[role] || 'user',
+          entity_id: orgId || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
         .select()
@@ -169,13 +180,22 @@ export function useUserContext() {
       await queryClient.cancelQueries({ queryKey: contextKey });
       const previousContext = queryClient.getQueryData<UserActiveContext | null>(contextKey);
 
-      queryClient.setQueryData<UserActiveContext | null>(contextKey, (old) => ({
-        id: old?.id ?? `temp-${user?.id ?? 'user'}`,
-        user_id: user?.id ?? old?.user_id ?? '',
-        active_role: role,
-        active_org_id: orgId || null,
-        updated_at: new Date().toISOString(),
-      }));
+      queryClient.setQueryData<UserActiveContext | null>(contextKey, (old) => {
+        const modeMap: Record<string, string> = {
+          admin: 'admin', uno_team: 'team', vendor: 'vendor',
+          owner: 'owner', property_owner: 'owner', property_manager: 'mc',
+          staff: 'mc', investor: 'investor',
+        };
+        return {
+          id: old?.id ?? `temp-${user?.id ?? 'user'}`,
+          user_id: user?.id ?? old?.user_id ?? '',
+          active_role: role,
+          active_org_id: orgId || null,
+          mode: modeMap[role] || 'user',
+          entity_id: orgId || null,
+          updated_at: new Date().toISOString(),
+        };
+      });
 
       return { previousContext };
     },

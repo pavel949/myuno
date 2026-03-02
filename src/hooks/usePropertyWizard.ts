@@ -395,6 +395,7 @@ export function usePropertyWizard() {
     const isOnBehalf = ownershipData.ownership_type !== 'own';
     
     // Strip fields that don't exist on the properties table
+    // IMPORTANT: property_type MUST be preserved — it's a required DB column
     const { 
       title, title_ru, description, description_ru,
       rental_platforms, custom_platform, platform_listed,

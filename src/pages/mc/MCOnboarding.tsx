@@ -36,6 +36,7 @@ interface CompanyForm {
 
 interface TeamInvite {
   email: string;
+  full_name: string;
   role: string;
   sent?: boolean;
 }
@@ -72,7 +73,7 @@ const MCOnboarding: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Step 3: Team invites
-  const [invites, setInvites] = useState<TeamInvite[]>([{ email: '', role: 'manager' }]);
+  const [invites, setInvites] = useState<TeamInvite[]>([{ email: '', full_name: '', role: 'manager' }]);
 
   const updateField = (field: keyof CompanyForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -154,14 +155,14 @@ const MCOnboarding: React.FC = () => {
   // Step 3: Invite team
   const addInvite = () => {
     if (invites.length >= 3) return;
-    setInvites(prev => [...prev, { email: '', role: 'manager' }]);
+    setInvites(prev => [...prev, { email: '', full_name: '', role: 'manager' }]);
   };
 
   const removeInvite = (index: number) => {
     setInvites(prev => prev.filter((_, i) => i !== index));
   };
 
-  const updateInvite = (index: number, field: 'email' | 'role', value: string) => {
+  const updateInvite = (index: number, field: 'email' | 'role' | 'full_name', value: string) => {
     setInvites(prev => prev.map((inv, i) => i === index ? { ...inv, [field]: value } : inv));
   };
 
@@ -172,13 +173,16 @@ const MCOnboarding: React.FC = () => {
     setLoading(true);
     try {
       for (const invite of validInvites) {
-        await supabase.functions.invoke('invite-team-member', {
+        const { data, error } = await supabase.functions.invoke('invite-team-member', {
           body: {
             email: invite.email.trim(),
+            full_name: invite.full_name.trim() || invite.email.split('@')[0],
             role: invite.role,
             company_id: companyId,
           },
         });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
         invite.sent = true;
       }
       setInvites([...invites]);
@@ -327,6 +331,12 @@ const MCOnboarding: React.FC = () => {
                     <CardContent className="pt-4 pb-4">
                       <div className="flex items-start gap-2">
                         <div className="flex-1 space-y-2">
+                          <Input
+                            value={inv.full_name}
+                            onChange={e => updateInvite(i, 'full_name', e.target.value)}
+                            placeholder={isRu ? 'Имя сотрудника' : 'Employee name'}
+                            disabled={inv.sent}
+                          />
                           <Input
                             type="email"
                             value={inv.email}
