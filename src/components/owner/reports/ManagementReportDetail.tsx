@@ -4,7 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import {
   TrendingUp, TrendingDown, Wrench, Home, DollarSign,
-  BarChart3, ClipboardList, Star
+  BarChart3, ClipboardList, Star, Globe
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru as ruLocale, enUS } from 'date-fns/locale';
@@ -207,6 +207,9 @@ export function ManagementReportDetail({ report }: ManagementReportDetailProps) 
                       {b.check_in ? format(new Date(b.check_in), 'dd MMM', { locale: isRu ? ruLocale : enUS }) : '—'}
                       {' → '}
                       {b.check_out ? format(new Date(b.check_out), 'dd MMM', { locale: isRu ? ruLocale : enUS }) : '—'}
+                      {b.source && (
+                        <span className="ml-1.5 text-primary">• {b.source}</span>
+                      )}
                     </p>
                   </div>
                   <span className="text-sm font-medium">{formatCurrency(b.total_amount)}</span>
@@ -221,6 +224,40 @@ export function ManagementReportDetail({ report }: ManagementReportDetailProps) 
           </div>
         </>
       )}
+
+      {/* Booking Sources breakdown */}
+      {bookings.length > 0 && (() => {
+        const sourceCounts: Record<string, { count: number; revenue: number }> = {};
+        bookings.forEach((b: any) => {
+          const src = b.source || 'direct';
+          if (!sourceCounts[src]) sourceCounts[src] = { count: 0, revenue: 0 };
+          sourceCounts[src].count++;
+          sourceCounts[src].revenue += Number(b.total_amount || 0);
+        });
+        const entries = Object.entries(sourceCounts).sort(([, a], [, b]) => b.revenue - a.revenue);
+        return (
+          <>
+            <Separator />
+            <div>
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
+                <Globe className="h-4 w-4 text-primary" />
+                {isRu ? 'Источники бронирований' : 'Booking Sources'}
+              </h3>
+              <div className="space-y-1.5">
+                {entries.map(([src, data]) => (
+                  <div key={src} className="flex items-center justify-between py-1 border-b border-border/30 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm capitalize">{src.replace(/_/g, ' ')}</span>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{data.count}</Badge>
+                    </div>
+                    <span className="text-sm font-medium">{formatCurrency(data.revenue)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Highlights */}
       {highlights.length > 0 && (
