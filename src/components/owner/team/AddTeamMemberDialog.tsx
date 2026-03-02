@@ -52,13 +52,28 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
   const handleSubmit = async () => {
     if (!fullName.trim() || !email.trim() || !activeCompany || !canManage) return;
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailPattern = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
+
+    if (!emailPattern.test(normalizedEmail)) {
+      toast({
+        title: t('Invalid email', 'Некорректный email'),
+        description: t(
+          'Please use a valid email in latin format (example: name@example.com)',
+          'Используйте корректный email латиницей (пример: name@example.com)'
+        ),
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('invite-team-member', {
         body: {
           company_id: activeCompany.company_id,
           full_name: fullName.trim(),
-          email: email.trim().toLowerCase(),
+          email: normalizedEmail,
           phone: phone.trim() || undefined,
           role,
         },
@@ -70,8 +85,8 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       toast({
         title: t('Team member added', 'Сотрудник добавлен'),
         description: t(
-          `Credentials sent to ${email}`,
-          `Данные для входа отправлены на ${email}`
+          `Credentials sent to ${normalizedEmail}`,
+          `Данные для входа отправлены на ${normalizedEmail}`
         ),
       });
 
@@ -83,9 +98,17 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       onOpenChange(false);
       onSuccess?.();
     } catch (err: any) {
+      const errorMessage = typeof err?.message === 'string' ? err.message : '';
+      const invalidEmailFromBackend = errorMessage.toLowerCase().includes('invalid email');
+
       toast({
         title: t('Error', 'Ошибка'),
-        description: err.message || t('Failed to add team member', 'Не удалось добавить сотрудника'),
+        description: invalidEmailFromBackend
+          ? t(
+              'Please use a valid email in latin format (example: name@example.com)',
+              'Используйте корректный email латиницей (пример: name@example.com)'
+            )
+          : errorMessage || t('Failed to add team member', 'Не удалось добавить сотрудника'),
         variant: 'destructive',
       });
     } finally {
