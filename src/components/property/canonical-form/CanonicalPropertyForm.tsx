@@ -536,7 +536,7 @@ export function CanonicalPropertyForm({
           </span>
         </div>
 
-        <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(70vh - 200px)' }}>
+        <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(100vh - 280px)' }}>
           <TabsContent value="basic" className="mt-0">
             <BasicInfoStep
               formData={formData}
