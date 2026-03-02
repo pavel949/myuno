@@ -1,8 +1,22 @@
 import React from 'react';
-import { Calculator, Percent, Calendar, Users } from 'lucide-react';
+import { Calculator, Percent, Calendar, Users, Sun, Snowflake, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+
+interface SeasonalPriceEntry {
+  id: string;
+  name: string;
+  nameRu?: string;
+  type: 'high' | 'low' | 'holiday' | 'custom';
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+  priceModifier: number;
+  minNights?: number;
+}
+
 interface PropertyPriceBreakdownProps {
   pricePerNight?: number;
   weeklyDiscount?: number;
@@ -13,6 +27,7 @@ interface PropertyPriceBreakdownProps {
   extraGuestPrice?: number;
   extraGuestThreshold?: number;
   minStayNights?: number;
+  seasonalPricing?: SeasonalPriceEntry[];
   currency?: string;
   className?: string;
 }
@@ -27,6 +42,7 @@ export function PropertyPriceBreakdown({
   extraGuestPrice,
   extraGuestThreshold,
   minStayNights,
+  seasonalPricing,
   currency = 'THB',
   className,
 }: PropertyPriceBreakdownProps) {
@@ -95,7 +111,56 @@ export function PropertyPriceBreakdown({
           </div>
         )}
 
-        {/* Extra guest pricing */}
+        {/* Seasonal Pricing */}
+        {seasonalPricing && seasonalPricing.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-primary" />
+              {isRu ? 'Сезонные цены' : 'Seasonal Rates'}
+            </p>
+            <div className="grid gap-2">
+              {seasonalPricing.map((season) => {
+                const seasonPrice = pricePerNight ? Math.round(pricePerNight * season.priceModifier / 100) : 0;
+                const isHigher = season.priceModifier > 100;
+                const isLower = season.priceModifier < 100;
+                const SeasonIcon = season.type === 'high' ? Sun : season.type === 'low' ? Snowflake : season.type === 'holiday' ? Sparkles : Calendar;
+                
+                const monthNames = isRu 
+                  ? ['', 'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
+                  : ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const dateRange = `${season.startDay} ${monthNames[season.startMonth]} – ${season.endDay} ${monthNames[season.endMonth]}`;
+                
+                return (
+                  <div 
+                    key={season.id} 
+                    className={`flex items-center justify-between p-2.5 rounded-lg border ${
+                      isHigher ? 'bg-warning/5 border-warning/20' : isLower ? 'bg-success/5 border-success/20' : 'bg-muted/30 border-border/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <SeasonIcon className={`w-4 h-4 flex-shrink-0 ${
+                        isHigher ? 'text-warning' : isLower ? 'text-success' : 'text-muted-foreground'
+                      }`} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{isRu ? (season.nameRu || season.name) : season.name}</p>
+                        <p className="text-xs text-muted-foreground">{dateRange}</p>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <p className={`text-sm font-bold ${isHigher ? 'text-warning' : isLower ? 'text-success' : ''}`}>
+                        {symbol}{seasonPrice.toLocaleString()}
+                      </p>
+                      <p className={`text-xs ${isHigher ? 'text-warning' : isLower ? 'text-success' : 'text-muted-foreground'}`}>
+                        {isHigher ? '+' : ''}{season.priceModifier - 100}%
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {extraGuestPrice && extraGuestPrice > 0 && (
           <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
             <div className="flex items-center gap-2">

@@ -471,6 +471,7 @@ export default function PropertyDetail() {
                 extraGuestPrice={rentalTerms.extra_guest_price}
                 extraGuestThreshold={rentalTerms.extra_guest_threshold}
                 minStayNights={rentalTerms.min_stay_nights}
+                seasonalPricing={rentalTerms.seasonal_pricing as any}
                 currency="THB"
               />
             </>

@@ -453,7 +453,7 @@ export function CanonicalPropertyForm({
     const basic = [formData.title, formData.property_type, formData.description, formData.bedrooms, formData.bathrooms, formData.area_sqm];
     const location = [formData.address, formData.district, formData.lat, formData.lng];
     const photos = [formData.cover_image, ...(formData.images || [])];
-    const pricing = [formData.price_per_night, formData.max_guests];
+    const pricing = [formData.price_per_night, formData.max_guests, formData.seasonal_pricing?.length ? true : undefined];
     const utilities = [utilitiesData.electricity_included, utilitiesData.water_included, utilitiesData.internet_speed];
     const services = [servicesData.cleaning_included, servicesData.cleaning_frequency];
 

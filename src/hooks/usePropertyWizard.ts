@@ -92,6 +92,18 @@ export interface PropertyFormData {
   cancellation_policy?: string;
   weekly_discount?: number;
   monthly_discount?: number;
+  seasonal_pricing?: Array<{
+    id: string;
+    name: string;
+    nameRu?: string;
+    type: 'high' | 'low' | 'holiday' | 'custom';
+    startMonth: number;
+    startDay: number;
+    endMonth: number;
+    endDay: number;
+    priceModifier: number;
+    minNights?: number;
+  }>;
   highlights: string[];
   // Platform listing
   platform_listed?: boolean;
@@ -150,6 +162,7 @@ const initialFormData: PropertyFormData = {
   quiet_hours_end: '08:00',
   // Cancellation & Discounts defaults
   cancellation_policy: 'flexible',
+  seasonal_pricing: [],
   highlights: [],
   platform_listed: true,
 };
@@ -385,7 +398,7 @@ export function usePropertyWizard() {
       title, title_ru, description, description_ru,
       rental_platforms, custom_platform, platform_listed,
       is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
-      smoking_allowed,
+      smoking_allowed, seasonal_pricing,
       ...cleanData 
     } = formData;
     
@@ -404,6 +417,7 @@ export function usePropertyWizard() {
       is_for_sale,
       // Map smoking_allowed boolean to smoking_policy text column
       smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
+      seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,
       // These will be remapped by useCreateOwnerProperty
       title,
       title_ru,
