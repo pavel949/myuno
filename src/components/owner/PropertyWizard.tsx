@@ -1,10 +1,8 @@
 import { useState, ReactNode, useCallback, memo } from 'react';
-import { Save } from 'lucide-react';
+import { Save, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { propertyWizardSteps, WizardStep } from './PropertyWizardSteps';
 
@@ -161,10 +159,7 @@ function PropertyWizardInner({
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => {
-              onSaveDraft();
-              toast.success(isRu ? 'Черновик сохранён' : 'Draft saved');
-            }}
+            onClick={onSaveDraft}
             disabled={isSubmitting}
             title={isRu ? 'Сохранить черновик' : 'Save draft'}
           >
