@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { toast } from 'sonner';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
+import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 
 // Quick action buttons for most critical services
 const quickActions = [
@@ -282,13 +283,16 @@ export default function SOS() {
       <PageContainer>
         <PageHeader title="SOS" showBack fallbackPath="/" />
 
-        {/* Offline indicator */}
+        {/* Offline indicator + Emergency Card */}
         {isOffline && (
-          <div className="mb-4 p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-2">
-            <WifiOff className="w-5 h-5 text-warning" />
-            <span className="text-sm text-warning font-medium">
-              {language === 'ru' ? 'Вы офлайн — данные из кеша' : 'You are offline — using cached data'}
-            </span>
+          <div className="mb-4 space-y-3">
+            <div className="p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-2">
+              <WifiOff className="w-5 h-5 text-warning" />
+              <span className="text-sm text-warning font-medium">
+                {language === 'ru' ? 'Вы офлайн — данные из кеша' : 'You are offline — using cached data'}
+              </span>
+            </div>
+            <OfflineEmergencyCard />
           </div>
         )}
 

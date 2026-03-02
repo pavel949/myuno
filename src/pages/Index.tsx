@@ -32,6 +32,9 @@ import { TodayEventsFeed } from '@/components/home/TodayEventsFeed';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
+import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
+import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
+import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -43,6 +46,7 @@ const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingMod
 const Index = () => {
   const { activeCode } = useLifeSituationContext();
   const { user } = useAuth();
+  const { isOffline } = useOfflineStatus();
   const isDesktop = useIsDesktop();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -131,6 +135,8 @@ const Index = () => {
             <>
               {/* Public: Today's Events feed — full width */}
               <TodayEventsFeed compact />
+              {/* Popular on UNO for non-logged-in users */}
+              <PopularServicesStrip />
               {/* Property Tour — full width */}
               <PropertyTourBanner />
             </>
@@ -140,6 +146,13 @@ const Index = () => {
           <RevealOnScroll>
             <HomeProductsSection />
           </RevealOnScroll>
+
+          {/* ─── Offline Emergency Card ─── */}
+          {isOffline && (
+            <RevealOnScroll>
+              <OfflineEmergencyCard compact />
+            </RevealOnScroll>
+          )}
 
           {/* ─── SECTION 5: Trust + Emergency (unified strip) ─── */}
           <RevealOnScroll>
