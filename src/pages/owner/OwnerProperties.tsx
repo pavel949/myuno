@@ -160,6 +160,8 @@ export default function OwnerProperties() {
       toast({ title: isRu ? 'Объект удалён' : 'Property deleted' });
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['company-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
     }
     setDeleteTarget(null);
   };
