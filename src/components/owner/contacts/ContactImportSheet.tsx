@@ -138,11 +138,11 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
       )}
 
       {step === 'map' && (
-        <>
+        <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             {isRu ? `Найдено ${rawData.length} строк. Сопоставьте колонки:` : `Found ${rawData.length} rows. Map columns:`}
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
             {columns.map(col => (
               <div key={col} className="flex items-center gap-3">
                 <span className="text-sm font-mono w-32 truncate shrink-0">{col}</span>
@@ -159,22 +159,22 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
             ))}
           </div>
           {previewRows.length > 0 && (
-            <div className="overflow-x-auto">
-              <p className="text-xs font-medium mb-1">{isRu ? 'Предпросмотр (5 строк):' : 'Preview (5 rows):'}</p>
+            <div className="overflow-x-auto max-h-[20vh] overflow-y-auto border rounded-lg">
+              <p className="text-xs font-medium mb-1 px-2 pt-2">{isRu ? 'Предпросмотр (5 строк):' : 'Preview (5 rows):'}</p>
               <table className="text-xs w-full">
-                <thead><tr>{columns.filter(c => mapping[c]).map(c => <th key={c} className="text-left p-1 border-b font-medium">{mapping[c]}</th>)}</tr></thead>
-                <tbody>{previewRows.map((row, i) => <tr key={i}>{columns.filter(c => mapping[c]).map(c => <td key={c} className="p-1 border-b text-muted-foreground truncate max-w-[120px]">{row[c]}</td>)}</tr>)}</tbody>
+                <thead><tr>{columns.filter(c => mapping[c]).map(c => <th key={c} className="text-left p-1.5 border-b font-medium bg-muted/50 sticky top-0">{mapping[c]}</th>)}</tr></thead>
+                <tbody>{previewRows.map((row, i) => <tr key={i}>{columns.filter(c => mapping[c]).map(c => <td key={c} className="p-1.5 border-b text-muted-foreground truncate max-w-[150px]">{row[c]}</td>)}</tr>)}</tbody>
               </table>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={reset}>{isRu ? 'Назад' : 'Back'}</Button>
             <Button onClick={handleImport} disabled={importing || !Object.values(mapping).some(v => v)}>
               {importing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FileText className="h-4 w-4 mr-1" />}
               {isRu ? `Импортировать ${rawData.length}` : `Import ${rawData.length}`}
             </Button>
           </div>
-        </>
+        </div>
       )}
 
       {step === 'done' && (
