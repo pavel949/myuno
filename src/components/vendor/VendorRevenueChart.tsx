@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { VendorPeriodSelector, Period } from './dashboard/VendorPeriodSelector';
 import { cn } from '@/lib/utils';
+import { CHART_THEME } from '@/lib/chartTheme';
 
 interface RevenueDataPoint {
   date: string;
@@ -45,7 +46,7 @@ export function VendorRevenueChart({
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[180px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
         </CardContent>
       </Card>
     );
@@ -68,7 +69,6 @@ export function VendorRevenueChart({
   const totalRevenue = data.reduce((sum, d) => sum + d.revenue, 0);
   const totalOrders = data.reduce((sum, d) => sum + d.orders, 0);
 
-  // Calculate comparison percentage
   let changePercent: number | null = null;
   let trend: 'up' | 'down' | 'neutral' = 'neutral';
   
@@ -84,7 +84,7 @@ export function VendorRevenueChart({
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4 text-success" />
             {isRu ? 'Доход' : 'Revenue'}
           </CardTitle>
@@ -98,7 +98,7 @@ export function VendorRevenueChart({
         </div>
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-success">{formatCurrency(totalRevenue)}</p>
+            <p className="text-2xl font-bold text-success tracking-[-0.02em]">{formatCurrency(totalRevenue)}</p>
             {changePercent !== null && (
               <div className={cn("flex items-center gap-0.5 text-sm font-medium", trendColor)}>
                 <TrendIcon className="h-3.5 w-3.5" />
@@ -113,42 +113,37 @@ export function VendorRevenueChart({
       </CardHeader>
       <CardContent className="pt-0">
         {data.length === 0 ? (
-          <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
             {isRu ? 'Нет данных за период' : 'No data for period'}
           </div>
         ) : (
-          <div className="h-[180px]">
+          <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="vendorRevenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                <CartesianGrid {...CHART_THEME.grid} vertical={false} />
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={formatDate}
-                  tick={{ fontSize: 10 }}
-                  className="text-muted-foreground"
+                  tick={CHART_THEME.axisTick}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis 
                   tickFormatter={formatCurrency}
-                  tick={{ fontSize: 10 }}
-                  className="text-muted-foreground"
+                  tick={CHART_THEME.axisTick}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
+                  contentStyle={CHART_THEME.tooltip}
+                  labelStyle={CHART_THEME.tooltipLabel}
+                  itemStyle={CHART_THEME.tooltipItem}
                   formatter={(value: number, name: string) => [
                     name === 'revenue' ? formatCurrency(value) : value,
                     name === 'revenue' ? (isRu ? 'Доход' : 'Revenue') : (isRu ? 'Заказы' : 'Orders')
@@ -158,20 +153,20 @@ export function VendorRevenueChart({
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="hsl(var(--success))"
-                  strokeWidth={2}
+                  stroke={CHART_THEME.colors.success}
+                  strokeWidth={CHART_THEME.area.strokeWidth}
                   fill="url(#vendorRevenueGradient)"
+                  animationDuration={CHART_THEME.area.animationDuration}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
         
-        {/* Legend */}
-        <div className="flex justify-center gap-6 mt-2">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-success" />
-            <span className="text-xs text-muted-foreground">
+        <div className={CHART_THEME.legend.containerClass}>
+          <div className="flex items-center gap-2">
+            <div className={`${CHART_THEME.legend.dotSize} bg-success`} />
+            <span className={CHART_THEME.legend.textClass}>
               {isRu ? 'Доход' : 'Revenue'}
             </span>
           </div>

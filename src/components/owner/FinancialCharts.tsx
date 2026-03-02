@@ -10,24 +10,12 @@ import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMon
 import { ru } from 'date-fns/locale';
 import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { CHART_THEME } from '@/lib/chartTheme';
 
 interface FinancialChartsProps {
   financials: PropertyFinancialFull[];
   dateRange?: { from: Date; to: Date };
 }
-
-const CHART_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  '#22c55e',
-  '#eab308',
-  '#f97316',
-  '#a855f7',
-  '#ec4899',
-];
 
 export function FinancialCharts({ financials, dateRange }: FinancialChartsProps) {
   const { language } = useLanguage();
@@ -69,7 +57,6 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
   // Calculate expense breakdown by category
   const expensesByCategory = useMemo(() => {
     const categoryTotals: Record<string, number> = {};
-
     financials
       .filter(f => f.transaction_type === 'expense')
       .forEach(f => {
@@ -80,11 +67,7 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
     return Object.entries(categoryTotals)
       .map(([category, amount]) => {
         const cat = EXPENSE_CATEGORIES.find(c => c.value === category);
-        return {
-          name: cat ? (isRu ? cat.labelRu : cat.labelEn) : category,
-          value: amount,
-          category,
-        };
+        return { name: cat ? (isRu ? cat.labelRu : cat.labelEn) : category, value: amount, category };
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
@@ -93,7 +76,6 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
   // Calculate income breakdown by category
   const incomeByCategory = useMemo(() => {
     const categoryTotals: Record<string, number> = {};
-
     financials
       .filter(f => f.transaction_type === 'income')
       .forEach(f => {
@@ -104,26 +86,20 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
     return Object.entries(categoryTotals)
       .map(([category, amount]) => {
         const cat = INCOME_CATEGORIES.find(c => c.value === category);
-        return {
-          name: cat ? (isRu ? cat.labelRu : cat.labelEn) : category,
-          value: amount,
-          category,
-        };
+        return { name: cat ? (isRu ? cat.labelRu : cat.labelEn) : category, value: amount, category };
       })
       .sort((a, b) => b.value - a.value);
   }, [financials, isRu]);
 
-  // Format currency for tooltip
   const formatCurrency = (value: number) => `${getCurrencySymbol('THB')}${value.toLocaleString()}`;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;
-
     return (
-      <div className="bg-background border rounded-lg p-3 shadow-lg">
-        <p className="font-medium mb-2">{payload[0]?.payload?.fullMonth || label}</p>
+      <div style={CHART_THEME.tooltip}>
+        <p style={CHART_THEME.tooltipLabel}>{payload[0]?.payload?.fullMonth || label}</p>
         {payload.map((item: any, index: number) => (
-          <p key={index} style={{ color: item.color }} className="text-sm">
+          <p key={index} style={{ ...CHART_THEME.tooltipItem, color: item.color }} className="text-sm">
             {item.name}: {formatCurrency(item.value)}
           </p>
         ))}
@@ -131,53 +107,53 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
     );
   };
 
-  if (!financials.length) {
-    return null;
-  }
+  if (!financials.length) return null;
 
   return (
     <div className="space-y-4">
       {/* Monthly Trends Chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4" />
             {isRu ? 'Динамика за 6 месяцев' : '6 Month Trend'}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px]">
+          <div className="h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+              <AreaChart data={monthlyData} margin={{ top: 8, right: 8, left: -20, bottom: 4 }}>
                 <defs>
-                  <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  <linearGradient id="finIncomeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CHART_THEME.colors.success} stopOpacity={0.25} />
+                    <stop offset="100%" stopColor={CHART_THEME.colors.success} stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  <linearGradient id="finExpenseGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CHART_THEME.colors.destructive} stopOpacity={0.2} />
+                    <stop offset="100%" stopColor={CHART_THEME.colors.destructive} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+                <CartesianGrid {...CHART_THEME.grid} vertical={false} />
+                <XAxis dataKey="month" tick={CHART_THEME.axisTick} axisLine={false} tickLine={false} />
+                <YAxis tick={CHART_THEME.axisTick} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
                   dataKey="income"
                   name={isRu ? 'Доходы' : 'Income'}
-                  stroke="#22c55e"
-                  fill="url(#incomeGradient)"
-                  strokeWidth={2}
+                  stroke={CHART_THEME.colors.success}
+                  fill="url(#finIncomeGrad)"
+                  strokeWidth={CHART_THEME.area.strokeWidth}
+                  animationDuration={CHART_THEME.area.animationDuration}
                 />
                 <Area
                   type="monotone"
                   dataKey="expenses"
                   name={isRu ? 'Расходы' : 'Expenses'}
-                  stroke="#ef4444"
-                  fill="url(#expenseGradient)"
-                  strokeWidth={2}
+                  stroke={CHART_THEME.colors.destructive}
+                  fill="url(#finExpenseGrad)"
+                  strokeWidth={CHART_THEME.area.strokeWidth}
+                  animationDuration={CHART_THEME.area.animationDuration}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -187,38 +163,42 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
 
       {/* Income/Expense Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Expense Breakdown */}
         {expensesByCategory.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
                 <PieChartIcon className="h-4 w-4" />
                 {isRu ? 'Структура расходов' : 'Expense Breakdown'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
+              <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={expensesByCategory}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={2}
+                      innerRadius={45}
+                      outerRadius={75}
+                      paddingAngle={CHART_THEME.pie.paddingAngle}
+                      cornerRadius={CHART_THEME.pie.cornerRadius}
                       dataKey="value"
+                      animationDuration={CHART_THEME.pie.animationDuration}
                     >
                       {expensesByCategory.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        <Cell key={`cell-${index}`} fill={CHART_THEME.palette[index % CHART_THEME.palette.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Tooltip 
+                      contentStyle={CHART_THEME.tooltip}
+                      formatter={(value: number) => formatCurrency(value)} 
+                    />
                     <Legend 
                       layout="vertical" 
                       align="right" 
                       verticalAlign="middle"
-                      formatter={(value) => <span className="text-xs">{value}</span>}
+                      formatter={(value) => <span className={CHART_THEME.legend.textClass}>{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -227,29 +207,35 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
           </Card>
         )}
 
-        {/* Income Sources */}
         {incomeByCategory.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
                 <BarChart3 className="h-4 w-4" />
                 {isRu ? 'Источники дохода' : 'Income Sources'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
+              <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={incomeByCategory} layout="vertical" margin={{ left: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                    <XAxis type="number" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10 }} />
+                    <CartesianGrid {...CHART_THEME.grid} horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} tick={CHART_THEME.axisTick} axisLine={false} tickLine={false} />
                     <YAxis 
                       type="category" 
                       dataKey="name" 
-                      tick={{ fontSize: 10 }}
+                      tick={{ ...CHART_THEME.axisTick, fontSize: 10 }}
                       width={80}
+                      axisLine={false}
+                      tickLine={false}
                     />
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    <Bar dataKey="value" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                    <Tooltip contentStyle={CHART_THEME.tooltip} formatter={(value: number) => formatCurrency(value)} />
+                    <Bar 
+                      dataKey="value" 
+                      fill={CHART_THEME.colors.success} 
+                      radius={CHART_THEME.bar.radiusHorizontal}
+                      animationDuration={CHART_THEME.bar.animationDuration}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -261,28 +247,29 @@ export function FinancialCharts({ financials, dateRange }: FinancialChartsProps)
       {/* Net Profit Chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4" />
             {isRu ? 'Чистый доход по месяцам' : 'Monthly Net Income'}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[160px]">
+          <div className="h-[180px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+              <BarChart data={monthlyData} margin={{ top: 8, right: 8, left: -20, bottom: 4 }}>
+                <CartesianGrid {...CHART_THEME.grid} vertical={false} />
+                <XAxis dataKey="month" tick={CHART_THEME.axisTick} axisLine={false} tickLine={false} />
+                <YAxis tick={CHART_THEME.axisTick} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar 
                   dataKey="net" 
                   name={isRu ? 'Чистый доход' : 'Net Income'}
-                  radius={[4, 4, 0, 0]}
+                  radius={CHART_THEME.bar.radius}
+                  animationDuration={CHART_THEME.bar.animationDuration}
                 >
                   {monthlyData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={entry.net >= 0 ? '#22c55e' : '#ef4444'} 
+                      fill={entry.net >= 0 ? CHART_THEME.colors.success : CHART_THEME.colors.destructive} 
                     />
                   ))}
                 </Bar>

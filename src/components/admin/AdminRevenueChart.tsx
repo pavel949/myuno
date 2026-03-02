@@ -2,6 +2,7 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CHART_THEME } from '@/lib/chartTheme';
 
 interface AdminRevenueChartProps {
   data: { date: string; revenue: number; gmv: number }[];
@@ -16,13 +17,13 @@ export function AdminRevenueChart({ data, loading }: AdminRevenueChartProps) {
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium">
+          <CardTitle className="text-base font-medium tracking-[-0.01em]">
             {isRussian ? 'Доход за период' : 'Revenue Trend'}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[200px] flex items-center justify-center">
-            <div className="animate-pulse text-muted-foreground">
+          <div className="h-[220px] flex items-center justify-center">
+            <div className="animate-pulse text-muted-foreground text-sm">
               {isRussian ? 'Загрузка...' : 'Loading...'}
             </div>
           </div>
@@ -48,47 +49,43 @@ export function AdminRevenueChart({ data, loading }: AdminRevenueChartProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium">
+        <CardTitle className="text-base font-medium tracking-[-0.01em]">
           {isRussian ? 'Доход за период' : 'Revenue Trend'}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px]">
+        <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(43 74% 49%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(43 74% 49%)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gmvGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(199 89% 48%)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="hsl(199 89% 48%)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--accent-cyan))" stopOpacity={0.18} />
+                  <stop offset="100%" stopColor="hsl(var(--accent-cyan))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+              <CartesianGrid {...CHART_THEME.grid} vertical={false} />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={{ stroke: 'hsl(var(--border))' }}
+                tick={CHART_THEME.axisTick}
+                axisLine={false}
                 tickLine={false}
               />
               <YAxis 
                 tickFormatter={formatCurrency}
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                tick={CHART_THEME.axisTick}
                 axisLine={false}
                 tickLine={false}
                 width={50}
               />
               <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }}
-                labelStyle={{ color: 'hsl(var(--foreground))' }}
+                contentStyle={CHART_THEME.tooltip}
+                labelStyle={CHART_THEME.tooltipLabel}
+                itemStyle={CHART_THEME.tooltipItem}
                 formatter={(value: number, name: string) => [
                   formatCurrency(value),
                   name === 'revenue' ? (isRussian ? 'Доход' : 'Revenue') : 'GMV'
@@ -98,32 +95,34 @@ export function AdminRevenueChart({ data, loading }: AdminRevenueChartProps) {
               <Area
                 type="monotone"
                 dataKey="gmv"
-                stroke="hsl(199 89% 48%)"
-                strokeWidth={2}
+                stroke={CHART_THEME.colors.cyan}
+                strokeWidth={CHART_THEME.area.strokeWidth}
                 fill="url(#gmvGradient)"
+                animationDuration={CHART_THEME.area.animationDuration}
               />
               <Area
                 type="monotone"
                 dataKey="revenue"
-                stroke="hsl(43 74% 49%)"
-                strokeWidth={2}
+                stroke={CHART_THEME.colors.primary}
+                strokeWidth={CHART_THEME.area.strokeWidth}
                 fill="url(#revenueGradient)"
+                animationDuration={CHART_THEME.area.animationDuration}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
         
         {/* Legend */}
-        <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-border/50">
+        <div className={CHART_THEME.legend.containerClass}>
           <div className="flex items-center gap-2">
-            <div className="h-2.5 w-2.5 rounded-full bg-[hsl(43_74%_49%)]" />
-            <span className="text-xs text-muted-foreground">
+            <div className={`${CHART_THEME.legend.dotSize} bg-primary`} />
+            <span className={CHART_THEME.legend.textClass}>
               {isRussian ? 'Доход платформы' : 'Platform Revenue'}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-2.5 w-2.5 rounded-full bg-[hsl(199_89%_48%)]" />
-            <span className="text-xs text-muted-foreground">GMV</span>
+            <div className={`${CHART_THEME.legend.dotSize} bg-accent-cyan`} />
+            <span className={CHART_THEME.legend.textClass}>GMV</span>
           </div>
         </div>
       </CardContent>

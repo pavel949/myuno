@@ -14,6 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { CHART_THEME } from '@/lib/chartTheme';
 
 interface RevenueDataPoint {
   date: string;
@@ -39,7 +40,7 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
           <Skeleton className="h-5 w-40" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[180px] w-full" />
+          <Skeleton className="h-[200px] w-full" />
         </CardContent>
       </Card>
     );
@@ -68,7 +69,7 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="text-base flex items-center gap-2 tracking-[-0.01em]">
             <TrendingUp className="h-4 w-4 text-success" />
             {isRu ? 'Финансы за месяц' : 'Monthly Finances'}
           </CardTitle>
@@ -83,54 +84,49 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
               {isRu ? 'Портфель' : 'Portfolio'}
             </Button>
             <div className="text-right">
-              <p className="text-lg font-bold text-success">{formatCurrency(netProfit)}</p>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Чистая прибыль' : 'Net Profit'}</p>
+              <p className="text-lg font-bold text-success tracking-[-0.02em]">{formatCurrency(netProfit)}</p>
+              <p className="text-[11px] text-muted-foreground">{isRu ? 'Чистая прибыль' : 'Net Profit'}</p>
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
         {data.length === 0 ? (
-          <div className="h-[180px] flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
             {isRu ? 'Нет данных за период' : 'No data for period'}
           </div>
         ) : (
-          <div className="h-[180px]">
+          <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <linearGradient id="ownerIncomeGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
+                  <linearGradient id="ownerExpenseGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                <CartesianGrid {...CHART_THEME.grid} vertical={false} />
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={formatDate}
-                  tick={{ fontSize: 10 }}
-                  className="text-muted-foreground"
+                  tick={CHART_THEME.axisTick}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis 
                   tickFormatter={formatCurrency}
-                  tick={{ fontSize: 10 }}
-                  className="text-muted-foreground"
+                  tick={CHART_THEME.axisTick}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                  }}
+                  contentStyle={CHART_THEME.tooltip}
+                  labelStyle={CHART_THEME.tooltipLabel}
+                  itemStyle={CHART_THEME.tooltipItem}
                   formatter={(value: number, name: string) => [
                     formatCurrency(value),
                     name === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расходы' : 'Expenses')
@@ -140,33 +136,34 @@ export function OwnerRevenueChart({ data, loading }: OwnerRevenueChartProps) {
                 <Area
                   type="monotone"
                   dataKey="income"
-                  stroke="hsl(var(--success))"
-                  strokeWidth={2}
-                  fill="url(#incomeGradient)"
+                  stroke={CHART_THEME.colors.success}
+                  strokeWidth={CHART_THEME.area.strokeWidth}
+                  fill="url(#ownerIncomeGradient)"
+                  animationDuration={CHART_THEME.area.animationDuration}
                 />
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke="hsl(var(--destructive))"
-                  strokeWidth={2}
-                  fill="url(#expenseGradient)"
+                  stroke={CHART_THEME.colors.destructive}
+                  strokeWidth={CHART_THEME.area.strokeWidth}
+                  fill="url(#ownerExpenseGradient)"
+                  animationDuration={CHART_THEME.area.animationDuration}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
         
-        {/* Legend */}
-        <div className="flex justify-center gap-6 mt-2">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-success" />
-            <span className="text-xs text-muted-foreground">
+        <div className={CHART_THEME.legend.containerClass}>
+          <div className="flex items-center gap-2">
+            <div className={`${CHART_THEME.legend.dotSize} bg-success`} />
+            <span className={CHART_THEME.legend.textClass}>
               {isRu ? 'Доход' : 'Income'} ({formatCurrency(totalIncome)})
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-destructive" />
-            <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <div className={`${CHART_THEME.legend.dotSize} bg-destructive`} />
+            <span className={CHART_THEME.legend.textClass}>
               {isRu ? 'Расходы' : 'Expenses'} ({formatCurrency(totalExpenses)})
             </span>
           </div>
