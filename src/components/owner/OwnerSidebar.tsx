@@ -95,7 +95,6 @@ const navigationGroups: NavGroup[] = [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/owner', icon: LayoutDashboard },
       { title: 'Portfolio', titleRu: 'Портфолио', path: '/owner/portfolio', icon: Building2 },
       { title: 'Finance', titleRu: 'Финансы', path: '/owner/finance', icon: DollarSign },
-      { title: 'Superhost', titleRu: 'Суперхозяин', path: '/owner/superhost', icon: Crown },
       { title: 'Guide', titleRu: 'Руководство', path: '/owner/guide', icon: BookOpen },
     ],
   },

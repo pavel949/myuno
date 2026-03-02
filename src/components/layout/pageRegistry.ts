@@ -371,7 +371,7 @@ export const PropertyQuickSetup = lazy(() => import('@/pages/owner/PropertyQuick
 export const OwnerSetupWizard = lazy(() => import('@/pages/owner/OwnerSetupWizard'));
 export const OwnerPortfolio = lazy(() => import('@/pages/owner/OwnerPortfolio'));
 export const OwnerRevenueDashboard = lazy(() => import('@/pages/owner/OwnerRevenueDashboard'));
-export const OwnerSuperhost = lazy(() => import('@/pages/owner/OwnerSuperhost'));
+
 export const OwnerOperations = lazy(() => import('@/pages/owner/OwnerOperations'));
 export const OwnerGuidePage = lazy(() => import('@/pages/owner/OwnerGuidePage'));
 export const OwnerPropertyImport = lazy(() => import('@/pages/owner/OwnerPropertyImport'));
