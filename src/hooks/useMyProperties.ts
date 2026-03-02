@@ -31,6 +31,9 @@ export interface UnifiedProperty {
   complex_id: string | null;
   project_id: string | null;
   property_type: string | null;
+  lat: number | null;
+  lng: number | null;
+  approval_status: string | null;
 }
 
 /**
@@ -47,7 +50,7 @@ function useCompanyProperties() {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency')
+        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency, lat, lng, approval_status')
         .eq('management_company_id', companyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -86,6 +89,9 @@ export function useMyProperties() {
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
       property_type: p.property_type || null,
+      lat: p.lat ?? null,
+      lng: p.lng ?? null,
+      approval_status: p.approval_status || null,
     }));
   }, [ownedRaw]);
 
@@ -107,6 +113,9 @@ export function useMyProperties() {
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
       property_type: 'property_type' in p ? (p as AssignedProperty & { property_type?: string | null }).property_type || null : null,
+      lat: 'lat' in p ? (p as any).lat ?? null : null,
+      lng: 'lng' in p ? (p as any).lng ?? null : null,
+      approval_status: 'approval_status' in p ? (p as any).approval_status || null : null,
     }));
   }, [managedRaw]);
 
@@ -129,6 +138,9 @@ export function useMyProperties() {
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
       property_type: p.property_type || null,
+      lat: p.lat ?? null,
+      lng: p.lng ?? null,
+      approval_status: p.approval_status || null,
     }));
   }, [companyRaw]);
 
