@@ -268,19 +268,19 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
       extracted.equipment = equipmentIds;
     }
     
-    // Highlights
+    // Highlights / Features
     if (listing.highlights?.length > 0) {
       extracted.highlights = listing.highlights;
     }
     
     // House rules
-    if (listing.house_rules) extracted.house_rules = listing.house_rules;
+    if (listing.house_rules || listing.houseRules) extracted.house_rules = listing.house_rules || listing.houseRules;
     if (listing.pets_allowed !== undefined) extracted.pets_allowed = listing.pets_allowed;
     if (listing.smoking_allowed !== undefined) extracted.smoking_allowed = listing.smoking_allowed;
     if (listing.parties_allowed !== undefined) extracted.parties_allowed = listing.parties_allowed;
     if (listing.children_friendly !== undefined) extracted.children_friendly = listing.children_friendly;
-    if (listing.check_in_time) extracted.check_in_time = listing.check_in_time;
-    if (listing.check_out_time) extracted.check_out_time = listing.check_out_time;
+    if (listing.check_in_time || listing.checkInTime) extracted.check_in_time = listing.check_in_time || listing.checkInTime;
+    if (listing.check_out_time || listing.checkOutTime) extracted.check_out_time = listing.check_out_time || listing.checkOutTime;
     
     // Physical attributes
     if (listing.floor) extracted.floor = listing.floor;

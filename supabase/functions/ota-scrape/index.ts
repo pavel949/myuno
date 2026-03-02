@@ -150,10 +150,22 @@ Return equipment as: equipment: string[] (array of matching IDs from the list ab
 - check_in_time: string (e.g. "14:00")
 - check_out_time: string (e.g. "12:00")
 
-## Highlights (pick up to 8 most distinctive features using these IDs):
-sea_view, private_pool, beachfront, mountain_view, rooftop_terrace, infinity_pool, tropical_garden, walk_to_beach, panoramic_view, sunset_view, waterfront, lush_greenery, jacuzzi, smart_home, home_theater, wine_cellar, private_chef, concierge, gym, yoga_deck, pet_friendly, ev_charging, gated_community, cctv_24h, keyless_entry
+## Highlights (CRITICAL — pick up to 12 most distinctive features using EXACTLY these IDs):
+### Location & Views: beachfront, walk_to_beach, sea_view, mountain_view, garden_view, city_view, lake_view, panoramic_view
+### Pool & Water: private_pool, pool, infinity_pool, rooftop_pool, jacuzzi, plunge_pool, kids_pool
+### Indoor: wifi, air_conditioning, washer, dryer, dishwasher, smart_tv, workspace, fully_equipped_kitchen, coffee_machine, safe, king_bed, bathtub, rain_shower, iron
+### Outdoor: parking, garage, garden, terrace, balcony, rooftop, bbq, outdoor_shower, sun_loungers, tropical_garden
+### Security: gated_community, cctv, security_24h, smart_lock, keypad_entry, elevator
+### Wellness: gym, spa, sauna, yoga_space, tennis
+### Family: kid_friendly, pet_friendly, baby_crib, high_chair, playground
+### Character: luxury, eco_friendly, new_build, renovated, traditional_thai, modern_design, minimalist
+### Services: daily_cleaning, weekly_cleaning, concierge, airport_transfer, breakfast, laundry_service
+### Nearby: near_restaurants, near_shopping, near_hospital, near_school, near_airport, golf_nearby
 
-Return highlights as: highlights: string[]
+Return highlights as: highlights: string[] (array of matching IDs)
+
+## District Detection (for Phuket properties):
+Known districts: bang_tao, surin, kamala, patong, kata, karon, rawai, nai_harn, chalong, phuket_town, laguna, cherng_talay, mai_khao, nai_yang, cape_panwa, ao_po, thalang
 
 IMPORTANT: Return ONLY valid JSON, no markdown code fences. Extract as many fields as possible.`,
           },
