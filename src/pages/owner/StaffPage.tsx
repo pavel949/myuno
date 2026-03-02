@@ -6,7 +6,7 @@ import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTa
 import { PageContainer } from '@/components/uno/PageContainer';
 import { AddTeamMemberDialog } from '@/components/owner/team/AddTeamMemberDialog';
 import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
-import { useMemberPermissions, MODULES } from '@/hooks/useTeamPermissions';
+import { useMemberPermissions, MODULES, useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -256,6 +256,7 @@ function StaffCard({
   onViewTasks,
   onEditPermissions,
   onViewActivity,
+  canManage,
 }: {
   staff: StaffMember;
   isRu: boolean;
@@ -266,6 +267,7 @@ function StaffCard({
   onViewTasks: () => void;
   onEditPermissions: () => void;
   onViewActivity: () => void;
+  canManage: boolean;
 }) {
   const t = (en: string, ru: string) => isRu ? ru : en;
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
@@ -394,10 +396,12 @@ function StaffCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>
-                <Pencil className="h-4 w-4 mr-2" />
-                {t('Edit', 'Редактировать')}
-              </DropdownMenuItem>
+              {canManage && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  {t('Edit', 'Редактировать')}
+                </DropdownMenuItem>
+              )}
               {staff.phone && (
                 <DropdownMenuItem asChild>
                   <a href={`tel:${staff.phone}`}>
@@ -426,17 +430,21 @@ function StaffCard({
                 <History className="h-4 w-4 mr-2" />
                 {t('Activity Log', 'Лог активности')}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {staff.is_active ? (
-                <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
-                  <UserX className="h-4 w-4 mr-2" />
-                  {t('Deactivate', 'Деактивировать')}
-                </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={onReactivate} className="text-success">
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  {t('Reactivate', 'Активировать')}
-                </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuSeparator />
+                  {staff.is_active ? (
+                    <DropdownMenuItem onClick={onDeactivate} className="text-destructive">
+                      <UserX className="h-4 w-4 mr-2" />
+                      {t('Deactivate', 'Деактивировать')}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={onReactivate} className="text-success">
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      {t('Reactivate', 'Активировать')}
+                    </DropdownMenuItem>
+                  )}
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -458,6 +466,7 @@ export default function StaffPage() {
   const { activeCompany } = useActiveCompany();
   const assignStaff = useAssignStaffToProperty();
   const removeAssignment = useRemoveStaffAssignment();
+  const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<StaffMember | null>(null);
@@ -639,10 +648,12 @@ export default function StaffPage() {
               className="pl-9"
             />
           </div>
-          <Button onClick={() => setAddMemberOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            {t('Add', 'Добавить')}
-          </Button>
+          {canManage && (
+            <Button onClick={() => setAddMemberOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              {t('Add', 'Добавить')}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -662,10 +673,12 @@ export default function StaffPage() {
                 'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
               )}
             </p>
-            <Button onClick={openCreate}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              {t('Add first staff member', 'Добавить первого сотрудника')}
-            </Button>
+            {canManage && (
+              <Button onClick={openCreate}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                {t('Add first staff member', 'Добавить первого сотрудника')}
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -682,6 +695,7 @@ export default function StaffPage() {
               onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
               onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
               onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
+              canManage={canManage}
             />
           ))}
         </div>
