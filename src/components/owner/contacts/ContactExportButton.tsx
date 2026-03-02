@@ -1,12 +1,18 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { CrmContact } from '@/hooks/useCrmContacts';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ContactExportButtonProps {
   contacts: CrmContact[];
@@ -35,6 +41,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const canManage = useCanManagePermissions();
 
   const handleExport = async () => {
     if (contacts.length === 0) {
@@ -83,6 +90,24 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
 
     toast.success(isRu ? `Экспортировано ${contacts.length} контактов` : `Exported ${contacts.length} contacts`);
   };
+
+  if (!canManage) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Button variant="outline" size="sm" disabled>
+              <Download className="h-4 w-4 mr-1" />
+              CSV
+            </Button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {isRu ? 'Экспорт доступен только директору или администратору' : 'Export is available to directors and admins only'}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <Button variant="outline" size="sm" onClick={handleExport} disabled={contacts.length === 0}>

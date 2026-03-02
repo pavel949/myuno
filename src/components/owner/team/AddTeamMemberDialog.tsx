@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -40,6 +41,7 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
   const isRu = language === 'ru';
   const t = (en: string, ru: string) => (isRu ? ru : en);
   const { activeCompany } = useActiveCompany();
+  const canManage = useCanManagePermissions();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -48,7 +50,7 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!fullName.trim() || !email.trim() || !activeCompany) return;
+    if (!fullName.trim() || !email.trim() || !activeCompany || !canManage) return;
 
     setLoading(true);
     try {
@@ -155,7 +157,7 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
           <Button
             className="w-full"
             onClick={handleSubmit}
-            disabled={loading || !fullName.trim() || !email.trim()}
+            disabled={loading || !fullName.trim() || !email.trim() || !canManage}
           >
             {loading ? (
               <>
