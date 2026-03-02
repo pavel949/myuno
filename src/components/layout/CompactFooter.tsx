@@ -69,8 +69,8 @@ export function CompactFooter() {
   // Desktop: professional multi-column footer
   if (isDesktop) {
     return (
-      <footer className="border-t-2 border-border bg-muted/20 mt-auto">
-        <div className="max-w-[1536px] mx-auto px-8 py-12">
+      <footer className="border-t border-border/40 bg-muted/10 mt-auto">
+        <div className="max-w-[1536px] mx-auto px-8 py-10 lg:py-12">
           {/* Main grid */}
           <div className="grid grid-cols-4 gap-8 mb-8">
             {/* Brand column */}
@@ -92,7 +92,7 @@ export function CompactFooter() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors ${social.hoverColor}`}
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground transition-all duration-200 ${social.hoverColor}`}
                     aria-label={social.label}
                   >
                     <social.icon className="w-4 h-4" />
@@ -148,11 +148,11 @@ export function CompactFooter() {
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-border/50 pt-4 flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+          <div className="border-t border-border/30 pt-5 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground/70">
               © {new Date().getFullYear()} myUNO · Phuket Edition
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground/70">
               {isRu ? 'Сделано с заботой на Пхукете' : 'Made with care in Phuket'}
             </p>
           </div>

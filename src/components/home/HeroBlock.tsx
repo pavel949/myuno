@@ -63,11 +63,11 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
             onClick={() => setPersonas([p])}
             disabled={isSetting}
             className={cn(
-              "relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all",
+              "relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all duration-200",
               "focus-visible:ring-2 focus-visible:ring-primary/50",
               isActive
-                ? "bg-white shadow-md border border-white/90"
-                : "bg-white/10 border border-white/15 hover:bg-white/15"
+                ? "bg-white shadow-lg border border-white/90 scale-[1.01]"
+                : "bg-white/8 border border-white/12 hover:bg-white/14 hover:border-white/20"
             )}
           >
             <span className="text-xl shrink-0">{info.icon}</span>
@@ -134,10 +134,15 @@ export const HeroBlock = memo(function HeroBlock() {
   // Mobile
   if (!isDesktop) {
     return (
-    <div className="relative rounded-2xl overflow-hidden">
+    <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
         {/* Hero gradient — uses CSS vars for theme consistency */}
         <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 18%) 55%, hsl(230 45% 22%) 100%)'
+          background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 16%) 40%, hsl(230 45% 24%) 100%)'
+        }} />
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
         }} />
         
         <div className="relative px-5 py-5 space-y-4">
@@ -204,10 +209,14 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10">
+    <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10 shadow-[var(--shadow-elevated)]">
       {/* Hero gradient — uses CSS vars for theme consistency */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 18%) 55%, hsl(230 45% 22%) 100%)'
+        background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 16%) 40%, hsl(230 45% 24%) 100%)'
+      }} />
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
       }} />
       
       <div className="relative flex items-start justify-between">

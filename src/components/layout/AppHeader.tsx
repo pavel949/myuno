@@ -54,7 +54,8 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
       <header
         className={cn(
           "sticky top-0 z-50 w-full",
-          "bg-background/95 backdrop-blur-xl border-b border-border/40",
+          "bg-background/90 backdrop-blur-2xl border-b border-border/30",
+          "shadow-[0_1px_3px_0_hsl(220_20%_20%/0.04)]",
           className
         )}
       >
@@ -64,7 +65,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             to="/"
             className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group"
           >
-            <span className="text-sm lg:text-[15px] text-muted-foreground font-light transition-all duration-300 group-hover:tracking-wider">
+            <span className="text-sm lg:text-[15px] text-muted-foreground/80 font-light transition-all duration-300 group-hover:tracking-wider group-hover:text-muted-foreground">
               my
             </span>
             <span className="text-base lg:text-xl font-bold text-foreground font-display tracking-tight">
@@ -110,7 +111,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
           {/* Right — grouped utilities */}
           <div className="flex items-center gap-0.5 lg:gap-1 ml-auto shrink-0">
             {/* Utility group */}
-            <div className="hidden lg:flex items-center gap-0.5 bg-muted/40 rounded-lg p-0.5">
+            <div className="hidden lg:flex items-center gap-0.5 bg-muted/30 rounded-xl p-0.5 border border-border/30">
               <LanguageSwitcher size="sm" />
               <ThemeSwitcher size="sm" />
               <CurrencySwitcher size="sm" />

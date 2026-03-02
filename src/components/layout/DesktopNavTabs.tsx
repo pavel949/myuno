@@ -16,7 +16,7 @@ export const DesktopNavTabs = React.memo(function DesktopNavTabs() {
   const isRu = language === 'ru';
 
   return (
-    <nav className="hidden lg:flex items-center gap-0.5 ml-8 relative bg-muted/40 rounded-xl p-1">
+    <nav className="hidden lg:flex items-center gap-0.5 ml-8 relative bg-muted/30 rounded-xl p-1 border border-border/20">
       {navItems.map((item) => (
         <NavLink
           key={item.path}
@@ -29,7 +29,7 @@ export const DesktopNavTabs = React.memo(function DesktopNavTabs() {
               {isActive && (
                 <motion.div
                   layoutId="activeNavPill"
-                  className="absolute inset-0 bg-background rounded-lg shadow-sm border border-border/50"
+                  className="absolute inset-0 bg-background rounded-lg shadow-sm border border-border/40"
                   transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                 />
               )}

@@ -3,7 +3,7 @@
  * No marketing/referral content — only genuinely useful advice.
  */
 import React, { useMemo, useState, useCallback } from 'react';
-import { ArrowRight, X } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -75,8 +75,7 @@ export function LifecycleSmartTip() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  // TTL-aware dismissed tips: stored as { [tipId]: expiresAt (ms) }
-  const TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+  const TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
   const [dismissedTips, setDismissedTips] = useState<Set<string>>(() => {
     try {
@@ -84,7 +83,6 @@ export function LifecycleSmartTip() {
       if (!saved) return new Set();
       const parsed: Record<string, number> = JSON.parse(saved);
       const now = Date.now();
-      // Only keep non-expired entries
       const valid = Object.entries(parsed)
         .filter(([, exp]) => exp > now)
         .map(([id]) => id);
@@ -96,14 +94,12 @@ export function LifecycleSmartTip() {
     setDismissedTips(prev => {
       const next = new Set(prev);
       next.add(tipId);
-      // Persist as { tipId: expiresAt } map so TTL can be checked on load
       try {
         const existing: Record<string, number> = (() => {
           const s = localStorage.getItem('myuno-dismissed-tips-v2');
           return s ? JSON.parse(s) : {};
         })();
         existing[tipId] = Date.now() + TTL_MS;
-        // Prune expired entries before saving
         const now = Date.now();
         const pruned = Object.fromEntries(
           Object.entries(existing).filter(([, exp]) => exp > now)
@@ -117,7 +113,6 @@ export function LifecycleSmartTip() {
   const situationKey = useMemo(() => {
     if (activeCode) return activeCode;
     if (activeRole === 'owner') return 'property';
-    // Use persona-specific defaults instead of generic
     if (personas.includes('tourist')) return 'default_tourist';
     if (personas.includes('resident')) return 'default_resident';
     return 'default';
@@ -133,35 +128,40 @@ export function LifecycleSmartTip() {
   if (!tip) return null;
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-primary/5 to-transparent border border-primary/10 p-4">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg shrink-0">
-          {tip.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {isRu ? tip.titleRu : tip.titleEn}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {isRu ? tip.descRu : tip.descEn}
-              </p>
+    <div className="rounded-2xl bg-card border border-primary/15 shadow-[var(--shadow-card)] overflow-hidden">
+      {/* Subtle gradient accent bar */}
+      <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary/20 to-transparent" />
+      
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center text-lg shrink-0">
+            {tip.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-foreground leading-tight">
+                  {isRu ? tip.titleRu : tip.titleEn}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  {isRu ? tip.descRu : tip.descEn}
+                </p>
+              </div>
+              <button
+                onClick={() => dismiss(tip.id)}
+                className="p-1.5 rounded-lg hover:bg-muted transition-colors shrink-0 -mt-0.5"
+              >
+                <X className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
             </div>
             <button
-              onClick={() => dismiss(tip.id)}
-              className="p-1 rounded-full hover:bg-muted transition-colors shrink-0"
+              onClick={() => navigate(tip.path)}
+              className="inline-flex items-center gap-1 mt-2.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
             >
-              <X className="w-3.5 h-3.5 text-muted-foreground" />
+              {isRu ? 'Подробнее' : 'Learn more'}
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button
-            onClick={() => navigate(tip.path)}
-            className="flex items-center gap-1 mt-2 text-xs font-medium text-primary hover:underline"
-          >
-            {isRu ? 'Подробнее' : 'Learn more'}
-            <ArrowRight className="w-3 h-3" />
-          </button>
         </div>
       </div>
     </div>
