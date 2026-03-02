@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Building2, Mail, Phone, Globe, MapPin, Save, Loader2, MessageCircle, Landmark, FileText, Image } from 'lucide-react';
+import { Building2, Mail, Phone, Globe, MapPin, Save, Loader2, MessageCircle, Landmark, FileText, Image, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 
@@ -30,6 +30,7 @@ interface CompanyProfile {
   name_ru: string;
   logo: string | null;
   cover_image: string | null;
+  brand_color: string;
   email: string | null;
   phone: string | null;
   whatsapp: string | null;
@@ -42,7 +43,6 @@ interface CompanyProfile {
   tax_id: string | null;
   license_number: string | null;
   founded_year: number | null;
-  // New fields
   legal_name: string | null;
   registration_number: string | null;
   legal_address: string | null;
@@ -53,8 +53,18 @@ interface CompanyProfile {
   documents: CompanyDocument[];
 }
 
+const COLOR_SCHEMES = [
+  { id: 'blue', labelEn: 'Blue', labelRu: 'Синий', hsl: '221 83% 53%' },
+  { id: 'teal', labelEn: 'Teal', labelRu: 'Бирюзовый', hsl: '173 80% 40%' },
+  { id: 'violet', labelEn: 'Violet', labelRu: 'Фиолетовый', hsl: '263 70% 50%' },
+  { id: 'rose', labelEn: 'Rose', labelRu: 'Розовый', hsl: '347 77% 50%' },
+  { id: 'amber', labelEn: 'Amber', labelRu: 'Янтарный', hsl: '38 92% 50%' },
+  { id: 'emerald', labelEn: 'Emerald', labelRu: 'Изумрудный', hsl: '160 84% 39%' },
+  { id: 'slate', labelEn: 'Slate', labelRu: 'Графитовый', hsl: '215 16% 47%' },
+];
+
 const INITIAL_FORM: CompanyProfile = {
-  name_en: '', name_ru: '', logo: null, cover_image: null,
+  name_en: '', name_ru: '', logo: null, cover_image: null, brand_color: 'blue',
   email: null, phone: null, whatsapp: null, website: null,
   address: null, district: null, description_en: null, description_ru: null,
   director_name: null, tax_id: null, license_number: null, founded_year: null,
@@ -63,7 +73,7 @@ const INITIAL_FORM: CompanyProfile = {
   dbd_card_url: null, documents: [],
 };
 
-const SELECT_FIELDS = 'name_en, name_ru, logo, cover_image, email, phone, whatsapp, website, address, district, description_en, description_ru, director_name, tax_id, license_number, founded_year, legal_name, registration_number, legal_address, bank_name, bank_account, swift_code, dbd_card_url, documents';
+const SELECT_FIELDS = 'name_en, name_ru, logo, cover_image, brand_color, email, phone, whatsapp, website, address, district, description_en, description_ru, director_name, tax_id, license_number, founded_year, legal_name, registration_number, legal_address, bank_name, bank_account, swift_code, dbd_card_url, documents';
 
 export function CompanyProfileSettings() {
   const { language } = useLanguage();
@@ -199,6 +209,37 @@ export function CompanyProfileSettings() {
                 folder="covers"
                 placeholder={isRu ? 'Обложка (1200×400)' : 'Cover (1200×400)'}
               />
+            </div>
+
+            {/* Color Scheme */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Palette className="h-3.5 w-3.5" />
+                {isRu ? 'Цветовая схема' : 'Color Scheme'}
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {COLOR_SCHEMES.map((scheme) => (
+                  <button
+                    key={scheme.id}
+                    type="button"
+                    onClick={() => update({ brand_color: scheme.id })}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                      form.brand_color === scheme.id
+                        ? 'border-foreground ring-2 ring-foreground/20 bg-accent'
+                        : 'border-border hover:border-foreground/30 bg-card'
+                    }`}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full shrink-0 ring-1 ring-black/10"
+                      style={{ backgroundColor: `hsl(${scheme.hsl})` }}
+                    />
+                    {isRu ? scheme.labelRu : scheme.labelEn}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                {isRu ? 'Используется в витрине и фирменных отчётах' : 'Used in storefront and branded reports'}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
