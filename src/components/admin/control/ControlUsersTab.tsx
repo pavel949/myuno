@@ -4,14 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Search, Users, MoreHorizontal, ChevronDown, Shield, Mail, Phone } from 'lucide-react';
+import { Search, Users, ChevronDown, Shield, Mail, Phone, KeyRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ProfileWithRoles {
   id: string;
@@ -36,6 +36,26 @@ export function ControlUsersTab() {
   const isRussian = language === 'ru';
   const [searchQuery, setSearchQuery] = React.useState('');
   const [expandedUser, setExpandedUser] = React.useState<string | null>(null);
+  const [resettingId, setResettingId] = React.useState<string | null>(null);
+
+  const handleResetPassword = async (email: string | null, userId: string) => {
+    if (!email) {
+      toast.error(isRussian ? 'У пользователя нет email' : 'User has no email');
+      return;
+    }
+    setResettingId(userId);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (error) throw error;
+      toast.success(isRussian ? `Ссылка для сброса отправлена на ${email}` : `Reset link sent to ${email}`);
+    } catch (e: any) {
+      toast.error(e.message || 'Error');
+    } finally {
+      setResettingId(null);
+    }
+  };
 
   const { data: profiles, isLoading } = useQuery({
     queryKey: ['admin-profiles-with-roles', searchQuery],
@@ -173,6 +193,21 @@ export function ControlUsersTab() {
                         <p className="text-[11px] text-muted-foreground">
                           ID: <code className="bg-muted px-1 rounded text-[10px]">{profile.id.slice(0, 8)}…</code>
                         </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1.5 mt-1"
+                          disabled={resettingId === profile.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleResetPassword(profile.email, profile.id);
+                          }}
+                        >
+                          <KeyRound className="h-3 w-3" />
+                          {resettingId === profile.id
+                            ? (isRussian ? 'Отправка...' : 'Sending...')
+                            : (isRussian ? 'Сбросить пароль' : 'Reset Password')}
+                        </Button>
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
