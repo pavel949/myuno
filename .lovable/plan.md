@@ -1,63 +1,61 @@
 
+# Корзина для удалённых объектов (Soft Delete and Recovery)
 
-# Добавление описания объекта и доработка карточки комплекса
+## Проблема
+Сейчас удаление объектов из базы данных — необратимое. Нет возможности восстановить случайно удалённый объект.
 
-## 1. Добавить поля описания в шаг "Основная информация" (BasicInfoStep)
-
-Сейчас в `PropertyFormData` есть поля `description` и `description_ru`, но в форме визарда нет textarea для их ввода. Добавлю:
-
-- **Двуязычный Textarea** (TranslatableInput или два Textarea) для описания объекта, как в Airbnb — краткое привлекательное описание
-- Размещу сразу после блока "Название / Title"
-- Placeholder с подсказкой в стиле Airbnb: "Расскажите гостям, чем уникален ваш объект..."
-
-**Файл:** `src/components/owner/property-wizard/steps/BasicInfoStep.tsx`  
-**Изменение:** Добавить блок с `<Textarea>` для `description` / `description_ru` после TranslatableInput для Title (после строки ~156)
-
-## 2. AI Intake — слияние с частично заполненной формой
-
-Эта функция **уже работает**: кнопка "Быстрый ввод с AI" вызывает `onDataExtracted` -> `wizard.applyPrefillData`, которая мержит данные в текущую форму. Описание (`description`, `description_ru`) уже извлекается AI и передается в форму. С добавлением textarea пользователь сразу увидит результат.
-
-Дополнительных изменений не требуется.
-
-## 3. ComplexCard — показать только описание платформы, скрыть описание УК
-
-В карточке комплекса (`ComplexCard.tsx`) сейчас вообще нет описания. Добавлю:
-- Показ `description_en` / `description_ru` (описание для платформы) — 2 строки с line-clamp
-- Поле `description` (описание от УК) — **не показывать**
-
-**Файл:** `src/components/owner/ComplexCard.tsx`  
-**Изменение:** Добавить отображение описания между названием/районом и строкой статистики
+## Решение
+Реализовать механизм "мягкого удаления" (soft delete) с корзиной в админ-панели, где удалённые объекты хранятся 30 дней перед окончательным удалением.
 
 ---
 
-### Технические детали
+## Этапы реализации
 
-**BasicInfoStep.tsx** — вставка после строки 156 (после TranslatableInput для Title):
-```tsx
-<div className="space-y-2">
-  <Label>{isRu ? 'Описание' : 'Description'}</Label>
-  <Textarea
-    value={isRu ? formData.description_ru : formData.description}
-    onChange={(e) => updateFormData({ [isRu ? 'description_ru' : 'description']: e.target.value })}
-    placeholder={isRu ? 'Расскажите гостям, чем уникален ваш объект...' : 'Tell guests what makes your place special...'}
-    rows={4}
-  />
-  {/* Второй язык */}
-  <Textarea
-    value={isRu ? formData.description : formData.description_ru}
-    onChange={(e) => updateFormData({ [isRu ? 'description' : 'description_ru']: e.target.value })}
-    placeholder={isRu ? 'Description in English (optional)' : 'Описание на русском (необязательно)'}
-    rows={3}
-    className="text-sm"
-  />
-</div>
+### 1. Изменение структуры базы данных
+Добавить в таблицу `properties` два поля:
+- `deleted_at` (timestamp, nullable) — дата удаления
+- `deleted_by` (uuid, nullable) — кто удалил
+
+Обновить существующие RLS-политики и представления, чтобы обычные запросы автоматически исключали записи с `deleted_at IS NOT NULL`.
+
+### 2. Обновление логики удаления
+Во всех местах, где сейчас выполняется `DELETE FROM properties`, заменить на `UPDATE ... SET deleted_at = now(), deleted_by = auth.uid(), is_active = false`.
+
+Затронутые файлы:
+- `src/components/admin/catalog/UnifiedCatalogTable.tsx` — кнопка удаления в каталоге
+- Любые другие компоненты, вызывающие `.delete()` на таблице `properties`
+
+### 3. Раздел "Корзина" в админ-панели
+Новая страница/вкладка в админ-панели (`/admin/trash` или вкладка в каталоге), показывающая удалённые объекты с возможностью:
+- **Восстановить** — обнулить `deleted_at`, `deleted_by`, вернуть `is_active = true`
+- **Удалить навсегда** — выполнить настоящий `DELETE`
+- Показать дату удаления и кто удалил
+
+### 4. Автоочистка (опционально)
+Запланированная backend-функция (cron) для окончательного удаления записей старше 30 дней из корзины.
+
+---
+
+## Технические детали
+
+**Миграция SQL:**
+```sql
+ALTER TABLE public.properties
+  ADD COLUMN IF NOT EXISTS deleted_at timestamptz DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS deleted_by uuid DEFAULT NULL;
+
+CREATE INDEX idx_properties_deleted_at ON public.properties(deleted_at)
+  WHERE deleted_at IS NOT NULL;
 ```
 
-**ComplexCard.tsx** — вставка описания платформы:
-```tsx
-{(complex.description_en || complex.description_ru) && (
-  <p className="text-xs text-muted-foreground line-clamp-2">
-    {isRu ? (complex.description_ru || complex.description_en) : (complex.description_en || complex.description_ru)}
-  </p>
-)}
-```
+**Фильтрация в запросах:**
+Все существующие запросы к `properties` получат дополнительный фильтр `.is('deleted_at', null)`, чтобы удалённые объекты не отображались в обычных списках.
+
+**Новые файлы:**
+- `src/pages/admin/AdminTrash.tsx` — страница корзины
+- Маршрут в роутере
+
+**Изменяемые файлы:**
+- `UnifiedCatalogTable.tsx` — soft delete вместо hard delete
+- Хуки загрузки properties — добавить фильтр `deleted_at is null`
+- Роутер — добавить маршрут `/admin/trash`
