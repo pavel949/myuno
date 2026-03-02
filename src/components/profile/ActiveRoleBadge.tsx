@@ -2,6 +2,7 @@ import React from 'react';
 import { Home, Building2, Store, Shield, Users, Briefcase, User, Plane, Handshake, UserCog, Scale, Headphones, Wallet, TrendingUp, LineChart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import type { AppRole } from '@/types/auth';
 import { cn } from '@/lib/utils';
 
@@ -10,8 +11,52 @@ interface ActiveRoleBadgeProps {
   showLabel?: boolean;
 }
 
+// MC company role config — takes priority when user is in MC context
+const MC_ROLE_BADGE_CONFIG: Record<string, {
+  icon: React.ElementType;
+  labelEn: string;
+  labelRu: string;
+  color: string;
+  bgColor: string;
+}> = {
+  director: {
+    icon: Shield,
+    labelEn: 'Director',
+    labelRu: 'Директор',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
+  },
+  admin: {
+    icon: Shield,
+    labelEn: 'Admin',
+    labelRu: 'Администратор',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
+  },
+  manager: {
+    icon: Briefcase,
+    labelEn: 'Manager',
+    labelRu: 'Менеджер',
+    color: 'text-teal',
+    bgColor: 'bg-teal/10',
+  },
+  accountant: {
+    icon: Wallet,
+    labelEn: 'Accountant',
+    labelRu: 'Бухгалтер',
+    color: 'text-success',
+    bgColor: 'bg-success/10',
+  },
+  staff: {
+    icon: Users,
+    labelEn: 'Staff',
+    labelRu: 'Сотрудник',
+    color: 'text-warning',
+    bgColor: 'bg-warning/10',
+  },
+};
+
 // UI-specific role config for badge display
-// Only includes roles that are commonly displayed in badge form
 const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
   icon: React.ElementType;
   labelEn: string;
@@ -143,15 +188,21 @@ const DEFAULT_BADGE_CONFIG = {
 };
 
 /**
- * Badge showing the user's current active role
+ * Badge showing the user's current active role.
+ * Prioritizes MC company role (director/manager/etc.) over platform role when available.
  */
 export function ActiveRoleBadge({ className, showLabel = true }: ActiveRoleBadgeProps) {
   const { language } = useLanguage();
   const { activeRole, isLoading } = useUserContext();
+  const { activeCompany } = useActiveCompany();
 
   if (isLoading) return null;
 
-  const config = ROLE_BADGE_CONFIG[activeRole] || DEFAULT_BADGE_CONFIG;
+  // Prioritize MC company role when user has an active company
+  const mcRole = activeCompany?.role;
+  const mcConfig = mcRole ? MC_ROLE_BADGE_CONFIG[mcRole] : null;
+  
+  const config = mcConfig || ROLE_BADGE_CONFIG[activeRole] || DEFAULT_BADGE_CONFIG;
   const Icon = config.icon;
   const label = language === 'ru' ? config.labelRu : config.labelEn;
 

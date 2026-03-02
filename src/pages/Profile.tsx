@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck } from 'lucide-react';
+import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, Building2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
 import { ActiveRoleBadge } from '@/components/profile/ActiveRoleBadge';
 import { BecomePartnerCTA } from '@/components/profile/BecomePartnerCTA';
 import { UserRolesPermissions } from '@/components/profile/UserRolesPermissions';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -21,6 +22,7 @@ export default function Profile() {
   const { t, language } = useLanguage();
   const { user, isLoading, signOut } = useAuth();
   const { profile } = useProfile();
+  const { activeCompany } = useActiveCompany();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -127,6 +129,12 @@ export default function Profile() {
               <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {profile?.full_name ? user.email : (language === 'ru' ? 'Аккаунт туриста' : 'Tourist Account')}
               </p>
+              {activeCompany && (
+                <p className="text-xs text-muted-foreground/80 flex items-center gap-1 mt-0.5">
+                  <Building2 className="w-3 h-3" />
+                  {language === 'ru' ? activeCompany.name_ru : activeCompany.name_en}
+                </p>
+              )}
             </div>
             <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')} className="shrink-0">
               {t('action.edit')}
