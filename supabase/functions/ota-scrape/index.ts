@@ -35,6 +35,12 @@ interface ListingData {
   price_per_night?: number;
   currency?: string;
   min_stay_nights?: number;
+  cancellation_policy?: string;
+  instant_booking?: boolean;
+  deposit_amount?: number;
+  deposit_currency?: string;
+  cleaning_fee?: number;
+  service_fee?: number;
   pool_type?: string;
   parking_type?: string;
   rating?: number;
@@ -126,6 +132,14 @@ Return equipment as: equipment: string[] (array of matching IDs from the list ab
 ## Pool type (separate field)
 - pool_type: "private" | "shared" | "rooftop" | "none"
 - parking_type: "free" | "paid" | "none"
+
+## Rental Terms & Conditions (CRITICAL — extract ALL booking conditions)
+- cancellation_policy: "flexible" | "moderate" | "strict" | "super_strict" | "non_refundable" (map from host's cancellation rules: free cancellation = flexible, partial refund = moderate, no refund = strict/non_refundable)
+- instant_booking: boolean (true if "Instant Book" / "Мгновенное бронирование" / "Book now" without host approval)
+- deposit_amount: number (security deposit / залог / damage deposit, numeric only)
+- deposit_currency: "THB" | "USD" | "EUR" | "RUB" | "GBP"
+- cleaning_fee: number (cleaning fee / плата за уборку, numeric only)
+- service_fee: number (service fee if shown separately)
 
 ## House Rules
 - house_rules: string (summary of rules)
@@ -274,6 +288,41 @@ function parseWithRegex(markdown: string): ListingData {
   // House rules detection
   data.pets_allowed = lower.includes('pets allowed') || lower.includes('можно с животными') || lower.includes('pet-friendly');
   data.children_friendly = !lower.includes('no children') && !lower.includes('adults only');
+  
+  // Cancellation policy detection
+  if (lower.includes('free cancellation') || lower.includes('бесплатная отмена') || lower.includes('full refund')) {
+    (data as any).cancellation_policy = 'flexible';
+  } else if (lower.includes('partial refund') || lower.includes('частичный возврат') || lower.includes('50%')) {
+    (data as any).cancellation_policy = 'moderate';
+  } else if (lower.includes('non-refundable') || lower.includes('невозвратн') || lower.includes('no refund')) {
+    (data as any).cancellation_policy = 'non_refundable';
+  } else if (lower.includes('strict') || lower.includes('строг')) {
+    (data as any).cancellation_policy = 'strict';
+  }
+  
+  // Instant booking
+  if (lower.includes('instant book') || lower.includes('мгновенное бронирование') || lower.includes('book now')) {
+    (data as any).instant_booking = true;
+  }
+  
+  // Deposit
+  const depositMatch = markdown.match(/(?:deposit|залог|damage deposit|страховой депозит)[:\s]*[฿$€£₽]?\s*([\d\s,]+)/i);
+  if (depositMatch) {
+    (data as any).deposit_amount = parseFloat(depositMatch[1].replace(/[\s,]/g, ''));
+  }
+  
+  // Cleaning fee
+  const cleaningFeeMatch = markdown.match(/(?:cleaning fee|плата за уборку|уборка)[:\s]*[฿$€£₽]?\s*([\d\s,]+)/i);
+  if (cleaningFeeMatch) {
+    (data as any).cleaning_fee = parseFloat(cleaningFeeMatch[1].replace(/[\s,]/g, ''));
+  }
+  
+  // Check-in/out times
+  const checkInMatch = markdown.match(/(?:check.?in|заезд|заселение)[:\s]*(?:после|after|from)?\s*(\d{1,2}[:.]\d{2}|\d{1,2}\s*(?:am|pm|:00))/i);
+  if (checkInMatch) data.check_in_time = checkInMatch[1].replace('.', ':');
+  
+  const checkOutMatch = markdown.match(/(?:check.?out|выезд|выселение)[:\s]*(?:до|before|by)?\s*(\d{1,2}[:.]\d{2}|\d{1,2}\s*(?:am|pm|:00))/i);
+  if (checkOutMatch) data.check_out_time = checkOutMatch[1].replace('.', ':');
   
   return data;
 }

@@ -23,9 +23,17 @@ interface AirbnbListingData {
   pricePerNight?: number;
   currency?: string;
   cleaningFee?: number;
+  serviceFee?: number;
   icalUrl?: string;
   rating?: number;
   reviewCount?: number;
+  cancellationPolicy?: string;
+  instantBooking?: boolean;
+  depositAmount?: number;
+  depositCurrency?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  minStayNights?: number;
 }
 
 // Extract Airbnb listing ID from URL
@@ -199,6 +207,54 @@ function parseAirbnbListing(markdown: string, url: string): AirbnbListingData {
   if (rulesMatch) {
     data.houseRules = rulesMatch[1].trim().slice(0, 1000);
   }
+  
+  // ── Cancellation policy ──
+  const cancelSection = markdown.match(/(?:cancellation|отмена|правила отмены|cancellation policy)\s*\n+([\s\S]*?)(?=\n#|\n\*\*|$)/i);
+  const cancelText = (cancelSection?.[1] || lower).toLowerCase();
+  if (cancelText.includes('free cancellation') || cancelText.includes('бесплатная отмена') || cancelText.includes('full refund') || cancelText.includes('полный возврат')) {
+    data.cancellationPolicy = 'flexible';
+  } else if (cancelText.includes('partial') || cancelText.includes('частичн') || cancelText.includes('50%') || cancelText.includes('moderate')) {
+    data.cancellationPolicy = 'moderate';
+  } else if (cancelText.includes('non-refundable') || cancelText.includes('невозвратн') || cancelText.includes('no refund') || cancelText.includes('без возврата')) {
+    data.cancellationPolicy = 'non_refundable';
+  } else if (cancelText.includes('strict') || cancelText.includes('строг')) {
+    data.cancellationPolicy = 'strict';
+  }
+  
+  // ── Instant booking ──
+  if (lower.includes('instant book') || lower.includes('мгновенное бронирование') || lower.includes('reserve') && lower.includes('without') && lower.includes('approval')) {
+    data.instantBooking = true;
+  }
+  
+  // ── Deposit / damage deposit ──
+  const depositMatch = markdown.match(/(?:security deposit|damage deposit|залог|страховой депозит|deposit)[:\s]*[฿$€£₽]?\s*([\d\s,]+)/i);
+  if (depositMatch) {
+    data.depositAmount = parseFloat(depositMatch[1].replace(/[\s,]/g, ''));
+    data.depositCurrency = data.currency;
+  }
+  
+  // ── Cleaning fee ──
+  const cleanFeeMatch = markdown.match(/(?:cleaning fee|плата за уборку|уборка|сбор за уборку)[:\s]*[฿$€£₽]?\s*([\d\s,]+)/i);
+  if (cleanFeeMatch) {
+    data.cleaningFee = parseFloat(cleanFeeMatch[1].replace(/[\s,]/g, ''));
+  }
+  
+  // ── Service fee ──
+  const serviceFeeMatch = markdown.match(/(?:service fee|сервисный сбор)[:\s]*[฿$€£₽]?\s*([\d\s,]+)/i);
+  if (serviceFeeMatch) {
+    data.serviceFee = parseFloat(serviceFeeMatch[1].replace(/[\s,]/g, ''));
+  }
+  
+  // ── Check-in / Check-out times ──
+  const checkInMatch = markdown.match(/(?:check.?in|заезд|заселение)[:\s]*(?:после|after|from)?\s*(\d{1,2}[:.]\d{2}|\d{1,2}\s*(?:am|pm|:00))/i);
+  if (checkInMatch) data.checkInTime = checkInMatch[1].replace('.', ':');
+  
+  const checkOutMatch = markdown.match(/(?:check.?out|выезд|выселение)[:\s]*(?:до|before|by)?\s*(\d{1,2}[:.]\d{2}|\d{1,2}\s*(?:am|pm|:00))/i);
+  if (checkOutMatch) data.checkOutTime = checkOutMatch[1].replace('.', ':');
+  
+  // ── Min stay ──
+  const minStayMatch = markdown.match(/(?:minimum stay|мин[а-яё]*\s*(?:срок|проживание|ночей))[:\s]*(\d+)\s*(?:night|ноч)/i);
+  if (minStayMatch) data.minStayNights = parseInt(minStayMatch[1]);
   
   // ── Location/address ──
   const locationMatch = markdown.match(/(?:where you.ll be|location|где вы будете жить|местоположение)\s*\n+([^\n]+)/i);

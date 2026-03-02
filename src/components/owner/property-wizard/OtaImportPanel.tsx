@@ -241,7 +241,26 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
       extracted.price_per_night = String(listing.pricePerNight || listing.price_per_night);
     }
     if (listing.currency) extracted.currency = listing.currency;
-    if (listing.min_stay_nights) extracted.min_stay_nights = listing.min_stay_nights;
+    if (listing.min_stay_nights || listing.minStayNights) {
+      extracted.min_stay_nights = listing.min_stay_nights || listing.minStayNights;
+    }
+    
+    // Rental conditions
+    if (listing.cancellationPolicy || listing.cancellation_policy) {
+      extracted.cancellation_policy = listing.cancellationPolicy || listing.cancellation_policy;
+    }
+    if (listing.instantBooking !== undefined || listing.instant_booking !== undefined) {
+      extracted.instant_booking = listing.instantBooking ?? listing.instant_booking;
+    }
+    if (listing.depositAmount || listing.deposit_amount) {
+      extracted.deposit_amount = String(listing.depositAmount || listing.deposit_amount);
+    }
+    if (listing.depositCurrency || listing.deposit_currency) {
+      extracted.deposit_currency = listing.depositCurrency || listing.deposit_currency;
+    }
+    if (listing.cleaningFee || listing.cleaning_fee) {
+      extracted.cleaning_fee = String(listing.cleaningFee || listing.cleaning_fee);
+    }
     
     // Equipment (amenities mapped to equipment IDs)
     const equipmentIds = listing.equipment || listing.amenities;
@@ -422,7 +441,9 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
                 <li>• {isRu ? 'Фотографии объекта' : 'Property photos'}</li>
                 <li>• {isRu ? 'Характеристики (спальни, ванные, гости)' : 'Specs (bedrooms, baths, guests)'}</li>
                 <li>• {isRu ? 'Цена за ночь и валюта' : 'Price per night and currency'}</li>
-                <li>• {isRu ? 'Удобства и правила' : 'Amenities and rules'}</li>
+                <li>• {isRu ? 'Правила отмены и депозит' : 'Cancellation policy and deposit'}</li>
+                <li>• {isRu ? 'Check-in/out, мин. срок проживания' : 'Check-in/out, min stay'}</li>
+                <li>• {isRu ? 'Удобства и правила дома' : 'Amenities and house rules'}</li>
                 <li>• {isRu ? 'Адрес и координаты' : 'Address and coordinates'}</li>
               </ul>
             </div>
