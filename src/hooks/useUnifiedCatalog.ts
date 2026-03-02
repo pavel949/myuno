@@ -118,6 +118,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         let propertiesQuery = supabase
           .from('properties')
           .select('id, title_en, title_ru, price, currency, is_active, is_featured, provider_id, created_at, cover_image')
+          .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(100);
 
@@ -192,6 +193,17 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
 
   const bulkDelete = async (ids: string[], type: CatalogItemType) => {
     const table = type === 'service' ? 'services' : type === 'product' ? 'marketplace_products' : 'properties';
+    
+    // Soft delete for properties, hard delete for others
+    if (type === 'property') {
+      const { error } = await supabase
+        .from('properties')
+        .update({ deleted_at: new Date().toISOString(), is_active: false } as any)
+        .in('id', ids);
+      if (!error) await fetchItems();
+      return { error };
+    }
+    
     const { error } = await supabase
       .from(table)
       .delete()

@@ -396,6 +396,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route element={<AdminRouteLayout />}>
           <Route path="/admin" element={<Pages.AdminDashboard />} />
           <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
+          <Route path="/admin/trash" element={<Pages.AdminTrash />} />
           <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
           <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
           <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />

@@ -5,6 +5,7 @@ import {
   Package, 
   Cog,
   Layers,
+  Trash2,
   LogOut,
   ChevronRight,
   ChevronDown,
@@ -75,6 +76,7 @@ const navigationGroups: NavGroup[] = [
       { title: 'Unified Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
       { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
       { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
+      { title: 'Trash', titleRu: 'Корзина', path: '/admin/trash', icon: Trash2 },
     ],
   },
   {
