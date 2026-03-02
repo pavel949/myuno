@@ -15,7 +15,9 @@ import {
   Plus,
   Gift,
   ChevronRight,
+  Building2,
 } from 'lucide-react';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 interface MenuItem {
   path: string;
@@ -45,16 +47,24 @@ export function AccountFlatMenu() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { activeRole } = useUserContext();
+  const { companies } = useActiveCompany();
   const isRu = language === 'ru';
 
+  const hasCompany = companies.length > 0;
   const isOwner = activeRole === 'owner';
-  const allItems = isOwner ? [...OWNER_ITEMS, ...MENU_ITEMS] : MENU_ITEMS;
+
+  // Build menu: MC workspace link first (if user belongs to a company), then owner items, then standard
+  const mcItem: MenuItem = { path: '/mc', icon: Building2, labelEn: 'MC Workspace', labelRu: 'Рабочее пространство УК' };
+  const prefix: MenuItem[] = [];
+  if (hasCompany) prefix.push(mcItem);
+  if (isOwner) prefix.push(...OWNER_ITEMS);
+  const allItems = [...prefix, ...MENU_ITEMS];
 
   return (
     <nav className="space-y-0">
       {allItems.map((item, i) => {
         const Icon = item.icon;
-        const showDividerAfter = isOwner && i === OWNER_ITEMS.length - 1;
+        const showDividerAfter = prefix.length > 0 && i === prefix.length - 1;
 
         return (
           <React.Fragment key={item.path}>

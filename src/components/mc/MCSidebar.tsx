@@ -46,10 +46,11 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/mc', icon: LayoutDashboard },
+      { title: 'Portfolio', titleRu: 'Портфель', path: '/mc/portfolio', icon: Crown },
       { title: 'Properties', titleRu: 'Объекты', path: '/mc/properties', icon: Building2 },
-      
       { title: 'Calendar', titleRu: 'Календарь', path: '/mc/calendar', icon: CalendarDays },
       { title: 'Messages', titleRu: 'Сообщения', path: '/mc/messages', icon: MessageSquare, badgeKey: 'messages' },
+      { title: 'Owner Guide', titleRu: 'Руководство', path: '/mc/guide', icon: BookOpen },
     ],
   },
   {
