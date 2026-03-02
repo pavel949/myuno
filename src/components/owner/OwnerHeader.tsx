@@ -44,7 +44,7 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/owner/income/quick': { en: 'Record Income', ru: 'Записать доход' },
   '/owner/portfolio': { en: 'Portfolio', ru: 'Портфолио' },
   '/owner/reviews': { en: 'Reviews', ru: 'Отзывы' },
-  '/owner/superhost': { en: 'Superhost', ru: 'Суперхозяин' },
+  
   '/owner/channels': { en: 'Channel Manager', ru: 'Каналы' },
   '/owner/full-management': { en: 'Full Management', ru: 'Полное управление' },
   '/owner/service-request': { en: 'Service Request', ru: 'Заявка на услугу' },
