@@ -18,7 +18,8 @@ import {
 } from '@/components/owner/property-wizard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Copy, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Copy, MapPin, Plus, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AddProperty() {
@@ -54,6 +55,12 @@ export default function AddProperty() {
     setShowRestorationBanner(false);
     toast.info(isRu ? 'Черновик удалён' : 'Draft discarded');
   }, [wizard.clearDraft, isRu]);
+
+  const handleNewObject = useCallback(() => {
+    wizard.resetForm();
+    setShowRestorationBanner(false);
+    toast.info(isRu ? 'Форма очищена — создайте новый объект' : 'Form cleared — create a new property');
+  }, [wizard.resetForm, isRu]);
 
   // Render step content - streamlined 4-step wizard
   const renderStep = useCallback((stepId: string) => {
@@ -102,6 +109,7 @@ export default function AddProperty() {
       <PropertySubmissionSuccess
         propertyId={wizard.createdPropertyId}
         propertyTitle={wizard.createdPropertyTitle}
+        onAddAnother={handleNewObject}
       />
     );
   }
@@ -123,14 +131,45 @@ export default function AddProperty() {
     );
   }
 
+  // Check if form has data (for showing "New Object" button)
+  const hasFormData = !!(wizard.formData.title || wizard.formData.title_ru || wizard.formData.images.length > 0);
+
   return (
     <PageContainer>
-      <PageHeader 
-        title={isRu ? 'Добавить объект' : 'Add Property'}
-        subtitle={isRu ? 'Заполните информацию о вашей недвижимости' : 'Fill in your property information'}
-        showBack
-        fallbackPath="/mc/properties"
-      />
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <PageHeader 
+          title={isRu ? 'Добавить объект' : 'Add Property'}
+          subtitle={isRu ? 'Заполните информацию о вашей недвижимости' : 'Fill in your property information'}
+          showBack
+          fallbackPath="/mc/properties"
+        />
+        
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          {hasFormData && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={wizard.handleSaveDraft}
+                disabled={wizard.isSavingDraft || wizard.isSubmitting}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {isRu ? 'Сохранить черновик' : 'Save Draft'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNewObject}
+                disabled={wizard.isSubmitting}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {isRu ? 'Новый объект' : 'New Object'}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Draft Restoration Banner */}
       {showRestorationBanner && (
@@ -141,12 +180,10 @@ export default function AddProperty() {
       )}
 
       {/* Import Panels */}
-      {!wizard.cloneFromId && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <OtaImportPanel onDataExtracted={wizard.applyPrefillData} />
-          <AIIntakePanel onDataExtracted={wizard.applyPrefillData} />
-        </div>
-      )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <OtaImportPanel onDataExtracted={wizard.applyPrefillData} />
+        <AIIntakePanel onDataExtracted={wizard.applyPrefillData} />
+      </div>
 
       {/* Clone Notice */}
       {wizard.cloneFromId && wizard.sourceProperty && (
@@ -166,9 +203,7 @@ export default function AddProperty() {
           onSubmit={wizard.handleSubmit}
           isSubmitting={wizard.isSubmitting}
           validateStep={wizard.validateStep}
-          onSaveDraft={() => {
-            // Draft is auto-saved via useFormDraft, this triggers a manual toast
-          }}
+          onSaveDraft={wizard.handleSaveDraft}
           lastSaved={wizard.lastSaved}
         >
           {renderStep}

@@ -539,6 +539,72 @@ export function usePropertyWizard() {
     clearDraft();
   }, [clearDraft]);
 
+  // Save current form as a draft to the database
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const handleSaveDraft = useCallback(async () => {
+    if (!formData.title.trim() && !formData.title_ru.trim()) {
+      toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
+      return;
+    }
+
+    setIsSavingDraft(true);
+    try {
+      const { 
+        title, title_ru, description, description_ru,
+        rental_platforms, custom_platform, platform_listed,
+        is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
+        smoking_allowed,
+        ...cleanData 
+      } = formData;
+
+      const draftPayload: any = {
+        ...cleanData,
+        area_sqm: area_sqm ? Number(area_sqm) : undefined,
+        price_per_night: price_per_night ? Number(price_per_night) : undefined,
+        deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
+        sale_price: sale_price ? Number(sale_price) : undefined,
+        is_for_sale,
+        smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
+        title,
+        title_ru,
+        description,
+        description_ru,
+        approval_status: 'draft',
+        is_active: false,
+        rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
+        listing_modes: [
+          ...(platform_listed ? ['platform'] : []),
+          ...(is_for_sale ? ['sale'] : []),
+          ...(price_per_night ? ['rent'] : []),
+        ],
+      };
+
+      const property = await createProperty.mutateAsync(draftPayload);
+      clearDraft();
+      toast.success(isRu ? 'Черновик сохранён в список объектов' : 'Draft saved to property list');
+      setCreatedPropertyId(property?.id);
+      setCreatedPropertyTitle(formData.title || formData.title_ru);
+      setShowSuccess(true);
+    } catch (error) {
+      errorLog.error(error, 'save_draft');
+      toast.error(isRu ? 'Ошибка сохранения черновика' : 'Error saving draft');
+    } finally {
+      setIsSavingDraft(false);
+    }
+  }, [formData, createProperty, clearDraft, isRu]);
+
+  // Reset form to start a new property from scratch
+  const resetForm = useCallback(() => {
+    setFormData(initialFormData);
+    setOwnershipData(initialOwnershipData);
+    setSelectedProject(null);
+    setIsCloneDataApplied(false);
+    setShowSuccess(false);
+    setCreatedPropertyId(undefined);
+    setCreatedPropertyTitle(undefined);
+    clearDraft();
+  }, [setFormData, clearDraft]);
+
   return {
     formData,
     ownershipData,
@@ -552,6 +618,7 @@ export function usePropertyWizard() {
     sourceProperty,
     previewData,
     isSubmitting: createProperty.isPending,
+    isSavingDraft,
     // Draft-related
     hasDraft,
     lastSaved,
@@ -564,6 +631,8 @@ export function usePropertyWizard() {
     applyPrefillData,
     validateStep,
     handleSubmit,
+    handleSaveDraft,
+    resetForm,
     setShowSuccess,
     handleSuccessfulSubmission,
   };

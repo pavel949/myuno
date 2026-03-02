@@ -16,11 +16,13 @@ import {
 interface PropertySubmissionSuccessProps {
   propertyId?: string;
   propertyTitle?: string;
+  onAddAnother?: () => void;
 }
 
 export function PropertySubmissionSuccess({ 
   propertyId, 
-  propertyTitle 
+  propertyTitle,
+  onAddAnother,
 }: PropertySubmissionSuccessProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -205,7 +207,13 @@ export function PropertySubmissionSuccess({
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={() => navigate('/mc/properties/new')}
+            onClick={() => {
+              if (onAddAnother) {
+                onAddAnother();
+              } else {
+                navigate('/mc/properties/new');
+              }
+            }}
           >
             {isRu ? 'Добавить ещё объект' : 'Add another property'}
             <ArrowRight className="h-4 w-4 ml-2" />
