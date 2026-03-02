@@ -63,6 +63,8 @@ function useCompanyProperties() {
 
 export function useMyProperties() {
   const { hasRole } = useUserContext();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
   const isOwner = hasRole('owner') || hasRole('property_owner');
   const isManager = hasRole('property_manager');
 
@@ -70,30 +72,36 @@ export function useMyProperties() {
   const { properties: managedRaw, isLoading: managedLoading } = useAssignedProperties();
   const { data: companyRaw, isLoading: companyLoading } = useCompanyProperties();
 
+  // When an active MC is selected, only show properties belonging to that MC
+  const isInMCMode = !!activeCompanyId;
+
   const ownedProperties = useMemo<UnifiedProperty[]>(() => {
     if (!ownedRaw) return [];
-    return ownedRaw.map(p => ({
-      id: p.id,
-      property_id: p.id,
-      title: p.title_en || p.title || 'Untitled',
-      title_ru: p.title_ru || p.title_en || p.title || 'Без названия',
-      cover_image: p.cover_image || p.images?.[0] || null,
-      address: p.address || null,
-      district: p.district || null,
-      is_active: p.is_active ?? true,
-      bedrooms: p.bedrooms ?? null,
-      bathrooms: p.bathrooms ?? null,
-      price_per_night: p.price_per_night ?? null,
-      currency: p.deposit_currency || 'THB',
-      source: 'owned' as const,
-      complex_id: p.complex_id || null,
-      project_id: p.project_id || null,
-      property_type: p.property_type || null,
-      lat: p.lat ?? null,
-      lng: p.lng ?? null,
-      approval_status: p.approval_status || null,
-    }));
-  }, [ownedRaw]);
+    return ownedRaw
+      // In MC mode, filter owned properties to only those belonging to the active company
+      .filter(p => !isInMCMode || (p as any).management_company_id === activeCompanyId)
+      .map(p => ({
+        id: p.id,
+        property_id: p.id,
+        title: p.title_en || p.title || 'Untitled',
+        title_ru: p.title_ru || p.title_en || p.title || 'Без названия',
+        cover_image: p.cover_image || p.images?.[0] || null,
+        address: p.address || null,
+        district: p.district || null,
+        is_active: p.is_active ?? true,
+        bedrooms: p.bedrooms ?? null,
+        bathrooms: p.bathrooms ?? null,
+        price_per_night: p.price_per_night ?? null,
+        currency: p.deposit_currency || 'THB',
+        source: 'owned' as const,
+        complex_id: p.complex_id || null,
+        project_id: p.project_id || null,
+        property_type: p.property_type || null,
+        lat: p.lat ?? null,
+        lng: p.lng ?? null,
+        approval_status: p.approval_status || null,
+      }));
+  }, [ownedRaw, isInMCMode, activeCompanyId]);
 
   const managedProperties = useMemo<UnifiedProperty[]>(() => {
     return managedRaw.map(p => ({
