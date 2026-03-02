@@ -1,8 +1,10 @@
 import { useState, ReactNode, useCallback, memo } from 'react';
+import { Save } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { propertyWizardSteps, WizardStep } from './PropertyWizardSteps';
 
@@ -11,13 +13,17 @@ interface PropertyWizardProps {
   onSubmit: () => Promise<void>;
   isSubmitting: boolean;
   validateStep?: (stepId: string) => boolean;
+  onSaveDraft?: () => void;
+  lastSaved?: Date | null;
 }
 
 function PropertyWizardInner({ 
   children, 
   onSubmit, 
   isSubmitting,
-  validateStep 
+  validateStep,
+  onSaveDraft,
+  lastSaved,
 }: PropertyWizardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -149,6 +155,22 @@ function PropertyWizardInner({
           <ChevronLeft className="h-4 w-4 mr-1" />
           {isRu ? 'Назад' : 'Back'}
         </Button>
+
+        {onSaveDraft && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              onSaveDraft();
+              toast.success(isRu ? 'Черновик сохранён' : 'Draft saved');
+            }}
+            disabled={isSubmitting}
+            title={isRu ? 'Сохранить черновик' : 'Save draft'}
+          >
+            <Save className="h-4 w-4" />
+          </Button>
+        )}
         
         <Button
           type="button"
@@ -174,6 +196,14 @@ function PropertyWizardInner({
           )}
         </Button>
       </div>
+
+      {/* Last saved indicator */}
+      {lastSaved && (
+        <p className="text-[10px] text-muted-foreground text-center mt-1">
+          {isRu ? 'Автосохранение: ' : 'Auto-saved: '}
+          {lastSaved.toLocaleTimeString()}
+        </p>
+      )}
     </div>
   );
 }
