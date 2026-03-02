@@ -1,66 +1,63 @@
 
 
-# Настройка УК Show Property: Татьяна и Екатерина
+# Добавление описания объекта и доработка карточки комплекса
 
-## Текущее состояние (результаты аудита)
+## 1. Добавить поля описания в шаг "Основная информация" (BasicInfoStep)
 
-### Компания
-- **Show Property Phuket** (ID: `017c9759-af23-4233-8bba-f379c819736a`)
-- Статус: активна
+Сейчас в `PropertyFormData` есть поля `description` и `description_ru`, но в форме визарда нет textarea для их ввода. Добавлю:
 
-### Участники компании (management_company_members)
+- **Двуязычный Textarea** (TranslatableInput или два Textarea) для описания объекта, как в Airbnb — краткое привлекательное описание
+- Размещу сразу после блока "Название / Title"
+- Placeholder с подсказкой в стиле Airbnb: "Расскажите гостям, чем уникален ваш объект..."
 
-| Пользователь | Email | Роль в УК | UUID |
-|---|---|---|---|
-| Татьяна Черевченко | smartpropertyphuket@gmail.com | **director** | `3a06f71a-...` |
-| Екатерина | katrin.gev278@gmail.com | **manager** | `7667f121-...` |
-| Pavel Ignatev | pavel@ignatevestate.com | director | `5cbbcd96-...` |
+**Файл:** `src/components/owner/property-wizard/steps/BasicInfoStep.tsx`  
+**Изменение:** Добавить блок с `<Textarea>` для `description` / `description_ru` после TranslatableInput для Title (после строки ~156)
 
-### Найденные проблемы
+## 2. AI Intake — слияние с частично заполненной формой
 
-1. **Pavel Ignatev** записан как director в Show Property — вероятно, это ошибка (системный пользователь, который создал компанию). Нужно удалить или понизить.
+Эта функция **уже работает**: кнопка "Быстрый ввод с AI" вызывает `onDataExtracted` -> `wizard.applyPrefillData`, которая мержит данные в текущую форму. Описание (`description`, `description_ru`) уже извлекается AI и передается в форму. С добавлением textarea пользователь сразу увидит результат.
 
-2. **Татьяна** имеет лишние платформенные роли:
-   - `owner` — дублирует то, что и так вычисляется из MC membership
-   - `property_owner` — нужна только если она владеет объектами вне УК
-   - Это вызывает путаницу на странице профиля (секция "Роли на платформе")
+Дополнительных изменений не требуется.
 
-3. **Екатерина** имеет роль `staff` в user_roles — корректно, дает доступ к рабочему пространству "Управление". Права доступа к модулям настроены (все 7 модулей: view + edit).
+## 3. ComplexCard — показать только описание платформы, скрыть описание УК
 
-4. **Профиль** показывает "сырые" платформенные роли (user, owner, property_owner, staff) — пользователи не понимают, что это значит. Нужно либо скрыть, либо показать понятные названия.
+В карточке комплекса (`ComplexCard.tsx`) сейчас вообще нет описания. Добавлю:
+- Показ `description_en` / `description_ru` (описание для платформы) — 2 строки с line-clamp
+- Поле `description` (описание от УК) — **не показывать**
 
-5. **Домашний экран** (OwnerDashboard) корректно адаптируется:
-   - Татьяна (director) видит "General" — полный набор виджетов
-   - Екатерина (manager) видит "Property Manager" — операционный набор
-
-## План изменений
-
-### 1. Очистка данных в базе
-- Удалить Pavel Ignatev из Show Property (если подтвердите)
-- Удалить лишнюю роль `property_owner` у Татьяны из user_roles (роль `owner` уже вычисляется из MC membership автоматически)
-
-### 2. Улучшение отображения ролей в профиле
-- Скрыть технические роли (`user`, `staff`) из секции "Роли на платформе" — они не несут смысла для пользователя
-- Оставить только значимые роли (admin, vendor) если есть
-- Приоритет отображения: роль в УК (Director/Manager) в секции "Управляющие компании"
-
-### 3. Проверка навигации
-- Татьяна (director): видит "Управление" в меню переключения, попадает на /owner, может настраивать права Екатерине через /mc/team
-- Екатерина (manager): видит "Управление" в меню, попадает на /owner с урезанным дашбордом, видит свои права в профиле (read-only)
+**Файл:** `src/components/owner/ComplexCard.tsx`  
+**Изменение:** Добавить отображение описания между названием/районом и строкой статистики
 
 ---
 
 ### Технические детали
 
-**Файлы для изменения:**
+**BasicInfoStep.tsx** — вставка после строки 156 (после TranslatableInput для Title):
+```tsx
+<div className="space-y-2">
+  <Label>{isRu ? 'Описание' : 'Description'}</Label>
+  <Textarea
+    value={isRu ? formData.description_ru : formData.description}
+    onChange={(e) => updateFormData({ [isRu ? 'description_ru' : 'description']: e.target.value })}
+    placeholder={isRu ? 'Расскажите гостям, чем уникален ваш объект...' : 'Tell guests what makes your place special...'}
+    rows={4}
+  />
+  {/* Второй язык */}
+  <Textarea
+    value={isRu ? formData.description : formData.description_ru}
+    onChange={(e) => updateFormData({ [isRu ? 'description' : 'description_ru']: e.target.value })}
+    placeholder={isRu ? 'Description in English (optional)' : 'Описание на русском (необязательно)'}
+    rows={3}
+    className="text-sm"
+  />
+</div>
+```
 
-1. **SQL миграция данных** — удалить `property_owner` из user_roles для Татьяны, опционально удалить Pavel из MC members
-2. **`src/components/profile/UserRolesPermissions.tsx`** — фильтровать технические роли (`user`, `staff`, `property_owner`) из отображения, показывать только значимые
-3. **`src/pages/Profile.tsx`** — без изменений (уже корректно показывает MC role и company name)
-
-**Что уже работает корректно:**
-- ActiveRoleBadge приоритизирует MC role (Директор/Менеджер)
-- OwnerDashboard адаптирует виджеты под MC role
-- Права доступа Екатерины к модулям настроены через team_member_permissions
-- Татьяна как director имеет полный доступ автоматически (canAccess всегда true)
-
+**ComplexCard.tsx** — вставка описания платформы:
+```tsx
+{(complex.description_en || complex.description_ru) && (
+  <p className="text-xs text-muted-foreground line-clamp-2">
+    {isRu ? (complex.description_ru || complex.description_en) : (complex.description_en || complex.description_ru)}
+  </p>
+)}
+```
