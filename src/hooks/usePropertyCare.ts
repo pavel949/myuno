@@ -159,6 +159,7 @@ export function useCreateOwnerProperty() {
         ...restData, 
         owner_id: user.id,
         approval_status: data.approval_status || 'pending',
+        is_active: data.approval_status === 'draft' ? false : true,
         title_en: title || data.address || 'New Property',
         title_ru: title_ru || title || 'Новый объект',
         description_en: description || (data as any).description_en || '',

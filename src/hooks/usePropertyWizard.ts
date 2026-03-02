@@ -385,8 +385,14 @@ export function usePropertyWizard() {
       title, title_ru, description, description_ru,
       rental_platforms, custom_platform, platform_listed,
       is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
+      smoking_allowed,
       ...cleanData 
     } = formData;
+    
+    // Determine approval_status based on platform_listed flag
+    // If user wants to list on myUNO platform → pending (goes for moderation)
+    // If not → draft (stays in user's cabinet without moderation)
+    const approvalStatus = platform_listed ? 'pending' : 'draft';
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const submitPayload: any = {
@@ -396,11 +402,14 @@ export function usePropertyWizard() {
       deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
       sale_price: sale_price ? Number(sale_price) : undefined,
       is_for_sale,
+      // Map smoking_allowed boolean to smoking_policy text column
+      smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
       // These will be remapped by useCreateOwnerProperty
       title,
       title_ru,
       description,
       description_ru,
+      approval_status: approvalStatus,
       rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
       listing_modes: [
         ...(platform_listed ? ['platform'] : []),
