@@ -21,6 +21,7 @@ import {
   GuestServicesBlock,
   GuestMessagesBlock,
 } from '@/components/guest/dashboard';
+import { CheckInStatusStepper } from '@/components/guest/dashboard/CheckInStatusStepper';
 
 const serviceTypes = [
   { id: 'cleaning', icon: Sparkles, label: { en: 'Cleaning', ru: 'Уборка' } },
@@ -118,6 +119,9 @@ export default function MyStay() {
 
   return (
     <div className="p-4 space-y-3">
+
+      {/* Check-in Status Stepper */}
+      <CheckInStatusStepper />
 
       {/* Row 1: Stay + Orders (side by side on larger screens) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -37,6 +37,7 @@ import { ReferralCard } from "@/components/uno/ReferralCard";
 import { LoyaltyStatusCard } from "@/components/wallet/LoyaltyStatusCard";
 import { AchievementsCard } from "@/components/wallet/AchievementsCard";
 import { PaymentMethodsSection } from "@/components/wallet/PaymentMethodsSection";
+import { SpendingInsights } from "@/components/wallet/SpendingInsights";
 
 interface WalletData {
   id: string;
@@ -284,6 +285,9 @@ const Wallet = () => {
             );
           })}
         </div>
+
+        {/* Spending Insights */}
+        <SpendingInsights transactions={transactions} />
 
         {/* Transactions */}
         <Card>

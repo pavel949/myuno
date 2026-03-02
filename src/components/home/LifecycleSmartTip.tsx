@@ -50,6 +50,16 @@ const TIPS_BY_SITUATION: Record<string, Tip[]> = {
     { id: 'res-school', titleRu: 'Школы и курсы', titleEn: 'Schools & courses', descRu: 'Образование для детей и взрослых', descEn: 'Education for kids & adults', path: '/education', icon: '📚' },
     { id: 'res-clinic', titleRu: 'Клиники рядом', titleEn: 'Clinics nearby', descRu: 'Проверенные врачи с отзывами', descEn: 'Verified doctors with reviews', path: '/medical', icon: '🏥' },
   ],
+  family: [
+    { id: 'fam-school', titleRu: 'Школы и детсады', titleEn: 'Schools & kindergartens', descRu: 'Международные школы с английской программой', descEn: 'International schools with English programs', path: '/education', icon: '🎒' },
+    { id: 'fam-pediatr', titleRu: 'Детский врач', titleEn: 'Pediatrician', descRu: 'Проверенные педиатры с отзывами', descEn: 'Verified pediatricians with reviews', path: '/medical', icon: '👶' },
+    { id: 'fam-restaurant', titleRu: 'Семейные рестораны', titleEn: 'Family restaurants', descRu: 'Места с детскими меню и площадками', descEn: 'Places with kids menus & play areas', path: '/restaurants', icon: '🍕' },
+  ],
+  digital_nomad: [
+    { id: 'dn-cowork', titleRu: 'Коворкинги', titleEn: 'Coworking spaces', descRu: 'Лучшие рабочие пространства с быстрым Wi-Fi', descEn: 'Top workspaces with fast Wi-Fi', path: '/discover', icon: '💻' },
+    { id: 'dn-internet', titleRu: 'Быстрый интернет', titleEn: 'Fast internet spots', descRu: 'Кафе и залы с интернетом от 100 Мбит', descEn: 'Cafés & lounges with 100+ Mbps', path: '/discover', icon: '📶' },
+    { id: 'dn-visa', titleRu: 'Визаран и продление', titleEn: 'Visa run & extension', descRu: 'Проверенные агенты для виз и border-run', descEn: 'Verified agents for visas & border runs', path: '/legal', icon: '🛂' },
+  ],
   default: [
     { id: 'def-explore', titleRu: 'Исследуйте остров', titleEn: 'Explore the island', descRu: '100+ проверенных мест и сервисов', descEn: '100+ verified places & services', path: '/discover', icon: '🌴' },
     { id: 'def-flowers', titleRu: 'Доставка цветов', titleEn: 'Flower delivery', descRu: 'Свежие букеты с доставкой в тот же день', descEn: 'Fresh bouquets, same-day delivery', path: '/flowers', icon: '💐' },
