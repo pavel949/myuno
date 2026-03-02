@@ -289,7 +289,7 @@ export function MCSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.user_metadata?.name || (isRussian ? 'Менеджер' : 'Manager')}
+                {user?.user_metadata?.name || user?.email?.split('@')[0] || (isRussian ? 'Пользователь' : 'User')}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
