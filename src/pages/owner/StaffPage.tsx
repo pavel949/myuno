@@ -1,11 +1,9 @@
 import { useState, lazy, Suspense, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { AddTeamMemberDialog } from '@/components/owner/team/AddTeamMemberDialog';
 import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
 import { useMemberPermissions, MODULES, useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
@@ -477,13 +475,12 @@ export default function StaffPage() {
   const [deactivateTarget, setDeactivateTarget] = useState<StaffMember | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
-  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  // addMemberOpen removed — unified into Sheet form
   const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string; staffId: string; customTitle?: string } | null>(null);
   const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const shown = (staff ?? [])
     .filter(s => staffFilter === 'active' ? s.is_active : true)
@@ -651,7 +648,7 @@ export default function StaffPage() {
             />
           </div>
           {canManage && (
-            <Button onClick={() => setAddMemberOpen(true)}>
+            <Button onClick={openCreate}>
               <UserPlus className="h-4 w-4 mr-2" />
               {t('Add', 'Добавить')}
             </Button>
@@ -703,7 +700,7 @@ export default function StaffPage() {
         </div>
       )}
 
-      {/* Edit / Create Sheet */}
+      {/* Unified Edit / Create Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="mb-6">
@@ -711,14 +708,18 @@ export default function StaffPage() {
               {editing ? <Pencil className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
               {editing ? t('Edit Staff Member', 'Редактировать сотрудника') : t('New Staff Member', 'Новый сотрудник')}
             </SheetTitle>
+            {!editing && (
+              <p className="text-sm text-muted-foreground">
+                {t('Add to your team and optionally send login credentials', 'Добавьте в команду и при необходимости отправьте доступ')}
+              </p>
+            )}
           </SheetHeader>
 
-          <div className="space-y-5">
-            {/* Basic info */}
-            <div className="space-y-4">
-              {/* Photo */}
-              <div>
-                <Label className="mb-1.5 block">{t('Photo', 'Фото')}</Label>
+          <div className="space-y-6">
+            {/* Section: Profile */}
+            <section className="space-y-4">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Profile', 'Профиль')}</h4>
+              <div className="flex items-center gap-4">
                 <UnifiedMediaUploader
                   mode="avatar"
                   value={form.photo_url}
@@ -726,18 +727,27 @@ export default function StaffPage() {
                   name={form.name}
                   folder="staff"
                 />
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <Label className="mb-1 block text-xs">{t('Full Name', 'ФИО')} *</Label>
+                    <Input
+                      value={form.name}
+                      onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                      placeholder={t('e.g. Nong Yui', 'например, Юлия Петрова')}
+                    />
+                  </div>
+                  <div>
+                    <Label className="mb-1 block text-xs">{t('Job Title', 'Должность')}</Label>
+                    <Input
+                      value={form.custom_title}
+                      onChange={e => setForm(f => ({ ...f, custom_title: e.target.value }))}
+                      placeholder={t('e.g. Booking Coordinator', 'напр. Координатор бронирований')}
+                    />
+                  </div>
+                </div>
               </div>
               <div>
-                <Label className="mb-1.5 block">{t('Full Name', 'ФИО')}</Label>
-                <Input
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder={t('e.g. Nong Yui', 'например, Юлия Петрова')}
-                />
-              </div>
-
-              <div>
-                <Label className="mb-1.5 block">{t('Role', 'Роль')}</Label>
+                <Label className="mb-1 block text-xs">{t('Role', 'Роль')}</Label>
                 <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v as StaffRole }))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -755,143 +765,98 @@ export default function StaffPage() {
                 </Select>
               </div>
 
-              {/* Custom job title */}
-              <div>
-                <Label className="mb-1.5 block">{t('Job Title', 'Должность')}</Label>
-                <Input
-                  value={form.custom_title}
-                  onChange={e => setForm(f => ({ ...f, custom_title: e.target.value }))}
-                  placeholder={t('e.g. Booking Coordinator', 'напр. Координатор бронирований')}
-                />
-              </div>
-
-              {/* Active toggle for editing */}
               {editing && (
                 <div className="flex items-center justify-between p-3 rounded-xl border">
                   <div>
-                    <p className="text-sm font-medium">{t('Active Status', 'Статус активности')}</p>
+                    <p className="text-sm font-medium">{t('Active', 'Активен')}</p>
                     <p className="text-xs text-muted-foreground">
-                      {form.is_active ? t('Employee is active', 'Сотрудник активен') : t('Employee is deactivated', 'Сотрудник деактивирован')}
+                      {form.is_active ? t('Employee is active', 'Сотрудник активен') : t('Deactivated', 'Деактивирован')}
                     </p>
                   </div>
-                  <Switch
-                    checked={form.is_active}
-                    onCheckedChange={checked => setForm(f => ({ ...f, is_active: checked }))}
-                  />
+                  <Switch checked={form.is_active} onCheckedChange={checked => setForm(f => ({ ...f, is_active: checked }))} />
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* Contacts */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                {t('Contact Info', 'Контакты')}
-              </h4>
+            {/* Section: Contact */}
+            <section className="space-y-3">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Contact', 'Контакты')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="mb-1.5 block">{t('Phone', 'Телефон')}</Label>
-                  <Input
-                    value={form.phone}
-                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                    placeholder="+66 8x xxx xxxx"
-                  />
+                  <Label className="mb-1 block text-xs">{t('Phone', 'Телефон')}</Label>
+                  <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+66 8x xxx xxxx" />
                 </div>
                 <div>
-                  <Label className="mb-1.5 block">{t('Email', 'Email')}</Label>
-                  <Input
-                    value={form.email}
-                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                    placeholder="staff@company.com"
-                  />
+                  <Label className="mb-1 block text-xs">Email</Label>
+                  <Input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="staff@company.com" />
                 </div>
               </div>
 
-              {/* Send credentials toggle - only for new staff with email */}
               {!editing && form.email.trim() && activeCompany?.company_id && (
-                <div className="flex items-center justify-between rounded-lg border border-border p-3 bg-muted/30">
+                <div className="flex items-center justify-between rounded-xl border p-3 bg-muted/30">
                   <div className="space-y-0.5 min-w-0 mr-3">
-                    <p className="text-sm font-medium">
-                      {t('Send login credentials', 'Отправить данные для входа')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t(
-                        'Create account and send password to email',
-                        'Создать аккаунт и отправить пароль на email'
-                      )}
-                    </p>
+                    <p className="text-sm font-medium">{t('Send login credentials', 'Отправить данные для входа')}</p>
+                    <p className="text-xs text-muted-foreground">{t('Create account & send password to email', 'Создать аккаунт и отправить пароль')}</p>
                   </div>
-                  <Switch
-                    checked={form.sendCredentials}
-                    onCheckedChange={checked => setForm(f => ({ ...f, sendCredentials: checked }))}
-                  />
+                  <Switch checked={form.sendCredentials} onCheckedChange={checked => setForm(f => ({ ...f, sendCredentials: checked }))} />
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* Pay */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                {t('Compensation', 'Оплата')}
-              </h4>
-              <div>
-                <Label className="mb-1.5 block">{t('Pay Type', 'Тип оплаты')}</Label>
-                <Select value={form.pay_type} onValueChange={v => setForm(f => ({ ...f, pay_type: v as PayType }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PAY_TYPES.map(p => (
-                      <SelectItem key={p.value} value={p.value}>
-                        {isRu ? p.labelRu : p.labelEn}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+            {/* Section: Compensation */}
+            <section className="space-y-3">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Compensation', 'Оплата')}</h4>
+              <Select value={form.pay_type} onValueChange={v => setForm(f => ({ ...f, pay_type: v as PayType }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAY_TYPES.map(p => (
+                    <SelectItem key={p.value} value={p.value}>{isRu ? p.labelRu : p.labelEn}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {form.pay_type === 'salary' && (
                 <div>
-                  <Label className="mb-1.5 block">{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
                   <Input type="number" value={form.monthly_salary} onChange={e => setForm(f => ({ ...f, monthly_salary: e.target.value }))} placeholder="15000" />
                 </div>
               )}
               {form.pay_type === 'hourly' && (
                 <div>
-                  <Label className="mb-1.5 block">{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
                   <Input type="number" value={form.hourly_rate} onChange={e => setForm(f => ({ ...f, hourly_rate: e.target.value }))} placeholder="200" />
                 </div>
               )}
               {form.pay_type === 'daily' && (
                 <div>
-                  <Label className="mb-1.5 block">{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="1000" />
                 </div>
               )}
               {form.pay_type === 'per_task' && (
                 <div>
-                  <Label className="mb-1.5 block">{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="500" />
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* Notes */}
-            <div>
-              <Label className="mb-1.5 block">{t('Notes', 'Примечания')}</Label>
+            {/* Section: Notes */}
+            <section>
+              <Label className="mb-1 block text-xs">{t('Notes', 'Примечания')}</Label>
               <Textarea
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                 placeholder={t('Special skills, schedule, preferences...', 'Особые навыки, график работы, предпочтения...')}
                 rows={3}
               />
-            </div>
+            </section>
 
             {/* Property Assignments (edit mode only) */}
             {editing && allProperties.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t('Property Assignments', 'Назначения на объекты')}
-                </h4>
+              <section className="space-y-3">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
                 <StaffPropertyAssignments
                   staffId={editing.id}
                   properties={allProperties}
@@ -899,17 +864,15 @@ export default function StaffPage() {
                   onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
                   onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
                 />
-              </div>
+              </section>
             )}
 
             {/* Staff Documents (edit mode only) */}
             {editing && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t('Documents', 'Документы')}
-                </h4>
+              <section className="space-y-3">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Documents', 'Документы')}</h4>
                 <VendorDocumentsTab vendorId={editing.id} docSource="staff" />
-              </div>
+              </section>
             )}
 
             <Button className="w-full" onClick={handleSave} disabled={isBusy || !form.name.trim()}>
@@ -954,15 +917,7 @@ export default function StaffPage() {
       </>
       )}
 
-      {/* Add Team Member Dialog */}
-      <AddTeamMemberDialog
-        open={addMemberOpen}
-        onOpenChange={setAddMemberOpen}
-        onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ['staff-members'] });
-          queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
-        }}
-      />
+      {/* AddTeamMemberDialog removed — consolidated into Sheet form above */}
 
       {/* Member Permissions Sheet */}
       <MemberPermissionsSheet
