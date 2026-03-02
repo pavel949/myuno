@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -149,205 +148,171 @@ export function CompanyProfileSettings() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Logo & Branding */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            {isRu ? 'Бренд компании' : 'Company Branding'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="flex items-start gap-6">
-            <div className="space-y-2 shrink-0">
-              <Label className="text-xs text-muted-foreground">
-                {isRu ? 'Логотип' : 'Logo'}
-              </Label>
-              <Avatar className="h-20 w-20 rounded-xl border-2 border-dashed border-border">
-                <AvatarImage src={form.logo || undefined} className="object-cover" />
-                <AvatarFallback className="rounded-xl bg-muted text-lg font-bold">
-                  {(form.name_en || 'MC')[0]}
-                </AvatarFallback>
-              </Avatar>
+    <div className="space-y-3">
+      <Accordion type="multiple" defaultValue={['branding', 'contacts']} className="space-y-3">
+        {/* Branding */}
+        <AccordionItem value="branding" className="border rounded-xl px-4">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
+            <span className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              {isRu ? 'Бренд компании' : 'Company Branding'}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-4 pb-4">
+            <div className="flex items-start gap-4">
+              <div className="space-y-1.5 shrink-0">
+                <Label className="text-xs text-muted-foreground">
+                  {isRu ? 'Логотип' : 'Logo'}
+                </Label>
+                <Avatar className="h-16 w-16 rounded-xl border-2 border-dashed border-border">
+                  <AvatarImage src={form.logo || undefined} className="object-cover" />
+                  <AvatarFallback className="rounded-xl bg-muted text-base font-bold">
+                    {(form.name_en || 'MC')[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="flex-1">
+                <UnifiedMediaUploader
+                  mode="single"
+                  value={form.logo || ''}
+                  onChange={(url) => update({ logo: typeof url === 'string' ? url : '' })}
+                  bucket="company-logos"
+                  placeholder={isRu ? 'Логотип (400×400)' : 'Logo (400×400)'}
+                />
+              </div>
             </div>
-            <div className="flex-1 space-y-3">
+
+            {/* Cover Image */}
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Image className="h-3.5 w-3.5" />
+                {isRu ? 'Обложка' : 'Cover'}
+              </Label>
+              {form.cover_image && (
+                <img src={form.cover_image} alt="Cover" className="w-full h-24 object-cover rounded-lg border border-border" />
+              )}
               <UnifiedMediaUploader
                 mode="single"
-                value={form.logo || ''}
-                onChange={(url) => update({ logo: typeof url === 'string' ? url : '' })}
+                value={form.cover_image || ''}
+                onChange={(url) => update({ cover_image: typeof url === 'string' ? url : '' })}
                 bucket="company-logos"
-                placeholder={isRu ? 'Загрузите логотип (рекомендуется 400×400)' : 'Upload logo (recommended 400×400)'}
+                folder="covers"
+                placeholder={isRu ? 'Обложка (1200×400)' : 'Cover (1200×400)'}
               />
             </div>
-          </div>
 
-          <Separator />
-
-          {/* Cover Image */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-1.5">
-              <Image className="h-3.5 w-3.5" />
-              {isRu ? 'Обложка компании' : 'Cover Image'}
-            </Label>
-            {form.cover_image && (
-              <img
-                src={form.cover_image}
-                alt="Cover"
-                className="w-full h-32 object-cover rounded-lg border border-border"
-              />
-            )}
-            <UnifiedMediaUploader
-              mode="single"
-              value={form.cover_image || ''}
-              onChange={(url) => update({ cover_image: typeof url === 'string' ? url : '' })}
-              bucket="company-logos"
-              folder="covers"
-              placeholder={isRu ? 'Загрузите обложку (1200×400)' : 'Upload cover (1200×400)'}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{isRu ? 'Название (EN)' : 'Company Name (EN)'}</Label>
-              <Input
-                value={form.name_en}
-                onChange={(e) => update({ name_en: e.target.value })}
-                placeholder="My Property Company"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
+                <Input value={form.name_en} onChange={(e) => update({ name_en: e.target.value })} placeholder="My Property Company" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
+                <Input value={form.name_ru} onChange={(e) => update({ name_ru: e.target.value })} placeholder="Моя УК" className="h-9" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>{isRu ? 'Название (RU)' : 'Company Name (RU)'}</Label>
-              <Input
-                value={form.name_ru}
-                onChange={(e) => update({ name_ru: e.target.value })}
-                placeholder="Моя управляющая компания"
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>{isRu ? 'Директор / Представитель' : 'Director / Representative'}</Label>
-            <Input
-              value={form.director_name || ''}
-              onChange={(e) => update({ director_name: e.target.value })}
-              placeholder={isRu ? 'Иван Петров' : 'John Smith'}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Директор' : 'Director'}</Label>
+              <Input value={form.director_name || ''} onChange={(e) => update({ director_name: e.target.value })} placeholder={isRu ? 'Иван Петров' : 'John Smith'} className="h-9" />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Contact Information */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Phone className="h-4 w-4" />
-            {isRu ? 'Контакты' : 'Contact Information'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" /> Email
-              </Label>
-              <Input type="email" value={form.email || ''} onChange={(e) => update({ email: e.target.value })} placeholder="info@company.com" />
+        {/* Contacts */}
+        <AccordionItem value="contacts" className="border rounded-xl px-4">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
+            <span className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-primary" />
+              {isRu ? 'Контакты' : 'Contacts'}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs"><Mail className="h-3 w-3" /> Email</Label>
+                <Input type="email" value={form.email || ''} onChange={(e) => update({ email: e.target.value })} placeholder="info@company.com" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" /> {isRu ? 'Телефон' : 'Phone'}</Label>
+                <Input type="tel" value={form.phone || ''} onChange={(e) => update({ phone: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs"><MessageCircle className="h-3 w-3" /> WhatsApp</Label>
+                <Input type="tel" value={form.whatsapp || ''} onChange={(e) => update({ whatsapp: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3" /> {isRu ? 'Сайт' : 'Website'}</Label>
+                <Input value={form.website || ''} onChange={(e) => update({ website: e.target.value })} placeholder="https://company.com" className="h-9" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5" /> {isRu ? 'Телефон' : 'Phone'}
-              </Label>
-              <Input type="tel" value={form.phone || ''} onChange={(e) => update({ phone: e.target.value })} placeholder="+66 XX XXX XXXX" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1 text-xs"><MapPin className="h-3 w-3" /> {isRu ? 'Адрес' : 'Address'}</Label>
+                <Input value={form.address || ''} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Район' : 'District'}</Label>
+                <Input value={form.district || ''} onChange={(e) => update({ district: e.target.value })} placeholder="Rawai" className="h-9" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-              </Label>
-              <Input type="tel" value={form.whatsapp || ''} onChange={(e) => update({ whatsapp: e.target.value })} placeholder="+66 XX XXX XXXX" />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5" /> {isRu ? 'Сайт' : 'Website'}
-              </Label>
-              <Input value={form.website || ''} onChange={(e) => update({ website: e.target.value })} placeholder="https://company.com" />
-            </div>
-          </div>
+          </AccordionContent>
+        </AccordionItem>
 
-          <Separator />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" /> {isRu ? 'Адрес' : 'Address'}
-              </Label>
-              <Input value={form.address || ''} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St, Rawai" />
+        {/* About */}
+        <AccordionItem value="about" className="border rounded-xl px-4">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
+            <span className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              {isRu ? 'О компании' : 'About'}
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3 pb-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
+              <Textarea value={form.description_en || ''} onChange={(e) => update({ description_en: e.target.value })} rows={2} />
             </div>
-            <div className="space-y-2">
-              <Label>{isRu ? 'Район' : 'District'}</Label>
-              <Input value={form.district || ''} onChange={(e) => update({ district: e.target.value })} placeholder={isRu ? 'Раваи' : 'Rawai'} />
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
+              <Textarea value={form.description_ru || ''} onChange={(e) => update({ description_ru: e.target.value })} rows={2} />
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Description & About */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">
-            {isRu ? 'О компании' : 'About Company'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
-            <Textarea value={form.description_en || ''} onChange={(e) => update({ description_en: e.target.value })} rows={3} />
-          </div>
-          <div className="space-y-2">
-            <Label>{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
-            <Textarea value={form.description_ru || ''} onChange={(e) => update({ description_ru: e.target.value })} rows={3} />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Accordion for Legal, Banking, Documents */}
-      <Accordion type="multiple" defaultValue={['legal']} className="space-y-3">
+          </AccordionContent>
+        </AccordionItem>
         {/* Legal Details */}
         <AccordionItem value="legal" className="border rounded-xl px-4">
-          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               {isRu ? 'Юридические данные' : 'Legal Details'}
             </span>
           </AccordionTrigger>
-          <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{isRu ? 'Юридическое название' : 'Legal Name'}</Label>
-                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={isRu ? 'ООО «Компания»' : 'Company LLC'} />
+          <AccordionContent className="space-y-3 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Юридическое название' : 'Legal Name'}</Label>
+                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={isRu ? 'ООО «Компания»' : 'Company LLC'} className="h-9" />
               </div>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Рег. номер' : 'Registration №'}</Label>
-                <Input value={form.registration_number || ''} onChange={(e) => update({ registration_number: e.target.value })} />
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Рег. номер' : 'Registration №'}</Label>
+                <Input value={form.registration_number || ''} onChange={(e) => update({ registration_number: e.target.value })} className="h-9" />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>{isRu ? 'Юридический адрес' : 'Legal Address'}</Label>
-              <Input value={form.legal_address || ''} onChange={(e) => update({ legal_address: e.target.value })} />
+            <div className="space-y-1.5">
+              <Label className="text-xs">{isRu ? 'Юридический адрес' : 'Legal Address'}</Label>
+              <Input value={form.legal_address || ''} onChange={(e) => update({ legal_address: e.target.value })} className="h-9" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>{isRu ? 'ИНН / Tax ID' : 'Tax ID'}</Label>
-                <Input value={form.tax_id || ''} onChange={(e) => update({ tax_id: e.target.value })} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'ИНН / Tax ID' : 'Tax ID'}</Label>
+                <Input value={form.tax_id || ''} onChange={(e) => update({ tax_id: e.target.value })} className="h-9" />
               </div>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Лицензия' : 'License №'}</Label>
-                <Input value={form.license_number || ''} onChange={(e) => update({ license_number: e.target.value })} />
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Лицензия' : 'License №'}</Label>
+                <Input value={form.license_number || ''} onChange={(e) => update({ license_number: e.target.value })} className="h-9" />
               </div>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Год основания' : 'Founded Year'}</Label>
-                <Input type="number" value={form.founded_year || ''} onChange={(e) => update({ founded_year: e.target.value ? Number(e.target.value) : null })} placeholder="2020" />
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Год основания' : 'Founded'}</Label>
+                <Input type="number" value={form.founded_year || ''} onChange={(e) => update({ founded_year: e.target.value ? Number(e.target.value) : null })} placeholder="2020" className="h-9" />
               </div>
             </div>
 
@@ -373,33 +338,33 @@ export function CompanyProfileSettings() {
 
         {/* Banking */}
         <AccordionItem value="banking" className="border rounded-xl px-4">
-          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Landmark className="h-4 w-4 text-primary" />
               {isRu ? 'Банковские реквизиты' : 'Banking Details'}
             </span>
           </AccordionTrigger>
-          <AccordionContent className="space-y-4 pb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{isRu ? 'Название банка' : 'Bank Name'}</Label>
-                <Input value={form.bank_name || ''} onChange={(e) => update({ bank_name: e.target.value })} placeholder="Bangkok Bank" />
+          <AccordionContent className="space-y-3 pb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Название банка' : 'Bank Name'}</Label>
+                <Input value={form.bank_name || ''} onChange={(e) => update({ bank_name: e.target.value })} placeholder="Bangkok Bank" className="h-9" />
               </div>
-              <div className="space-y-2">
-                <Label>{isRu ? 'Номер счёта' : 'Account Number'}</Label>
-                <Input value={form.bank_account || ''} onChange={(e) => update({ bank_account: e.target.value })} />
+              <div className="space-y-1.5">
+                <Label className="text-xs">{isRu ? 'Номер счёта' : 'Account №'}</Label>
+                <Input value={form.bank_account || ''} onChange={(e) => update({ bank_account: e.target.value })} className="h-9" />
               </div>
             </div>
-            <div className="space-y-2 max-w-xs">
-              <Label>SWIFT</Label>
-              <Input value={form.swift_code || ''} onChange={(e) => update({ swift_code: e.target.value })} placeholder="BKKBTHBK" />
+            <div className="space-y-1.5 max-w-xs">
+              <Label className="text-xs">SWIFT</Label>
+              <Input value={form.swift_code || ''} onChange={(e) => update({ swift_code: e.target.value })} placeholder="BKKBTHBK" className="h-9" />
             </div>
           </AccordionContent>
         </AccordionItem>
 
         {/* Company Documents */}
         <AccordionItem value="documents" className="border rounded-xl px-4">
-          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline">
+          <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               {isRu ? 'Документы компании' : 'Company Documents'}

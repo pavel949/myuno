@@ -79,15 +79,16 @@ export default function MCSettingsPage() {
         </TabsContent>
 
         <TabsContent value="operations">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="text-base font-semibold text-foreground mb-4">
-              {isRu ? 'Настройки операций' : 'Operations Settings'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {isRu
-                ? 'Шаблоны чек-листов, настройки задач — скоро.'
-                : 'Checklist templates, task settings — coming soon.'}
-            </p>
+          <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+            <Wrench className="h-5 w-5 text-muted-foreground shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {isRu ? 'Настройки операций' : 'Operations Settings'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isRu ? 'Шаблоны чек-листов, настройки задач — скоро' : 'Checklist templates, task settings — coming soon'}
+              </p>
+            </div>
           </div>
         </TabsContent>
 
