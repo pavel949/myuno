@@ -99,6 +99,109 @@ async function extractFromYandexDisk(publicUrl: string): Promise<ImageResult[]> 
   return images;
 }
 
+// Handle Google Drive shared links
+async function extractFromGoogleDrive(publicUrl: string): Promise<ImageResult[]> {
+  console.log('Extracting from Google Drive:', publicUrl);
+  
+  // Extract folder/file ID from various Google Drive URL formats
+  let fileId: string | null = null;
+  let isFolder = false;
+  
+  // https://drive.google.com/drive/folders/FOLDER_ID
+  const folderMatch = publicUrl.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  // https://drive.google.com/file/d/FILE_ID/view
+  const fileMatch = publicUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  // https://drive.google.com/open?id=ID
+  const openMatch = publicUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  
+  if (folderMatch) {
+    fileId = folderMatch[1];
+    isFolder = true;
+  } else if (fileMatch) {
+    fileId = fileMatch[1];
+  } else if (openMatch) {
+    fileId = openMatch[1];
+  }
+  
+  if (!fileId) {
+    throw new Error('Не удалось определить ID файла/папки Google Drive');
+  }
+  
+  const images: ImageResult[] = [];
+  const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
+  
+  if (GOOGLE_API_KEY) {
+    // Use Google Drive API if key is available
+    if (isFolder) {
+      const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${fileId}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name,mimeType,thumbnailLink)&key=${GOOGLE_API_KEY}&pageSize=100`;
+      const resp = await fetch(apiUrl);
+      if (resp.ok) {
+        const data = await resp.json();
+        for (const file of (data.files || [])) {
+          images.push({
+            url: `https://drive.google.com/uc?export=download&id=${file.id}`,
+            preview: file.thumbnailLink?.replace(/=s\d+/, '=s800') || `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
+            name: file.name,
+          });
+        }
+      } else {
+        console.error('Google Drive API error:', await resp.text());
+      }
+    } else {
+      // Single file
+      const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,thumbnailLink&key=${GOOGLE_API_KEY}`;
+      const resp = await fetch(apiUrl);
+      if (resp.ok) {
+        const file = await resp.json();
+        if (file.mimeType?.startsWith('image/')) {
+          images.push({
+            url: `https://drive.google.com/uc?export=download&id=${file.id}`,
+            preview: file.thumbnailLink?.replace(/=s\d+/, '=s800') || `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
+            name: file.name,
+          });
+        }
+      }
+    }
+  } else {
+    // Fallback: use thumbnail URLs (works for publicly shared files without API key)
+    if (isFolder) {
+      // For folders without API key, we can't list files — inform user
+      console.log('No GOOGLE_API_KEY, trying to scrape folder page');
+      // Try fetching the folder page HTML
+      const resp = await fetch(publicUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Lovable/1.0)' },
+      });
+      if (resp.ok) {
+        const html = await resp.text();
+        // Extract file IDs from folder page
+        const idRegex = /data-id="([a-zA-Z0-9_-]{20,})"/g;
+        const ids = new Set<string>();
+        let m;
+        while ((m = idRegex.exec(html)) !== null) {
+          ids.add(m[1]);
+        }
+        for (const id of ids) {
+          images.push({
+            url: `https://drive.google.com/uc?export=download&id=${id}`,
+            preview: `https://drive.google.com/thumbnail?id=${id}&sz=w800`,
+            name: `Image ${images.length + 1}`,
+          });
+        }
+      }
+    } else {
+      // Single file — direct thumbnail
+      images.push({
+        url: `https://drive.google.com/uc?export=download&id=${fileId}`,
+        preview: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
+        name: 'Google Drive Image',
+      });
+    }
+  }
+  
+  console.log(`Extracted ${images.length} images from Google Drive`);
+  return images;
+}
+
 // Handle regular websites via Firecrawl
 async function extractFromWebsite(url: string, apiKey: string): Promise<ImageResult[]> {
   console.log('Extracting images from website:', url);
@@ -244,17 +347,26 @@ Deno.serve(async (req) => {
 
     console.log('Processing URL:', formattedUrl);
 
-    // Check if it's a Yandex Disk URL
+    // Check source type
     const isYandexDisk = formattedUrl.includes('disk.yandex.ru') || 
                          formattedUrl.includes('yadi.sk');
+    const isGoogleDrive = formattedUrl.includes('drive.google.com') ||
+                          formattedUrl.includes('docs.google.com/file');
 
     let images: ImageResult[];
     let pageTitle = '';
+    let source = 'firecrawl';
 
     if (isYandexDisk) {
       console.log('Detected Yandex Disk URL');
       images = await extractFromYandexDisk(formattedUrl);
       pageTitle = 'Yandex Disk';
+      source = 'yandex_disk';
+    } else if (isGoogleDrive) {
+      console.log('Detected Google Drive URL');
+      images = await extractFromGoogleDrive(formattedUrl);
+      pageTitle = 'Google Drive';
+      source = 'google_drive';
     } else {
       // Use Firecrawl for regular websites
       const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
@@ -285,7 +397,7 @@ Deno.serve(async (req) => {
         images: images.slice(0, 50), // Limit to 50 images
         pageTitle,
         totalFound: images.length,
-        source: isYandexDisk ? 'yandex_disk' : 'firecrawl'
+        source
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

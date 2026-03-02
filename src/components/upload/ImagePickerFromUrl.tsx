@@ -173,6 +173,7 @@ export function ImagePickerFromUrl({
   };
 
   const isYandexDiskUrl = url.includes('disk.yandex.ru') || url.includes('yadi.sk');
+  const isGoogleDriveUrl = url.includes('drive.google.com') || url.includes('docs.google.com/file');
   const loadedCount = images.filter((_, idx) => loadedImages.has(idx) && !failedImages.has(idx)).length;
 
   const content = (
@@ -181,7 +182,7 @@ export function ImagePickerFromUrl({
       <div className="flex gap-2">
         <Input
           type="url"
-          placeholder="https://disk.yandex.ru/d/... или любой сайт"
+          placeholder="https://drive.google.com/... или любой сайт"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleExtract()}
@@ -197,6 +198,12 @@ export function ImagePickerFromUrl({
       {isYandexDiskUrl && !isLoading && images.length === 0 && (
         <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
           🔗 Обнаружена ссылка на Yandex Disk. Нажмите "Найти" для загрузки изображений.
+        </div>
+      )}
+
+      {isGoogleDriveUrl && !isLoading && images.length === 0 && (
+        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+          🔗 Обнаружена ссылка на Google Drive. Убедитесь, что доступ открыт «для всех, у кого есть ссылка».
         </div>
       )}
 
@@ -217,7 +224,7 @@ export function ImagePickerFromUrl({
           <div className="text-center space-y-3">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
             <p className="text-muted-foreground">
-              {isYandexDiskUrl ? 'Загрузка файлов с Yandex Disk...' : 'Поиск изображений...'}
+              {isYandexDiskUrl ? 'Загрузка файлов с Yandex Disk...' : isGoogleDriveUrl ? 'Загрузка файлов с Google Drive...' : 'Поиск изображений...'}
             </p>
           </div>
         </div>
@@ -335,7 +342,7 @@ export function ImagePickerFromUrl({
           <div className="text-center text-muted-foreground space-y-2">
             <Globe className="h-12 w-12 mx-auto mb-4 opacity-40" />
             <p className="font-medium">Вставьте ссылку на страницу с фотографиями</p>
-            <p className="text-sm">Поддерживается Yandex Disk и другие сайты</p>
+            <p className="text-sm">Поддерживается Google Drive, Yandex Disk и другие сайты</p>
           </div>
         </div>
       )}
@@ -352,7 +359,7 @@ export function ImagePickerFromUrl({
               Загрузить фото с сайта
             </DrawerTitle>
             <DrawerDescription>
-              Вставьте ссылку на Yandex Disk или другой сайт
+              Вставьте ссылку на Google Drive, Yandex Disk или другой сайт
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-6 flex-1 overflow-hidden">
@@ -372,7 +379,7 @@ export function ImagePickerFromUrl({
             Загрузить фото с сайта
           </DialogTitle>
           <DialogDescription>
-            Вставьте ссылку на Yandex Disk или другой сайт с изображениями
+            Вставьте ссылку на Google Drive, Yandex Disk или другой сайт с изображениями
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 min-h-0 overflow-hidden">
