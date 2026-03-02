@@ -35,6 +35,7 @@ import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
 import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
+import { ProactiveConcierge } from '@/components/home/ProactiveConcierge';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
@@ -107,6 +108,7 @@ const Index = () => {
                     </Suspense>
                   </div>
                   <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
+                    <ProactiveConcierge />
                     <LifecycleSmartTip />
                     {hasContext ? (
                       <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
@@ -122,6 +124,7 @@ const Index = () => {
                 <Suspense fallback={null}>
                   <YourDayFeed compact />
                 </Suspense>
+                <ProactiveConcierge />
                 <LifecycleSmartTip />
                 <PropertyTourBanner />
                 {hasContext ? (
