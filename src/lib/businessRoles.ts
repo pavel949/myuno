@@ -11,7 +11,7 @@
 export type BusinessRole = 'property_manager' | 'sales_agent' | 'service_provider' | 'general';
 
 /** MC company role from management_company_members table */
-export type MCCompanyRole = 'director' | 'admin' | 'manager' | 'accountant' | 'staff';
+export type MCCompanyRole = 'director' | 'admin' | 'manager' | 'accountant' | 'staff' | 'member';
 
 export interface BusinessRoleConfig {
   id: BusinessRole;
@@ -138,6 +138,7 @@ export const MC_ROLE_TO_BUSINESS_ROLE: Record<MCCompanyRole, BusinessRole> = {
   manager: 'property_manager', // Operations-focused
   accountant: 'service_provider', // Finance-focused (payments, tasks)
   staff: 'property_manager',  // Operations-focused
+  member: 'general',          // Default view
 };
 
 /** Human-readable labels for MC company roles */
@@ -147,6 +148,7 @@ export const MC_ROLE_LABELS: Record<MCCompanyRole, { en: string; ru: string; ico
   manager: { en: 'Manager', ru: 'Менеджер', icon: '📋' },
   accountant: { en: 'Accountant', ru: 'Бухгалтер', icon: '📊' },
   staff: { en: 'Staff', ru: 'Сотрудник', icon: '👤' },
+  member: { en: 'Member', ru: 'Участник', icon: '👥' },
 };
 
 /**
