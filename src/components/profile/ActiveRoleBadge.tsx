@@ -194,9 +194,9 @@ const DEFAULT_BADGE_CONFIG = {
 export function ActiveRoleBadge({ className, showLabel = true }: ActiveRoleBadgeProps) {
   const { language } = useLanguage();
   const { activeRole, isLoading } = useUserContext();
-  const { activeCompany } = useActiveCompany();
+  const { activeCompany, isLoading: isCompanyLoading } = useActiveCompany();
 
-  if (isLoading) return null;
+  if (isLoading || isCompanyLoading) return null;
 
   // Prioritize MC company role when user has an active company
   const mcRole = activeCompany?.role;
