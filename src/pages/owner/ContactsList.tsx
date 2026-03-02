@@ -220,18 +220,18 @@ export default function ContactsList() {
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-4 pb-24 md:pb-8 max-w-[1536px] mx-auto w-full space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold">{isRu ? 'Контакты' : 'Contacts'}</h1>
           {totalCount > 0 && (
             <Badge variant="secondary" className="text-[10px]">{totalCount}</Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap md:justify-end">
           <ContactExportButton contacts={contacts} />
-          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
+          <Button variant="default" size="sm" onClick={() => setShowImport(true)} className="font-semibold">
             <Upload className="h-4 w-4 mr-1" />
-            {isRu ? 'Импорт' : 'Import'}
+            {isRu ? 'Импорт контактов' : 'Import Contacts'}
           </Button>
           <Button size="sm" onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4 mr-1" />
