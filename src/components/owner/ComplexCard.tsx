@@ -56,6 +56,13 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
           )}
         </div>
 
+        {/* Platform description (hide MC description) */}
+        {(complex.description_en || complex.description_ru) && (
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {isRu ? (complex.description_ru || complex.description_en) : (complex.description_en || complex.description_ru)}
+          </p>
+        )}
+
         {/* Stats row */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {complex.total_units && (

@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info, Building2, Video } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -154,6 +155,24 @@ function BasicInfoStepInner({
             placeholder={isRu ? 'Современная вилла с бассейном' : 'Modern Villa with Pool'}
             translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
           />
+
+          {/* Airbnb-style Description */}
+          <div className="space-y-3">
+            <Label>{isRu ? 'Описание' : 'Description'}</Label>
+            <Textarea
+              value={isRu ? (formData.description_ru || '') : (formData.description || '')}
+              onChange={(e) => updateFormData({ [isRu ? 'description_ru' : 'description']: e.target.value })}
+              placeholder={isRu ? 'Расскажите гостям, чем уникален ваш объект...' : 'Tell guests what makes your place special...'}
+              rows={4}
+            />
+            <Textarea
+              value={isRu ? (formData.description || '') : (formData.description_ru || '')}
+              onChange={(e) => updateFormData({ [isRu ? 'description' : 'description_ru']: e.target.value })}
+              placeholder={isRu ? 'Description in English (optional)' : 'Описание на русском (необязательно)'}
+              rows={3}
+              className="text-sm"
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
