@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { HouseRulesSection } from './HouseRulesSection';
 import { DiscountsSection } from './DiscountsSection';
 import { CancellationPolicySection } from './CancellationPolicySection';
+import { SeasonalPricing } from '@/components/property/SeasonalPricing';
 
 interface PricingStepProps {
   formData: PropertyFormData;
@@ -226,6 +227,16 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
 
       {/* Long-stay Discounts */}
       <DiscountsSection formData={formData} updateFormData={updateFormData} />
+
+      {/* Seasonal Pricing */}
+      {formData.price_per_night && Number(formData.price_per_night) > 0 && (
+        <SeasonalPricing
+          basePrice={Number(formData.price_per_night)}
+          currency="THB"
+          seasons={formData.seasonal_pricing || []}
+          onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
+        />
+      )}
 
       {/* Sale Option */}
       <Card>
