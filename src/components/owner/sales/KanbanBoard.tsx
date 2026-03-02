@@ -85,9 +85,17 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
         </p>
       ) : null}
 
+      {/* Contact info */}
+      {(deal.client_phone || deal.client_email) && (
+        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+          {deal.client_phone || deal.client_email}
+        </p>
+      )}
+
       {/* Agent name */}
       {agentName && (
-        <p className="text-[11px] text-muted-foreground mt-1 truncate">
+        <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
+          <User className="h-2.5 w-2.5 shrink-0" />
           {agentName}
         </p>
       )}

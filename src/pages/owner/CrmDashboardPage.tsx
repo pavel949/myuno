@@ -1,245 +1,230 @@
-import React from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isPast, isToday } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useCrmPipelines } from '@/hooks/useCrmPipelines';
+import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus, formatValue } from '@/hooks/useAgentDeals';
+import { useDynamicPipelineStages } from '@/hooks/useDynamicPipelineStages';
 import { useCrmContacts } from '@/hooks/useCrmContacts';
-import { useCrmTasks, useTodayTasksCount } from '@/hooks/useCrmTasks';
-import { useAgentDeals, DEAL_STAGE_LABELS, type DealStage } from '@/hooks/useAgentDeals';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useTodayTasksCount } from '@/hooks/useCrmTasks';
+import { KanbanBoard } from '@/components/owner/sales/KanbanBoard';
+import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
+import { DealSearchBar } from '@/components/owner/sales/DealSearchBar';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  TrendingUp, Target, Users, ListTodo, Mail, ChevronRight,
-  AlertTriangle, CheckCircle, Plus, ContactRound, BarChart3,
-  Percent, DollarSign, Activity,
+  Plus, Settings, Search, TrendingUp, Target, Users,
+  ListTodo, DollarSign, Percent, Filter, BarChart3,
 } from 'lucide-react';
-import { isToday, isPast } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function CrmDashboardPage() {
-  const { language } = useLanguage();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { activeCompany } = useActiveCompany();
-  const companyId = activeCompany?.company_id;
-
-  const { data: pipelines = [] } = useCrmPipelines(companyId);
+  const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
+  const companyId = membership?.company_id;
+  const { data: dealsResult, isLoading } = useAgentDeals(companyId);
+  const deals = dealsResult?.data || [];
+  const { data: members = [] } = useCompanyMembers(companyId);
   const { data: contactsResult } = useCrmContacts(companyId, 0, 1);
   const { data: todayCount = 0 } = useTodayTasksCount();
-  const { data: overdueTasks } = useCrmTasks({ status: 'pending' });
-  const { data: dealsResult } = useAgentDeals(companyId);
 
-  const totalContacts = contactsResult?.count || 0;
-  const deals = dealsResult?.data || [];
-  const activeDeals = deals.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost');
-  const wonDeals = deals.filter(d => d.stage === 'closed_won');
-  const lostDeals = deals.filter(d => d.stage === 'closed_lost');
-  const closedDeals = wonDeals.length + lostDeals.length;
-  const winRate = closedDeals > 0 ? Math.round((wonDeals.length / closedDeals) * 100) : 0;
-  const totalRevenue = wonDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
-  const weightedPipeline = activeDeals.reduce((sum, d) => {
-    const prob = { new: 0.1, contacted: 0.2, showing: 0.4, negotiation: 0.6, contract: 0.8 }[d.stage] || 0.1;
-    return sum + (d.deal_value || 0) * prob;
-  }, 0);
+  const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const pipelineData = useDynamicPipelineStages(companyId, selectedPipelineId);
+  const { stages, pipelines } = pipelineData;
 
-  const overdueCount = (overdueTasks || []).filter(
-    t => t.due_date && isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date))
-  ).length;
+  const [showCreate, setShowCreate] = useState(false);
+  const [filterType, setFilterType] = useState<DealType | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
+  const [search, setSearch] = useState('');
+  const [agentFilter, setAgentFilter] = useState('all');
 
-  const stageCounts: Partial<Record<DealStage, number>> = {};
-  for (const d of activeDeals) {
-    stageCounts[d.stage] = (stageCounts[d.stage] || 0) + 1;
+  const wonLostKeys = useMemo(() => {
+    const won = stages.filter(s => s.isWon).map(s => s.key);
+    const lost = stages.filter(s => s.isLost).map(s => s.key);
+    return { won, lost, closed: [...won, ...lost] };
+  }, [stages]);
+
+  // KPIs
+  const kpis = useMemo(() => {
+    const activeDeals = deals.filter(d => !wonLostKeys.closed.includes(d.stage));
+    const wonDeals = deals.filter(d => wonLostKeys.won.includes(d.stage));
+    const lostDeals = deals.filter(d => wonLostKeys.lost.includes(d.stage));
+    const closedCount = wonDeals.length + lostDeals.length;
+    const winRate = closedCount > 0 ? Math.round((wonDeals.length / closedCount) * 100) : 0;
+    const totalPipeline = activeDeals.reduce((s, d) => s + Number(d.deal_value || d.budget_max || 0), 0);
+    const wonRevenue = wonDeals.reduce((s, d) => s + Number(d.deal_value || 0), 0);
+    const weighted = activeDeals.reduce((s, d) => {
+      const val = Number(d.deal_value || d.budget_max || 0);
+      return s + val * pipelineData.getProbability(d.stage);
+    }, 0);
+    return { activeCount: activeDeals.length, totalPipeline, weighted, wonRevenue, wonCount: wonDeals.length, winRate, totalContacts: contactsResult?.count || 0, todayTasks: todayCount };
+  }, [deals, wonLostKeys, pipelineData, contactsResult, todayCount]);
+
+  // Filtered deals
+  const filtered = useMemo(() => {
+    let result = deals;
+    if (filterStatus !== 'all') {
+      result = result.filter(d => (d as any).deal_status === filterStatus || (!(d as any).deal_status && filterStatus === 'active'));
+    }
+    if (filterType !== 'all') {
+      result = result.filter(d => (d as any).deal_type === filterType || (!(d as any).deal_type && filterType === 'sale'));
+    }
+    if (agentFilter !== 'all') {
+      result = result.filter(d => d.agent_id === agentFilter);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(d =>
+        d.client_name.toLowerCase().includes(q) ||
+        d.client_phone?.toLowerCase().includes(q) ||
+        d.client_email?.toLowerCase().includes(q) ||
+        d.notes?.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [deals, filterType, filterStatus, search, agentFilter]);
+
+  if (membershipLoading || isLoading) {
+    return (
+      <div className="p-4 md:p-6 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
+        </div>
+        <Skeleton className="h-[400px] w-full rounded-xl" />
+      </div>
+    );
   }
 
-  const stats = [
-    { labelEn: 'Contacts', labelRu: 'Контакты', value: totalContacts, icon: ContactRound, color: 'text-primary', path: '/mc/contacts' },
-    { labelEn: 'Active Deals', labelRu: 'Активные сделки', value: activeDeals.length, icon: TrendingUp, color: 'text-success', path: '/mc/sales' },
-    { labelEn: "Today's Tasks", labelRu: 'Задачи сегодня', value: todayCount, icon: ListTodo, color: 'text-warning', path: '/mc/tasks' },
-    { labelEn: 'Overdue', labelRu: 'Просрочено', value: overdueCount, icon: AlertTriangle, color: 'text-destructive', path: '/mc/tasks' },
-  ];
+  if (!membership) {
+    return (
+      <div className="p-4 md:p-6 text-center text-muted-foreground pt-20">
+        <p className="text-lg font-medium mb-2">{isRu ? 'Нет доступа' : 'No Access'}</p>
+        <p className="text-sm">{isRu ? 'Вы не являетесь членом управляющей компании' : "You're not a member of any management company"}</p>
+      </div>
+    );
+  }
 
-  const kpi2 = [
-    { labelEn: 'Win Rate', labelRu: 'Конверсия', value: `${winRate}%`, icon: Percent, color: 'text-success' },
-    { labelEn: 'Won Revenue', labelRu: 'Выиграно', value: totalRevenue > 0 ? `${(totalRevenue / 1e6).toFixed(1)}M` : '0', icon: DollarSign, color: 'text-primary' },
-    { labelEn: 'Weighted Pipeline', labelRu: 'Взвеш. воронка', value: weightedPipeline > 0 ? `${(weightedPipeline / 1e6).toFixed(1)}M` : '0', icon: Activity, color: 'text-warning' },
-    { labelEn: 'Won Deals', labelRu: 'Выигранных', value: wonDeals.length, icon: CheckCircle, color: 'text-success' },
-  ];
-
-  const quickLinks = [
-    { labelEn: 'New Contact', labelRu: 'Новый контакт', path: '/mc/contacts', icon: Plus },
-    { labelEn: 'New Deal', labelRu: 'Новая сделка', path: '/mc/sales/new', icon: Plus },
-    { labelEn: 'Duplicates', labelRu: 'Дубликаты', path: '/mc/duplicates', icon: Users },
-    { labelEn: 'Web Forms', labelRu: 'Веб-формы', path: '/mc/forms', icon: Mail },
+  const kpiItems = [
+    { label: isRu ? 'В работе' : 'Active', value: String(kpis.activeCount), icon: Target, color: 'text-primary' },
+    { label: isRu ? 'Воронка' : 'Pipeline', value: formatValue(kpis.totalPipeline), icon: DollarSign, color: 'text-primary' },
+    { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.weighted), icon: TrendingUp, color: 'text-warning' },
+    { label: isRu ? 'Конверсия' : 'Win Rate', value: `${kpis.winRate}%`, icon: Percent, color: 'text-success' },
+    { label: isRu ? 'Контакты' : 'Contacts', value: String(kpis.totalContacts), icon: Users, color: 'text-info', onClick: () => navigate('/mc/contacts') },
+    { label: isRu ? 'Задачи' : 'Tasks', value: String(kpis.todayTasks), icon: ListTodo, color: 'text-warning', onClick: () => navigate('/mc/tasks') },
   ];
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">{isRu ? 'CRM Обзор' : 'CRM Overview'}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{isRu ? 'Продажи, контакты и задачи' : 'Sales, contacts, and tasks'}</p>
-        </div>
-        <div className="flex gap-2">
-          {quickLinks.map(link => (
-            <Button key={link.path + link.labelEn} variant="outline" size="sm" className="text-xs" onClick={() => navigate(link.path)}>
-              <link.icon className="h-3 w-3 mr-1" />
-              {isRu ? link.labelRu : link.labelEn}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Primary KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map(stat => (
-          <Card key={stat.labelEn} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(stat.path)}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <stat.icon className={cn('h-4 w-4', stat.color)} />
-                <span className="text-xs text-muted-foreground">{isRu ? stat.labelRu : stat.labelEn}</span>
-              </div>
-              <p className="text-2xl font-bold">{stat.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Secondary KPIs — conversion, revenue */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {kpi2.map(k => (
-          <Card key={k.labelEn}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <k.icon className={cn('h-4 w-4', k.color)} />
-                <span className="text-xs text-muted-foreground">{isRu ? k.labelRu : k.labelEn}</span>
-              </div>
-              <p className="text-2xl font-bold">{k.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Pipeline Funnel */}
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-sm">{isRu ? 'Конверсионная воронка' : 'Conversion Funnel'}</h3>
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/sales')}>
-                {isRu ? 'Открыть' : 'Open'} <ChevronRight className="h-3 w-3 ml-0.5" />
-              </Button>
-            </div>
-            {activeDeals.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет активных сделок' : 'No active deals'}</p>
-            ) : (
-              <div className="space-y-2">
-                {(Object.entries(stageCounts) as [DealStage, number][]).map(([stage, count]) => {
-                  const pct = Math.round((count / activeDeals.length) * 100);
-                  return (
-                    <div key={stage} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>{isRu ? DEAL_STAGE_LABELS[stage]?.ru : DEAL_STAGE_LABELS[stage]?.en}</span>
-                        <span className="text-muted-foreground">{count} ({pct}%)</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            {wonDeals.length > 0 && (
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <CheckCircle className="h-3.5 w-3.5 text-success" />
-                <span className="text-xs text-muted-foreground">
-                  {isRu ? `${wonDeals.length} закрытых сделок` : `${wonDeals.length} won deals`}
-                  {lostDeals.length > 0 && ` · ${lostDeals.length} ${isRu ? 'проиграно' : 'lost'}`}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Urgent Tasks */}
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ListTodo className="h-4 w-4 text-warning" />
-                <h3 className="font-semibold text-sm">{isRu ? 'Срочные задачи' : 'Urgent Tasks'}</h3>
-                {overdueCount > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{overdueCount}</Badge>}
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/tasks')}>
-                {isRu ? 'Все' : 'All'} <ChevronRight className="h-3 w-3 ml-0.5" />
-              </Button>
-            </div>
-            {(() => {
-              const urgent = (overdueTasks || [])
-                .filter(t => t.due_date && (isToday(new Date(t.due_date)) || isPast(new Date(t.due_date))))
-                .slice(0, 5);
-              if (urgent.length === 0) {
-                return <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет срочных задач ✓' : 'No urgent tasks ✓'}</p>;
-              }
-              return (
-                <div className="space-y-1.5">
-                  {urgent.map(task => {
-                    const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date));
-                    return (
-                      <div key={task.id} className={cn('flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer hover:bg-muted/80', isOverdue ? 'bg-destructive/5' : 'bg-muted/50')} onClick={() => navigate('/mc/tasks')}>
-                        <span className="flex-1 truncate">{task.title}</span>
-                        {isOverdue && <Badge variant="destructive" className="text-[10px] px-1 py-0">!</Badge>}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Pipelines Overview */}
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold text-sm">{isRu ? 'Воронки' : 'Pipelines'}</h3>
-            </div>
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/sales/settings')}>
-              {isRu ? 'Настройки' : 'Settings'} <ChevronRight className="h-3 w-3 ml-0.5" />
-            </Button>
-          </div>
-          {pipelines.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">{isRu ? 'Нет воронок' : 'No pipelines'}</p>
-          ) : (
-            <div className="space-y-3">
-              {pipelines.map(pipeline => (
-                <div key={pipeline.id} className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-medium">{isRu ? pipeline.name_ru : pipeline.name_en}</h4>
-                    <Badge variant="outline" className="text-[10px]">{pipeline.pipeline_type}</Badge>
-                    {pipeline.is_default && <Badge className="text-[10px]">Default</Badge>}
-                  </div>
-                  <div className="flex gap-1 overflow-x-auto pb-1">
-                    {pipeline.stages.map(stage => (
-                      <div key={stage.id} className="shrink-0 text-center py-1.5 px-2 rounded text-[10px] bg-muted border min-w-[60px]">
-                        <span className="font-medium">{isRu ? stage.name_ru : stage.name_en}</span>
-                        <span className="block text-muted-foreground">{stage.probability}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+    <div className="p-4 md:p-6 space-y-4 w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold">CRM</h1>
+          {pipelines.length > 1 && (
+            <Select value={selectedPipelineId || ''} onValueChange={v => setSelectedPipelineId(v || null)}>
+              <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectValue placeholder={isRu ? 'Воронка' : 'Pipeline'} />
+              </SelectTrigger>
+              <SelectContent>
+                {pipelines.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {isRu ? p.name_ru : p.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/settings')} title={isRu ? 'Настройки' : 'Settings'}>
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/analytics')}>
+            <BarChart3 className="h-4 w-4" />
+          </Button>
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            {isRu ? 'Новая' : 'New'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Compact KPI Strip */}
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        {kpiItems.map(k => (
+          <button
+            key={k.label}
+            onClick={k.onClick}
+            className={cn(
+              'flex items-center gap-2 p-2.5 rounded-lg border bg-card text-left transition-colors',
+              k.onClick && 'hover:bg-accent/50 cursor-pointer',
+              !k.onClick && 'cursor-default',
+            )}
+          >
+            <k.icon className={cn('h-4 w-4 shrink-0', k.color)} />
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground truncate">{k.label}</p>
+              <p className="text-sm font-bold leading-tight">{k.value}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Status tabs */}
+        {(['active', 'on_hold', 'archived', 'all'] as const).map(s => (
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s === 'all' ? 'all' : s)}
+            className={cn(
+              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              filterStatus === s ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+            )}
+          >
+            {s === 'all' ? (isRu ? 'Все' : 'All') : (isRu ? DEAL_STATUS_LABELS[s].ru : DEAL_STATUS_LABELS[s].en)}
+          </button>
+        ))}
+        {DEAL_TYPES.length > 1 && (
+          <>
+            <span className="w-px h-5 bg-border shrink-0" />
+            {(['all', ...DEAL_TYPES] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setFilterType(t === 'all' ? 'all' : t)}
+                className={cn(
+                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  filterType === t ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+                )}
+              >
+                {t === 'all' ? (isRu ? 'Все типы' : 'All types') : (isRu ? DEAL_TYPE_LABELS[t].ru : DEAL_TYPE_LABELS[t].en)}
+              </button>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* Search + Agent Filter */}
+      <DealSearchBar
+        search={search}
+        onSearchChange={setSearch}
+        agentFilter={agentFilter}
+        onAgentFilterChange={setAgentFilter}
+        agents={members}
+      />
+
+      {/* Kanban Board */}
+      <KanbanBoard
+        deals={filtered}
+        members={members}
+        pipelineData={pipelineData}
+        onQuickCreate={() => setShowCreate(true)}
+      />
+
+      <CreateDealSheet open={showCreate} onOpenChange={setShowCreate} companyId={membership.company_id} />
     </div>
   );
 }
