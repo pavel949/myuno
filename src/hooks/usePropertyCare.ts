@@ -83,9 +83,11 @@ export function useOwnerProperties() {
  */
 export function useOwnerProperty(id: string | undefined) {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
 
   return useQuery({
-    queryKey: ['owner-property', id],
+    queryKey: ['owner-property', id, activeCompanyId],
     queryFn: async () => {
       if (!id || !user) return null;
 
@@ -108,16 +110,45 @@ export function useOwnerProperty(id: string | undefined) {
         .eq('is_active', true)
         .maybeSingle();
 
-      if (!assignment) return null;
+      if (assignment) {
+        const { data: managed, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', id)
+          .single();
+        if (!error && managed) return managed as OwnerProperty;
+      }
 
-      const { data: managed, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      return managed as OwnerProperty;
+      // Try as MC company member
+      if (activeCompanyId) {
+        const { data: companyProp } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', id)
+          .eq('management_company_id', activeCompanyId)
+          .maybeSingle();
+        if (companyProp) return companyProp as OwnerProperty;
+      }
+
+      // Fallback: check all user companies
+      const { data: memberships } = await supabase
+        .from('management_company_members')
+        .select('company_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (memberships?.length) {
+        const companyIds = memberships.map(m => m.company_id);
+        const { data: companyProp } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', id)
+          .in('management_company_id', companyIds)
+          .maybeSingle();
+        if (companyProp) return companyProp as OwnerProperty;
+      }
+
+      return null;
     },
     enabled: !!id && !!user,
   });
