@@ -32,25 +32,29 @@ const TARGET_FIELDS = [
   { name: 'notes', label: 'Notes', labelRu: 'Заметки', required: false },
 ];
 
+function normalize(s: string): string {
+  return s.toLowerCase().replace(/[^a-zа-яё0-9]/gi, '').trim();
+}
+
 function autoMap(columns: string[]): Record<string, string> {
   const mapping: Record<string, string> = {};
   const aliases: Record<string, string[]> = {
-    first_name: ['first_name', 'firstname', 'first', 'имя', 'name'],
-    last_name: ['last_name', 'lastname', 'last', 'surname', 'фамилия'],
-    phone: ['phone', 'tel', 'telephone', 'mobile', 'телефон'],
-    email: ['email', 'e-mail', 'почта', 'емейл'],
-    whatsapp: ['whatsapp', 'wa'],
-    telegram: ['telegram', 'tg'],
-    contact_type: ['type', 'contact_type', 'тип'],
-    source: ['source', 'источник'],
-    nationality: ['nationality', 'гражданство', 'nation'],
-    company_name: ['company', 'company_name', 'компания'],
-    notes: ['notes', 'note', 'заметки', 'comment', 'comments'],
+    first_name: ['firstname', 'first', 'имя', 'name', 'givenname', 'prénom'],
+    last_name: ['lastname', 'last', 'surname', 'фамилия', 'family', 'familyname'],
+    phone: ['phone', 'tel', 'telephone', 'mobile', 'телефон', 'моб', 'мобильный', 'номер'],
+    email: ['email', 'mail', 'почта', 'емейл', 'емаил', 'correo'],
+    whatsapp: ['whatsapp', 'wa', 'ватсап', 'вотсап'],
+    telegram: ['telegram', 'tg', 'телеграм'],
+    contact_type: ['type', 'contacttype', 'тип', 'типконтакта'],
+    source: ['source', 'источник', 'откуда', 'leadsource'],
+    nationality: ['nationality', 'гражданство', 'nation', 'country', 'страна'],
+    company_name: ['company', 'companyname', 'компания', 'организация', 'org', 'firma'],
+    notes: ['notes', 'note', 'заметки', 'comment', 'comments', 'комментарий', 'описание'],
   };
   columns.forEach(col => {
-    const lower = col.toLowerCase().trim();
+    const norm = normalize(col);
     for (const [field, keys] of Object.entries(aliases)) {
-      if (keys.includes(lower) && !Object.values(mapping).includes(field)) {
+      if (keys.some(k => norm === k || norm.includes(k)) && !Object.values(mapping).includes(field)) {
         mapping[col] = field;
         break;
       }
@@ -113,6 +117,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
   };
 
   const previewRows = rawData.slice(0, 5);
+  const hasMapped = Object.values(mapping).some(v => v);
   const reset = () => { setStep('upload'); setRawData([]); setColumns([]); setMapping({}); };
 
   return (
@@ -167,9 +172,14 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
               </table>
             </div>
           )}
+          {!hasMapped && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
+              {isRu ? '⚠ Сопоставьте хотя бы одну колонку с полем CRM, чтобы активировать импорт' : '⚠ Map at least one column to a CRM field to enable import'}
+            </div>
+          )}
           <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={reset}>{isRu ? 'Назад' : 'Back'}</Button>
-            <Button onClick={handleImport} disabled={importing || !Object.values(mapping).some(v => v)}>
+            <Button onClick={handleImport} disabled={importing || !hasMapped}>
               {importing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <FileText className="h-4 w-4 mr-1" />}
               {isRu ? `Импортировать ${rawData.length}` : `Import ${rawData.length}`}
             </Button>
