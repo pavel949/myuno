@@ -483,8 +483,6 @@ export function CanonicalPropertyForm({
     return 'empty';
   };
 
-  const colCount = tabs.length;
-
   return (
     <div className="flex flex-col h-full">
       {/* Provider Selector for Admin */}
@@ -494,15 +492,19 @@ export function CanonicalPropertyForm({
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-        <ScrollArea className="w-full pb-1">
-          <TabsList className={`inline-flex w-full mb-4`} style={{ display: 'grid', gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0">
+        <ScrollArea className="w-full pb-2">
+          <TabsList className="inline-flex w-max min-w-full mb-4">
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
               return (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center gap-1 px-1.5 relative">
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex-none min-w-[132px] sm:min-w-[148px] items-center justify-start gap-2 px-3 relative"
+                >
                   <tab.icon className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
+                  <span className="text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
                   {status === 'complete' && (
                     <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary flex items-center justify-center">
                       <Check className="h-2 w-2 text-primary-foreground" />
@@ -536,7 +538,7 @@ export function CanonicalPropertyForm({
           </span>
         </div>
 
-        <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(100vh - 280px)' }}>
+        <div className="pr-0 md:pr-2">
           <TabsContent value="basic" className="mt-0">
             <BasicInfoStep
               formData={formData}
@@ -603,7 +605,7 @@ export function CanonicalPropertyForm({
               {et.content}
             </TabsContent>
           ))}
-        </ScrollArea>
+        </div>
       </Tabs>
 
       {/* Action Buttons */}
