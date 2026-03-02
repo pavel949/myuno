@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
       .eq('is_active', true)
       .single();
 
-    if (!membership || !['director', 'admin'].includes(membership.role)) {
-      return new Response(JSON.stringify({ error: 'Forbidden: director or admin role required' }), {
+    if (!membership || !['director', 'admin', 'manager'].includes(membership.role)) {
+      return new Response(JSON.stringify({ error: 'Forbidden: director, admin or manager role required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
