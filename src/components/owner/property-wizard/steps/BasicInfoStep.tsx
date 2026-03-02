@@ -28,37 +28,104 @@ interface BasicInfoStepProps {
   updateOwnershipData?: (updates: Partial<OwnershipData>) => void;
 }
 
-function ComplexSelector({ value, onChange }: { value?: string; onChange: (id?: string) => void }) {
+function ComplexProjectSelector({ 
+  complexId, 
+  projectId,
+  selectedProject,
+  onComplexChange, 
+  onProjectChange,
+  setSelectedProject,
+  updateFormData,
+  formData,
+}: { 
+  complexId?: string; 
+  projectId?: string;
+  selectedProject: PropertyProject | null;
+  onComplexChange: (id?: string) => void; 
+  onProjectChange: (id?: string, project?: PropertyProject) => void;
+  setSelectedProject: (project: PropertyProject | null) => void;
+  updateFormData: (updates: Partial<PropertyFormData>) => void;
+  formData: PropertyFormData;
+}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: complexes } = usePropertyComplexes();
+  const hasSelection = !!complexId || !!projectId;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Building2 className="h-4 w-4" />
-          {isRu ? 'Жилой комплекс' : 'Property Complex'}
+          {isRu ? 'Комплекс / Проект' : 'Complex / Project'}
         </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Select value={value || '__none__'} onValueChange={v => onChange(v === '__none__' ? undefined : v)}>
-          <SelectTrigger>
-            <SelectValue placeholder={isRu ? 'Не выбран' : 'None'} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">{isRu ? 'Не выбран' : 'None'}</SelectItem>
-            {(complexes || []).map(c => (
-              <SelectItem key={c.id} value={c.id}>
-                {isRu ? (c.name_ru || c.name) : c.name}
-                {c.district ? ` — ${c.district}` : ''}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground mt-1.5">
-          {isRu ? 'Удобства комплекса автоматически наследуются объектом' : 'Complex amenities are automatically inherited by the property'}
+        <p className="text-xs text-muted-foreground mt-1">
+          {isRu 
+            ? 'Выберите жилой комплекс или проект, к которому относится объект. Удобства комплекса автоматически наследуются.' 
+            : 'Select the residential complex or project this property belongs to. Complex amenities are inherited automatically.'}
         </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Complex */}
+        <div className="space-y-1.5">
+          <Label className="text-sm">{isRu ? 'Жилой комплекс' : 'Residential Complex'}</Label>
+          <Select value={complexId || '__none__'} onValueChange={v => onComplexChange(v === '__none__' ? undefined : v)}>
+            <SelectTrigger>
+              <SelectValue placeholder={isRu ? 'Не выбран' : 'None'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">{isRu ? 'Не выбран' : 'None'}</SelectItem>
+              {(complexes || []).map(c => (
+                <SelectItem key={c.id} value={c.id}>
+                  {isRu ? (c.name_ru || c.name) : c.name}
+                  {c.district ? ` — ${c.district}` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Project */}
+        <div className="space-y-1.5">
+          <Label className="text-sm">{isRu ? 'Проект (новостройка)' : 'Project (New Build)'}</Label>
+          <ProjectSelector
+            value={projectId}
+            selectedProject={selectedProject}
+            onChange={(pid, project) => {
+              setSelectedProject(project || null);
+              onProjectChange(pid, project || undefined);
+              if (project) {
+                updateFormData({ 
+                  project_id: pid,
+                  address: project.address || formData.address,
+                  district: project.district || formData.district,
+                  lat: project.lat ?? formData.lat,
+                  lng: project.lng ?? formData.lng,
+                });
+                const projectName = isRu 
+                  ? (project.name_ru || project.name_en) 
+                  : project.name_en;
+                toast.success(
+                  isRu 
+                    ? `Данные проекта "${projectName}" загружены` 
+                    : `Project data loaded: "${projectName}"`
+                );
+              }
+            }}
+          />
+        </div>
+
+        {/* Hint: complex/project not in the list */}
+        {!hasSelection && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/60 border border-border">
+            <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              {isRu 
+                ? 'Не нашли ваш комплекс или проект в списке? Сообщите администратору — мы добавим его в систему.' 
+                : "Can't find your complex or project? Let the admin know — we'll add it to the system."}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -378,46 +445,18 @@ function BasicInfoStepInner({
         </CardContent>
       </Card>
 
-      {/* Project Selection — for all types (villas can be in compounds too) */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">
-            {isRu ? 'Проект / ЖК' : 'Project / Complex'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProjectSelector
-            value={formData.project_id}
-            selectedProject={selectedProject}
-            onChange={(projectId, project) => {
-              setSelectedProject(project || null);
-              updateFormData({ 
-                project_id: projectId,
-                address: project?.address || formData.address,
-                district: project?.district || formData.district,
-                lat: project?.lat ?? formData.lat,
-                lng: project?.lng ?? formData.lng,
-              });
-              
-              if (project) {
-                const projectName = isRu 
-                  ? (project.name_ru || project.name_en) 
-                  : project.name_en;
-                toast.success(
-                  isRu 
-                    ? `Данные проекта "${projectName}" загружены` 
-                    : `Project data loaded: "${projectName}"`
-                );
-              }
-            }}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Complex Assignment */}
-      <ComplexSelector
-        value={formData.complex_id}
-        onChange={(complex_id) => updateFormData({ complex_id })}
+      {/* Unified Complex / Project selector */}
+      <ComplexProjectSelector
+        complexId={formData.complex_id}
+        projectId={formData.project_id}
+        selectedProject={selectedProject}
+        onComplexChange={(complex_id) => updateFormData({ complex_id })}
+        onProjectChange={(projectId, project) => {
+          updateFormData({ project_id: projectId });
+        }}
+        setSelectedProject={setSelectedProject}
+        updateFormData={updateFormData}
+        formData={formData}
       />
 
       {/* Unit Fields — always shown after type is selected */}
