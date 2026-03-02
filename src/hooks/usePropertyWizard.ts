@@ -107,6 +107,17 @@ export interface PropertyFormData {
   highlights: string[];
   // Platform listing
   platform_listed?: boolean;
+  // Advanced pricing rules
+  early_booking_discount?: number;
+  early_booking_days?: number;
+  last_minute_discount?: number;
+  last_minute_days?: number;
+  payment_policy?: string;
+  prepay_percent?: number;
+  balance_due_days?: number;
+  deposit_currency?: string;
+  negotiation_enabled?: boolean;
+  custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
 }
 
 const initialFormData: PropertyFormData = {
@@ -165,6 +176,10 @@ const initialFormData: PropertyFormData = {
   seasonal_pricing: [],
   highlights: [],
   platform_listed: true,
+  // Advanced pricing defaults
+  payment_policy: 'prepay_10',
+  deposit_currency: 'USD',
+  negotiation_enabled: false,
 };
 
 const initialOwnershipData: OwnershipData = {

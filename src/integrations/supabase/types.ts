@@ -14067,6 +14067,7 @@ export type Database = {
           created_by_uno_team: boolean | null
           created_on_behalf: boolean | null
           currency: string | null
+          custom_length_discounts: Json | null
           deleted_at: string | null
           deleted_by: string | null
           deposit_amount: number | null
@@ -14075,6 +14076,8 @@ export type Database = {
           description_en: string | null
           description_ru: string | null
           district: string | null
+          early_booking_days: number | null
+          early_booking_discount: number | null
           early_checkin_price: number | null
           electricity_included: boolean | null
           electricity_meter_id: string | null
@@ -14120,6 +14123,8 @@ export type Database = {
           is_verified: boolean | null
           juristic_office_contact: string | null
           key_handover: string | null
+          last_minute_days: number | null
+          last_minute_discount: number | null
           lat: number | null
           late_checkout_penalty: number | null
           late_checkout_price: number | null
@@ -14149,6 +14154,7 @@ export type Database = {
           mortgage_interest_rate: number | null
           mortgage_monthly_payment: number | null
           nearby_places: Json | null
+          negotiation_enabled: boolean | null
           notes: string | null
           owner_contact_id: string | null
           owner_id: string | null
@@ -14165,6 +14171,7 @@ export type Database = {
           parking_type: string | null
           parties_allowed: boolean | null
           payment_model: string | null
+          payment_policy: string | null
           pet_deposit: number | null
           pet_monthly_fee: number | null
           pet_notes: string | null
@@ -14273,6 +14280,7 @@ export type Database = {
           created_by_uno_team?: boolean | null
           created_on_behalf?: boolean | null
           currency?: string | null
+          custom_length_discounts?: Json | null
           deleted_at?: string | null
           deleted_by?: string | null
           deposit_amount?: number | null
@@ -14281,6 +14289,8 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
           early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
@@ -14326,6 +14336,8 @@ export type Database = {
           is_verified?: boolean | null
           juristic_office_contact?: string | null
           key_handover?: string | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
           lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
@@ -14355,6 +14367,7 @@ export type Database = {
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
           nearby_places?: Json | null
+          negotiation_enabled?: boolean | null
           notes?: string | null
           owner_contact_id?: string | null
           owner_id?: string | null
@@ -14371,6 +14384,7 @@ export type Database = {
           parking_type?: string | null
           parties_allowed?: boolean | null
           payment_model?: string | null
+          payment_policy?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
           pet_notes?: string | null
@@ -14479,6 +14493,7 @@ export type Database = {
           created_by_uno_team?: boolean | null
           created_on_behalf?: boolean | null
           currency?: string | null
+          custom_length_discounts?: Json | null
           deleted_at?: string | null
           deleted_by?: string | null
           deposit_amount?: number | null
@@ -14487,6 +14502,8 @@ export type Database = {
           description_en?: string | null
           description_ru?: string | null
           district?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
           early_checkin_price?: number | null
           electricity_included?: boolean | null
           electricity_meter_id?: string | null
@@ -14532,6 +14549,8 @@ export type Database = {
           is_verified?: boolean | null
           juristic_office_contact?: string | null
           key_handover?: string | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
           lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
@@ -14561,6 +14580,7 @@ export type Database = {
           mortgage_interest_rate?: number | null
           mortgage_monthly_payment?: number | null
           nearby_places?: Json | null
+          negotiation_enabled?: boolean | null
           notes?: string | null
           owner_contact_id?: string | null
           owner_id?: string | null
@@ -14577,6 +14597,7 @@ export type Database = {
           parking_type?: string | null
           parties_allowed?: boolean | null
           payment_model?: string | null
+          payment_policy?: string | null
           pet_deposit?: number | null
           pet_monthly_fee?: number | null
           pet_notes?: string | null
@@ -17406,6 +17427,102 @@ export type Database = {
             columns: ["recipient_staff_id"]
             isOneToOne: false
             referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_price_offers: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          created_by: string
+          discount_percent: number | null
+          guest_user_id: string | null
+          id: string
+          message: string | null
+          nights: number | null
+          offered_price: number
+          original_price: number
+          property_id: string
+          responded_at: string | null
+          response_message: string | null
+          status: string
+          type: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          created_by: string
+          discount_percent?: number | null
+          guest_user_id?: string | null
+          id?: string
+          message?: string | null
+          nights?: number | null
+          offered_price: number
+          original_price: number
+          property_id: string
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          type: string
+          valid_from: string
+          valid_until: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string
+          discount_percent?: number | null
+          guest_user_id?: string | null
+          id?: string
+          message?: string | null
+          nights?: number | null
+          offered_price?: number
+          original_price?: number
+          property_id?: string
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          type?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_price_offers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_price_offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_price_offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_price_offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_price_offers_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
             referencedColumns: ["id"]
           },
         ]

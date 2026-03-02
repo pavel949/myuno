@@ -36,6 +36,10 @@ export { ProjectPromoSection } from './ProjectPromoSection';
 export { OffplanProjectCard } from './OffplanProjectCard';
 export { OffplanPromoSection } from './OffplanPromoSection';
 export { DeveloperBadge } from './DeveloperBadge';
+export { PricingRulesSection } from './PricingRulesSection';
+export { PaymentPolicySection } from './PaymentPolicySection';
+export { NegotiationPanel } from './NegotiationPanel';
+export { GuestPriceProposal } from './GuestPriceProposal';
 
 // Canonical Property Form (shared across Admin/Vendor/Owner)
 export { CanonicalPropertyForm } from './canonical-form';
