@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign, FileText, Sparkles, Building } from 'lucide-react';
+import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign, FileText, Sparkles, Building, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -181,6 +181,39 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               checked={formData.instant_booking}
               onCheckedChange={(checked) => updateFormData({ instant_booking: checked })}
             />
+          </div>
+
+          {/* Platform Listing Toggle */}
+          <div className={`p-4 rounded-lg border-2 transition-colors ${
+            formData.platform_listed 
+              ? 'border-primary/40 bg-primary/5' 
+              : 'border-muted bg-muted'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="font-medium flex items-center gap-2">
+                  <Rocket className="h-4 w-4 text-primary" />
+                  {isRu ? 'Разместить на myUNO для гостей' : 'List on myUNO for guests'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isRu 
+                    ? 'Комиссия платформы 10% с каждого успешного бронирования, включается в первый платёж' 
+                    : '10% platform fee per successful booking, included in first payment'}
+                </p>
+              </div>
+              <Switch
+                checked={formData.platform_listed ?? true}
+                onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
+              />
+            </div>
+            {formData.platform_listed && formData.price_per_night && Number(formData.price_per_night) > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
+                {isRu ? 'Пример: ' : 'Example: '}
+                {Number(formData.price_per_night).toLocaleString()} THB/
+                {isRu ? 'ночь' : 'night'} → 
+                {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(Number(formData.price_per_night) * 0.1).toLocaleString()} THB
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

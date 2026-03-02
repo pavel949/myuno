@@ -93,6 +93,8 @@ export interface PropertyFormData {
   weekly_discount?: number;
   monthly_discount?: number;
   highlights: string[];
+  // Platform listing
+  platform_listed?: boolean;
 }
 
 const initialFormData: PropertyFormData = {
@@ -149,6 +151,7 @@ const initialFormData: PropertyFormData = {
   // Cancellation & Discounts defaults
   cancellation_policy: 'flexible',
   highlights: [],
+  platform_listed: true,
 };
 
 const initialOwnershipData: OwnershipData = {
@@ -328,6 +331,11 @@ export function usePropertyWizard() {
       price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
       deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
       sale_price: formData.sale_price ? Number(formData.sale_price) : undefined,
+      listing_modes: [
+        ...(formData.platform_listed ? ['platform'] : []),
+        ...(formData.is_for_sale ? ['sale'] : []),
+        ...(formData.price_per_night ? ['rent'] : []),
+      ],
       created_on_behalf: isOnBehalf,
       ownership_type: ownershipData.ownership_type,
       actual_owner_email: isOnBehalf ? ownershipData.actual_owner_email : undefined,
