@@ -4,12 +4,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyCompanyId, DEAL_TYPES, DEAL_TYPE_LABELS, DealType } from '@/hooks/useAgentDeals';
 import { useAllPipelineStages, useCreatePipelineStage, useUpdatePipelineStage, useDeletePipelineStage, PipelineStage, DEFAULT_STAGES } from '@/hooks/useDealPipelineStages';
 import { useCrmOptions, useCreateCrmOption, useUpdateCrmOption, useDeleteCrmOption, CrmCustomOption, CrmOptionCategory } from '@/hooks/useCrmSettings';
+import { OdooCrmSettingsImportModal } from '@/components/owner/crm/OdooCrmSettingsImportModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Plus, GripVertical, Trash2, Save, Pencil, X, Check } from 'lucide-react';
+import { ArrowLeft, Plus, GripVertical, Trash2, Save, Pencil, X, Check, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
@@ -335,6 +336,7 @@ export default function PipelineSettingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
+  const [showOdooImport, setShowOdooImport] = useState(false);
 
   if (membershipLoading) {
     return <div className="p-4 space-y-4 max-w-2xl mx-auto"><Skeleton className="h-8 w-48" /><Skeleton className="h-40 w-full rounded-xl" /></div>;
@@ -359,12 +361,18 @@ export default function PipelineSettingsPage() {
 
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 md:pb-8 max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/mc/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" />
-          {isRu ? 'Назад' : 'Back'}
-        </button>
-        <h1 className="text-lg font-bold">{isRu ? 'Настройки CRM' : 'CRM Settings'}</h1>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/mc/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" />
+            {isRu ? 'Назад' : 'Back'}
+          </button>
+          <h1 className="text-lg font-bold">{isRu ? 'Настройки CRM' : 'CRM Settings'}</h1>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setShowOdooImport(true)}>
+          <Upload className="h-4 w-4 mr-1" />
+          {isRu ? 'Импорт ODOO' : 'Import ODOO'}
+        </Button>
       </div>
 
       <p className="text-sm text-muted-foreground">
@@ -410,6 +418,13 @@ export default function PipelineSettingsPage() {
           <OptionListEditor companyId={membership.company_id} category="lost_reason" isRu={isRu} />
         </TabsContent>
       </Tabs>
+
+      <OdooCrmSettingsImportModal
+        open={showOdooImport}
+        onOpenChange={setShowOdooImport}
+        companyId={membership.company_id}
+        isRu={isRu}
+      />
     </div>
   );
 }
