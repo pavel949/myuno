@@ -139,7 +139,7 @@ Deno.serve(async (req: Request) => {
 
     // Send email to all admins
     const { error: emailError } = await resend.emails.send({
-      from: "UNO Notifications <noreply@uno.ae>",
+      from: "UNO Notifications <noreply@updates.myuno.ai>",
       to: adminEmails,
       subject: `🏠 Новый объект на модерации: ${payload.property_title || "Без названия"}`,
       html: emailHtml,
