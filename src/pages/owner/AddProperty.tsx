@@ -18,7 +18,7 @@ import {
 } from '@/components/owner/property-wizard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Copy } from 'lucide-react';
+import { Copy, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AddProperty() {
@@ -166,13 +166,37 @@ export default function AddProperty() {
           onSubmit={wizard.handleSubmit}
           isSubmitting={wizard.isSubmitting}
           validateStep={wizard.validateStep}
+          onSaveDraft={() => {
+            // Draft is auto-saved via useFormDraft, this triggers a manual toast
+          }}
+          lastSaved={wizard.lastSaved}
         >
           {renderStep}
         </PropertyWizard>
 
-        {/* Desktop Preview */}
-        <div className="hidden lg:block sticky top-24 h-fit">
+        {/* Desktop Preview + Map */}
+        <div className="hidden lg:block sticky top-24 h-fit space-y-4">
           <LivePropertyPreview data={wizard.previewData} />
+          
+          {/* Map preview when coordinates are set */}
+          {wizard.formData.lat && wizard.formData.lng && (
+            <div className="rounded-lg overflow-hidden border">
+              <img
+                src={`https://static-maps.yandex.ru/v1?ll=${wizard.formData.lng},${wizard.formData.lat}&z=14&size=320,200&l=map&pt=${wizard.formData.lng},${wizard.formData.lat},pm2rdm`}
+                alt="Property location"
+                className="w-full h-[200px] object-cover bg-muted"
+                loading="lazy"
+                onError={(e) => {
+                  // Fallback: hide if static map fails
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              <div className="bg-muted/30 px-3 py-1.5 text-[10px] text-muted-foreground flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {wizard.formData.lat.toFixed(4)}, {wizard.formData.lng.toFixed(4)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

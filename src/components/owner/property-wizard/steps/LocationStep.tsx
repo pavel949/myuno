@@ -45,7 +45,13 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
               <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
             </SelectTrigger>
             <SelectContent>
-              {PHUKET_DISTRICTS.map((district) => (
+              {[...PHUKET_DISTRICTS]
+                .sort((a, b) => {
+                  const labelA = isRu ? a.labelRu : a.labelEn;
+                  const labelB = isRu ? b.labelRu : b.labelEn;
+                  return labelA.localeCompare(labelB, isRu ? 'ru' : 'en');
+                })
+                .map((district) => (
                 <SelectItem key={district.id} value={district.id}>
                   {isRu ? district.labelRu : district.labelEn}
                 </SelectItem>
