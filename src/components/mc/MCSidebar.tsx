@@ -19,6 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 
@@ -154,6 +155,7 @@ export function MCSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
+  const { role: resolvedRole } = useResolvedContext();
   const { canAccess } = useTeamPermissions();
   const { data: todayTasksCount } = useTodayTasksCount();
 

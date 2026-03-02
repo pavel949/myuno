@@ -21855,21 +21855,27 @@ export type Database = {
         Row: {
           active_org_id: string | null
           active_role: string
+          entity_id: string | null
           id: string
+          mode: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
           active_org_id?: string | null
           active_role?: string
+          entity_id?: string | null
           id?: string
+          mode?: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
           active_org_id?: string | null
           active_role?: string
+          entity_id?: string | null
           id?: string
+          mode?: string
           updated_at?: string | null
           user_id?: string
         }
@@ -27601,6 +27607,10 @@ export type Database = {
           task_type: string
         }[]
       }
+      resolve_user_context: {
+        Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }
+        Returns: Json
+      }
       resolve_verticals_for_situation: {
         Args: { p_situation_code: string }
         Returns: {
@@ -27624,6 +27634,10 @@ export type Database = {
         Returns: boolean
       }
       soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
+      staff_can_access_property: {
+        Args: { p_property_id: string; p_user_id: string }
+        Returns: boolean
+      }
       start_simulation_run: {
         Args: { p_config?: Json; p_label: string }
         Returns: string

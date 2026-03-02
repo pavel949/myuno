@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
+import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
 
@@ -30,9 +31,10 @@ export function RoleGuard({
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { hasRole, isLoading: contextLoading } = useUserContext();
+  const { context, isLoading: resolvedLoading } = useResolvedContext();
 
   // Show loading while checking auth/context
-  if (authLoading || contextLoading) {
+  if (authLoading || contextLoading || resolvedLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner size="lg" />
@@ -43,6 +45,11 @@ export function RoleGuard({
   // Redirect to auth if not logged in
   if (!user) {
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // Server-resolved admin always passes
+  if (context?.role === 'admin' || context?.role === 'uno_team') {
+    return <>{children}</>;
   }
 
   // Check if user has any of the allowed roles (Airbnb-style: check ownership, not active role)
