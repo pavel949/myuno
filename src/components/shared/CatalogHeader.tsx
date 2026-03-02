@@ -47,8 +47,9 @@ export const CatalogHeader = memo(function CatalogHeader({
 
   return (
     <header className={cn(
-      "z-40 border-b border-white/10",
+      "z-40 border-b border-border-subtle",
       "bg-gradient-to-br from-[hsl(222_47%_11%)] via-[hsl(224_55%_22%)] to-[hsl(222_47%_11%)]",
+      "[box-shadow:var(--shadow-elevation-3)]",
       !isDesktop && "sticky top-0",
       className
     )}>

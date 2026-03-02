@@ -92,8 +92,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         ref={ref}
         onClick={handleClick}
         className={cn(
-          "relative overflow-hidden rounded-2xl bg-card border border-border/60 transition-all [box-shadow:var(--shadow-card)]",
-          isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-0.5 active:scale-[0.98]",
+          "relative overflow-hidden rounded-xl bg-card border border-border/60 transition-all [box-shadow:var(--shadow-elevation-2)]",
+          isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 active:scale-[0.98]",
           !isAvailable && "opacity-60",
           className
         )}
@@ -182,8 +182,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       ref={ref}
       onClick={handleClick}
       className={cn(
-        "bg-card rounded-2xl overflow-hidden border border-border/60 [box-shadow:var(--shadow-card)]",
-        isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
+        "bg-card rounded-xl overflow-hidden border border-border/60 [box-shadow:var(--shadow-elevation-2)]",
+        isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
         !isAvailable && "opacity-60",
         "transition-all",
         className

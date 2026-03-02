@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-// Card hierarchy variants
+// DS2.0 Card hierarchy variants (aligned with elevation scale)
 type CardVariant = 'surface' | 'content' | 'interactive' | 'elevated';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,10 +10,10 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const cardVariants: Record<CardVariant, string> = {
-  surface: "bg-muted/30 dark:bg-muted/10 rounded-2xl",
-  content: "bg-card border border-border/40 dark:border-border/20 rounded-2xl [box-shadow:var(--shadow-card)]",
-  interactive: "bg-card border border-border/40 dark:border-border/20 rounded-2xl [box-shadow:var(--shadow-card)] hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-1 transition-all duration-250 cursor-pointer",
-  elevated: "bg-card border border-border/40 dark:border-border/20 rounded-2xl [box-shadow:var(--shadow-elevated)]",
+  surface: "bg-muted/30 dark:bg-muted/10 rounded-xl",
+  content: "bg-card border border-border/60 rounded-xl [box-shadow:var(--shadow-elevation-2)]",
+  interactive: "bg-card border border-border/60 rounded-xl [box-shadow:var(--shadow-elevation-2)] hover:[box-shadow:var(--shadow-elevation-3)] hover:-translate-y-0.5 transition-all duration-150 cursor-pointer",
+  elevated: "bg-card border border-border/60 rounded-xl [box-shadow:var(--shadow-elevation-4)]",
 };
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -40,7 +40,7 @@ CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-base font-semibold leading-snug tracking-tight", className)} {...props} />
+    <h3 ref={ref} className={cn("font-display text-base font-semibold leading-snug tracking-[-0.01em]", className)} {...props} />
   ),
 );
 CardTitle.displayName = "CardTitle";

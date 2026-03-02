@@ -13,7 +13,7 @@ const Skeleton = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "rounded-2xl bg-muted relative overflow-hidden",
+        "rounded-xl bg-muted relative overflow-hidden",
         "before:absolute before:inset-0",
         "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
         "before:animate-shimmer",
