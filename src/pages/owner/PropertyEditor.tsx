@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyPreviewCard } from '@/components/property/PropertyPreviewCard';
 import { PropertyRooms, Room } from '@/components/property/PropertyRooms';
 import { PropertyCalendar, AvailabilityEntry } from '@/components/property/PropertyCalendar';
-import { SeasonalPricing, SeasonalPrice } from '@/components/property/SeasonalPricing';
+import { SeasonalPrice } from '@/components/property/SeasonalPricing';
 import { PropertyTeamTab } from '@/components/owner/PropertyTeamTab';
 import { CanonicalPropertyForm, ExtraTab } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import { AIIntakePanel } from '@/components/owner/property-wizard/AIIntakePanel';
@@ -119,7 +119,6 @@ export default function PropertyEditor() {
 
   // Rooms & Calendar local state (not in CanonicalPropertyForm)
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [seasonalPricing, setSeasonalPricing] = useState<SeasonalPrice[]>([]);
   const [localAvailability, setLocalAvailability] = useState<AvailabilityEntry[]>([]);
 
   // Controlled form data for CanonicalPropertyForm
@@ -184,6 +183,7 @@ export default function PropertyEditor() {
       cancellation_policy: mapped.cancellation_policy,
       weekly_discount: mapped.weekly_discount,
       monthly_discount: mapped.monthly_discount,
+      seasonal_pricing: (property.seasonal_pricing as unknown as SeasonalPrice[]) || [],
       highlights: mapped.highlights,
     } as PropertyFormData);
 
@@ -213,7 +213,6 @@ export default function PropertyEditor() {
     });
 
     setRooms((property.rooms as unknown as Room[]) || []);
-    setSeasonalPricing((property.seasonal_pricing as unknown as SeasonalPrice[]) || []);
   }, [property, hasDraftToRestore, draftRestored]);
 
   // Sync availability
@@ -229,11 +228,11 @@ export default function PropertyEditor() {
     if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current);
     draftTimeoutRef.current = setTimeout(() => {
       try {
-        localStorage.setItem(`vendor_draft_${draftKey}`, JSON.stringify({ formData, rooms, seasonalPricing }));
+        localStorage.setItem(`vendor_draft_${draftKey}`, JSON.stringify({ formData, rooms }));
       } catch { /* quota exceeded */ }
     }, 800);
     return () => { if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current); };
-  }, [formData, rooms, seasonalPricing, draftKey, property, draftRestored]);
+  }, [formData, rooms, draftKey, property, draftRestored]);
 
   const clearEditorDraft = () => localStorage.removeItem(`vendor_draft_${draftKey}`);
 
@@ -321,7 +320,7 @@ export default function PropertyEditor() {
         deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
         weekly_discount: Number(formData.weekly_discount) || 0,
         monthly_discount: Number(formData.monthly_discount) || 0,
-        seasonal_pricing: seasonalPricing,
+        seasonal_pricing: formData.seasonal_pricing && formData.seasonal_pricing.length > 0 ? formData.seasonal_pricing : null,
         min_stay_nights: formData.min_stay_nights,
         max_guests: formData.max_guests,
         instant_booking: formData.instant_booking,
@@ -395,20 +394,12 @@ export default function PropertyEditor() {
       labelEn: 'Calendar',
       labelRu: 'Календарь',
       content: (
-        <div className="space-y-6">
-          <PropertyCalendar
-            availability={localAvailability}
-            onChange={setLocalAvailability}
-            basePrice={Number(formData?.price_per_night) || 0}
-            currency="THB"
-          />
-          <SeasonalPricing
-            basePrice={Number(formData?.price_per_night) || 0}
-            currency="THB"
-            seasons={seasonalPricing}
-            onChange={setSeasonalPricing}
-          />
-        </div>
+        <PropertyCalendar
+          availability={localAvailability}
+          onChange={setLocalAvailability}
+          basePrice={Number(formData?.price_per_night) || 0}
+          currency="THB"
+        />
       ),
     },
     {
@@ -418,7 +409,7 @@ export default function PropertyEditor() {
       labelRu: 'Команда',
       content: <PropertyTeamTab propertyId={id || ''} />,
     },
-  ], [rooms, localAvailability, seasonalPricing, formData?.price_per_night, id]);
+  ], [rooms, localAvailability, formData?.price_per_night, formData?.seasonal_pricing, id]);
 
   // Loading state
   if (isLoading) {
@@ -494,7 +485,6 @@ export default function PropertyEditor() {
                   const parsed = JSON.parse(saved);
                   if (parsed.formData) setFormData(parsed.formData);
                   if (parsed.rooms) setRooms(parsed.rooms);
-                  if (parsed.seasonalPricing) setSeasonalPricing(parsed.seasonalPricing);
                 }
               } catch { /* ignore */ }
               setDraftRestored(true);

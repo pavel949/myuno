@@ -181,6 +181,7 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     cancellation_policy: data.cancellation_policy,
     weekly_discount: data.weekly_discount,
     monthly_discount: data.monthly_discount,
+    seasonal_pricing: data.seasonal_pricing as any || [],
     highlights: data.highlights || [],
   };
 }
@@ -235,6 +236,7 @@ function mapFromOwnerFormat(
     cancellation_policy: ownerData.cancellation_policy,
     weekly_discount: ownerData.weekly_discount,
     monthly_discount: ownerData.monthly_discount,
+    seasonal_pricing: ownerData.seasonal_pricing,
     house_rules: ownerData.house_rules,
     house_rules_ru: ownerData.house_rules_ru,
     listing_modes: [
