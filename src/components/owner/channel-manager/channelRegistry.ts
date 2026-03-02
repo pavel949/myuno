@@ -3,7 +3,7 @@
  * Adding a new OTA = adding one object to CHANNEL_REGISTRY array.
  */
 
-export type ChannelCategory = 'major_ota' | 'vacation_rental' | 'asia_pacific' | 'calendar' | 'other';
+export type ChannelCategory = 'major_ota' | 'vacation_rental' | 'russia_cis' | 'asia_pacific' | 'calendar' | 'other';
 
 export interface ChannelRegistryEntry {
   id: string;
@@ -38,16 +38,20 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/airbnb\.com/i],
     instructions: {
       en: [
-        'Go to your Airbnb listing',
-        'Click "Pricing and availability" → "Availability"',
-        'Scroll to "Connect calendars"',
-        'Click "Export Calendar" and copy the iCal URL',
+        'Log in to airbnb.com and open your listing',
+        'Go to "Calendar" tab at the top',
+        'Click the gear icon ⚙️ → "Availability settings"',
+        'Scroll down to "Connect calendars" section',
+        'Click "Export Calendar" — a link starting with https://www.airbnb.com/calendar/ical/... will appear',
+        'Copy this link and paste it below',
       ],
       ru: [
-        'Откройте ваш листинг на Airbnb',
-        'Нажмите "Цены и доступность" → "Доступность"',
-        'Прокрутите до "Подключить календари"',
-        'Нажмите "Экспорт календаря" и скопируйте iCal URL',
+        'Войдите на airbnb.com и откройте ваше объявление',
+        'Перейдите на вкладку "Календарь" вверху',
+        'Нажмите значок ⚙️ → "Настройки доступности"',
+        'Прокрутите до раздела "Подключить календари"',
+        'Нажмите "Экспорт календаря" — появится ссылка вида https://www.airbnb.com/calendar/ical/...',
+        'Скопируйте эту ссылку и вставьте ниже',
       ],
     },
     helpUrl: 'https://www.airbnb.com/help/article/99',
@@ -65,16 +69,20 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/booking\.com/i, /admin\.booking\.com/i],
     instructions: {
       en: [
-        'Log in to Booking.com Extranet',
-        'Go to "Calendar" → "Sync calendars"',
-        'Click "Export your calendar"',
-        'Copy the iCal link provided',
+        'Log in to admin.booking.com (Extranet)',
+        'Go to "Rates & Availability" → "Calendar" in the left menu',
+        'Click "Sync calendars" (top right of calendar)',
+        'Under "Export calendar" copy the iCal link',
+        'The link looks like: https://admin.booking.com/hotel/hoteladmin/ical.html?t=...',
+        'Paste this link below',
       ],
       ru: [
-        'Войдите в Booking.com Extranet',
-        'Перейдите в "Календарь" → "Синхронизация"',
-        'Нажмите "Экспортировать календарь"',
-        'Скопируйте iCal-ссылку',
+        'Войдите в admin.booking.com (Экстранет)',
+        'В левом меню: "Тарифы и наличие мест" → "Календарь"',
+        'Нажмите "Синхронизация календарей" (справа вверху)',
+        'В разделе "Экспортировать календарь" скопируйте iCal-ссылку',
+        'Ссылка выглядит как: https://admin.booking.com/hotel/hoteladmin/ical.html?t=...',
+        'Вставьте эту ссылку ниже',
       ],
     },
     helpUrl: 'https://partner.booking.com/en-gb/help/connectivity/how-do-i-sync-my-calendar-external-calendars',
@@ -92,16 +100,20 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/vrbo\.com/i, /homeaway\.com/i],
     instructions: {
       en: [
-        'Go to your VRBO dashboard',
-        'Select your property → "Calendar"',
-        'Click "Import/Export" tab',
-        'Copy the "Export calendar" link',
+        'Log in to vrbo.com and go to your property dashboard',
+        'Click "Calendar" in the left menu',
+        'Click "Import/Export" tab above the calendar',
+        'Under "Export this calendar" click "Copy Link"',
+        'The link looks like: https://www.vrbo.com/icalendar/...',
+        'Paste this link below',
       ],
       ru: [
-        'Откройте панель управления VRBO',
-        'Выберите объект → "Календарь"',
-        'Нажмите "Импорт/Экспорт"',
-        'Скопируйте ссылку экспорта',
+        'Войдите на vrbo.com в панель управления объектом',
+        'Нажмите "Календарь" в левом меню',
+        'Перейдите на вкладку "Импорт/Экспорт" над календарём',
+        'В разделе "Экспорт календаря" нажмите "Копировать ссылку"',
+        'Ссылка выглядит как: https://www.vrbo.com/icalendar/...',
+        'Вставьте эту ссылку ниже',
       ],
     },
     helpUrl: 'https://help.vrbo.com/articles/How-do-I-sync-my-calendar-with-other-sites',
@@ -115,20 +127,21 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     borderColor: 'border-warning/20',
     textColor: 'text-warning',
     category: 'major_ota',
-    featured: true,
     urlPatterns: [/expedia\.com/i, /hotels\.com/i],
     instructions: {
       en: [
-        'Log in to Expedia Partner Central',
-        'Go to "Calendar" → "Sync"',
-        'Export your iCal link',
-        'Copy the URL',
+        'Log in to apps.expediapartnercentral.com (Partner Central)',
+        'Navigate to "Rooms & Rates" → "Calendar"',
+        'Click "Sync calendars" or "Export calendar"',
+        'Copy the provided iCal URL',
+        'Note: Not all Expedia property types support iCal export',
       ],
       ru: [
-        'Войдите в Expedia Partner Central',
-        'Перейдите в "Календарь" → "Синхронизация"',
-        'Экспортируйте iCal-ссылку',
-        'Скопируйте URL',
+        'Войдите в apps.expediapartnercentral.com (Partner Central)',
+        'Перейдите в "Номера и тарифы" → "Календарь"',
+        'Нажмите "Синхронизация" или "Экспорт календаря"',
+        'Скопируйте iCal-ссылку',
+        'Примечание: не все типы объектов Expedia поддерживают iCal',
       ],
     },
     helpUrl: 'https://apps.expediapartnercentral.com/',
@@ -146,19 +159,21 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/agoda\.com/i],
     instructions: {
       en: [
-        'Log in to Agoda YCS (YieldConnect)',
-        'Go to "Rate & Availability"',
-        'Find "iCal export" option',
-        'Copy the calendar URL',
+        'Log in to ycs.agoda.com (YCS — Yield Control System)',
+        'Go to "Rate & Availability" in the left menu',
+        'Click "Calendar Sync" or "iCal" tab',
+        'Click "Export Calendar" and copy the URL',
+        'If you don\'t see this option, contact your Agoda account manager',
       ],
       ru: [
-        'Войдите в Agoda YCS',
-        'Перейдите в "Тарифы и Доступность"',
-        'Найдите опцию "iCal экспорт"',
-        'Скопируйте URL календаря',
+        'Войдите в ycs.agoda.com (YCS — Yield Control System)',
+        'Перейдите в "Тарифы и доступность" в левом меню',
+        'Нажмите "Calendar Sync" или вкладку "iCal"',
+        'Нажмите "Export Calendar" и скопируйте URL',
+        'Если опции нет, обратитесь к вашему менеджеру Agoda',
       ],
     },
-    helpUrl: 'https://partner.agoda.com/',
+    helpUrl: 'https://ycs.agoda.com/',
   },
   {
     id: 'tripadvisor',
@@ -172,16 +187,16 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/tripadvisor\.com/i, /flipkey\.com/i, /holidaylettings/i],
     instructions: {
       en: [
-        'Go to TripAdvisor Rental dashboard',
-        'Select property → "Calendar"',
-        'Click "Export Calendar"',
-        'Copy the iCal URL',
+        'Log in to rentals.tripadvisor.com (Owner Dashboard)',
+        'Select your property and go to "Calendar"',
+        'Click "Sync Calendars" → "Export Calendar"',
+        'Copy the iCal URL provided',
       ],
       ru: [
-        'Откройте панель TripAdvisor Rentals',
-        'Выберите объект → "Календарь"',
-        'Нажмите "Экспортировать"',
-        'Скопируйте iCal URL',
+        'Войдите в rentals.tripadvisor.com (Панель владельца)',
+        'Выберите объект и перейдите в "Календарь"',
+        'Нажмите "Синхронизация" → "Экспорт календаря"',
+        'Скопируйте предоставленную iCal-ссылку',
       ],
     },
     helpUrl: 'https://www.tripadvisor.com/Owners',
@@ -198,19 +213,234 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/hostelworld\.com/i],
     instructions: {
       en: [
-        'Log in to Hostelworld Inbox',
+        'Log in to inbox.hostelworld.com',
+        'Go to "Property" → "Rates & Availability"',
+        'Click "Calendar sync" or "iCal export"',
+        'Copy the generated URL',
+      ],
+      ru: [
+        'Войдите в inbox.hostelworld.com',
+        'Перейдите в "Property" → "Rates & Availability"',
+        'Нажмите "Calendar sync" или "iCal export"',
+        'Скопируйте сгенерированный URL',
+      ],
+    },
+  },
+
+  // ─── Russia & CIS ────────────────────────────────
+  {
+    id: 'ostrovok',
+    name: 'Островок (Ostrovok)',
+    icon: '🟢',
+    color: 'from-success to-accent-teal',
+    bgColor: 'bg-success/5 hover:bg-success/10',
+    borderColor: 'border-success/20',
+    textColor: 'text-success',
+    category: 'russia_cis',
+    featured: true,
+    urlPatterns: [/ostrovok\.ru/i, /extranet\.ostrovok/i],
+    instructions: {
+      en: [
+        'Log in to extranet.ostrovok.ru',
+        'Go to "Rooms & Rates" → "Calendar"',
+        'Click "Sync with external calendar"',
+        'Copy the iCal export URL',
+        'Paste it below',
+      ],
+      ru: [
+        'Войдите в extranet.ostrovok.ru (Экстранет Островка)',
+        'Перейдите в "Номера и тарифы" → "Календарь"',
+        'Нажмите "Синхронизация с внешним календарём"',
+        'Скопируйте ссылку iCal-экспорта',
+        'Вставьте её ниже',
+      ],
+    },
+    helpUrl: 'https://help.ostrovok.ru/',
+  },
+  {
+    id: 'sutochno',
+    name: 'Суточно.ру',
+    icon: '🏘️',
+    color: 'from-info to-primary',
+    bgColor: 'bg-info/5 hover:bg-info/10',
+    borderColor: 'border-info/20',
+    textColor: 'text-info',
+    category: 'russia_cis',
+    featured: true,
+    urlPatterns: [/sutochno\.ru/i],
+    instructions: {
+      en: [
+        'Log in to sutochno.ru owner dashboard',
+        'Open your property → "Calendar"',
+        'Click "Export calendar" (iCal)',
+        'Copy the link and paste below',
+      ],
+      ru: [
+        'Войдите в личный кабинет на sutochno.ru',
+        'Откройте ваш объект → "Календарь бронирований"',
+        'Нажмите "Экспорт календаря" (формат iCal)',
+        'Скопируйте ссылку и вставьте ниже',
+        'Ссылка выглядит как: https://sutochno.ru/ical/...',
+      ],
+    },
+    helpUrl: 'https://sutochno.ru/help',
+  },
+  {
+    id: 'tvil',
+    name: 'Tvil.ru',
+    icon: '🌊',
+    color: 'from-accent-cyan to-info',
+    bgColor: 'bg-accent-cyan/5 hover:bg-accent-cyan/10',
+    borderColor: 'border-accent-cyan/20',
+    textColor: 'text-accent-cyan',
+    category: 'russia_cis',
+    urlPatterns: [/tvil\.ru/i],
+    instructions: {
+      en: [
+        'Log in to tvil.ru owner account',
+        'Open your listing → "Calendar"',
+        'Find "Export to iCal" option',
+        'Copy the URL and paste below',
+      ],
+      ru: [
+        'Войдите в личный кабинет на tvil.ru',
+        'Откройте ваше объявление → "Календарь"',
+        'Найдите опцию "Экспорт в iCal"',
+        'Скопируйте URL и вставьте ниже',
+      ],
+    },
+  },
+  {
+    id: 'bronevik',
+    name: 'Броневик (Bronevik)',
+    icon: '🛡️',
+    color: 'from-primary to-primary/80',
+    bgColor: 'bg-primary/5 hover:bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary',
+    category: 'russia_cis',
+    urlPatterns: [/bronevik\.com/i],
+    instructions: {
+      en: [
+        'Log in to bronevik.com partner portal',
         'Go to "Rates & Availability"',
-        'Find the iCal export option',
+        'Find "Calendar sync / iCal export"',
         'Copy the URL',
       ],
       ru: [
-        'Войдите в Hostelworld Inbox',
-        'Перейдите в "Тарифы и Доступность"',
-        'Найдите экспорт iCal',
+        'Войдите в партнёрский портал bronevik.com',
+        'Перейдите в "Тарифы и доступность"',
+        'Найдите "Синхронизация календаря / iCal экспорт"',
         'Скопируйте URL',
       ],
     },
   },
+  {
+    id: '101hotels',
+    name: '101Hotels.com',
+    icon: '🏨',
+    color: 'from-accent-amber to-warning',
+    bgColor: 'bg-accent-amber/5 hover:bg-accent-amber/10',
+    borderColor: 'border-accent-amber/20',
+    textColor: 'text-accent-amber',
+    category: 'russia_cis',
+    urlPatterns: [/101hotels\.com/i],
+    instructions: {
+      en: [
+        'Log in to partner.101hotels.com',
+        'Go to "Calendar"',
+        'Click "Export iCal"',
+        'Copy URL and paste below',
+      ],
+      ru: [
+        'Войдите в partner.101hotels.com',
+        'Перейдите в "Календарь"',
+        'Нажмите "Экспорт iCal"',
+        'Скопируйте URL и вставьте ниже',
+      ],
+    },
+  },
+  {
+    id: 'domclick',
+    name: 'ДомКлик (Сбер)',
+    icon: '🟩',
+    color: 'from-success to-success/80',
+    bgColor: 'bg-success/5 hover:bg-success/10',
+    borderColor: 'border-success/20',
+    textColor: 'text-success',
+    category: 'russia_cis',
+    urlPatterns: [/domclick\.ru/i],
+    instructions: {
+      en: [
+        'Log in to domclick.ru (Sber)',
+        'Go to your rental listing',
+        'Find calendar sync or iCal export',
+        'Copy URL',
+      ],
+      ru: [
+        'Войдите в личный кабинет на domclick.ru',
+        'Откройте ваш объект аренды',
+        'Найдите синхронизацию календаря или iCal-экспорт',
+        'Скопируйте URL',
+      ],
+    },
+  },
+  {
+    id: 'avito',
+    name: 'Авито Недвижимость',
+    icon: '🔵',
+    color: 'from-info to-info/80',
+    bgColor: 'bg-info/5 hover:bg-info/10',
+    borderColor: 'border-info/20',
+    textColor: 'text-info',
+    category: 'russia_cis',
+    urlPatterns: [/avito\.ru/i],
+    instructions: {
+      en: [
+        'Log in to avito.ru → My Listings',
+        'Open your rental listing',
+        'Go to "Booking calendar" section',
+        'If iCal export is available, copy the link',
+        'Note: iCal support may be limited on Avito',
+      ],
+      ru: [
+        'Войдите на avito.ru → Мои объявления',
+        'Откройте объявление об аренде',
+        'Перейдите в раздел "Календарь бронирований"',
+        'Если доступен iCal-экспорт, скопируйте ссылку',
+        'Примечание: поддержка iCal на Авито может быть ограничена',
+      ],
+    },
+  },
+  {
+    id: 'cian',
+    name: 'ЦИАН',
+    icon: '🔷',
+    color: 'from-primary to-info',
+    bgColor: 'bg-primary/5 hover:bg-primary/10',
+    borderColor: 'border-primary/20',
+    textColor: 'text-primary',
+    category: 'russia_cis',
+    urlPatterns: [/cian\.ru/i],
+    instructions: {
+      en: [
+        'Log in to cian.ru → My Listings',
+        'Open your rental listing',
+        'Go to calendar settings',
+        'If iCal export is available, copy the link',
+        'Note: CIAN has limited iCal support for short-term rentals',
+      ],
+      ru: [
+        'Войдите на cian.ru → Мои объявления',
+        'Откройте объявление о посуточной аренде',
+        'Перейдите в настройки календаря',
+        'Если iCal-экспорт доступен, скопируйте ссылку',
+        'Примечание: ЦИАН имеет ограниченную поддержку iCal для краткосрочной аренды',
+      ],
+    },
+  },
+
+  // ─── Asia / Pacific ──────────────────────────────
   {
     id: 'trip_com',
     name: 'Trip.com',
@@ -224,16 +454,41 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/trip\.com/i, /ctrip\.com/i],
     instructions: {
       en: [
-        'Log in to Trip.com Partner Hub',
-        'Go to "Room & Rate"',
-        'Select "Calendar Sync"',
-        'Export and copy iCal URL',
+        'Log in to ebooking.trip.com (Partner Hub)',
+        'Go to "Room & Rate" → "Calendar"',
+        'Click "Sync calendars" tab',
+        'Copy the export iCal URL',
       ],
       ru: [
-        'Войдите в Trip.com Partner Hub',
-        'Перейдите в "Номера и тарифы"',
-        'Выберите "Синхронизация календаря"',
-        'Экспортируйте и скопируйте iCal URL',
+        'Войдите в ebooking.trip.com (Partner Hub)',
+        'Перейдите в "Номера и тарифы" → "Календарь"',
+        'Нажмите вкладку "Синхронизация календарей"',
+        'Скопируйте iCal URL экспорта',
+      ],
+    },
+  },
+  {
+    id: 'traveloka',
+    name: 'Traveloka',
+    icon: '🌺',
+    color: 'from-info to-primary',
+    bgColor: 'bg-info/5 hover:bg-info/10',
+    borderColor: 'border-info/20',
+    textColor: 'text-info',
+    category: 'asia_pacific',
+    urlPatterns: [/traveloka\.com/i],
+    instructions: {
+      en: [
+        'Log in to extranet.traveloka.com',
+        'Go to "Room" → "Calendar" section',
+        'Click "Sync Calendar" or "Export iCal"',
+        'Copy the generated URL',
+      ],
+      ru: [
+        'Войдите в extranet.traveloka.com',
+        'Перейдите в "Номера" → "Календарь"',
+        'Нажмите "Sync Calendar" или "Export iCal"',
+        'Скопируйте сгенерированный URL',
       ],
     },
   },
@@ -251,16 +506,16 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/marriott\.com/i, /homes-and-villas/i],
     instructions: {
       en: [
-        'Access your Marriott Homes dashboard',
-        'Go to "Calendar" settings',
-        'Export iCal link',
-        'Copy the URL',
+        'Log in to your Marriott Homes & Villas host portal',
+        'Go to "Calendar" → "Availability"',
+        'Find "Export calendar" or "iCal sync"',
+        'Copy the iCal URL and paste below',
       ],
       ru: [
-        'Откройте панель Marriott Homes',
-        'Перейдите в настройки календаря',
-        'Экспортируйте iCal-ссылку',
-        'Скопируйте URL',
+        'Войдите в портал хоста Marriott Homes & Villas',
+        'Перейдите в "Календарь" → "Доступность"',
+        'Найдите "Экспорт календаря" или "iCal sync"',
+        'Скопируйте iCal URL и вставьте ниже',
       ],
     },
   },
@@ -276,16 +531,16 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/holidu\.com/i],
     instructions: {
       en: [
-        'Log in to Holidu Host dashboard',
-        'Go to "Calendar"',
-        'Click "Export iCal"',
-        'Copy the link',
+        'Log in to host.holidu.com',
+        'Select your property → "Calendar"',
+        'Click "Sync" → "Export iCal"',
+        'Copy the link and paste below',
       ],
       ru: [
-        'Войдите в панель Holidu Host',
-        'Перейдите в "Календарь"',
-        'Нажмите "Экспорт iCal"',
-        'Скопируйте ссылку',
+        'Войдите в host.holidu.com',
+        'Выберите объект → "Календарь"',
+        'Нажмите "Sync" → "Export iCal"',
+        'Скопируйте ссылку и вставьте ниже',
       ],
     },
   },
@@ -301,15 +556,15 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/hometogo\.com/i],
     instructions: {
       en: [
-        'Log in to HomeToGo dashboard',
-        'Navigate to calendar settings',
-        'Export your iCal feed',
-        'Copy URL',
+        'Log in to hometogo.com host portal',
+        'Go to property settings → "Calendar"',
+        'Find "Export iCal feed"',
+        'Copy the URL',
       ],
       ru: [
-        'Войдите в панель HomeToGo',
-        'Перейдите в настройки календаря',
-        'Экспортируйте iCal-ленту',
+        'Войдите в портал хоста на hometogo.com',
+        'Настройки объекта → "Календарь"',
+        'Найдите "Export iCal feed"',
         'Скопируйте URL',
       ],
     },
@@ -325,8 +580,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'vacation_rental',
     urlPatterns: [/atraveo\.com/i],
     instructions: {
-      en: ['Log in to Atraveo', 'Go to Calendar', 'Export iCal URL', 'Copy the link'],
-      ru: ['Войдите в Atraveo', 'Перейдите в Календарь', 'Экспортируйте iCal URL', 'Скопируйте ссылку'],
+      en: ['Log in to atraveo.com partner portal', 'Go to Calendar settings', 'Export iCal URL', 'Copy and paste below'],
+      ru: ['Войдите в партнёрский портал atraveo.com', 'Перейдите в настройки Календаря', 'Экспортируйте iCal URL', 'Скопируйте и вставьте ниже'],
     },
   },
   {
@@ -340,8 +595,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'vacation_rental',
     urlPatterns: [/casamundo\.com/i],
     instructions: {
-      en: ['Log in to Casamundo', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Casamundo', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to casamundo.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в casamundo.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -355,8 +610,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'vacation_rental',
     urlPatterns: [/traum-ferienwohnungen/i],
     instructions: {
-      en: ['Log in to Traum-Ferienwohnungen', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Traum-Ferienwohnungen', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to traum-ferienwohnungen.de', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в traum-ferienwohnungen.de', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -370,8 +625,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'vacation_rental',
     urlPatterns: [/fewo-direkt/i],
     instructions: {
-      en: ['Log in to FeWo-direkt', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в FeWo-direkt', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to fewo-direkt.de', 'Go to Calendar → Import/Export', 'Export iCal link', 'Copy URL'],
+      ru: ['Войдите в fewo-direkt.de', 'Перейдите в Календарь → Импорт/Экспорт', 'Экспортируйте iCal-ссылку', 'Скопируйте URL'],
     },
   },
   {
@@ -385,25 +640,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'vacation_rental',
     urlPatterns: [/abritel\.fr/i],
     instructions: {
-      en: ['Log in to Abritel', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Abritel', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
-    },
-  },
-
-  // ─── Asia / Pacific ──────────────────────────────
-  {
-    id: 'traveloka',
-    name: 'Traveloka',
-    icon: '🌺',
-    color: 'from-info to-primary',
-    bgColor: 'bg-info/5 hover:bg-info/10',
-    borderColor: 'border-info/20',
-    textColor: 'text-info',
-    category: 'asia_pacific',
-    urlPatterns: [/traveloka\.com/i],
-    instructions: {
-      en: ['Log in to Traveloka Extranet', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Traveloka Extranet', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to abritel.fr', 'Go to Calendar → Import/Export', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в abritel.fr', 'Перейдите в Календарь → Импорт/Экспорт', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
 
@@ -421,16 +659,18 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     urlPatterns: [/google\.com\/calendar/i, /calendar\.google\.com/i],
     instructions: {
       en: [
-        'Open Google Calendar settings',
-        'Select the calendar to share',
-        'Under "Integrate calendar", copy "Public address in iCal format"',
-        'Or use "Secret address" for private calendars',
+        'Open calendar.google.com → Settings (gear icon)',
+        'Click on the calendar you want to export in the left panel',
+        'Scroll to "Integrate calendar" section',
+        'Copy "Secret address in iCal format" (for private calendars)',
+        'Or "Public address in iCal format" (for public calendars)',
       ],
       ru: [
-        'Откройте настройки Google Календаря',
-        'Выберите календарь',
-        'В "Интеграция" скопируйте "Публичный адрес в формате iCal"',
-        'Или используйте "Секретный адрес"',
+        'Откройте calendar.google.com → Настройки (значок шестерёнки)',
+        'Нажмите на нужный календарь в левой панели',
+        'Прокрутите до раздела "Интеграция календаря"',
+        'Скопируйте "Секретный адрес в формате iCal" (для приватных)',
+        'Или "Публичный адрес в формате iCal" (для публичных)',
       ],
     },
     helpUrl: 'https://support.google.com/calendar/answer/37648',
@@ -448,8 +688,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/wimdu\.com/i],
     instructions: {
-      en: ['Log in to Wimdu', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Wimdu', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to wimdu.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в wimdu.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -463,8 +703,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/9flats\.com/i],
     instructions: {
-      en: ['Log in to 9flats', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в 9flats', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to 9flats.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в 9flats.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -478,8 +718,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/homestay\.com/i],
     instructions: {
-      en: ['Log in to Homestay.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Homestay.com', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to homestay.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в homestay.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -493,8 +733,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/furnishedfinder\.com/i],
     instructions: {
-      en: ['Log in to Furnished Finder', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Furnished Finder', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to furnishedfinder.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в furnishedfinder.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -508,8 +748,8 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/spotahome\.com/i],
     instructions: {
-      en: ['Log in to Spotahome', 'Go to Calendar', 'Export iCal', 'Copy URL'],
-      ru: ['Войдите в Spotahome', 'Перейдите в Календарь', 'Экспорт iCal', 'Скопируйте URL'],
+      en: ['Log in to spotahome.com', 'Go to Calendar', 'Export iCal', 'Copy URL'],
+      ru: ['Войдите в spotahome.com', 'Перейдите в Календарь', 'Экспортируйте iCal', 'Скопируйте URL'],
     },
   },
   {
@@ -523,8 +763,18 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     category: 'other',
     urlPatterns: [/turno\.com/i, /turnoverbnb\.com/i],
     instructions: {
-      en: ['Log in to Turno', 'Go to "Properties"', 'Export iCal URL for cleanings', 'Copy URL'],
-      ru: ['Войдите в Turno', 'Перейдите в "Объекты"', 'Экспортируйте iCal URL для уборок', 'Скопируйте URL'],
+      en: [
+        'Log in to turno.com (formerly TurnoverBnB)',
+        'Go to "Properties" → select your property',
+        'Click "Calendars" → "Export iCal"',
+        'Copy URL — this exports cleaning schedule, not bookings',
+      ],
+      ru: [
+        'Войдите в turno.com (ранее TurnoverBnB)',
+        'Перейдите в "Объекты" → выберите объект',
+        'Нажмите "Календари" → "Экспорт iCal"',
+        'Скопируйте URL — экспортирует график уборок, не бронирования',
+      ],
     },
   },
   {
@@ -552,12 +802,14 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
     instructions: {
       en: [
         'Get the iCal export URL from your platform',
-        'It usually ends with .ics or contains "ical"',
+        'It usually ends with .ics or contains "ical" in the URL',
+        'Make sure it\'s a direct link (starts with https://)',
         'Paste the full URL below',
       ],
       ru: [
-        'Получите iCal URL из вашей платформы',
-        'Обычно он заканчивается на .ics или содержит "ical"',
+        'Получите iCal URL экспорта из вашей платформы',
+        'Обычно ссылка заканчивается на .ics или содержит "ical"',
+        'Убедитесь что это прямая ссылка (начинается с https://)',
         'Вставьте полный URL ниже',
       ],
     },
@@ -567,6 +819,7 @@ export const CHANNEL_REGISTRY: ChannelRegistryEntry[] = [
 /** Category labels */
 export const CATEGORY_LABELS: Record<ChannelCategory, { en: string; ru: string }> = {
   major_ota: { en: 'Major OTA', ru: 'Крупные OTA' },
+  russia_cis: { en: 'Russia & CIS', ru: 'Россия и СНГ' },
   vacation_rental: { en: 'Vacation Rentals', ru: 'Vacation Rentals' },
   asia_pacific: { en: 'Asia & Pacific', ru: 'Азия и Тихий океан' },
   calendar: { en: 'Calendars', ru: 'Календари' },
@@ -580,7 +833,7 @@ export function getFeaturedChannels() {
 
 /** Get channels grouped by category (excluding manual) */
 export function getChannelsByCategory() {
-  const categories: ChannelCategory[] = ['major_ota', 'vacation_rental', 'asia_pacific', 'calendar', 'other'];
+  const categories: ChannelCategory[] = ['major_ota', 'russia_cis', 'vacation_rental', 'asia_pacific', 'calendar', 'other'];
   return categories
     .map(cat => ({
       category: cat,

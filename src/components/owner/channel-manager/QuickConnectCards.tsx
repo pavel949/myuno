@@ -201,33 +201,29 @@ export function QuickConnectCards({ onConnected }: QuickConnectCardsProps) {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Instructions */}
-            {selectedOta?.instructions[isRu ? 'ru' : 'en'].length > 0 && (
-              <Accordion type="single" collapsible>
-                <AccordionItem value="instructions" className="border-none">
-                  <AccordionTrigger className="py-2 text-sm">
-                    {isRu ? 'Как получить iCal-ссылку?' : 'How to get iCal link?'}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                      {selectedOta?.instructions[isRu ? 'ru' : 'en'].map((step, i) => (
-                        <li key={i}>{step}</li>
-                      ))}
-                    </ol>
-                    {selectedOta?.helpUrl && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="mt-2 h-auto p-0"
-                        onClick={() => window.open(selectedOta.helpUrl, '_blank')}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        {isRu ? 'Подробная инструкция' : 'Detailed instructions'}
-                      </Button>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+            {/* Instructions — shown by default */}
+            {selectedOta && selectedOta.instructions[isRu ? 'ru' : 'en'].length > 0 && (
+              <div className="rounded-lg bg-muted/50 border border-border p-3 space-y-2">
+                <h4 className="text-sm font-medium text-foreground">
+                  {isRu ? '📋 Как получить iCal-ссылку' : '📋 How to get iCal link'}
+                </h4>
+                <ol className="list-decimal list-inside space-y-1.5 text-sm text-muted-foreground">
+                  {selectedOta.instructions[isRu ? 'ru' : 'en'].map((step, i) => (
+                    <li key={i} className="leading-relaxed">{step}</li>
+                  ))}
+                </ol>
+                {selectedOta.helpUrl && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="mt-1 h-auto p-0 text-xs"
+                    onClick={() => window.open(selectedOta.helpUrl, '_blank')}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {isRu ? 'Официальная документация' : 'Official documentation'}
+                  </Button>
+                )}
+              </div>
             )}
 
             {/* Property Selection */}
