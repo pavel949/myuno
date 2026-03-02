@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useProfile } from '@/hooks/useProfile';
 import { type BusinessRoleConfig, type MCCompanyRole, MC_ROLE_LABELS } from '@/lib/businessRoles';
 
 interface DashboardGreetingProps {
@@ -13,6 +14,7 @@ interface DashboardGreetingProps {
 export function DashboardGreeting({ roleConfig, mcRole, mcRoleLabel }: DashboardGreetingProps) {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { profile } = useProfile();
   const isRu = language === 'ru';
 
   const hour = new Date().getHours();
@@ -20,7 +22,7 @@ export function DashboardGreeting({ roleConfig, mcRole, mcRoleLabel }: Dashboard
     ? hour < 12 ? 'Доброе утро' : hour < 18 ? 'Добрый день' : 'Добрый вечер'
     : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0]
+  const firstName = profile?.full_name?.split(' ')[0]
     || user?.email?.split('@')[0]
     || '';
 

@@ -22,6 +22,7 @@ import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { useTodayTasksCount } from '@/hooks/useCrmTasks';
+import { useProfile } from '@/hooks/useProfile';
 
 interface NavItem {
   title: string;
@@ -158,6 +159,7 @@ export function MCSidebar() {
   const { role: resolvedRole } = useResolvedContext();
   const { canAccess } = useTeamPermissions();
   const { data: todayTasksCount } = useTodayTasksCount();
+  const { profile } = useProfile();
 
   const companyName = activeCompany
     ? (isRussian ? activeCompany.name_ru : activeCompany.name_en)
@@ -281,7 +283,7 @@ export function MCSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-primary/20 text-primary text-xs">
               {user?.email?.charAt(0).toUpperCase() || 'M'}
             </AvatarFallback>
@@ -289,7 +291,7 @@ export function MCSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user?.user_metadata?.name || user?.email?.split('@')[0] || (isRussian ? 'Пользователь' : 'User')}
+                {profile?.full_name || user?.email?.split('@')[0] || (isRussian ? 'Пользователь' : 'User')}
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
