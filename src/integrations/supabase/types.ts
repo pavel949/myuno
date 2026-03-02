@@ -14835,36 +14835,7 @@ export type Database = {
           ip_address?: string | null
           property_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "property_activity_log_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "owner_properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_activity_log_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_activity_log_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_marketplace_listings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_activity_log_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "v_owner_properties"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       property_analytics: {
         Row: {
