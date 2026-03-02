@@ -217,12 +217,11 @@ export default function AddProperty() {
           {wizard.formData.lat && wizard.formData.lng && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={`https://static-maps.yandex.ru/v1?ll=${wizard.formData.lng},${wizard.formData.lat}&z=14&size=320,200&l=map&pt=${wizard.formData.lng},${wizard.formData.lat},pm2rdm`}
+                src={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+ef4444(${wizard.formData.lng},${wizard.formData.lat})/${wizard.formData.lng},${wizard.formData.lat},14,0/320x200@2x?access_token=pk.eyJ1IjoibG92YWJsZWRldiIsImEiOiJjbTlsMXlrNzIwMDhrMmpzZGVtbXhwYTdoIn0.aekxNRmnsXK-BBNQ-Cn6Xg`}
                 alt="Property location"
                 className="w-full h-[200px] object-cover bg-muted"
                 loading="lazy"
                 onError={(e) => {
-                  // Fallback: hide if static map fails
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />

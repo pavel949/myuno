@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MapPin, AlertTriangle } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
@@ -75,11 +76,20 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
           }}
         />
 
-        {formData.lat && formData.lng && (
+        {formData.lat && formData.lng ? (
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
           </p>
+        ) : (
+          <Alert variant="default" className="bg-warning/10 border-warning/30">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-xs">
+              {isRu 
+                ? 'Укажите точку на карте — без координат объект не появится в поиске на карте' 
+                : 'Pin a location on the map — without coordinates the property won\'t appear in map search'}
+            </AlertDescription>
+          </Alert>
         )}
       </CardContent>
     </Card>

@@ -195,7 +195,20 @@ export function PropertySubmissionSuccess({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.1 }}
         >
+          {propertyId && (
+            <Button 
+              className="w-full" 
+              size="lg"
+              onClick={() => navigate(`/mc/properties/${propertyId}/editor`)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              {isRu ? 'Открыть объект' : 'Open Property'}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
+
           <Button 
+            variant={propertyId ? 'outline' : 'default'}
             className="w-full" 
             size="lg"
             onClick={() => navigate('/mc/properties')}
