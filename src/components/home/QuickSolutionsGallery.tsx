@@ -4,6 +4,7 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import useEmblaCarousel from 'embla-carousel-react';
+import { SectionHeader } from '@/components/ds';
 
 // Image imports — unified editorial style
 import yachtImg from '@/assets/solutions/yacht.jpg';
@@ -102,15 +103,12 @@ export function QuickSolutionsGallery() {
 
   return (
     <section className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-        </div>
-        <h2 className="text-base font-bold text-foreground font-display tracking-tight">
-          {isRu ? 'Чем помочь?' : 'How can we help?'}
-        </h2>
-      </div>
+      {/* DS2.0 SectionHeader */}
+      <SectionHeader
+        title={isRu ? 'Чем помочь?' : 'How can we help?'}
+        icon={Sparkles}
+        size="md"
+      />
 
       {/* Carousel */}
       <div className="overflow-hidden" ref={emblaRef}>

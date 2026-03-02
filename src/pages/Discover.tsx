@@ -16,6 +16,8 @@ import { resolveIcon } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { DiscoverHero } from '@/components/discover/DiscoverHero';
+import { Surface } from '@/components/ui/surface';
+import { SectionHeader } from '@/components/ds';
 
 import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
@@ -90,9 +92,10 @@ export default function Discover() {
         <div className="space-y-4">
           {searchResults.contexts?.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {isRu ? 'Ситуации' : 'Life situations'}
-              </p>
+              <SectionHeader
+                title={isRu ? 'Ситуации' : 'Life situations'}
+                size="sm"
+              />
               {searchResults.contexts.map((ctx) => (
                 <button
                   key={ctx.code}
@@ -108,9 +111,10 @@ export default function Discover() {
 
           {searchResults.verticals?.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {isRu ? 'Сервисы' : 'Services'}
-              </p>
+              <SectionHeader
+                title={isRu ? 'Сервисы' : 'Services'}
+                size="sm"
+              />
               {searchResults.verticals.map((item) => {
                 const I = resolveIcon(item.icon);
                 return (
@@ -156,8 +160,8 @@ export default function Discover() {
           {/* Separator */}
           <div className="h-px bg-border/50" />
 
-          {/* Support block */}
-          <div className="rounded-2xl bg-muted/30 border border-border/50 p-4 space-y-3">
+          {/* Support block — DS2.0 Surface */}
+          <Surface variant="muted" bordered padding="md" radius="2xl" className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Headphones className="w-5 h-5 text-primary" />
@@ -189,7 +193,7 @@ export default function Discover() {
                 <span>{isRu ? 'Позвонить' : 'Call'}</span>
               </a>
             </div>
-          </div>
+          </Surface>
         </div>
       )}
     </MiniAppLayout>
