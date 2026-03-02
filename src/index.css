@@ -65,67 +65,91 @@ body {
 
 @layer base {
   :root {
-    /* Deep contrast light — navy-anchored readability */
+    /* ═══════ DS2.0 — Navy Premium Light ═══════ */
+    /* Surfaces */
     --background: 220 20% 97%;
     --foreground: 222 47% 11%;
     --card: 220 14% 99%;
     --card-foreground: 222 47% 11%;
+    --card-elevated: 0 0% 100%;
+    --card-hover: 220 14% 97%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    /* Primary — deep navy-indigo */
+
+    /* Brand — deep navy */
     --primary: 224 55% 32%;
     --primary-foreground: 0 0% 100%;
     --primary-light: 224 45% 48%;
+    --primary-hover: 224 55% 26%;
+
+    /* Secondary / Muted */
     --secondary: 220 16% 95%;
     --secondary-foreground: 222 47% 11%;
     --muted: 220 12% 93%;
     --muted-foreground: 222 20% 38%;
+
     /* Accent */
     --accent: 220 14% 94%;
     --accent-foreground: 222 47% 11%;
+
     /* Semantic accents */
     --accent-coral: 12 65% 52%;
     --accent-teal: 180 55% 38%;
+    --accent-purple: 270 55% 50%;
+    --accent-cyan: 190 65% 40%;
+    --accent-amber: 38 85% 48%;
+
+    /* Status */
+    --success: 152 60% 34%;
+    --warning: 38 85% 48%;
+    --info: 210 75% 45%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
     --border: 220 14% 84%;
+    --border-strong: 220 14% 70%;
+    --border-subtle: 220 14% 92%;
     --input: 220 12% 82%;
     --ring: 224 55% 32%;
     --radius: 0.75rem;
 
-    /* Semantic colors */
+    /* Legacy compat */
     --gold: 224 55% 32%;
     --gold-light: 224 45% 48%;
     --gold-dark: 224 55% 22%;
-    --success: 152 60% 34%;
-    --warning: 38 85% 48%;
-    --info: 210 75% 45%;
-    --accent-purple: 270 55% 50%;
-    --accent-cyan: 190 65% 40%;
-    --accent-amber: 38 85% 48%;
     --icon-dark: 222 47% 11%;
 
-    /* Card tokens */
+    /* Card geometry */
     --card-radius: 1rem;
     --card-radius-compact: 0.75rem;
     --card-padding: 1rem;
     --card-padding-compact: 0.75rem;
     --card-gap: 0.75rem;
-    
-    /* Shadows — deep navy */
-    --shadow-card: 0 2px 8px -2px hsl(222 47% 11% / 0.08), 0 1px 2px 0 hsl(222 47% 11% / 0.05);
-    --shadow-card-hover: 0 8px 24px -4px hsl(224 55% 32% / 0.16), 0 2px 6px -1px hsl(222 47% 11% / 0.08);
-    --shadow-elevated: 0 12px 32px -8px hsl(224 55% 32% / 0.2), 0 4px 12px -4px hsl(222 47% 11% / 0.1);
-    --shadow-float: 0 20px 48px -12px hsl(224 55% 32% / 0.24), 0 8px 16px -4px hsl(222 47% 11% / 0.1);
+
+    /* ═══ DS2.0 Elevation Scale (5 levels) ═══ */
+    --shadow-elevation-0: none;
+    --shadow-elevation-1: 0 1px 3px -1px hsl(222 47% 11% / 0.06), 0 1px 2px hsl(222 47% 11% / 0.04);
+    --shadow-elevation-2: 0 2px 8px -2px hsl(222 47% 11% / 0.08), 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+    --shadow-elevation-3: 0 8px 24px -4px hsl(224 55% 32% / 0.16), 0 2px 6px -1px hsl(222 47% 11% / 0.08);
+    --shadow-elevation-4: 0 12px 32px -8px hsl(224 55% 32% / 0.2), 0 4px 12px -4px hsl(222 47% 11% / 0.1);
+    --shadow-elevation-5: 0 20px 48px -12px hsl(224 55% 32% / 0.24), 0 8px 16px -4px hsl(222 47% 11% / 0.1);
+
+    /* Compat aliases */
+    --shadow-card: var(--shadow-elevation-2);
+    --shadow-card-hover: var(--shadow-elevation-3);
+    --shadow-elevated: var(--shadow-elevation-4);
+    --shadow-float: var(--shadow-elevation-5);
     --shadow-neu-inset: inset 0 1px 2px hsl(222 20% 50% / 0.1);
     --shadow-btn: 0 2px 8px -2px hsl(224 55% 32% / 0.3), 0 1px 2px hsl(222 47% 11% / 0.12);
     --shadow-btn-hover: 0 6px 20px -4px hsl(224 55% 32% / 0.4), 0 2px 4px hsl(222 47% 11% / 0.12);
 
-    /* Luminescent gradient for borders */
+    /* Luminescent glow */
     --glow-from: 224 70% 55%;
     --glow-via: 260 60% 58%;
     --glow-to: 190 70% 50%;
 
+    /* Sidebar */
     --sidebar-background: 220 16% 96%;
     --sidebar-foreground: 222 40% 18%;
     --sidebar-primary: 224 55% 32%;
@@ -137,64 +161,81 @@ body {
   }
 
   .dark {
-    /* Dark — deep navy with contrast */
+    /* ═══════ DS2.0 — Navy Premium Dark ═══════ */
+    /* Surfaces */
     --background: 222 30% 6%;
     --foreground: 210 15% 95%;
-    
     --card: 222 25% 9%;
     --card-foreground: 210 12% 93%;
-    
+    --card-elevated: 222 25% 11%;
+    --card-hover: 222 25% 13%;
     --popover: 222 25% 9%;
     --popover-foreground: 210 12% 93%;
-    
+
+    /* Brand */
     --primary: 224 50% 58%;
     --primary-foreground: 0 0% 100%;
     --primary-light: 224 45% 68%;
-    
+    --primary-hover: 224 50% 64%;
+
+    /* Secondary / Muted */
     --secondary: 222 18% 14%;
     --secondary-foreground: 210 12% 92%;
-    
     --muted: 222 14% 18%;
     --muted-foreground: 220 10% 72%;
-    
+
+    /* Accent */
     --accent: 222 18% 14%;
     --accent-foreground: 210 12% 92%;
     --accent-coral: 12 65% 58%;
     --accent-teal: 180 55% 48%;
-    
-    --destructive: 0 65% 48%;
-    --destructive-foreground: 0 0% 96%;
-    
-    --border: 222 14% 20%;
-    --input: 222 14% 20%;
-    --ring: 224 50% 58%;
-
-    --gold: 224 50% 58%;
-    --gold-light: 224 45% 68%;
-    --gold-dark: 224 50% 42%;
-    --success: 152 58% 42%;
-    --warning: 38 85% 52%;
-    --info: 210 70% 52%;
     --accent-purple: 270 50% 62%;
     --accent-cyan: 190 60% 52%;
     --accent-amber: 38 80% 55%;
+
+    /* Status */
+    --success: 152 58% 42%;
+    --warning: 38 85% 52%;
+    --info: 210 70% 52%;
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 96%;
+
+    /* Borders */
+    --border: 222 14% 20%;
+    --border-strong: 222 14% 30%;
+    --border-subtle: 222 14% 14%;
+    --input: 222 14% 20%;
+    --ring: 224 50% 58%;
+
+    /* Legacy compat */
+    --gold: 224 50% 58%;
+    --gold-light: 224 45% 68%;
+    --gold-dark: 224 50% 42%;
     --icon-dark: 210 60% 75%;
 
-    --card-elevated: 222 25% 11%;
-    --card-hover: 222 25% 13%;
-
+    /* Luminescent glow */
     --glow-from: 224 70% 62%;
     --glow-via: 260 60% 65%;
     --glow-to: 190 70% 58%;
-    
-    --shadow-card: 0 2px 8px -2px hsl(222 30% 4% / 0.5), 0 1px 2px hsl(222 30% 4% / 0.25);
-    --shadow-card-hover: 0 8px 24px -4px hsl(224 50% 58% / 0.22), 0 2px 6px hsl(222 30% 4% / 0.35);
-    --shadow-elevated: 0 12px 32px -8px hsl(224 50% 58% / 0.28), 0 4px 12px hsl(222 30% 4% / 0.35);
-    --shadow-float: 0 20px 48px -12px hsl(224 50% 58% / 0.35), 0 8px 16px hsl(222 30% 4% / 0.3);
+
+    /* ═══ DS2.0 Elevation Scale (dark) ═══ */
+    --shadow-elevation-0: none;
+    --shadow-elevation-1: 0 1px 3px -1px hsl(222 30% 4% / 0.3), 0 1px 2px hsl(222 30% 4% / 0.2);
+    --shadow-elevation-2: 0 2px 8px -2px hsl(222 30% 4% / 0.5), 0 1px 2px hsl(222 30% 4% / 0.25);
+    --shadow-elevation-3: 0 8px 24px -4px hsl(224 50% 58% / 0.22), 0 2px 6px hsl(222 30% 4% / 0.35);
+    --shadow-elevation-4: 0 12px 32px -8px hsl(224 50% 58% / 0.28), 0 4px 12px hsl(222 30% 4% / 0.35);
+    --shadow-elevation-5: 0 20px 48px -12px hsl(224 50% 58% / 0.35), 0 8px 16px hsl(222 30% 4% / 0.3);
+
+    /* Compat aliases */
+    --shadow-card: var(--shadow-elevation-2);
+    --shadow-card-hover: var(--shadow-elevation-3);
+    --shadow-elevated: var(--shadow-elevation-4);
+    --shadow-float: var(--shadow-elevation-5);
     --shadow-neu-inset: inset 0 1px 3px hsl(222 30% 2% / 0.35);
     --shadow-btn: 0 2px 8px -2px hsl(224 50% 58% / 0.35), 0 1px 2px hsl(222 30% 4% / 0.25);
     --shadow-btn-hover: 0 6px 20px -4px hsl(224 50% 58% / 0.5), 0 2px 4px hsl(222 30% 4% / 0.25);
 
+    /* Sidebar */
     --sidebar-background: 222 30% 7%;
     --sidebar-foreground: 210 12% 90%;
     --sidebar-primary: 224 50% 58%;

@@ -62,6 +62,9 @@ export default {
           elevated: "hsl(var(--card-elevated))",
           hover: "hsl(var(--card-hover))",
         },
+        "border-strong": "hsl(var(--border-strong))",
+        "border-subtle": "hsl(var(--border-subtle))",
+        "primary-hover": "hsl(var(--primary-hover))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
