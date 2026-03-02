@@ -14067,6 +14067,8 @@ export type Database = {
           created_by_uno_team: boolean | null
           created_on_behalf: boolean | null
           currency: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           deposit_amount: number | null
           deposit_currency: string | null
           deposit_type: string | null
@@ -14271,6 +14273,8 @@ export type Database = {
           created_by_uno_team?: boolean | null
           created_on_behalf?: boolean | null
           currency?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
           deposit_type?: string | null
@@ -14475,6 +14479,8 @@ export type Database = {
           created_by_uno_team?: boolean | null
           created_on_behalf?: boolean | null
           currency?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           deposit_amount?: number | null
           deposit_currency?: string | null
           deposit_type?: string | null

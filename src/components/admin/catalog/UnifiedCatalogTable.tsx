@@ -364,14 +364,21 @@ export function UnifiedCatalogTable() {
                           className="text-destructive"
                           onClick={async () => {
                             if (!confirm(isRussian ? 'Удалить этот элемент?' : 'Delete this item?')) return;
-                            const table = item.type === 'service' ? 'services' : item.type === 'product' ? 'marketplace_products' : 'properties';
-                            const { error } = await supabase.from(table).delete().eq('id', item.id);
-                            if (!error) { refetch(); toast.success(isRussian ? 'Удалено' : 'Deleted'); }
-                            else toast.error(error.message);
+                            if (item.type === 'property') {
+                              // Soft delete for properties
+                              const { error } = await (supabase.from('properties') as any).update({ deleted_at: new Date().toISOString(), is_active: false }).eq('id', item.id);
+                              if (!error) { refetch(); toast.success(isRussian ? 'Перемещено в корзину' : 'Moved to trash'); }
+                              else toast.error(error.message);
+                            } else {
+                              const table = item.type === 'service' ? 'services' : 'marketplace_products';
+                              const { error } = await supabase.from(table).delete().eq('id', item.id);
+                              if (!error) { refetch(); toast.success(isRussian ? 'Удалено' : 'Deleted'); }
+                              else toast.error(error.message);
+                            }
                           }}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          {isRussian ? 'Удалить' : 'Delete'}
+                          {item.type === 'property' ? (isRussian ? 'В корзину' : 'Move to trash') : (isRussian ? 'Удалить' : 'Delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
