@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, Building2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -15,43 +15,18 @@ import { ActiveRoleBadge } from '@/components/profile/ActiveRoleBadge';
 import { BecomePartnerCTA } from '@/components/profile/BecomePartnerCTA';
 import { UserRolesPermissions } from '@/components/profile/UserRolesPermissions';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { supabase } from '@/integrations/supabase/client';
+import { useUserContext } from '@/hooks/useUserContext';
 import { useProfile } from '@/hooks/useProfile';
 
 export default function Profile() {
   const { t, language } = useLanguage();
-  const { user, isLoading, signOut } = useAuth();
+  const { user, isLoading: authLoading, signOut } = useAuth();
   const { profile } = useProfile();
   const { activeCompany } = useActiveCompany();
+  const { hasRole, isLoading: rolesLoading } = useUserContext();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('/auth', { replace: true });
-    }
-  }, [user, isLoading, navigate]);
-
-  // Check admin role
-  useEffect(() => {
-    let isMounted = true;
-    
-    const checkAdminRole = async () => {
-      if (!user) {
-        if (isMounted) setIsAdmin(false);
-        return;
-      }
-
-      const { data } = await supabase
-        .rpc('has_role', { _user_id: user.id, _role: 'admin' });
-
-      if (isMounted) setIsAdmin(data === true);
-    };
-
-    checkAdminRole();
-    
-    return () => { isMounted = false; };
-  }, [user]);
+  const isLoading = authLoading || rolesLoading;
 
   if (isLoading) {
     return (
@@ -62,8 +37,11 @@ export default function Profile() {
   }
 
   if (!user) {
+    // Redirect handled by route guards
     return null;
   }
+
+  const isAdmin = hasRole('admin');
 
   const handleLogout = async () => {
     await signOut();

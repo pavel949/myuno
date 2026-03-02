@@ -43,8 +43,12 @@ export interface UserActiveContext {
 export type { AppRole } from '@/types/auth';
 
 /**
- * Hook for managing user's active context (role + org) stored in database
- * This replaces localStorage-based role switching
+ * Hook for managing user's active context (role + org) stored in database.
+ * 
+ * Role sources (merged):
+ * 1. user_roles table (platform roles: admin, uno_team, staff, etc.)
+ * 2. management_company_members (→ adds 'owner' role)
+ * 3. org_members (→ adds 'vendor'/'owner' based on org_type)
  */
 export function useUserContext() {
   const { user } = useAuth();
@@ -82,7 +86,7 @@ export function useUserContext() {
     ...CACHE_PROFILES.DYNAMIC,
   });
 
-  // Fetch user's org memberships
+  // Fetch user's org memberships (Clean Core orgs)
   const { data: memberships, isLoading: membershipsLoading } = useQuery({
     queryKey: ['org-memberships', user?.id],
     queryFn: async (): Promise<OrgMember[]> => {
@@ -104,7 +108,7 @@ export function useUserContext() {
     ...CACHE_PROFILES.DYNAMIC,
   });
 
-  // Fetch user roles from user_roles table (legacy support)
+  // Fetch user roles from user_roles table
   const { data: userRoles, isLoading: rolesLoading } = useQuery({
     queryKey: ['user-roles', user?.id],
     queryFn: async (): Promise<string[]> => {
@@ -116,8 +120,26 @@ export function useUserContext() {
         .eq('user_id', user.id);
       
       if (error) throw error;
-      // Explicitly extract role as string to ensure proper type
       return (data || []).map(r => String(r.role));
+    },
+    enabled: !!user?.id,
+    ...CACHE_PROFILES.DYNAMIC,
+  });
+
+  // Fetch MC memberships — the PRIMARY source for 'owner' role
+  const { data: mcMemberships, isLoading: mcLoading } = useQuery({
+    queryKey: ['user-mc-membership-roles', user?.id],
+    queryFn: async (): Promise<{ company_id: string; role: string }[]> => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('management_company_members')
+        .select('company_id, role')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+      
+      if (error) return [];
+      return data || [];
     },
     enabled: !!user?.id,
     ...CACHE_PROFILES.DYNAMIC,
@@ -170,7 +192,7 @@ export function useUserContext() {
     },
   });
 
-  // Get orgs by type - memoized to prevent infinite re-render loops
+  // Get orgs by type - memoized
   const vendorOrgs = useMemo(
     () => memberships?.filter(m => m.org?.org_type === 'vendor') || [],
     [memberships]
@@ -188,16 +210,28 @@ export function useUserContext() {
     [userRoles]
   );
 
-  // Determine available roles based on memberships and user_roles - memoized
+  // Whether user is an MC member (management_company_members)
+  const hasMCMembership = useMemo(() => (mcMemberships || []).length > 0, [mcMemberships]);
+
+  // Determine available roles from ALL sources - memoized
   const availableRoles = useMemo(() => {
     const roles: AppRole[] = ['user'];
     
+    // From org_members
     if (vendorOrgs.length > 0 || normalizedRoles.includes('vendor')) {
       roles.push('vendor');
     }
-    if (ownerOrgs.length > 0 || normalizedRoles.includes('property_owner') || normalizedRoles.includes('owner')) {
+    
+    // From org_members OR management_company_members OR user_roles
+    if (
+      ownerOrgs.length > 0 || 
+      hasMCMembership || 
+      normalizedRoles.includes('property_owner') || 
+      normalizedRoles.includes('owner')
+    ) {
       roles.push('owner');
     }
+    
     if (normalizedRoles.includes('admin')) {
       roles.push('admin');
     }
@@ -209,10 +243,7 @@ export function useUserContext() {
     }
     
     return roles;
-  }, [vendorOrgs.length, ownerOrgs.length, normalizedRoles]);
-  
-  // Debug logging - only log when values actually change
-  // console.log('[useUserContext] availableRoles:', availableRoles);
+  }, [vendorOrgs.length, ownerOrgs.length, hasMCMembership, normalizedRoles]);
 
   // Get current active org
   const activeOrg = memberships?.find(m => m.org_id === context?.active_org_id)?.org || null;
@@ -247,8 +278,8 @@ export function useUserContext() {
     switchContext: switchContext.mutateAsync,
     isSwitching: switchContext.isPending,
     
-    // Loading state - MUST include rolesLoading to prevent premature redirects
-    isLoading: contextLoading || membershipsLoading || rolesLoading,
+    // Loading state - includes MC membership loading
+    isLoading: contextLoading || membershipsLoading || rolesLoading || mcLoading,
   };
 }
 
