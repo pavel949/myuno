@@ -11,10 +11,9 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, OwnerGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
-import { OwnerLayout } from '@/components/owner/OwnerLayout';
 import { MCLayout } from '@/components/mc/MCLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
@@ -613,82 +612,27 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
           <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
           <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
-        </Route>
-
-        {/* ── Owner (individual property owners) ── */}
-        <Route path="/owner/landing" element={<Navigate to="/owner" replace />} />
-        <Route path="/owner/onboarding" element={<Navigate to="/owner/setup" replace />} />
-        
-        <Route path="/owner" element={<OwnerGuard><OwnerLayout /></OwnerGuard>}>
-          <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
+          {/* Pages moved from /owner */}
+          <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
           <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
           <Route path="setup" element={<LazyPage><Pages.OwnerSetupWizard /></LazyPage>} />
-          <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
-          <Route path="finance" element={<LazyPage><Pages.FinanceOverview /></LazyPage>} />
-          
           <Route path="service-request" element={<LazyPage><Pages.ServiceRequest /></LazyPage>} />
           <Route path="inspection" element={<LazyPage><Pages.InspectionRequest /></LazyPage>} />
           <Route path="full-management" element={<LazyPage><Pages.FullManagement /></LazyPage>} />
-          <Route path="modules" element={<LazyPage><Pages.OwnerModulesPage /></LazyPage>} />
-          <Route path="revenue" element={<Navigate to="/owner/finance" replace />} />
-          <Route path="analytics" element={<Navigate to="/owner/finance" replace />} />
-
-          {/* ── Redirects: MC routes that were on /owner → /mc ── */}
-          <Route path="properties" element={<Navigate to="/mc/properties" replace />} />
-          <Route path="properties/*" element={<Navigate to="/mc/properties" replace />} />
-          <Route path="calendar" element={<Navigate to="/mc/calendar" replace />} />
-          <Route path="bookings" element={<Navigate to="/mc/calendar" replace />} />
-          <Route path="bookings/*" element={<Navigate to="/mc/calendar" replace />} />
-          <Route path="operations" element={<Navigate to="/mc/operations" replace />} />
-          <Route path="financials" element={<Navigate to="/mc/financials" replace />} />
-          <Route path="financials/*" element={<Navigate to="/mc/financials" replace />} />
-          <Route path="budget" element={<Navigate to="/mc/budget" replace />} />
-          <Route path="quick-expense" element={<Navigate to="/mc/quick-expense" replace />} />
-          <Route path="expenses/quick" element={<Navigate to="/mc/expenses/quick" replace />} />
-          <Route path="income/quick" element={<Navigate to="/mc/income/quick" replace />} />
-          <Route path="messages" element={<Navigate to="/mc/messages" replace />} />
-          <Route path="auto-messaging" element={<Navigate to="/mc/auto-messaging" replace />} />
-          <Route path="chat/*" element={<Navigate to="/mc/messages" replace />} />
-          <Route path="support-chat" element={<Navigate to="/mc/support-chat" replace />} />
-          <Route path="message-templates" element={<Navigate to="/mc/message-templates" replace />} />
-          <Route path="channels" element={<Navigate to="/mc/channels" replace />} />
-          <Route path="team" element={<Navigate to="/mc/staff" replace />} />
-          <Route path="reports" element={<Navigate to="/mc/reports" replace />} />
-          <Route path="maintenance-plan" element={<Navigate to="/mc/maintenance-plan" replace />} />
-          <Route path="management-terms" element={<Navigate to="/mc/management-terms" replace />} />
-          <Route path="staff" element={<Navigate to="/mc/staff" replace />} />
-          <Route path="subscription" element={<Navigate to="/mc/subscription" replace />} />
-          <Route path="sales" element={<Navigate to="/mc/sales" replace />} />
-          <Route path="sales/*" element={<Navigate to="/mc/sales" replace />} />
-          <Route path="contacts" element={<Navigate to="/mc/contacts" replace />} />
-          <Route path="contacts/*" element={<Navigate to="/mc/contacts" replace />} />
-          <Route path="invoices" element={<Navigate to="/mc/invoices" replace />} />
-          <Route path="tasks" element={<Navigate to="/mc/tasks" replace />} />
-          <Route path="crm-dashboard" element={<Navigate to="/mc/crm-dashboard" replace />} />
-          <Route path="sequences" element={<Navigate to="/mc/sequences" replace />} />
-          <Route path="quotes" element={<Navigate to="/mc/quotes" replace />} />
-          <Route path="meetings" element={<Navigate to="/mc/meetings" replace />} />
-          <Route path="crm-emails" element={<Navigate to="/mc/crm-emails" replace />} />
-          <Route path="automations" element={<Navigate to="/mc/automations" replace />} />
-          <Route path="crm-templates" element={<Navigate to="/mc/crm-templates" replace />} />
-          <Route path="duplicates" element={<Navigate to="/mc/duplicates" replace />} />
-          <Route path="companies" element={<Navigate to="/mc/companies" replace />} />
-          <Route path="forms" element={<Navigate to="/mc/forms" replace />} />
-          <Route path="assignment" element={<Navigate to="/mc/assignment" replace />} />
-          <Route path="vendors" element={<Navigate to="/mc/vendors" replace />} />
-          <Route path="inventory" element={<Navigate to="/mc/inventory" replace />} />
-          <Route path="documents" element={<Navigate to="/mc/documents" replace />} />
-          <Route path="marketing" element={<Navigate to="/mc/marketing" replace />} />
-          <Route path="vault" element={<Navigate to="/mc/vault" replace />} />
-          <Route path="rates" element={<Navigate to="/mc/rates" replace />} />
-          <Route path="reviews-management" element={<Navigate to="/mc/reviews-management" replace />} />
-          <Route path="reviews" element={<Navigate to="/mc/reviews-management" replace />} />
-          <Route path="insurance" element={<Navigate to="/mc/insurance" replace />} />
-          <Route path="owners" element={<Navigate to="/mc/owners" replace />} />
-          <Route path="owners/*" element={<Navigate to="/mc/owners" replace />} />
-          <Route path="owner-reports" element={<Navigate to="/mc/reports" replace />} />
-          <Route path="transparency/*" element={<Navigate to="/mc" replace />} />
         </Route>
+
+        {/* ── Owner → MC Redirects (legacy backward compat) ── */}
+        <Route path="/owner/landing" element={<Navigate to="/mc" replace />} />
+        <Route path="/owner/onboarding" element={<Navigate to="/mc/setup" replace />} />
+        <Route path="/owner/guide" element={<Navigate to="/mc/guide" replace />} />
+        <Route path="/owner/setup" element={<Navigate to="/mc/setup" replace />} />
+        <Route path="/owner/portfolio" element={<Navigate to="/mc/portfolio" replace />} />
+        <Route path="/owner/finance" element={<Navigate to="/mc/finance" replace />} />
+        <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
+        <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
+        <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />
+        <Route path="/owner" element={<Navigate to="/mc" replace />} />
+        <Route path="/owner/*" element={<Navigate to="/mc" replace />} />
         
         {/* ── Owner Portal (property owner read-only) ── */}
         <Route path="/my-property" element={<AuthGuard><LazyPage><Pages.OwnerPortalDashboard /></LazyPage></AuthGuard>} />
