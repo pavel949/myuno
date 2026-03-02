@@ -46,6 +46,16 @@ function generatePassword(length = 16): string {
   return result.join('');
 }
 
+const EMAIL_ASCII_REGEX = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
+
+function normalizeEmail(value: unknown): string {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -74,9 +84,17 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const { company_id, full_name, email, phone, role } = body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!company_id || !full_name || !email || !role) {
+    if (!company_id || !full_name || !normalizedEmail || !role) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
+    }
+
+    if (!EMAIL_ASCII_REGEX.test(normalizedEmail)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format. Please use a valid latin email like name@example.com' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Check caller is director/admin
@@ -97,7 +115,7 @@ Deno.serve(async (req) => {
 
     // Create auth user
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email,
+      email: normalizedEmail,
       password: tempPassword,
       email_confirm: true,
       user_metadata: { full_name },
@@ -158,7 +176,7 @@ Deno.serve(async (req) => {
       const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
       await resend.emails.send({
         from: 'myUNO <noreply@myuno.app>',
-        to: [email],
+        to: [normalizedEmail],
         subject: `Welcome to ${companyName} — Your Account`,
         html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <style>
@@ -184,7 +202,7 @@ Deno.serve(async (req) => {
     <p>You've been added to <strong>${companyName}</strong> as <strong>${role}</strong>. Here are your login credentials:</p>
     <div class="card">
       <div class="label">Email (Login)</div>
-      <div class="value">${email}</div>
+      <div class="value">${normalizedEmail}</div>
       <div class="label">Temporary Password</div>
       <div class="value" style="font-family:monospace;letter-spacing:1px">${tempPassword}</div>
     </div>
