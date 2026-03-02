@@ -627,11 +627,29 @@ function UnitFieldsInner({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label>{isRu ? 'Удобства и оснащение' : 'Amenities & Equipment'}</Label>
-            {totalSelected > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {totalSelected} {isRu ? 'выбрано' : 'selected'}
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {totalSelected > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {totalSelected} {isRu ? 'выбрано' : 'selected'}
+                </Badge>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-xs h-7"
+                onClick={() => {
+                  const allIds = amenityCategories.flatMap(c => c.items.map(i => i.id));
+                  const allSelected = allIds.every(id => equipment.includes(id));
+                  onEquipmentChange(allSelected ? [] : allIds);
+                }}
+              >
+                {amenityCategories.flatMap(c => c.items.map(i => i.id)).every(id => equipment.includes(id))
+                  ? (isRu ? 'Снять все' : 'Deselect All')
+                  : (isRu ? 'Отметить все' : 'Select All')
+                }
+              </Button>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -673,25 +691,48 @@ function UnitFieldsInner({
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="grid grid-cols-2 gap-1 px-3 py-2 border-l-2 border-muted ml-3">
-                      {category.items.map((item) => (
-                        <div 
-                          key={item.id} 
-                          className="flex items-center space-x-2 py-1"
-                        >
-                          <Checkbox
-                            id={`amenity-${item.id}`}
-                            checked={equipment.includes(item.id)}
-                            onCheckedChange={() => handleEquipmentToggle(item.id)}
-                          />
-                          <label
-                            htmlFor={`amenity-${item.id}`}
-                            className="text-sm cursor-pointer leading-tight"
+                    <div className="px-3 py-2 border-l-2 border-muted ml-3">
+                      {/* Per-category select all */}
+                      <button
+                        type="button"
+                        className="text-xs text-primary hover:underline mb-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const catIds = category.items.map(i => i.id);
+                          const allCatSelected = catIds.every(id => equipment.includes(id));
+                          if (allCatSelected) {
+                            onEquipmentChange(equipment.filter(id => !catIds.includes(id)));
+                          } else {
+                            const merged = new Set([...equipment, ...catIds]);
+                            onEquipmentChange(Array.from(merged));
+                          }
+                        }}
+                      >
+                        {category.items.every(i => equipment.includes(i.id))
+                          ? (isRu ? 'Снять все' : 'Deselect all')
+                          : (isRu ? 'Выбрать все' : 'Select all')
+                        }
+                      </button>
+                      <div className="grid grid-cols-2 gap-1">
+                        {category.items.map((item) => (
+                          <div 
+                            key={item.id} 
+                            className="flex items-center space-x-2 py-1"
                           >
-                            {isRu ? item.labelRu : item.labelEn}
-                          </label>
-                        </div>
-                      ))}
+                            <Checkbox
+                              id={`amenity-${item.id}`}
+                              checked={equipment.includes(item.id)}
+                              onCheckedChange={() => handleEquipmentToggle(item.id)}
+                            />
+                            <label
+                              htmlFor={`amenity-${item.id}`}
+                              className="text-sm cursor-pointer leading-tight"
+                            >
+                              {isRu ? item.labelRu : item.labelEn}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
