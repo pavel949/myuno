@@ -32,6 +32,7 @@ export function PropertiesBlock() {
 
   const activeCount = properties?.filter(p => p.status === 'active' && p.approval_status === 'approved').length || 0;
   const pendingCount = properties?.filter(p => p.approval_status === 'pending').length || 0;
+  const draftCount = properties?.filter(p => !p.approval_status || p.approval_status === 'draft').length || 0;
   const totalCount = properties?.length || 0;
 
   // Empty state
@@ -62,6 +63,9 @@ export function PropertiesBlock() {
   }
 
   const getStatusIndicator = (property: any) => {
+    if (property.approval_status === 'draft') {
+      return { icon: Home, color: 'text-muted-foreground', bg: 'bg-muted-foreground' };
+    }
     if (property.approval_status === 'pending') {
       return { icon: Clock, color: 'text-warning', bg: 'bg-warning' };
     }
