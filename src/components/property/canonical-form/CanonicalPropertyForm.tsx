@@ -9,9 +9,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound, Check } from 'lucide-react';
 
 // Import canonical step components from Owner Wizard
@@ -493,52 +493,44 @@ export function CanonicalPropertyForm({
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0">
-        <ScrollArea className="w-full pb-2">
-          <TabsList className="inline-flex w-max min-w-full mb-4">
+        {/* Prominent tab bar — full width, bold labels */}
+        <div className="border-b border-border mb-6">
+          <div className="flex gap-0 overflow-x-auto scrollbar-none -mb-px">
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
+              const isActive = activeTab === tab.id;
               return (
-                <TabsTrigger
+                <button
                   key={tab.id}
-                  value={tab.id}
-                  className="flex-none min-w-[132px] sm:min-w-[148px] items-center justify-start gap-2 px-3 relative"
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "relative flex items-center gap-2.5 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
+                    isActive
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  )}
                 >
-                  <tab.icon className="h-3.5 w-3.5" />
-                  <span className="text-xs">{isRu ? tab.labelRu : tab.labelEn}</span>
+                  <tab.icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
+                  <span>{isRu ? tab.labelRu : tab.labelEn}</span>
+                  {/* Completion dot */}
                   {status === 'complete' && (
-                    <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary flex items-center justify-center">
-                      <Check className="h-2 w-2 text-primary-foreground" />
-                    </span>
+                    <span className="h-2 w-2 rounded-full bg-primary" />
                   )}
                   {status === 'partial' && (
-                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-accent-foreground/50 border-2 border-background" />
+                    <span className="h-2 w-2 rounded-full bg-accent-foreground/50" />
                   )}
                   {status === 'empty' && (
-                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-muted-foreground/20 border-2 border-background" />
+                    <span className="h-2 w-2 rounded-full bg-muted-foreground/20" />
                   )}
-                </TabsTrigger>
+                </button>
               );
             })}
-          </TabsList>
-        </ScrollArea>
-
-        {/* Completion legend */}
-        <div className="flex items-center gap-3 px-1 mb-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-primary inline-block" />
-            {isRu ? 'Заполнено' : 'Complete'}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-accent-foreground/50 inline-block" />
-            {isRu ? 'Частично' : 'Partial'}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-muted-foreground/20 inline-block" />
-            {isRu ? 'Пусто' : 'Empty'}
-          </span>
+          </div>
         </div>
 
-        <div className="pr-0 md:pr-2">
+        {/* Content area — full width, no ScrollArea constraint */}
+        <div className="w-full">
           <TabsContent value="basic" className="mt-0">
             <BasicInfoStep
               formData={formData}

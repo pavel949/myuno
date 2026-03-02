@@ -506,8 +506,11 @@ export default function PropertyEditor() {
       {/* AI Intake - merge mode for existing property */}
       <AIIntakePanel onDataExtracted={handleAIMerge} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),280px] xl:grid-cols-[minmax(0,1fr),320px]">
-        <div>
+      <div className={showPreview 
+        ? "grid gap-8 lg:grid-cols-[minmax(0,1fr),300px] xl:grid-cols-[minmax(0,1fr),340px]" 
+        : ""
+      }>
+        <div className="min-w-0">
           {formData && (
             <CanonicalPropertyForm
               mode="owner"
