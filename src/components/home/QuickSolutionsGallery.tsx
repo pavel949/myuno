@@ -44,25 +44,21 @@ const SOLUTIONS: QuickSolution[] = [
   { id: 'massage', image: massageImg, labelRu: 'Тайский массаж', labelEn: 'Thai massage nearby', path: '/beauty', personas: ['tourist'] },
   { id: 'islands', image: islandsImg, labelRu: 'Экскурсия на острова', labelEn: 'Island tour', path: '/experiences', personas: ['tourist'] },
   { id: 'transfer-t', image: transferImg, labelRu: 'Трансфер из аэропорта', labelEn: 'Airport transfer', path: '/transport/airport-transfer', personas: ['tourist'] },
-
   // Resident
   { id: 'pediatr', image: pediatrImg, labelRu: 'Педиатр на дом', labelEn: 'Pediatrician house call', path: '/medical', personas: ['resident'] },
   { id: 'camp', image: campImg, labelRu: 'Английский лагерь', labelEn: 'English camp for kids', path: '/education', personas: ['resident'] },
   { id: 'visa', image: visaImg, labelRu: 'Продлить визу', labelEn: 'Extend visa', path: '/legal', personas: ['resident'] },
   { id: 'plumber-r', image: plumberImg, labelRu: 'Вызвать сантехника', labelEn: 'Call a plumber', path: '/services', personas: ['resident'] },
-
   // Investor
   { id: 'risks', image: risksImg, labelRu: 'Риски новостроек', labelEn: 'Off-plan risks report', path: '/property/invest', personas: ['investor'] },
   { id: 'roi', image: roiImg, labelRu: 'Сравнить доходность', labelEn: 'Compare ROI', path: '/property/offplan', personas: ['investor'] },
   { id: 'legal-check', image: legalImg, labelRu: 'Юридическая проверка', labelEn: 'Legal check', path: '/legal', personas: ['investor'] },
   { id: 'rental-mgmt', image: rentalMgmtImg, labelRu: 'Управление арендой', labelEn: 'Rental management', path: '/owner', personas: ['investor'] },
-
   // Owner
   { id: 'cleaning', image: cleaningImg, labelRu: 'Клининг сегодня', labelEn: 'Cleaning today', path: '/cleaning', personas: ['property_owner'] },
   { id: 'pool', image: poolImg, labelRu: 'Обслуживание бассейна', labelEn: 'Pool maintenance', path: '/services', personas: ['property_owner'] },
   { id: 'pm', image: pmImg, labelRu: 'Управляющая компания', labelEn: 'Property management', path: '/owner', personas: ['property_owner'] },
   { id: 'renovation', image: renovationImg, labelRu: 'Ремонт и отделка', labelEn: 'Renovation', path: '/services', personas: ['property_owner'] },
-
   // Universal
   { id: 'property-tour', image: propertyTourImg, labelRu: 'Бесплатный тур', labelEn: 'Free property tour', path: '/property/consultation?type=property_tour', personas: ['all'] },
   { id: 'flowers', image: flowersImg, labelRu: 'Заказать цветы', labelEn: 'Order flowers', path: '/flowers', personas: ['all'] },
@@ -88,7 +84,6 @@ export function QuickSolutionsGallery() {
   }, [personas]);
 
   const solutions = useMemo(() => {
-    // Collect items matching ANY of the selected personas
     const personaItems = SOLUTIONS.filter(s => 
       activePersonas.some(p => s.personas.includes(p))
     );
@@ -108,11 +103,11 @@ export function QuickSolutionsGallery() {
   return (
     <section className="space-y-3">
       {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="flex items-center gap-2.5">
+        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
         </div>
-        <h2 className="text-base font-bold text-foreground">
+        <h2 className="text-base font-bold text-foreground font-display tracking-tight">
           {isRu ? 'Чем помочь?' : 'How can we help?'}
         </h2>
       </div>
@@ -127,21 +122,21 @@ export function QuickSolutionsGallery() {
               className="shrink-0 min-w-0 basis-[180px] lg:basis-[210px] group text-left"
             >
               {/* Photo */}
-              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-2 transition-transform duration-200 group-active:scale-[0.97]">
+              <div className="aspect-[4/3] rounded-xl overflow-hidden mb-2 shadow-[var(--shadow-card)] ring-1 ring-black/[0.04] dark:ring-white/[0.06] transition-all duration-200 group-hover:shadow-[var(--shadow-card-hover)] group-active:scale-[0.97]">
                 <img
                   src={s.image}
                   alt={isRu ? s.labelRu : s.labelEn}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   loading="lazy"
                   decoding="async"
                 />
               </div>
               {/* Label */}
-              <p className="text-[12px] font-medium text-foreground leading-tight line-clamp-2 mb-0.5">
+              <p className="text-[12px] font-semibold text-foreground leading-tight line-clamp-2 mb-0.5">
                 {isRu ? s.labelRu : s.labelEn}
               </p>
-              <div className="flex items-center gap-0.5 text-muted-foreground">
-                <span className="text-[11px]">{isRu ? 'Подробнее' : 'Learn more'}</span>
+              <div className="flex items-center gap-0.5 text-muted-foreground group-hover:text-primary transition-colors">
+                <span className="text-[11px] font-medium">{isRu ? 'Подробнее' : 'Learn more'}</span>
                 <ChevronRight className="w-3 h-3" />
               </div>
             </button>

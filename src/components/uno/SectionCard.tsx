@@ -5,15 +5,19 @@ interface SectionCardProps {
   children: ReactNode;
   className?: string;
   noPadding?: boolean;
+  elevated?: boolean;
 }
 
 export const SectionCard = forwardRef<HTMLDivElement, SectionCardProps>(
-  ({ children, className, noPadding = false }, ref) => {
+  ({ children, className, noPadding = false, elevated = false }, ref) => {
     return (
       <div 
         ref={ref}
         className={cn(
-          "bg-card rounded-2xl border border-border",
+          "bg-card rounded-2xl border border-border/50 transition-shadow duration-200",
+          elevated 
+            ? "shadow-[var(--shadow-elevated)]" 
+            : "shadow-[var(--shadow-card)]",
           !noPadding && "p-4",
           className
         )}
@@ -29,12 +33,18 @@ SectionCard.displayName = 'SectionCard';
 interface SectionTitleProps {
   children: ReactNode;
   className?: string;
+  subtitle?: string;
 }
 
-export function SectionTitle({ children, className }: SectionTitleProps) {
+export function SectionTitle({ children, className, subtitle }: SectionTitleProps) {
   return (
-    <h3 className={cn("text-lg font-semibold mb-3", className)}>
-      {children}
-    </h3>
+    <div className={cn("mb-3", className)}>
+      <h3 className="text-lg font-semibold font-display tracking-tight">
+        {children}
+      </h3>
+      {subtitle && (
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+      )}
+    </div>
   );
 }

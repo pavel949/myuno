@@ -255,7 +255,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             <div className={cn(
               "relative w-14 h-14 rounded-2xl flex items-center justify-center",
               "transition-all duration-200 group-hover:scale-105 group-active:scale-95",
-              "shadow-md ring-1 ring-black/[0.04] dark:ring-white/[0.06]",
+              "shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
+              "border border-transparent",
               tint,
               "lg:w-16 lg:h-16"
             )}>
