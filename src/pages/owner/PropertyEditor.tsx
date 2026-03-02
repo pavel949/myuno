@@ -6,7 +6,7 @@ import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabili
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { PropertyPreviewCard } from '@/components/property/PropertyPreviewCard';
+import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyRooms, Room } from '@/components/property/PropertyRooms';
 import { PropertyCalendar, AvailabilityEntry } from '@/components/property/PropertyCalendar';
 import { SeasonalPrice } from '@/components/property/SeasonalPricing';
@@ -533,21 +533,23 @@ export default function PropertyEditor() {
             <div className="text-sm font-medium mb-3 text-muted-foreground">
               {isRu ? 'Как будет выглядеть в поиске:' : 'Search result preview:'}
             </div>
-            <PropertyPreviewCard
-              data={{
-                title: formData.title,
-                titleRu: formData.title_ru,
-                coverImage: formData.cover_image,
-                propertyType: formData.property_type,
-                district: formData.district,
-                bedrooms: formData.bedrooms,
-                bathrooms: formData.bathrooms,
-                maxGuests: formData.max_guests,
-                pricePerNight: Number(formData.price_per_night) || undefined,
-                currency: 'THB',
-                instantBooking: formData.instant_booking,
-                highlights: formData.highlights,
-              }}
+            <PropertyListingCard
+              property={{
+                id: id || 'preview',
+                title_en: formData.title || '',
+                title_ru: formData.title_ru || '',
+                cover_image: formData.cover_image || '',
+                images: formData.images || [],
+                property_type: formData.property_type || 'apartment',
+                district: formData.district || '',
+                bedrooms: formData.bedrooms || 1,
+                bathrooms: formData.bathrooms || 1,
+                max_guests: formData.max_guests || 2,
+                price: Number(formData.price_per_night) || 0,
+                price_period: 'night',
+                instant_booking: formData.instant_booking || false,
+                is_featured: false,
+              } as any}
             />
           </div>
         )}

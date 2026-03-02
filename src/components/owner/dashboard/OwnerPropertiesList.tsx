@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
+import { PropertyCard } from '@/components/property/PropertyCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, Plus, Home, Building2, Users, Zap, CheckCircle2, XCircle } from 'lucide-react';
+import { ChevronRight, Plus, Home, Building2, Users } from 'lucide-react';
 
 export function OwnerPropertiesList() {
   const navigate = useNavigate();
@@ -44,48 +45,32 @@ export function OwnerPropertiesList() {
     );
   }
 
-  const renderProperty = (property: UnifiedProperty) => {
-    const title = isRu ? property.title_ru : property.title;
-    const isActive = property.is_active;
+  const mapToOwnerProperty = (property: UnifiedProperty) => ({
+    id: property.property_id,
+    title: isRu ? property.title_ru : property.title,
+    title_ru: property.title_ru,
+    cover_image: property.cover_image || undefined,
+    address: property.address || undefined,
+    district: property.district || undefined,
+    is_active: property.is_active,
+    approval_status: (property as any).approval_status || 'approved',
+    property_type: (property as any).property_type,
+    bedrooms: (property as any).bedrooms,
+    bathrooms: (property as any).bathrooms,
+    price_per_night: (property as any).price_per_night,
+    currency: (property as any).currency || 'THB',
+  });
 
-    return (
-      <button
-        key={`${property.source}-${property.property_id}`}
-        onClick={() => navigate(`/mc/properties/${property.property_id}/manage`)}
-        className="w-full flex items-center gap-4 py-4 md:py-3 text-left hover:opacity-70 transition-opacity md:rounded-xl md:border md:border-border md:p-3 md:hover:shadow-sm"
-      >
-        <div className="relative w-[72px] h-[72px] md:w-16 md:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
-          {property.cover_image ? (
-            <img src={property.cover_image} alt={title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Home className="h-6 w-6 text-muted-foreground" />
-            </div>
-          )}
-          {/* Active indicator dot */}
-          <div className={`absolute top-1.5 left-1.5 w-3 h-3 rounded-full border-2 border-background ${isActive ? 'bg-success' : 'bg-muted-foreground/40'}`} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-medium text-[15px] line-clamp-1">{title}</p>
-            {!isActive && (
-              <Badge variant="outline" className="text-[10px] h-5 text-muted-foreground">
-                {isRu ? 'Неактивен' : 'Inactive'}
-              </Badge>
-            )}
-          </div>
-          {property.address && (
-            <p className="text-sm text-muted-foreground mt-0.5 truncate">
-              {property.address}
-            </p>
-          )}
-        </div>
-
-        <ChevronRight className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
-      </button>
-    );
-  };
+  const renderProperty = (property: UnifiedProperty) => (
+    <div key={`${property.source}-${property.property_id}`}>
+      <PropertyCard
+        property={mapToOwnerProperty(property) as any}
+        variant="compact"
+        mode="owner"
+        navigateTo={`/mc/properties/${property.property_id}/manage`}
+      />
+    </div>
+  );
 
   const showSections = accessRole === 'both';
 

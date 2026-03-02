@@ -694,28 +694,3 @@ export function PropertyCardSkeleton({ variant = 'list' }: { variant?: PropertyC
   );
 }
 
-// ============= RE-EXPORTS FOR BACKWARD COMPATIBILITY =============
-
-/** @deprecated Use PropertyCard with variant="hero" instead */
-export const PropertyHeroCard = forwardRef<
-  HTMLDivElement, 
-  { property: OwnerProperty | VendorProperty; stats?: PropertyCardStats }
->(({ property, stats }, ref) => (
-  <PropertyCard 
-    ref={ref} 
-    property={property} 
-    variant="hero" 
-    stats={stats} 
-    mode="owner" 
-  />
-));
-PropertyHeroCard.displayName = 'PropertyHeroCard';
-
-/** @deprecated Use PropertyCardSkeleton with variant="hero" instead */
-export const PropertyHeroCardSkeleton = () => <PropertyCardSkeleton variant="hero" />;
-
-/** @deprecated Use PropertyCard with variant="list" instead */
-export const PropertyListItem = forwardRef<HTMLDivElement, PropertyCardProps>(
-  (props, ref) => <PropertyCard ref={ref} {...props} variant="list" />
-);
-PropertyListItem.displayName = 'PropertyListItem';

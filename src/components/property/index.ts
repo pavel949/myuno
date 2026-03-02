@@ -2,9 +2,6 @@
 export { 
   PropertyCard, 
   PropertyCardSkeleton,
-  PropertyHeroCard,
-  PropertyHeroCardSkeleton,
-  PropertyListItem,
   type PropertyCardProps,
   type PropertyCardVariant,
   type PropertyCardMode,
