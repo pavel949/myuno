@@ -105,7 +105,7 @@ function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
           ))}
         </div>
 
-        <h3 className="font-medium text-sm leading-tight line-clamp-2">{card.title}</h3>
+        <h3 className="font-semibold text-sm leading-tight line-clamp-2 text-foreground">{card.title}</h3>
 
         {card.location && (
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -114,7 +114,7 @@ function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
           </p>
         )}
 
-        <p className="text-sm font-semibold text-foreground">
+        <p className="text-sm font-bold text-foreground">
           {card.price ? formatPrice(card.price) : ''}
           <span className="text-xs font-normal text-muted-foreground ml-1">{card.priceLabel}</span>
         </p>

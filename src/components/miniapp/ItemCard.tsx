@@ -92,8 +92,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         ref={ref}
         onClick={handleClick}
         className={cn(
-          "relative overflow-hidden rounded-2xl bg-card border border-border/50 transition-all",
-          isAvailable && "cursor-pointer hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]",
+          "relative overflow-hidden rounded-2xl bg-card border border-border/60 transition-all [box-shadow:var(--shadow-card)]",
+          isAvailable && "cursor-pointer hover:border-primary/30 hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-0.5 active:scale-[0.98]",
           !isAvailable && "opacity-60",
           className
         )}
@@ -145,7 +145,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
 
         {/* Content */}
         <div className="p-2.5">
-          <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">{title}</h3>
+          <h3 className="font-semibold text-sm line-clamp-2 min-h-[2.5rem] text-foreground">{title}</h3>
           
           {/* Rating */}
           {rating !== undefined && (
@@ -161,7 +161,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
           {/* Price */}
           {price !== undefined && (
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-base font-bold text-primary">
+              <span className="text-base font-bold text-foreground">
                 {formatPrice(price)}
               </span>
               {originalPrice && (
@@ -182,8 +182,8 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
       ref={ref}
       onClick={handleClick}
       className={cn(
-        "bg-card rounded-2xl overflow-hidden shadow-sm border",
-        isAvailable && "cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
+        "bg-card rounded-2xl overflow-hidden border border-border/60 [box-shadow:var(--shadow-card)]",
+        isAvailable && "cursor-pointer hover:[box-shadow:var(--shadow-card-hover)] hover:-translate-y-0.5 hover:border-primary/30 active:scale-[0.98]",
         !isAvailable && "opacity-60",
         "transition-all",
         className
@@ -234,7 +234,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         <div className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between min-w-0">
           <div>
             {/* Title */}
-            <h3 className="font-semibold text-sm sm:text-base line-clamp-2 flex items-center gap-1">
+            <h3 className="font-bold text-sm sm:text-base line-clamp-2 flex items-center gap-1 text-foreground">
               {title}
               {isVerified && (
                 <BadgeCheck className={cn(iconSizes.md, "text-primary flex-shrink-0")} />
@@ -285,7 +285,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
               {price !== undefined && (
                 <div className="text-right">
                   {pricePrefix && <span className="text-xs text-muted-foreground mr-1">{pricePrefix}</span>}
-                  <span className="text-base font-bold text-primary">
+                  <span className="text-base font-bold text-foreground">
                     {formatPrice(price)}
                   </span>
                   {priceUnit && <span className="text-xs text-muted-foreground">{priceUnit}</span>}
