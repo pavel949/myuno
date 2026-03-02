@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MODULES, useMemberPermissions, useUpdateMemberPermission, type TeamPermission } from '@/hooks/useTeamPermissions';
+import { MODULES, useMemberPermissions, useUpdateMemberPermission, useCanManagePermissions, type TeamPermission } from '@/hooks/useTeamPermissions';
 import { SUB_PERMISSIONS, PERMISSION_PRESETS, type SubPermissionsMap } from '@/lib/permissionPresets';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,6 +31,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const t = (en: string, ru: string) => (isRu ? ru : en);
+  const canManage = useCanManagePermissions();
 
   const { data: permissions = [], isLoading } = useMemberPermissions(userId);
   const updatePermission = useUpdateMemberPermission();
@@ -142,8 +143,18 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
       size="lg"
     >
 
+        {/* Read-only notice for non-directors */}
+        {!canManage && (
+          <div className="mb-4 p-3 rounded-lg bg-warning/10 border border-warning/30 text-sm text-warning-foreground">
+            <p className="font-medium">{t('View Only', 'Только просмотр')}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {t('Only directors and admins can change permissions', 'Только директор и администратор могут изменять права доступа')}
+            </p>
+          </div>
+        )}
+
         {/* Custom title */}
-        {staffId && (
+        {staffId && canManage && (
           <div className="mb-5 space-y-2">
             <Label className="flex items-center gap-1.5 text-sm">
               <Briefcase className="h-3.5 w-3.5" />
@@ -163,27 +174,30 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
           </div>
         )}
 
-        {/* Presets */}
-        <div className="mb-5">
-          <Label className="flex items-center gap-1.5 text-sm mb-2">
-            <Zap className="h-3.5 w-3.5" />
-            {t('Quick Presets', 'Быстрые шаблоны')}
-          </Label>
-          <div className="flex flex-wrap gap-1.5">
-            {PERMISSION_PRESETS.map(preset => (
-              <Button
-                key={preset.key}
-                variant="outline"
-                size="sm"
-                className="text-xs"
-                onClick={() => applyPreset(preset.key)}
-                title={isRu ? preset.descRu : preset.descEn}
-              >
-                {isRu ? preset.labelRu : preset.labelEn}
-              </Button>
-            ))}
+        {/* Presets — only for directors */}
+        {canManage && (
+          <div className="mb-5">
+            <Label className="flex items-center gap-1.5 text-sm mb-2">
+              <Zap className="h-3.5 w-3.5" />
+              {t('Quick Presets', 'Быстрые шаблоны')}
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {PERMISSION_PRESETS.map(preset => (
+                <Button
+                  key={preset.key}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => applyPreset(preset.key)}
+                  title={isRu ? preset.descRu : preset.descEn}
+                >
+                  {isRu ? preset.labelRu : preset.labelEn}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
 
         {isLoading ? (
           <div className="space-y-3">
@@ -237,7 +251,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
                             <Checkbox
                               checked={canEdit}
                               onCheckedChange={(v) => handleEditToggle(mod.key, !!v)}
-                              disabled={!canView}
+                              disabled={!canView || !canManage}
                             />
                             {t('Can Edit', 'Редактирование')}
                           </label>
@@ -245,7 +259,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
                             <Checkbox
                               checked={canExport}
                               onCheckedChange={(v) => handleExportToggle(mod.key, !!v)}
-                              disabled={!canView}
+                              disabled={!canView || !canManage}
                             />
                             {t('Can Export', 'Экспорт')}
                           </label>
@@ -257,7 +271,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
                             <Checkbox
                               checked={subPerms[sub.key] ?? false}
                               onCheckedChange={(v) => handleSubToggle(mod.key, sub.key, !!v)}
-                              disabled={!canView}
+                              disabled={!canView || !canManage}
                             />
                             <span className={!canView ? 'text-muted-foreground/50' : ''}>
                               {isRu ? sub.labelRu : sub.labelEn}
