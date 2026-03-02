@@ -380,16 +380,32 @@ export function usePropertyWizard() {
   const handleSubmit = useCallback(async () => {
     const isOnBehalf = ownershipData.ownership_type !== 'own';
     
-    const property = await createProperty.mutateAsync({
-      ...formData,
-      area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
-      price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
-      deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
-      sale_price: formData.sale_price ? Number(formData.sale_price) : undefined,
+    // Strip fields that don't exist on the properties table
+    const { 
+      title, title_ru, description, description_ru,
+      rental_platforms, custom_platform, platform_listed,
+      is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
+      ...cleanData 
+    } = formData;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const submitPayload: any = {
+      ...cleanData,
+      area_sqm: area_sqm ? Number(area_sqm) : undefined,
+      price_per_night: price_per_night ? Number(price_per_night) : undefined,
+      deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
+      sale_price: sale_price ? Number(sale_price) : undefined,
+      is_for_sale,
+      // These will be remapped by useCreateOwnerProperty
+      title,
+      title_ru,
+      description,
+      description_ru,
+      rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
       listing_modes: [
-        ...(formData.platform_listed ? ['platform'] : []),
-        ...(formData.is_for_sale ? ['sale'] : []),
-        ...(formData.price_per_night ? ['rent'] : []),
+        ...(platform_listed ? ['platform'] : []),
+        ...(is_for_sale ? ['sale'] : []),
+        ...(price_per_night ? ['rent'] : []),
       ],
       created_on_behalf: isOnBehalf,
       ownership_type: ownershipData.ownership_type,
@@ -401,7 +417,9 @@ export function usePropertyWizard() {
       management_document_name: ownershipData.management_document_name || undefined,
       commercial_terms_redacted: ownershipData.commercial_terms_redacted,
       ownership_verification_status: isOnBehalf ? 'pending' : 'verified',
-    });
+    };
+
+    const property = await createProperty.mutateAsync(submitPayload);
 
     // Save documents
     if (property?.id) {
@@ -482,6 +500,9 @@ export function usePropertyWizard() {
       }
     }
 
+    // Clear draft on successful save
+    clearDraft();
+    
     setCreatedPropertyId(property?.id);
     setCreatedPropertyTitle(formData.title || formData.title_ru);
     setShowSuccess(true);
