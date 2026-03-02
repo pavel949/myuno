@@ -46,36 +46,56 @@ function PropertyFeaturesSelectorInner({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {PROPERTY_FEATURE_GROUPS.map((group) => (
-          <div key={group.groupId}>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-              {isRu ? group.labelRu : group.labelEn}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {group.features.map((feat) => {
-                const Icon = feat.icon;
-                const isSelected = highlights.includes(feat.id);
-                const isDisabled = false;
-
-                return (
-                  <Badge
-                    key={feat.id}
-                    variant={isSelected ? 'default' : 'outline'}
-                    className={cn(
-                      'cursor-pointer gap-1.5 py-1.5 px-2.5 transition-all text-xs',
-                      isDisabled && 'opacity-40 cursor-not-allowed',
-                      isSelected && 'ring-2 ring-primary/20',
-                    )}
-                    onClick={() => !isDisabled && toggle(feat.id)}
-                  >
-                    <Icon className="w-3 h-3" />
-                    {isRu ? feat.labelRu : feat.labelEn}
-                  </Badge>
-                );
-              })}
+        {PROPERTY_FEATURE_GROUPS.map((group) => {
+          const groupIds = group.features.map(f => f.id);
+          const allSelected = groupIds.every(id => highlights.includes(id));
+          const toggleAll = () => {
+            if (allSelected) {
+              onChange(highlights.filter(h => !groupIds.includes(h)));
+            } else {
+              const newHighlights = [...new Set([...highlights, ...groupIds])];
+              onChange(newHighlights);
+            }
+          };
+          return (
+            <div key={group.groupId}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {isRu ? group.labelRu : group.labelEn}
+                </p>
+                <button
+                  type="button"
+                  onClick={toggleAll}
+                  className="text-[10px] font-medium text-primary hover:underline"
+                >
+                  {allSelected
+                    ? (isRu ? 'Снять все' : 'Deselect all')
+                    : (isRu ? 'Выбрать все' : 'Select all')}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {group.features.map((feat) => {
+                  const Icon = feat.icon;
+                  const isSelected = highlights.includes(feat.id);
+                  return (
+                    <Badge
+                      key={feat.id}
+                      variant={isSelected ? 'default' : 'outline'}
+                      className={cn(
+                        'cursor-pointer gap-1.5 py-1.5 px-2.5 transition-all text-xs',
+                        isSelected && 'ring-2 ring-primary/20',
+                      )}
+                      onClick={() => toggle(feat.id)}
+                    >
+                      <Icon className="w-3 h-3" />
+                      {isRu ? feat.labelRu : feat.labelEn}
+                    </Badge>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );
