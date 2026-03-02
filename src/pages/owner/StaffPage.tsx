@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -482,6 +483,7 @@ export default function StaffPage() {
 
   const t = (en: string, ru: string) => isRu ? ru : en;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const shown = (staff ?? [])
     .filter(s => staffFilter === 'active' ? s.is_active : true)
@@ -956,6 +958,10 @@ export default function StaffPage() {
       <AddTeamMemberDialog
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['staff-members'] });
+          queryClient.invalidateQueries({ queryKey: ['staff-members-all'] });
+        }}
       />
 
       {/* Member Permissions Sheet */}
