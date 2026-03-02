@@ -406,7 +406,7 @@ const VendorServices = () => {
               </div>
             </DialogHeader>
 
-            <div className="grid md:grid-cols-[1fr,280px] gap-6 flex-1 min-h-0 py-4">
+            <div className="grid md:grid-cols-[1fr,280px] gap-6 flex-1 min-h-0 overflow-hidden py-4">
               {/* Form Wizard */}
               <VendorFormWizard
                 steps={steps}
