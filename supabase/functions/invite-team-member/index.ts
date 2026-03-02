@@ -56,6 +56,21 @@ function normalizeEmail(value: unknown): string {
     .toLowerCase();
 }
 
+function mapCompanyRoleToStaffRole(role: string): { staffRole: string; customTitle: string | null } {
+  switch (role) {
+    case 'director':
+      return { staffRole: 'admin', customTitle: 'Director' };
+    case 'manager':
+      return { staffRole: 'manager', customTitle: null };
+    case 'admin':
+      return { staffRole: 'admin', customTitle: null };
+    case 'accountant':
+      return { staffRole: 'staff', customTitle: 'Accountant' };
+    default:
+      return { staffRole: 'staff', customTitle: null };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -113,7 +128,10 @@ Deno.serve(async (req) => {
     // Generate password
     const tempPassword = generatePassword(16);
 
-    // Create auth user
+    // Create auth user (or reuse existing one)
+    let newUserId: string | null = null;
+    let isNewUser = false;
+
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email: normalizedEmail,
       password: tempPassword,
@@ -122,33 +140,61 @@ Deno.serve(async (req) => {
     });
 
     if (authError) {
-      return new Response(JSON.stringify({ error: authError.message }), { status: 400, headers: corsHeaders });
+      const message = authError.message?.toLowerCase() || '';
+      const alreadyExists = message.includes('already') || message.includes('registered');
+
+      if (!alreadyExists) {
+        return new Response(JSON.stringify({ error: authError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const { data: listed, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (listError) throw listError;
+
+      const existingUser = listed?.users?.find(
+        (u) => (u.email || '').toLowerCase() === normalizedEmail
+      );
+
+      if (!existingUser) {
+        return new Response(JSON.stringify({ error: 'User exists but could not be resolved by email' }), {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      newUserId = existingUser.id;
+    } else {
+      newUserId = authUser.user.id;
+      isNewUser = true;
     }
 
-    const newUserId = authUser.user.id;
+    if (!newUserId) {
+      throw new Error('Failed to resolve team member user id');
+    }
 
-    // Create profile
-    await supabase.from('profiles').upsert({
+    const { error: profileError } = await supabase.from('profiles').upsert({
       id: newUserId,
       full_name,
       phone: phone || null,
     }, { onConflict: 'id' });
+    if (profileError) throw profileError;
 
-    // Add user_roles entry
-    await supabase.from('user_roles').insert({
+    const { error: roleError } = await supabase.from('user_roles').upsert({
       user_id: newUserId,
       role: 'staff',
-    });
+    }, { onConflict: 'user_id,role' });
+    if (roleError) throw roleError;
 
-    // Add to management_company_members
-    await supabase.from('management_company_members').insert({
+    const { error: memberError } = await supabase.from('management_company_members').upsert({
       company_id,
       user_id: newUserId,
-      role: role,
+      role,
       is_active: true,
-    });
+    }, { onConflict: 'company_id,user_id' });
+    if (memberError) throw memberError;
 
-    // Insert default permissions
     const defaultPerms = ROLE_DEFAULT_PERMISSIONS[role] || ROLE_DEFAULT_PERMISSIONS.staff;
     const permModules = role === 'accountant' ? ACCOUNTANT_MODULES : MODULES;
     const permRows = permModules.map(module => ({
@@ -159,7 +205,26 @@ Deno.serve(async (req) => {
       can_edit: defaultPerms.can_edit,
       granted_by: callerId,
     }));
-    await supabase.from('team_member_permissions').insert(permRows);
+
+    const { error: permissionsError } = await supabase
+      .from('team_member_permissions')
+      .upsert(permRows, { onConflict: 'company_id,user_id,module' });
+    if (permissionsError) throw permissionsError;
+
+    const { staffRole, customTitle } = mapCompanyRoleToStaffRole(role);
+    const { error: staffError } = await supabase.from('staff_members').upsert({
+      id: newUserId,
+      owner_id: callerId,
+      company_id,
+      name: full_name,
+      role: staffRole,
+      custom_title: customTitle,
+      phone: phone || null,
+      email: normalizedEmail,
+      is_active: true,
+      pay_type: 'salary',
+    }, { onConflict: 'id' });
+    if (staffError) throw staffError;
 
     // Get company name for email
     const { data: company } = await supabase
@@ -169,16 +234,18 @@ Deno.serve(async (req) => {
       .single();
 
     const companyName = company?.name_en || company?.name_ru || 'myUNO';
-    const loginUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://myuno.app';
 
     // Send welcome email via Resend
+    let emailSent = false;
     try {
       const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-      await resend.emails.send({
-        from: 'myUNO <noreply@myuno.app>',
-        to: [normalizedEmail],
-        subject: `Welcome to ${companyName} — Your Account`,
-        html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+      const subject = isNewUser
+        ? `Welcome to ${companyName} — Your Account`
+        : `You were added to ${companyName}`;
+
+      const bodyHtml = isNewUser
+        ? `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <style>
   body { font-family: 'Space Grotesk', 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background: #f8f9fc; }
   .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
@@ -214,14 +281,27 @@ Deno.serve(async (req) => {
   <div class="footer">
     <p style="margin:0">myUNO — Property Management Platform</p>
   </div>
-</div></body></html>`,
+</div></body></html>`
+        : `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;line-height:1.6;color:#1f2937">
+<p>Hi ${full_name},</p>
+<p>You were added to <strong>${companyName}</strong> as <strong>${role}</strong>.</p>
+<p>Your account already exists, so you can log in using your current password.</p>
+<p><a href="https://myuno.app">Log in to myUNO</a></p>
+</body></html>`;
+
+      await resend.emails.send({
+        from: 'myUNO <noreply@myuno.app>',
+        to: [normalizedEmail],
+        subject,
+        html: bodyHtml,
       });
+      emailSent = true;
     } catch (emailErr) {
       console.error('Failed to send welcome email:', emailErr);
       // Don't fail the whole operation if email fails
     }
 
-    return new Response(JSON.stringify({ user_id: newUserId, email_sent: true }), {
+    return new Response(JSON.stringify({ user_id: newUserId, email_sent: emailSent, created_new_user: isNewUser }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
