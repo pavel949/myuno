@@ -43,8 +43,12 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
     setGenerating(true);
 
     try {
-      const { default: jsPDF } = await import('jspdf');
+      const [{ default: jsPDF }, { loadCyrillicFont }] = await Promise.all([
+        import('jspdf'),
+        import('@/utils/pdfFonts'),
+      ]);
       const doc = new jsPDF('p', 'mm', 'a4');
+      await loadCyrillicFont(doc);
       const pageW = 210;
       const margin = 15;
       const contentW = pageW - margin * 2;
