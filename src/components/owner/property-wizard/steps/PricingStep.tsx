@@ -1,11 +1,12 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign, FileText, Sparkles, Building, Rocket } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSign, FileText, Sparkles, Building, Rocket, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
@@ -17,6 +18,7 @@ import { CancellationPolicySection } from './CancellationPolicySection';
 import { SeasonalPricing } from '@/components/property/SeasonalPricing';
 import { PricingRulesSection } from '@/components/property/PricingRulesSection';
 import { PaymentPolicySection } from '@/components/property/PaymentPolicySection';
+import { cn } from '@/lib/utils';
 
 interface PricingStepProps {
   formData: PropertyFormData;
@@ -42,6 +44,50 @@ const ownershipOptions = [
   { value: 'foreign_company', labelEn: 'Foreign LLC', labelRu: 'Иностранная компания', icon: <Briefcase className="h-4 w-4" /> },
 ];
 
+/** Reusable collapsible section wrapper */
+function CollapsibleSection({
+  icon,
+  title,
+  defaultOpen = false,
+  badge,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  defaultOpen?: boolean;
+  badge?: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
+            <CardTitle className="text-base flex items-center gap-2">
+              {icon}
+              <span className="flex-1">{title}</span>
+              {badge && (
+                <Badge variant="secondary" className="text-xs font-normal">{badge}</Badge>
+              )}
+              <ChevronDown className={cn(
+                "h-4 w-4 text-muted-foreground transition-transform",
+                open && "rotate-180"
+              )} />
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            {children}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+}
+
 function PricingStepInner({ formData, updateFormData, selectedProject }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -51,60 +97,53 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
       description: selectedProject?.description_en || '',
       description_ru: selectedProject?.description_ru || '',
     });
-    toast.success(
-      isRu 
-        ? 'Описание проекта загружено' 
-        : 'Project description loaded'
-    );
+    toast.success(isRu ? 'Описание проекта загружено' : 'Project description loaded');
   };
 
   const projectAmenities = selectedProject?.amenities || [];
   const hasProjectDescription = selectedProject?.description_en || selectedProject?.description_ru;
   const isDescriptionEmpty = !formData.description && !formData.description_ru;
   const basePrice = Number(formData.price_per_night) || 0;
+  const seasonCount = formData.seasonal_pricing?.length || 0;
 
   return (
-    <div className="space-y-6">
-      {/* Ownership Form */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Landmark className="h-4 w-4" />
-            {isRu ? 'Форма собственности' : 'Ownership Structure'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {ownershipOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => updateFormData({ ownership_form: option.value as PropertyFormData['ownership_form'] })}
-                className={`p-3 rounded-xl border-2 text-left transition-colors ${
-                  formData.ownership_form === option.value
-                    ? 'border-primary bg-primary/5'
-                    : 'border-muted hover:border-muted-foreground/30'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">{option.icon}</span>
-                  <span className="font-medium text-sm">{isRu ? option.labelRu : option.labelEn}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-3">
+      {/* ─── Ownership — always open ─── */}
+      <CollapsibleSection
+        icon={<Landmark className="h-4 w-4" />}
+        title={isRu ? 'Форма собственности' : 'Ownership Structure'}
+        defaultOpen
+        badge={formData.ownership_form ? (ownershipOptions.find(o => o.value === formData.ownership_form)?.[isRu ? 'labelRu' : 'labelEn']) : undefined}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {ownershipOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => updateFormData({ ownership_form: option.value as PropertyFormData['ownership_form'] })}
+              className={`p-3 rounded-xl border-2 text-left transition-colors ${
+                formData.ownership_form === option.value
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted hover:border-muted-foreground/30'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{option.icon}</span>
+                <span className="font-medium text-sm">{isRu ? option.labelRu : option.labelEn}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </CollapsibleSection>
 
-      {/* ─── SECTION 1: Base Rental Terms ─── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            {isRu ? 'Условия аренды' : 'Rental Terms'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* ─── Rental Terms — always open ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Условия аренды' : 'Rental Terms'}
+        defaultOpen
+        badge={basePrice > 0 ? `${basePrice.toLocaleString()} THB` : undefined}
+      >
+        <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}</Label>
@@ -175,77 +214,114 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               onCheckedChange={(checked) => updateFormData({ instant_booking: checked })}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* ─── SECTION 2: Seasonal Pricing (always visible) ─── */}
-      <SeasonalPricing
-        basePrice={basePrice > 0 ? basePrice : 0}
-        currency="THB"
-        seasons={formData.seasonal_pricing || []}
-        onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
-      />
+      {/* ─── Seasonal Pricing — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Сезонные цены' : 'Seasonal Pricing'}
+        badge={seasonCount > 0 ? `${seasonCount}` : undefined}
+      >
+        <SeasonalPricing
+          basePrice={basePrice > 0 ? basePrice : 0}
+          currency="THB"
+          seasons={formData.seasonal_pricing || []}
+          onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
+        />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 3: Length-of-Stay Discounts ─── */}
-      <DiscountsSection formData={formData} updateFormData={updateFormData} />
+      {/* ─── Discounts — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Скидки за длительность' : 'Length Discounts'}
+        badge={
+          (formData.weekly_discount || formData.monthly_discount)
+            ? (isRu ? 'Настроено' : 'Set')
+            : undefined
+        }
+      >
+        <DiscountsSection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 4: Advanced Pricing Rules ─── */}
-      <PricingRulesSection formData={formData} updateFormData={updateFormData} />
+      {/* ─── Advanced Pricing Rules — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Продвинутые правила' : 'Advanced Pricing Rules'}
+      >
+        <PricingRulesSection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 5: Payment Schedule & Deposit (single source of truth for deposit) ─── */}
-      <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
+      {/* ─── Payment & Deposit — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Оплата и депозит' : 'Payment & Deposit'}
+        badge={formData.deposit_amount ? `${Number(formData.deposit_amount).toLocaleString()} ${formData.deposit_currency || 'THB'}` : undefined}
+      >
+        <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 6: Cancellation Policy ─── */}
-      <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+      {/* ─── Cancellation — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Политика отмены' : 'Cancellation Policy'}
+      >
+        <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 7: House Rules ─── */}
-      <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+      {/* ─── House Rules — collapsed ─── */}
+      <CollapsibleSection
+        icon={<DollarSign className="h-4 w-4" />}
+        title={isRu ? 'Правила дома' : 'House Rules'}
+      >
+        <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+      </CollapsibleSection>
 
-      {/* ─── SECTION 8: Platform Listing ─── */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className={`p-4 rounded-lg border-2 transition-colors ${
-            formData.platform_listed 
-              ? 'border-primary/40 bg-primary/5' 
-              : 'border-muted bg-muted'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="font-medium flex items-center gap-2">
-                  <Rocket className="h-4 w-4 text-primary" />
-                  {isRu ? 'Разместить на myUNO для гостей' : 'List on myUNO for guests'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isRu 
-                    ? 'Комиссия платформы 10% с каждого успешного бронирования' 
-                    : '10% platform fee per successful booking'}
-                </p>
-              </div>
-              <Switch
-                checked={formData.platform_listed ?? true}
-                onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
-              />
+      {/* ─── Platform Listing — collapsed ─── */}
+      <CollapsibleSection
+        icon={<Rocket className="h-4 w-4" />}
+        title={isRu ? 'Размещение на платформе' : 'Platform Listing'}
+        badge={formData.platform_listed ? (isRu ? 'Вкл' : 'On') : undefined}
+      >
+        <div className={`p-4 rounded-lg border-2 transition-colors ${
+          formData.platform_listed 
+            ? 'border-primary/40 bg-primary/5' 
+            : 'border-muted bg-muted'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="font-medium flex items-center gap-2">
+                <Rocket className="h-4 w-4 text-primary" />
+                {isRu ? 'Разместить на myUNO для гостей' : 'List on myUNO for guests'}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isRu 
+                  ? 'Комиссия платформы 10% с каждого успешного бронирования' 
+                  : '10% platform fee per successful booking'}
+              </p>
             </div>
-            {formData.platform_listed && basePrice > 0 && (
-              <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
-                {isRu ? 'Пример: ' : 'Example: '}
-                {basePrice.toLocaleString()} THB/{isRu ? 'ночь' : 'night'} → 
-                {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(basePrice * 0.1).toLocaleString()} THB
-              </div>
-            )}
+            <Switch
+              checked={formData.platform_listed ?? true}
+              onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
+            />
           </div>
-        </CardContent>
-      </Card>
+          {formData.platform_listed && basePrice > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
+              {isRu ? 'Пример: ' : 'Example: '}
+              {basePrice.toLocaleString()} THB/{isRu ? 'ночь' : 'night'} → 
+              {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(basePrice * 0.1).toLocaleString()} THB
+            </div>
+          )}
+        </div>
+      </CollapsibleSection>
 
-      {/* ─── SECTION 9: Sale Option ─── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <BadgeDollarSign className="h-4 w-4" />
-            {isRu ? 'Продажа объекта' : 'Property Sale'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* ─── Sale Option — collapsed ─── */}
+      <CollapsibleSection
+        icon={<BadgeDollarSign className="h-4 w-4" />}
+        title={isRu ? 'Продажа объекта' : 'Property Sale'}
+        badge={formData.is_for_sale ? (isRu ? 'Да' : 'Yes') : undefined}
+      >
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">{isRu ? 'Открыт к продаже' : 'Open to Sale'}</p>
@@ -277,40 +353,29 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* ─── SECTION 10: Description ─── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            {isRu ? 'Описание объекта' : 'Property Description'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Use Project Description Button */}
+      {/* ─── Description — collapsed ─── */}
+      <CollapsibleSection
+        icon={<FileText className="h-4 w-4" />}
+        title={isRu ? 'Описание объекта' : 'Property Description'}
+        badge={formData.description ? '✓' : undefined}
+      >
+        <div className="space-y-4">
           {hasProjectDescription && isDescriptionEmpty && (
             <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
               <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
               <p className="text-sm text-muted-foreground flex-1">
-                {isRu 
-                  ? 'Использовать описание проекта?' 
-                  : 'Use project description?'}
+                {isRu ? 'Использовать описание проекта?' : 'Use project description?'}
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleUseProjectDescription}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleUseProjectDescription}>
                 <Building className="h-4 w-4 mr-1" />
                 {isRu ? 'Да' : 'Yes'}
               </Button>
             </div>
           )}
 
-          {/* Project Amenities Reference */}
           {projectAmenities.length > 0 && (
             <div className="p-3 bg-muted/50 rounded-lg space-y-2">
               <p className="text-sm font-medium">
@@ -325,9 +390,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                   </Badge>
                 ))}
                 {projectAmenities.length > 5 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{projectAmenities.length - 5}
-                  </Badge>
+                  <Badge variant="outline" className="text-xs">+{projectAmenities.length - 5}</Badge>
                 )}
               </div>
             </div>
@@ -353,8 +416,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 : "After adding, the property will be reviewed by UNO within 24 hours."}
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
     </div>
   );
 }
