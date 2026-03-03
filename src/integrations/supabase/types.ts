@@ -25161,6 +25161,20 @@ export type Database = {
           },
         ]
       }
+      life_os_catalog: {
+        Row: {
+          currency: string | null
+          entity_id: string | null
+          entity_type: string | null
+          location: string | null
+          price: number | null
+          provider_id: string | null
+          title: string | null
+          title_ru: string | null
+          trust_level: string | null
+        }
+        Relationships: []
+      }
       lifeos_health_view: {
         Row: {
           entity_overuse_count: number | null
