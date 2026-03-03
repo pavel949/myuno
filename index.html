@@ -49,7 +49,8 @@
     <meta name="twitter:image" content="https://myuno.app/og-image.png" />
     
     <!-- Preconnect for performance -->
-    <link rel="preconnect" href="https://api.mapbox.com" />
+    <link rel="preconnect" href="https://kakkwibljrjsawxgnupk.supabase.co" />
+    <link rel="dns-prefetch" href="https://kakkwibljrjsawxgnupk.supabase.co" />
     <link rel="dns-prefetch" href="https://api.mapbox.com" />
     
     <!-- Google Fonts: Instrument Sans + Instrument Serif (non-render-blocking) -->
@@ -169,7 +170,21 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- Inline critical CSS for fast FCP -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      html{-webkit-text-size-adjust:100%;font-family:'DM Sans',system-ui,-apple-system,sans-serif}
+      body{min-height:100vh;background:#09090b;color:#fafafa;-webkit-font-smoothing:antialiased}
+      #root{min-height:100vh;display:flex;flex-direction:column}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#09090b}
+      .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite}
+      @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    </style>
+    <div id="root">
+      <div class="uno-splash" aria-label="Loading myUNO">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
