@@ -21,6 +21,7 @@ import { SectionHeader } from '@/components/ds';
 
 import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
+import { ContextualRecommendations } from '@/components/discover/ContextualRecommendations';
 
 // ── Search data ───────────────────────────────────
 const LIFE_CONTEXTS_SEARCH = [
@@ -147,6 +148,9 @@ export default function Discover() {
         <div className="space-y-8">
           {/* Hero Banner */}
           <DiscoverHero />
+
+          {/* Contextual Recommendations (LifeOS-aware) */}
+          <ContextualRecommendations />
 
           {/* Life Situations 2x Grid */}
           <LifeSituationsGrid />
