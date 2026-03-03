@@ -1,184 +1,127 @@
 project_id = "kakkwibljrjsawxgnupk"
 
-[functions.geocode-address]
-verify_jwt = false
-
-[functions.get-mapbox-token]
-verify_jwt = false
-
-[functions.booking-reminders]
-verify_jwt = false
-
-[functions.create-checkout-session]
-verify_jwt = false
-
-[functions.create-order-checkout]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.send-promotions]
-verify_jwt = false
-
-[functions.ai-support-chat]
-verify_jwt = false
-
-[functions.create-restaurant-checkout]
-verify_jwt = false
-
-[functions.restaurant-order-notifications]
-verify_jwt = false
-
-[functions.get-weather]
-verify_jwt = false
-
-[functions.create-vendor-subscription]
-verify_jwt = false
-
-[functions.check-vendor-subscription]
-verify_jwt = false
-
-[functions.vendor-portal]
-verify_jwt = false
-
-[functions.ical-sync]
-verify_jwt = false
-
-[functions.calendar-export]
-verify_jwt = false
-
-[functions.ai-translate]
-verify_jwt = false
-
-[functions.send-order-email]
-verify_jwt = false
-
-[functions.image-resize]
-verify_jwt = false
-
-[functions.property-moderation-email]
-verify_jwt = false
-
-[functions.create-flowers-checkout]
-verify_jwt = false
-
-[functions.ai-smart-search]
-verify_jwt = false
-
-[functions.ai-agent]
-verify_jwt = false
-
-[functions.intake-listing-agent]
-verify_jwt = false
-
-[functions.leads-factory]
-verify_jwt = false
-
-[functions.vendor-acquisition]
-verify_jwt = false
-
-[functions.generate-booking-voucher]
-verify_jwt = false
-
-[functions.airbnb-sync]
-verify_jwt = false
-
-[functions.generate-report-pdf]
-verify_jwt = false
-
-[functions.send-property-report]
-verify_jwt = false
-
-[functions.notify-lead-whatsapp]
-verify_jwt = false
-
-[functions.fazwaz-discover-projects]
-verify_jwt = false
-
-[functions.fazwaz-scrape-project]
-verify_jwt = false
-
-[functions.etagi-scrape-projects]
-verify_jwt = false
-
-[functions.enrich-projects]
-verify_jwt = false
-
-[functions.update-user-segments]
-verify_jwt = false
-
-[functions.auto-lifecycle-actions]
-verify_jwt = false
-
-[functions.auto-vendor-nurture]
-verify_jwt = false
-
-[functions.post-order-autopilot]
-verify_jwt = false
-
-[functions.utility-payment-reminders]
-verify_jwt = false
-
-[functions.generate-sitemap]
-verify_jwt = false
-
-[functions.send-email]
-verify_jwt = false
-
-[functions.ai-cross-sell]
-verify_jwt = false
-
-[functions.ai-pricing-optimizer]
-verify_jwt = false
-
-[functions.document-reminder-check]
-verify_jwt = false
-
-[functions.publish-telegram-post]
-verify_jwt = false
-
-[functions.ai-content-planner]
-verify_jwt = false
-
-[functions.auto-social-publish]
-verify_jwt = false
-
-[functions.ai-owner-nurture]
-verify_jwt = false
-
-[functions.ai-platform-intelligence]
-verify_jwt = false
-
-[functions.invite-team-member]
-verify_jwt = false
-
-[functions.monthly-owner-statements]
-verify_jwt = false
-
-[functions.send-crm-email]
-verify_jwt = false
-
-[functions.crm-ai-assistant]
-verify_jwt = false
-
-[functions.detect-crm-duplicates]
-verify_jwt = false
-
-[functions.submit-web-form]
-verify_jwt = false
-
-[functions.firecrawl-map]
-verify_jwt = false
-
-[functions.firecrawl-scrape]
-verify_jwt = false
-
-[functions.scrape-phuket-insider]
-verify_jwt = false
-
-[functions.ota-scrape]
-verify_jwt = false
-
-[functions.ai-concierge]
-verify_jwt = false
+[functions]
+  [functions.ai-agent]
+    verify_jwt = false
+  [functions.ai-concierge]
+    verify_jwt = false
+  [functions.ai-content-planner]
+    verify_jwt = false
+  [functions.ai-cross-sell]
+    verify_jwt = false
+  [functions.ai-owner-nurture]
+    verify_jwt = false
+  [functions.ai-platform-intelligence]
+    verify_jwt = false
+  [functions.ai-pricing-optimizer]
+    verify_jwt = false
+  [functions.ai-smart-search]
+    verify_jwt = false
+  [functions.ai-support-chat]
+    verify_jwt = false
+  [functions.ai-translate]
+    verify_jwt = false
+  [functions.airbnb-sync]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.auto-lifecycle-actions]
+    verify_jwt = false
+  [functions.auto-social-publish]
+    verify_jwt = false
+  [functions.auto-vendor-nurture]
+    verify_jwt = false
+  [functions.booking-reminders]
+    verify_jwt = false
+  [functions.calendar-export]
+    verify_jwt = false
+  [functions.check-vendor-subscription]
+    verify_jwt = false
+  [functions.create-checkout-session]
+    verify_jwt = false
+  [functions.create-flowers-checkout]
+    verify_jwt = false
+  [functions.create-order-checkout]
+    verify_jwt = false
+  [functions.create-restaurant-checkout]
+    verify_jwt = false
+  [functions.create-vendor-subscription]
+    verify_jwt = false
+  [functions.crm-ai-assistant]
+    verify_jwt = false
+  [functions.detect-crm-duplicates]
+    verify_jwt = false
+  [functions.document-reminder-check]
+    verify_jwt = false
+  [functions.enrich-projects]
+    verify_jwt = false
+  [functions.etagi-scrape-projects]
+    verify_jwt = false
+  [functions.fazwaz-discover-projects]
+    verify_jwt = false
+  [functions.fazwaz-scrape-project]
+    verify_jwt = false
+  [functions.firecrawl-map]
+    verify_jwt = false
+  [functions.firecrawl-scrape]
+    verify_jwt = false
+  [functions.generate-booking-voucher]
+    verify_jwt = false
+  [functions.generate-report-pdf]
+    verify_jwt = false
+  [functions.generate-sitemap]
+    verify_jwt = false
+  [functions.geocode-address]
+    verify_jwt = false
+  [functions.get-mapbox-token]
+    verify_jwt = false
+  [functions.get-weather]
+    verify_jwt = false
+  [functions.ical-sync]
+    verify_jwt = false
+  [functions.image-resize]
+    verify_jwt = false
+  [functions.intake-listing-agent]
+    verify_jwt = false
+  [functions.invite-team-member]
+    verify_jwt = false
+  [functions.leads-factory]
+    verify_jwt = false
+  [functions.monthly-owner-statements]
+    verify_jwt = false
+  [functions.notify-lead-whatsapp]
+    verify_jwt = false
+  [functions.ota-scrape]
+    verify_jwt = false
+  [functions.post-order-autopilot]
+    verify_jwt = false
+  [functions.property-moderation-email]
+    verify_jwt = false
+  [functions.publish-telegram-post]
+    verify_jwt = false
+  [functions.restaurant-order-notifications]
+    verify_jwt = false
+  [functions.scrape-phuket-insider]
+    verify_jwt = false
+  [functions.send-crm-email]
+    verify_jwt = false
+  [functions.send-email]
+    verify_jwt = false
+  [functions.send-order-email]
+    verify_jwt = false
+  [functions.send-promotions]
+    verify_jwt = false
+  [functions.send-property-report]
+    verify_jwt = false
+  [functions.stripe-webhook]
+    verify_jwt = false
+  [functions.submit-web-form]
+    verify_jwt = false
+  [functions.update-user-segments]
+    verify_jwt = false
+  [functions.utility-payment-reminders]
+    verify_jwt = false
+  [functions.vendor-acquisition]
+    verify_jwt = false
+  [functions.vendor-portal]
+    verify_jwt = false
