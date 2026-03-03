@@ -110,7 +110,7 @@ const TopAppCard = memo(function TopAppCard({ app, isRu, onClick, index }: TopAp
         <h3 className="text-base font-bold text-foreground">
           {isRu ? app.titleRu : app.titleEn}
         </h3>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-foreground/60">
           {isRu ? app.descRu : app.descEn}
         </p>
       </div>
