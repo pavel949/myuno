@@ -7,7 +7,9 @@ const corsHeaders = {
 
 interface ListingData {
   title?: string;
+  title_ru?: string;
   description?: string;
+  description_ru?: string;
   property_type?: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -89,8 +91,10 @@ Context: ${hint}
 Return a JSON object with these fields (omit if not found):
 
 ## Basic Info
-- title: string (property name/title)
-- description: string (main description, max 2000 chars)  
+- title: string (property name/title in English, or original language if not English)
+- title_ru: string (property name/title in Russian — translate if original is not Russian, or use original if it is Russian)
+- description: string (main description in English, max 2000 chars — translate if original is not English)
+- description_ru: string (main description in Russian, max 2000 chars — translate if original is not Russian, or use original if it is Russian)
 - property_type: "apartment" | "villa" | "house" | "condo" | "studio" | "hotel_room" | "townhouse"
 - bedrooms: number
 - bathrooms: number
