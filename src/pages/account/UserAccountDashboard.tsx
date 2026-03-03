@@ -8,11 +8,10 @@ import { AccountProfileCard } from '@/components/account/AccountProfileCard';
 import { AccountActiveStay } from '@/components/account/AccountActiveStay';
 import { AccountActivitySection } from '@/components/account/AccountActivitySection';
 import { AccountFlatMenu } from '@/components/account/AccountFlatMenu';
+import { QuickActionsPanel } from '@/components/account/QuickActionsPanel';
+import { PersonalRecommendations } from '@/components/account/PersonalRecommendations';
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { AchievementShowcase } from '@/components/gamification/AchievementShowcase';
-import { ActivityPulse } from '@/components/home/ActivityPulse';
-import { VerticalSubscriptions } from '@/components/account/VerticalSubscriptions';
 
 export default function UserAccountDashboard() {
   const navigate = useNavigate();
@@ -32,8 +31,6 @@ export default function UserAccountDashboard() {
           {/* Left column — Profile & identity */}
           <div className="space-y-6 mb-8 md:mb-0">
             <AccountProfileCard />
-            <ActivityPulse />
-            <AchievementShowcase />
             <DownloadAppButton />
             <button
               onClick={handleLogout}
@@ -47,11 +44,13 @@ export default function UserAccountDashboard() {
           {/* Right column — Content */}
           <div className="space-y-8">
             <AccountActiveStay />
+            <QuickActionsPanel />
+            <Separator className="bg-border/50" />
             <AccountActivitySection />
             <Separator className="bg-border/50" />
-            <AccountFlatMenu />
+            <PersonalRecommendations />
             <Separator className="bg-border/50" />
-            <VerticalSubscriptions />
+            <AccountFlatMenu />
           </div>
         </div>
       </div>
