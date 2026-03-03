@@ -2,9 +2,10 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SectionHeader } from '@/components/ds';
-import { DollarSign, BarChart3 } from 'lucide-react';
+import { DollarSign, BarChart3, Rocket } from 'lucide-react';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
+import { AdminPromotionsTab } from '@/components/admin/finance/AdminPromotionsTab';
 
 export default function AdminFinance() {
   const { language } = useLanguage();
@@ -29,6 +30,10 @@ export default function AdminFinance() {
             <BarChart3 className="h-4 w-4" />
             {isRu ? 'Аналитика' : 'Analytics'}
           </TabsTrigger>
+          <TabsTrigger value="promotions" className="gap-1.5">
+            <Rocket className="h-4 w-4" />
+            {isRu ? 'Промо' : 'Promotions'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="finance" className="mt-4">
@@ -36,6 +41,9 @@ export default function AdminFinance() {
         </TabsContent>
         <TabsContent value="analytics" className="mt-4">
           <ControlAnalyticsTab />
+        </TabsContent>
+        <TabsContent value="promotions" className="mt-4">
+          <AdminPromotionsTab />
         </TabsContent>
       </Tabs>
     </div>
