@@ -1,70 +1,50 @@
 
 
-## Что можно реализовать прямо сейчас
+## Редизайн раздела "Все сервисы" на Discover
 
-Проанализировав кодовую базу, вот что уже есть и чего реально не хватает:
+### Проблема
+Текущий `AllServicesGrid` использует маленькие (36px) полупрозрачные иконки (`bg-muted/60`, `text-foreground/70`) без цвета и контраста. На десктопе 4-колоночная сетка мелких серых кнопок теряется. Не используются `IconBadge` с градиентами и `Surface` из DS2.0.
 
-**Уже реализовано:**
-- Система отзывов (таблица `reviews`, компоненты `WriteReviewModal`, `ReviewsSection`, `EntityReviewsSummary`)
-- Реферальная система (таблица `referrals`, хуки, UI-компоненты, RPC-функции)
-- Админ-панель с KPI, финансами, операциями
-- Stripe-интеграция для платежей
+### Решение
 
-**Отсутствует и можно сделать сейчас:**
+**1. Заменить серые иконки на IconBadge с градиентами вертикалей**
+- Каждая вертикаль получит свой цветной градиент (уже определены в `VERTICAL_GRADIENTS` из `ExploreVerticalsSheet`)
+- Размер иконок: `lg` на мобильном, `xl` на десктопе
+- Контейнер иконки с тенью `shadow-md` для глубины
 
-### 1. Promoted Listings (Монетизация)
-Создать систему платного продвижения объектов:
-- Таблица `promoted_listings` (listing_id, type, starts_at, expires_at, amount_paid, status)
-- UI для владельца: кнопка "Продвинуть" на карточке объекта в личном кабинете
-- Оплата через баланс кошелька (уже есть)
-- Логика сортировки: promoted объекты показываются выше в каталогах
-- Админ: просмотр активных промо в AdminFinance
+**2. Адаптивная сетка**
+- Мобайл: `grid-cols-4` (как сейчас)
+- Десктоп (md+): `grid-cols-6` с увеличенными карточками
+- Каждая группа в `Surface` с `variant="card"` вместо голого `bg-muted/20`
 
-### 2. Система диспутов (Trust & Safety)
-Создать функциональную систему споров (сейчас есть только информационная страница `DisputeResolutionPage`):
-- Таблица `disputes` (order_id, user_id, provider_id, type, status, description, evidence_urls, resolution, resolved_at)
-- Кнопка "Открыть спор" в деталях заказа/бронирования
-- UI формы: тип проблемы, описание, загрузка доказательств
-- Админ-вкладка в Operations для модерации споров
-- Статусы: open → under_review → resolved/rejected
+**3. Группировки с цветными заголовками**
+- Эмодзи группы заменить на цветной `IconBadge` или оставить эмодзи, но увеличить
+- Подписи сервисов: `text-xs` вместо `text-[10px]`, `font-medium text-foreground` вместо `text-foreground/70`
 
-### 3. Продуктовая аналитика (Event Tracking)
-Лёгкий внутренний трекинг без внешних сервисов:
-- Таблица `analytics_events` (user_id, event_name, event_data, page_path, created_at)
-- Хук `useAnalytics` с методом `track(eventName, data)`
-- Трекинг ключевых событий: page_view, search, listing_click, booking_start, payment_complete
-- Дашборд в админке: воронка конверсии, GMV, MAU — данные для инвесторов
+**4. Карточки сервисов**
+- Убрать серый `bg-muted/60` контейнер иконки
+- Добавить hover-эффект с подсветкой градиентом
+- На десктопе: горизонтальный layout (иконка + текст в строку) для лучшего использования пространства
 
-### 4. Investor Metrics Dashboard
-Отдельная страница в админке с ключевыми метриками:
-- GMV (общий объём транзакций)
-- MAU / DAU (активные пользователи)
-- Конверсия по воронке (просмотр → бронирование → оплата)
-- Unit economics: средний чек, LTV
-- Графики на recharts (уже установлен)
+### Файлы для изменения
 
----
+| Файл | Изменение |
+|---|---|
+| `src/components/discover/AllServicesGrid.tsx` | Полный редизайн: IconBadge, адаптивная сетка, Surface обёртки |
+| `src/lib/resolveVerticalItem.ts` | Добавить поле `gradient` в результат resolve |
 
-### Техническая реализация
+### Визуальная структура
 
-**База данных (3 миграции):**
-1. `promoted_listings` + RLS (владелец видит свои, админ — все)
-2. `disputes` + RLS (участники спора + админ)
-3. `analytics_events` + RLS (insert для authenticated, select для админа)
+```text
+Mobile (4 cols):                    Desktop (6 cols):
+┌─────────────────────┐            ┌─────────────────────────────────┐
+│ 🏠 Home & Living    │            │ 🏠 Home & Living                │
+│ ┌──┐ ┌──┐ ┌──┐ ┌──┐│            │ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ │
+│ │🟢│ │🟡│ │🩷│ │🟠││            │ │🟢│ │🟡│ │🩷│ │🟠│ │🩷│ │  │ │
+│ │Rent│Clean│Baby│Pet││            │ │Rent│Clean│Baby│Pet│Flower│  │ │
+│ └──┘ └──┘ └──┘ └──┘│            └─────────────────────────────────┘
+└─────────────────────┘
+```
 
-**Новые компоненты:**
-- `src/components/promoted/PromoteListingModal.tsx` — форма промо с выбором срока и оплатой
-- `src/components/disputes/OpenDisputeModal.tsx` — форма открытия спора
-- `src/components/disputes/DisputeCard.tsx` — карточка спора
-- `src/pages/admin/AdminDisputes.tsx` — админ-модерация
-- `src/hooks/usePromotedListings.ts`, `src/hooks/useDisputes.ts`, `src/hooks/useAnalytics.ts`
-- `src/pages/admin/AdminInvestorMetrics.tsx` — дашборд для инвесторов
-
-**Модификации существующих файлов:**
-- Каталоги (PropertyIndex, ServicesIndex и тд) — сортировка promoted выше
-- Страница заказа — кнопка "Открыть спор"
-- App.tsx / routes — новые маршруты
-- AdminOperations — вкладка "Споры"
-
-**Ничего не ломается** — это всё новые таблицы и компоненты, существующий код затрагивается минимально (добавление кнопок и сортировки).
+Каждая иконка — цветной градиентный круг/квадрат с белой Lucide-иконкой внутри (как в ExploreVerticalsSheet), а не серый полупрозрачный квадрат.
 
