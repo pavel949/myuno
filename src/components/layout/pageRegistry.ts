@@ -280,6 +280,9 @@ export const AdminQuickListings = lazy(() => import('@/pages/admin/AdminQuickLis
 export const AdminWaterActivities = lazy(() => import('@/pages/admin/AdminWaterActivities'));
 export const AdminExperiences = lazy(() => import('@/pages/admin/AdminExperiences'));
 
+export const AdminDisputes = lazy(() => import('@/pages/admin/AdminDisputes'));
+export const AdminInvestorMetrics = lazy(() => import('@/pages/admin/AdminInvestorMetrics'));
+
 export const AdminConsultations = lazy(() => import('@/pages/admin/AdminConsultations'));
 export const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
 export const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));

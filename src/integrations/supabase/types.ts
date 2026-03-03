@@ -947,6 +947,42 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_name: string
+          id: string
+          page_path: string | null
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_name: string
+          id?: string
+          page_path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_name?: string
+          id?: string
+          page_path?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       booking_addresses: {
         Row: {
           address: string
@@ -5483,6 +5519,72 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      disputes: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string
+          dispute_type: string
+          evidence_urls: string[] | null
+          id: string
+          order_id: string | null
+          provider_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description: string
+          dispute_type?: string
+          evidence_urls?: string[] | null
+          id?: string
+          order_id?: string | null
+          provider_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string
+          dispute_type?: string
+          evidence_urls?: string[] | null
+          id?: string
+          order_id?: string | null
+          provider_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       doctors: {
         Row: {
@@ -14101,6 +14203,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      promoted_listings: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          listing_id: string
+          listing_type: string
+          promotion_type: string
+          starts_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          expires_at: string
+          id?: string
+          listing_id: string
+          listing_type?: string
+          promotion_type?: string
+          starts_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          listing_id?: string
+          listing_type?: string
+          promotion_type?: string
+          starts_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       properties: {
         Row: {

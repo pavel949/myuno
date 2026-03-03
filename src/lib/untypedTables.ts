@@ -22,4 +22,7 @@ export const untypedTables = {
   socialPosts: () => untypedFrom('social_posts'),
   socialContentCalendar: () => untypedFrom('social_content_calendar'),
   ownerProspects: () => untypedFrom('owner_prospects'),
+  promotedListings: () => untypedFrom('promoted_listings'),
+  disputes: () => untypedFrom('disputes'),
+  analyticsEvents: () => untypedFrom('analytics_events'),
 } as const;

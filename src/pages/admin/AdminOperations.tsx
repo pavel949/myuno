@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ClipboardList, ShieldCheck, MessageSquare, Users, 
   Plus, Building2, Home, Package, FileText, ArrowRight,
-  RefreshCw
+  RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { OperationsBookingsTab } from '@/components/admin/operations/OperationsBookingsTab';
 import { OperationsModerationTab } from '@/components/admin/operations/OperationsModerationTab';
 import { OperationsLeadsTab } from '@/components/admin/operations/OperationsLeadsTab';
 import { OperationsInquiriesTab } from '@/components/admin/operations/OperationsInquiriesTab';
+import { OperationsDisputesTab } from '@/components/admin/operations/OperationsDisputesTab';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -70,6 +71,11 @@ export default function AdminOperations() {
       label: isRu ? 'Тикеты' : 'Tickets', 
       icon: MessageSquare,
       badge: overview?.openTickets,
+    },
+    { 
+      id: 'disputes', 
+      label: isRu ? 'Споры' : 'Disputes', 
+      icon: AlertTriangle,
     },
   ];
 
@@ -191,6 +197,10 @@ export default function AdminOperations() {
 
         <TabsContent value="inquiries" className="mt-4">
           <OperationsInquiriesTab />
+        </TabsContent>
+
+        <TabsContent value="disputes" className="mt-4">
+          <OperationsDisputesTab />
         </TabsContent>
       </Tabs>
     </div>
