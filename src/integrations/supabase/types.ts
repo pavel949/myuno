@@ -27619,6 +27619,10 @@ export type Database = {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
       }
+      is_chat_participant: {
+        Args: { _property_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
       is_company_member: {
         Args: { _company_id: string; _user_id: string }
