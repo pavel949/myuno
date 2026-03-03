@@ -3683,6 +3683,12 @@ export type Database = {
       }
       crm_contacts: {
         Row: {
+          address_city: string | null
+          address_country: string | null
+          address_state: string | null
+          address_street: string | null
+          address_street2: string | null
+          address_zip: string | null
           avatar_url: string | null
           bedrooms_min: number | null
           birthday: string | null
@@ -3704,6 +3710,7 @@ export type Database = {
           id: string
           interests: string[] | null
           is_archived: boolean
+          is_company: boolean
           job_title: string | null
           language: string | null
           last_name: string
@@ -3712,6 +3719,7 @@ export type Database = {
           lifecycle_stage: string | null
           line_id: string | null
           linked_user_id: string | null
+          mobile: string | null
           nationality: string | null
           notes: string | null
           phone: string | null
@@ -3722,11 +3730,19 @@ export type Database = {
           source: string | null
           special_notes: string | null
           tags: string[] | null
+          tax_id: string | null
           telegram: string | null
           updated_at: string
+          website: string | null
           whatsapp: string | null
         }
         Insert: {
+          address_city?: string | null
+          address_country?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_street2?: string | null
+          address_zip?: string | null
           avatar_url?: string | null
           bedrooms_min?: number | null
           birthday?: string | null
@@ -3748,6 +3764,7 @@ export type Database = {
           id?: string
           interests?: string[] | null
           is_archived?: boolean
+          is_company?: boolean
           job_title?: string | null
           language?: string | null
           last_name?: string
@@ -3756,6 +3773,7 @@ export type Database = {
           lifecycle_stage?: string | null
           line_id?: string | null
           linked_user_id?: string | null
+          mobile?: string | null
           nationality?: string | null
           notes?: string | null
           phone?: string | null
@@ -3766,11 +3784,19 @@ export type Database = {
           source?: string | null
           special_notes?: string | null
           tags?: string[] | null
+          tax_id?: string | null
           telegram?: string | null
           updated_at?: string
+          website?: string | null
           whatsapp?: string | null
         }
         Update: {
+          address_city?: string | null
+          address_country?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_street2?: string | null
+          address_zip?: string | null
           avatar_url?: string | null
           bedrooms_min?: number | null
           birthday?: string | null
@@ -3792,6 +3818,7 @@ export type Database = {
           id?: string
           interests?: string[] | null
           is_archived?: boolean
+          is_company?: boolean
           job_title?: string | null
           language?: string | null
           last_name?: string
@@ -3800,6 +3827,7 @@ export type Database = {
           lifecycle_stage?: string | null
           line_id?: string | null
           linked_user_id?: string | null
+          mobile?: string | null
           nationality?: string | null
           notes?: string | null
           phone?: string | null
@@ -3810,8 +3838,10 @@ export type Database = {
           source?: string | null
           special_notes?: string | null
           tags?: string[] | null
+          tax_id?: string | null
           telegram?: string | null
           updated_at?: string
+          website?: string | null
           whatsapp?: string | null
         }
         Relationships: [
