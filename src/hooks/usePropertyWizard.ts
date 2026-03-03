@@ -102,6 +102,7 @@ export interface PropertyFormData {
     endMonth: number;
     endDay: number;
     priceModifier: number;
+    pricePerNight?: number;
     minNights?: number;
   }>;
   highlights: string[];

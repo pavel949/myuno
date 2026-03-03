@@ -118,6 +118,16 @@ export default function OwnerPropertyDetail() {
                 ฿{Number(property.price_per_night).toLocaleString()}/{isRu ? 'ночь' : 'night'}
               </span>
             )}
+            {property.deposit_amount && Number(property.deposit_amount) > 0 && (
+              <span className="text-muted-foreground">
+                {isRu ? 'Депозит:' : 'Deposit:'} {Number(property.deposit_amount).toLocaleString()} {(property as any).deposit_currency || 'USD'}
+              </span>
+            )}
+            {(property as any).seasonal_pricing?.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {(property as any).seasonal_pricing.length} {isRu ? 'сезон.' : 'seasons'}
+              </Badge>
+            )}
           </div>
           {property.internal_name && (
             <p className="text-xs text-muted-foreground mt-2 italic">
