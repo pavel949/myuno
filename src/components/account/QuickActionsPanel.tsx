@@ -25,7 +25,7 @@ export function QuickActionsPanel() {
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">{isRu ? 'Быстрые действия' : 'Quick Actions'}</h2>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none lg:grid lg:grid-cols-4 lg:mx-0 lg:px-0 lg:overflow-visible">
         {ACTIONS.map((action) => {
           const Icon = action.icon;
           return (

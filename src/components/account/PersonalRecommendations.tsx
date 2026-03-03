@@ -123,7 +123,7 @@ export function PersonalRecommendations() {
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Попробуйте новое' : 'Try something new'}
           </p>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:mx-0 lg:px-0 lg:overflow-visible">
             {data.suggestions.map((service) => (
               <button
                 key={service.id}
