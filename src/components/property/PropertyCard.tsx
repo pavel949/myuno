@@ -355,6 +355,12 @@ function ListVariant({
                       <Globe className="h-3 w-3" />
                     </Badge>
                   )}
+                  {(property as any).listing_modes?.includes('platform') && (
+                    <Badge variant="outline" className="text-xs h-5 px-1.5 border-emerald-400 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30">
+                      <Globe className="h-3 w-3 mr-0.5" />
+                      {isRu ? 'Платформа' : 'Platform'}
+                    </Badge>
+                  )}
                   {isInactive && (
                     <Badge variant="outline" className="text-xs h-5">
                       {isRu ? 'Неактивен' : 'Inactive'}
