@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicListings } from '@/hooks/useUserListings';
@@ -27,9 +28,13 @@ export default function ClassifiedsIndex() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedCondition, setSelectedCondition] = useState<ItemCondition | undefined>();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { getValue, setValue } = useUrlFilters();
+  const selectedCategory = getValue('cat', '');
+  const setSelectedCategory = (v: string) => setValue('cat', v || null);
+  const selectedCondition = (getValue('condition', '') as ItemCondition | '') || undefined;
+  const setSelectedCondition = (v: ItemCondition | undefined) => setValue('condition', v || null);
+  const searchQuery = getValue('q', '');
+  const setSearchQuery = (v: string) => setValue('q', v || null);
 
   const { listings, isLoading } = usePublicListings({
     category: selectedCategory || undefined,

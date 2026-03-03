@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TeamLayout } from '@/components/team/TeamLayout';
 import { useTeamLeads, getSlaStatus, type LeadFilters, type LeadStatus, type LeadRequestType } from '@/hooks/useTeamLeads';
@@ -40,9 +41,22 @@ export default function TeamLeadsPage() {
   const isRu = language === 'ru';
   const dateLocale = isRu ? ru : enUS;
   
-  const [filters, setFilters] = useState<LeadFilters>({ status: 'all', requestType: 'all' });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('pending');
+  const { getValue, setValue, setValues } = useUrlFilters();
+  const searchQuery = getValue('q', '');
+  const setSearchQuery = (v: string) => setValue('q', v || null);
+  const activeTab = getValue('tab', 'pending');
+  const setActiveTab = (v: string) => setValue('tab', v === 'pending' ? null : v);
+  const filters: LeadFilters = {
+    status: (getValue('status', 'all') as any),
+    requestType: (getValue('type', 'all') as any),
+  };
+  const setFilters = (updater: LeadFilters | ((prev: LeadFilters) => LeadFilters)) => {
+    const next = typeof updater === 'function' ? updater(filters) : updater;
+    setValues({
+      status: next.status === 'all' ? null : (next.status ?? null),
+      type: next.requestType === 'all' ? null : (next.requestType ?? null),
+    });
+  };
 
   const { leads, sortedByUrgency, stats, isLoading, recordContact } = useTeamLeads({
     ...filters,
