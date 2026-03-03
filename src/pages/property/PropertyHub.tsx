@@ -9,6 +9,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { Home, ShoppingCart, Building2, User } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { CompareProvider } from '@/components/property/PropertyCompare';
 import { cn } from '@/lib/utils';
 
 interface TabConfig {
@@ -116,9 +117,9 @@ export function PropertyHubTabs() {
 
 export default function PropertyHub() {
   return (
-    <>
+    <CompareProvider>
       <PropertyHubTabs />
       <Outlet />
-    </>
+    </CompareProvider>
   );
 }
