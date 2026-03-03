@@ -95,6 +95,19 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
 
       if (error) throw error;
 
+      // Notify owner via email (fire-and-forget)
+      if (propertyId) {
+        supabase.functions
+          .invoke('notify-chat-message', {
+            body: {
+              propertyId,
+              senderName: params.senderName || user.email?.split('@')[0] || 'Guest',
+              messagePreview: params.message,
+            },
+          })
+          .catch((err) => console.warn('[Chat Notify] Error:', err));
+      }
+
       // Trigger AI auto-reply asynchronously (fire-and-forget)
       if (propertyId) {
         triggerAutoReply(propertyId, bookingId, params.message, params.senderName);
