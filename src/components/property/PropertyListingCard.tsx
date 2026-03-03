@@ -12,7 +12,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { getDistrictLabel } from '@/lib/propertyTaxonomy';
+import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 
@@ -129,13 +129,31 @@ export function PropertyListingCard({
           {property.rating != null && property.rating > 0 && (
             <div className="flex items-center gap-1 shrink-0">
               <Star className="w-3.5 h-3.5 fill-foreground text-foreground" />
-              <span className="text-sm text-foreground">{property.rating.toFixed(1)}</span>
+              <span className="text-sm text-foreground">
+                {property.rating.toFixed(1)}
+                {property.review_count != null && property.review_count > 0 && (
+                  <span className="text-muted-foreground"> ({property.review_count})</span>
+                )}
+              </span>
             </div>
           )}
         </div>
 
-        {/* Row 2: Title (muted) */}
-        <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
+        {/* Row 2: Property type · bedrooms · baths · guests */}
+        <p className="text-sm text-muted-foreground line-clamp-1">
+          {property.property_type
+            ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
+            : title}
+          {property.bedrooms != null && property.bedrooms > 0 && (
+            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'спальня' : property.bedrooms < 5 ? 'спальни' : 'спален') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
+          )}
+          {property.bathrooms != null && property.bathrooms > 0 && (
+            <> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</>
+          )}
+          {property.max_guests != null && property.max_guests > 0 && (
+            <> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</>
+          )}
+        </p>
 
         {/* Row 3: Price */}
         <div className="pt-1">
@@ -153,7 +171,6 @@ export function PropertyListingCard({
               </>
             )}
           </p>
-          {/* Total price for selected dates */}
           {totalPrice && nights && mode !== 'buy' && (
             <p className="text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
               {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'} · {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
