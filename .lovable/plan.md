@@ -1,115 +1,104 @@
 
-# Реструктуризация Admin Panel myUNO -- 7 разделов
 
-## Текущее состояние
+## Концепция: Единый личный кабинет с ролевыми модулями
 
-Сейчас сайдбар имеет 5 групп (Core, Business, Content, AI, System) с ~25 пунктами. Отдельные вертикали (Yachts, Salons, Properties...) доступны как 30+ отдельных роутов, но не видны в сайдбаре (только через Unified Catalog или прямые ссылки). Control Center объединяет пользователей, роли, аналитику, финансы, аудит и логи в одной вкладочной странице. CRM и MC Dashboard находятся в сайдбаре админки.
+### Проблема
 
-## Новая структура сайдбара -- 7 разделов
+Сейчас три отдельных кабинета — `/account` (пользователь), `/mc` (УК), `/vendor` (провайдер) — каждый со своими настройками, профилем, навигацией. У пользователя с несколькими ролями нет единой точки входа. Личные данные, заказы, настройки продублированы или разбросаны.
+
+### Архитектурный принцип
+
+**`/account` = единственный личный кабинет для ВСЕХ ролей.**
+`/mc` и `/vendor` остаются рабочими пространствами (workspace), но НЕ содержат личных настроек.
 
 ```text
-1. Dashboard          -- /admin
-2. Users & Access     -- /admin/users (NEW route)
-3. Catalog & Content  -- /admin/catalog (existing)
-4. LifeOS             -- /admin/life-situations (existing)
-5. Finance            -- /admin/finance (NEW route)
-6. Partners           -- /admin/providers (existing, расширенный)
-7. System Settings    -- /admin/settings (NEW route)
+/account                    ← Личный кабинет (единый)
+  ├── Профиль, аватар, контакты
+  ├── Настройки (тема, язык, валюта, уведомления)
+  ├── Заказы и брони
+  ├── Кошелёк и платежи
+  ├── Документы
+  └── Ролевые модули (динамические)
+       ├── [owner]  → Мои объекты, Портал владельца
+       ├── [vendor] → Мои сервисы, Аналитика
+       └── [mc]     → Ссылка на workspace
+
+/mc                         ← Рабочее пространство УК (без личных настроек)
+/vendor                     ← Рабочее пространство провайдера (без личных настроек)
 ```
 
-## Детали по каждому разделу
+### Десктоп Layout
 
-### 1. Dashboard (/admin)
-Сокращаем до 6 KPI: Active Users, New Registrations, Active Listings, Platform Revenue, Pending Approvals (кликабельный бейдж), System Health. Плюс Activity Feed за 24 часа. Убираем AllVerticalsGrid и QuickActionsGrid (перегрузка). Pending Approvals -- кликабельная карточка, ведущая к /admin/catalog?status=pending.
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  AppHeader                                                   │
+├──────────┬──────────────────────────────────────────────────┤
+│ Sidebar  │  Content Area (full width)                       │
+│ (260px)  │                                                  │
+│ sticky   │  ┌────────────────────────────────────────────┐  │
+│          │  │ Active Stay / Context Banner               │  │
+│ Avatar   │  └────────────────────────────────────────────┘  │
+│ Name     │                                                  │
+│ Role     │  ┌──────────┐ ┌──────────┐ ┌──────────┐        │
+│          │  │ Orders   │ │ Wallet   │ │ Favorites│        │
+│ ──────── │  │ (count)  │ │ (balance)│ │ (count)  │        │
+│ Nav      │  └──────────┘ └──────────┘ └──────────┘        │
+│  Orders  │                                                  │
+│  Wallet  │  ┌────────────────────────────────────────────┐  │
+│  Favs    │  │ Quick Actions (grid 4x2)                  │  │
+│  Docs    │  └────────────────────────────────────────────┘  │
+│  Referral│                                                  │
+│          │  ┌─────────────────┐ ┌────────────────────────┐  │
+│ ──────── │  │ Recent Orders   │ │ Recommendations        │  │
+│ Roles    │  │ (last 5)        │ │ (personalized)         │  │
+│  Owner → │  └─────────────────┘ └────────────────────────┘  │
+│  MC →    │                                                  │
+│  Vendor→ │  ┌────────────────────────────────────────────┐  │
+│ ──────── │  │ Role-specific widgets                      │  │
+│ Settings │  │ (Owner: properties | Vendor: services)     │  │
+│  Theme   │  └────────────────────────────────────────────┘  │
+│  Lang    │                                                  │
+│  Notif.  │                                                  │
+│ ──────── │                                                  │
+│ Log out  │                                                  │
+└──────────┴──────────────────────────────────────────────────┘
+```
 
-**Файлы:** `AdminDashboard.tsx`, `AdminKPIGrid.tsx` (рефакторинг), удаление `AdminAllVerticalsGrid.tsx`, `AdminQuickActionsGrid.tsx` из дашборда.
+### Как избежать дублирования
 
-### 2. Users & Access (/admin/users -- NEW)
-Выносим ControlUsersTab и ControlRolesTab из Control Center в отдельную страницу. Табы: Users List (поиск, фильтры по роли/статусу/дате/персоне), User Card (профиль, активность, бронирования, платежи, документы -- вкладки внутри карточки), Roles & RBAC, Staff & Permissions.
+| Что | Где живёт | MC/Vendor workspace |
+|---|---|---|
+| Профиль, аватар, имя | `/account` sidebar | Показывает мини-аватар, ссылка на `/account` |
+| Тема, язык, валюта | `/account` quick settings | НЕ дублируется |
+| Уведомления (настройки) | `/account` → Notifications | НЕ дублируется |
+| Заказы/брони | `/account` → Orders | НЕ дублируется |
+| Кошелёк | `/account` → Wallet | НЕ дублируется |
+| Документы | `/account` → Documents | MC: свои доки через CRM Vault |
+| Мои объекты | `/account` role widget | `/mc` — операционное управление |
+| Мои сервисы | `/account` role widget | `/vendor` — полное управление |
 
-**Файлы:** Новая страница `AdminUsersAccess.tsx`, переиспользует `ControlUsersTab` и `ControlRolesTab`.
+### Ключевые компоненты
 
-### 3. Catalog & Content (/admin/catalog)
-Уже существует Unified Catalog. Добавляем:
-- Фильтр по entity type (Properties, Yachts, Restaurants...)
-- Колонки: название, тип, статус (active/pending/draft), верификация, дата
-- Модерация: approval queue с pending-бейджем
-- Подразделы через табы: Listings, Categories & Tags, Locations, Moderation Queue
+1. **`AccountSidebar.tsx`** — Sticky sidebar: аватар, навигация, ролевые ссылки, quick settings (тема/язык/валюта), logout
+2. **`AccountQuickSettings.tsx`** — Компактные переключатели в sidebar (theme toggle, language select, currency select)
+3. **`AccountStatsBar.tsx`** — 3 карточки-счётчика (активные заказы, баланс, избранное)
+4. **`AccountRoleWidgets.tsx`** — Динамический блок: показывает виджеты в зависимости от ролей пользователя (owner → мини-список объектов, vendor → мини-статистика сервисов)
+5. **Рефакторинг `UserAccountDashboard.tsx`** — Full-width layout `max-w-[1536px]`, sidebar + main grid на `lg+`, стек на мобайле
 
-**Файлы:** Расширение `AdminUnifiedCatalog.tsx` -- добавить таб "Moderation" и approval-бейдж.
+### Мобайл
 
-### 4. LifeOS (/admin/life-situations)
-Уже существует. Без изменений.
+Sidebar скрыт. Профиль наверху → Quick Actions → Active Stay → Stats → Orders → Role widgets → Menu → Settings кнопка → Logout. Тот же контент, стеком.
 
-### 5. Finance (/admin/finance -- NEW)
-Сейчас /admin/finance редиректит на /admin/control. Создаем отдельную страницу:
-- Транзакции платформы (Stripe)
-- Комиссии и payouts
-- Подписки (кто на каком плане)
-- Revenue по вертикалям
-Переиспользуем `ControlFinanceTab` + `ControlAnalyticsTab`.
-
-**Файлы:** Новая страница `AdminFinance.tsx`.
-
-### 6. Partners & Providers (/admin/providers)
-Расширяем существующую страницу:
-- Approval queue (заявки на верификацию) -- вкладка
-- Верифицированные партнеры -- вкладка
-- Листинги, рейтинги, жалобы
-- Комиссионные ставки
-
-**Файлы:** Расширение `AdminProviders.tsx` -- добавить табы.
-
-### 7. System Settings (/admin/settings -- NEW)
-Объединяем всё из бывшего "System" + часть Control Center:
-- Regions (Cities)
-- Localization (Translations)
-- Integrations (API keys, Stripe, Mapbox)
-- SEO
-- Feature Flags
-- Logs & Audit (из ControlLogsTab + ControlAuditTab)
-- Taxonomy
-- Data Import
-
-**Файлы:** Новая страница `AdminSystemSettings.tsx` с табами/аккордеонами.
-
-## Что убираем из сайдбара
-
-- CRM (/admin/crm) -- отдельный workspace, не админка
-- MC Dashboard (/admin/mc-dashboard) -- отдельный workspace /mc
-- Marketing, Contracts, Vendor Prospects -- доступны через Cmd+K и через Partners/Operations
-- Все отдельные вертикали (yachts, salons...) -- внутри Catalog
-- Control Center -- разнесен по Users, Finance, System
-- AI & Automation -- переносим в System Settings как подраздел
-- Trash, Intake, Operations -- через Quick Actions на Dashboard или Cmd+K
-
-Старые роуты сохраняются (Navigate redirects), ничего не ломается.
-
-## Бейджи на сайдбаре
-
-Pending Approvals badge на "Catalog & Content" (из `pendingContent` stat).
-Unverified Partners badge на "Partners" (из `pendingProviders` stat).
-
-## Изменяемые файлы
+### Изменяемые файлы
 
 | Файл | Действие |
-|------|----------|
-| `src/components/admin/AdminSidebar.tsx` | Полная перестройка: 7 flat items вместо 5 групп |
-| `src/components/admin/AdminMobileBottomNav.tsx` | Обновить: 5 main items из 7 |
-| `src/components/admin/AdminCommandPalette.tsx` | Обновить группировку |
-| `src/components/admin/AdminHeader.tsx` | Обновить routeLabels |
-| `src/pages/admin/AdminDashboard.tsx` | Упростить: 6 KPI + alerts + activity |
-| `src/components/admin/dashboard/AdminKPIGrid.tsx` | 6 KPI вместо 4 |
-| `src/pages/admin/AdminUsersAccess.tsx` | NEW -- Users & Access page |
-| `src/pages/admin/AdminFinance.tsx` | NEW -- Finance page |
-| `src/pages/admin/AdminSystemSettings.tsx` | NEW -- System Settings page |
-| `src/components/layout/AnimatedRoutes.tsx` | Новые роуты + redirects старых |
+|---|---|
+| `UserAccountDashboard.tsx` | Полный рефакторинг layout |
+| Новый: `AccountSidebar.tsx` | Sidebar компонент |
+| Новый: `AccountQuickSettings.tsx` | Inline settings |
+| Новый: `AccountStatsBar.tsx` | Счётчики-карточки |
+| Новый: `AccountRoleWidgets.tsx` | Ролевые виджеты |
+| `AccountFlatMenu.tsx` | Адаптация для sidebar |
+| `QuickActionsPanel.tsx` | Desktop: grid layout |
+| `PersonalRecommendations.tsx` | Desktop: multi-column grid |
 
-## Принципы
-
-- Approval queue с badge-счетчиком на sidebar
-- Cmd+K (уже работает) -- обновить группировку
-- Bulk actions на таблицах (уже частично есть)
-- Activity log на каждой сущности (уже реализован property_activity_log)
-- Максимум 2 клика до любого действия
-- CRM и MC -- через workspace switcher в хедере (RoleContextSwitcher уже есть)
