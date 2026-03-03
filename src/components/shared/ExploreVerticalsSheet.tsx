@@ -3,31 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { LayoutGrid } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { VERTICALS } from '@/lib/verticals';
-import { resolveIcon } from '@/lib/iconMap';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { IconBadge } from '@/components/ui/IconBadge';
-
-const VERTICAL_GRADIENTS: Record<string, string> = {
-  property: 'from-emerald-500 to-green-400',
-  yacht: 'from-blue-500 to-cyan-400',
-  vehicle: 'from-indigo-500 to-violet-400',
-  experience: 'from-purple-500 to-indigo-400',
-  cleaning: 'from-amber-500 to-yellow-400',
-  babysitter: 'from-pink-400 to-rose-300',
-  beauty: 'from-pink-500 to-purple-400',
-  restaurant: 'from-rose-500 to-pink-400',
-  medical: 'from-teal-500 to-emerald-400',
-  legal: 'from-slate-500 to-gray-400',
-  education: 'from-blue-400 to-indigo-300',
-  fitness: 'from-orange-500 to-red-400',
-  event: 'from-purple-500 to-indigo-400',
-  water_activity: 'from-cyan-500 to-blue-400',
-  pet_service: 'from-orange-500 to-amber-400',
-  flower: 'from-pink-400 to-rose-300',
-  insurance: 'from-slate-500 to-blue-400',
-  transfer: 'from-indigo-500 to-blue-400',
-};
+import { VERTICAL_GRADIENTS } from '@/lib/resolveVerticalItem';
 
 interface ExploreVerticalsSheetProps {
   trigger?: ReactNode;
