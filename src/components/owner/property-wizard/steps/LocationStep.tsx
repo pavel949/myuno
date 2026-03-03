@@ -40,7 +40,15 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
           <Label>{isRu ? 'Район' : 'District'}</Label>
           <Select 
             value={formData.district}
-            onValueChange={(value) => updateFormData({ district: value })}
+            onValueChange={(value) => {
+              const district = PHUKET_DISTRICTS.find(d => d.id === value);
+              const updates: Partial<PropertyFormData> = { district: value };
+              // Auto-fill address if empty
+              if (!formData.address.trim() && district) {
+                updates.address = `${isRu ? district.labelRu : district.labelEn}, Phuket`;
+              }
+              updateFormData(updates);
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
