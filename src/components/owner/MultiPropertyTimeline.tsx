@@ -435,9 +435,11 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                         const guestName = booking.guest_name || '?';
                         const statusColor = booking.status === 'confirmed' 
                           ? 'bg-primary/80 text-primary-foreground' 
+                          : booking.status === 'checked_in'
+                          ? 'bg-success/80 text-success-foreground'
                           : booking.status === 'cancelled'
                           ? 'bg-muted text-muted-foreground line-through'
-                          : 'bg-secondary text-secondary-foreground';
+                          : 'bg-amber-500/80 text-white'; // pending
 
                         return (
                           <div
@@ -477,30 +479,37 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground justify-center pt-1">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground justify-center pt-2">
+          <span className="font-medium text-foreground/70">{isRu ? 'Бронирования:' : 'Bookings:'}</span>
           <div className="flex items-center gap-1.5">
-            <div className="w-6 h-3 rounded bg-primary/80" />
+            <div className="w-5 h-3 rounded bg-primary/80" />
             <span>{isRu ? 'Подтверждено' : 'Confirmed'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-6 h-3 rounded bg-secondary" />
-            <span>{isRu ? 'Ожидает' : 'Pending'}</span>
+            <div className="w-5 h-3 rounded bg-amber-500/80" />
+            <span>{isRu ? 'Ожидает подтверждения' : 'Awaiting confirmation'}</span>
           </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-3 rounded bg-success/80" />
+            <span>{isRu ? 'Гость на месте' : 'Checked in'}</span>
+          </div>
+
+          <span className="font-medium text-foreground/70 ml-2">{isRu ? 'Задачи:' : 'Tasks:'}</span>
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3 w-3 text-info" />
             <span>{isRu ? 'Уборка' : 'Cleaning'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Wrench className="h-3 w-3 text-accent-foreground" />
-            <span>{isRu ? 'Ремонт' : 'Repair'}</span>
+            <span>{isRu ? 'Ремонт' : 'Maintenance'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <FileText className="h-3 w-3 text-destructive" />
-            <span>{isRu ? 'Документ' : 'Document'}</span>
+            <span>{isRu ? 'Документ истекает' : 'Doc expiring'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <DollarSign className="h-3 w-3 text-warning" />
-            <span>{isRu ? 'Оплата' : 'Payment'}</span>
+            <span>{isRu ? 'Запланированный платёж' : 'Scheduled payment'}</span>
           </div>
         </div>
       </div>

@@ -103,11 +103,19 @@ export default function OwnerCalendar() {
   return (
     <div className="p-4 pb-24 space-y-4">
       {/* View Mode Toggle */}
-      {allProperties.length > 1 && (
-        <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
           <h2 className="text-lg font-semibold">
-            {isRu ? 'Календарь' : 'Calendar'}
+            {isRu ? 'Календарь бронирований' : 'Booking Calendar'}
           </h2>
+          <p className="text-xs text-muted-foreground">
+            {isRu 
+              ? 'Управление бронированиями, задачами и доступностью объектов' 
+              : 'Manage bookings, tasks and property availability'}
+          </p>
+        </div>
+        {allProperties.length > 1 && (
           <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
             <button
               onClick={() => setViewMode('multi')}
@@ -117,7 +125,7 @@ export default function OwnerCalendar() {
               )}
             >
               <LayoutGrid className="h-3.5 w-3.5" />
-              {isRu ? 'Все' : 'All'}
+              {isRu ? 'Все объекты' : 'All'}
             </button>
             <button
               onClick={() => setViewMode('single')}
@@ -127,11 +135,11 @@ export default function OwnerCalendar() {
               )}
             >
               <List className="h-3.5 w-3.5" />
-              {isRu ? 'Один' : 'Single'}
+              {isRu ? 'По одному' : 'Single'}
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {isMulti ? (
         /* Multi-property timeline view */
