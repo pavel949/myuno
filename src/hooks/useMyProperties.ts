@@ -77,10 +77,8 @@ export function useMyProperties() {
 
   const ownedProperties = useMemo<UnifiedProperty[]>(() => {
     if (!ownedRaw) return [];
-    return ownedRaw
-      // In MC mode, filter owned properties to only those belonging to the active company
-      .filter(p => !isInMCMode || (p as any).management_company_id === activeCompanyId)
-      .map(p => ({
+    // Always show all owned properties — owner should see their drafts/pending regardless of MC context
+    return ownedRaw.map(p => ({
         id: p.id,
         property_id: p.id,
         title: p.title_en || p.title || 'Untitled',
@@ -101,7 +99,7 @@ export function useMyProperties() {
         lng: p.lng ?? null,
         approval_status: p.approval_status || null,
       }));
-  }, [ownedRaw, isInMCMode, activeCompanyId]);
+  }, [ownedRaw]);
 
   const managedProperties = useMemo<UnifiedProperty[]>(() => {
     return managedRaw.map(p => ({
