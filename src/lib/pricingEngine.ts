@@ -242,3 +242,179 @@ function emptyBreakdown(rules: PricingRules): PricingBreakdown {
     depositCurrency: rules.depositCurrency || 'USD',
   };
 }
+
+/**
+ * Rate season record from `property_rate_seasons` table
+ */
+export interface RateSeasonRecord {
+  id: string;
+  property_id: string;
+  name_en: string;
+  name_ru?: string | null;
+  start_date: string;
+  end_date: string;
+  nightly_rate: number;
+  weekly_rate?: number | null;
+  monthly_rate?: number | null;
+  min_stay_nights?: number | null;
+  currency?: string | null;
+  is_active?: boolean | null;
+  early_booking_discount?: number | null;
+  early_booking_days?: number | null;
+  last_minute_discount?: number | null;
+  last_minute_days?: number | null;
+  weekly_discount?: number | null;
+  monthly_discount?: number | null;
+}
+
+/**
+ * Convert a date string "YYYY-MM-DD" to month/day components
+ */
+function dateToMonthDay(dateStr: string): { month: number; day: number } {
+  const d = new Date(dateStr + 'T00:00:00');
+  return { month: d.getMonth() + 1, day: d.getDate() };
+}
+
+/**
+ * Build PricingRules from property base data + rate season records.
+ * Rate seasons become SeasonalPricingRule entries; per-season discounts
+ * override property-level discounts when the check-in falls in that season.
+ */
+export function buildPricingRulesFromSeasons(
+  property: {
+    price_per_night: number;
+    weekly_discount?: number;
+    monthly_discount?: number;
+    early_booking_discount?: number;
+    early_booking_days?: number;
+    last_minute_discount?: number;
+    last_minute_days?: number;
+    custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
+    deposit_amount?: number;
+    deposit_currency?: string;
+    payment_policy?: string;
+    prepay_percent?: number;
+  },
+  seasons: RateSeasonRecord[]
+): PricingRules {
+  const activeSeasons = seasons.filter(s => s.is_active !== false);
+
+  const seasonalPricing: SeasonalPricingRule[] = activeSeasons.map(s => {
+    const start = dateToMonthDay(s.start_date);
+    const end = dateToMonthDay(s.end_date);
+    return {
+      type: s.name_en,
+      startMonth: start.month,
+      startDay: start.day,
+      endMonth: end.month,
+      endDay: end.day,
+      priceModifier: Math.round((s.nightly_rate / property.price_per_night) * 100),
+      pricePerNight: s.nightly_rate,
+      minNights: s.min_stay_nights ?? undefined,
+    };
+  });
+
+  // Use first matching season's discounts if available, else property defaults
+  return {
+    pricePerNight: property.price_per_night,
+    weeklyDiscount: property.weekly_discount,
+    monthlyDiscount: property.monthly_discount,
+    customLengthDiscounts: property.custom_length_discounts,
+    earlyBookingDiscount: property.early_booking_discount,
+    earlyBookingDays: property.early_booking_days,
+    lastMinuteDiscount: property.last_minute_discount,
+    lastMinuteDays: property.last_minute_days,
+    seasonalPricing,
+    depositAmount: property.deposit_amount,
+    depositCurrency: property.deposit_currency || 'USD',
+    paymentPolicy: property.payment_policy,
+    prepayPercent: property.prepay_percent,
+  };
+}
+
+/**
+ * Get season-specific discounts for a check-in date from rate_seasons records.
+ * Falls back to property-level discounts if no season overrides exist.
+ */
+export function getSeasonDiscounts(
+  checkInDate: Date,
+  seasons: RateSeasonRecord[],
+  propertyDefaults: {
+    weekly_discount?: number;
+    monthly_discount?: number;
+    early_booking_discount?: number;
+    early_booking_days?: number;
+    last_minute_discount?: number;
+    last_minute_days?: number;
+  }
+): {
+  weeklyDiscount?: number;
+  monthlyDiscount?: number;
+  earlyBookingDiscount?: number;
+  earlyBookingDays?: number;
+  lastMinuteDiscount?: number;
+  lastMinuteDays?: number;
+} {
+  const activeSeasons = seasons.filter(s => s.is_active !== false);
+
+  for (const s of activeSeasons) {
+    const start = new Date(s.start_date + 'T00:00:00');
+    const end = new Date(s.end_date + 'T00:00:00');
+    if (checkInDate >= start && checkInDate <= end) {
+      return {
+        weeklyDiscount: s.weekly_discount ?? propertyDefaults.weekly_discount,
+        monthlyDiscount: s.monthly_discount ?? propertyDefaults.monthly_discount,
+        earlyBookingDiscount: s.early_booking_discount ?? propertyDefaults.early_booking_discount,
+        earlyBookingDays: s.early_booking_days ?? propertyDefaults.early_booking_days,
+        lastMinuteDiscount: s.last_minute_discount ?? propertyDefaults.last_minute_discount,
+        lastMinuteDays: s.last_minute_days ?? propertyDefaults.last_minute_days,
+      };
+    }
+  }
+
+  return {
+    weeklyDiscount: propertyDefaults.weekly_discount,
+    monthlyDiscount: propertyDefaults.monthly_discount,
+    earlyBookingDiscount: propertyDefaults.early_booking_discount,
+    earlyBookingDays: propertyDefaults.early_booking_days,
+    lastMinuteDiscount: propertyDefaults.last_minute_discount,
+    lastMinuteDays: propertyDefaults.last_minute_days,
+  };
+}
+
+/**
+ * Convert rate_seasons table records back to the JSONB format stored in
+ * `properties.seasonal_pricing` for backward compatibility.
+ */
+export function rateSeasonsToJsonb(
+  seasons: RateSeasonRecord[],
+  basePricePerNight: number
+): Array<{
+  type: string;
+  start_month: number;
+  start_day: number;
+  end_month: number;
+  end_day: number;
+  price_modifier: number;
+  price_per_night: number;
+  min_nights?: number;
+}> {
+  return seasons
+    .filter(s => s.is_active !== false)
+    .map(s => {
+      const start = dateToMonthDay(s.start_date);
+      const end = dateToMonthDay(s.end_date);
+      return {
+        type: s.name_en,
+        start_month: start.month,
+        start_day: start.day,
+        end_month: end.month,
+        end_day: end.day,
+        price_modifier: basePricePerNight > 0
+          ? Math.round((s.nightly_rate / basePricePerNight) * 100)
+          : 100,
+        price_per_night: s.nightly_rate,
+        min_nights: s.min_stay_nights ?? undefined,
+      };
+    });
+}

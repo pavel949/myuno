@@ -10,7 +10,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
-import { calculatePricing, type PricingRules } from '@/lib/pricingEngine';
+import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
+import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { GuestPriceProposal } from './GuestPriceProposal';
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -65,7 +66,7 @@ export function PropertyBookingCard({
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   
   const { data: blockedDates } = usePropertyBlockedDates(propertyId);
-  
+  const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
   // Calculate nights
   const nights = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return 0;
@@ -78,23 +79,47 @@ export function PropertyBookingCard({
     ) ?? false;
   };
   
-  // Build pricing rules and calculate
+  // Build pricing rules — prefer rate_seasons table data when available
   const pricing = useMemo(() => {
-    const rules: PricingRules = {
-      pricePerNight,
-      weeklyDiscount: rentalTerms?.weekly_discount,
-      monthlyDiscount: rentalTerms?.monthly_discount,
-      customLengthDiscounts,
-      earlyBookingDiscount,
-      earlyBookingDays,
-      lastMinuteDiscount,
-      lastMinuteDays,
-      seasonalPricing,
-      depositAmount,
-      depositCurrency: depositCurrency || 'USD',
-      paymentPolicy: paymentPolicy || 'prepay_10',
-      prepayPercent,
-    };
+    let rules: PricingRules;
+
+    if (rateSeasons && rateSeasons.length > 0) {
+      // Build from table data (source of truth)
+      rules = buildPricingRulesFromSeasons(
+        {
+          price_per_night: pricePerNight,
+          weekly_discount: rentalTerms?.weekly_discount,
+          monthly_discount: rentalTerms?.monthly_discount,
+          early_booking_discount: earlyBookingDiscount,
+          early_booking_days: earlyBookingDays,
+          last_minute_discount: lastMinuteDiscount,
+          last_minute_days: lastMinuteDays,
+          custom_length_discounts: customLengthDiscounts,
+          deposit_amount: depositAmount,
+          deposit_currency: depositCurrency || 'USD',
+          payment_policy: paymentPolicy || 'prepay_10',
+          prepay_percent: prepayPercent,
+        },
+        rateSeasons
+      );
+    } else {
+      // Fallback: use props (JSONB data from property card)
+      rules = {
+        pricePerNight,
+        weeklyDiscount: rentalTerms?.weekly_discount,
+        monthlyDiscount: rentalTerms?.monthly_discount,
+        customLengthDiscounts,
+        earlyBookingDiscount,
+        earlyBookingDays,
+        lastMinuteDiscount,
+        lastMinuteDays,
+        seasonalPricing,
+        depositAmount,
+        depositCurrency: depositCurrency || 'USD',
+        paymentPolicy: paymentPolicy || 'prepay_10',
+        prepayPercent,
+      };
+    }
 
     if (!dateRange?.from || !dateRange?.to || nights <= 0) {
       return {
@@ -112,7 +137,7 @@ export function PropertyBookingCard({
     }
 
     return calculatePricing(rules, dateRange.from, dateRange.to);
-  }, [pricePerNight, nights, dateRange, rentalTerms, earlyBookingDiscount, earlyBookingDays, lastMinuteDiscount, lastMinuteDays, customLengthDiscounts, paymentPolicy, prepayPercent, depositAmount, depositCurrency, seasonalPricing]);
+  }, [pricePerNight, nights, dateRange, rentalTerms, earlyBookingDiscount, earlyBookingDays, lastMinuteDiscount, lastMinuteDays, customLengthDiscounts, paymentPolicy, prepayPercent, depositAmount, depositCurrency, seasonalPricing, rateSeasons]);
   
   // Validation
   const validationErrors = useMemo(() => {
