@@ -49,7 +49,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       onClick={handleClick}
-      className="w-[160px] shrink-0 text-left rounded-xl border border-border/60 overflow-hidden bg-card hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation group"
+      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-xl border border-border/60 overflow-hidden bg-card hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation group"
     >
       {/* Cover */}
       <div className="relative h-24 overflow-hidden bg-muted">
@@ -176,8 +176,9 @@ export function LifeFlowCatalogGrid({ items, accentColor }: LifeFlowCatalogGridP
           </div>
 
           {/* Horizontal scroll */}
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-            {section.items.slice(0, 8).map((item, i) => (
+          {/* Horizontal scroll on mobile, grid on desktop */}
+          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:overflow-x-visible md:mx-0 md:px-0">
+            {section.items.slice(0, 10).map((item, i) => (
               <CatalogCard key={item.entity_id} item={item} index={i} />
             ))}
           </div>
