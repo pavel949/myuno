@@ -17834,10 +17834,15 @@ export type Database = {
         Row: {
           created_at: string | null
           currency: string | null
+          early_booking_days: number | null
+          early_booking_discount: number | null
           end_date: string
           id: string
           is_active: boolean | null
+          last_minute_days: number | null
+          last_minute_discount: number | null
           min_stay_nights: number | null
+          monthly_discount: number | null
           monthly_rate: number | null
           name_en: string
           name_ru: string | null
@@ -17847,15 +17852,21 @@ export type Database = {
           property_id: string
           start_date: string
           updated_at: string | null
+          weekly_discount: number | null
           weekly_rate: number | null
         }
         Insert: {
           created_at?: string | null
           currency?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
           end_date: string
           id?: string
           is_active?: boolean | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
           monthly_rate?: number | null
           name_en: string
           name_ru?: string | null
@@ -17865,15 +17876,21 @@ export type Database = {
           property_id: string
           start_date: string
           updated_at?: string | null
+          weekly_discount?: number | null
           weekly_rate?: number | null
         }
         Update: {
           created_at?: string | null
           currency?: string | null
+          early_booking_days?: number | null
+          early_booking_discount?: number | null
           end_date?: string
           id?: string
           is_active?: boolean | null
+          last_minute_days?: number | null
+          last_minute_discount?: number | null
           min_stay_nights?: number | null
+          monthly_discount?: number | null
           monthly_rate?: number | null
           name_en?: string
           name_ru?: string | null
@@ -17883,6 +17900,7 @@ export type Database = {
           property_id?: string
           start_date?: string
           updated_at?: string | null
+          weekly_discount?: number | null
           weekly_rate?: number | null
         }
         Relationships: [

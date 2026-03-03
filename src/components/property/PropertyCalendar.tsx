@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Lock, Unlock, DollarSign, X, Calendar as Cal
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { getEffectiveNightlyRate, type SeasonalPricingRule } from '@/lib/pricingEngine';
+import { getEffectiveNightlyRate, buildPricingRulesFromSeasons, type SeasonalPricingRule, type RateSeasonRecord } from '@/lib/pricingEngine';
 
 export interface AvailabilityEntry {
   date: Date;
@@ -27,6 +27,7 @@ interface PropertyCalendarProps {
   basePrice?: number;
   currency?: string;
   seasonalPricing?: SeasonalPricingRule[];
+  rateSeasons?: RateSeasonRecord[];
   className?: string;
 }
 
@@ -36,6 +37,7 @@ export function PropertyCalendar({
   basePrice = 0,
   currency = 'THB',
   seasonalPricing,
+  rateSeasons,
   className 
 }: PropertyCalendarProps) {
   const { language } = useLanguage();
@@ -90,12 +92,21 @@ export function PropertyCalendar({
     return entry?.status || 'available';
   }, [availabilityMap]);
 
+  // Build effective seasonal rules from rate_seasons table if available
+  const effectiveSeasonalPricing = useMemo(() => {
+    if (rateSeasons && rateSeasons.length > 0 && basePrice > 0) {
+      const rules = buildPricingRulesFromSeasons({ price_per_night: basePrice }, rateSeasons);
+      return rules.seasonalPricing;
+    }
+    return seasonalPricing;
+  }, [rateSeasons, seasonalPricing, basePrice]);
+
   const getDatePrice = useCallback((date: Date): number => {
     const entry = availabilityMap.get(format(date, 'yyyy-MM-dd'));
     // Manual override takes priority, then seasonal rule, then base price
     if (entry?.priceOverride) return entry.priceOverride;
-    return getEffectiveNightlyRate(date, basePrice, seasonalPricing);
-  }, [availabilityMap, basePrice, seasonalPricing]);
+    return getEffectiveNightlyRate(date, basePrice, effectiveSeasonalPricing);
+  }, [availabilityMap, basePrice, effectiveSeasonalPricing]);
 
   const isDateInSelection = useCallback((date: Date): boolean => {
     if (!selectionStart) return false;
