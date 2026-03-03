@@ -4,6 +4,30 @@ import { type RateSeasonRecord, rateSeasonsToJsonb } from '@/lib/pricingEngine';
 
 export type { RateSeasonRecord };
 
+/** Log an activity to property_activity_log */
+async function logActivity(params: {
+  propertyId: string;
+  actorId: string;
+  action: string;
+  entityType?: string;
+  entityId?: string;
+  details?: Record<string, unknown>;
+}) {
+  try {
+    await supabase.from('property_activity_log').insert({
+      property_id: params.propertyId,
+      actor_id: params.actorId,
+      actor_role: 'owner',
+      action: params.action,
+      entity_type: params.entityType || null,
+      entity_id: params.entityId || null,
+      details: params.details as any,
+    });
+  } catch (err) {
+    console.error('Failed to log activity:', err);
+  }
+}
+
 /**
  * Fetch rate seasons for a single property (used by guest-facing components)
  */
@@ -71,7 +95,7 @@ export async function syncRateSeasonsToProperty(propertyId: string, basePricePer
 }
 
 /**
- * Save (upsert) a rate season and sync JSONB
+ * Save (upsert) a rate season, sync JSONB, and log activity
  */
 export function useSaveRateSeason() {
   const queryClient = useQueryClient();
@@ -86,11 +110,30 @@ export function useSaveRateSeason() {
       if (id) {
         const { error } = await supabase.from('property_rate_seasons').update(season as any).eq('id', id);
         if (error) throw error;
+
+        // Log update
+        await logActivity({
+          propertyId: season.property_id,
+          actorId: season.owner_id,
+          action: 'season_updated',
+          entityType: 'rate_season',
+          entityId: id,
+          details: { name: season.name_en, nightly_rate: season.nightly_rate, start_date: season.start_date, end_date: season.end_date },
+        });
       } else {
-        const { error } = await supabase.from('property_rate_seasons').insert(season as any);
+        const { data, error } = await supabase.from('property_rate_seasons').insert(season as any).select('id').single();
         if (error) throw error;
+
+        // Log creation
+        await logActivity({
+          propertyId: season.property_id,
+          actorId: season.owner_id,
+          action: 'season_created',
+          entityType: 'rate_season',
+          entityId: data?.id,
+          details: { name: season.name_en, nightly_rate: season.nightly_rate, start_date: season.start_date, end_date: season.end_date },
+        });
       }
-      // Sync JSONB
       await syncRateSeasonsToProperty(season.property_id, basePricePerNight);
     },
     onSuccess: () => {
@@ -101,16 +144,28 @@ export function useSaveRateSeason() {
 }
 
 /**
- * Delete a rate season and sync JSONB
+ * Delete a rate season, sync JSONB, and log activity
  */
 export function useDeleteRateSeason() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: { id: string; propertyId: string; basePricePerNight: number }) => {
+    mutationFn: async (params: { id: string; propertyId: string; basePricePerNight: number; actorId?: string; seasonName?: string }) => {
       const { error } = await supabase.from('property_rate_seasons').delete().eq('id', params.id);
       if (error) throw error;
       await syncRateSeasonsToProperty(params.propertyId, params.basePricePerNight);
+
+      // Log deletion
+      if (params.actorId) {
+        await logActivity({
+          propertyId: params.propertyId,
+          actorId: params.actorId,
+          action: 'season_deleted',
+          entityType: 'rate_season',
+          entityId: params.id,
+          details: { name: params.seasonName || 'unknown' },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rate-seasons'] });
