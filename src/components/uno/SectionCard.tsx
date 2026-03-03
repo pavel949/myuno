@@ -14,7 +14,8 @@ export const SectionCard = forwardRef<HTMLDivElement, SectionCardProps>(
       <div 
         ref={ref}
         className={cn(
-          "bg-card rounded-2xl border border-border/50 transition-shadow duration-200",
+          "bg-card rounded-2xl border border-border/60 transition-shadow duration-200",
+          "dark:border-border/40",
           elevated 
             ? "shadow-[var(--shadow-elevated)]" 
             : "shadow-[var(--shadow-card)]",

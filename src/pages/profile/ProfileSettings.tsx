@@ -115,7 +115,7 @@ export default function ProfileSettings() {
       <PageContainer>
         <PageHeader title={isRu ? 'Настройки профиля' : 'Profile Settings'} showBack fallbackPath="/profile" />
 
-        <div className="space-y-6 pb-24">
+        <div className="space-y-6 pb-24 [&_label]:text-foreground/80 [&_input]:text-foreground [&_input]:bg-secondary/50 [&_input:disabled]:bg-muted/80 [&_input:disabled]:text-foreground/60 [&_input:disabled]:opacity-100 [&_textarea]:text-foreground [&_textarea]:bg-secondary/50 [&_.text-sm]:text-foreground/90">
           {/* Profile Completion Progress */}
           <ProfileCompletionCard />
 
@@ -142,26 +142,26 @@ export default function ProfileSettings() {
 
           {/* Interface Settings */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
               <Palette className="w-4 h-4" />
               {isRu ? 'Настройки интерфейса' : 'Interface Settings'}
             </div>
             <SectionCard>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{isRu ? 'Тема' : 'Theme'}</span>
+                  <span className="text-sm text-foreground/80">{isRu ? 'Тема' : 'Theme'}</span>
                   <ThemeSwitcher variant="cards" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{isRu ? 'Язык' : 'Language'}</span>
+                  <span className="text-sm text-foreground/80">{isRu ? 'Язык' : 'Language'}</span>
                   <LanguageSwitcher variant="toggle" size="sm" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{isRu ? 'Валюта' : 'Currency'}</span>
+                  <span className="text-sm text-foreground/80">{isRu ? 'Валюта' : 'Currency'}</span>
                   <CurrencySwitcher size="sm" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{isRu ? 'Город' : 'Location'}</span>
+                  <span className="text-sm text-foreground/80">{isRu ? 'Город' : 'Location'}</span>
                   <LocationSwitcher />
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function ProfileSettings() {
 
           {/* Personal Information */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
               <User className="w-4 h-4" />
               {isRu ? 'Личные данные' : 'Personal Information'}
             </div>
@@ -228,7 +228,7 @@ export default function ProfileSettings() {
 
           {/* Verified Identity Data */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
               <Shield className="w-4 h-4" />
               {isRu ? 'Верифицированные данные' : 'Verified Identity'}
             </div>
@@ -292,7 +292,7 @@ export default function ProfileSettings() {
 
           {/* Address */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3 text-sm font-medium text-foreground/70">
               <MapPin className="w-4 h-4" />
               {isRu ? 'Адрес проживания' : 'Residential Address'}
             </div>
