@@ -536,17 +536,21 @@ export default function OwnerProperties() {
                   />
                 </div>
               )}
-              <div className={cn('flex-1 min-w-0', selectionMode && 'pointer-events-none')}>
-                {property.source === 'managed' && (
-                  <Badge variant="secondary" className="absolute top-2 left-[140px] z-10 text-[10px]">
-                    {isRu ? 'В управлении' : 'Managed'}
-                  </Badge>
-                )}
-                {!property.lat && !property.lng && (
-                  <Badge variant="outline" className="absolute top-2 left-[140px] z-10 text-[10px] bg-warning/10 text-warning border-warning/30">
-                    <Map className="h-3 w-3 mr-0.5" />
-                    {isRu ? 'Нет координат' : 'No coords'}
-                  </Badge>
+              <div className={cn('flex-1 min-w-0 relative', selectionMode && 'pointer-events-none')}>
+                {(property.source === 'managed' || (!property.lat && !property.lng)) && (
+                  <div className="absolute top-2 left-[140px] z-10 flex flex-col gap-1 max-w-[calc(100%-220px)] sm:max-w-[calc(100%-260px)] pointer-events-none">
+                    {property.source === 'managed' && (
+                      <Badge variant="secondary" className="w-fit max-w-full text-[10px] truncate">
+                        {isRu ? 'В управлении' : 'Managed'}
+                      </Badge>
+                    )}
+                    {!property.lat && !property.lng && (
+                      <Badge variant="outline" className="w-fit max-w-full text-[10px] bg-warning/10 text-warning border-warning/30 truncate">
+                        <Map className="h-3 w-3 mr-0.5" />
+                        {isRu ? 'Нет координат' : 'No coords'}
+                      </Badge>
+                    )}
+                  </div>
                 )}
                 <PropertyCard
                   property={property as any}
