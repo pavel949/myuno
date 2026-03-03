@@ -1,75 +1,115 @@
 
+# Реструктуризация Admin Panel myUNO -- 7 разделов
 
-# Редактирование цен по клику + аудит-лог изменений
+## Текущее состояние
 
-## Что сделаем
+Сейчас сайдбар имеет 5 групп (Core, Business, Content, AI, System) с ~25 пунктами. Отдельные вертикали (Yachts, Salons, Properties...) доступны как 30+ отдельных роутов, но не видны в сайдбаре (только через Unified Catalog или прямые ссылки). Control Center объединяет пользователей, роли, аналитику, финансы, аудит и логи в одной вкладочной странице. CRM и MC Dashboard находятся в сайдбаре админки.
 
-1. **Клик по дате в календаре** -- открывает попавер редактирования цены для одной конкретной даты (сейчас работает только drag-selection нескольких дат)
-2. **Логирование всех изменений** -- каждое изменение цены, блокировки или условий аренды записывается в `property_activity_log` с указанием кто, что, когда и какое значение было/стало
-3. **Доступ директора к логу** -- директор УК видит полную историю изменений по всем объектам компании
-
----
-
-## Шаг 1. Клик по дате в календаре
-
-**Файл:** `src/components/property/PropertyCalendar.tsx`
-
-Сейчас popover открывается только после drag-selection (mouseDown -> mouseUp). Добавим обработку обычного клика:
-- Если mouseDown и mouseUp на одной дате (без перетаскивания) -- открывается попавер для одной даты
-- Попавер показывает текущую цену, статус, и позволяет изменить стоимость, min nights, заметку
-- Добавить кнопку "Сохранить цену" которая применяет изменение только к этой дате
-
-Техническая деталь: различать клик и drag по расстоянию -- если selectionStart === selectionEnd, это клик по одной дате.
-
-## Шаг 2. Логирование изменений цен и условий
-
-**Файлы:** `PropertyCalendar.tsx`, `CalendarSection.tsx`, `RateManagementPage.tsx`
-
-Добавить callback `onLogActivity` в PropertyCalendar, который вызывается при каждом изменении:
-- Изменение цены конкретной даты: action = `price_override`, details = `{date, old_value, new_value}`
-- Блокировка/разблокировка дат: action = `availability_changed`, details = `{dates, status}`
-- Изменение базовой цены (на странице тарифов): action = `base_price_changed`, details = `{old_value, new_value}`
-- Создание/изменение/удаление сезона: action = `season_created/updated/deleted`
-
-Все записи сохраняются в существующую таблицу `property_activity_log` через `supabase.from('property_activity_log').insert(...)`.
-
-## Шаг 3. RLS для доступа директора УК
-
-**Миграция:** Добавить RLS-политику, позволяющую директорам/админам УК видеть логи всех объектов компании:
+## Новая структура сайдбара -- 7 разделов
 
 ```text
-CREATE POLICY "MC directors can view company property activity"
-ON property_activity_log FOR SELECT
-USING (
-  EXISTS (
-    SELECT 1 FROM management_company_members mcm
-    JOIN properties p ON p.management_company_id = mcm.company_id
-    WHERE p.id = property_activity_log.property_id
-      AND mcm.user_id = auth.uid()
-      AND mcm.role IN ('director', 'admin')
-      AND mcm.status = 'active'
-  )
-);
+1. Dashboard          -- /admin
+2. Users & Access     -- /admin/users (NEW route)
+3. Catalog & Content  -- /admin/catalog (existing)
+4. LifeOS             -- /admin/life-situations (existing)
+5. Finance            -- /admin/finance (NEW route)
+6. Partners           -- /admin/providers (existing, расширенный)
+7. System Settings    -- /admin/settings (NEW route)
 ```
 
-## Шаг 4. UI лога для директора
+## Детали по каждому разделу
 
-**Файл:** Новый компонент или расширение существующего `ActivityFeed.tsx`
+### 1. Dashboard (/admin)
+Сокращаем до 6 KPI: Active Users, New Registrations, Active Listings, Platform Revenue, Pending Approvals (кликабельный бейдж), System Health. Плюс Activity Feed за 24 часа. Убираем AllVerticalsGrid и QuickActionsGrid (перегрузка). Pending Approvals -- кликабельная карточка, ведущая к /admin/catalog?status=pending.
 
-На странице тарифов (`RateManagementPage.tsx`) добавить секцию "История изменений" (collapsible), показывающую последние записи из `property_activity_log` отфильтрованные по action типам: `price_override`, `base_price_changed`, `season_created`, `season_updated`, `season_deleted`, `availability_changed`. Каждая запись показывает:
-- Имя сотрудника (из profiles через join)
-- Действие и детали (старое -> новое значение)
-- Дата и время
+**Файлы:** `AdminDashboard.tsx`, `AdminKPIGrid.tsx` (рефакторинг), удаление `AdminAllVerticalsGrid.tsx`, `AdminQuickActionsGrid.tsx` из дашборда.
 
----
+### 2. Users & Access (/admin/users -- NEW)
+Выносим ControlUsersTab и ControlRolesTab из Control Center в отдельную страницу. Табы: Users List (поиск, фильтры по роли/статусу/дате/персоне), User Card (профиль, активность, бронирования, платежи, документы -- вкладки внутри карточки), Roles & RBAC, Staff & Permissions.
 
-## Технические детали
+**Файлы:** Новая страница `AdminUsersAccess.tsx`, переиспользует `ControlUsersTab` и `ControlRolesTab`.
 
-**Изменяемые файлы:**
-- `src/components/property/PropertyCalendar.tsx` -- обработка клика, callback логирования
-- `src/components/owner/property-manage/CalendarSection.tsx` -- передача propertyId и логирования
-- `src/pages/owner/RateManagementPage.tsx` -- логирование изменений базовой цены и сезонов, секция истории
-- `supabase/migrations/` -- RLS-политика для MC директоров
-- `src/hooks/usePropertyRateSeasons.ts` -- добавить логирование в мутации save/delete
+### 3. Catalog & Content (/admin/catalog)
+Уже существует Unified Catalog. Добавляем:
+- Фильтр по entity type (Properties, Yachts, Restaurants...)
+- Колонки: название, тип, статус (active/pending/draft), верификация, дата
+- Модерация: approval queue с pending-бейджем
+- Подразделы через табы: Listings, Categories & Tags, Locations, Moderation Queue
 
-**Существующая инфраструктура:** Таблица `property_activity_log` уже существует с полями `property_id`, `actor_id`, `actor_role`, `action`, `entity_type`, `entity_id`, `details` (JSONB). RLS включен, политики для владельцев и делегатов есть. Хук `usePropertyActivityLog` уже реализован.
+**Файлы:** Расширение `AdminUnifiedCatalog.tsx` -- добавить таб "Moderation" и approval-бейдж.
+
+### 4. LifeOS (/admin/life-situations)
+Уже существует. Без изменений.
+
+### 5. Finance (/admin/finance -- NEW)
+Сейчас /admin/finance редиректит на /admin/control. Создаем отдельную страницу:
+- Транзакции платформы (Stripe)
+- Комиссии и payouts
+- Подписки (кто на каком плане)
+- Revenue по вертикалям
+Переиспользуем `ControlFinanceTab` + `ControlAnalyticsTab`.
+
+**Файлы:** Новая страница `AdminFinance.tsx`.
+
+### 6. Partners & Providers (/admin/providers)
+Расширяем существующую страницу:
+- Approval queue (заявки на верификацию) -- вкладка
+- Верифицированные партнеры -- вкладка
+- Листинги, рейтинги, жалобы
+- Комиссионные ставки
+
+**Файлы:** Расширение `AdminProviders.tsx` -- добавить табы.
+
+### 7. System Settings (/admin/settings -- NEW)
+Объединяем всё из бывшего "System" + часть Control Center:
+- Regions (Cities)
+- Localization (Translations)
+- Integrations (API keys, Stripe, Mapbox)
+- SEO
+- Feature Flags
+- Logs & Audit (из ControlLogsTab + ControlAuditTab)
+- Taxonomy
+- Data Import
+
+**Файлы:** Новая страница `AdminSystemSettings.tsx` с табами/аккордеонами.
+
+## Что убираем из сайдбара
+
+- CRM (/admin/crm) -- отдельный workspace, не админка
+- MC Dashboard (/admin/mc-dashboard) -- отдельный workspace /mc
+- Marketing, Contracts, Vendor Prospects -- доступны через Cmd+K и через Partners/Operations
+- Все отдельные вертикали (yachts, salons...) -- внутри Catalog
+- Control Center -- разнесен по Users, Finance, System
+- AI & Automation -- переносим в System Settings как подраздел
+- Trash, Intake, Operations -- через Quick Actions на Dashboard или Cmd+K
+
+Старые роуты сохраняются (Navigate redirects), ничего не ломается.
+
+## Бейджи на сайдбаре
+
+Pending Approvals badge на "Catalog & Content" (из `pendingContent` stat).
+Unverified Partners badge на "Partners" (из `pendingProviders` stat).
+
+## Изменяемые файлы
+
+| Файл | Действие |
+|------|----------|
+| `src/components/admin/AdminSidebar.tsx` | Полная перестройка: 7 flat items вместо 5 групп |
+| `src/components/admin/AdminMobileBottomNav.tsx` | Обновить: 5 main items из 7 |
+| `src/components/admin/AdminCommandPalette.tsx` | Обновить группировку |
+| `src/components/admin/AdminHeader.tsx` | Обновить routeLabels |
+| `src/pages/admin/AdminDashboard.tsx` | Упростить: 6 KPI + alerts + activity |
+| `src/components/admin/dashboard/AdminKPIGrid.tsx` | 6 KPI вместо 4 |
+| `src/pages/admin/AdminUsersAccess.tsx` | NEW -- Users & Access page |
+| `src/pages/admin/AdminFinance.tsx` | NEW -- Finance page |
+| `src/pages/admin/AdminSystemSettings.tsx` | NEW -- System Settings page |
+| `src/components/layout/AnimatedRoutes.tsx` | Новые роуты + redirects старых |
+
+## Принципы
+
+- Approval queue с badge-счетчиком на sidebar
+- Cmd+K (уже работает) -- обновить группировку
+- Bulk actions на таблицах (уже частично есть)
+- Activity log на каждой сущности (уже реализован property_activity_log)
+- Максимум 2 клика до любого действия
+- CRM и MC -- через workspace switcher в хедере (RoleContextSwitcher уже есть)
