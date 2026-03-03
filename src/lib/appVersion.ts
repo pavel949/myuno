@@ -1,6 +1,6 @@
 // App version for PWA cache busting
 // Increment this when deploying significant changes
-export const APP_VERSION = '3.39.0';
+export const APP_VERSION = '3.40.0';
 
 // Injected by vite `define` at build-time — always reflects the actual build moment,
 // not the runtime moment (which would be wrong after caching).
