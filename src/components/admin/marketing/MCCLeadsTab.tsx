@@ -121,6 +121,14 @@ export function MCCLeadsTab() {
   };
 
   const getSourceBadge = (lead: UnifiedLead) => {
+    if (lead.source_table === 'profiles') {
+      return (
+        <Badge variant="outline" className="gap-1 text-xs bg-success/10 text-success">
+          <Users className="h-3 w-3" />
+          {lead.request_type || (isRu ? 'Пользователь' : 'User')}
+        </Badge>
+      );
+    }
     if (lead.source_table === 'consultation_requests') {
       return (
         <Badge variant="outline" className="gap-1 text-xs">
@@ -230,7 +238,12 @@ export function MCCLeadsTab() {
       </div>
 
       {/* Source Stats */}
-      <div className="flex gap-2 text-sm text-muted-foreground">
+      <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
+        <span className="flex items-center gap-1">
+          <Users className="h-4 w-4" />
+          {isRu ? 'Зарегистрированные:' : 'Registered:'} <strong>{stats.fromRegistered}</strong>
+        </span>
+        <span>|</span>
         <span className="flex items-center gap-1">
           <Database className="h-4 w-4" />
           {isRu ? 'Консультации:' : 'Consultations:'} <strong>{stats.fromConsultations}</strong>
@@ -259,6 +272,7 @@ export function MCCLeadsTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{isRu ? 'Все источники' : 'All Sources'}</SelectItem>
+              <SelectItem value="registered">{isRu ? 'Зарегистрированные' : 'Registered'}</SelectItem>
               <SelectItem value="consultations">{isRu ? 'Консультации' : 'Consultations'}</SelectItem>
               <SelectItem value="mcc">MCC Leads</SelectItem>
             </SelectContent>

@@ -5,14 +5,14 @@ import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('useLeadHub');
 
-export type LeadSource = 'mcc' | 'consultations' | 'all';
+export type LeadSource = 'mcc' | 'consultations' | 'registered' | 'all';
 export type LeadPriority = 'hot' | 'warm' | 'cold';
 export type LeadStatus = 'new' | 'contacted' | 'engaged' | 'qualified' | 'converted' | 'lost';
 
 // Unified lead type combining mcc_leads and consultation_requests
 export interface UnifiedLead {
   id: string;
-  source_table: 'mcc_leads' | 'consultation_requests';
+  source_table: 'mcc_leads' | 'consultation_requests' | 'profiles';
   name: string;
   email: string | null;
   phone: string | null;
@@ -45,6 +45,7 @@ interface LeadStats {
   withAiScore: number;
   fromConsultations: number;
   fromMCC: number;
+  fromRegistered: number;
 }
 
 // Map consultation_requests ai_priority to lead priority
@@ -173,6 +174,56 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
         }
       }
 
+      // Fetch registered users from profiles (exclude test users)
+      if (source === 'registered' || source === 'all') {
+        let profilesQuery = supabase
+          .from('profiles')
+          .select('id, full_name, email, phone, user_type, created_at, updated_at, avatar_url')
+          .not('email', 'like', '%@test.com')
+          .not('email', 'like', 'test-%@myuno.app')
+          .order('created_at', { ascending: false })
+          .limit(200);
+
+        if (search) {
+          profilesQuery = profilesQuery.or(`email.ilike.%${search}%,full_name.ilike.%${search}%,phone.ilike.%${search}%`);
+        }
+
+        const { data: profiles, error: profilesError } = await profilesQuery;
+        if (profilesError) {
+          errorLog.silent(profilesError, 'fetch_profiles');
+        } else if (profiles) {
+          // Collect existing lead emails to avoid duplicates
+          const existingEmails = new Set(unifiedLeads.map(l => l.email?.toLowerCase()).filter(Boolean));
+
+          profiles.forEach((profile: any) => {
+            // Skip if already exists as a lead
+            if (profile.email && existingEmails.has(profile.email.toLowerCase())) return;
+            // Skip priority/status filters for registered users (they're all "warm" / "new" by default)
+            if (priority && priority !== 'warm') return;
+            if (status && status !== 'new' && status !== 'qualified') return;
+
+            unifiedLeads.push({
+              id: profile.id,
+              source_table: 'profiles',
+              name: profile.full_name || profile.email?.split('@')[0] || '',
+              email: profile.email,
+              phone: profile.phone,
+              priority: 'warm',
+              status: 'qualified',
+              score: null,
+              ai_score: null,
+              ai_priority: null,
+              ai_reasoning: null,
+              source_channel: 'Registration',
+              request_type: profile.user_type || 'user',
+              user_id: profile.id,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at,
+            });
+          });
+        }
+      }
+
       // Sort by created_at desc
       unifiedLeads.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -184,26 +235,23 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
   const { data: stats } = useQuery({
     queryKey: ['lead-hub-stats'],
     queryFn: async (): Promise<LeadStats> => {
-      // Fetch all mcc_leads
-      const { data: mccLeads, error: mccError } = await supabase
-        .from('mcc_leads')
-        .select('priority, status');
+      const [mccRes, consultRes, profilesRes] = await Promise.all([
+        supabase.from('mcc_leads').select('priority, status'),
+        supabase.from('consultation_requests').select('status, ai_score, ai_priority'),
+        supabase.from('profiles').select('id')
+          .not('email', 'like', '%@test.com')
+          .not('email', 'like', 'test-%@myuno.app'),
+      ]);
 
-      // Fetch all consultation_requests
-      const { data: consultations, error: consultationsError } = await supabase
-        .from('consultation_requests')
-        .select('status, ai_score, ai_priority');
+      const mccData = mccRes.data || [];
+      const consultData = consultRes.data || [];
+      const registeredCount = (profilesRes.data || []).length;
 
-      const mccData = mccLeads || [];
-      const consultData = consultations || [];
-
-      // Count priorities from mcc_leads
       const mccHot = mccData.filter(l => l.priority === 'hot').length;
       const mccWarm = mccData.filter(l => l.priority === 'warm').length;
       const mccCold = mccData.filter(l => l.priority === 'cold').length;
       const mccConverted = mccData.filter(l => l.status === 'converted').length;
 
-      // Count priorities from consultation_requests based on ai_priority
       const consultHot = consultData.filter(c => mapAiPriorityToLeadPriority(c.ai_priority) === 'hot').length;
       const consultWarm = consultData.filter(c => mapAiPriorityToLeadPriority(c.ai_priority) === 'warm').length;
       const consultCold = consultData.filter(c => mapAiPriorityToLeadPriority(c.ai_priority) === 'cold').length;
@@ -211,14 +259,15 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
       const withAiScore = consultData.filter(c => c.ai_score !== null).length;
 
       return {
-        total: mccData.length + consultData.length,
+        total: mccData.length + consultData.length + registeredCount,
         hot: mccHot + consultHot,
-        warm: mccWarm + consultWarm,
+        warm: mccWarm + consultWarm + registeredCount,
         cold: mccCold + consultCold,
         converted: mccConverted + consultConverted,
         withAiScore,
         fromConsultations: consultData.length,
         fromMCC: mccData.length,
+        fromRegistered: registeredCount,
       };
     }
   });
@@ -291,6 +340,7 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
       withAiScore: 0,
       fromConsultations: 0,
       fromMCC: 0,
+      fromRegistered: 0,
     },
     isLoading,
     error,
