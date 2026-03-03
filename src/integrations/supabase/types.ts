@@ -14025,6 +14025,53 @@ export type Database = {
         }
         Relationships: []
       }
+      project_requests: {
+        Row: {
+          created_at: string
+          created_project_id: string | null
+          id: string
+          notes: string | null
+          project_name: string
+          requested_by: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_project_id?: string | null
+          id?: string
+          notes?: string | null
+          project_name: string
+          requested_by: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_project_id?: string | null
+          id?: string
+          notes?: string | null
+          project_name?: string
+          requested_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_requests_created_project_id_fkey"
+            columns: ["created_project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           accessibility_features: string[] | null

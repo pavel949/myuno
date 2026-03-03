@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useRef, useEffect, memo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { usePropertyProjects, useCreatePropertyProject, PropertyProject } from '@/hooks/usePropertyProjects';
+import { usePropertyProjects, PropertyProject } from '@/hooks/usePropertyProjects';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Plus, MapPin, Calendar, Loader2, Search, X, Clock, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Building2, MapPin, Calendar, Loader2, Search, X, Clock, ExternalLink, Send } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -26,12 +28,14 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: projects, isLoading } = usePropertyProjects();
-  const createProject = useCreatePropertyProject();
+  const { user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [newProjectName, setNewProjectName] = useState('');
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestName, setRequestName] = useState('');
+  const [requestNotes, setRequestNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showProjectDetails, setShowProjectDetails] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +65,7 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    if (!isOpen) return; // Only add listener when dropdown is open
+    if (!isOpen) return;
     
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -69,7 +73,6 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
       }
     };
 
-    // Use setTimeout to avoid immediate triggering
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 0);
@@ -92,31 +95,37 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
     setSearchQuery('');
   }, [onChange]);
 
-  const handleCreateNewProject = useCallback(async () => {
-    if (!newProjectName.trim()) return;
-
-    const trimmedName = newProjectName.trim();
-    
+  const handleSubmitRequest = useCallback(async () => {
+    if (!requestName.trim() || !user?.id) return;
+    setIsSubmitting(true);
     try {
-      const newProject = await createProject.mutateAsync({
-        name_en: trimmedName,
-        name_ru: trimmedName,
-        // All other fields will be filled by UNO team later
-      });
-
-      onChange(newProject.id, newProject);
-      setNewProjectName('');
-      setIsCreatingNew(false);
-      setSearchQuery('');
-      setIsOpen(false);
-    } catch (error) {
-      console.error('Failed to create project:', error);
+      const { error } = await (supabase as any)
+        .from('project_requests')
+        .insert({
+          requested_by: user.id,
+          project_name: requestName.trim(),
+          notes: requestNotes.trim() || null,
+        });
+      if (error) throw error;
+      toast.success(
+        isRu 
+          ? 'Заявка отправлена команде myUNO. Мы добавим проект в систему.' 
+          : 'Request sent to myUNO team. We will add the project.'
+      );
+      setRequestName('');
+      setRequestNotes('');
+      setShowRequestForm(false);
+    } catch (err) {
+      console.error('Failed to submit project request:', err);
+      toast.error(isRu ? 'Ошибка отправки заявки' : 'Failed to submit request');
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [newProjectName, createProject, onChange]);
+  }, [requestName, requestNotes, user?.id, isRu]);
 
-  const handleInitiateCreate = useCallback(() => {
-    setNewProjectName(searchQuery);
-    setIsCreatingNew(true);
+  const handleInitiateRequest = useCallback(() => {
+    setRequestName(searchQuery.trim());
+    setShowRequestForm(true);
     setIsOpen(false);
   }, [searchQuery]);
 
@@ -158,15 +167,10 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
                       </h4>
                       <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
                     </div>
-                    {selectedProject.address ? (
+                    {selectedProject.address && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-3 w-3" />
                         {selectedProject.address}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
-                        <Clock className="h-3 w-3" />
-                        {isRu ? 'Детали заполнит команда UNO' : 'Details to be filled by UNO team'}
                       </p>
                     )}
                   </div>
@@ -272,11 +276,6 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
                               {project.address && ` • ${project.address}`}
                             </p>
                           )}
-                          {!project.address && !project.district && (
-                            <p className="text-xs text-amber-600">
-                              {isRu ? 'Ожидает заполнения' : 'Pending details'}
-                            </p>
-                          )}
                         </div>
                       </button>
                     ))
@@ -286,18 +285,18 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
                     </div>
                   )}
 
-                  {/* Create new project option */}
+                  {/* Submit request to myUNO */}
                   {searchQuery.trim() && !exactMatchExists && (
                     <button
                       type="button"
-                      onClick={handleInitiateCreate}
+                      onClick={handleInitiateRequest}
                       className="w-full px-3 py-3 text-left hover:bg-accent flex items-center gap-2 border-t text-primary font-medium"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Send className="h-4 w-4" />
                       <span>
                         {isRu 
-                          ? `Добавить "${searchQuery.trim()}"` 
-                          : `Add "${searchQuery.trim()}"`
+                          ? `Отправить заявку: "${searchQuery.trim()}"` 
+                          : `Submit request: "${searchQuery.trim()}"`
                         }
                       </span>
                     </button>
@@ -310,37 +309,51 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
       )}
 
       {/* Helper text */}
-      {!selectedProject && !isOpen && (
+      {!selectedProject && !isOpen && !showRequestForm && (
         <p className="text-xs text-muted-foreground">
           {isRu 
-            ? 'Начните вводить название. Если проекта нет в списке, введите его название — команда UNO внесёт все детали.' 
-            : 'Start typing the name. If the project is not listed, enter its name — the UNO team will add all details.'
+            ? 'Начните вводить название. Если проекта нет в списке — отправьте заявку команде myUNO.' 
+            : 'Start typing. If not listed — submit a request to the myUNO team.'
           }
         </p>
       )}
 
-      {/* Create new project dialog */}
-      {isCreatingNew && (
+      {/* Request form */}
+      {showRequestForm && (
         <Card className="border-primary/50 bg-primary/5">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Building2 className="h-5 w-5 text-primary" />
+                <Send className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1 space-y-2">
-                <Label className="text-sm font-medium">
-                  {isRu ? 'Название нового проекта' : 'New project name'}
-                </Label>
-                <Input
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  placeholder={isRu ? 'Например: Laguna Beach Resort' : 'e.g., Laguna Beach Resort'}
-                  autoFocus
-                />
+              <div className="flex-1 space-y-3">
+                <div>
+                  <Label className="text-sm font-medium">
+                    {isRu ? 'Название проекта / ЖК' : 'Project / Complex name'}
+                  </Label>
+                  <Input
+                    value={requestName}
+                    onChange={(e) => setRequestName(e.target.value)}
+                    placeholder={isRu ? 'Например: Laguna Beach Resort' : 'e.g., Laguna Beach Resort'}
+                    autoFocus
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm">
+                    {isRu ? 'Комментарий (необязательно)' : 'Notes (optional)'}
+                  </Label>
+                  <Input
+                    value={requestNotes}
+                    onChange={(e) => setRequestNotes(e.target.value)}
+                    placeholder={isRu ? 'Район, адрес или ссылка на сайт проекта' : 'District, address or project website link'}
+                    className="mt-1"
+                  />
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {isRu 
-                    ? 'Команда UNO добавит адрес, фото, удобства и другие детали проекта после модерации.' 
-                    : 'The UNO team will add address, photos, amenities, and other project details after moderation.'
+                    ? 'Команда myUNO добавит проект со всеми деталями: адрес, фото, удобства. Вы получите уведомление.' 
+                    : 'The myUNO team will add the project with all details: address, photos, amenities. You\'ll be notified.'
                   }
                 </p>
               </div>
@@ -350,26 +363,27 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setIsCreatingNew(false);
-                  setNewProjectName('');
+                  setShowRequestForm(false);
+                  setRequestName('');
+                  setRequestNotes('');
                 }}
               >
                 {isRu ? 'Отмена' : 'Cancel'}
               </Button>
               <Button
                 size="sm"
-                onClick={handleCreateNewProject}
-                disabled={!newProjectName.trim() || createProject.isPending}
+                onClick={handleSubmitRequest}
+                disabled={!requestName.trim() || isSubmitting}
               >
-                {createProject.isPending ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {isRu ? 'Создание...' : 'Creating...'}
+                    {isRu ? 'Отправка...' : 'Sending...'}
                   </>
                 ) : (
                   <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {isRu ? 'Добавить проект' : 'Add project'}
+                    <Send className="h-4 w-4 mr-2" />
+                    {isRu ? 'Отправить в myUNO' : 'Send to myUNO'}
                   </>
                 )}
               </Button>
