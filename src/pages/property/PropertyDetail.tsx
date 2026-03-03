@@ -6,6 +6,9 @@ import {
   Zap, Loader2, ChevronRight, Home, Eye, Sofa, Building2,
   Sparkles, Clock, Award, Copy, Check, Minus, Plus
 } from 'lucide-react';
+import { PropertyShareSheet } from '@/components/property/PropertyShareSheet';
+import { CompareButton, type CompareProperty } from '@/components/property/PropertyCompare';
+import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -66,7 +69,7 @@ export default function PropertyDetail() {
   const [activeImage, setActiveImage] = useState(0);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [copied, setCopied] = useState(false);
+  // copied state removed — handled by ShareSheet
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(2);
@@ -100,32 +103,7 @@ export default function PropertyDetail() {
     }
   }, [rentalTerms?.extra_services]);
 
-  // Share functionality
-  const handleShare = useCallback(async () => {
-    const shareUrl = window.location.href;
-    const shareTitle = isRu ? (property?.title_ru || '') : (property?.title_en || '');
-    const shareText = isRu 
-      ? `Посмотрите это жильё: ${shareTitle}` 
-      : `Check out this property: ${shareTitle}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-        return;
-      } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      toast.success(isRu ? 'Ссылка скопирована!' : 'Link copied!');
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error(isRu ? 'Не удалось скопировать' : 'Failed to copy');
-    }
-  }, [isRu, property?.title_en, property?.title_ru]);
+  // Share handled by PropertyShareSheet component
 
   if (isLoading) {
     return (
@@ -190,17 +168,39 @@ export default function PropertyDetail() {
           <BackButton fallbackPath="/property" variant="default" size="md" />
           
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 text-sm"
-              onClick={handleShare}
+            <PropertyShareSheet
+              title={isRu ? (property.title_ru || property.title_en) : property.title_en}
+              image={images[0]}
+              district={property.district}
             >
-              {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
-              <span className="hidden sm:inline">
-                {copied ? (isRu ? 'Скопировано' : 'Copied') : (isRu ? 'Поделиться' : 'Share')}
-              </span>
-            </Button>
+              <Button variant="ghost" size="sm" className="gap-2 text-sm">
+                <Share2 className="w-4 h-4" />
+                <span className="hidden sm:inline">{isRu ? 'Поделиться' : 'Share'}</span>
+              </Button>
+            </PropertyShareSheet>
+            <CompareButton
+              property={{
+                id: id || '',
+                title_en: property.title_en,
+                title_ru: property.title_ru,
+                cover_image: property.cover_image,
+                property_type: property.property_type,
+                district: property.district,
+                bedrooms: property.bedrooms,
+                bathrooms: property.bathrooms,
+                area_sqm: property.area_sqm,
+                max_guests: property.max_guests || rentalTerms?.max_guests,
+                price: property.price,
+                price_per_night: rentalTerms?.price_per_night || property.price,
+                price_period: property.price_period,
+                rating: property.rating,
+                amenities: property.amenities,
+              } as CompareProperty}
+            />
+            <PropertyPdfButton property={{
+              ...property,
+              price_per_night: rentalTerms?.price_per_night,
+            }} />
             <FavoriteButton
               itemType="property"
               itemId={id || 'prop-1'}
