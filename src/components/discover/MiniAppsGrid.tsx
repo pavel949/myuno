@@ -150,7 +150,7 @@ const MiniAppCard = memo(function MiniAppCard({
       </div>
       
       {/* Name */}
-      <span className="text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-medium text-center leading-tight line-clamp-2 px-0.5 text-foreground/80 group-hover:text-foreground transition-colors">
+      <span className="text-[10px] sm:text-[11px] md:text-xs lg:text-sm font-medium text-center leading-tight line-clamp-2 px-0.5 text-foreground group-hover:text-foreground transition-colors">
         {name}
       </span>
       

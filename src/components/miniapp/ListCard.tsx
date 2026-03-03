@@ -82,7 +82,7 @@ export function ListCard({
         <div className="flex-1 p-3 flex flex-col justify-between">
           <div>
             {/* Title */}
-            <h3 className="font-semibold line-clamp-2 flex items-center gap-1">
+            <h3 className="font-semibold line-clamp-2 flex items-center gap-1 text-foreground">
               {title}
               {isVerified && (
                 <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />

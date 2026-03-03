@@ -63,7 +63,7 @@ export const MiniAppQuickGrid = forwardRef<HTMLDivElement, MiniAppQuickGridProps
           <div className="mb-1.5 flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
             {renderIcon(item.icon)}
           </div>
-          <span className="text-xs font-medium text-center truncate w-full">{item.label}</span>
+          <span className="text-xs font-medium text-center truncate w-full text-foreground">{item.label}</span>
           {(item.sublabel || item.price) && (
             <span className="text-xs text-primary mt-0.5">{item.sublabel || item.price}</span>
           )}
