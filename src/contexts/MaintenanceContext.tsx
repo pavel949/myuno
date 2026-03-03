@@ -22,6 +22,13 @@ const isSimulationMode = () => {
          new URLSearchParams(window.location.search).get('simulation') === 'true';
 };
 
+// Check if running in Lovable preview environment
+const isLovablePreview = () => {
+  return window.location.hostname.includes('lovable.app') || 
+         window.location.hostname.includes('lovable.dev') ||
+         window.location.hostname === 'localhost';
+};
+
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
     // Force maintenance ON - site is closed
@@ -46,7 +53,7 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(SIMULATION_BYPASS_KEY, 'true');
     }
     
-    return hasQueryBypass || hasStoredBypass || hasSimulationBypass;
+    return hasQueryBypass || hasStoredBypass || hasSimulationBypass || isLovablePreview();
   });
 
   // Check if current route is an admin route (always bypass)
