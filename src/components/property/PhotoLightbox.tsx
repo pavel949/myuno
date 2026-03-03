@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -48,7 +49,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
 
   if (!open || images.length === 0) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] bg-black flex flex-col" role="dialog" aria-modal="true">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 text-white/90">
@@ -111,6 +112,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
