@@ -284,21 +284,31 @@ export function UnifiedTaskHub() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setTaskCategory('business')}
-                  className={cn('flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm transition-all',
+                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-lg border text-sm transition-all',
                     taskCategory === 'business' ? 'border-primary bg-primary/10 font-medium' : 'border-border hover:bg-muted'
                   )}
                 >
-                  <Briefcase className="h-4 w-4" />
-                  {t('Business', 'Бизнес')}
+                  <span className="flex items-center gap-1.5">
+                    <Briefcase className="h-4 w-4" />
+                    {t('Business', 'Бизнес')}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    {t('Clients, deals, calls', 'Клиенты, сделки, звонки')}
+                  </span>
                 </button>
                 <button
                   onClick={() => setTaskCategory('operations')}
-                  className={cn('flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm transition-all',
+                  className={cn('flex-1 flex flex-col items-center gap-1 py-2.5 rounded-lg border text-sm transition-all',
                     taskCategory === 'operations' ? 'border-primary bg-primary/10 font-medium' : 'border-border hover:bg-muted'
                   )}
                 >
-                  <Wrench className="h-4 w-4" />
-                  {t('Operations', 'Операции')}
+                  <span className="flex items-center gap-1.5">
+                    <Wrench className="h-4 w-4" />
+                    {t('Operations', 'Операции')}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    {t('Cleaning, repairs, check-ins', 'Уборка, ремонт, заезды')}
+                  </span>
                 </button>
               </div>
 
