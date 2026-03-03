@@ -2,28 +2,30 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TeamLayout } from '@/components/team/TeamLayout';
 import { useTeamMember } from '@/hooks/useTeamMember';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  Inbox, CheckCircle2, Clock, AlertTriangle, User, Phone,
+  Inbox, CheckCircle2, Clock, AlertTriangle, User,
   MessageCircle, FileText, Eye, Sparkles,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// TODO: Replace with DB query - tasks should come from team_tasks or unified_inbox table
-// Mock data for unified inbox - for demo purposes
-const MOCK_TASKS = [
-  { id: '1', type: 'lead', title: 'New rental inquiry', subtitle: 'John Smith • Vacation Rental', priority: 'high', time: new Date(Date.now() - 30 * 60000) },
-  { id: '2', type: 'ticket', title: 'Payment issue', subtitle: 'Order #12345', priority: 'medium', time: new Date(Date.now() - 2 * 3600000) },
-  { id: '3', type: 'moderation', title: 'Review pending', subtitle: 'Villa Ocean View', priority: 'low', time: new Date(Date.now() - 5 * 3600000) },
-  { id: '4', type: 'lead', title: 'Investment consultation', subtitle: 'Maria Garcia', priority: 'high', time: new Date(Date.now() - 10 * 60000) },
-];
+interface InboxTask {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  priority: string;
+  time: Date;
+}
 
 const TASK_TYPE_CONFIG = {
   lead: { icon: User, color: 'bg-info/10 text-info', labelEn: 'Lead', labelRu: 'Лид' },
@@ -38,15 +40,56 @@ const PRIORITY_CONFIG = {
   low: { color: '', labelEn: 'Normal', labelRu: 'Обычный' },
 };
 
+function useInboxTasks() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['team-inbox', user?.id],
+    queryFn: async (): Promise<InboxTask[]> => {
+      if (!user?.id) return [];
+
+      // Fetch unread notifications as inbox items
+      const { data: notifications } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!notifications?.length) return [];
+
+      return notifications.map(n => ({
+        id: n.id,
+        type: mapNotificationType(n.type),
+        title: n.title,
+        subtitle: n.body,
+        priority: n.is_read ? 'low' : 'medium',
+        time: new Date(n.created_at),
+      }));
+    },
+    enabled: !!user?.id,
+    refetchInterval: 30000,
+  });
+}
+
+function mapNotificationType(type: string): string {
+  if (type.includes('lead') || type.includes('inquiry')) return 'lead';
+  if (type.includes('ticket') || type.includes('support')) return 'ticket';
+  if (type.includes('moderation') || type.includes('review')) return 'moderation';
+  if (type.includes('content')) return 'content';
+  return 'ticket';
+}
+
 export default function TeamInboxPage() {
   const { language } = useLanguage();
-  const { member, hasSpecialization, isTeamLead } = useTeamMember();
+  const { hasSpecialization, isTeamLead } = useTeamMember();
   const isRu = language === 'ru';
   const dateLocale = isRu ? ru : enUS;
   const [activeTab, setActiveTab] = useState('all');
 
+  const { data: tasks = [], isLoading } = useInboxTasks();
+
   // Filter tasks based on user specialization
-  const filteredTasks = MOCK_TASKS.filter(task => {
+  const filteredTasks = tasks.filter(task => {
     if (isTeamLead) return true;
     if (task.type === 'lead' && hasSpecialization('sales_manager')) return true;
     if (task.type === 'ticket' && hasSpecialization('support_operator')) return true;
@@ -69,9 +112,7 @@ export default function TeamInboxPage() {
               {isRu ? 'Входящие задачи' : 'Unified Inbox'}
             </h1>
             <p className="text-muted-foreground">
-              {isRu 
-                ? 'Все ваши задачи в одном месте' 
-                : 'All your tasks in one place'}
+              {isRu ? 'Все ваши задачи в одном месте' : 'All your tasks in one place'}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -121,7 +162,13 @@ export default function TeamInboxPage() {
             <Card>
               <CardContent className="p-0">
                 <ScrollArea className="h-[500px]">
-                  {filteredTasks.length === 0 ? (
+                  {isLoading ? (
+                    <div className="p-4 space-y-3">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                      ))}
+                    </div>
+                  ) : filteredTasks.length === 0 ? (
                     <div className="py-12 text-center text-muted-foreground">
                       <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-30" />
                       <p className="font-medium">{isRu ? 'Всё чисто!' : 'All clear!'}</p>
