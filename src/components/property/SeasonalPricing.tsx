@@ -18,7 +18,10 @@ export interface SeasonalPrice {
   startDay: number;
   endMonth: number;
   endDay: number;
-  priceModifier: number; // percentage: 130 = +30%, 80 = -20%
+  /** Direct price per night for this season (THB). Takes priority if set. */
+  pricePerNight?: number;
+  /** Legacy: percentage modifier (130 = +30%). Kept for backward compat. */
+  priceModifier: number;
   minNights?: number;
 }
 
@@ -38,25 +41,25 @@ const seasonTypes = [
 ];
 
 const months = [
-  { value: 1, labelEn: 'January', labelRu: 'Январь' },
-  { value: 2, labelEn: 'February', labelRu: 'Февраль' },
-  { value: 3, labelEn: 'March', labelRu: 'Март' },
-  { value: 4, labelEn: 'April', labelRu: 'Апрель' },
+  { value: 1, labelEn: 'Jan', labelRu: 'Янв' },
+  { value: 2, labelEn: 'Feb', labelRu: 'Фев' },
+  { value: 3, labelEn: 'Mar', labelRu: 'Мар' },
+  { value: 4, labelEn: 'Apr', labelRu: 'Апр' },
   { value: 5, labelEn: 'May', labelRu: 'Май' },
-  { value: 6, labelEn: 'June', labelRu: 'Июнь' },
-  { value: 7, labelEn: 'July', labelRu: 'Июль' },
-  { value: 8, labelEn: 'August', labelRu: 'Август' },
-  { value: 9, labelEn: 'September', labelRu: 'Сентябрь' },
-  { value: 10, labelEn: 'October', labelRu: 'Октябрь' },
-  { value: 11, labelEn: 'November', labelRu: 'Ноябрь' },
-  { value: 12, labelEn: 'December', labelRu: 'Декабрь' },
+  { value: 6, labelEn: 'Jun', labelRu: 'Июн' },
+  { value: 7, labelEn: 'Jul', labelRu: 'Июл' },
+  { value: 8, labelEn: 'Aug', labelRu: 'Авг' },
+  { value: 9, labelEn: 'Sep', labelRu: 'Сен' },
+  { value: 10, labelEn: 'Oct', labelRu: 'Окт' },
+  { value: 11, labelEn: 'Nov', labelRu: 'Ноя' },
+  { value: 12, labelEn: 'Dec', labelRu: 'Дек' },
 ];
 
 // Preset seasons for Thailand
 const presetSeasons: Omit<SeasonalPrice, 'id'>[] = [
   {
-    name: 'High Season (Dec-Feb)',
-    nameRu: 'Высокий сезон (Дек-Фев)',
+    name: 'High Season',
+    nameRu: 'Высокий сезон',
     type: 'high',
     startMonth: 12,
     startDay: 1,
@@ -77,8 +80,8 @@ const presetSeasons: Omit<SeasonalPrice, 'id'>[] = [
     minNights: 5,
   },
   {
-    name: 'Low Season (May-Oct)',
-    nameRu: 'Низкий сезон (Май-Окт)',
+    name: 'Low Season',
+    nameRu: 'Низкий сезон',
     type: 'low',
     startMonth: 5,
     startDay: 1,
@@ -100,7 +103,7 @@ export function SeasonalPricing({
 
   const addSeason = (preset?: Omit<SeasonalPrice, 'id'>) => {
     const newSeason: SeasonalPrice = preset 
-      ? { ...preset, id: crypto.randomUUID() }
+      ? { ...preset, id: crypto.randomUUID(), pricePerNight: Math.round(basePrice * preset.priceModifier / 100) }
       : {
           id: crypto.randomUUID(),
           name: isRu ? 'Новый сезон' : 'New Season',
@@ -110,6 +113,7 @@ export function SeasonalPricing({
           endMonth: 1,
           endDay: 31,
           priceModifier: 100,
+          pricePerNight: basePrice,
         };
     onChange([...seasons, newSeason]);
   };
@@ -119,11 +123,21 @@ export function SeasonalPricing({
   };
 
   const updateSeason = (id: string, updates: Partial<SeasonalPrice>) => {
-    onChange(seasons.map(s => s.id === id ? { ...s, ...updates } : s));
+    onChange(seasons.map(s => {
+      if (s.id !== id) return s;
+      const updated = { ...s, ...updates };
+      // Sync priceModifier from pricePerNight for backward compat
+      if (updates.pricePerNight !== undefined && basePrice > 0) {
+        updated.priceModifier = Math.round((updates.pricePerNight / basePrice) * 100);
+      }
+      return updated;
+    }));
   };
 
-  const calculatePrice = (modifier: number) => {
-    return Math.round(basePrice * modifier / 100);
+  /** Resolve the effective price for a season */
+  const getEffectivePrice = (season: SeasonalPrice) => {
+    if (season.pricePerNight !== undefined && season.pricePerNight > 0) return season.pricePerNight;
+    return Math.round(basePrice * season.priceModifier / 100);
   };
 
   const getSeasonIcon = (type: string) => {
@@ -141,7 +155,7 @@ export function SeasonalPricing({
     const endMonth = months.find(m => m.value === season.endMonth);
     const startLabel = isRu ? startMonth?.labelRu : startMonth?.labelEn;
     const endLabel = isRu ? endMonth?.labelRu : endMonth?.labelEn;
-    return `${season.startDay} ${startLabel} - ${season.endDay} ${endLabel}`;
+    return `${season.startDay} ${startLabel} — ${season.endDay} ${endLabel}`;
   };
 
   return (
@@ -152,12 +166,12 @@ export function SeasonalPricing({
             {isRu ? 'Сезонные цены' : 'Seasonal Pricing'}
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Базовая цена:' : 'Base price:'} {basePrice.toLocaleString()} {currency}/{isRu ? 'ночь' : 'night'}
+            {isRu ? 'Базовая:' : 'Base:'} {basePrice.toLocaleString()} {currency}/{isRu ? 'ночь' : 'night'}
           </p>
         </div>
         <Button onClick={() => addSeason()} size="sm" variant="outline">
           <Plus className="h-4 w-4 mr-1" />
-          {isRu ? 'Добавить' : 'Add Season'}
+          {isRu ? 'Добавить' : 'Add'}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -165,7 +179,7 @@ export function SeasonalPricing({
         {seasons.length === 0 && (
           <div className="border-2 border-dashed rounded-lg p-4 space-y-3">
             <p className="text-sm text-muted-foreground text-center">
-              {isRu ? 'Быстрое добавление популярных сезонов для Таиланда:' : 'Quick add popular seasons for Thailand:'}
+              {isRu ? 'Быстрое добавление:' : 'Quick add:'}
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
               {presetSeasons.map((preset, index) => (
@@ -185,38 +199,32 @@ export function SeasonalPricing({
         {/* Season List */}
         {seasons.map((season) => {
           const SeasonIcon = getSeasonIcon(season.type);
-          const calculatedPrice = calculatePrice(season.priceModifier);
-          const priceDiff = calculatedPrice - basePrice;
+          const effectivePrice = getEffectivePrice(season);
+          const priceDiff = effectivePrice - basePrice;
           
           return (
-            <div key={season.id} className="border rounded-lg p-4 space-y-4">
-              {/* Season Header */}
-              <div className="flex items-center gap-3">
-                <div className={cn("p-2 bg-muted rounded-lg", getSeasonColor(season.type))}>
-                  <SeasonIcon className="h-5 w-5" />
+            <div key={season.id} className="border rounded-lg p-4 space-y-3">
+              {/* Row 1: Name + Type + Delete */}
+              <div className="flex items-start gap-2">
+                <div className={cn("p-2 bg-muted rounded-lg mt-1", getSeasonColor(season.type))}>
+                  <SeasonIcon className="h-4 w-4" />
                 </div>
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex-1 grid grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-xs text-muted-foreground">
-                      {isRu ? 'Название' : 'Name'}
-                    </Label>
+                    <Label className="text-xs text-muted-foreground">{isRu ? 'Название' : 'Name'}</Label>
                     <Input
                       value={season.name}
                       onChange={(e) => updateSeason(season.id, { name: e.target.value })}
-                      className="h-9"
+                      className="h-8 text-sm"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-muted-foreground">
-                      {isRu ? 'Тип' : 'Type'}
-                    </Label>
+                    <Label className="text-xs text-muted-foreground">{isRu ? 'Тип' : 'Type'}</Label>
                     <Select
                       value={season.type}
                       onValueChange={(value) => updateSeason(season.id, { type: value as SeasonalPrice['type'] })}
                     >
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {seasonTypes.map(st => (
                           <SelectItem key={st.value} value={st.value}>
@@ -231,25 +239,21 @@ export function SeasonalPricing({
                   variant="ghost"
                   size="icon"
                   onClick={() => removeSeason(season.id)}
-                  className="text-destructive hover:text-destructive"
+                  className="text-destructive hover:text-destructive h-8 w-8 mt-4"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
 
-              {/* Date Range */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Row 2: Date range — From / To */}
+              <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'Начало: месяц' : 'Start: month'}
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">{isRu ? 'С: месяц' : 'From: month'}</Label>
                   <Select
                     value={season.startMonth.toString()}
-                    onValueChange={(value) => updateSeason(season.id, { startMonth: Number(value) })}
+                    onValueChange={(v) => updateSeason(season.id, { startMonth: Number(v) })}
                   >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {months.map(m => (
                         <SelectItem key={m.value} value={m.value.toString()}>
@@ -260,29 +264,21 @@ export function SeasonalPricing({
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'день' : 'day'}
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">{isRu ? 'день' : 'day'}</Label>
                   <Input
-                    type="number"
-                    min={1}
-                    max={31}
+                    type="number" min={1} max={31}
                     value={season.startDay}
                     onChange={(e) => updateSeason(season.id, { startDay: Number(e.target.value) })}
-                    className="h-9"
+                    className="h-8 text-sm"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'Конец: месяц' : 'End: month'}
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">{isRu ? 'По: месяц' : 'To: month'}</Label>
                   <Select
                     value={season.endMonth.toString()}
-                    onValueChange={(value) => updateSeason(season.id, { endMonth: Number(value) })}
+                    onValueChange={(v) => updateSeason(season.id, { endMonth: Number(v) })}
                   >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {months.map(m => (
                         <SelectItem key={m.value} value={m.value.toString()}>
@@ -293,66 +289,58 @@ export function SeasonalPricing({
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'день' : 'day'}
-                  </Label>
+                  <Label className="text-xs text-muted-foreground">{isRu ? 'день' : 'day'}</Label>
                   <Input
-                    type="number"
-                    min={1}
-                    max={31}
+                    type="number" min={1} max={31}
                     value={season.endDay}
                     onChange={(e) => updateSeason(season.id, { endDay: Number(e.target.value) })}
-                    className="h-9"
+                    className="h-8 text-sm"
                   />
                 </div>
               </div>
 
-              {/* Pricing */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Row 3: Price per night + Min nights */}
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'Модификатор цены (%)' : 'Price modifier (%)'}
+                    {isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}
                   </Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={10}
-                      max={500}
-                      value={season.priceModifier}
-                      onChange={(e) => updateSeason(season.id, { priceModifier: Number(e.target.value) })}
-                      className="h-9"
-                    />
-                    <Badge 
-                      variant={priceDiff >= 0 ? 'default' : 'secondary'}
-                      className="whitespace-nowrap"
-                    >
-                      {priceDiff >= 0 ? '+' : ''}{priceDiff.toLocaleString()} {currency}
-                    </Badge>
-                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={season.pricePerNight ?? effectivePrice}
+                    onChange={(e) => updateSeason(season.id, { pricePerNight: Number(e.target.value) || 0 })}
+                    className="h-8 text-sm"
+                    placeholder={basePrice.toString()}
+                  />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">
                     {isRu ? 'Мин. ночей' : 'Min nights'}
                   </Label>
                   <Input
-                    type="number"
-                    min={1}
+                    type="number" min={1}
                     placeholder="1"
                     value={season.minNights ?? ''}
                     onChange={(e) => updateSeason(season.id, { minNights: e.target.value ? Number(e.target.value) : undefined })}
-                    className="h-9"
+                    className="h-8 text-sm"
                   />
                 </div>
               </div>
 
               {/* Summary */}
               <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
-                <span className="text-muted-foreground">
-                  {formatDateRange(season)}
-                </span>
-                <span className="font-medium">
-                  {calculatedPrice.toLocaleString()} {currency}/{isRu ? 'ночь' : 'night'}
-                </span>
+                <span className="text-muted-foreground">{formatDateRange(season)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">
+                    {effectivePrice.toLocaleString()} {currency}/{isRu ? 'ночь' : 'night'}
+                  </span>
+                  {priceDiff !== 0 && (
+                    <Badge variant={priceDiff > 0 ? 'default' : 'secondary'} className="text-xs">
+                      {priceDiff > 0 ? '+' : ''}{priceDiff.toLocaleString()}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           );
