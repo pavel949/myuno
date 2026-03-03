@@ -114,6 +114,16 @@ const TABLE_CONFIG: Record<string, {
     table: 'marketplace_products', nameEn: 'name_en', nameRu: 'name_ru',
     coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
   },
+  education: {
+    table: 'education_providers', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+    isVerified: 'is_verified', district: 'district',
+  },
+  school: {
+    table: 'education_providers', nameEn: 'name_en', nameRu: 'name_ru',
+    coverImage: 'cover_image', rating: 'rating', reviewCount: 'review_count',
+    isVerified: 'is_verified', district: 'district',
+  },
 };
 
 async function fetchEntityData(entityType: string, entityIds: string[]): Promise<Record<string, Partial<EnrichedCatalogItem>>> {

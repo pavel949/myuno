@@ -59,7 +59,7 @@ export default function LifeFlowPage() {
       <div className="min-h-screen bg-background">
         {/* HEADER */}
         <div className="border-b border-border/50">
-          <div className="flex items-center gap-3 p-4">
+          <div className="flex items-center gap-3 p-4 max-w-5xl mx-auto">
             <Button
               variant="ghost"
               size="icon"
@@ -71,7 +71,7 @@ export default function LifeFlowPage() {
           </div>
 
           {currentSituation && (
-            <div className="px-4 pb-5">
+            <div className="px-4 pb-5 max-w-5xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -96,7 +96,7 @@ export default function LifeFlowPage() {
         </div>
 
         {/* CONTENT */}
-        <div className="p-4 space-y-6 max-w-lg mx-auto">
+        <div className="p-4 space-y-6 max-w-5xl mx-auto">
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-16 w-full rounded-xl" />
