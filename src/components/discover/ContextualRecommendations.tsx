@@ -12,7 +12,7 @@ import { Surface } from '@/components/ui/surface';
 import { ChevronRight, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-
+import { DEFAULT_IMAGES } from '@/lib/config/defaults';
 /** Map entity_type → route prefix */
 const ENTITY_ROUTES: Record<string, string> = {
   experience: '/experiences',
@@ -88,11 +88,17 @@ export const ContextualRecommendations = memo(function ContextualRecommendations
                 'transition-all touch-manipulation text-left overflow-hidden',
               )}
             >
-              {/* Image placeholder */}
-              <div className="h-24 bg-muted flex items-center justify-center">
-                <span className="text-xs text-muted-foreground capitalize">
-                  {item.item_type.replace(/_/g, ' ')}
-                </span>
+              {/* Image */}
+              <div className="h-24 bg-muted overflow-hidden">
+                <img
+                  src={item.image || DEFAULT_IMAGES.service}
+                  alt={displayTitle}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_IMAGES.service;
+                  }}
+                />
               </div>
               {/* Info */}
               <div className="p-3 space-y-1">
