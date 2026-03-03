@@ -1,17 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   AdminKPIGrid,
-  AdminQuickActionsGrid,
   AdminOperationalAlerts,
-  AdminAllVerticalsGrid,
-  AdminRevenueBlock,
   AdminActivityBlock,
 } from '@/components/admin/dashboard';
 import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
-import { Surface } from '@/components/ui/surface';
 import { SectionHeader } from '@/components/ds';
-import { LayoutDashboard, Zap, BarChart3 } from 'lucide-react';
+import { LayoutDashboard } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
@@ -30,20 +27,13 @@ export default function AdminDashboard() {
         <LaunchSwitch variant="compact" />
       </div>
 
-      {/* Row 1: KPI Metrics */}
+      {/* Row 1: KPI Metrics — 6 cards */}
       <AdminKPIGrid />
 
-      {/* Row 2: Quick Actions + Alerts + Revenue */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <AdminOperationalAlerts />
-        <AdminRevenueBlock />
-        <AdminQuickActionsGrid />
-      </div>
+      {/* Row 2: Alerts */}
+      <AdminOperationalAlerts />
 
-      {/* Row 3: All Verticals */}
-      <AdminAllVerticalsGrid />
-
-      {/* Row 4: Activity */}
+      {/* Row 3: Activity Feed */}
       <AdminActivityBlock />
     </div>
   );

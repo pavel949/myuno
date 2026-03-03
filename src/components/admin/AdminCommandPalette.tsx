@@ -13,29 +13,30 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   LayoutDashboard,
   Package,
-  Layers,
-  Inbox,
   Users,
-  Building,
-  Building2,
-  FileText,
-  Target,
-  Megaphone,
-  MapPin,
-  BookOpen,
-  Languages,
-  FileEdit,
-  Scale,
-  Brain,
-  Bot,
-  Cog,
   Sparkles,
-  FolderTree,
-  Database,
-  TestTube,
+  DollarSign,
+  Building2,
+  Settings,
   Plus,
   Search,
   ShoppingCart,
+  MapPin,
+  Languages,
+  FolderTree,
+  Database,
+  Brain,
+  Bot,
+  TestTube,
+  FileText,
+  Scale,
+  FileEdit,
+  Target,
+  Megaphone,
+  Building,
+  Home,
+  Ship,
+  Utensils,
 } from 'lucide-react';
 
 interface CmdItem {
@@ -44,44 +45,40 @@ interface CmdItem {
   titleRu: string;
   path: string;
   icon: React.ElementType;
-  group: 'core' | 'business' | 'content' | 'ai' | 'system' | 'actions';
+  group: 'main' | 'tools' | 'actions';
   keywords?: string[];
 }
 
 const navigationItems: CmdItem[] = [
-  // Core
-  { id: 'dashboard', titleEn: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard, group: 'core', keywords: ['home', 'main', 'overview'] },
-  { id: 'catalog', titleEn: 'Unified Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package, group: 'core', keywords: ['listings', 'verticals', 'yachts', 'salons', 'properties', 'flowers', 'clinics', 'restaurants'] },
-  { id: 'operations', titleEn: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers, group: 'core', keywords: ['orders', 'tickets', 'moderation', 'leads'] },
-  { id: 'intake', titleEn: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox, group: 'core', keywords: ['incoming', 'applications'] },
+  // Main 7 sections
+  { id: 'dashboard', titleEn: 'Dashboard', titleRu: 'Обзор', path: '/admin', icon: LayoutDashboard, group: 'main', keywords: ['home', 'overview'] },
+  { id: 'users', titleEn: 'Users & Access', titleRu: 'Пользователи', path: '/admin/users', icon: Users, group: 'main', keywords: ['roles', 'rbac', 'staff', 'permissions'] },
+  { id: 'catalog', titleEn: 'Catalog & Content', titleRu: 'Каталог', path: '/admin/catalog', icon: Package, group: 'main', keywords: ['listings', 'verticals', 'yachts', 'salons', 'properties', 'flowers', 'clinics', 'restaurants', 'moderation'] },
+  { id: 'lifeos', titleEn: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles, group: 'main', keywords: ['situations', 'tourist', 'resident', 'scenarios'] },
+  { id: 'finance', titleEn: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign, group: 'main', keywords: ['revenue', 'transactions', 'payouts', 'stripe', 'subscriptions'] },
+  { id: 'partners', titleEn: 'Partners & Providers', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, group: 'main', keywords: ['vendor', 'partner', 'verification'] },
+  { id: 'settings', titleEn: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings, group: 'main', keywords: ['config', 'system', 'audit', 'logs'] },
 
-  // Business
-  { id: 'providers', titleEn: 'Providers', titleRu: 'Провайдеры', path: '/admin/providers', icon: Users, group: 'business', keywords: ['vendor', 'partner', 'business'] },
-  { id: 'pm-companies', titleEn: 'PM Companies', titleRu: 'УК (справочник)', path: '/admin/pm-companies', icon: Building, group: 'business', keywords: ['management company'] },
-  { id: 'mc-dashboard', titleEn: 'MC Dashboard', titleRu: 'УК — Обзор', path: '/admin/mc-dashboard', icon: Building2, group: 'business', keywords: ['management overview'] },
-  { id: 'contracts', titleEn: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText, group: 'business', keywords: ['agreement', 'deal'] },
-  { id: 'crm', titleEn: 'CRM Hub', titleRu: 'CRM', path: '/admin/crm', icon: Target, group: 'business', keywords: ['crm', 'leads', 'acquisition', 'prospects', 'funnel'] },
-  { id: 'vendor-prospects', titleEn: 'Vendor Prospects', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target, group: 'business', keywords: ['acquisition', 'lead'] },
-  { id: 'marketing', titleEn: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone, group: 'business', keywords: ['mcc', 'campaign'] },
-
-  // Content
-  { id: 'cities', titleEn: 'Cities & Locations', titleRu: 'Города', path: '/admin/cities', icon: MapPin, group: 'content', keywords: ['location', 'region', 'area'] },
-  { id: 'location-knowledge', titleEn: 'Location Knowledge', titleRu: 'База знаний', path: '/admin/location-knowledge', icon: BookOpen, group: 'content', keywords: ['guide', 'info'] },
-  { id: 'translations', titleEn: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Languages, group: 'content', keywords: ['i18n', 'language'] },
-  { id: 'vendor-content', titleEn: 'Vendor Content', titleRu: 'Контент вендоров', path: '/admin/vendor-content', icon: FileEdit, group: 'content', keywords: ['description', 'photos'] },
-  { id: 'legal-documents', titleEn: 'Legal Documents', titleRu: 'Юр. документы', path: '/admin/legal-documents', icon: Scale, group: 'content', keywords: ['terms', 'policy', 'contract'] },
-
-  // AI
-  { id: 'ai-ops', titleEn: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain, group: 'ai', keywords: ['automation', 'intelligence'] },
-  { id: 'ai-agents', titleEn: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot, group: 'ai', keywords: ['chatbot', 'assistant'] },
-
-  // System
-  { id: 'control', titleEn: 'Control Center', titleRu: 'Управление', path: '/admin/control', icon: Cog, group: 'system', keywords: ['users', 'roles', 'finance', 'settings', 'analytics'] },
-  { id: 'lifeos', titleEn: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles, group: 'system', keywords: ['situations', 'tourist', 'resident'] },
-  { id: 'taxonomy', titleEn: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree, group: 'system', keywords: ['categories', 'tags'] },
-  { id: 'data-import', titleEn: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database, group: 'system', keywords: ['csv', 'upload', 'migration'] },
-  { id: 'uno-team', titleEn: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users, group: 'system', keywords: ['staff', 'employee'] },
-  { id: 'qa-test-runner', titleEn: 'QA Test Runner', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube, group: 'system', keywords: ['test', 'quality'] },
+  // Tools (accessible via Cmd+K)
+  { id: 'cities', titleEn: 'Cities & Regions', titleRu: 'Города', path: '/admin/cities', icon: MapPin, group: 'tools', keywords: ['location', 'region'] },
+  { id: 'translations', titleEn: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Languages, group: 'tools', keywords: ['i18n'] },
+  { id: 'taxonomy', titleEn: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree, group: 'tools', keywords: ['categories', 'tags'] },
+  { id: 'data-import', titleEn: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database, group: 'tools', keywords: ['csv', 'upload'] },
+  { id: 'ai-ops', titleEn: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain, group: 'tools', keywords: ['automation'] },
+  { id: 'ai-agents', titleEn: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot, group: 'tools', keywords: ['chatbot'] },
+  { id: 'uno-team', titleEn: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users, group: 'tools', keywords: ['staff'] },
+  { id: 'qa', titleEn: 'QA Tests', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube, group: 'tools', keywords: ['test', 'quality'] },
+  { id: 'operations', titleEn: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: ShoppingCart, group: 'tools', keywords: ['orders', 'tickets'] },
+  { id: 'crm', titleEn: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: Target, group: 'tools', keywords: ['leads', 'funnel'] },
+  { id: 'marketing', titleEn: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone, group: 'tools', keywords: ['campaign'] },
+  { id: 'pm-companies', titleEn: 'PM Companies', titleRu: 'УК', path: '/admin/pm-companies', icon: Building, group: 'tools', keywords: ['management company'] },
+  { id: 'mc-dashboard', titleEn: 'MC Dashboard', titleRu: 'УК Обзор', path: '/admin/mc-dashboard', icon: Building, group: 'tools', keywords: ['management overview'] },
+  { id: 'properties', titleEn: 'Properties', titleRu: 'Недвижимость', path: '/admin/properties', icon: Home, group: 'tools', keywords: ['real estate'] },
+  { id: 'yachts', titleEn: 'Boat Charters', titleRu: 'Чартер', path: '/admin/yachts', icon: Ship, group: 'tools', keywords: ['yachts', 'boats'] },
+  { id: 'restaurants', titleEn: 'Restaurants', titleRu: 'Рестораны', path: '/admin/restaurants', icon: Utensils, group: 'tools', keywords: ['food'] },
+  { id: 'legal-docs', titleEn: 'Legal Documents', titleRu: 'Юр. документы', path: '/admin/legal-documents', icon: Scale, group: 'tools', keywords: ['terms', 'policy'] },
+  { id: 'vendor-content', titleEn: 'Vendor Content', titleRu: 'Контент вендоров', path: '/admin/vendor-content', icon: FileEdit, group: 'tools', keywords: ['description'] },
+  { id: 'contracts', titleEn: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText, group: 'tools', keywords: ['agreement'] },
 ];
 
 const quickActions: CmdItem[] = [
@@ -90,14 +87,6 @@ const quickActions: CmdItem[] = [
   { id: 'view-orders', titleEn: 'View Recent Orders', titleRu: 'Последние заказы', path: '/admin/operations', icon: ShoppingCart, group: 'actions', keywords: ['bookings', 'sales'] },
   { id: 'search-providers', titleEn: 'Search Providers', titleRu: 'Поиск провайдеров', path: '/admin/providers', icon: Search, group: 'actions', keywords: ['find', 'lookup'] },
 ];
-
-const groupLabels: Record<string, { en: string; ru: string }> = {
-  core: { en: 'Core', ru: 'Ядро' },
-  business: { en: 'Business', ru: 'Бизнес' },
-  content: { en: 'Content', ru: 'Контент' },
-  ai: { en: 'AI & Automation', ru: 'AI и автоматизация' },
-  system: { en: 'System', ru: 'Система' },
-};
 
 interface AdminCommandPaletteProps {
   open: boolean;
@@ -114,8 +103,8 @@ export function AdminCommandPalette({ open, onOpenChange }: AdminCommandPaletteP
     navigate(path);
   }, [navigate, onOpenChange]);
 
-  const actionsGroup = quickActions;
-  const groupIds = ['core', 'business', 'content', 'ai', 'system'] as const;
+  const mainItems = navigationItems.filter(i => i.group === 'main');
+  const toolItems = navigationItems.filter(i => i.group === 'tools');
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -129,7 +118,7 @@ export function AdminCommandPalette({ open, onOpenChange }: AdminCommandPaletteP
         
         {/* Quick Actions */}
         <CommandGroup heading={isRussian ? 'Быстрые действия' : 'Quick Actions'}>
-          {actionsGroup.map((item) => (
+          {quickActions.map((item) => (
             <CommandItem
               key={item.id}
               value={`${item.titleEn} ${item.titleRu} ${item.keywords?.join(' ') || ''}`}
@@ -144,32 +133,40 @@ export function AdminCommandPalette({ open, onOpenChange }: AdminCommandPaletteP
 
         <CommandSeparator />
 
-        {/* Grouped Navigation */}
-        {groupIds.map((gid) => {
-          const items = navigationItems.filter(i => i.group === gid);
-          if (!items.length) return null;
-          const label = groupLabels[gid];
-          return (
-            <React.Fragment key={gid}>
-              <CommandGroup heading={isRussian ? label.ru : label.en}>
-                {items.map((item) => (
-                  <CommandItem
-                    key={item.id}
-                    value={`${item.titleEn} ${item.titleRu} ${item.keywords?.join(' ') || ''}`}
-                    onSelect={() => handleSelect(item.path)}
-                    className="flex items-center gap-3 py-2 cursor-pointer"
-                  >
-                    <item.icon className="h-4 w-4 text-muted-foreground" />
-                    <span>{isRussian ? item.titleRu : item.titleEn}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {item.path}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </React.Fragment>
-          );
-        })}
+        {/* Main Navigation */}
+        <CommandGroup heading={isRussian ? 'Навигация' : 'Navigation'}>
+          {mainItems.map((item) => (
+            <CommandItem
+              key={item.id}
+              value={`${item.titleEn} ${item.titleRu} ${item.keywords?.join(' ') || ''}`}
+              onSelect={() => handleSelect(item.path)}
+              className="flex items-center gap-3 py-2 cursor-pointer"
+            >
+              <item.icon className="h-4 w-4 text-muted-foreground" />
+              <span>{isRussian ? item.titleRu : item.titleEn}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        {/* Tools & Pages */}
+        <CommandGroup heading={isRussian ? 'Инструменты' : 'Tools & Pages'}>
+          {toolItems.map((item) => (
+            <CommandItem
+              key={item.id}
+              value={`${item.titleEn} ${item.titleRu} ${item.keywords?.join(' ') || ''}`}
+              onSelect={() => handleSelect(item.path)}
+              className="flex items-center gap-3 py-2 cursor-pointer"
+            >
+              <item.icon className="h-4 w-4 text-muted-foreground" />
+              <span>{isRussian ? item.titleRu : item.titleEn}</span>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {item.path}
+              </span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );
