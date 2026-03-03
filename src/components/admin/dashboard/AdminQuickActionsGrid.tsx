@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
+import { SectionHeader } from '@/components/ds';
 import { 
   Plus, UserPlus, FileText, 
   Users, Ticket, Package
@@ -9,8 +10,6 @@ import {
 import { cn } from '@/lib/utils';
 
 // Consolidated Quick Actions - Provider-First Strategy
-// Removed direct vertical shortcuts (+ Yacht, + Property, etc.)
-// All content creation now flows through: Catalog → Select Provider → ContentCreatorMenu
 const QUICK_ACTIONS = [
   { 
     id: 'operations', 
@@ -57,13 +56,13 @@ export function AdminQuickActionsGrid() {
   const isRu = language === 'ru';
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Plus className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-medium">
-          {isRu ? 'Быстрые действия' : 'Quick Actions'}
-        </h3>
-      </div>
+    <Surface variant="card" padding="md" radius="xl">
+      <SectionHeader
+        title={isRu ? 'Быстрые действия' : 'Quick Actions'}
+        icon={Plus}
+        size="sm"
+        className="mb-3"
+      />
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {QUICK_ACTIONS.map((action) => {
           const Icon = action.icon;
@@ -89,6 +88,6 @@ export function AdminQuickActionsGrid() {
           );
         })}
       </div>
-    </Card>
+    </Surface>
   );
 }

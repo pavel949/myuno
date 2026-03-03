@@ -1,7 +1,8 @@
+import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Building2, ShoppingCart, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -16,45 +17,52 @@ interface KPICardProps {
   onClick?: () => void;
 }
 
-function KPICard({ title, value, change, icon: Icon, color, onClick }: KPICardProps) {
-  const hasGrowth = change !== undefined && change !== 0;
-  const isPositive = (change || 0) > 0;
+const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
+  ({ title, value, change, icon: Icon, color, onClick }, ref) => {
+    const hasGrowth = change !== undefined && change !== 0;
+    const isPositive = (change || 0) > 0;
 
-  return (
-    <Card 
-      className={cn(
-        "p-4 lg:p-3 transition-all hover:shadow-md group",
-        onClick && "cursor-pointer hover:bg-muted/30"
-      )}
-      onClick={onClick}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-            {title}
-          </p>
-          <p className="text-2xl lg:text-xl font-bold">{value}</p>
-          {hasGrowth && (
-            <div className={cn(
-              "flex items-center gap-1 mt-1 text-xs font-medium",
-              isPositive ? "text-success" : "text-destructive"
-            )}>
-              {isPositive ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              <span>{isPositive ? '+' : ''}{change?.toFixed(1)}%</span>
-            </div>
-          )}
+    return (
+      <Surface
+        ref={ref}
+        variant="card"
+        padding="md"
+        radius="xl"
+        className={cn(
+          "lg:p-3 transition-all group",
+          onClick && "cursor-pointer hover:bg-muted/30"
+        )}
+        onClick={onClick}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+              {title}
+            </p>
+            <p className="text-2xl lg:text-xl font-bold">{value}</p>
+            {hasGrowth && (
+              <div className={cn(
+                "flex items-center gap-1 mt-1 text-xs font-medium",
+                isPositive ? "text-success" : "text-destructive"
+              )}>
+                {isPositive ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
+                <span>{isPositive ? '+' : ''}{change?.toFixed(1)}%</span>
+              </div>
+            )}
+          </div>
+          <div className={cn("p-2 rounded-lg", color)}>
+            <Icon className="h-5 w-5 text-white" />
+          </div>
         </div>
-        <div className={cn("p-2 rounded-lg", color)}>
-          <Icon className="h-5 w-5 text-white" />
-        </div>
-      </div>
-    </Card>
-  );
-}
+      </Surface>
+    );
+  }
+);
+KPICard.displayName = 'KPICard';
 
 export function AdminKPIGrid() {
   const { language } = useLanguage();
@@ -68,11 +76,11 @@ export function AdminKPIGrid() {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="p-4">
+          <Surface key={i} variant="card" padding="md" radius="xl">
             <Skeleton className="h-4 w-20 mb-2" />
             <Skeleton className="h-8 w-16 mb-1" />
             <Skeleton className="h-3 w-12" />
-          </Card>
+          </Surface>
         ))}
       </div>
     );

@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { SectionHeader } from '@/components/ds';
 import { 
   Ship, Home, Utensils, Scissors, MapPin, Dumbbell, 
   Stethoscope, Calendar, Car, GraduationCap, Scale, 
@@ -45,14 +46,14 @@ export function AdminAllVerticalsGrid() {
 
   if (isLoading) {
     return (
-      <Card className="p-3">
+      <Surface variant="card" padding="sm" radius="xl">
         <Skeleton className="h-5 w-32 mb-3" />
         <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-1.5">
           {[...Array(10)].map((_, i) => (
             <Skeleton key={i} className="h-14 w-full rounded-lg" />
           ))}
         </div>
-      </Card>
+      </Surface>
     );
   }
 
@@ -63,20 +64,20 @@ export function AdminAllVerticalsGrid() {
   };
 
   const total = ALL_VERTICALS.reduce((sum, v) => sum + getCount(v.key), 0);
-  // Show top verticals (with count > 0) first, then rest in collapsible
   const activeVerticals = ALL_VERTICALS.filter(v => getCount(v.key) > 0);
   const emptyVerticals = ALL_VERTICALS.filter(v => getCount(v.key) === 0);
 
   return (
-    <Card className="p-3">
+    <Surface variant="card" padding="sm" radius="xl">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between cursor-pointer hover:bg-muted/30 -m-1 p-1 rounded-lg transition-colors">
             <div className="flex items-center gap-2">
-              <Grid3X3 className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-medium">
-                {isRu ? 'Вертикали' : 'Verticals'}
-              </h3>
+              <SectionHeader
+                title={isRu ? 'Вертикали' : 'Verticals'}
+                icon={Grid3X3}
+                size="sm"
+              />
               <Badge variant="secondary" className="text-xs">
                 {total}
               </Badge>
@@ -95,9 +96,13 @@ export function AdminAllVerticalsGrid() {
             const count = getCount(vertical.key);
             
             return (
-              <div
+              <Surface
                 key={vertical.key}
-                className="flex flex-col items-center p-1.5 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors text-center"
+                variant="muted"
+                padding="none"
+                radius="lg"
+                bordered={false}
+                className="flex flex-col items-center p-1.5 hover:bg-muted cursor-pointer transition-colors text-center"
                 onClick={() => navigate(vertical.href)}
               >
                 <div className={cn("mb-0.5", vertical.color)}>
@@ -107,7 +112,7 @@ export function AdminAllVerticalsGrid() {
                 <p className="text-[8px] text-muted-foreground truncate w-full leading-tight">
                   {isRu ? vertical.labelRu : vertical.label}
                 </p>
-              </div>
+              </Surface>
             );
           })}
         </div>
@@ -138,6 +143,6 @@ export function AdminAllVerticalsGrid() {
           )}
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </Surface>
   );
 }

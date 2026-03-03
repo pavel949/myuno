@@ -2,15 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
+import { CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SectionHeader } from '@/components/ds';
 import AdminMCSubscriptions from '@/components/admin/mc/AdminMCSubscriptions';
 import {
   Sheet,
@@ -28,7 +29,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  TrendingUp,
   Mail,
   Phone,
   Globe,
@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface MCWithStats {
   id: string;
@@ -60,7 +61,6 @@ interface MCWithStats {
   director_name: string | null;
   district: string | null;
   service_types: string[] | null;
-  // Computed
   member_count: number;
   active_slot_count: number;
 }
@@ -69,26 +69,22 @@ function useAdminMCData() {
   return useQuery({
     queryKey: ['admin-mc-dashboard'],
     queryFn: async () => {
-      // Fetch all management companies
       const { data: companies, error: mcError } = await supabase
         .from('management_companies')
         .select('*')
         .order('created_at', { ascending: false });
       if (mcError) throw mcError;
 
-      // Fetch member counts per company
       const { data: members, error: membersError } = await supabase
         .from('management_company_members')
         .select('company_id, is_active');
       if (membersError) throw membersError;
 
-      // Fetch active slot counts
       const { data: slots, error: slotsError } = await supabase
         .from('mc_property_slots')
         .select('company_id, is_active');
       if (slotsError) throw slotsError;
 
-      // Aggregate
       const memberMap = new Map<string, number>();
       (members || []).forEach(m => {
         if (m.is_active) {
@@ -141,7 +137,6 @@ export default function AdminMCDashboard() {
     return list;
   }, [companies, tab, search]);
 
-  // Summary stats
   const stats = useMemo(() => {
     const total = companies.length;
     const active = companies.filter(c => c.is_active).length;
@@ -169,17 +164,12 @@ export default function AdminMCDashboard() {
   return (
     <div className="p-4 md:p-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-primary" />
-            {isRu ? 'Управляющие компании' : 'Management Companies'}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {isRu ? 'Мониторинг всех подключённых УК' : 'Monitor all connected MCs'}
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        title={isRu ? 'Управляющие компании' : 'Management Companies'}
+        subtitle={isRu ? 'Мониторинг всех подключённых УК' : 'Monitor all connected MCs'}
+        icon={Building2}
+        size="lg"
+      />
 
       {/* Page-level tabs */}
       <Tabs value={pageTab} onValueChange={setPageTab}>
@@ -223,12 +213,12 @@ export default function AdminMCDashboard() {
 
           {/* Company List */}
           {filtered.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
+            <Surface variant="card" padding="lg" radius="xl">
+              <div className="py-12 text-center">
                 <Building2 className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">{isRu ? 'Нет компаний' : 'No companies found'}</p>
-              </CardContent>
-            </Card>
+              </div>
+            </Surface>
           ) : (
             <div className="space-y-2">
               {filtered.map(mc => (
@@ -256,15 +246,13 @@ export default function AdminMCDashboard() {
 // ── KPI Card ──
 function KPICard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number; accent?: boolean }) {
   return (
-    <Card className={accent ? 'border-primary/30 bg-primary/5' : ''}>
-      <CardContent className="p-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className={`h-4 w-4 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
-          <span className="text-xs text-muted-foreground truncate">{label}</span>
-        </div>
-        <p className="text-2xl font-bold tabular-nums">{value}</p>
-      </CardContent>
-    </Card>
+    <Surface variant="card" padding="sm" radius="xl" className={accent ? 'border-primary/30 bg-primary/5' : ''}>
+      <div className="flex items-center gap-2 mb-1">
+        <Icon className={cn("h-4 w-4", accent ? 'text-primary' : 'text-muted-foreground')} />
+        <span className="text-xs text-muted-foreground truncate">{label}</span>
+      </div>
+      <p className="text-2xl font-bold tabular-nums">{value}</p>
+    </Surface>
   );
 }
 
@@ -274,8 +262,8 @@ function MCRow({ mc, isRu, onClick }: { mc: MCWithStats; isRu: boolean; onClick:
   const hasSub = !!mc.stripe_subscription_id;
 
   return (
-    <Card className="hover:border-primary/20 transition-colors cursor-pointer" onClick={onClick}>
-      <CardContent className="p-3 flex items-center gap-3">
+    <Surface variant="card" padding="sm" radius="xl" className="hover:border-primary/20 transition-colors cursor-pointer" onClick={onClick}>
+      <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10 flex-shrink-0">
           <AvatarImage src={mc.logo || undefined} />
           <AvatarFallback className="text-sm bg-primary/10 text-primary font-semibold">
@@ -323,8 +311,8 @@ function MCRow({ mc, isRu, onClick }: { mc: MCWithStats; isRu: boolean; onClick:
           )}
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Surface>
   );
 }
 
@@ -395,9 +383,7 @@ function MCDetail({ mc, isRu }: { mc: MCWithStats; isRu: boolean }) {
         {/* Contact Info */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">{isRu ? 'Контакты' : 'Contacts'}</h3>
-          {mc.director_name && (
-            <InfoRow icon={Users} label={isRu ? 'Директор' : 'Director'} value={mc.director_name} />
-          )}
+          {mc.director_name && <InfoRow icon={Users} label={isRu ? 'Директор' : 'Director'} value={mc.director_name} />}
           {mc.email && <InfoRow icon={Mail} label="Email" value={mc.email} />}
           {mc.phone && <InfoRow icon={Phone} label={isRu ? 'Телефон' : 'Phone'} value={mc.phone} />}
           {mc.website && <InfoRow icon={Globe} label={isRu ? 'Сайт' : 'Website'} value={mc.website} />}
@@ -456,11 +442,11 @@ function MCDetail({ mc, isRu }: { mc: MCWithStats; isRu: boolean }) {
 
 function MetricBox({ label, value, icon: Icon }: { label: string; value: number | string; icon: any }) {
   return (
-    <div className="rounded-lg border p-3 text-center">
+    <Surface variant="muted" padding="sm" radius="lg" bordered className="text-center">
       <Icon className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
       <p className="text-lg font-bold tabular-nums">{value}</p>
       <p className="text-[10px] text-muted-foreground">{label}</p>
-    </div>
+    </Surface>
   );
 }
 

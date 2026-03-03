@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingUp, TrendingDown, DollarSign, ChevronRight } from 'lucide-react';
+import { SectionHeader } from '@/components/ds';
+import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
@@ -22,7 +23,7 @@ export function AdminRevenueBlock() {
 
   if (isLoading) {
     return (
-      <Card className="p-3">
+      <Surface variant="card" padding="sm" radius="xl">
         <div className="flex items-center justify-between mb-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-4" />
@@ -33,7 +34,7 @@ export function AdminRevenueBlock() {
           <Skeleton className="h-12" />
           <Skeleton className="h-12" />
         </div>
-      </Card>
+      </Surface>
     );
   }
 
@@ -42,20 +43,21 @@ export function AdminRevenueBlock() {
   const growth = summary?.bookingGrowth || 0;
 
   return (
-    <Card 
-      className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+    <Surface 
+      variant="card" 
+      padding="sm" 
+      radius="xl"
+      className="cursor-pointer hover:bg-muted/50 transition-colors"
       onClick={() => navigate('/admin/finance')}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1.5">
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {isRu ? 'Финансы' : 'Finances'}
-          </span>
-        </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </div>
+      <SectionHeader
+        title={isRu ? 'Финансы' : 'Finances'}
+        icon={DollarSign}
+        size="sm"
+        action={{ label: isRu ? 'Подробнее' : 'Details', onClick: () => navigate('/admin/finance') }}
+        className="mb-1"
+      />
 
       {/* GMV */}
       <div className="flex items-baseline gap-2 mb-3">
@@ -74,19 +76,19 @@ export function AdminRevenueBlock() {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="text-center p-2 rounded-lg bg-muted/50">
+        <Surface variant="muted" padding="sm" radius="lg" bordered={false} className="text-center">
           <p className="text-lg font-semibold text-success">{formatCurrency(revenue)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">
             {isRu ? 'Выручка' : 'Revenue'}
           </p>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-muted/50">
+        </Surface>
+        <Surface variant="muted" padding="sm" radius="lg" bordered={false} className="text-center">
           <p className="text-lg font-semibold">{growth >= 0 ? '+' : ''}{growth.toFixed(0)}%</p>
           <p className="text-[10px] text-muted-foreground uppercase">
             {isRu ? 'Рост' : 'Growth'}
           </p>
-        </div>
+        </Surface>
       </div>
-    </Card>
+    </Surface>
   );
 }
