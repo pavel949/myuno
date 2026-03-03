@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import * as LucideIcons from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
-import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { CACHE_PROFILES, queryKeys } from '@/lib/queryConfig';
 
 // Icon mapping from string to component
 const iconMap: Record<string, LucideIcon> = {
@@ -281,13 +281,13 @@ export function useCategories() {
   const { language } = useLanguage();
 
   const groupsQuery = useQuery({
-    queryKey: ['category-groups', 'v3'], // Force cache invalidation
+    queryKey: queryKeys.categories.groups,
     queryFn: fetchCategoryGroups,
     ...CACHE_PROFILES.STATIC,
   });
 
   const allCategoriesQuery = useQuery({
-    queryKey: ['all-categories', 'v3'], // Force cache invalidation
+    queryKey: queryKeys.categories.all,
     queryFn: fetchAllCategories,
     ...CACHE_PROFILES.STATIC,
   });

@@ -91,10 +91,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    loadRates();
+    let cancelled = false;
+    loadRates().then(() => {
+      if (cancelled) return;
+    });
     // Refresh rates every hour
     const interval = setInterval(loadRates, 60 * 60 * 1000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [loadRates]);
 
   useEffect(() => {
