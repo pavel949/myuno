@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
-  LayoutDashboard, Home, Calendar, ClipboardList, MessageSquare,
-  Grid3X3, DollarSign, Plus, Receipt, CalendarPlus, ShoppingBag, ListTodo,
+  LayoutDashboard, Home, Calendar, ClipboardList,
+  Grid3X3, Plus, Receipt, CalendarPlus, ShoppingBag, ListTodo,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,7 +50,7 @@ export function MCMobileNav() {
   return (
     <>
       {fabOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm md:hidden" onClick={() => setFabOpen(false)}>
+        <div className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm md:hidden" onClick={() => setFabOpen(false)}>
           <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
             {QUICK_ACTIONS.map((action, i) => {
               const Icon = action.icon;
@@ -61,10 +61,10 @@ export function MCMobileNav() {
                   className="flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in"
                   style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
                 >
-                  <span className="text-sm font-semibold text-white bg-black/60 backdrop-blur rounded-full px-3 py-1.5 shadow-lg">
+                  <span className="text-sm font-semibold text-primary-foreground bg-foreground/60 backdrop-blur rounded-full px-3 py-1.5 [box-shadow:var(--shadow-elevation-3)]">
                     {isRu ? action.labelRu : action.labelEn}
                   </span>
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shadow-lg", action.color)}>
+                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center [box-shadow:var(--shadow-elevation-3)]", action.color)}>
                     <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </div>
                 </button>
@@ -77,14 +77,14 @@ export function MCMobileNav() {
       <button
         onClick={() => setFabOpen(!fabOpen)}
         className={cn(
-          "fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200",
+          "fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full [box-shadow:var(--shadow-elevation-4)] flex items-center justify-center transition-all duration-200",
           fabOpen ? "bg-foreground text-background rotate-45" : "bg-primary text-primary-foreground"
         )}
       >
         <Plus className="h-7 w-7" strokeWidth={2.5} />
       </button>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom shadow-[0_-2px_20px_-4px_rgba(0,0,0,0.08)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 md:hidden safe-area-bottom [box-shadow:0_-2px_20px_-4px_hsl(var(--foreground)/0.08)]">
         <div className="grid grid-cols-5 h-[68px] px-1">
           {MC_NAV.map((item) => {
             const Icon = item.icon;
@@ -94,7 +94,7 @@ export function MCMobileNav() {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "flex flex-col items-center justify-center h-full gap-0.5 transition-all",
+                  "flex flex-col items-center justify-center h-full gap-0.5 transition-all min-h-[44px]",
                   active ? "text-primary" : "text-muted-foreground/70 active:text-foreground"
                 )}
               >

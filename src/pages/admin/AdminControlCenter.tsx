@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SectionHeader } from '@/components/ds';
 import { Users, Shield, BarChart3, DollarSign, Settings, FileText, History } from 'lucide-react';
 import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
 import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
@@ -28,14 +29,12 @@ export default function AdminControlCenter() {
   return (
     <div className="p-4 md:p-6 space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold">
-          {isRussian ? 'Центр управления' : 'Control Center'}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {isRussian ? 'Пользователи, аналитика, настройки системы' : 'Users, analytics, system settings'}
-        </p>
-      </div>
+      <SectionHeader
+        title={isRussian ? 'Центр управления' : 'Control Center'}
+        subtitle={isRussian ? 'Пользователи, аналитика, настройки системы' : 'Users, analytics, system settings'}
+        icon={Settings}
+        size="lg"
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -55,27 +54,21 @@ export default function AdminControlCenter() {
         <TabsContent value="users" className="mt-4">
           <ControlUsersTab />
         </TabsContent>
-
         <TabsContent value="roles" className="mt-4">
           <ControlRolesTab />
         </TabsContent>
-
         <TabsContent value="analytics" className="mt-4">
           <ControlAnalyticsTab />
         </TabsContent>
-
         <TabsContent value="finance" className="mt-4">
           <ControlFinanceTab />
         </TabsContent>
-
         <TabsContent value="system" className="mt-4">
           <ControlSystemTab />
         </TabsContent>
-
         <TabsContent value="audit" className="mt-4">
           <ControlAuditTab />
         </TabsContent>
-
         <TabsContent value="logs" className="mt-4">
           <ControlLogsTab />
         </TabsContent>

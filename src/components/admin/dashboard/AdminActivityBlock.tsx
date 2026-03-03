@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminAuditLogs, ACTION_CONFIG } from '@/hooks/useAdminAuditLogs';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, ChevronRight, ShoppingCart, UserPlus, FileCheck, Settings, Package, Home, Ship, Calendar, CreditCard, TicketCheck, AlertCircle } from 'lucide-react';
+import { SectionHeader } from '@/components/ds';
+import { Activity, ShoppingCart, UserPlus, FileCheck, Settings, Package, Home, Ship, Calendar, CreditCard, TicketCheck, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -25,15 +26,9 @@ const ENTITY_ICONS: Record<string, React.ElementType> = {
 };
 
 function getActionIcon(action: string, entityType: string | null): React.ElementType {
-  // First check by action
   const actionBase = action.split('.')[0];
-  if (ENTITY_ICONS[actionBase]) {
-    return ENTITY_ICONS[actionBase];
-  }
-  // Then by entity type
-  if (entityType && ENTITY_ICONS[entityType]) {
-    return ENTITY_ICONS[entityType];
-  }
+  if (ENTITY_ICONS[actionBase]) return ENTITY_ICONS[actionBase];
+  if (entityType && ENTITY_ICONS[entityType]) return ENTITY_ICONS[entityType];
   return ENTITY_ICONS.default;
 }
 
@@ -53,7 +48,7 @@ export function AdminActivityBlock() {
 
   if (isLoading) {
     return (
-      <Card className="p-3">
+      <Surface variant="card" padding="sm" radius="xl">
         <div className="flex items-center justify-between mb-3">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-4" />
@@ -63,27 +58,27 @@ export function AdminActivityBlock() {
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-      </Card>
+      </Surface>
     );
   }
 
   const activities = logs || [];
 
   return (
-    <Card 
-      className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+    <Surface 
+      variant="card" 
+      padding="sm" 
+      radius="xl"
+      className="cursor-pointer hover:bg-muted/50 transition-colors"
       onClick={() => navigate('/admin/analytics')}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          <Activity className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {isRu ? 'Активность' : 'Activity'}
-          </span>
-        </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </div>
+      <SectionHeader
+        title={isRu ? 'Активность' : 'Activity'}
+        icon={Activity}
+        size="sm"
+        action={{ label: isRu ? 'Все' : 'All', onClick: () => navigate('/admin/analytics') }}
+        className="mb-2"
+      />
 
       {/* Activity list */}
       <div className="space-y-2">
@@ -105,9 +100,13 @@ export function AdminActivityBlock() {
             const config = getActionConfig(log.action);
             
             return (
-              <div 
+              <Surface 
                 key={log.id}
-                className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/30"
+                variant="muted"
+                padding="sm"
+                radius="lg"
+                bordered={false}
+                className="flex items-center gap-2.5"
               >
                 <div className={cn("p-1.5 rounded-lg bg-muted", config.color)}>
                   <Icon className="h-3.5 w-3.5" />
@@ -128,11 +127,11 @@ export function AdminActivityBlock() {
                     locale: isRu ? ru : undefined 
                   })}
                 </span>
-              </div>
+              </Surface>
             );
           })
         )}
       </div>
-    </Card>
+    </Surface>
   );
 }

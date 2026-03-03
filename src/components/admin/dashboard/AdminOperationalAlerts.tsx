@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
-import { Card } from '@/components/ui/card';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ds';
 import { 
   AlertTriangle, Clock, MessageSquare, FileText, 
   Users, ChevronRight, CheckCircle 
@@ -63,14 +64,14 @@ export function AdminOperationalAlerts() {
 
   if (isLoading) {
     return (
-      <Card className="p-4">
+      <Surface variant="card" padding="md" radius="xl">
         <Skeleton className="h-5 w-40 mb-4" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
-      </Card>
+      </Surface>
     );
   }
 
@@ -93,17 +94,14 @@ export function AdminOperationalAlerts() {
   const totalAlerts = activeAlerts.reduce((sum, a) => sum + a.count, 0);
 
   return (
-    <Card className="p-4">
+    <Surface variant="card" padding="md" radius="xl">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className={cn(
-            "h-4 w-4",
-            totalAlerts > 0 ? "text-warning" : "text-muted-foreground"
-          )} />
-          <h3 className="text-sm font-medium">
-            {isRu ? 'Требует внимания' : 'Needs Attention'}
-          </h3>
-        </div>
+        <SectionHeader
+          title={isRu ? 'Требует внимания' : 'Needs Attention'}
+          icon={AlertTriangle}
+          iconClassName={totalAlerts > 0 ? 'text-warning' : undefined}
+          size="sm"
+        />
         {totalAlerts > 0 && (
           <Badge variant="destructive" className="font-bold">
             {totalAlerts}
@@ -164,6 +162,6 @@ export function AdminOperationalAlerts() {
           })}
         </div>
       )}
-    </Card>
+    </Surface>
   );
 }
