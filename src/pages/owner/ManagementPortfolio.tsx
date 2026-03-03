@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -262,8 +263,11 @@ export default function ManagementPortfolio() {
   const { data: allTerms, isLoading } = useAllManagementTerms();
   const updateTerms = useUpdateManagementTerms();
 
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const { getValue, setValue } = useUrlFilters();
+  const search = getValue('q', '');
+  const setSearch = (v: string) => setValue('q', v || null);
+  const filterStatus = (getValue('status', 'all') as FilterStatus);
+  const setFilterStatus = (v: FilterStatus) => setValue('status', v === 'all' ? null : v);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedTerms, setSelectedTerms] = useState<ManagementTerms | undefined>(undefined);

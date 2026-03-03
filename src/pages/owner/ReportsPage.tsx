@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -127,7 +128,9 @@ export default function ReportsPage() {
   const markViewed = useMarkReportViewed();
   const { data: accountingPolicies } = useAccountingPolicies();
 
-  const [activeTab, setActiveTab] = useState<'all' | 'portfolio'>('all');
+  const { getValue, setValue } = useUrlFilters();
+  const activeTab = getValue('tab', 'all') as 'all' | 'portfolio';
+  const setActiveTab = (v: 'all' | 'portfolio') => setValue('tab', v === 'all' ? null : v);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedReportForSend, setSelectedReportForSend] = useState<string | null>(null);
@@ -144,9 +147,12 @@ export default function ReportsPage() {
   const [selectedComplexId, setSelectedComplexId] = useState('');
   const [selectedOwnerId, setSelectedOwnerId] = useState('');
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
-  const [filterScope, setFilterScope] = useState<'all' | 'complex' | 'owner'>('all');
-  const [filterComplexId, setFilterComplexId] = useState('');
-  const [filterOwnerId, setFilterOwnerId] = useState('');
+  const filterScope = getValue('scope', 'all') as 'all' | 'complex' | 'owner';
+  const setFilterScope = (v: 'all' | 'complex' | 'owner') => setValue('scope', v === 'all' ? null : v);
+  const filterComplexId = getValue('complex', '');
+  const setFilterComplexId = (v: string) => setValue('complex', v || null);
+  const filterOwnerId = getValue('owner', '');
+  const setFilterOwnerId = (v: string) => setValue('owner', v || null);
 
   const allSelectableProperties = useMemo(() => {
     const deduped = [
