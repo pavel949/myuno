@@ -1,104 +1,70 @@
 
 
-## Концепция: Единый личный кабинет с ролевыми модулями
+## Что можно реализовать прямо сейчас
 
-### Проблема
+Проанализировав кодовую базу, вот что уже есть и чего реально не хватает:
 
-Сейчас три отдельных кабинета — `/account` (пользователь), `/mc` (УК), `/vendor` (провайдер) — каждый со своими настройками, профилем, навигацией. У пользователя с несколькими ролями нет единой точки входа. Личные данные, заказы, настройки продублированы или разбросаны.
+**Уже реализовано:**
+- Система отзывов (таблица `reviews`, компоненты `WriteReviewModal`, `ReviewsSection`, `EntityReviewsSummary`)
+- Реферальная система (таблица `referrals`, хуки, UI-компоненты, RPC-функции)
+- Админ-панель с KPI, финансами, операциями
+- Stripe-интеграция для платежей
 
-### Архитектурный принцип
+**Отсутствует и можно сделать сейчас:**
 
-**`/account` = единственный личный кабинет для ВСЕХ ролей.**
-`/mc` и `/vendor` остаются рабочими пространствами (workspace), но НЕ содержат личных настроек.
+### 1. Promoted Listings (Монетизация)
+Создать систему платного продвижения объектов:
+- Таблица `promoted_listings` (listing_id, type, starts_at, expires_at, amount_paid, status)
+- UI для владельца: кнопка "Продвинуть" на карточке объекта в личном кабинете
+- Оплата через баланс кошелька (уже есть)
+- Логика сортировки: promoted объекты показываются выше в каталогах
+- Админ: просмотр активных промо в AdminFinance
 
-```text
-/account                    ← Личный кабинет (единый)
-  ├── Профиль, аватар, контакты
-  ├── Настройки (тема, язык, валюта, уведомления)
-  ├── Заказы и брони
-  ├── Кошелёк и платежи
-  ├── Документы
-  └── Ролевые модули (динамические)
-       ├── [owner]  → Мои объекты, Портал владельца
-       ├── [vendor] → Мои сервисы, Аналитика
-       └── [mc]     → Ссылка на workspace
+### 2. Система диспутов (Trust & Safety)
+Создать функциональную систему споров (сейчас есть только информационная страница `DisputeResolutionPage`):
+- Таблица `disputes` (order_id, user_id, provider_id, type, status, description, evidence_urls, resolution, resolved_at)
+- Кнопка "Открыть спор" в деталях заказа/бронирования
+- UI формы: тип проблемы, описание, загрузка доказательств
+- Админ-вкладка в Operations для модерации споров
+- Статусы: open → under_review → resolved/rejected
 
-/mc                         ← Рабочее пространство УК (без личных настроек)
-/vendor                     ← Рабочее пространство провайдера (без личных настроек)
-```
+### 3. Продуктовая аналитика (Event Tracking)
+Лёгкий внутренний трекинг без внешних сервисов:
+- Таблица `analytics_events` (user_id, event_name, event_data, page_path, created_at)
+- Хук `useAnalytics` с методом `track(eventName, data)`
+- Трекинг ключевых событий: page_view, search, listing_click, booking_start, payment_complete
+- Дашборд в админке: воронка конверсии, GMV, MAU — данные для инвесторов
 
-### Десктоп Layout
+### 4. Investor Metrics Dashboard
+Отдельная страница в админке с ключевыми метриками:
+- GMV (общий объём транзакций)
+- MAU / DAU (активные пользователи)
+- Конверсия по воронке (просмотр → бронирование → оплата)
+- Unit economics: средний чек, LTV
+- Графики на recharts (уже установлен)
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  AppHeader                                                   │
-├──────────┬──────────────────────────────────────────────────┤
-│ Sidebar  │  Content Area (full width)                       │
-│ (260px)  │                                                  │
-│ sticky   │  ┌────────────────────────────────────────────┐  │
-│          │  │ Active Stay / Context Banner               │  │
-│ Avatar   │  └────────────────────────────────────────────┘  │
-│ Name     │                                                  │
-│ Role     │  ┌──────────┐ ┌──────────┐ ┌──────────┐        │
-│          │  │ Orders   │ │ Wallet   │ │ Favorites│        │
-│ ──────── │  │ (count)  │ │ (balance)│ │ (count)  │        │
-│ Nav      │  └──────────┘ └──────────┘ └──────────┘        │
-│  Orders  │                                                  │
-│  Wallet  │  ┌────────────────────────────────────────────┐  │
-│  Favs    │  │ Quick Actions (grid 4x2)                  │  │
-│  Docs    │  └────────────────────────────────────────────┘  │
-│  Referral│                                                  │
-│          │  ┌─────────────────┐ ┌────────────────────────┐  │
-│ ──────── │  │ Recent Orders   │ │ Recommendations        │  │
-│ Roles    │  │ (last 5)        │ │ (personalized)         │  │
-│  Owner → │  └─────────────────┘ └────────────────────────┘  │
-│  MC →    │                                                  │
-│  Vendor→ │  ┌────────────────────────────────────────────┐  │
-│ ──────── │  │ Role-specific widgets                      │  │
-│ Settings │  │ (Owner: properties | Vendor: services)     │  │
-│  Theme   │  └────────────────────────────────────────────┘  │
-│  Lang    │                                                  │
-│  Notif.  │                                                  │
-│ ──────── │                                                  │
-│ Log out  │                                                  │
-└──────────┴──────────────────────────────────────────────────┘
-```
+---
 
-### Как избежать дублирования
+### Техническая реализация
 
-| Что | Где живёт | MC/Vendor workspace |
-|---|---|---|
-| Профиль, аватар, имя | `/account` sidebar | Показывает мини-аватар, ссылка на `/account` |
-| Тема, язык, валюта | `/account` quick settings | НЕ дублируется |
-| Уведомления (настройки) | `/account` → Notifications | НЕ дублируется |
-| Заказы/брони | `/account` → Orders | НЕ дублируется |
-| Кошелёк | `/account` → Wallet | НЕ дублируется |
-| Документы | `/account` → Documents | MC: свои доки через CRM Vault |
-| Мои объекты | `/account` role widget | `/mc` — операционное управление |
-| Мои сервисы | `/account` role widget | `/vendor` — полное управление |
+**База данных (3 миграции):**
+1. `promoted_listings` + RLS (владелец видит свои, админ — все)
+2. `disputes` + RLS (участники спора + админ)
+3. `analytics_events` + RLS (insert для authenticated, select для админа)
 
-### Ключевые компоненты
+**Новые компоненты:**
+- `src/components/promoted/PromoteListingModal.tsx` — форма промо с выбором срока и оплатой
+- `src/components/disputes/OpenDisputeModal.tsx` — форма открытия спора
+- `src/components/disputes/DisputeCard.tsx` — карточка спора
+- `src/pages/admin/AdminDisputes.tsx` — админ-модерация
+- `src/hooks/usePromotedListings.ts`, `src/hooks/useDisputes.ts`, `src/hooks/useAnalytics.ts`
+- `src/pages/admin/AdminInvestorMetrics.tsx` — дашборд для инвесторов
 
-1. **`AccountSidebar.tsx`** — Sticky sidebar: аватар, навигация, ролевые ссылки, quick settings (тема/язык/валюта), logout
-2. **`AccountQuickSettings.tsx`** — Компактные переключатели в sidebar (theme toggle, language select, currency select)
-3. **`AccountStatsBar.tsx`** — 3 карточки-счётчика (активные заказы, баланс, избранное)
-4. **`AccountRoleWidgets.tsx`** — Динамический блок: показывает виджеты в зависимости от ролей пользователя (owner → мини-список объектов, vendor → мини-статистика сервисов)
-5. **Рефакторинг `UserAccountDashboard.tsx`** — Full-width layout `max-w-[1536px]`, sidebar + main grid на `lg+`, стек на мобайле
+**Модификации существующих файлов:**
+- Каталоги (PropertyIndex, ServicesIndex и тд) — сортировка promoted выше
+- Страница заказа — кнопка "Открыть спор"
+- App.tsx / routes — новые маршруты
+- AdminOperations — вкладка "Споры"
 
-### Мобайл
-
-Sidebar скрыт. Профиль наверху → Quick Actions → Active Stay → Stats → Orders → Role widgets → Menu → Settings кнопка → Logout. Тот же контент, стеком.
-
-### Изменяемые файлы
-
-| Файл | Действие |
-|---|---|
-| `UserAccountDashboard.tsx` | Полный рефакторинг layout |
-| Новый: `AccountSidebar.tsx` | Sidebar компонент |
-| Новый: `AccountQuickSettings.tsx` | Inline settings |
-| Новый: `AccountStatsBar.tsx` | Счётчики-карточки |
-| Новый: `AccountRoleWidgets.tsx` | Ролевые виджеты |
-| `AccountFlatMenu.tsx` | Адаптация для sidebar |
-| `QuickActionsPanel.tsx` | Desktop: grid layout |
-| `PersonalRecommendations.tsx` | Desktop: multi-column grid |
+**Ничего не ломается** — это всё новые таблицы и компоненты, существующий код затрагивается минимально (добавление кнопок и сортировки).
 
