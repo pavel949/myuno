@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Lock, Unlock, DollarSign, X, Calendar as Cal
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { getEffectiveNightlyRate, type SeasonalPricingRule } from '@/lib/pricingEngine';
 
 export interface AvailabilityEntry {
   date: Date;
@@ -25,6 +26,7 @@ interface PropertyCalendarProps {
   onChange: (availability: AvailabilityEntry[]) => void;
   basePrice?: number;
   currency?: string;
+  seasonalPricing?: SeasonalPricingRule[];
   className?: string;
 }
 
@@ -33,6 +35,7 @@ export function PropertyCalendar({
   onChange, 
   basePrice = 0,
   currency = 'THB',
+  seasonalPricing,
   className 
 }: PropertyCalendarProps) {
   const { language } = useLanguage();
@@ -89,8 +92,10 @@ export function PropertyCalendar({
 
   const getDatePrice = useCallback((date: Date): number => {
     const entry = availabilityMap.get(format(date, 'yyyy-MM-dd'));
-    return entry?.priceOverride ?? basePrice;
-  }, [availabilityMap, basePrice]);
+    // Manual override takes priority, then seasonal rule, then base price
+    if (entry?.priceOverride) return entry.priceOverride;
+    return getEffectiveNightlyRate(date, basePrice, seasonalPricing);
+  }, [availabilityMap, basePrice, seasonalPricing]);
 
   const isDateInSelection = useCallback((date: Date): boolean => {
     if (!selectionStart) return false;
@@ -262,14 +267,16 @@ export function PropertyCalendar({
                     {format(day, 'd')}
                   </span>
                   
-                  {/* Price indicator */}
+                  {/* Price indicator — shows effective nightly rate */}
                   {isCurrentMonth && !isPast && price > 0 && (
                     <div className="absolute bottom-1 left-1 right-1">
                       <span className={cn(
                         "text-[10px] block truncate",
-                        entry?.priceOverride && entry.priceOverride !== basePrice
-                          ? "font-semibold text-primary"
-                          : "text-muted-foreground"
+                        price > basePrice
+                          ? "font-semibold text-warning"
+                          : price < basePrice
+                            ? "font-semibold text-success"
+                            : "text-muted-foreground"
                       )}>
                         {price.toLocaleString()}
                       </span>

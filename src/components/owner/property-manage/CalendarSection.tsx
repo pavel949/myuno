@@ -4,19 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, RefreshCw, Link2, ExternalLink } from 'lucide-react';
+import type { SeasonalPricingRule } from '@/lib/pricingEngine';
 
 interface CalendarSectionProps {
   availability: AvailabilityEntry[];
   onChange: (availability: AvailabilityEntry[]) => void;
   basePrice: number;
   currency: string;
+  seasonalPricing?: SeasonalPricingRule[];
 }
 
 export function PropertyManageCalendarSection({
   availability,
   onChange,
   basePrice,
-  currency
+  currency,
+  seasonalPricing,
 }: CalendarSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -55,6 +58,7 @@ export function PropertyManageCalendarSection({
         onChange={onChange}
         basePrice={basePrice}
         currency={currency}
+        seasonalPricing={seasonalPricing}
       />
 
       {/* iCal Sync Section */}

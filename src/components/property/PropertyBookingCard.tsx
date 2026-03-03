@@ -229,7 +229,7 @@ export function PropertyBookingCard({
         ) : (
           <>
             {/* Price Breakdown */}
-            <div className="space-y-2 pt-2">
+             <div className="space-y-2 pt-2">
               <button className="flex items-center justify-between w-full text-sm" onClick={() => setShowPriceDetails(!showPriceDetails)}>
                 <span className="underline">{formatPrice(pricing.nightlyRate)} × {nights} {isRu ? 'ночей' : 'nights'}</span>
                 <div className="flex items-center gap-2">
@@ -240,6 +240,12 @@ export function PropertyBookingCard({
               
               {showPriceDetails && (
                 <>
+                  {pricing.seasonalAdjustment !== 0 && (
+                    <div className={cn("flex items-center justify-between text-sm", pricing.seasonalAdjustment > 0 ? "text-warning" : "text-success")}>
+                      <span>{isRu ? 'Сезонная корректировка' : 'Seasonal adjustment'}</span>
+                      <span>{pricing.seasonalAdjustment > 0 ? '+' : ''}{formatPrice(pricing.seasonalAdjustment)}</span>
+                    </div>
+                  )}
                   {pricing.lengthDiscount > 0 && (
                     <div className="flex items-center justify-between text-sm text-success">
                       <span>{pricing.lengthDiscountPercent}% {isRu ? 'скидка за срок' : 'length discount'}</span>
