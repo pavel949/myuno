@@ -64,8 +64,8 @@ export function PropertyListingCard({
     ? getDistrictLabel(property.district, isRu ? 'ru' : 'en')
     : 'Phuket';
 
-  // Calculate total price when nights are provided
-  const unitPrice = property.price || 0;
+  // Use price_per_night as primary, fallback to price
+  const unitPrice = property.price_per_night || property.price || 0;
   const totalPrice = nights && nights > 0 && (property.price_period === 'night' || !property.price_period)
     ? unitPrice * nights
     : null;
