@@ -47,6 +47,9 @@ export default function AdminProperties() {
   const [filterProviderId, setFilterProviderId] = useState<string>(searchParams.get('provider') || '');
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [approvalFilter, setApprovalFilter] = useState<'all' | 'pending' | 'approved' | 'draft' | 'rejected'>(
+    searchParams.get('status') === 'pending' ? 'pending' : 'all'
+  );
   
   // Auto-detect if filter ID is an MC to search both provider_id and management_company_id
   const { properties, isLoading: propertiesLoading, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
@@ -387,8 +390,15 @@ export default function AdminProperties() {
     if (!matchesSearch) return false;
     if (filter === 'active') return p.is_active;
     if (filter === 'inactive') return !p.is_active;
+    // Approval status filter
+    const status = (p as any).approval_status || 'pending';
+    if (approvalFilter !== 'all' && status !== approvalFilter) return false;
     return true;
   });
+
+  const pendingCount = properties.filter(p => (p as any).approval_status === 'pending').length;
+  const approvedCount = properties.filter(p => (p as any).approval_status === 'approved').length;
+  const draftCount = properties.filter(p => (p as any).approval_status === 'draft').length;
 
   if (authLoading || adminLoading) {
     return (
@@ -441,7 +451,7 @@ export default function AdminProperties() {
         </div>
 
         {/* Status Filter Chips */}
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex gap-2 mb-2 flex-wrap">
           {([
             { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
             { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
@@ -466,6 +476,34 @@ export default function AdminProperties() {
           <Badge variant="outline" className="ml-auto self-center">
             {filteredProperties.length} / {properties.length}
           </Badge>
+        </div>
+
+        {/* Approval / Moderation Filter */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {([
+            { key: 'all' as const, labelEn: 'All statuses', labelRu: 'Все статусы', count: properties.length },
+            { key: 'pending' as const, labelEn: '⏳ Pending', labelRu: '⏳ На модерации', count: pendingCount },
+            { key: 'approved' as const, labelEn: '✅ Approved', labelRu: '✅ Одобрено', count: approvedCount },
+            { key: 'draft' as const, labelEn: '📝 Draft', labelRu: '📝 Черновик', count: draftCount },
+          ]).map(f => (
+            <Button
+              key={f.key}
+              variant={approvalFilter === f.key ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setApprovalFilter(f.key)}
+              className={f.key === 'pending' && pendingCount > 0 && approvalFilter !== 'pending' ? 'border-amber-500 text-amber-700 dark:text-amber-400' : ''}
+            >
+              {isRussian ? f.labelRu : f.labelEn}
+              {f.key !== 'all' && (
+                <Badge 
+                  variant={f.key === 'pending' && f.count > 0 ? 'destructive' : 'secondary'} 
+                  className="ml-1.5 h-5 px-1.5 text-xs"
+                >
+                  {f.count}
+                </Badge>
+              )}
+            </Button>
+          ))}
         </div>
 
         {/* Properties List */}
