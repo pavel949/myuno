@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,39 +12,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Megaphone, Mail, BarChart3, Tag, Percent, Calendar, Eye, Send } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 interface Promotion {
   id: string;
   title: string;
-  type: 'discount' | 'early_bird' | 'last_minute' | 'seasonal';
+  type: string;
   value: number;
   unit: '%' | 'fixed';
   startDate: string;
   endDate: string;
-  status: 'active' | 'scheduled' | 'expired';
+  status: string;
 }
 
-// Mock data for demonstration
-const MOCK_PROMOTIONS: Promotion[] = [
-  { id: '1', title: 'Early Bird Summer 2026', type: 'early_bird', value: 15, unit: '%', startDate: '2026-03-01', endDate: '2026-05-31', status: 'active' },
-  { id: '2', title: 'Long Stay Discount', type: 'discount', value: 20, unit: '%', startDate: '2026-01-01', endDate: '2026-12-31', status: 'active' },
-];
-
-const MOCK_STATS = {
-  totalViews: 1248,
-  viewsChange: 12,
-  inquiries: 34,
-  inquiriesChange: 8,
-  conversionRate: 2.7,
-  topSource: 'Airbnb',
-};
+interface MarketingStats {
+  totalViews: number;
+  viewsChange: number;
+  inquiries: number;
+  inquiriesChange: number;
+  conversionRate: number;
+  topSource: string;
+}
 
 export default function MarketingHubPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  const [promos, setPromos] = useState<Promotion[]>(MOCK_PROMOTIONS);
+  const [promos, setPromos] = useState<Promotion[]>([]);
+  const [stats, setStats] = useState<MarketingStats | null>(null);
+  const [promosLoading, setPromosLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [emailSheetOpen, setEmailSheetOpen] = useState(false);
 
@@ -58,6 +57,102 @@ export default function MarketingHubPage() {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
 
+  // Fetch promotions from DB
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+
+    const fetchPromos = async () => {
+      setPromosLoading(true);
+      const { data } = await supabase
+        .from('property_promotions')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!cancelled && data) {
+        setPromos(data.map(p => ({
+          id: p.id,
+          title: `${p.promotion_type} promotion`,
+          type: p.promotion_type || 'discount',
+          value: p.cost || 0,
+          unit: '%' as const,
+          startDate: p.starts_at,
+          endDate: p.ends_at,
+          status: p.status || 'active',
+        })));
+      }
+      if (!cancelled) setPromosLoading(false);
+    };
+    fetchPromos();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // Fetch analytics stats from DB
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+
+    const fetchStats = async () => {
+      setStatsLoading(true);
+      // Get all properties for the owner
+      const { data: properties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user.id);
+
+      if (!properties?.length) {
+        if (!cancelled) {
+          setStats({ totalViews: 0, viewsChange: 0, inquiries: 0, inquiriesChange: 0, conversionRate: 0, topSource: '—' });
+          setStatsLoading(false);
+        }
+        return;
+      }
+
+      const propertyIds = properties.map(p => p.id);
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+      const sixtyDaysAgo = new Date(Date.now() - 60 * 86400000).toISOString().split('T')[0];
+
+      // Current 30 days
+      const { data: current } = await supabase
+        .from('property_analytics')
+        .select('views, inquiries, source')
+        .in('property_id', propertyIds)
+        .gte('date', thirtyDaysAgo);
+
+      // Previous 30 days
+      const { data: previous } = await supabase
+        .from('property_analytics')
+        .select('views, inquiries')
+        .in('property_id', propertyIds)
+        .gte('date', sixtyDaysAgo)
+        .lt('date', thirtyDaysAgo);
+
+      if (!cancelled) {
+        const curViews = (current || []).reduce((s, r) => s + (r.views || 0), 0);
+        const curInq = (current || []).reduce((s, r) => s + (r.inquiries || 0), 0);
+        const prevViews = (previous || []).reduce((s, r) => s + (r.views || 0), 0);
+        const prevInq = (previous || []).reduce((s, r) => s + (r.inquiries || 0), 0);
+
+        // Find top source
+        const sourceMap: Record<string, number> = {};
+        (current || []).forEach(r => {
+          if (r.source) sourceMap[r.source] = (sourceMap[r.source] || 0) + (r.views || 0);
+        });
+        const topSource = Object.entries(sourceMap).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+        const viewsChange = prevViews > 0 ? Math.round(((curViews - prevViews) / prevViews) * 100) : 0;
+        const inqChange = prevInq > 0 ? Math.round(((curInq - prevInq) / prevInq) * 100) : 0;
+        const convRate = curViews > 0 ? Math.round((curInq / curViews) * 1000) / 10 : 0;
+
+        setStats({ totalViews: curViews, viewsChange, inquiries: curInq, inquiriesChange: inqChange, conversionRate: convRate, topSource });
+        setStatsLoading(false);
+      }
+    };
+    fetchStats();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
   const handleCreatePromo = () => {
     if (!promoTitle.trim()) {
       toast.error(isRu ? 'Укажите название' : 'Title required');
@@ -66,7 +161,7 @@ export default function MarketingHubPage() {
     const newPromo: Promotion = {
       id: Date.now().toString(),
       title: promoTitle,
-      type: promoType as any,
+      type: promoType,
       value: promoValue,
       unit: '%',
       startDate: promoStart,
@@ -95,6 +190,8 @@ export default function MarketingHubPage() {
       early_bird: { en: 'Early Bird', ru: 'Раннее бронирование' },
       last_minute: { en: 'Last Minute', ru: 'Горящее' },
       seasonal: { en: 'Seasonal', ru: 'Сезонное' },
+      boost: { en: 'Boost', ru: 'Продвижение' },
+      featured: { en: 'Featured', ru: 'Топ-размещение' },
     };
     return labels[type] ? (isRu ? labels[type].ru : labels[type].en) : type;
   };
@@ -169,7 +266,12 @@ export default function MarketingHubPage() {
             </Sheet>
           </div>
 
-          {promos.length === 0 ? (
+          {promosLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-20 w-full rounded-xl" />
+            </div>
+          ) : promos.length === 0 ? (
             <Card className="p-8 text-center">
               <Megaphone className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
               <p className="text-muted-foreground">{isRu ? 'Нет промо-акций' : 'No promotions yet'}</p>
@@ -183,9 +285,11 @@ export default function MarketingHubPage() {
                       <p className="font-semibold text-sm">{p.title}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-[10px]">{promoTypeLabel(p.type)}</Badge>
-                        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                          <Percent className="h-3 w-3" />{p.value}%
-                        </span>
+                        {p.value > 0 && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                            <Percent className="h-3 w-3" />{p.value}%
+                          </span>
+                        )}
                       </div>
                     </div>
                     <Badge variant={p.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
@@ -246,33 +350,51 @@ export default function MarketingHubPage() {
 
         {/* Analytics Tab */}
         <TabsContent value="analytics" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4 text-center">
-              <Eye className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-2xl font-bold">{MOCK_STATS.totalViews}</p>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Просмотров' : 'Views'}</p>
-              <p className="text-xs text-success mt-1">+{MOCK_STATS.viewsChange}%</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <Mail className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-2xl font-bold">{MOCK_STATS.inquiries}</p>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Запросов' : 'Inquiries'}</p>
-              <p className="text-xs text-success mt-1">+{MOCK_STATS.inquiriesChange}%</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <Tag className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-2xl font-bold">{MOCK_STATS.conversionRate}%</p>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Конверсия' : 'Conversion'}</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <Megaphone className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-2xl font-bold">{MOCK_STATS.topSource}</p>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Топ источник' : 'Top Source'}</p>
-            </Card>
-          </div>
-          <p className="text-xs text-muted-foreground text-center">
-            {isRu ? 'Данные обновляются ежедневно' : 'Data updates daily'}
-          </p>
+          {statsLoading ? (
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : stats ? (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="p-4 text-center">
+                  <Eye className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-2xl font-bold">{stats.totalViews}</p>
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Просмотров' : 'Views'}</p>
+                  {stats.viewsChange !== 0 && (
+                    <p className={`text-xs mt-1 ${stats.viewsChange > 0 ? 'text-success' : 'text-destructive'}`}>
+                      {stats.viewsChange > 0 ? '+' : ''}{stats.viewsChange}%
+                    </p>
+                  )}
+                </Card>
+                <Card className="p-4 text-center">
+                  <Mail className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-2xl font-bold">{stats.inquiries}</p>
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Запросов' : 'Inquiries'}</p>
+                  {stats.inquiriesChange !== 0 && (
+                    <p className={`text-xs mt-1 ${stats.inquiriesChange > 0 ? 'text-success' : 'text-destructive'}`}>
+                      {stats.inquiriesChange > 0 ? '+' : ''}{stats.inquiriesChange}%
+                    </p>
+                  )}
+                </Card>
+                <Card className="p-4 text-center">
+                  <Tag className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-2xl font-bold">{stats.conversionRate}%</p>
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Конверсия' : 'Conversion'}</p>
+                </Card>
+                <Card className="p-4 text-center">
+                  <Megaphone className="h-5 w-5 mx-auto text-primary mb-1" />
+                  <p className="text-2xl font-bold">{stats.topSource}</p>
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Топ источник' : 'Top Source'}</p>
+                </Card>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                {isRu ? 'Данные за последние 30 дней' : 'Data for the last 30 days'}
+              </p>
+            </>
+          ) : null}
         </TabsContent>
       </Tabs>
     </div>

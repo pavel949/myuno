@@ -49,117 +49,38 @@ interface UseServicesOptions {
   limit?: number;
 }
 
-// Demo services for when DB is empty
-const demoServices: Service[] = [
-  {
-    id: 'demo-1',
-    name_en: 'Thai Massage',
-    name_ru: 'Тайский массаж',
-    description_en: 'Traditional Thai massage for relaxation',
-    description_ru: 'Традиционный тайский массаж для релаксации',
-    price: 1500,
-    currency: 'THB',
-    duration_minutes: 60,
-    images: ['/placeholder.svg'],
-    category_id: 'beauty',
-    provider_id: 'demo-provider',
-    rating: 4.8,
-    review_count: 124,
-    languages: ['en', 'th'],
-    provider: { name: 'Orchid Spa', logo_url: null, is_verified: true },
-    category: { name_en: 'Beauty & Spa', name_ru: 'Красота и СПА', slug: 'beauty-spa' },
-  },
-  {
-    id: 'demo-2',
-    name_en: 'Personal Training',
-    name_ru: 'Персональная тренировка',
-    description_en: 'One-on-one fitness training session',
-    description_ru: 'Индивидуальная фитнес-тренировка',
-    price: 2000,
-    currency: 'THB',
-    duration_minutes: 60,
-    images: ['/placeholder.svg'],
-    category_id: 'fitness',
-    provider_id: 'demo-provider',
-    rating: 4.9,
-    review_count: 87,
-    languages: ['en', 'ru'],
-    provider: { name: 'Fitness First', logo_url: null, is_verified: true },
-    category: { name_en: 'Fitness', name_ru: 'Фитнес', slug: 'fitness' },
-  },
-  {
-    id: 'demo-3',
-    name_en: 'Seafood Dinner',
-    name_ru: 'Ужин с морепродуктами',
-    description_en: 'Fresh seafood dining experience',
-    description_ru: 'Ужин со свежими морепродуктами',
-    price: 1200,
-    currency: 'THB',
-    duration_minutes: 120,
-    images: ['/placeholder.svg'],
-    category_id: 'food',
-    provider_id: 'demo-provider',
-    rating: 4.5,
-    review_count: 56,
-    languages: ['en', 'th', 'zh'],
-    provider: { name: 'Ocean View', logo_url: null, is_verified: false, has_machine_translation: true },
-    category: { name_en: 'Restaurants', name_ru: 'Рестораны', slug: 'restaurants' },
-  },
-  {
-    id: 'demo-4',
-    name_en: 'Dental Checkup',
-    name_ru: 'Стоматологический осмотр',
-    description_en: 'Complete dental examination and cleaning',
-    description_ru: 'Полный стоматологический осмотр и чистка',
-    price: 2500,
-    currency: 'THB',
-    duration_minutes: 45,
-    images: ['/placeholder.svg'],
-    category_id: 'medical',
-    provider_id: 'demo-provider',
-    rating: 4.7,
-    review_count: 203,
-    languages: ['en', 'ru', 'th'],
-    provider: { name: 'Phuket Dental', logo_url: null, is_verified: true },
-    category: { name_en: 'Medical', name_ru: 'Медицина', slug: 'medical' },
-  },
-  {
-    id: 'demo-5',
-    name_en: 'Car Rental',
-    name_ru: 'Аренда автомобиля',
-    description_en: 'Daily car rental with insurance',
-    description_ru: 'Посуточная аренда авто со страховкой',
-    price: 1000,
-    currency: 'THB',
-    duration_minutes: 1440,
-    images: ['/placeholder.svg'],
-    category_id: 'transport',
-    provider_id: 'demo-provider',
-    rating: 4.6,
-    review_count: 312,
-    languages: ['en'],
-    provider: { name: 'Phuket Cars', logo_url: null, is_verified: true, has_machine_translation: true },
-    category: { name_en: 'Transport', name_ru: 'Транспорт', slug: 'transport' },
-  },
-  {
-    id: 'demo-6',
-    name_en: 'Island Tour',
-    name_ru: 'Тур по островам',
-    description_en: 'Full day island hopping tour',
-    description_ru: 'Полнодневный тур по островам',
-    price: 3500,
-    currency: 'THB',
-    duration_minutes: 480,
-    images: ['/placeholder.svg'],
-    category_id: 'events',
-    provider_id: 'demo-provider',
-    rating: 4.9,
-    review_count: 445,
-    languages: ['en', 'ru', 'zh'],
-    provider: { name: 'Phuket Tours', logo_url: null, is_verified: true },
-    category: { name_en: 'Events & Tickets', name_ru: 'Мероприятия', slug: 'events' },
-  },
-];
+function buildQuery(options: UseServicesOptions) {
+  let query = supabase
+    .from('services')
+    .select(`
+      *,
+      provider:providers(name, logo_url, is_verified, has_machine_translation),
+      category:categories(name_en, name_ru, slug)
+    `)
+    .eq('is_active', true);
+
+  if (options.categoryId) query = query.eq('category_id', options.categoryId);
+  if (options.searchQuery) query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
+  if (options.priceMin !== undefined) query = query.gte('price', options.priceMin);
+  if (options.priceMax !== undefined) query = query.lte('price', options.priceMax);
+
+  switch (options.sortBy) {
+    case 'price_asc':
+      query = query.order('price', { ascending: true, nullsFirst: false });
+      break;
+    case 'price_desc':
+      query = query.order('price', { ascending: false, nullsFirst: false });
+      break;
+    case 'newest':
+      query = query.order('created_at', { ascending: false });
+      break;
+    default:
+      query = query.order('created_at', { ascending: false });
+      break;
+  }
+
+  return query.limit(options.limit || 50);
+}
 
 export const useServices = (options: UseServicesOptions = {}) => {
   const [services, setServices] = useState<Service[]>([]);
@@ -169,100 +90,14 @@ export const useServices = (options: UseServicesOptions = {}) => {
   const loadServices = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
-      let query = supabase
-        .from('services')
-        .select(`
-          *,
-          provider:providers(name, logo_url, is_verified, has_machine_translation),
-          category:categories(name_en, name_ru, slug)
-        `)
-        .eq('is_active', true);
-
-      if (options.categoryId) {
-        query = query.eq('category_id', options.categoryId);
-      }
-
-      if (options.searchQuery) {
-        query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
-      }
-
-      if (options.priceMin !== undefined) {
-        query = query.gte('price', options.priceMin);
-      }
-
-      if (options.priceMax !== undefined) {
-        query = query.lte('price', options.priceMax);
-      }
-
-      // Apply sorting
-      switch (options.sortBy) {
-        case 'price_asc':
-          query = query.order('price', { ascending: true, nullsFirst: false });
-          break;
-        case 'price_desc':
-          query = query.order('price', { ascending: false, nullsFirst: false });
-          break;
-        case 'newest':
-          query = query.order('created_at', { ascending: false });
-          break;
-        case 'rating':
-        case 'popular':
-        default:
-          // Default: sort by provider trust_score (popularity proxy)
-          query = query.order('created_at', { ascending: false });
-          break;
-      }
-
-      query = query.limit(options.limit || 50);
-
-      const { data, error: queryError } = await query;
-
+      const { data, error: queryError } = await buildQuery(options);
       if (queryError) throw queryError;
-
-      // If no data from DB, use demo services
-      if (!data || data.length === 0) {
-        let filteredDemo = [...demoServices];
-        
-        // Filter by category slug instead of category_id for demo data
-        if (options.categoryId) {
-          filteredDemo = filteredDemo.filter(s => 
-            s.category?.slug === options.categoryId || s.category_id === options.categoryId
-          );
-        }
-        
-        if (options.searchQuery) {
-          const q = options.searchQuery.toLowerCase();
-          filteredDemo = filteredDemo.filter(s => 
-            s.name_en.toLowerCase().includes(q) || 
-            s.name_ru.toLowerCase().includes(q)
-          );
-        }
-        
-        if (options.priceMin !== undefined) {
-          filteredDemo = filteredDemo.filter(s => (s.price || 0) >= options.priceMin!);
-        }
-        
-        if (options.priceMax !== undefined) {
-          filteredDemo = filteredDemo.filter(s => (s.price || 0) <= options.priceMax!);
-        }
-
-        // Apply sorting to demo data
-        if (options.sortBy === 'price_asc') {
-          filteredDemo.sort((a, b) => (a.price || 0) - (b.price || 0));
-        } else if (options.sortBy === 'price_desc') {
-          filteredDemo.sort((a, b) => (b.price || 0) - (a.price || 0));
-        }
-        setServices(filteredDemo);
-      } else {
-        setServices(data.map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
-      }
+      setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
     } catch (err) {
       console.error('Error loading services:', err);
       setError(err as Error);
-      // Fallback to demo on error
-      setServices(demoServices);
+      setServices([]);
     } finally {
       setIsLoading(false);
     }
@@ -270,104 +105,17 @@ export const useServices = (options: UseServicesOptions = {}) => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const load = async () => {
-      if (isMounted) {
-        setIsLoading(true);
-        setError(null);
-      }
-
+      if (isMounted) { setIsLoading(true); setError(null); }
       try {
-        let query = supabase
-          .from('services')
-          .select(`
-            *,
-            provider:providers(name, logo_url, is_verified, has_machine_translation),
-            category:categories(name_en, name_ru, slug)
-          `)
-          .eq('is_active', true);
-
-        if (options.categoryId) {
-          query = query.eq('category_id', options.categoryId);
-        }
-
-        if (options.searchQuery) {
-          query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
-        }
-
-        if (options.priceMin !== undefined) {
-          query = query.gte('price', options.priceMin);
-        }
-
-        if (options.priceMax !== undefined) {
-          query = query.lte('price', options.priceMax);
-        }
-
-        switch (options.sortBy) {
-          case 'price_asc':
-            query = query.order('price', { ascending: true, nullsFirst: false });
-            break;
-          case 'price_desc':
-            query = query.order('price', { ascending: false, nullsFirst: false });
-            break;
-          case 'newest':
-            query = query.order('created_at', { ascending: false });
-            break;
-          case 'rating':
-          case 'popular':
-          default:
-            query = query.order('created_at', { ascending: false });
-            break;
-        }
-
-        query = query.limit(options.limit || 50);
-
-        const { data, error: queryError } = await query;
-
+        const { data, error: queryError } = await buildQuery(options);
         if (queryError) throw queryError;
-
         if (!isMounted) return;
-
-        if (!data || data.length === 0) {
-          let filteredDemo = [...demoServices];
-          
-          if (options.categoryId) {
-            filteredDemo = filteredDemo.filter(s => 
-              s.category?.slug === options.categoryId || s.category_id === options.categoryId
-            );
-          }
-          
-          if (options.searchQuery) {
-            const q = options.searchQuery.toLowerCase();
-            filteredDemo = filteredDemo.filter(s => 
-              s.name_en.toLowerCase().includes(q) || 
-              s.name_ru.toLowerCase().includes(q)
-            );
-          }
-          
-          if (options.priceMin !== undefined) {
-            filteredDemo = filteredDemo.filter(s => (s.price || 0) >= options.priceMin!);
-          }
-          
-          if (options.priceMax !== undefined) {
-            filteredDemo = filteredDemo.filter(s => (s.price || 0) <= options.priceMax!);
-          }
-
-          if (options.sortBy === 'price_asc') {
-            filteredDemo.sort((a, b) => (a.price || 0) - (b.price || 0));
-          } else if (options.sortBy === 'price_desc') {
-            filteredDemo.sort((a, b) => (b.price || 0) - (a.price || 0));
-          }
-          setServices(filteredDemo);
-        } else {
-          setServices(data.map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
-        }
+        setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
       } catch (err) {
         console.error('Error loading services:', err);
-        if (isMounted) {
-          setError(err as Error);
-          setServices(demoServices);
-        }
+        if (isMounted) { setError(err as Error); setServices([]); }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -389,7 +137,6 @@ export const useCategories = () => {
     
     const loadCategories = async () => {
       try {
-        // First get category IDs that have services
         const { data: serviceCategories } = await supabase
           .from('services')
           .select('category_id')
@@ -400,7 +147,6 @@ export const useCategories = () => {
         const categoryIds = [...new Set((serviceCategories || []).map(s => s.category_id).filter(Boolean))];
         
         if (categoryIds.length === 0) {
-          // Fallback to main categories if no services exist
           const { data } = await supabase
             .from('categories')
             .select('*')
@@ -409,7 +155,6 @@ export const useCategories = () => {
             .order('sort_order');
           if (isMounted) setCategories(data || []);
         } else {
-          // Get categories that have services
           const { data, error } = await supabase
             .from('categories')
             .select('id, name_en, name_ru, slug, icon, mini_app_type')
@@ -428,7 +173,6 @@ export const useCategories = () => {
     };
 
     loadCategories();
-    
     return () => { isMounted = false; };
   }, []);
 
