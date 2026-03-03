@@ -420,14 +420,27 @@ export default function PropertyDetail() {
             ))}
           </div>
 
-          {/* Unit Specs */}
-          <UnitSpecs
-            floor={property.floor}
-            unitNumber={property.unit_number}
-            viewType={property.view_type}
-            furnishingLevel={property.furnishing_level}
-            equipment={property.equipment}
-          />
+          {/* Unit Specs & Equipment — grouped by category */}
+          <Separator />
+          <div>
+            <h2 className="text-xl lg:text-2xl font-semibold mb-4">
+              {isRu ? 'Что есть в жилье' : 'What this place offers'}
+            </h2>
+            <UnitSpecs
+              floor={property.floor}
+              unitNumber={property.unit_number}
+              viewType={property.view_type}
+              furnishingLevel={property.furnishing_level}
+              equipment={
+                (property.equipment && property.equipment.length > 0)
+                  ? property.equipment
+                  : amenities.length > 0
+                    ? amenities as string[]
+                    : undefined
+              }
+              propertyType={property.property_type}
+            />
+          </div>
 
           {/* Project Info Card */}
           {property.project && (
@@ -553,8 +566,8 @@ export default function PropertyDetail() {
             </>
           )}
 
-          {/* Amenities */}
-          {amenities.length > 0 && (
+          {/* Amenities — only show if equipment is empty and amenities exist */}
+          {amenities.length > 0 && (!property.equipment || property.equipment.length === 0) && (
             <>
               <Separator />
               <div>

@@ -1,30 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   Layers, Eye, Sofa, Tv, WashingMachine, Refrigerator, 
   Microwave, Coffee, Wind, LockKeyhole, Car, Waves, TreePine,
-  ArrowUpDown, Ruler, Building2
+  ArrowUpDown, Ruler, Building2, Wifi, UtensilsCrossed, Flame,
+  ShowerHead, BedDouble, Shirt, DoorOpen, Dumbbell, Baby,
+  Sun, ParkingMeter, Shield, Moon, Blinds, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { 
   VIEW_TYPES, 
   FURNISHING_LEVELS, 
-  getAmenityIcon, 
-  normalizeAmenityId 
 } from '@/lib/propertyTaxonomy';
 
 interface UnitSpecsProps {
-  // Multi-unit fields
   floor?: number;
   unitNumber?: string;
-  // Standalone fields
   totalFloors?: number;
   plotSizeSqm?: number;
   hasElevator?: boolean;
   parkingType?: string;
   poolType?: string;
   gardenType?: string;
-  // Common fields
   viewType?: string;
   furnishingLevel?: string;
   equipment?: string[];
@@ -32,15 +30,12 @@ interface UnitSpecsProps {
   className?: string;
 }
 
-// Property type categories
 const STANDALONE_TYPES = ['villa', 'house', 'townhouse'];
 
-// View type labels derived from taxonomy
 const viewTypeLabels: Record<string, { en: string; ru: string }> = Object.fromEntries(
   VIEW_TYPES.map(v => [v.id, { en: v.labelEn, ru: v.labelRu }])
 );
 
-// Furnishing labels derived from taxonomy
 const furnishingLabels: Record<string, { en: string; ru: string }> = Object.fromEntries(
   FURNISHING_LEVELS.map(f => [f.id, { en: f.labelEn, ru: f.labelRu }])
 );
@@ -70,30 +65,132 @@ const gardenTypeLabels: Record<string, { en: string; ru: string }> = {
   none: { en: 'No Garden', ru: 'Нет' },
 };
 
-const equipmentIcons: Record<string, React.ReactNode> = {
-  tv: <Tv className="h-3.5 w-3.5" />,
-  washer: <WashingMachine className="h-3.5 w-3.5" />,
-  fridge: <Refrigerator className="h-3.5 w-3.5" />,
-  microwave: <Microwave className="h-3.5 w-3.5" />,
-  coffee_machine: <Coffee className="h-3.5 w-3.5" />,
-  ac: <Wind className="h-3.5 w-3.5" />,
-  safe: <LockKeyhole className="h-3.5 w-3.5" />,
+// ============= COMPREHENSIVE EQUIPMENT LABELS =============
+interface EquipmentMeta {
+  en: string;
+  ru: string;
+  icon: React.ReactNode;
+  group: 'connectivity' | 'climate' | 'kitchen' | 'bathroom' | 'bedroom' | 'laundry' | 'living' | 'outdoor' | 'fitness' | 'kids' | 'parking' | 'safety' | 'other';
+}
+
+const GROUP_LABELS: Record<string, { en: string; ru: string }> = {
+  connectivity: { en: 'Connectivity', ru: 'Связь' },
+  climate: { en: 'Climate', ru: 'Климат' },
+  kitchen: { en: 'Kitchen', ru: 'Кухня' },
+  bathroom: { en: 'Bathroom', ru: 'Ванная' },
+  bedroom: { en: 'Bedroom', ru: 'Спальня' },
+  laundry: { en: 'Laundry', ru: 'Стирка' },
+  living: { en: 'Living', ru: 'Гостиная' },
+  outdoor: { en: 'Outdoor', ru: 'На улице' },
+  fitness: { en: 'Fitness', ru: 'Фитнес' },
+  kids: { en: 'For kids', ru: 'Для детей' },
+  parking: { en: 'Parking', ru: 'Парковка' },
+  safety: { en: 'Safety', ru: 'Безопасность' },
+  other: { en: 'Other', ru: 'Прочее' },
 };
 
-const equipmentLabels: Record<string, { en: string; ru: string }> = {
-  tv: { en: 'TV', ru: 'Телевизор' },
-  washer: { en: 'Washing Machine', ru: 'Стиральная машина' },
-  dryer: { en: 'Dryer', ru: 'Сушильная машина' },
-  dishwasher: { en: 'Dishwasher', ru: 'Посудомоечная машина' },
-  fridge: { en: 'Refrigerator', ru: 'Холодильник' },
-  microwave: { en: 'Microwave', ru: 'Микроволновка' },
-  oven: { en: 'Oven', ru: 'Духовка' },
-  coffee_machine: { en: 'Coffee Machine', ru: 'Кофемашина' },
-  iron: { en: 'Iron', ru: 'Утюг' },
-  hair_dryer: { en: 'Hair Dryer', ru: 'Фен' },
-  safe: { en: 'Safe', ru: 'Сейф' },
-  ac: { en: 'Air Conditioning', ru: 'Кондиционер' },
+const ICON_SIZE = "h-4 w-4";
+
+const EQUIPMENT_META: Record<string, EquipmentMeta> = {
+  // Connectivity
+  wifi: { en: 'WiFi', ru: 'WiFi', icon: <Wifi className={ICON_SIZE} />, group: 'connectivity' },
+  
+  // Climate
+  ac: { en: 'Air Conditioning', ru: 'Кондиционер', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
+  fan: { en: 'Fan', ru: 'Вентилятор', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
+  heater: { en: 'Heater', ru: 'Обогреватель', icon: <Flame className={ICON_SIZE} />, group: 'climate' },
+  
+  // Kitchen
+  kitchen: { en: 'Full Kitchen', ru: 'Полная кухня', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  fridge: { en: 'Refrigerator', ru: 'Холодильник', icon: <Refrigerator className={ICON_SIZE} />, group: 'kitchen' },
+  microwave: { en: 'Microwave', ru: 'Микроволновка', icon: <Microwave className={ICON_SIZE} />, group: 'kitchen' },
+  oven: { en: 'Oven', ru: 'Духовка', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
+  stove: { en: 'Stove', ru: 'Плита', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
+  coffee_machine: { en: 'Coffee Machine', ru: 'Кофемашина', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
+  kettle: { en: 'Kettle', ru: 'Чайник', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
+  toaster: { en: 'Toaster', ru: 'Тостер', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dishes: { en: 'Dishes & Cutlery', ru: 'Посуда и приборы', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  wine_glasses: { en: 'Wine Glasses', ru: 'Бокалы для вина', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  cookware: { en: 'Cookware', ru: 'Кухонная утварь', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dining_table: { en: 'Dining Table', ru: 'Обеденный стол', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dishwasher: { en: 'Dishwasher', ru: 'Посудомоечная машина', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  blender: { en: 'Blender', ru: 'Блендер', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  rice_cooker: { en: 'Rice Cooker', ru: 'Рисоварка', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  water_filter: { en: 'Water Filter', ru: 'Фильтр для воды', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  
+  // Bathroom
+  hot_water: { en: 'Hot Water', ru: 'Горячая вода', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  towels: { en: 'Towels', ru: 'Полотенца', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  hair_dryer: { en: 'Hair Dryer', ru: 'Фен', icon: <Wind className={ICON_SIZE} />, group: 'bathroom' },
+  bathtub: { en: 'Bathtub', ru: 'Ванна', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  bidet: { en: 'Bidet', ru: 'Биде', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  toiletries: { en: 'Toiletries', ru: 'Туалетные принадлежности', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  steam_room: { en: 'Steam Room', ru: 'Хамам', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  
+  // Bedroom
+  bed_linens: { en: 'Bed Linens', ru: 'Постельное бельё', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
+  extra_pillows: { en: 'Extra Pillows', ru: 'Доп. подушки', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
+  blackout_curtains: { en: 'Blackout Curtains', ru: 'Шторы блэкаут', icon: <Blinds className={ICON_SIZE} />, group: 'bedroom' },
+  hangers: { en: 'Hangers', ru: 'Вешалки', icon: <Shirt className={ICON_SIZE} />, group: 'bedroom' },
+  closet: { en: 'Closet', ru: 'Шкаф', icon: <DoorOpen className={ICON_SIZE} />, group: 'bedroom' },
+  
+  // Laundry
+  washer: { en: 'Washing Machine', ru: 'Стиральная машина', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
+  dryer: { en: 'Dryer', ru: 'Сушильная машина', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
+  iron: { en: 'Iron', ru: 'Утюг', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
+  ironing_board: { en: 'Ironing Board', ru: 'Гладильная доска', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
+  
+  // Living
+  tv: { en: 'TV', ru: 'Телевизор', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  smart_tv: { en: 'Smart TV', ru: 'Smart TV', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  netflix: { en: 'Netflix', ru: 'Netflix', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  bluetooth_speaker: { en: 'Bluetooth Speaker', ru: 'Bluetooth-колонка', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  safe: { en: 'Safe', ru: 'Сейф', icon: <LockKeyhole className={ICON_SIZE} />, group: 'living' },
+  desk: { en: 'Work Desk', ru: 'Рабочий стол', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
+  sofa: { en: 'Sofa', ru: 'Диван', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
+  
+  // Outdoor
+  balcony: { en: 'Balcony', ru: 'Балкон', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+  terrace: { en: 'Terrace', ru: 'Терраса', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+  private_pool: { en: 'Private Pool', ru: 'Частный бассейн', icon: <Waves className={ICON_SIZE} />, group: 'outdoor' },
+  garden: { en: 'Garden', ru: 'Сад', icon: <TreePine className={ICON_SIZE} />, group: 'outdoor' },
+  bbq: { en: 'BBQ', ru: 'Барбекю', icon: <Flame className={ICON_SIZE} />, group: 'outdoor' },
+  outdoor_furniture: { en: 'Outdoor Furniture', ru: 'Уличная мебель', icon: <Sofa className={ICON_SIZE} />, group: 'outdoor' },
+  outdoor_shower: { en: 'Outdoor Shower', ru: 'Уличный душ', icon: <ShowerHead className={ICON_SIZE} />, group: 'outdoor' },
+  sun_loungers: { en: 'Sun Loungers', ru: 'Шезлонги', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+  
+  // Fitness
+  gym: { en: 'Gym', ru: 'Тренажёрный зал', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  weights: { en: 'Weights', ru: 'Гантели', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  treadmill: { en: 'Treadmill', ru: 'Беговая дорожка', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  exercise_bike: { en: 'Exercise Bike', ru: 'Велотренажёр', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  yoga_mat: { en: 'Yoga Mat', ru: 'Коврик для йоги', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  
+  // Kids
+  crib: { en: 'Crib', ru: 'Детская кроватка', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  high_chair: { en: 'High Chair', ru: 'Детский стульчик', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  baby_bath: { en: 'Baby Bath', ru: 'Детская ванночка', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  toys: { en: 'Toys', ru: 'Игрушки', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  
+  // Parking
+  free_parking: { en: 'Free Parking', ru: 'Бесплатная парковка', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+  covered_parking: { en: 'Covered Parking', ru: 'Крытая парковка', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+  garage: { en: 'Garage', ru: 'Гараж', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+  
+  // Safety
+  smoke_detector: { en: 'Smoke Detector', ru: 'Датчик дыма', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  fire_extinguisher: { en: 'Fire Extinguisher', ru: 'Огнетушитель', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  first_aid: { en: 'First Aid Kit', ru: 'Аптечка', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  security_camera: { en: 'Security Camera', ru: 'Камера наблюдения', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  elevator_access: { en: 'Elevator', ru: 'Лифт', icon: <Layers className={ICON_SIZE} />, group: 'safety' },
+  
+  // Other
+  long_term_stays: { en: 'Long-term stays', ru: 'Долгосрочная аренда', icon: <Moon className={ICON_SIZE} />, group: 'other' },
+  pet_friendly: { en: 'Pet Friendly', ru: 'Можно с питомцами', icon: <Sun className={ICON_SIZE} />, group: 'other' },
 };
+
+// Group order for display
+const GROUP_ORDER = ['connectivity', 'climate', 'kitchen', 'bathroom', 'bedroom', 'laundry', 'living', 'outdoor', 'fitness', 'kids', 'parking', 'safety', 'other'];
 
 export function UnitSpecs({ 
   floor, 
@@ -112,103 +209,148 @@ export function UnitSpecs({
 }: UnitSpecsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [showAll, setShowAll] = useState(false);
   
-  // Handle null/undefined equipment from database
   const safeEquipment = equipment ?? [];
   const isStandalone = STANDALONE_TYPES.includes(propertyType || '');
 
-  const hasAnyData = floor !== undefined || unitNumber || viewType || furnishingLevel || 
-    safeEquipment.length > 0 || totalFloors !== undefined || plotSizeSqm !== undefined ||
+  const hasPropertyBadges = floor !== undefined || unitNumber || viewType || furnishingLevel || 
+    totalFloors !== undefined || plotSizeSqm !== undefined ||
     parkingType || poolType || gardenType;
+
+  const hasAnyData = hasPropertyBadges || safeEquipment.length > 0;
   
   if (!hasAnyData) return null;
 
+  // Group equipment by category
+  const grouped: Record<string, string[]> = {};
+  safeEquipment.forEach(item => {
+    const meta = EQUIPMENT_META[item];
+    const group = meta?.group || 'other';
+    if (!grouped[group]) grouped[group] = [];
+    grouped[group].push(item);
+  });
+
+  const orderedGroups = GROUP_ORDER.filter(g => grouped[g]?.length);
+  const COLLAPSED_GROUPS = 3;
+  const visibleGroups = showAll ? orderedGroups : orderedGroups.slice(0, COLLAPSED_GROUPS);
+  const hiddenCount = orderedGroups.length - COLLAPSED_GROUPS;
+
   return (
     <div className={className}>
-      {/* Unit/Property identifier */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        {/* Multi-unit: Floor and Unit Number */}
-        {!isStandalone && floor !== undefined && (
-          <Badge variant="outline" className="gap-1">
-            <Building2 className="h-3 w-3" />
-            {isRu ? `${floor} этаж` : `Floor ${floor}`}
-          </Badge>
-        )}
-        {!isStandalone && unitNumber && (
-          <Badge variant="outline">
-            {isRu ? `Кв. ${unitNumber}` : `Unit ${unitNumber}`}
-          </Badge>
-        )}
+      {/* Property badges */}
+      {hasPropertyBadges && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {!isStandalone && floor !== undefined && (
+            <Badge variant="outline" className="gap-1">
+              <Building2 className="h-3 w-3" />
+              {isRu ? `${floor} этаж` : `Floor ${floor}`}
+            </Badge>
+          )}
+          {!isStandalone && unitNumber && (
+            <Badge variant="outline">
+              {isRu ? `Кв. ${unitNumber}` : `Unit ${unitNumber}`}
+            </Badge>
+          )}
+          {isStandalone && totalFloors !== undefined && (
+            <Badge variant="outline" className="gap-1">
+              <ArrowUpDown className="h-3 w-3" />
+              {isRu ? `${totalFloors} этаж${totalFloors > 1 ? 'а' : ''}` : `${totalFloors} floor${totalFloors > 1 ? 's' : ''}`}
+            </Badge>
+          )}
+          {isStandalone && plotSizeSqm !== undefined && (
+            <Badge variant="outline" className="gap-1">
+              <Ruler className="h-3 w-3" />
+              {plotSizeSqm} {isRu ? 'м² участок' : 'm² plot'}
+            </Badge>
+          )}
+          {isStandalone && hasElevator && (
+            <Badge variant="outline" className="gap-1">
+              <Layers className="h-3 w-3" />
+              {isRu ? 'Лифт' : 'Elevator'}
+            </Badge>
+          )}
+          {isStandalone && poolType && poolType !== 'none' && poolTypeLabels[poolType] && (
+            <Badge variant="secondary" className="gap-1">
+              <Waves className="h-3 w-3" />
+              {isRu ? poolTypeLabels[poolType].ru : poolTypeLabels[poolType].en}
+            </Badge>
+          )}
+          {isStandalone && parkingType && parkingType !== 'none' && parkingTypeLabels[parkingType] && (
+            <Badge variant="secondary" className="gap-1">
+              <Car className="h-3 w-3" />
+              {isRu ? parkingTypeLabels[parkingType].ru : parkingTypeLabels[parkingType].en}
+            </Badge>
+          )}
+          {isStandalone && gardenType && gardenType !== 'none' && gardenTypeLabels[gardenType] && (
+            <Badge variant="secondary" className="gap-1">
+              <TreePine className="h-3 w-3" />
+              {isRu ? gardenTypeLabels[gardenType].ru : gardenTypeLabels[gardenType].en}
+            </Badge>
+          )}
+          {viewType && viewTypeLabels[viewType] && (
+            <Badge variant="secondary" className="gap-1">
+              <Eye className="h-3 w-3" />
+              {isRu ? viewTypeLabels[viewType].ru : viewTypeLabels[viewType].en}
+            </Badge>
+          )}
+          {furnishingLevel && furnishingLabels[furnishingLevel] && (
+            <Badge className="gap-1 bg-primary/10 text-primary border-primary/20">
+              <Sofa className="h-3 w-3" />
+              {isRu ? furnishingLabels[furnishingLevel].ru : furnishingLabels[furnishingLevel].en}
+            </Badge>
+          )}
+        </div>
+      )}
 
-        {/* Standalone: Building characteristics */}
-        {isStandalone && totalFloors !== undefined && (
-          <Badge variant="outline" className="gap-1">
-            <ArrowUpDown className="h-3 w-3" />
-            {isRu ? `${totalFloors} этаж${totalFloors > 1 ? 'а' : ''}` : `${totalFloors} floor${totalFloors > 1 ? 's' : ''}`}
-          </Badge>
-        )}
-        {isStandalone && plotSizeSqm !== undefined && (
-          <Badge variant="outline" className="gap-1">
-            <Ruler className="h-3 w-3" />
-            {plotSizeSqm} {isRu ? 'м² участок' : 'm² plot'}
-          </Badge>
-        )}
-        {isStandalone && hasElevator && (
-          <Badge variant="outline" className="gap-1">
-            <Layers className="h-3 w-3" />
-            {isRu ? 'Лифт' : 'Elevator'}
-          </Badge>
-        )}
-
-        {/* Standalone: Pool, Parking, Garden */}
-        {isStandalone && poolType && poolType !== 'none' && poolTypeLabels[poolType] && (
-          <Badge variant="secondary" className="gap-1">
-            <Waves className="h-3 w-3" />
-            {isRu ? poolTypeLabels[poolType].ru : poolTypeLabels[poolType].en}
-          </Badge>
-        )}
-        {isStandalone && parkingType && parkingType !== 'none' && parkingTypeLabels[parkingType] && (
-          <Badge variant="secondary" className="gap-1">
-            <Car className="h-3 w-3" />
-            {isRu ? parkingTypeLabels[parkingType].ru : parkingTypeLabels[parkingType].en}
-          </Badge>
-        )}
-        {isStandalone && gardenType && gardenType !== 'none' && gardenTypeLabels[gardenType] && (
-          <Badge variant="secondary" className="gap-1">
-            <TreePine className="h-3 w-3" />
-            {isRu ? gardenTypeLabels[gardenType].ru : gardenTypeLabels[gardenType].en}
-          </Badge>
-        )}
-
-        {/* Common: View and Furnishing */}
-        {viewType && viewTypeLabels[viewType] && (
-          <Badge variant="secondary" className="gap-1">
-            <Eye className="h-3 w-3" />
-            {isRu ? viewTypeLabels[viewType].ru : viewTypeLabels[viewType].en}
-          </Badge>
-        )}
-        {furnishingLevel && furnishingLabels[furnishingLevel] && (
-          <Badge className="gap-1 bg-primary/10 text-primary border-primary/20">
-            <Sofa className="h-3 w-3" />
-            {isRu ? furnishingLabels[furnishingLevel].ru : furnishingLabels[furnishingLevel].en}
-          </Badge>
-        )}
-      </div>
-
-      {/* Equipment */}
+      {/* Grouped Equipment */}
       {safeEquipment.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {safeEquipment.map((item) => (
-            <span
-              key={item}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground"
-            >
-              {equipmentIcons[item]}
-              {equipmentLabels[item]
-                ? (isRu ? equipmentLabels[item].ru : equipmentLabels[item].en)
-                : item}
-            </span>
+        <div className="space-y-4">
+          {visibleGroups.map(groupKey => (
+            <div key={groupKey}>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                {isRu ? GROUP_LABELS[groupKey].ru : GROUP_LABELS[groupKey].en}
+              </h4>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {grouped[groupKey].map(item => {
+                  const meta = EQUIPMENT_META[item];
+                  const label = meta
+                    ? (isRu ? meta.ru : meta.en)
+                    : item.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                  const icon = meta?.icon || <Sofa className={ICON_SIZE} />;
+                  return (
+                    <div key={item} className="flex items-center gap-2.5 py-1 text-sm">
+                      <span className="text-muted-foreground shrink-0">{icon}</span>
+                      <span>{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           ))}
+
+          {hiddenCount > 0 && !showAll && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1"
+              onClick={() => setShowAll(true)}
+            >
+              {isRu ? `Показать ещё ${hiddenCount} категорий` : `Show ${hiddenCount} more categories`}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          )}
+          {showAll && orderedGroups.length > COLLAPSED_GROUPS && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full gap-1"
+              onClick={() => setShowAll(false)}
+            >
+              {isRu ? 'Свернуть' : 'Show less'}
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
     </div>
