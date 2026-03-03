@@ -219,7 +219,28 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
     
     // Basic info
     if (listing.title) extracted.title = listing.title;
+    if (listing.title_ru) extracted.title_ru = listing.title_ru;
     if (listing.description) extracted.description = listing.description;
+    if (listing.description_ru) extracted.description_ru = listing.description_ru;
+    
+    // For Russian OTA platforms, if we only got description (not description_ru),
+    // the content is likely in Russian — map it to description_ru
+    if (listing.description && !listing.description_ru) {
+      const platform = selectedPlatform?.id;
+      const russianPlatforms = ['ostrovok', 'sutochno', 'avito', 'cian'];
+      if (platform && russianPlatforms.includes(platform)) {
+        extracted.description_ru = listing.description;
+        delete extracted.description; // Don't put Russian text in EN field
+      }
+    }
+    if (listing.title && !listing.title_ru) {
+      const platform = selectedPlatform?.id;
+      const russianPlatforms = ['ostrovok', 'sutochno', 'avito', 'cian'];
+      if (platform && russianPlatforms.includes(platform)) {
+        extracted.title_ru = listing.title;
+        delete extracted.title;
+      }
+    }
     if (listing.bedrooms) extracted.bedrooms = listing.bedrooms;
     if (listing.bathrooms) extracted.bathrooms = listing.bathrooms;
     if (listing.maxGuests || listing.max_guests) extracted.max_guests = listing.maxGuests || listing.max_guests;
