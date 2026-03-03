@@ -298,7 +298,7 @@ export function useCategories() {
   };
 
   // Flatten all categories from groups
-  const flatCategories = groupsQuery.data?.flatMap(g => g.categories) || [];
+  const flatCategories = groupsQuery.data?.flatMap(g => g.categories || []) || [];
 
   // Find category by slug
   const getCategoryBySlug = (slug: string): Category | undefined => {
