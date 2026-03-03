@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ChevronLeft, ChevronRight, Lock, Unlock, DollarSign, X, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock, Unlock, DollarSign, X, Calendar as CalendarIcon, Save } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,13 @@ export interface AvailabilityEntry {
   bookingId?: string;
 }
 
+export interface ActivityLogEntry {
+  action: string;
+  entity_type?: string;
+  entity_id?: string;
+  details?: Record<string, unknown>;
+}
+
 interface PropertyCalendarProps {
   availability: AvailabilityEntry[];
   onChange: (availability: AvailabilityEntry[]) => void;
@@ -28,6 +35,7 @@ interface PropertyCalendarProps {
   currency?: string;
   seasonalPricing?: SeasonalPricingRule[];
   rateSeasons?: RateSeasonRecord[];
+  onLogActivity?: (entry: ActivityLogEntry) => void;
   className?: string;
 }
 
@@ -38,6 +46,7 @@ export function PropertyCalendar({
   currency = 'THB',
   seasonalPricing,
   rateSeasons,
+  onLogActivity,
   className 
 }: PropertyCalendarProps) {
   const { language } = useLanguage();
@@ -48,6 +57,7 @@ export function PropertyCalendar({
   const [selectionStart, setSelectionStart] = useState<Date | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<Date | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
   const [editPopoverOpen, setEditPopoverOpen] = useState(false);
   const [editData, setEditData] = useState<{
     priceOverride?: number;
@@ -68,15 +78,12 @@ export function PropertyCalendar({
   const calendarDays = useMemo(() => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
-    const days = eachDayOfInterval({ start, end });
     
-    // Pad with days from previous month to start on Monday
     const startDay = start.getDay();
     const paddingDays = startDay === 0 ? 6 : startDay - 1;
     const paddedStart = new Date(start);
     paddedStart.setDate(paddedStart.getDate() - paddingDays);
     
-    // Generate 6 weeks of days
     const allDays: Date[] = [];
     for (let i = 0; i < 42; i++) {
       const day = new Date(paddedStart);
@@ -92,7 +99,6 @@ export function PropertyCalendar({
     return entry?.status || 'available';
   }, [availabilityMap]);
 
-  // Build effective seasonal rules from rate_seasons table if available
   const effectiveSeasonalPricing = useMemo(() => {
     if (rateSeasons && rateSeasons.length > 0 && basePrice > 0) {
       const rules = buildPricingRulesFromSeasons({ price_per_night: basePrice }, rateSeasons);
@@ -103,7 +109,6 @@ export function PropertyCalendar({
 
   const getDatePrice = useCallback((date: Date): number => {
     const entry = availabilityMap.get(format(date, 'yyyy-MM-dd'));
-    // Manual override takes priority, then seasonal rule, then base price
     if (entry?.priceOverride) return entry.priceOverride;
     return getEffectiveNightlyRate(date, basePrice, effectiveSeasonalPricing);
   }, [availabilityMap, basePrice, effectiveSeasonalPricing]);
@@ -123,16 +128,30 @@ export function PropertyCalendar({
     setSelectionStart(date);
     setSelectionEnd(date);
     setIsDragging(true);
+    setHasDragged(false);
   };
 
   const handleMouseEnter = (date: Date) => {
     if (isDragging && selectionStart) {
+      if (!isSameDay(date, selectionStart)) {
+        setHasDragged(true);
+      }
       setSelectionEnd(date);
     }
   };
 
   const handleMouseUp = () => {
     if (isDragging && selectionStart && selectionEnd) {
+      const isSingleClick = isSameDay(selectionStart, selectionEnd) && !hasDragged;
+      if (isSingleClick) {
+        // Pre-fill edit data from existing entry for single date
+        const entry = availabilityMap.get(format(selectionStart, 'yyyy-MM-dd'));
+        setEditData({
+          priceOverride: entry?.priceOverride,
+          minNightsOverride: entry?.minNightsOverride,
+          note: entry?.note,
+        });
+      }
       setEditPopoverOpen(true);
     }
     setIsDragging(false);
@@ -154,6 +173,7 @@ export function PropertyCalendar({
     dates.forEach(date => {
       const dateKey = format(date, 'yyyy-MM-dd');
       const existingIndex = newAvailability.findIndex(e => format(e.date, 'yyyy-MM-dd') === dateKey);
+      const oldEntry = existingIndex >= 0 ? newAvailability[existingIndex] : undefined;
       
       const entry: AvailabilityEntry = {
         date,
@@ -164,15 +184,83 @@ export function PropertyCalendar({
       };
       
       if (existingIndex >= 0) {
-        // Don't override booked dates
         if (newAvailability[existingIndex].status !== 'booked') {
           newAvailability[existingIndex] = entry;
         }
       } else {
         newAvailability.push(entry);
       }
+
+      // Log price override changes
+      if (onLogActivity && editData.priceOverride !== undefined) {
+        const oldPrice = oldEntry?.priceOverride ?? getEffectiveNightlyRate(date, basePrice, effectiveSeasonalPricing);
+        if (editData.priceOverride !== oldPrice) {
+          onLogActivity({
+            action: 'price_override',
+            entity_type: 'availability',
+            details: { date: dateKey, old_value: oldPrice, new_value: editData.priceOverride },
+          });
+        }
+      }
     });
+
+    // Log availability status changes
+    if (onLogActivity && dates.length > 0) {
+      onLogActivity({
+        action: 'availability_changed',
+        entity_type: 'availability',
+        details: {
+          dates: dates.map(d => format(d, 'yyyy-MM-dd')),
+          status,
+          count: dates.length,
+        },
+      });
+    }
     
+    onChange(newAvailability);
+    clearSelection();
+  };
+
+  /** Save only the price/settings for the selected dates without changing status */
+  const savePriceOnly = () => {
+    const dates = getSelectedDates();
+    const newAvailability = [...availability];
+    
+    dates.forEach(date => {
+      const dateKey = format(date, 'yyyy-MM-dd');
+      const existingIndex = newAvailability.findIndex(e => format(e.date, 'yyyy-MM-dd') === dateKey);
+      const oldEntry = existingIndex >= 0 ? newAvailability[existingIndex] : undefined;
+      const currentStatus = oldEntry?.status || 'available';
+
+      if (currentStatus === 'booked') return;
+
+      const entry: AvailabilityEntry = {
+        date,
+        status: currentStatus,
+        priceOverride: editData.priceOverride,
+        minNightsOverride: editData.minNightsOverride,
+        note: editData.note,
+      };
+
+      if (existingIndex >= 0) {
+        newAvailability[existingIndex] = entry;
+      } else {
+        newAvailability.push(entry);
+      }
+
+      // Log
+      if (onLogActivity && editData.priceOverride !== undefined) {
+        const oldPrice = oldEntry?.priceOverride ?? getEffectiveNightlyRate(date, basePrice, effectiveSeasonalPricing);
+        if (editData.priceOverride !== oldPrice) {
+          onLogActivity({
+            action: 'price_override',
+            entity_type: 'availability',
+            details: { date: dateKey, old_value: oldPrice, new_value: editData.priceOverride },
+          });
+        }
+      }
+    });
+
     onChange(newAvailability);
     clearSelection();
   };
@@ -194,6 +282,9 @@ export function PropertyCalendar({
     ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  const selectedDates = getSelectedDates();
+  const isSingleDate = selectedDates.length === 1;
+
   return (
     <Card className={cn("", className)} onMouseUp={handleMouseUp} onMouseLeave={() => setIsDragging(false)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -203,7 +294,7 @@ export function PropertyCalendar({
             {isRu ? 'Календарь доступности' : 'Availability Calendar'}
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Выделите даты для блокировки или настройки цен' : 'Select dates to block or set custom prices'}
+            {isRu ? 'Кликните на дату или выделите диапазон для настройки' : 'Click a date or drag to select a range'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -237,7 +328,6 @@ export function PropertyCalendar({
 
         {/* Calendar Grid */}
         <div className="select-none">
-          {/* Week Days Header */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {weekDays.map(day => (
               <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
@@ -246,7 +336,6 @@ export function PropertyCalendar({
             ))}
           </div>
 
-          {/* Days Grid */}
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, index) => {
               const status = getDateStatus(day);
@@ -254,7 +343,6 @@ export function PropertyCalendar({
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isPast = isBefore(day, startOfDay(new Date()));
               const isSelected = isDateInSelection(day);
-              const entry = availabilityMap.get(format(day, 'yyyy-MM-dd'));
 
               return (
                 <div
@@ -278,7 +366,6 @@ export function PropertyCalendar({
                     {format(day, 'd')}
                   </span>
                   
-                  {/* Price indicator — shows effective nightly rate */}
                   {isCurrentMonth && !isPast && price > 0 && (
                     <div className="absolute bottom-1 left-1 right-1">
                       <span className={cn(
@@ -294,7 +381,6 @@ export function PropertyCalendar({
                     </div>
                   )}
 
-                  {/* Status icon */}
                   {status === 'blocked' && !isPast && (
                     <Lock className="absolute top-1 right-1 h-3 w-3 text-muted-foreground" />
                   )}
@@ -313,12 +399,21 @@ export function PropertyCalendar({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">
-                  {getSelectedDates().length} {isRu ? 'дней выбрано' : 'days selected'}
+                  {isSingleDate
+                    ? (isRu ? format(selectedDates[0], 'd MMMM', { locale: ru }) : format(selectedDates[0], 'MMM d'))
+                    : `${selectedDates.length} ${isRu ? 'дней выбрано' : 'days selected'}`
+                  }
                 </h4>
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={clearSelection}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
+
+              {isSingleDate && (
+                <div className="text-xs text-muted-foreground">
+                  {isRu ? 'Текущая цена' : 'Current price'}: {getDatePrice(selectedDates[0]).toLocaleString()} {currency}
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div>
@@ -365,25 +460,38 @@ export function PropertyCalendar({
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
+                {/* Save price only button */}
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
-                  className="flex-1"
-                  onClick={() => applyToSelection('available')}
+                  className="w-full"
+                  onClick={savePriceOnly}
+                  disabled={editData.priceOverride === undefined && editData.minNightsOverride === undefined && !editData.note}
                 >
-                  <Unlock className="h-3 w-3 mr-1" />
-                  {isRu ? 'Открыть' : 'Open'}
+                  <Save className="h-3 w-3 mr-1" />
+                  {isRu ? 'Сохранить цену' : 'Save Price'}
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => applyToSelection('blocked')}
-                >
-                  <Lock className="h-3 w-3 mr-1" />
-                  {isRu ? 'Закрыть' : 'Block'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => applyToSelection('available')}
+                  >
+                    <Unlock className="h-3 w-3 mr-1" />
+                    {isRu ? 'Открыть' : 'Open'}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => applyToSelection('blocked')}
+                  >
+                    <Lock className="h-3 w-3 mr-1" />
+                    {isRu ? 'Закрыть' : 'Block'}
+                  </Button>
+                </div>
               </div>
             </div>
           </PopoverContent>

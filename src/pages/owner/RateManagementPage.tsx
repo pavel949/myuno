@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import {
@@ -20,14 +20,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
   Plus, Calendar, Moon, Edit2, Trash2, ChevronLeft,
-  Home, Pencil, Check, X, Tag,
+  Home, Pencil, Check, X, Tag, History, ChevronDown, User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const PRICING_ACTIONS = ['price_override', 'base_price_changed', 'season_created', 'season_updated', 'season_deleted', 'availability_changed'];
 
 export default function RateManagementPage() {
   const { user } = useAuth();
@@ -40,17 +43,54 @@ export default function RateManagementPage() {
   const [selectedProperty, setSelectedProperty] = useState<string>('all');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<RateSeasonRecord | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const { data: rates, isLoading } = useOwnerRateSeasons(user?.id, selectedProperty);
   const deleteMutation = useDeleteRateSeason();
 
   const activeRates = rates?.filter(r => r.is_active) || [];
 
+  // Fetch activity logs for pricing-related actions
+  const propertyIds = selectedProperty === 'all'
+    ? allProperties.map(p => p.property_id)
+    : [selectedProperty];
+
+  const { data: activityLogs = [], isLoading: logsLoading } = useQuery({
+    queryKey: ['pricing-activity-logs', propertyIds.sort().join(',')],
+    queryFn: async () => {
+      if (propertyIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from('property_activity_log')
+        .select(`
+          *,
+          actor:profiles!property_activity_log_actor_id_fkey(id, full_name, avatar_url)
+        `)
+        .in('property_id', propertyIds)
+        .in('action', PRICING_ACTIONS)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: propertyIds.length > 0,
+  });
+
   const handleDelete = (rate: RateSeasonRecord) => {
     const prop = allProperties.find(p => p.property_id === rate.property_id);
     deleteMutation.mutate(
-      { id: rate.id, propertyId: rate.property_id, basePricePerNight: prop?.price_per_night || 0 },
-      { onSuccess: () => toast.success(t('Season deleted', 'Сезон удалён')) }
+      {
+        id: rate.id,
+        propertyId: rate.property_id,
+        basePricePerNight: prop?.price_per_night || 0,
+        actorId: user?.id,
+        seasonName: rate.name_en,
+      },
+      {
+        onSuccess: () => {
+          toast.success(t('Season deleted', 'Сезон удалён'));
+          queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] });
+        },
+      }
     );
   };
 
@@ -108,6 +148,7 @@ export default function RateManagementPage() {
                 currency={prop.currency || 'THB'}
                 seasonCount={seasonCount}
                 isRu={isRu}
+                userId={user?.id}
               />
             );
           })}
@@ -170,7 +211,6 @@ export default function RateManagementPage() {
                             {format(start, 'dd MMM', { locale: isRu ? ru : undefined })} — {format(end, 'dd MMM yyyy', { locale: isRu ? ru : undefined })}
                           </span>
                         </div>
-                        {/* Discount badges */}
                         <div className="flex flex-wrap gap-1 mt-1">
                           {rate.weekly_discount && (
                             <Badge variant="secondary" className="text-[10px]">
@@ -226,20 +266,127 @@ export default function RateManagementPage() {
         )}
       </div>
 
+      <Separator />
+
+      {/* ─── Section 3: Activity History ─── */}
+      <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full justify-between px-2">
+            <span className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              <History className="h-4 w-4" />
+              {t('Change History', 'История изменений')}
+              {activityLogs.length > 0 && (
+                <Badge variant="secondary" className="text-[10px]">{activityLogs.length}</Badge>
+              )}
+            </span>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", historyOpen && "rotate-180")} />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-2 mt-2">
+          {logsLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+            </div>
+          ) : activityLogs.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {t('No changes recorded yet', 'Изменений пока нет')}
+            </p>
+          ) : (
+            activityLogs.map((log: any) => {
+              const prop = allProperties.find(p => p.property_id === log.property_id);
+              return (
+                <Card key={log.id}>
+                  <CardContent className="p-3 flex items-start gap-3">
+                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium truncate">
+                          {log.actor?.full_name || t('System', 'Система')}
+                        </span>
+                        <ActivityActionBadge action={log.action} isRu={isRu} />
+                      </div>
+                      {prop && <p className="text-[10px] text-muted-foreground">{prop.title}</p>}
+                      <ActivityDetails details={log.details} action={log.action} isRu={isRu} />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: isRu ? ru : undefined })}
+                    </span>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
       <RateSeasonSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         editingRate={editingRate}
         properties={allProperties}
         ownerId={user?.id || ''}
+        onSaved={() => queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] })}
       />
     </div>
   );
 }
 
+/* ─── Activity log helpers ─── */
+function ActivityActionBadge({ action, isRu }: { action: string; isRu: boolean }) {
+  const labels: Record<string, [string, string, string]> = {
+    price_override: ['Price Override', 'Изменение цены', 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'],
+    base_price_changed: ['Base Price', 'Базовая цена', 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'],
+    season_created: ['Season Created', 'Сезон создан', 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'],
+    season_updated: ['Season Updated', 'Сезон обновлён', 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'],
+    season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'],
+    availability_changed: ['Availability', 'Доступность', 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'],
+  };
+  const [en, rur, color] = labels[action] || [action, action, 'bg-muted text-muted-foreground'];
+  return <Badge className={cn("text-[10px] font-normal", color)}>{isRu ? rur : en}</Badge>;
+}
+
+function ActivityDetails({ details, action, isRu }: { details: any; action: string; isRu: boolean }) {
+  if (!details) return null;
+  
+  if (action === 'price_override' && details.old_value !== undefined) {
+    return (
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {details.date}: {details.old_value?.toLocaleString()} → {details.new_value?.toLocaleString()}
+      </p>
+    );
+  }
+  if (action === 'base_price_changed') {
+    return (
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {details.old_value?.toLocaleString()} → {details.new_value?.toLocaleString()}
+      </p>
+    );
+  }
+  if ((action === 'season_created' || action === 'season_updated') && details.name) {
+    return (
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {details.name}: ฿{details.nightly_rate?.toLocaleString()}/{isRu ? 'ночь' : 'night'} ({details.start_date} — {details.end_date})
+      </p>
+    );
+  }
+  if (action === 'season_deleted' && details.name) {
+    return <p className="text-xs text-muted-foreground mt-0.5">{details.name}</p>;
+  }
+  if (action === 'availability_changed' && details.count) {
+    return (
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {details.count} {isRu ? 'дней' : 'days'} → {details.status}
+      </p>
+    );
+  }
+  return null;
+}
+
 /* ─── Inline price editor row ─── */
 function PropertyPriceRow({
-  propertyId, title, pricePerNight, currency, seasonCount, isRu,
+  propertyId, title, pricePerNight, currency, seasonCount, isRu, userId,
 }: {
   propertyId: string;
   title: string;
@@ -247,6 +394,7 @@ function PropertyPriceRow({
   currency: string;
   seasonCount: number;
   isRu: boolean;
+  userId?: string;
 }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(pricePerNight));
@@ -263,8 +411,25 @@ function PropertyPriceRow({
       toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
     } else {
       toast.success(isRu ? 'Цена обновлена' : 'Price updated');
+
+      // Log base price change
+      if (userId && num !== pricePerNight) {
+        try {
+          await supabase.from('property_activity_log').insert({
+            property_id: propertyId,
+            actor_id: userId,
+            actor_role: 'owner',
+            action: 'base_price_changed',
+            entity_type: 'property',
+            entity_id: propertyId,
+            details: { old_value: pricePerNight, new_value: num } as any,
+          });
+        } catch {}
+      }
+
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] });
     }
     setEditing(false);
   };
@@ -314,13 +479,14 @@ function PropertyPriceRow({
 
 /* ─── Season create/edit sheet ─── */
 function RateSeasonSheet({
-  open, onOpenChange, editingRate, properties, ownerId,
+  open, onOpenChange, editingRate, properties, ownerId, onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editingRate: RateSeasonRecord | null;
   properties: any[];
   ownerId: string;
+  onSaved?: () => void;
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -329,13 +495,11 @@ function RateSeasonSheet({
 
   const [form, setForm] = useState(getDefaultForm(editingRate, properties));
 
-  // Reset form when sheet opens
   const handleOpenChange = (v: boolean) => {
     if (v) setForm(getDefaultForm(editingRate, properties));
     onOpenChange(v);
   };
 
-  // Also reset when editingRate changes
   useState(() => {
     setForm(getDefaultForm(editingRate, properties));
   });
@@ -371,6 +535,7 @@ function RateSeasonSheet({
         onSuccess: () => {
           toast.success(t('Saved', 'Сохранено'));
           onOpenChange(false);
+          onSaved?.();
         },
         onError: () => toast.error(t('Save failed', 'Ошибка сохранения')),
       }
@@ -430,7 +595,7 @@ function RateSeasonSheet({
             </div>
           </div>
 
-          {/* Nightly rate with diff indicator */}
+          {/* Nightly rate */}
           <div>
             <Label>{t('Nightly Rate (฿)', 'Цена за ночь (฿)')}</Label>
             <Input type="number" value={form.nightly_rate} onChange={e => setForm(f => ({ ...f, nightly_rate: e.target.value }))} />
@@ -449,13 +614,13 @@ function RateSeasonSheet({
 
           <Separator />
 
-          {/* ─── Discounts section ─── */}
+          {/* Discounts */}
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Tag className="h-4 w-4" />
             {t('Season Discounts', 'Скидки сезона')}
           </h3>
           <p className="text-xs text-muted-foreground -mt-2">
-            {t('Override property defaults for this season. Leave blank to use property settings.', 
+            {t('Override property defaults for this season. Leave blank to use property settings.',
                'Переопределить настройки объекта для этого сезона. Оставьте пустым для дефолтных.')}
           </p>
 

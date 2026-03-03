@@ -1,9 +1,11 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PropertyCalendar, AvailabilityEntry } from '@/components/property/PropertyCalendar';
+import { useAuth } from '@/contexts/AuthContext';
+import { PropertyCalendar, AvailabilityEntry, ActivityLogEntry } from '@/components/property/PropertyCalendar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, RefreshCw, Link2, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import type { SeasonalPricingRule } from '@/lib/pricingEngine';
 
 interface CalendarSectionProps {
@@ -12,6 +14,7 @@ interface CalendarSectionProps {
   basePrice: number;
   currency: string;
   seasonalPricing?: SeasonalPricingRule[];
+  propertyId?: string;
 }
 
 export function PropertyManageCalendarSection({
@@ -20,13 +23,31 @@ export function PropertyManageCalendarSection({
   basePrice,
   currency,
   seasonalPricing,
+  propertyId,
 }: CalendarSectionProps) {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
 
-  // Count blocked and booked days
   const blockedDays = availability.filter(a => a.status === 'blocked').length;
   const bookedDays = availability.filter(a => a.status === 'booked').length;
+
+  const handleLogActivity = async (entry: ActivityLogEntry) => {
+    if (!propertyId || !user) return;
+    try {
+      await supabase.from('property_activity_log').insert({
+        property_id: propertyId,
+        actor_id: user.id,
+        actor_role: 'owner',
+        action: entry.action,
+        entity_type: entry.entity_type || null,
+        entity_id: entry.entity_id || null,
+        details: entry.details as any,
+      });
+    } catch (err) {
+      console.error('Failed to log activity:', err);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -59,6 +80,7 @@ export function PropertyManageCalendarSection({
         basePrice={basePrice}
         currency={currency}
         seasonalPricing={seasonalPricing}
+        onLogActivity={propertyId ? handleLogActivity : undefined}
       />
 
       {/* iCal Sync Section */}
