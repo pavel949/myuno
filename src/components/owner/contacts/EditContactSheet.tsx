@@ -60,6 +60,16 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     interests: contact.interests || [],
     scoring: contact.scoring?.toString() || '0',
     tags: contact.tags || [],
+    // Odoo-style fields
+    mobile: contact.mobile || '',
+    address_street: contact.address_street || '',
+    address_street2: contact.address_street2 || '',
+    address_city: contact.address_city || '',
+    address_state: contact.address_state || '',
+    address_zip: contact.address_zip || '',
+    address_country: contact.address_country || '',
+    tax_id: contact.tax_id || '',
+    website: contact.website || '',
   });
 
   const [customInterest, setCustomInterest] = useState('');
@@ -90,6 +100,15 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       interests: contact.interests || [],
       scoring: contact.scoring?.toString() || '0',
       tags: contact.tags || [],
+      mobile: contact.mobile || '',
+      address_street: contact.address_street || '',
+      address_street2: contact.address_street2 || '',
+      address_city: contact.address_city || '',
+      address_state: contact.address_state || '',
+      address_zip: contact.address_zip || '',
+      address_country: contact.address_country || '',
+      tax_id: contact.tax_id || '',
+      website: contact.website || '',
     });
   }, [contact]);
 
@@ -125,6 +144,15 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         interests: form.interests.length ? form.interests : null,
         scoring: form.scoring ? Number(form.scoring) : 0,
         tags: form.tags,
+        mobile: form.mobile || null,
+        address_street: form.address_street || null,
+        address_street2: form.address_street2 || null,
+        address_city: form.address_city || null,
+        address_state: form.address_state || null,
+        address_zip: form.address_zip || null,
+        address_country: form.address_country || null,
+        tax_id: form.tax_id || null,
+        website: form.website || null,
       } as any);
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
@@ -196,6 +224,28 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           </Select>
         </div>
         <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
+      </div>
+
+      <Separator />
+
+      {/* Address & Business (Odoo-style) */}
+      <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Адрес и бизнес' : 'Address & Business'}</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>{isRu ? 'Улица' : 'Street'}</Label><Input value={form.address_street} onChange={e => setForm(f => ({ ...f, address_street: e.target.value }))} /></div>
+        <div><Label>{isRu ? 'Улица 2' : 'Street 2'}</Label><Input value={form.address_street2} onChange={e => setForm(f => ({ ...f, address_street2: e.target.value }))} /></div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div><Label>{isRu ? 'Город' : 'City'}</Label><Input value={form.address_city} onChange={e => setForm(f => ({ ...f, address_city: e.target.value }))} /></div>
+        <div><Label>{isRu ? 'Регион' : 'State'}</Label><Input value={form.address_state} onChange={e => setForm(f => ({ ...f, address_state: e.target.value }))} /></div>
+        <div><Label>{isRu ? 'Индекс' : 'ZIP'}</Label><Input value={form.address_zip} onChange={e => setForm(f => ({ ...f, address_zip: e.target.value }))} /></div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div><Label>{isRu ? 'Страна' : 'Country'}</Label><Input value={form.address_country} onChange={e => setForm(f => ({ ...f, address_country: e.target.value }))} /></div>
+        <div><Label>Tax ID</Label><Input value={form.tax_id} onChange={e => setForm(f => ({ ...f, tax_id: e.target.value }))} /></div>
+        <div><Label>Website</Label><Input value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} placeholder="https://" /></div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label>{isRu ? 'Мобильный' : 'Mobile'}</Label><Input value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} /></div>
       </div>
 
       <Separator />

@@ -9,6 +9,7 @@ export interface CrmContact {
   last_name: string;
   phone: string | null;
   phone2: string | null;
+  mobile: string | null;
   email: string | null;
   whatsapp: string | null;
   telegram: string | null;
@@ -29,6 +30,7 @@ export interface CrmContact {
   tags: string[];
   avatar_url: string | null;
   is_archived: boolean;
+  is_company: boolean;
   created_by: string | null;
   birthday: string | null;
   family_info: string | null;
@@ -37,14 +39,33 @@ export interface CrmContact {
   created_at: string;
   updated_at: string;
   deal_count?: number;
+  // Odoo-style fields
+  address_street: string | null;
+  address_street2: string | null;
+  address_city: string | null;
+  address_state: string | null;
+  address_zip: string | null;
+  address_country: string | null;
+  tax_id: string | null;
+  website: string | null;
 }
 
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring'> & {
+export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website'> & {
   job_title?: string | null;
   birthday?: string | null;
   family_info?: string | null;
   interests?: string[] | null;
   scoring?: number | null;
+  mobile?: string | null;
+  is_company?: boolean;
+  address_street?: string | null;
+  address_street2?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_zip?: string | null;
+  address_country?: string | null;
+  tax_id?: string | null;
+  website?: string | null;
 };
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
