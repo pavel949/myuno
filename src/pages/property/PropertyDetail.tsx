@@ -257,11 +257,14 @@ export default function PropertyDetail() {
           ) : (
             // Single image with thumbnails for fewer images
             <div>
-              <div className="aspect-[16/10] overflow-hidden">
+              <div 
+                className="aspect-[16/10] overflow-hidden cursor-pointer"
+                onClick={() => { setLightboxIndex(activeImage); setShowAllPhotos(true); }}
+              >
                 <img
                   src={images[activeImage] || images[0]}
                   alt={isRu ? property.title_ru : property.title_en}
-                  className="w-full h-full object-contain bg-muted"
+                  className="w-full h-full object-contain bg-muted hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
               {images.length > 1 && (
