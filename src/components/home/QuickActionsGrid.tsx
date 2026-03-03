@@ -173,7 +173,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const queryClient = useQueryClient();
 
   const isOwnerPersona = useMemo(() => {
-    return personas.includes('property_owner') || activeRole === 'owner';
+    return personas.includes('property_owner') || activeRole === 'owner' || activeRole === 'property_manager';
   }, [personas, activeRole]);
 
   const quickActions = useMemo(() => {

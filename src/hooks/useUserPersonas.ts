@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type UserPersona = 'tourist' | 'resident' | 'property_owner' | 'investor';
+// Note: 'property_owner' persona key is kept for DB compatibility (user_persona enum)
+// but maps to 'owner' AppRole. UI label = "Собственник" / "Property Owner"
 
 const GUEST_PERSONAS_KEY = 'myuno-guest-personas';
 const GUEST_PERSONAS_CHANGED_EVENT = 'myuno-guest-personas-changed';
@@ -284,8 +286,8 @@ export const PERSONA_INFO: Record<UserPersona, {
   property_owner: {
     labelEn: 'Property Owner',
     labelRu: 'Собственник',
-    descEn: 'Property management',
-    descRu: 'Управление недвижимостью',
+    descEn: 'My property & services',
+    descRu: 'Мой объект и сервисы',
     icon: '🏢',
     color: 'text-amber-600',
     bgColor: 'bg-amber-500/10',

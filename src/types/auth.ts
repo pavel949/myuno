@@ -13,7 +13,7 @@
   * - guest: Unauthenticated visitor
   * - user: Basic authenticated user
   * - tourist/resident: User personas (can coexist with other roles)
-  * - partner/owner/property_owner/vendor: Business roles
+  * - partner/owner/vendor: Business roles
   * - staff/uno_team: Platform operators
   * - admin/ombudsman: Administrative roles
   * - finance/support/sales/investor: Specialized platform roles
@@ -28,7 +28,6 @@ export type AppRole =
   // Business roles
   | 'partner'
   | 'owner'
-  | 'property_owner'
   | 'property_manager'
   | 'vendor'
   // Platform operators
@@ -50,7 +49,7 @@ export type AppRole =
  export const OPERATOR_ROLES: AppRole[] = ['staff', 'uno_team', 'admin', 'ombudsman'];
  
  /** Roles that can be self-activated by users */
- export const SELF_ACTIVATABLE_ROLES: AppRole[] = ['property_owner', 'vendor'];
+ export const SELF_ACTIVATABLE_ROLES: AppRole[] = ['owner', 'vendor'];
  
  /** Roles that require admin approval */
  export const ADMIN_ONLY_ROLES: AppRole[] = ['admin', 'ombudsman', 'staff', 'uno_team', 'finance', 'support', 'sales'];
@@ -108,30 +107,23 @@ export type AppRole =
      color: 'from-indigo-400 to-indigo-500',
      defaultPath: '/vendor',
    },
-   owner: {
+    owner: {
      labelEn: 'Property Owner',
      labelRu: 'Собственник',
-     icon: 'Building',
-     color: 'from-amber-400 to-amber-500',
+     icon: 'Building2',
+     color: 'from-teal-400 to-teal-500',
      defaultPath: '/owner',
+     descriptionEn: 'Manage your property and order services',
+     descriptionRu: 'Управляйте своим объектом и заказывайте сервисы',
    },
-   property_owner: {
-      labelEn: 'Property Owner',
-      labelRu: 'Собственник',
-      icon: 'Building2',
-      color: 'from-teal-400 to-teal-500',
-      defaultPath: '/owner',
-      descriptionEn: 'Property management and bookings',
-       descriptionRu: 'Управление недвижимостью и бронированиями',
-     },
     property_manager: {
-       labelEn: 'Property Manager',
-       labelRu: 'Управление недвижимостью',
+       labelEn: 'Property Management (MC)',
+       labelRu: 'Управляющая компания (УК)',
        icon: 'UserCog',
        color: 'from-teal-500 to-cyan-600',
        defaultPath: '/owner',
-       descriptionEn: 'Professional property management',
-       descriptionRu: 'Профессиональное управление недвижимостью',
+       descriptionEn: 'Professional property management for owners',
+       descriptionRu: 'Профессиональное управление объектами собственников',
     },
     vendor: {
      labelEn: 'Service Provider',

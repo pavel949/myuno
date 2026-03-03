@@ -127,7 +127,7 @@ export function VendorGuard({ children }: { children: React.ReactNode }) {
  */
 export function OwnerGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['owner', 'property_owner', 'property_manager', 'admin']} fallbackPath="/owner/onboarding">
+    <RoleGuard allowedRoles={['owner', 'property_manager', 'admin']} fallbackPath="/owner/onboarding">
       {children}
     </RoleGuard>
   );

@@ -100,7 +100,7 @@ export function useLifeOSRole(): LifeOSRole {
   // Priority: investor > owner > resident > guest
   const roleStrings = roles as string[];
   if (roleStrings.includes('investor')) return 'investor';
-  if (roleStrings.includes('owner') || roleStrings.includes('property_owner') || roleStrings.includes('property_manager')) return 'owner';
+  if (roleStrings.includes('owner') || roleStrings.includes('property_manager')) return 'owner';
   return 'resident';
 }
 

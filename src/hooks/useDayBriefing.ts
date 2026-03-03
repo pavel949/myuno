@@ -80,9 +80,9 @@ const ORDER = {
 } as const;
 
 /** Roles that need owner/PM business data */
-const OWNER_ROLES: AppRole[] = ['owner', 'property_owner', 'property_manager'];
+const OWNER_ROLES: AppRole[] = ['owner', 'property_manager'];
 /** Roles that see platform content (news, events, recommendations) */
-const CONTENT_ROLES: AppRole[] = ['user', 'owner', 'property_owner', 'property_manager', 'vendor', 'investor'];
+const CONTENT_ROLES: AppRole[] = ['user', 'owner', 'property_manager', 'vendor', 'investor'];
 
 interface UseDayBriefingOptions {
   /** Override role detection */

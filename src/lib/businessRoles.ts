@@ -48,10 +48,11 @@ export type DashboardWidgetKey =
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
+  /** Property Management (MC) — for management company staff, not property owners */
   property_manager: {
     id: 'property_manager',
-    labelEn: 'Property Management',
-    labelRu: 'Управление недвижимостью',
+    labelEn: 'Property Management (MC)',
+    labelRu: 'Управление объектами (УК)',
     icon: '🏠',
     widgets: [
       'morning_briefing',
