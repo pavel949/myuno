@@ -1,32 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Package, 
-  Cog,
-  Layers,
-  Trash2,
-  LogOut,
-  ChevronRight,
-  ChevronDown,
-  Bot,
-  Brain,
-  Inbox,
-  Megaphone,
-  Building2,
-  Target,
-  FileText,
-  Building,
-  FolderTree,
-  Sparkles,
-  MapPin,
-  BookOpen,
-  Languages,
-  FileEdit,
-  Scale,
-  Database,
   Users,
-  TestTube,
+  Package, 
+  Sparkles,
+  DollarSign,
+  Building2,
+  Settings,
+  LogOut,
+  Badge as BadgeIcon,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -39,94 +22,28 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { cn } from '@/lib/utils';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 
 interface NavItem {
   title: string;
   titleRu: string;
   path: string;
   icon: React.ElementType;
+  badgeKey?: 'pendingContent' | 'pendingProviders';
 }
 
-interface NavGroup {
-  id: string;
-  title: string;
-  titleRu: string;
-  items: NavItem[];
-}
-
-// Storage key for group states
-const SIDEBAR_GROUPS_KEY = 'myuno_admin_sidebar_groups_v2';
-
-// Reorganized navigation: 5 groups
-const navigationGroups: NavGroup[] = [
-  {
-    id: 'core',
-    title: 'Core',
-    titleRu: 'Ядро',
-    items: [
-      { title: 'Dashboard', titleRu: 'Дашборд', path: '/admin', icon: LayoutDashboard },
-      { title: 'Unified Catalog', titleRu: 'Каталог', path: '/admin/catalog', icon: Package },
-      { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: Layers },
-      { title: 'Intake', titleRu: 'Приём', path: '/admin/intake', icon: Inbox },
-      { title: 'Trash', titleRu: 'Корзина', path: '/admin/trash', icon: Trash2 },
-    ],
-  },
-  {
-    id: 'business',
-    title: 'Business',
-    titleRu: 'Бизнес',
-    items: [
-      { title: 'Providers', titleRu: 'Провайдеры', path: '/admin/providers', icon: Users },
-      { title: 'PM Companies', titleRu: 'УК (справочник)', path: '/admin/pm-companies', icon: Building },
-      { title: 'MC Dashboard', titleRu: 'УК — Обзор', path: '/admin/mc-dashboard', icon: Building2 },
-      { title: 'Contracts', titleRu: 'Контракты', path: '/admin/contracts', icon: FileText },
-      { title: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: Target },
-      { title: 'Vendor Prospects', titleRu: 'Привлечение', path: '/admin/vendor-prospects', icon: Target },
-      { title: 'Marketing', titleRu: 'Маркетинг', path: '/admin/marketing', icon: Megaphone },
-    ],
-  },
-  {
-    id: 'content',
-    title: 'Content',
-    titleRu: 'Контент',
-    items: [
-      { title: 'Cities & Locations', titleRu: 'Города', path: '/admin/cities', icon: MapPin },
-      { title: 'Location Knowledge', titleRu: 'База знаний', path: '/admin/location-knowledge', icon: BookOpen },
-      { title: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Languages },
-      { title: 'Vendor Content', titleRu: 'Контент вендоров', path: '/admin/vendor-content', icon: FileEdit },
-      { title: 'Legal Documents', titleRu: 'Юр. документы', path: '/admin/legal-documents', icon: Scale },
-    ],
-  },
-  {
-    id: 'ai',
-    title: 'AI & Automation',
-    titleRu: 'AI и автоматизация',
-    items: [
-      { title: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain },
-      { title: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot },
-    ],
-  },
-  {
-    id: 'system',
-    title: 'System',
-    titleRu: 'Система',
-    items: [
-      { title: 'Control Center', titleRu: 'Управление', path: '/admin/control', icon: Cog },
-      { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
-      { title: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree },
-      { title: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database },
-      { title: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users },
-      { title: 'QA Test Runner', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube },
-    ],
-  },
+const navigationItems: NavItem[] = [
+  { title: 'Dashboard', titleRu: 'Обзор', path: '/admin', icon: LayoutDashboard },
+  { title: 'Users & Access', titleRu: 'Пользователи', path: '/admin/users', icon: Users },
+  { title: 'Catalog & Content', titleRu: 'Каталог', path: '/admin/catalog', icon: Package, badgeKey: 'pendingContent' },
+  { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
+  { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
+  { title: 'Partners', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, badgeKey: 'pendingProviders' },
+  { title: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -136,43 +53,13 @@ export function AdminSidebar() {
   const isRussian = language === 'ru';
   const { user, signOut } = useAuth();
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const { data: stats } = useAdminDashboardStats();
   
-  // Load group states from localStorage
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
-    try {
-      const stored = localStorage.getItem(SIDEBAR_GROUPS_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    // Default: core and business open, rest collapsed
-    return { core: true, business: true, content: false, ai: false, system: false };
-  });
-
-  // Save group states to localStorage
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify(openGroups));
-  }, [openGroups]);
-
   const isCollapsed = isMobile ? false : state === 'collapsed';
 
   const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin';
-    }
+    if (path === '/admin') return location.pathname === '/admin';
     return location.pathname.startsWith(path);
-  };
-
-  // Find which group contains the active route and ensure it's open
-  useEffect(() => {
-    const activeGroup = navigationGroups.find(group =>
-      group.items.some(item => isActive(item.path))
-    );
-    if (activeGroup && !openGroups[activeGroup.id]) {
-      setOpenGroups(prev => ({ ...prev, [activeGroup.id]: true }));
-    }
-  }, [location.pathname]);
-
-  const toggleGroup = (groupId: string) => {
-    setOpenGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
   const handleNavigate = (path: string) => {
@@ -180,7 +67,10 @@ export function AdminSidebar() {
     if (isMobile) setOpenMobile(false);
   };
 
-  const lastGroupId = navigationGroups[navigationGroups.length - 1].id;
+  const getBadgeCount = (key?: 'pendingContent' | 'pendingProviders') => {
+    if (!key || !stats) return 0;
+    return stats[key] || 0;
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -193,80 +83,41 @@ export function AdminSidebar() {
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="font-bold text-sidebar-foreground text-lg">myUNO</span>
-              <span className="text-xs text-sidebar-foreground/60">Command Center</span>
+              <span className="text-xs text-sidebar-foreground/60">Admin Panel</span>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      {/* Navigation - Collapsible Groups */}
+      {/* Navigation — 7 flat items */}
       <SidebarContent className="px-3 py-4">
-        {navigationGroups.map((group) => (
-          <Collapsible
-            key={group.id}
-            open={isCollapsed ? false : openGroups[group.id]}
-            onOpenChange={() => !isCollapsed && toggleGroup(group.id)}
-          >
-            {/* Group Header */}
-            {!isCollapsed && (
-              <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider hover:text-sidebar-foreground transition-colors">
-                <span>{isRussian ? group.titleRu : group.title}</span>
-                {openGroups[group.id] ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </CollapsibleTrigger>
-            )}
-
-            <CollapsibleContent className="space-y-1">
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      onClick={() => handleNavigate(item.path)}
-                      isActive={isActive(item.path)}
-                      tooltip={isRussian ? item.titleRu : item.title}
-                      className={cn(
-                        "transition-all duration-200",
-                        isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{isRussian ? item.titleRu : item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </CollapsibleContent>
-
-            {/* In collapsed mode, show items without group headers */}
-            {isCollapsed && (
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      onClick={() => handleNavigate(item.path)}
-                      isActive={isActive(item.path)}
-                      tooltip={isRussian ? item.titleRu : item.title}
-                      className={cn(
-                        "transition-all duration-200",
-                        isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            )}
-
-            {/* Divider between groups */}
-            {!isCollapsed && group.id !== lastGroupId && (
-              <div className="my-3 mx-3 h-px bg-sidebar-border/50" />
-            )}
-          </Collapsible>
-        ))}
+        <SidebarMenu className="space-y-1">
+          {navigationItems.map((item) => {
+            const badgeCount = getBadgeCount(item.badgeKey);
+            
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  onClick={() => handleNavigate(item.path)}
+                  isActive={isActive(item.path)}
+                  tooltip={isRussian ? item.titleRu : item.title}
+                  className={cn(
+                    "transition-all duration-200 h-10",
+                    isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="flex-1">{isRussian ? item.titleRu : item.title}</span>
+                  {!isCollapsed && badgeCount > 0 && (
+                    <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-[10px] font-bold">
+                      {badgeCount}
+                    </Badge>
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
       </SidebarContent>
 
       {/* Footer */}

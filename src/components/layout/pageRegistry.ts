@@ -306,6 +306,9 @@ export const AdminCRM = lazy(() => import('@/pages/admin/AdminCRM'));
 export const AdminLifeOS = lazy(() => import('@/pages/admin/AdminLifeOS'));
 export const MarketingDashboard = lazy(() => import('@/pages/admin/marketing/MarketingDashboard'));
 export const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/ExperienceCategoriesPage'));
+export const AdminUsersAccess = lazy(() => import('@/pages/admin/AdminUsersAccess'));
+export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
+export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
 
 // ── Provider ──
 export const ProviderOnboarding = lazy(() => import('@/pages/provider/ProviderOnboarding'));

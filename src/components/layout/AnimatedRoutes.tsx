@@ -394,6 +394,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Admin ── */}
         <Route element={<AdminRouteLayout />}>
           <Route path="/admin" element={<Pages.AdminDashboard />} />
+          <Route path="/admin/users" element={<Pages.AdminUsersAccess />} />
           <Route path="/admin/catalog" element={<Pages.AdminUnifiedCatalog />} />
           <Route path="/admin/trash" element={<Pages.AdminTrash />} />
           <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
@@ -445,7 +446,8 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
           <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
           <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
-          <Route path="/admin/finance" element={<Navigate to="/admin/control" replace />} />
+          <Route path="/admin/finance" element={<Pages.AdminFinance />} />
+          <Route path="/admin/settings" element={<Pages.AdminSystemSettings />} />
           <Route path="/admin/cities" element={<Pages.AdminCities />} />
           <Route path="/admin/translations" element={<Pages.AdminTranslations />} />
           <Route path="/admin/location-knowledge" element={<Pages.AdminLocationKnowledge />} />
