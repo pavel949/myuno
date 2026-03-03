@@ -61,6 +61,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
   const projectAmenities = selectedProject?.amenities || [];
   const hasProjectDescription = selectedProject?.description_en || selectedProject?.description_ru;
   const isDescriptionEmpty = !formData.description && !formData.description_ru;
+  const basePrice = Number(formData.price_per_night) || 0;
 
   return (
     <div className="space-y-6">
@@ -95,7 +96,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </CardContent>
       </Card>
 
-      {/* Rental Terms */}
+      {/* ─── SECTION 1: Base Rental Terms ─── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -115,47 +116,35 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 placeholder="2500"
               />
             </div>
-            {/* Deposit moved to PaymentPolicySection */}
-            <div className="space-y-2">
-              <Label>{isRu ? 'Депозит (возвратный)' : 'Deposit (refundable)'}</Label>
-              <Input
-                type="number"
-                min={0}
-                value={formData.deposit_amount}
-                onChange={(e) => updateFormData({ deposit_amount: e.target.value })}
-                placeholder="10000"
-              />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {isRu ? 'Мин. ночей' : 'Min nights'}
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={formData.min_stay_nights}
+                  onChange={(e) => updateFormData({ min_stay_nights: Number(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {isRu ? 'Макс. гостей' : 'Max guests'}
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={formData.max_guests}
+                  onChange={(e) => updateFormData({ max_guests: Number(e.target.value) })}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {isRu ? 'Мин. срок (ночей)' : 'Min stay (nights)'}
-              </Label>
-              <Input
-                type="number"
-                min={1}
-                value={formData.min_stay_nights}
-                onChange={(e) => updateFormData({ min_stay_nights: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {isRu ? 'Макс. гостей' : 'Max guests'}
-              </Label>
-              <Input
-                type="number"
-                min={1}
-                value={formData.max_guests}
-                onChange={(e) => updateFormData({ max_guests: Number(e.target.value) })}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Заезд' : 'Check-in'}</Label>
               <Input
@@ -186,8 +175,35 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               onCheckedChange={(checked) => updateFormData({ instant_booking: checked })}
             />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Platform Listing Toggle */}
+      {/* ─── SECTION 2: Seasonal Pricing (always visible) ─── */}
+      <SeasonalPricing
+        basePrice={basePrice > 0 ? basePrice : 0}
+        currency="THB"
+        seasons={formData.seasonal_pricing || []}
+        onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
+      />
+
+      {/* ─── SECTION 3: Length-of-Stay Discounts ─── */}
+      <DiscountsSection formData={formData} updateFormData={updateFormData} />
+
+      {/* ─── SECTION 4: Advanced Pricing Rules ─── */}
+      <PricingRulesSection formData={formData} updateFormData={updateFormData} />
+
+      {/* ─── SECTION 5: Payment Schedule & Deposit (single source of truth for deposit) ─── */}
+      <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
+
+      {/* ─── SECTION 6: Cancellation Policy ─── */}
+      <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+
+      {/* ─── SECTION 7: House Rules ─── */}
+      <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+
+      {/* ─── SECTION 8: Platform Listing ─── */}
+      <Card>
+        <CardContent className="pt-6">
           <div className={`p-4 rounded-lg border-2 transition-colors ${
             formData.platform_listed 
               ? 'border-primary/40 bg-primary/5' 
@@ -201,8 +217,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu 
-                    ? 'Комиссия платформы 10% с каждого успешного бронирования, включается в первый платёж' 
-                    : '10% platform fee per successful booking, included in first payment'}
+                    ? 'Комиссия платформы 10% с каждого успешного бронирования' 
+                    : '10% platform fee per successful booking'}
                 </p>
               </div>
               <Switch
@@ -210,44 +226,18 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
               />
             </div>
-            {formData.platform_listed && formData.price_per_night && Number(formData.price_per_night) > 0 && (
+            {formData.platform_listed && basePrice > 0 && (
               <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
                 {isRu ? 'Пример: ' : 'Example: '}
-                {Number(formData.price_per_night).toLocaleString()} THB/
-                {isRu ? 'ночь' : 'night'} → 
-                {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(Number(formData.price_per_night) * 0.1).toLocaleString()} THB
+                {basePrice.toLocaleString()} THB/{isRu ? 'ночь' : 'night'} → 
+                {' '}{isRu ? 'комиссия' : 'fee'} {Math.round(basePrice * 0.1).toLocaleString()} THB
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* House Rules */}
-      <HouseRulesSection formData={formData} updateFormData={updateFormData} />
-
-      {/* Cancellation Policy */}
-      <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
-
-      {/* Long-stay Discounts */}
-      <DiscountsSection formData={formData} updateFormData={updateFormData} />
-
-      {/* Seasonal Pricing */}
-      {formData.price_per_night && Number(formData.price_per_night) > 0 && (
-        <SeasonalPricing
-          basePrice={Number(formData.price_per_night)}
-          currency="THB"
-          seasons={formData.seasonal_pricing || []}
-          onChange={(seasons) => updateFormData({ seasonal_pricing: seasons })}
-        />
-      )}
-
-      {/* Advanced Pricing Rules */}
-      <PricingRulesSection formData={formData} updateFormData={updateFormData} />
-
-      {/* Payment Schedule & Deposit */}
-      <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
-
-      {/* Sale Option */}
+      {/* ─── SECTION 9: Sale Option ─── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -290,7 +280,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </CardContent>
       </Card>
 
-      {/* Description (moved from separate step) */}
+      {/* ─── SECTION 10: Description ─── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
