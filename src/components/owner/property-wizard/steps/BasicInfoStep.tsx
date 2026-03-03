@@ -70,13 +70,21 @@ function ProjectSection({
             setSelectedProject(project || null);
             onProjectChange(pid, project || undefined);
             if (project) {
-              updateFormData({ 
+              const updates: Partial<PropertyFormData> = { 
                 project_id: pid,
                 address: project.address || formData.address,
                 district: project.district || formData.district,
                 lat: project.lat ?? formData.lat,
                 lng: project.lng ?? formData.lng,
-              });
+              };
+              // Auto-fill description from project if empty
+              if (!formData.description.trim() && project.description_en) {
+                updates.description = project.description_en;
+              }
+              if (!formData.description_ru?.trim() && project.description_ru) {
+                updates.description_ru = project.description_ru;
+              }
+              updateFormData(updates);
               const projectName = isRu 
                 ? (project.name_ru || project.name_en) 
                 : project.name_en;

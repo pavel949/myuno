@@ -119,6 +119,7 @@ export interface PropertyFormData {
   deposit_currency?: string;
   negotiation_enabled?: boolean;
   custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
+  lock_code?: string;
 }
 
 const initialFormData: PropertyFormData = {
@@ -181,6 +182,7 @@ const initialFormData: PropertyFormData = {
   payment_policy: 'prepay_10',
   deposit_currency: 'USD',
   negotiation_enabled: false,
+  lock_code: '',
 };
 
 const initialOwnershipData: OwnershipData = {
