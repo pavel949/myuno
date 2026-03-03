@@ -14,6 +14,7 @@ interface SeasonalPriceEntry {
   endMonth: number;
   endDay: number;
   priceModifier: number;
+  pricePerNight?: number;
   minNights?: number;
 }
 
@@ -120,15 +121,19 @@ export function PropertyPriceBreakdown({
             </p>
             <div className="grid gap-2">
               {seasonalPricing.map((season) => {
-                const seasonPrice = pricePerNight ? Math.round(pricePerNight * season.priceModifier / 100) : 0;
-                const isHigher = season.priceModifier > 100;
-                const isLower = season.priceModifier < 100;
+                // Use absolute price if set, otherwise calculate from modifier
+                const seasonPrice = season.pricePerNight && season.pricePerNight > 0
+                  ? season.pricePerNight
+                  : (pricePerNight ? Math.round(pricePerNight * season.priceModifier / 100) : 0);
+                const isHigher = seasonPrice > (pricePerNight || 0);
+                const isLower = seasonPrice < (pricePerNight || 0);
                 const SeasonIcon = season.type === 'high' ? Sun : season.type === 'low' ? Snowflake : season.type === 'holiday' ? Sparkles : Calendar;
                 
                 const monthNames = isRu 
                   ? ['', 'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
                   : ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 const dateRange = `${season.startDay} ${monthNames[season.startMonth]} – ${season.endDay} ${monthNames[season.endMonth]}`;
+                const diffPercent = pricePerNight ? Math.round(((seasonPrice / pricePerNight) - 1) * 100) : 0;
                 
                 return (
                   <div 
@@ -150,9 +155,11 @@ export function PropertyPriceBreakdown({
                       <p className={`text-sm font-bold ${isHigher ? 'text-warning' : isLower ? 'text-success' : ''}`}>
                         {symbol}{seasonPrice.toLocaleString()}
                       </p>
-                      <p className={`text-xs ${isHigher ? 'text-warning' : isLower ? 'text-success' : 'text-muted-foreground'}`}>
-                        {isHigher ? '+' : ''}{season.priceModifier - 100}%
-                      </p>
+                      {diffPercent !== 0 && (
+                        <p className={`text-xs ${isHigher ? 'text-warning' : isLower ? 'text-success' : 'text-muted-foreground'}`}>
+                          {diffPercent > 0 ? '+' : ''}{diffPercent}%
+                        </p>
+                      )}
                     </div>
                   </div>
                 );

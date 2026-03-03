@@ -5,6 +5,18 @@
 
 import { differenceInDays } from 'date-fns';
 
+export interface SeasonalPricingRule {
+  type: string;
+  startMonth: number;
+  startDay: number;
+  endMonth: number;
+  endDay: number;
+  priceModifier: number; // e.g., 120 = +20%, 80 = -20%
+  /** Absolute price per night — takes priority over priceModifier if set */
+  pricePerNight?: number;
+  minNights?: number;
+}
+
 export interface PricingRules {
   pricePerNight: number;
   weeklyDiscount?: number;       // % off for 7+ nights
@@ -14,14 +26,7 @@ export interface PricingRules {
   earlyBookingDays?: number;     // threshold in days ahead
   lastMinuteDiscount?: number;   // % off
   lastMinuteDays?: number;       // threshold in days
-  seasonalPricing?: Array<{
-    type: string;
-    startMonth: number;
-    startDay: number;
-    endMonth: number;
-    endDay: number;
-    priceModifier: number; // e.g., 120 = +20%, 80 = -20%
-  }>;
+  seasonalPricing?: SeasonalPricingRule[];
   depositAmount?: number;
   depositCurrency?: string;
   paymentPolicy?: string;
@@ -85,30 +90,45 @@ function getBestLengthDiscount(
 }
 
 /**
- * Check if a date falls within a seasonal pricing period
+ * Check if a date falls within a seasonal pricing period.
+ * Returns the matching seasonal rule, or null.
  */
-function getSeasonalModifier(
-  checkIn: Date,
-  rules: PricingRules
-): number {
-  if (!rules.seasonalPricing?.length) return 100;
+export function getSeasonalRule(
+  date: Date,
+  seasonalPricing?: SeasonalPricingRule[]
+): SeasonalPricingRule | null {
+  if (!seasonalPricing?.length) return null;
 
-  const month = checkIn.getMonth() + 1;
-  const day = checkIn.getDate();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
 
-  for (const season of rules.seasonalPricing) {
+  for (const season of seasonalPricing) {
     const afterStart = month > season.startMonth || (month === season.startMonth && day >= season.startDay);
     const beforeEnd = month < season.endMonth || (month === season.endMonth && day <= season.endDay);
 
-    // Handle wrap-around (e.g., Nov-Feb)
     if (season.startMonth <= season.endMonth) {
-      if (afterStart && beforeEnd) return season.priceModifier;
+      if (afterStart && beforeEnd) return season;
     } else {
-      if (afterStart || beforeEnd) return season.priceModifier;
+      if (afterStart || beforeEnd) return season;
     }
   }
 
-  return 100;
+  return null;
+}
+
+/**
+ * Get the effective nightly rate for a date given seasonal rules
+ */
+export function getEffectiveNightlyRate(
+  date: Date,
+  basePrice: number,
+  seasonalPricing?: SeasonalPricingRule[]
+): number {
+  const rule = getSeasonalRule(date, seasonalPricing);
+  if (!rule) return basePrice;
+  // Absolute price takes priority
+  if (rule.pricePerNight && rule.pricePerNight > 0) return rule.pricePerNight;
+  return Math.round(basePrice * (rule.priceModifier / 100));
 }
 
 /**
@@ -127,10 +147,15 @@ export function calculatePricing(
 
   const basePrice = rules.pricePerNight;
 
-  // 1. Seasonal adjustment
-  const seasonalMod = getSeasonalModifier(checkIn, rules);
-  const nightlyRate = Math.round(basePrice * (seasonalMod / 100));
-  const subtotal = nightlyRate * nights;
+  // 1. Calculate subtotal with per-day seasonal rates
+  let subtotal = 0;
+  const checkInDate = new Date(checkIn);
+  for (let i = 0; i < nights; i++) {
+    const day = new Date(checkInDate);
+    day.setDate(day.getDate() + i);
+    subtotal += getEffectiveNightlyRate(day, basePrice, rules.seasonalPricing);
+  }
+  const nightlyRate = Math.round(subtotal / nights); // average for display
   const seasonalAdjustment = subtotal - (basePrice * nights);
 
   // 2. Length-of-stay discount
