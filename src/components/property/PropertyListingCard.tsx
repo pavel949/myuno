@@ -32,10 +32,10 @@ const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1613490493576-7fde63ac
 
 const formatPriceLabel = (period: string, lang: string) => {
   const labels: Record<string, { en: string; ru: string }> = {
-    night: { en: '/night', ru: '/ночь' },
-    week: { en: '/week', ru: '/нед' },
-    month: { en: '/mo', ru: '/мес' },
-    year: { en: '/year', ru: '/год' },
+    night: { en: ' night', ru: ' ночь' },
+    week: { en: ' week', ru: ' нед.' },
+    month: { en: ' month', ru: ' мес.' },
+    year: { en: ' year', ru: ' год' },
     total: { en: '', ru: '' },
   };
   return labels[period]?.[lang as 'en' | 'ru'] || '';
@@ -77,16 +77,16 @@ export function PropertyListingCard({
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
-      {/* Image Carousel */}
-      <div className="relative mb-3">
+      {/* Image Carousel — Airbnb style */}
+      <div className="relative">
         <PropertyImageCarousel
           images={images}
           alt={title}
           isHovered={isHovered}
         />
 
-        {/* Favorite */}
-        <div className="absolute top-3 right-3 z-10">
+        {/* Favorite — Airbnb heart */}
+        <div className="absolute top-2.5 right-2.5 z-10">
           <FavoriteButton
             itemType="property"
             itemId={property.id}
@@ -99,19 +99,19 @@ export function PropertyListingCard({
             }}
             size="sm"
             variant="ghost"
-            className="bg-background/80 backdrop-blur-sm hover:bg-background"
+            className="bg-transparent hover:bg-transparent p-0 h-auto [&_svg]:w-6 [&_svg]:h-6 [&_svg]:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
           />
         </div>
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+        {/* Badges — top left */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
           {property.is_featured && (
-            <Badge className="bg-background text-foreground border-0 shadow-sm text-xs">
+            <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
               {isRu ? 'Популярное' : 'Guest favorite'}
             </Badge>
           )}
           {property.instant_booking && (
-            <Badge className="bg-accent-amber text-white border-0 text-xs gap-1">
+            <Badge className="bg-accent-amber text-white border-0 text-[11px] gap-1 rounded-full px-2 py-0.5">
               <Zap className="w-3 h-3" />
               {isRu ? 'Мгновенное' : 'Instant'}
             </Badge>
@@ -119,33 +119,35 @@ export function PropertyListingCard({
         </div>
       </div>
 
-      {/* Content — Airbnb minimal: location, title, price */}
-      <div className="space-y-0.5">
-        {/* District + Rating */}
+      {/* Content — Airbnb minimal style */}
+      <div className="mt-2.5 space-y-0.5">
+        {/* Row 1: District + Rating */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm line-clamp-1">
+          <h3 className="font-semibold text-[15px] leading-tight line-clamp-1 text-foreground">
             {districtDisplay}
           </h3>
           {property.rating != null && property.rating > 0 && (
             <div className="flex items-center gap-1 shrink-0">
-              <Star className="w-3.5 h-3.5 fill-current" />
-              <span className="text-sm">{property.rating.toFixed(1)}</span>
+              <Star className="w-3.5 h-3.5 fill-foreground text-foreground" />
+              <span className="text-sm text-foreground">{property.rating.toFixed(1)}</span>
             </div>
           )}
         </div>
 
-        {/* Title */}
+        {/* Row 2: Title (muted) */}
         <p className="text-sm text-muted-foreground line-clamp-1">{title}</p>
 
-        {/* Price */}
+        {/* Row 3: Price */}
         <div className="pt-1">
-          <p className="text-sm font-semibold">
+          <p className="text-[15px] text-foreground">
             {mode === 'buy' ? (
-              formatPrice((property as any).sale_price || property.price || 0)
+              <span className="font-semibold">
+                {formatPrice((property as any).sale_price || property.price || 0)}
+              </span>
             ) : (
               <>
-                {formatPrice(unitPrice)}
-                <span className="font-normal text-muted-foreground">
+                <span className="font-semibold">{formatPrice(unitPrice)}</span>
+                <span className="font-normal text-foreground/70">
                   {formatPriceLabel(property.price_period || 'night', language)}
                 </span>
               </>
@@ -153,7 +155,7 @@ export function PropertyListingCard({
           </p>
           {/* Total price for selected dates */}
           {totalPrice && nights && mode !== 'buy' && (
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
               {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'} · {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
             </p>
           )}
