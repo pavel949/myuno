@@ -13,8 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Eye, ChevronRight } from 'lucide-react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+// jsPDF and jspdf-autotable are dynamically imported in handleExportPdf
 
 interface DocumentTemplate {
   id: string;
@@ -539,9 +538,11 @@ export default function DocumentTemplatesPage() {
     return body.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key] || `[${key}]`);
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     if (!selectedTemplate) return;
     const filled = fillTemplate(selectedTemplate);
+    const { default: jsPDF } = await import('jspdf');
+    await import('jspdf-autotable');
     const doc = new jsPDF();
     const title = isRu ? selectedTemplate.nameRu : selectedTemplate.nameEn;
     const pageW = doc.internal.pageSize.getWidth();

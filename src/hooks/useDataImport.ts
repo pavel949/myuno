@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import ExcelJS from 'exceljs';
+// ExcelJS is dynamically imported in parseExcel
 import Papa from 'papaparse';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -66,6 +66,7 @@ async function parseCSV(file: File): Promise<{ headers: string[]; rows: Record<s
 // Parse Excel file using ExcelJS (safer than xlsx)
 async function parseExcel(file: File): Promise<{ headers: string[]; rows: Record<string, unknown>[] }> {
   const arrayBuffer = await file.arrayBuffer();
+  const ExcelJS = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
   
   const extension = file.name.toLowerCase().split('.').pop();

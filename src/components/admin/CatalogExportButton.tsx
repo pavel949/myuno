@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-import ExcelJS from 'exceljs';
+// ExcelJS is dynamically imported in exportToExcel
 
 export interface ExportableItem {
   id: string;
@@ -96,6 +96,7 @@ export function CatalogExportButton({
 
     setIsExporting(true);
     try {
+      const ExcelJS = await import('exceljs');
       const workbook = new ExcelJS.Workbook();
       workbook.creator = 'UNO Admin';
       workbook.created = new Date();

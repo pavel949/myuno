@@ -7,9 +7,7 @@ import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Download, ChevronDown, ChevronRight, FileText, FileSpreadsheet, Sheet } from 'lucide-react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import ExcelJS from 'exceljs';
+// jsPDF, jspdf-autotable, and ExcelJS are dynamically imported in export functions
 
 interface Props {
   deals: AgentDeal[];
@@ -120,8 +118,10 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
   };
 
   // ─── PDF Export ───
-  const exportPDF = () => {
+  const exportPDF = async () => {
     const { header, rows, totalRow } = getTableData();
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(14);
     doc.text(isRu ? 'Воронка продаж — Pivot' : 'Sales Pipeline — Pivot', 14, 15);
@@ -150,6 +150,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
   // ─── Excel Export ───
   const exportExcel = async () => {
     const { header, rows, totalRow } = getTableData();
+    const ExcelJS = await import('exceljs');
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('Pipeline Pivot');
 
