@@ -302,6 +302,12 @@ export interface UnifiedPropertyCardProps {
   approvalStatus?: string;
   marketplacePropertyId?: string | null;
   highlights?: string[];
+  // Type-specific fields
+  floor?: number;
+  unitNumber?: string;
+  plotSizeSqm?: number;
+  poolType?: string;
+  totalFloors?: number;
 }
 
 /**
@@ -346,6 +352,11 @@ export function mapPropertyToCardProps(
       approvalStatus: property.approval_status,
       marketplacePropertyId: property.marketplace_property_id,
       highlights: property.highlights,
+      floor: (property as any).floor,
+      unitNumber: (property as any).unit_number,
+      plotSizeSqm: (property as any).plot_size_sqm,
+      poolType: (property as any).pool_type,
+      totalFloors: (property as any).total_floors,
     };
   } else {
     // VendorProperty format (title_en, title_ru)
@@ -374,6 +385,11 @@ export function mapPropertyToCardProps(
       isFeatured: property.is_featured,
       instantBooking: (property as any).instant_booking,
       approvalStatus: (property as any).approval_status,
+      floor: (property as any).floor,
+      unitNumber: (property as any).unit_number,
+      plotSizeSqm: (property as any).plot_size_sqm,
+      poolType: (property as any).pool_type,
+      totalFloors: (property as any).total_floors,
     };
   }
 }

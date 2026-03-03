@@ -15,6 +15,7 @@ import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
 import { toast } from 'sonner';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
+import { getTypeAwareLabels } from '@/lib/propertyTypeConfig';
 
 
 const DISMISS_KEY = 'owner_contact_auto_create_hint_dismissed';
@@ -35,6 +36,7 @@ function ProjectSection({
   setSelectedProject,
   updateFormData,
   formData,
+  projectTypeLabels,
 }: { 
   projectId?: string;
   selectedProject: PropertyProject | null;
@@ -42,6 +44,7 @@ function ProjectSection({
   setSelectedProject: (project: PropertyProject | null) => void;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
   formData: PropertyFormData;
+  projectTypeLabels?: ReturnType<typeof getTypeAwareLabels>;
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -51,12 +54,12 @@ function ProjectSection({
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Building2 className="h-4 w-4" />
-          {isRu ? 'Проект / ЖК' : 'Project / Complex'}
+          {isRu ? (projectTypeLabels?.projectLabelRu || 'Проект / ЖК') : (projectTypeLabels?.projectLabel || 'Project / Complex')}
         </CardTitle>
         <p className="text-xs text-muted-foreground mt-1">
           {isRu 
-            ? 'Выберите проект или жилой комплекс, к которому относится объект. Удобства проекта автоматически наследуются.' 
-            : 'Select the project or complex this property belongs to. Project amenities are inherited automatically.'}
+            ? 'Выберите проект или комплекс, к которому относится объект. Удобства наследуются автоматически.' 
+            : 'Select the project or complex this property belongs to. Amenities are inherited automatically.'}
         </p>
       </CardHeader>
       <CardContent>
@@ -138,6 +141,7 @@ function BasicInfoStepInner({
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { options: propertyTypes } = useTaxonomy('property_type');
+  const typeLabels = getTypeAwareLabels(formData.property_type);
   
   // Hint about auto-creating CRM contact
   const [hintDismissed, setHintDismissed] = useState(() => 
@@ -237,7 +241,7 @@ function BasicInfoStepInner({
             <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label className="flex items-center gap-1">
                 <SquareStack className="h-3 w-3" />
-                {isRu ? 'Площадь (м²)' : 'Area (m²)'}
+                {isRu ? typeLabels.areaLabelRu : typeLabels.areaLabel}
               </Label>
               <Input
                 type="number"
@@ -408,6 +412,7 @@ function BasicInfoStepInner({
       <ProjectSection
         projectId={formData.project_id}
         selectedProject={selectedProject}
+        projectTypeLabels={typeLabels}
         onProjectChange={(projectId, project) => {
           updateFormData({ project_id: projectId });
         }}
