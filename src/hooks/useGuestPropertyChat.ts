@@ -108,6 +108,21 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
           .catch((err) => console.warn('[Chat Notify] Error:', err));
       }
 
+      // AI chat moderation (fire-and-forget)
+      if (data?.id && propertyId) {
+        supabase.functions
+          .invoke('ai-chat-moderator', {
+            body: {
+              message: params.message,
+              messageId: data.id,
+              propertyId,
+              bookingId: bookingId || null,
+              senderId: user.id,
+            },
+          })
+          .catch((err) => console.warn('[AI Moderation] Error:', err));
+      }
+
       // Trigger AI auto-reply asynchronously (fire-and-forget)
       if (propertyId) {
         triggerAutoReply(propertyId, bookingId, params.message, params.senderName);
