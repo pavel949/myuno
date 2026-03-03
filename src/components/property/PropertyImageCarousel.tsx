@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PropertyImageCarouselProps {
@@ -7,11 +8,19 @@ interface PropertyImageCarouselProps {
   alt?: string;
   className?: string;
   isHovered?: boolean;
+  /** Aspect ratio class, default aspect-square */
+  aspectClass?: string;
 }
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600';
 
-export function PropertyImageCarousel({ images, alt = '', className, isHovered }: PropertyImageCarouselProps) {
+export function PropertyImageCarousel({
+  images,
+  alt = '',
+  className,
+  isHovered,
+  aspectClass = 'aspect-square',
+}: PropertyImageCarouselProps) {
   const allImages = images.length > 0 ? images : [FALLBACK_IMAGE];
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -32,10 +41,22 @@ export function PropertyImageCarousel({ images, alt = '', className, isHovered }
     return () => { emblaApi.off('select', onSelect); };
   }, [emblaApi, onSelect]);
 
-  // Only show carousel if more than 1 image
+  const scrollPrev = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    emblaApi?.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    emblaApi?.scrollNext();
+  }, [emblaApi]);
+
+  // Single image — no carousel
   if (allImages.length === 1) {
     return (
-      <div className={cn("aspect-square rounded-2xl overflow-hidden", className)}>
+      <div className={cn(aspectClass, "rounded-xl overflow-hidden", className)}>
         <img
           src={allImages[0]}
           alt={alt}
@@ -50,7 +71,7 @@ export function PropertyImageCarousel({ images, alt = '', className, isHovered }
   }
 
   return (
-    <div className={cn("aspect-square rounded-2xl overflow-hidden relative group/carousel", className)}>
+    <div className={cn(aspectClass, "rounded-xl overflow-hidden relative group/carousel", className)}>
       <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {allImages.slice(0, 5).map((img, i) => (
@@ -69,16 +90,50 @@ export function PropertyImageCarousel({ images, alt = '', className, isHovered }
         </div>
       </div>
 
+      {/* Airbnb-style navigation arrows — visible on hover */}
+      {allImages.length > 1 && (
+        <>
+          <button
+            onClick={scrollPrev}
+            className={cn(
+              "absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
+              "flex items-center justify-center",
+              "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
+              "hover:bg-background hover:shadow-lg hover:scale-105",
+              "disabled:opacity-0",
+              selectedIndex === 0 && "hidden"
+            )}
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-4 h-4 text-foreground" />
+          </button>
+          <button
+            onClick={scrollNext}
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
+              "flex items-center justify-center",
+              "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
+              "hover:bg-background hover:shadow-lg hover:scale-105",
+              "disabled:opacity-0",
+              selectedIndex === allImages.length - 1 && "hidden"
+            )}
+            aria-label="Next"
+          >
+            <ChevronRight className="w-4 h-4 text-foreground" />
+          </button>
+        </>
+      )}
+
       {/* Dots */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
         {allImages.slice(0, 5).map((_, i) => (
           <button
             key={i}
             className={cn(
-              "w-1.5 h-1.5 rounded-full transition-all",
+              "rounded-full transition-all",
               selectedIndex === i
-                ? "bg-white w-2 h-2"
-                : "bg-white/60"
+                ? "bg-white w-[6px] h-[6px]"
+                : "bg-white/50 w-[5px] h-[5px]"
             )}
             onClick={(e) => {
               e.preventDefault();

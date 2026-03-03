@@ -264,7 +264,7 @@ export default function PropertyIndex() {
                   {isRu ? 'Карта' : 'Map'}
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
                 {filteredProperties.slice(0, 20).map((property) => (
                   <PropertyListingCard key={property.id} property={property} mode={propertyMode} />
                 ))}
