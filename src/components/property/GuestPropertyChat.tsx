@@ -174,13 +174,13 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
             <MessageCircle className="w-10 h-10 text-muted-foreground/50 mb-3" />
             <p className="text-muted-foreground text-sm">
               {isRu 
-                ? 'Задайте вопрос или обсудите детали бронирования' 
-                : 'Ask a question or discuss booking details'}
+                ? 'Задайте вопрос хозяину об этом объекте' 
+                : 'Ask the host a question about this property'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {isRu 
-                ? 'Обычно отвечают в течение часа' 
-                : 'Usually responds within an hour'}
+                ? 'Хозяин получит уведомление по email' 
+                : 'The host will be notified by email'}
             </p>
           </div>
         ) : (
