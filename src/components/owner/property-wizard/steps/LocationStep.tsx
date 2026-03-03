@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { MapPin, AlertTriangle } from 'lucide-react';
+import { MapPin, AlertTriangle, Lock, EyeOff } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
@@ -19,87 +19,121 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
   const isRu = language === 'ru';
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <MapPin className="h-4 w-4" />
-          {isRu ? 'Расположение' : 'Location'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
-          <Input
-            value={formData.address}
-            onChange={(e) => updateFormData({ address: e.target.value })}
-            placeholder="123 Beach Road, Patong"
-          />
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            {isRu ? 'Расположение' : 'Location'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
+            <Input
+              value={formData.address}
+              onChange={(e) => updateFormData({ address: e.target.value })}
+              placeholder="123 Beach Road, Patong"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label>{isRu ? 'Район' : 'District'}</Label>
-          <Select 
-            value={formData.district}
-            onValueChange={(value) => {
-              const district = PHUKET_DISTRICTS.find(d => d.id === value);
-              const updates: Partial<PropertyFormData> = { district: value };
-              // Auto-fill address if empty
-              if (!formData.address.trim() && district) {
-                updates.address = `${isRu ? district.labelRu : district.labelEn}, Phuket`;
-              }
-              updateFormData(updates);
+          <div className="space-y-2">
+            <Label>{isRu ? 'Район' : 'District'}</Label>
+            <Select 
+              value={formData.district}
+              onValueChange={(value) => {
+                const district = PHUKET_DISTRICTS.find(d => d.id === value);
+                const updates: Partial<PropertyFormData> = { district: value };
+                if (!formData.address.trim() && district) {
+                  updates.address = `${isRu ? district.labelRu : district.labelEn}, Phuket`;
+                }
+                updateFormData(updates);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
+              </SelectTrigger>
+              <SelectContent>
+                {[...PHUKET_DISTRICTS]
+                  .sort((a, b) => {
+                    const labelA = isRu ? a.labelRu : a.labelEn;
+                    const labelB = isRu ? b.labelRu : b.labelEn;
+                    return labelA.localeCompare(labelB, isRu ? 'ru' : 'en');
+                  })
+                  .map((district) => (
+                  <SelectItem key={district.id} value={district.id}>
+                    {isRu ? district.labelRu : district.labelEn}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <ProjectLocationPicker
+            value={formData.lat && formData.lng ? { 
+              lat: formData.lat, 
+              lng: formData.lng, 
+              address: formData.address 
+            } : undefined}
+            onChange={(location) => {
+              updateFormData({
+                lat: location.lat,
+                lng: location.lng,
+                address: location.address || formData.address,
+              });
             }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
-            </SelectTrigger>
-            <SelectContent>
-              {[...PHUKET_DISTRICTS]
-                .sort((a, b) => {
-                  const labelA = isRu ? a.labelRu : a.labelEn;
-                  const labelB = isRu ? b.labelRu : b.labelEn;
-                  return labelA.localeCompare(labelB, isRu ? 'ru' : 'en');
-                })
-                .map((district) => (
-                <SelectItem key={district.id} value={district.id}>
-                  {isRu ? district.labelRu : district.labelEn}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          />
 
-        <ProjectLocationPicker
-          value={formData.lat && formData.lng ? { 
-            lat: formData.lat, 
-            lng: formData.lng, 
-            address: formData.address 
-          } : undefined}
-          onChange={(location) => {
-            updateFormData({
-              lat: location.lat,
-              lng: location.lng,
-              address: location.address || formData.address,
-            });
-          }}
-        />
+          {formData.lat && formData.lng ? (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+            </p>
+          ) : (
+            <Alert variant="default" className="bg-warning/10 border-warning/30">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <AlertDescription className="text-xs">
+                {isRu 
+                  ? 'Укажите точку на карте — без координат объект не появится в поиске на карте' 
+                  : 'Pin a location on the map — without coordinates the property won\'t appear in map search'}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
-        {formData.lat && formData.lng ? (
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+      {/* Smart Lock / Access Code */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            {isRu ? 'Электронный замок' : 'Smart Lock'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              {isRu ? 'Код доступа' : 'Access Code'}
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-normal">
+                <EyeOff className="h-3 w-3" />
+                {isRu ? 'не виден гостю' : 'hidden from guest'}
+              </span>
+            </Label>
+            <Input
+              type="password"
+              value={formData.lock_code || ''}
+              onChange={(e) => updateFormData({ lock_code: e.target.value })}
+              placeholder={isRu ? 'Код замка или пин-код' : 'Lock code or PIN'}
+              autoComplete="off"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {isRu 
+              ? 'Код хранится в зашифрованном виде и доступен только управляющим. Гости не видят это поле.' 
+              : 'The code is stored securely and only visible to managers. Guests cannot see this field.'}
           </p>
-        ) : (
-          <Alert variant="default" className="bg-warning/10 border-warning/30">
-            <AlertTriangle className="h-4 w-4 text-warning" />
-            <AlertDescription className="text-xs">
-              {isRu 
-                ? 'Укажите точку на карте — без координат объект не появится в поиске на карте' 
-                : 'Pin a location on the map — without coordinates the property won\'t appear in map search'}
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -14182,6 +14182,7 @@ export type Database = {
           listing_type: string
           lng: number | null
           location_id: string | null
+          lock_code: string | null
           managed_by: string | null
           managed_by_org_id: string | null
           management_company_id: string | null
@@ -14395,6 +14396,7 @@ export type Database = {
           listing_type: string
           lng?: number | null
           location_id?: string | null
+          lock_code?: string | null
           managed_by?: string | null
           managed_by_org_id?: string | null
           management_company_id?: string | null
@@ -14608,6 +14610,7 @@ export type Database = {
           listing_type?: string
           lng?: number | null
           location_id?: string | null
+          lock_code?: string | null
           managed_by?: string | null
           managed_by_org_id?: string | null
           management_company_id?: string | null
