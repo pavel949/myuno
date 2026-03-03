@@ -62,7 +62,7 @@ export function UserRolesPermissions() {
   });
 
   // Hide technical/system roles that don't carry meaning for end users
-  const HIDDEN_ROLES: AppRole[] = ['user', 'staff', 'owner', 'property_owner'];
+  const HIDDEN_ROLES: AppRole[] = ['user', 'staff', 'owner'];
   const visibleRoles = activeRoles.filter(r => !HIDDEN_ROLES.includes(r));
 
   if (visibleRoles.length === 0 && memberships.length === 0) return null;

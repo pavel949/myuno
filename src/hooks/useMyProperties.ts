@@ -65,7 +65,7 @@ export function useMyProperties() {
   const { hasRole } = useUserContext();
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id || null;
-  const isOwner = hasRole('owner') || hasRole('property_owner');
+  const isOwner = hasRole('owner');
   const isManager = hasRole('property_manager');
 
   const { data: ownedRaw, isLoading: ownedLoading } = useOwnerProperties();

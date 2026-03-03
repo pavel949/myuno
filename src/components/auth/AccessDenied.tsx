@@ -54,7 +54,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
     if (requiredRoles.includes('vendor') || requiredRoles.includes('partner')) {
       return '/vendor/onboarding';
     }
-    if (requiredRoles.includes('owner') || requiredRoles.includes('property_owner')) {
+    if (requiredRoles.includes('owner')) {
       return '/owner/onboarding';
     }
     return null;
@@ -69,7 +69,6 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
       case 'partner':
         return Store;
       case 'owner':
-      case 'property_owner':
         return Building2;
       case 'admin':
       case 'staff':

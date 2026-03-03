@@ -31,7 +31,6 @@ const ROLE_ICONS: Partial<Record<AppRole, React.ComponentType<{ className?: stri
   user: User,
   vendor: Store,
   owner: Building2,
-  property_owner: Building2,
   admin: Shield,
   staff: UserCog,
   uno_team: Headphones,

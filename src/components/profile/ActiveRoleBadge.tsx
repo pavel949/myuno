@@ -106,13 +106,6 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     color: 'text-teal',
     bgColor: 'bg-teal/10',
   },
-  property_owner: {
-    icon: Building2,
-    labelEn: 'Property Owner',
-    labelRu: 'Собственник',
-    color: 'text-teal',
-    bgColor: 'bg-teal/10',
-  },
   vendor: {
     icon: Store,
     labelEn: 'Provider',
