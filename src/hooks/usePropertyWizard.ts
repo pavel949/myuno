@@ -269,7 +269,7 @@ export function usePropertyWizard() {
         view_type: sourceProperty.view_type || '',
         furnishing_level: sourceProperty.furnishing_level || '',
         equipment: sourceProperty.equipment || [],
-        price_per_night: sourceProperty.price_per_night?.toString() || '',
+        price_per_night: sourceProperty.price_per_night ? sourceProperty.price_per_night.toString() : '',
         min_stay_nights: sourceProperty.min_stay_nights || 1,
         max_guests: sourceProperty.max_guests || 2,
         deposit_amount: sourceProperty.deposit_amount?.toString() || '',

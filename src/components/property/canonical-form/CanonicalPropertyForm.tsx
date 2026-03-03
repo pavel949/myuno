@@ -155,7 +155,7 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     view_type: data.view_type || '',
     furnishing_level: data.furnishing_level || '',
     equipment: data.equipment || [],
-    price_per_night: data.price_per_night || String(data.price || ''),
+    price_per_night: (data.price_per_night && data.price_per_night !== '0') ? data.price_per_night : (data.price ? String(data.price) : ''),
     min_stay_nights: data.min_stay_nights || 1,
     max_guests: data.max_guests || 2,
     deposit_amount: data.deposit_amount || '',

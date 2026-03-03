@@ -30,6 +30,8 @@ export const COMPLEX_AMENITIES = [
   { value: 'library', labelEn: 'Library', labelRu: 'Библиотека', icon: '📚' },
   { value: 'beach_access', labelEn: 'Beach Access', labelRu: 'Доступ к пляжу', icon: '🏖️' },
   { value: 'communal_kitchen', labelEn: 'Communal Kitchen', labelRu: 'Общая кухня', icon: '🍳' },
+  { value: 'golf', labelEn: 'Golf Course', labelRu: 'Гольф', icon: '⛳' },
+  { value: 'cinema', labelEn: 'Cinema', labelRu: 'Кинотеатр', icon: '🎬' },
 ] as const;
 
 export const COMPLEX_SERVICES = [
