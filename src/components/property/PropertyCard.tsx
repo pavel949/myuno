@@ -436,13 +436,13 @@ function ListVariant({
           </div>
 
           {/* Actions */}
-          <div className="p-2 flex items-start" onClick={(e) => e.stopPropagation()}>
+          <div className="p-2 flex items-start flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             {mode === 'owner' && onEdit && onView && (
               <div className="flex flex-col gap-1">
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="h-7 text-xs px-2"
+                  className="h-7 text-xs px-2 whitespace-nowrap"
                   onClick={() => onEdit(property.id)}
                 >
                   <Pencil className="h-3 w-3" />
@@ -451,7 +451,7 @@ function ListVariant({
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="h-7 text-xs"
+                  className="h-7 text-xs whitespace-nowrap"
                   onClick={() => onView(property.id)}
                 >
                   <Eye className="h-3 w-3 mr-1" />
