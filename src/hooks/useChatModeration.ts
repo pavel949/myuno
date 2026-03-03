@@ -135,9 +135,12 @@ export function useChatModeration(propertyId?: string) {
         .from('chat_violation_history')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // PGRST116 = no rows returned — non-blocking
+      if (error) {
+        console.warn('chat_violation_history query error:', error.message);
+        return null;
+      }
       return data;
     },
     enabled: !!user,
