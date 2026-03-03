@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -16,7 +16,8 @@ import {
   FileCheck,
   Plus,
   Users,
-  MessageCircle
+  MessageCircle,
+  LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,6 +26,7 @@ import { triggerRipple } from '@/hooks/useRipple';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
+import { AllAppsDrawer } from './AllAppsDrawer';
 
 type NavItem = {
   path: string;
@@ -33,15 +35,16 @@ type NavItem = {
   labelRu: string;
 };
 
-// Guest/User navigation — 4 tabs: Home / Discover / Market / Me
+// Guest/User navigation — 4 tabs + center apps button
 const guestNavItems: NavItem[] = [
   { path: '/', icon: Home, labelEn: 'Home', labelRu: 'Главная' },
   { path: '/discover', icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
+  // Center slot is for "Apps" button (handled separately)
   { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
   { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
 
-// Owner/Host navigation — 4 tabs (Profile accessible via header)
+// Owner/Host navigation
 const ownerNavItems: NavItem[] = [
   { path: '/mc', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/mc/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
@@ -104,13 +107,18 @@ function shouldHideBottomNav(pathname: string): boolean {
   return routesWithOwnBottomBar.some(route => pathname.includes(route));
 }
 
-function getNavItemsForPath(pathname: string): NavItem[] {
-  if (pathname.includes('/onboarding')) return guestNavItems;
-  if (pathname.startsWith('/admin')) return adminNavItems;
-  if (pathname.startsWith('/owner')) return ownerNavItems;
-  if (pathname.startsWith('/vendor')) return vendorNavItems;
-  if (pathname.startsWith('/team')) return teamNavItems;
-  return guestNavItems;
+type NavConfig = {
+  items: NavItem[];
+  showAppsButton: boolean;
+};
+
+function getNavConfigForPath(pathname: string): NavConfig {
+  if (pathname.includes('/onboarding')) return { items: guestNavItems, showAppsButton: true };
+  if (pathname.startsWith('/admin')) return { items: adminNavItems, showAppsButton: false };
+  if (pathname.startsWith('/owner')) return { items: ownerNavItems, showAppsButton: false };
+  if (pathname.startsWith('/vendor')) return { items: vendorNavItems, showAppsButton: false };
+  if (pathname.startsWith('/team')) return { items: teamNavItems, showAppsButton: false };
+  return { items: guestNavItems, showAppsButton: true };
 }
 
 export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -118,6 +126,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
     const { language } = useLanguage();
     const location = useLocation();
     const { prefetchRoute } = usePrefetchRoute();
+    const [appsOpen, setAppsOpen] = useState(false);
 
     const handlePrefetch = useCallback((path: string) => {
       prefetchRoute(path);
@@ -128,7 +137,7 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       return null;
     }
 
-    const navItems = getNavItemsForPath(location.pathname);
+    const { items: navItems, showAppsButton } = getNavConfigForPath(location.pathname);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       triggerRipple(e);
@@ -149,45 +158,104 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       return location.pathname.startsWith(itemPath);
     };
 
+    // Split guest items for center button insertion
+    const leftItems = showAppsButton ? navItems.slice(0, 2) : navItems;
+    const rightItems = showAppsButton ? navItems.slice(2) : [];
+    const gridCols = showAppsButton ? 'grid-cols-5' : `grid-cols-${navItems.length}`;
+
     return (
-      <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 md:hidden" {...props}>
-        {/* Clean backdrop */}
-        <div className="absolute inset-0 bg-card/95 backdrop-blur-xl border-t border-border/40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" />
-        
-        {/* Nav items — Figma style with gradient active */}
-        <div className="relative grid grid-cols-4 gap-1 h-16 px-2 py-2.5 max-w-[390px] mx-auto">
-          {navItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
-            const active = isActive(path);
-            
-            return (
-              <NavLink
-                key={path}
-                to={path}
-                onClick={handleNavClick}
-                onMouseEnter={() => handlePrefetch(path)}
-                onTouchStart={() => handlePrefetch(path)}
+      <>
+        <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 md:hidden" {...props}>
+          {/* Clean backdrop */}
+          <div className="absolute inset-0 bg-card/95 backdrop-blur-xl border-t border-border/40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" />
+          
+          {/* Nav items */}
+          <div className={cn("relative grid gap-1 h-16 px-2 py-2.5 max-w-[420px] mx-auto", gridCols)}>
+            {/* Left items */}
+            {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
+              const active = isActive(path);
+              return (
+                <NavLink
+                  key={path}
+                  to={path}
+                  onClick={handleNavClick}
+                  onMouseEnter={() => handlePrefetch(path)}
+                  onTouchStart={() => handlePrefetch(path)}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
+                    active
+                      ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
+                  )}
+                >
+                  <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
+                  <span className={cn(
+                    "text-[10px] whitespace-nowrap",
+                    active ? "font-bold" : "font-medium"
+                  )}>
+                    {language === 'ru' ? labelRu : labelEn}
+                  </span>
+                </NavLink>
+              );
+            })}
+
+            {/* Center Apps button */}
+            {showAppsButton && (
+              <button
+                onClick={(e) => {
+                  handleNavClick(e);
+                  setAppsOpen(true);
+                }}
                 className={cn(
                   "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
-                  active
-                    ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
+                  "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
                 )}
               >
-                <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
-                <span className={cn(
-                  "text-[10px]",
-                  active ? "font-bold" : "font-medium"
-                )}>
-                  {language === 'ru' ? labelRu : labelEn}
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center -mt-1">
+                  <LayoutGrid className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-[10px] font-medium whitespace-nowrap -mt-0.5">
+                  {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
-              </NavLink>
-            );
-          })}
-        </div>
-        
-        {/* Safe area */}
-        <div className="h-safe-area-inset-bottom bg-card/95" />
-      </nav>
+              </button>
+            )}
+
+            {/* Right items */}
+            {rightItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
+              const active = isActive(path);
+              return (
+                <NavLink
+                  key={path}
+                  to={path}
+                  onClick={handleNavClick}
+                  onMouseEnter={() => handlePrefetch(path)}
+                  onTouchStart={() => handlePrefetch(path)}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
+                    active
+                      ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
+                  )}
+                >
+                  <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
+                  <span className={cn(
+                    "text-[10px] whitespace-nowrap",
+                    active ? "font-bold" : "font-medium"
+                  )}>
+                    {language === 'ru' ? labelRu : labelEn}
+                  </span>
+                </NavLink>
+              );
+            })}
+          </div>
+          
+          {/* Safe area */}
+          <div className="h-safe-area-inset-bottom bg-card/95" />
+        </nav>
+
+        {/* All Apps Drawer */}
+        <AllAppsDrawer open={appsOpen} onOpenChange={setAppsOpen} />
+      </>
     );
   }
 );
