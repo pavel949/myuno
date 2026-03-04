@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export type LeadStatus = 'pending' | 'contacted' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 export type LeadRequestType = 'vacation_rental' | 'property_consultation' | 'property_tour' | 'full_management' | 'investment_advice';
@@ -79,7 +80,8 @@ export function useTeamLeads(filters?: LeadFilters) {
       }
 
       if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
       }
 
       const { data, error } = await query;

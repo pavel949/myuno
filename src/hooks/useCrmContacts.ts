@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface CrmContact {
   id: string;
@@ -103,8 +104,8 @@ export function useCrmContacts(
 
       // Server-side search
       if (filters?.search && filters.search.trim().length >= 2) {
-        const s = filters.search.trim().toLowerCase();
-        q = q.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) q = q.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
       }
 
       // Server-side type filter
@@ -214,7 +215,8 @@ export function useContactSearch(companyId: string | undefined, query: string) {
   return useQuery({
     queryKey: ['crm-contact-search', companyId, query],
     queryFn: async (): Promise<CrmContact[]> => {
-      const q = query.trim().toLowerCase();
+      const q = sanitizeSearchTerm(query);
+      if (!q) return [];
       const { data, error } = await supabase
         .from('crm_contacts')
         .select('*')

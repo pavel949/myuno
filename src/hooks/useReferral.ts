@@ -31,62 +31,6 @@ export const useReferral = () => {
     totalEarned: 0,
   });
 
-  const loadReferralCode = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .rpc('generate_referral_code', { p_user_id: user.id });
-
-      if (error) throw error;
-      setReferralCode(data);
-    } catch (error) {
-      console.error('Error loading referral code:', error);
-    }
-  }, [user]);
-
-  const loadReferrals = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('referrals')
-        .select('*')
-        .eq('referrer_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      const referralData = data || [];
-      setReferrals(referralData);
-      
-      // Calculate stats
-      const completed = referralData.filter(r => r.status === 'completed');
-      setStats({
-        totalReferrals: referralData.length,
-        completedReferrals: completed.length,
-        totalEarned: completed.reduce((sum, r) => sum + Number(r.referrer_bonus), 0),
-      });
-    } catch (error) {
-      console.error('Error loading referrals:', error);
-    }
-  }, [user]);
-
-  const loadSettings = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('referral_settings')
-        .select('*')
-        .eq('is_active', true)
-        .single();
-
-      if (error) throw error;
-      setSettings(data);
-    } catch (error) {
-      console.error('Error loading referral settings:', error);
-    }
-  }, []);
-
   const applyReferralCode = useCallback(async (code: string): Promise<boolean> => {
     if (!user) return false;
 
@@ -144,57 +88,64 @@ export const useReferral = () => {
       setIsLoading(true);
       
       try {
-        // Load referral code
-        const { data: codeData, error: codeError } = await supabase
-          .rpc('generate_referral_code', { p_user_id: user.id });
+        const [codeRes, referralRes, settingsRes] = await Promise.all([
+          supabase.rpc('generate_referral_code', { p_user_id: user.id }),
+          supabase
+            .from('referrals')
+            .select('*')
+            .eq('referrer_id', user.id)
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('referral_settings')
+            .select('*')
+            .eq('is_active', true)
+            .single(),
+        ]);
+
+        if (!isMounted) return;
+
+        if (!codeRes.error) setReferralCode(codeRes.data);
         
-        if (!codeError && isMounted) {
-          setReferralCode(codeData);
-        }
-        
-        // Load referrals
-        const { data: referralData, error: referralError } = await supabase
-          .from('referrals')
-          .select('*')
-          .eq('referrer_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (!referralError && isMounted) {
-          const referrals = referralData || [];
-          setReferrals(referrals);
-          
-          const completed = referrals.filter(r => r.status === 'completed');
+        if (!referralRes.error) {
+          const list = referralRes.data || [];
+          setReferrals(list);
+          const completed = list.filter(r => r.status === 'completed');
           setStats({
-            totalReferrals: referrals.length,
+            totalReferrals: list.length,
             completedReferrals: completed.length,
             totalEarned: completed.reduce((sum, r) => sum + Number(r.referrer_bonus), 0),
           });
         }
-        
-        // Load settings
-        const { data: settingsData, error: settingsError } = await supabase
-          .from('referral_settings')
-          .select('*')
-          .eq('is_active', true)
-          .single();
-        
-        if (!settingsError && isMounted) {
-          setSettings(settingsData);
-        }
+
+        if (!settingsRes.error) setSettings(settingsRes.data);
       } catch (error) {
         console.error('Error loading referral data:', error);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadData();
-    
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
+  }, [user]);
+
+  const refetch = useCallback(async () => {
+    if (!user) return;
+    const [codeRes, referralRes] = await Promise.all([
+      supabase.rpc('generate_referral_code', { p_user_id: user.id }),
+      supabase.from('referrals').select('*').eq('referrer_id', user.id).order('created_at', { ascending: false }),
+    ]);
+    if (!codeRes.error) setReferralCode(codeRes.data);
+    if (!referralRes.error) {
+      const list = referralRes.data || [];
+      setReferrals(list);
+      const completed = list.filter(r => r.status === 'completed');
+      setStats({
+        totalReferrals: list.length,
+        completedReferrals: completed.length,
+        totalEarned: completed.reduce((sum, r) => sum + Number(r.referrer_bonus), 0),
+      });
+    }
   }, [user]);
 
   return {
@@ -207,6 +158,6 @@ export const useReferral = () => {
     getShareLink,
     copyReferralCode,
     copyShareLink,
-    refetch: () => Promise.all([loadReferralCode(), loadReferrals()]),
+    refetch,
   };
 };

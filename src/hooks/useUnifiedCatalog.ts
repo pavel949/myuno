@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export type CatalogItemType = 'service' | 'product' | 'property';
 
@@ -54,7 +55,8 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
           servicesQuery = servicesQuery.eq('created_by_uno_team', filters.createdByAdmin);
         }
         if (filters.search) {
-          servicesQuery = servicesQuery.or(`name_en.ilike.%${filters.search}%,name_ru.ilike.%${filters.search}%`);
+          const ss = sanitizeSearchTerm(filters.search);
+          if (ss) servicesQuery = servicesQuery.or(`name_en.ilike.%${ss}%,name_ru.ilike.%${ss}%`);
         }
 
         const { data: services, error: servicesError } = await servicesQuery;
@@ -90,7 +92,8 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (filters.status === 'inactive') productsQuery = productsQuery.eq('is_active', false);
         if (filters.status === 'featured') productsQuery = productsQuery.eq('is_popular', true);
         if (filters.search) {
-          productsQuery = productsQuery.or(`name_en.ilike.%${filters.search}%,name_ru.ilike.%${filters.search}%`);
+          const sp = sanitizeSearchTerm(filters.search);
+          if (sp) productsQuery = productsQuery.or(`name_en.ilike.%${sp}%,name_ru.ilike.%${sp}%`);
         }
 
         const { data: products, error: productsError } = await productsQuery;
@@ -128,7 +131,8 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (filters.status === 'featured') propertiesQuery = propertiesQuery.eq('is_featured', true);
         if (filters.providerId) propertiesQuery = propertiesQuery.eq('provider_id', filters.providerId);
         if (filters.search) {
-          propertiesQuery = propertiesQuery.or(`title_en.ilike.%${filters.search}%,title_ru.ilike.%${filters.search}%`);
+          const sprp = sanitizeSearchTerm(filters.search);
+          if (sprp) propertiesQuery = propertiesQuery.or(`title_en.ilike.%${sprp}%,title_ru.ilike.%${sprp}%`);
         }
 
         const { data: properties, error: propertiesError } = await propertiesQuery;

@@ -61,7 +61,7 @@ export const useLoyalty = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLoyaltyData = useCallback(async () => {
+  const loadLoyaltyData = useCallback(async (signal?: AbortSignal) => {
     if (!user) {
       setData(null);
       setIsLoading(false);
@@ -132,30 +132,38 @@ export const useLoyalty = () => {
         return [];
       };
 
-      setData({
-        status: statusData.status,
-        currentTier: {
-          ...statusData.current_tier,
-          benefits: parseBenefits(statusData.current_tier.benefits),
-        },
-        nextTier: statusData.next_tier ? {
-          ...statusData.next_tier,
-          benefits: parseBenefits(statusData.next_tier.benefits),
-        } : null,
-        achievements: (achievements || []) as Achievement[],
-        allAchievements: (allAchievements || []) as AchievementDefinition[],
-        progressToNextTier,
-        amountToNextTier,
-      });
+      if (!signal?.aborted) {
+        setData({
+          status: statusData.status,
+          currentTier: {
+            ...statusData.current_tier,
+            benefits: parseBenefits(statusData.current_tier.benefits),
+          },
+          nextTier: statusData.next_tier ? {
+            ...statusData.next_tier,
+            benefits: parseBenefits(statusData.next_tier.benefits),
+          } : null,
+          achievements: (achievements || []) as Achievement[],
+          allAchievements: (allAchievements || []) as AchievementDefinition[],
+          progressToNextTier,
+          amountToNextTier,
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load loyalty data');
+      if (!signal?.aborted) {
+        setError(err instanceof Error ? err.message : 'Failed to load loyalty data');
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [user]);
 
   useEffect(() => {
-    loadLoyaltyData();
+    const controller = new AbortController();
+    loadLoyaltyData(controller.signal);
+    return () => controller.abort();
   }, [loadLoyaltyData]);
 
   const refetch = useCallback(() => {
