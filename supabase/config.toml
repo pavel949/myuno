@@ -85,6 +85,10 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.intake-listing-agent]
     verify_jwt = false
+  [functions.lifeos-ai-analyst]
+    verify_jwt = false
+  [functions.lifeos-ai-fix]
+    verify_jwt = false
   [functions.invite-team-member]
     verify_jwt = false
   [functions.leads-factory]
