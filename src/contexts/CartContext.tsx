@@ -240,19 +240,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = async (id: string) => {
+    const previousItems = [...items];
+    // Optimistic update
+    setItems(prev => prev.filter(item => item.id !== id));
+
     if (user) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('cart_items')
           .delete()
           .eq('user_id', user.id)
           .eq('item_id', id);
+        if (error) throw error;
       } catch (error) {
+        // Rollback on failure
+        setItems(previousItems);
         errorLog.silent(error, 'remove_item_from_cart');
       }
     }
-
-    setItems(prev => prev.filter(item => item.id !== id));
   };
 
   const updateQuantity = async (id: string, quantity: number) => {
@@ -261,21 +266,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const previousItems = [...items];
+    // Optimistic update
+    setItems(prev => prev.map(item => 
+      item.id === id ? { ...item, quantity } : item
+    ));
+
     if (user) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('cart_items')
           .update({ quantity })
           .eq('user_id', user.id)
           .eq('item_id', id);
+        if (error) throw error;
       } catch (error) {
+        // Rollback on failure
+        setItems(previousItems);
         errorLog.silent(error, 'update_item_quantity');
       }
     }
-
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity } : item
-    ));
   };
 
   const clearCart = async () => {
