@@ -45,13 +45,17 @@ interface UseLifeOSAIInsightsOptions {
 export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const isRu = language === 'ru';
   const [isLoading, setIsLoading] = useState(false);
+  const [isFixing, setIsFixing] = useState<string | null>(null); // tracks which suggestion index is being fixed
+  const [fixResults, setFixResults] = useState<Record<number, { success: boolean; actions: string[] }>>({});
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const runAnalysis = useCallback(async (mode: AnalysisMode) => {
     setIsLoading(true);
     setError(null);
+    setFixResults({});
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('lifeos-ai-analyst', {
@@ -68,19 +72,18 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
       }
 
       if (data.error) {
-        // Handle specific error codes
         if (data.error.includes('Rate limit')) {
           toast({
-            title: language === 'ru' ? 'Превышен лимит' : 'Rate Limited',
-            description: language === 'ru' 
+            title: isRu ? 'Превышен лимит' : 'Rate Limited',
+            description: isRu 
               ? 'Слишком много запросов. Попробуйте позже.'
               : 'Too many requests. Please try again later.',
             variant: 'destructive',
           });
         } else if (data.error.includes('credits')) {
           toast({
-            title: language === 'ru' ? 'Кредиты исчерпаны' : 'Credits Exhausted',
-            description: language === 'ru'
+            title: isRu ? 'Кредиты исчерпаны' : 'Credits Exhausted',
+            description: isRu
               ? 'Свяжитесь с администратором.'
               : 'Please contact the administrator.',
             variant: 'destructive',
@@ -92,8 +95,8 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
       setResult(data as AnalysisResult);
       
       toast({
-        title: language === 'ru' ? 'Анализ завершён' : 'Analysis Complete',
-        description: language === 'ru'
+        title: isRu ? 'Анализ завершён' : 'Analysis Complete',
+        description: isRu
           ? `Найдено ${data.suggestions?.length || 0} рекомендаций`
           : `Found ${data.suggestions?.length || 0} suggestions`,
       });
@@ -105,18 +108,56 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [options.situationCode, options.entityType, language, toast]);
+  }, [options.situationCode, options.entityType, language, toast, isRu]);
+
+  const applySuggestion = useCallback(async (suggestion: AISuggestion, index: number) => {
+    setIsFixing(String(index));
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('lifeos-ai-fix', {
+        body: { suggestion, language },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+
+      if (data.error) throw new Error(data.error);
+
+      setFixResults(prev => ({ ...prev, [index]: { success: data.success, actions: data.actions } }));
+
+      toast({
+        title: data.success
+          ? (isRu ? 'Исправление применено' : 'Fix Applied')
+          : (isRu ? 'Частично применено' : 'Partially Applied'),
+        description: data.actions?.[0] || '',
+        variant: data.success ? 'default' : 'destructive',
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Fix failed';
+      setFixResults(prev => ({ ...prev, [index]: { success: false, actions: [message] } }));
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsFixing(null);
+    }
+  }, [language, toast, isRu]);
 
   const clearResult = useCallback(() => {
     setResult(null);
     setError(null);
+    setFixResults({});
   }, []);
 
   return {
     isLoading,
+    isFixing,
+    fixResults,
     result,
     error,
     runAnalysis,
+    applySuggestion,
     clearResult,
   };
 }
