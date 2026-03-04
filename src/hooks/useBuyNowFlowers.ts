@@ -34,12 +34,15 @@ export function useBuyNowFlowers() {
       ? `${sizeVariant.label_en} (${size})` 
       : size;
 
+    // Use sizeVariant price if available, fallback to bouquet base price
+    const resolvedPrice = sizeVariant?.price ?? bouquet.price;
+
     const buyNowItem: FlowersBuyNowItem = {
       id: `bouquet-${bouquet.id}-${size}`,
       type: 'flowers',
       name: `${bouquet.name_en} (${size})`,
       nameRu: `${bouquet.name_ru} (${sizeLabel})`,
-      price: bouquet.price,
+      price: resolvedPrice,
       currency: bouquet.currency || 'THB',
       image: bouquet.image || undefined,
       providerId: bouquet.shop?.provider_id || 'flowers-shop',
