@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CalendarDays, Crown, CreditCard, DollarSign,
   Users, Zap, FileText as FileTextIcon, Calendar, BarChart3 as DashboardIcon,
-  LogOut, ContactRound, Home, ChevronDown, TrendingUp, Wrench, PackageOpen,
+  ContactRound, Home, ChevronDown, TrendingUp, Wrench, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, BarChart3, MessageSquare, Radio,
   BookOpen, FileText, Megaphone, Truck, ClipboardList, Search, Globe, Shuffle,
   ArrowLeftRight, Target,
@@ -117,7 +117,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   '/mc/sequences': 'crm',
   '/mc/quotes': 'crm',
   '/mc/reviews-management': 'crm',
-  '/mc/settings': 'crm',
+  '/mc/settings': 'staff',
   '/mc/marketing': 'crm',
   '/mc/tasks': 'tasks',
   '/mc/inventory': 'properties',
@@ -137,7 +137,7 @@ export function MCSidebar() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
@@ -250,19 +250,21 @@ export function MCSidebar() {
           </Collapsible>
         ))}
 
-        {/* Settings — standalone group at bottom */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {renderNavItem({
-                title: 'Settings',
-                titleRu: 'Настройки',
-                path: '/mc/settings',
-                icon: Settings,
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Settings — standalone, respects RBAC */}
+        {canAccess('staff', 'view') && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderNavItem({
+                  title: 'Settings',
+                  titleRu: 'Настройки',
+                  path: '/mc/settings',
+                  icon: Settings,
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
@@ -280,15 +282,6 @@ export function MCSidebar() {
               </p>
               <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
-          )}
-          {!isCollapsed && (
-            <button
-              onClick={() => signOut()}
-              className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
-              title={isRussian ? 'Выйти' : 'Sign out'}
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
           )}
         </div>
       </SidebarFooter>

@@ -29,37 +29,22 @@ export async function getAccessiblePropertyIds(
 ): Promise<AccessiblePropertyIdsResult> {
   const { userId, activeCompanyId } = input;
 
-  // Fire all queries in parallel
-  const promises = [
-    // 1. Owned properties (unified table)
-    supabase
-      .from('properties')
-      .select('id')
-      .eq('owner_id', userId),
-    // 2. Delegated properties (FK → properties)
-    supabase
-      .from('property_delegates')
-      .select('property_id')
-      .eq('user_id', userId)
-      .eq('status', 'active'),
-  ] as const;
-
-  // 3. Company properties
-  const companyPromise = activeCompanyId
-    ? supabase
-        .from('properties')
-        .select('id')
-        .eq('management_company_id', activeCompanyId)
-    : null;
-
-  const [ownedRes, delegatedRes] = await Promise.all(promises);
-  const companyRes = companyPromise ? await companyPromise : null;
+  // Fire ALL queries in parallel (including company)
+  const [ownedRes, delegatedRes, companyRes] = await Promise.all([
+    // 1. Owned properties
+    supabase.from('properties').select('id').eq('owner_id', userId),
+    // 2. Delegated properties
+    supabase.from('property_delegates').select('property_id').eq('user_id', userId).eq('status', 'active'),
+    // 3. Company properties (noop if no activeCompanyId)
+    activeCompanyId
+      ? supabase.from('properties').select('id').eq('management_company_id', activeCompanyId)
+      : Promise.resolve({ data: [] as { id: string }[], error: null }),
+  ]);
 
   const ownedIds = (ownedRes.data || []).map(p => p.id);
   const delegatedIds = (delegatedRes.data || []).map((d: any) => d.property_id as string);
-  const companyIds = companyRes ? (companyRes.data || []).map(p => p.id) : [];
+  const companyIds = (companyRes.data || []).map((p: any) => p.id as string);
 
-  // Deduplicate
   const allIds = [...new Set([...ownedIds, ...delegatedIds, ...companyIds])];
 
   return { ownedIds: [...new Set(ownedIds)], delegatedIds, companyIds: [...new Set(companyIds)], allIds };
