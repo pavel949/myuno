@@ -86,7 +86,7 @@ export function PropertyListingCard({
         />
 
         {/* Favorite — Airbnb heart */}
-        <div className="absolute top-2.5 right-2.5 z-10">
+        <div className="absolute top-2 right-2 z-10">
           <FavoriteButton
             itemType="property"
             itemId={property.id}
@@ -99,12 +99,12 @@ export function PropertyListingCard({
             }}
             size="sm"
             variant="ghost"
-            className="bg-transparent hover:bg-transparent p-0 h-auto [&_svg]:w-6 [&_svg]:h-6 [&_svg]:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+            className="bg-transparent hover:bg-transparent p-0 h-auto [&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6 [&_svg]:drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
           />
         </div>
 
         {/* Badges — top left */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {property.is_featured && (
             <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
               {isRu ? 'Популярное' : 'Guest favorite'}
@@ -119,45 +119,42 @@ export function PropertyListingCard({
         </div>
       </div>
 
-      {/* Content — Airbnb minimal style */}
-      <div className="mt-2.5 space-y-0.5">
+      {/* Content — Airbnb compact style */}
+      <div className="mt-1.5 sm:mt-2.5 space-y-0">
         {/* Row 1: District + Rating */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-[15px] leading-tight line-clamp-1 text-foreground">
+        <div className="flex items-start justify-between gap-1">
+          <h3 className="font-semibold text-xs sm:text-[15px] leading-tight line-clamp-1 text-foreground">
             {districtDisplay}
           </h3>
           {property.rating != null && property.rating > 0 && (
-            <div className="flex items-center gap-1 shrink-0">
-              <Star className="w-3.5 h-3.5 fill-foreground text-foreground" />
-              <span className="text-sm text-foreground">
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-foreground text-foreground" />
+              <span className="text-[11px] sm:text-sm text-foreground">
                 {property.rating.toFixed(1)}
-                {property.review_count != null && property.review_count > 0 && (
-                  <span className="text-muted-foreground"> ({property.review_count})</span>
-                )}
               </span>
             </div>
           )}
         </div>
 
-        {/* Row 2: Property type · bedrooms · baths · guests */}
-        <p className="text-sm text-muted-foreground line-clamp-1">
+        {/* Row 2: Property type · bedrooms */}
+        <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
           {property.property_type
             ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
             : title}
           {property.bedrooms != null && property.bedrooms > 0 && (
-            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'спальня' : property.bedrooms < 5 ? 'спальни' : 'спален') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
+            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
           )}
           {property.bathrooms != null && property.bathrooms > 0 && (
-            <> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</>
+            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
           )}
           {property.max_guests != null && property.max_guests > 0 && (
-            <> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</>
+            <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
           )}
         </p>
 
         {/* Row 3: Price */}
-        <div className="pt-1">
-          <p className="text-[15px] text-foreground">
+        <div className="pt-0.5 sm:pt-1">
+          <p className="text-xs sm:text-[15px] text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
                 {formatPrice((property as any).sale_price || property.price || 0)}
@@ -172,8 +169,8 @@ export function PropertyListingCard({
             )}
           </p>
           {totalPrice && nights && mode !== 'buy' && (
-            <p className="text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
-              {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'} · {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
+              {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'}
             </p>
           )}
         </div>
