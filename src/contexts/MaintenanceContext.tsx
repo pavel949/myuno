@@ -31,9 +31,9 @@ const isLovablePreview = () => {
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
-    // Force maintenance ON - site is closed
-    localStorage.setItem(MAINTENANCE_KEY, 'true');
-    return true;
+    // Default: maintenance OFF — site is open
+    const stored = localStorage.getItem(MAINTENANCE_KEY);
+    return stored === 'true';
   });
 
   const [canBypass, setCanBypass] = useState(() => {
