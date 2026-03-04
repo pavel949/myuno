@@ -14,7 +14,6 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AdminNotificationsDropdown } from './AdminNotificationsDropdown';
 
@@ -220,7 +219,6 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        <RoleContextSwitcher compact />
         <ThemeSwitcher />
         <LanguageSwitcher />
         <AdminNotificationsDropdown />

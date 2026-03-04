@@ -10,7 +10,6 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { CompanySwitcher } from '@/components/owner/CompanySwitcher';
@@ -128,7 +127,6 @@ export function MCHeader() {
       <div className="hidden md:block flex-1" />
 
       <div className="flex items-center gap-1">
-        <RoleContextSwitcher compact />
         <Button variant="ghost" size="icon" onClick={() => navigate('/mc/support-chat')} title={isRussian ? 'Поддержка' : 'Support'}>
           <HelpCircle className="h-4 w-4" />
         </Button>

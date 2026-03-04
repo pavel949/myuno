@@ -13,7 +13,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
+
 
 const routeLabels: Record<string, { en: string; ru: string }> = {
   '/staff': { en: 'Dashboard', ru: 'Обзор' },
@@ -76,7 +76,6 @@ export function StaffHeader() {
       </Breadcrumb>
 
       <div className="flex items-center gap-1">
-        <RoleContextSwitcher />
         <ThemeSwitcher />
         <LanguageSwitcher />
       </div>
