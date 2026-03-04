@@ -34,6 +34,9 @@ import {
   Loader2,
   ShieldAlert,
   Info,
+  Wrench,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -59,7 +62,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
   const [selectedMode, setSelectedMode] = useState<AnalysisMode>('scenario_gaps');
   const [isExpanded, setIsExpanded] = useState(true);
   
-  const { isLoading, result, error, runAnalysis, clearResult } = useLifeOSAIInsights({
+  const { isLoading, isFixing, fixResults, result, error, runAnalysis, applySuggestion, clearResult } = useLifeOSAIInsights({
     situationCode,
     entityType,
   });
@@ -200,6 +203,9 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
                           suggestion={suggestion} 
                           isRu={isRu}
                           onCopy={() => copySuggestion(suggestion)}
+                          onFix={() => applySuggestion(suggestion, idx)}
+                          isFixing={isFixing === String(idx)}
+                          fixResult={fixResults[idx]}
                         />
                       ))
                     )}
@@ -231,10 +237,15 @@ interface SuggestionCardProps {
   suggestion: AISuggestion;
   isRu: boolean;
   onCopy: () => void;
+  onFix: () => void;
+  isFixing: boolean;
+  fixResult?: { success: boolean; actions: string[] };
 }
 
-function SuggestionCard({ suggestion, isRu, onCopy }: SuggestionCardProps) {
+function SuggestionCard({ suggestion, isRu, onCopy, onFix, isFixing, fixResult }: SuggestionCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const isFixed = !!fixResult;
+  const canFix = suggestion.suggestion_type !== 'risk' && !suggestion.governance_conflict && !isFixed;
 
   return (
     <div 
@@ -326,6 +337,48 @@ function SuggestionCard({ suggestion, isRu, onCopy }: SuggestionCardProps) {
                 {suggestion.confidence}
               </span>
             </div>
+
+            {/* Fix Button */}
+            {canFix && (
+              <Button
+                size="sm"
+                variant="default"
+                className="w-full gap-2 mt-2"
+                onClick={onFix}
+                disabled={isFixing}
+              >
+                {isFixing ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {isRu ? 'Применяю...' : 'Applying...'}
+                  </>
+                ) : (
+                  <>
+                    <Wrench className="w-3 h-3" />
+                    {isRu ? 'Применить исправление' : 'Apply Fix'}
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Fix Result */}
+            {fixResult && (
+              <div className={cn(
+                "p-2 rounded text-xs space-y-1 mt-2",
+                fixResult.success ? "bg-success/10 border border-success/30" : "bg-destructive/10 border border-destructive/30"
+              )}>
+                <div className="flex items-center gap-1.5 font-medium">
+                  {fixResult.success ? (
+                    <><CheckCircle2 className="w-3 h-3 text-primary" /> {isRu ? 'Применено' : 'Applied'}</>
+                  ) : (
+                    <><XCircle className="w-3 h-3 text-destructive" /> {isRu ? 'Ошибка' : 'Failed'}</>
+                  )}
+                </div>
+                {fixResult.actions.map((a, i) => (
+                  <p key={i} className="text-muted-foreground">{a}</p>
+                ))}
+              </div>
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
