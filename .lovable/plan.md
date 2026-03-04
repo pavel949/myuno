@@ -1,50 +1,58 @@
 
 
-## Редизайн раздела "Все сервисы" на Discover
+## Унификация посыла платформы: "One stop shop for everything abroad"
 
 ### Проблема
-Текущий `AllServicesGrid` использует маленькие (36px) полупрозрачные иконки (`bg-muted/60`, `text-foreground/70`) без цвета и контраста. На десктопе 4-колоночная сетка мелких серых кнопок теряется. Не используются `IconBadge` с градиентами и `Surface` из DS2.0.
+Сейчас в разных местах платформы разные посылы:
+- **OnboardingModal**: «Жизнь за рубежом — без хаоса» — негативный фрейминг
+- **PostOrderReviewPrompt**: «Как всё прошло?» — это нормальный UX для отзыва, НЕ отдельный экран, убирать не нужно
+- **PWAWelcomeScreen**: «Добро пожаловать» — generic, без посыла
+- **DiscoverHero**: «Теперь всё просто» — ближе, но слабо
+- **HeroBlock** (desktop): «Ваш дом на острове» — хорошо, но не едино
+- **HeroBlock** (mobile, неавториз.): «Всё для жизни на Пхукете в одном месте» — локально, не abroad
+- **Brand book**: «Мы не продаём мечту — мы убираем хаос» — тоже негативный
 
-### Решение
+### Что убрать
+1. **OnboardingModal** — шаг "welcome" с «без хаоса». Заменить headline на новый посыл
+2. **PWAWelcomeScreen** — убрать полностью (generic экран без ценности)
 
-**1. Заменить серые иконки на IconBadge с градиентами вертикалей**
-- Каждая вертикаль получит свой цветной градиент (уже определены в `VERTICAL_GRADIENTS` из `ExploreVerticalsSheet`)
-- Размер иконок: `lg` на мобильном, `xl` на десктопе
-- Контейнер иконки с тенью `shadow-md` для глубины
+### Новый единый посыл
+**EN**: "Your trusted infrastructure abroad" / "One place for everything abroad"
+**RU**: "Надёжная инфраструктура для жизни за рубежом" / "Всё для жизни за рубежом — в одном месте"
 
-**2. Адаптивная сетка**
-- Мобайл: `grid-cols-4` (как сейчас)
-- Десктоп (md+): `grid-cols-6` с увеличенными карточками
-- Каждая группа в `Surface` с `variant="card"` вместо голого `bg-muted/20`
-
-**3. Группировки с цветными заголовками**
-- Эмодзи группы заменить на цветной `IconBadge` или оставить эмодзи, но увеличить
-- Подписи сервисов: `text-xs` вместо `text-[10px]`, `font-medium text-foreground` вместо `text-foreground/70`
-
-**4. Карточки сервисов**
-- Убрать серый `bg-muted/60` контейнер иконки
-- Добавить hover-эффект с подсветкой градиентом
-- На десктопе: горизонтальный layout (иконка + текст в строку) для лучшего использования пространства
-
-### Файлы для изменения
+### Файлы и изменения
 
 | Файл | Изменение |
 |---|---|
-| `src/components/discover/AllServicesGrid.tsx` | Полный редизайн: IconBadge, адаптивная сетка, Surface обёртки |
-| `src/lib/resolveVerticalItem.ts` | Добавить поле `gradient` в результат resolve |
+| `src/components/pwa/PWAWelcomeScreen.tsx` | Убрать компонент (или сделать no-op) |
+| `src/pages/Index.tsx` | Убрать `<PWAWelcomeScreen />` |
+| `src/components/onboarding/OnboardingModal.tsx` | Обновить `texts.headline` и `texts.subtitle` на новый посыл |
+| `src/components/discover/DiscoverHero.tsx` | Обновить h1 и subtitle |
+| `src/components/home/HeroBlock.tsx` | Обновить subtitle для неавториз. и desktop label |
+| `.lovable/brand-book.md` | Обновить позиционирование |
 
-### Визуальная структура
+### Новые тексты
 
-```text
-Mobile (4 cols):                    Desktop (6 cols):
-┌─────────────────────┐            ┌─────────────────────────────────┐
-│ 🏠 Home & Living    │            │ 🏠 Home & Living                │
-│ ┌──┐ ┌──┐ ┌──┐ ┌──┐│            │ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ │
-│ │🟢│ │🟡│ │🩷│ │🟠││            │ │🟢│ │🟡│ │🩷│ │🟠│ │🩷│ │  │ │
-│ │Rent│Clean│Baby│Pet││            │ │Rent│Clean│Baby│Pet│Flower│  │ │
-│ └──┘ └──┘ └──┘ └──┘│            └─────────────────────────────────┘
-└─────────────────────┘
-```
+**OnboardingModal headline:**
+- EN: "Everything abroad, in one place"
+- RU: "Всё для жизни за рубежом — в одном месте"
 
-Каждая иконка — цветной градиентный круг/квадрат с белой Lucide-иконкой внутри (как в ExploreVerticalsSheet), а не серый полупрозрачный квадрат.
+**OnboardingModal subtitle:**
+- EN: "Trusted infrastructure for housing, services, and daily life"
+- RU: "Надёжная система для жилья, сервисов и повседневных задач"
+
+**DiscoverHero:**
+- EN: "One place for everything abroad"
+- RU: "Всё для жизни за рубежом"
+
+**HeroBlock (неавториз.):**
+- EN: "Your trusted infrastructure abroad"
+- RU: "Надёжная инфраструктура для жизни за рубежом"
+
+**HeroBlock (desktop label):**
+- EN: "Your infrastructure abroad"
+- RU: "Ваша инфраструктура за рубежом"
+
+**Brand book позиционирование:**
+> «Мы — надёжная инфраструктура для путешествий и жизни за рубежом. One place for everything abroad.»
 
