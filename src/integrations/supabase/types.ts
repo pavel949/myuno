@@ -14076,6 +14076,7 @@ export type Database = {
           country: string | null
           created_at: string
           date_of_birth: string | null
+          deactivated_at: string | null
           dietary_restrictions: string[] | null
           email: string | null
           emergency_contact_name: string | null
@@ -14093,6 +14094,9 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           state_province: string | null
+          status: string
+          status_changed_by: string | null
+          suspended_at: string | null
           travel_preferences: Json | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"] | null
@@ -14105,6 +14109,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deactivated_at?: string | null
           dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -14122,6 +14127,9 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           state_province?: string | null
+          status?: string
+          status_changed_by?: string | null
+          suspended_at?: string | null
           travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -14134,6 +14142,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          deactivated_at?: string | null
           dietary_restrictions?: string[] | null
           email?: string | null
           emergency_contact_name?: string | null
@@ -14151,6 +14160,9 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           state_province?: string | null
+          status?: string
+          status_changed_by?: string | null
+          suspended_at?: string | null
           travel_preferences?: Json | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null

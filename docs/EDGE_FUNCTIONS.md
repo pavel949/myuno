@@ -93,6 +93,12 @@ All edge functions are in `supabase/functions/`. Each function is a Deno-based s
 | `scan-business-card` | Extract info from business cards | `LOVABLE_API_KEY` |
 | `user-analytics-api` | User behavior analytics endpoint | — |
 
+### 👑 Admin
+
+| Function | Description | Secrets |
+|----------|-------------|---------|
+| `admin-manage-user` | Suspend/activate/deactivate/delete users + role management | Service Role (auto) |
+
 ### 🏢 Business Logic
 
 | Function | Description | Secrets |
