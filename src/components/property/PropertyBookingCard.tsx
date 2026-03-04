@@ -206,7 +206,7 @@ export function PropertyBookingCard({
             >
               <div className="grid grid-cols-2 divide-x divide-border/80">
                 <div className="flex flex-col items-start px-4 py-3">
-                  <span className="text-[11px] uppercase tracking-wider text-foreground/60 font-bold leading-none mb-1">
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-1">
                     {isRu ? 'Заезд' : 'Check-in'}
                   </span>
                   <span className={cn(
@@ -217,7 +217,7 @@ export function PropertyBookingCard({
                   </span>
                 </div>
                 <div className="flex flex-col items-start px-4 py-3">
-                  <span className="text-[11px] uppercase tracking-wider text-foreground/60 font-bold leading-none mb-1">
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-1">
                     {isRu ? 'Выезд' : 'Check-out'}
                   </span>
                   <span className={cn(
@@ -286,7 +286,7 @@ export function PropertyBookingCard({
               )}
             >
               <div className="flex flex-col items-start">
-                <span className="text-[11px] uppercase tracking-wider text-foreground/60 font-bold leading-none mb-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-1">
                   {isRu ? 'Гости' : 'Guests'}
                 </span>
                 <span className="text-sm font-medium text-foreground">
@@ -366,7 +366,7 @@ export function PropertyBookingCard({
                 className="flex items-center justify-between w-full text-sm group" 
                 onClick={() => setShowPriceDetails(!showPriceDetails)}
               >
-                <span className="underline decoration-dotted underline-offset-4 text-foreground/80 group-hover:text-foreground transition-colors">
+                <span className="underline decoration-dotted underline-offset-4 text-foreground group-hover:text-foreground transition-colors">
                   {formatPrice(pricing.nightlyRate)} × {nights} {isRu ? 'ночей' : 'nights'}
                 </span>
                 <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export function PropertyBookingCard({
               {/* Payment Schedule — subtle card */}
               <div className="pt-2 mt-1 space-y-2 p-3 rounded-xl bg-muted/40">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-foreground/70">
+                  <span className="text-muted-foreground">
                     {isRu ? `Предоплата ${pricing.prepayPercent}%` : `${pricing.prepayPercent}% Prepayment`}
                   </span>
                   <span className="font-bold text-primary">
@@ -424,7 +424,7 @@ export function PropertyBookingCard({
                 </div>
                 {pricing.balanceAmount > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-foreground/70">
+                    <span className="text-muted-foreground">
                       {isRu ? 'Остаток при заезде' : 'Balance on arrival'}
                     </span>
                     <span className="font-medium text-foreground">{formatPrice(pricing.balanceAmount)}</span>
@@ -432,7 +432,7 @@ export function PropertyBookingCard({
                 )}
                 {pricing.depositAmount > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-foreground/70">
+                    <span className="text-muted-foreground">
                       {isRu ? 'Возвратный депозит' : 'Refundable deposit'}
                     </span>
                     <span className="font-medium text-foreground">

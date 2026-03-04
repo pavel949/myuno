@@ -162,7 +162,7 @@ export function PropertyListingCard({
             ) : (
               <>
                 <span className="font-semibold">{formatPrice(unitPrice)}</span>
-                <span className="font-normal text-foreground/70">
+                <span className="font-normal text-muted-foreground">
                   {formatPriceLabel(property.price_period || 'night', language)}
                 </span>
               </>

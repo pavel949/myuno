@@ -66,7 +66,7 @@ export function CategoryGrid({ showAll = false, compact = false }: CategoryGridP
               )}>
                 <Icon className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] font-medium text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
+              <span className="text-[11px] font-medium text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
                 {getName(cat)}
               </span>
             </button>

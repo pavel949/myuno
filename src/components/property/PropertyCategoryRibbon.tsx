@@ -95,7 +95,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
       <span className="text-lg leading-none">
         {typeof type.icon === 'string' ? type.icon : '🏠'}
       </span>
-      <span className="text-[10px] font-medium whitespace-nowrap">
+      <span className="text-[11px] font-medium whitespace-nowrap">
         {isRu ? type.labelRu : type.labelEn}
       </span>
     </button>
@@ -160,7 +160,7 @@ const PRIMARY_TYPE_IDS = ['condo', 'villa', 'apartment'];
               <span className="text-lg leading-none">
                 <MoreHorizontal className="w-5 h-5" />
               </span>
-              <span className="text-[10px] font-medium whitespace-nowrap">
+              <span className="text-[11px] font-medium whitespace-nowrap">
                 {isRu ? 'Ещё' : 'More'}
                 {isSecondarySelected && ` (${secondaryTypes.filter(t => selectedTypes.includes(t.id)).length})`}
               </span>
