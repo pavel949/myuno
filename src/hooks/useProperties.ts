@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface Property {
   id: string;
@@ -180,7 +181,8 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
 
       // Apply filters
       if (filters.search) {
-        query = query.or(`title_en.ilike.%${filters.search}%,title_ru.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
       }
       if (filters.propertyType && filters.propertyType !== 'all') {
         query = query.eq('property_type', filters.propertyType);
@@ -239,7 +241,8 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
 
       // Apply filters
       if (filters.search) {
-        query = query.or(`title_en.ilike.%${filters.search}%,title_ru.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
       }
       if (filters.propertyType && filters.propertyType !== 'all') {
         query = query.eq('property_type', filters.propertyType);

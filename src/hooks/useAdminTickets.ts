@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from './useTickets';
 
@@ -57,7 +58,8 @@ export function useAdminTickets() {
       }
 
       if (filters.search) {
-        query = query.or(`ticket_number.ilike.%${filters.search}%,subject.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`ticket_number.ilike.%${s}%,subject.ilike.%${s}%`);
       }
 
       const { data, error } = await query;

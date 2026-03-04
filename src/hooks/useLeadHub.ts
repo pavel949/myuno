@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 const errorLog = createErrorHandler('useLeadHub');
 
@@ -96,7 +97,8 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
           mccQuery = mccQuery.eq('status', status);
         }
         if (search) {
-          mccQuery = mccQuery.or(`email.ilike.%${search}%,name.ilike.%${search}%,phone.ilike.%${search}%`);
+          const ss = sanitizeSearchTerm(search);
+          if (ss) mccQuery = mccQuery.or(`email.ilike.%${ss}%,name.ilike.%${ss}%,phone.ilike.%${ss}%`);
         }
 
         const { data: mccLeads, error: mccError } = await mccQuery;
@@ -136,7 +138,8 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
           .limit(100);
 
         if (search) {
-          consultationsQuery = consultationsQuery.or(`email.ilike.%${search}%,name.ilike.%${search}%,phone.ilike.%${search}%`);
+          const sc = sanitizeSearchTerm(search);
+          if (sc) consultationsQuery = consultationsQuery.or(`email.ilike.%${sc}%,name.ilike.%${sc}%,phone.ilike.%${sc}%`);
         }
 
         const { data: consultations, error: consultationsError } = await consultationsQuery;
@@ -185,7 +188,8 @@ export function useLeadHub(filters: LeadHubFilters = {}) {
           .limit(200);
 
         if (search) {
-          profilesQuery = profilesQuery.or(`email.ilike.%${search}%,full_name.ilike.%${search}%,phone.ilike.%${search}%`);
+          const sp = sanitizeSearchTerm(search);
+          if (sp) profilesQuery = profilesQuery.or(`email.ilike.%${sp}%,full_name.ilike.%${sp}%,phone.ilike.%${sp}%`);
         }
 
         const { data: profiles, error: profilesError } = await profilesQuery;

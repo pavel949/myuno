@@ -10,6 +10,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { Search, Users, ChevronDown, Shield, Mail, Phone, KeyRound, Ban, CheckCircle, XCircle, Trash2, Plus, Minus } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -99,7 +100,8 @@ export function ControlUsersTab() {
         .limit(100);
       
       if (searchQuery) {
-        query = query.or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+        const s = sanitizeSearchTerm(searchQuery);
+        if (s) query = query.or(`full_name.ilike.%${s}%,email.ilike.%${s}%`);
       }
       
       const { data: profilesData, error } = await query;

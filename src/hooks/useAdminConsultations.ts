@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from './useConsultationRequests';
 
 export interface ConsultationFilters {
@@ -41,7 +42,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       }
 
       if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
       }
 
       const { data, error } = await query;

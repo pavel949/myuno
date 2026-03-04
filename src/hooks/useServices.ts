@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface Service {
   id: string;
@@ -60,7 +61,10 @@ function buildQuery(options: UseServicesOptions) {
     .eq('is_active', true);
 
   if (options.categoryId) query = query.eq('category_id', options.categoryId);
-  if (options.searchQuery) query = query.or(`name_en.ilike.%${options.searchQuery}%,name_ru.ilike.%${options.searchQuery}%`);
+  if (options.searchQuery) {
+    const s = sanitizeSearchTerm(options.searchQuery);
+    if (s) query = query.or(`name_en.ilike.%${s}%,name_ru.ilike.%${s}%`);
+  }
   if (options.priceMin !== undefined) query = query.gte('price', options.priceMin);
   if (options.priceMax !== undefined) query = query.lte('price', options.priceMax);
 

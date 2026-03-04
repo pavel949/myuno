@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import type { 
   MarketplaceProduct, 
   MarketplaceCategory, 
@@ -43,7 +44,8 @@ export function useAdminMarketplaceProducts(filters: ProductFilters = {}) {
         query = query.eq('is_active', filters.isActive);
       }
       if (filters.search) {
-        query = query.or(`name_en.ilike.%${filters.search}%,name_ru.ilike.%${filters.search}%`);
+        const s = sanitizeSearchTerm(filters.search);
+        if (s) query = query.or(`name_en.ilike.%${s}%,name_ru.ilike.%${s}%`);
       }
 
       const { data, error } = await query;
