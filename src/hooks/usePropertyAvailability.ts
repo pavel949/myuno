@@ -56,27 +56,32 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return [];
 
-      // In the unified model, the marketplace property ID IS the property ID
       const propertyId = marketplacePropertyId;
 
-      // Get all bookings for this property
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('property_bookings')
-        .select('id, check_in, check_out, status')
-        .eq('property_id', propertyId)
-        .neq('status', 'cancelled')
-        .neq('status', 'rejected');
+      // Query unified orders table (property_bookings is legacy/deprecated)
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select(`
+          id, start_at, end_at, status,
+          order_items!inner (resource_id, item_type)
+        `)
+        .eq('vertical', 'property')
+        .eq('order_items.item_type', 'property')
+        .eq('order_items.resource_id', propertyId)
+        .is('deleted_at', null)
+        .not('status', 'in', '("cancelled","refunded")');
 
-      if (bookingsError || !bookings) {
+      if (ordersError || !orders) {
         return [];
       }
 
       // Convert bookings to blocked dates array
       const blockedDates: BlockedDate[] = [];
       
-      bookings.forEach(booking => {
-        const checkIn = new Date(booking.check_in);
-        const checkOut = new Date(booking.check_out);
+      orders.forEach(order => {
+        if (!order.start_at || !order.end_at) return;
+        const checkIn = new Date(order.start_at);
+        const checkOut = new Date(order.end_at);
         
         // Add all dates between check_in and check_out (exclusive of check_out)
         const currentDate = new Date(checkIn);
@@ -84,7 +89,7 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
           blockedDates.push({
             date: new Date(currentDate),
             reason: 'booked',
-            bookingId: booking.id,
+            bookingId: order.id,
           });
           currentDate.setDate(currentDate.getDate() + 1);
         }

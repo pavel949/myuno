@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
 export interface SearchResult {
   id: string;
@@ -141,7 +142,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const searchTermLower = searchTerm.toLowerCase();
+    const searchTermLower = sanitizeSearchTerm(searchTerm.toLowerCase());
     const allResults: SearchResult[] = [];
 
     // 1. Synonym matches — pick highest-priority entries where ALL keywords match
@@ -168,7 +169,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         .from('categories')
         .select('id, slug, name_en, name_ru, icon, color, mini_app_type')
         .eq('is_active', true)
-        .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%`)
+        .or(`name_en.ilike.%${searchTermLower}%,name_ru.ilike.%${searchTermLower}%`)
         .limit(4);
 
       if (controller.signal.aborted) return;
@@ -225,7 +226,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
           .from('listings')
           .select('id, vertical, name_en, name_ru, cover_image, price, address, district, rating')
           .eq('is_active', true)
-          .or(`name_en.ilike.%${searchTerm}%,name_ru.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
+          .or(`name_en.ilike.%${searchTermLower}%,name_ru.ilike.%${searchTermLower}%,category.ilike.%${searchTermLower}%`)
           .limit(10);
 
         if (controller.signal.aborted) return;
@@ -263,7 +264,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
           const uniqueFields = [...new Set(selectFields)];
 
           // Build OR filter — always search title fields, plus extra fields for some tables
-          const orParts = [`${config.titleEn}.ilike.%${searchTerm}%,${config.titleRu}.ilike.%${searchTerm}%`];
+          const orParts = [`${config.titleEn}.ilike.%${searchTermLower}%,${config.titleRu}.ilike.%${searchTermLower}%`];
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           let queryBuilder = (supabase.from as any)(config.table)

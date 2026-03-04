@@ -151,7 +151,7 @@ export function SecuritySettingsSection() {
 
   const handleLogoutAllDevices = async () => {
     try {
-      await supabase.auth.signOut({ scope: 'global' });
+      await signOut(); // Uses AuthContext signOut which clears caches
       toast.success(t.logoutAllSuccess);
     } catch (error) {
       console.error('Logout error:', error);
