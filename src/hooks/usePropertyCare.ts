@@ -91,61 +91,38 @@ export function useOwnerProperty(id: string | undefined) {
     queryFn: async () => {
       if (!id || !user) return null;
 
-      // Try as owner first
-      const { data: owned } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', id)
-        .eq('owner_id', user.id)
-        .maybeSingle();
-      
-      if (owned) return owned as OwnerProperty;
+      // Fire all access checks in parallel instead of waterfall
+      const [ownerRes, assignmentRes, companyRes, membershipsRes] = await Promise.all([
+        // 1. Owner check
+        supabase.from('properties').select('*').eq('id', id).eq('owner_id', user.id).maybeSingle(),
+        // 2. Manager assignment check
+        supabase.from('property_manager_assignments').select('property_id').eq('property_id', id).eq('manager_user_id', user.id).eq('is_active', true).maybeSingle(),
+        // 3. Active company check
+        activeCompanyId
+          ? supabase.from('properties').select('*').eq('id', id).eq('management_company_id', activeCompanyId).maybeSingle()
+          : Promise.resolve({ data: null }),
+        // 4. All user companies fallback
+        supabase.from('management_company_members').select('company_id').eq('user_id', user.id).eq('is_active', true),
+      ]);
 
-      // Try as assigned manager
-      const { data: assignment } = await supabase
-        .from('property_manager_assignments')
-        .select('property_id')
-        .eq('property_id', id)
-        .eq('manager_user_id', user.id)
-        .eq('is_active', true)
-        .maybeSingle();
+      // Priority: owner > company > manager > fallback
+      if (ownerRes.data) return ownerRes.data as OwnerProperty;
+      if (companyRes.data) return companyRes.data as OwnerProperty;
 
-      if (assignment) {
-        const { data: managed, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', id)
-          .single();
-        if (!error && managed) return managed as OwnerProperty;
+      if (assignmentRes.data) {
+        const { data: managed } = await supabase.from('properties').select('*').eq('id', id).single();
+        if (managed) return managed as OwnerProperty;
       }
 
-      // Try as MC company member
-      if (activeCompanyId) {
-        const { data: companyProp } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', id)
-          .eq('management_company_id', activeCompanyId)
-          .maybeSingle();
-        if (companyProp) return companyProp as OwnerProperty;
-      }
-
-      // Fallback: check all user companies
-      const { data: memberships } = await supabase
-        .from('management_company_members')
-        .select('company_id')
-        .eq('user_id', user.id)
-        .eq('is_active', true);
-
-      if (memberships?.length) {
-        const companyIds = memberships.map(m => m.company_id);
-        const { data: companyProp } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', id)
-          .in('management_company_id', companyIds)
-          .maybeSingle();
-        if (companyProp) return companyProp as OwnerProperty;
+      // Fallback: check other companies
+      if (membershipsRes.data?.length) {
+        const companyIds = membershipsRes.data.map(m => m.company_id);
+        // Skip active company (already checked)
+        const otherCompanyIds = activeCompanyId ? companyIds.filter(c => c !== activeCompanyId) : companyIds;
+        if (otherCompanyIds.length) {
+          const { data: companyProp } = await supabase.from('properties').select('*').eq('id', id).in('management_company_id', otherCompanyIds).maybeSingle();
+          if (companyProp) return companyProp as OwnerProperty;
+        }
       }
 
       return null;
@@ -247,13 +224,14 @@ export function useCreateOwnerProperty() {
 export function useUpdateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
 
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<OwnerProperty> & { id: string }) => {
       if (!user) throw new Error('Not authenticated');
       
       // Try update as owner first
-      const { data: result, error } = await supabase
+      const { data: result } = await supabase
         .from('properties')
         .update(data)
         .eq('id', id)
@@ -263,17 +241,24 @@ export function useUpdateOwnerProperty() {
       
       if (result) return result;
 
-      // If not owner, check if assigned manager
-      const hasAccess = await canAccessProperty(user.id, id);
+      // Verify access: must be assigned manager OR member of the property's company
+      const activeCompanyId = activeCompany?.company_id || null;
+      const [assignmentCheck, propertyCheck] = await Promise.all([
+        supabase.from('property_manager_assignments').select('id').eq('property_id', id).eq('manager_user_id', user.id).eq('is_active', true).maybeSingle(),
+        activeCompanyId
+          ? supabase.from('properties').select('id, management_company_id').eq('id', id).eq('management_company_id', activeCompanyId).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+
+      const hasAccess = !!assignmentCheck.data || !!propertyCheck.data;
       if (!hasAccess) throw new Error('Property not found or access denied');
 
-      // Update without owner_id filter (manager has access via assignment)
-      const { data: managedResult, error: managedError } = await supabase
-        .from('properties')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single();
+      // Scoped update: filter by company if available, otherwise by assignment-verified id
+      let query = supabase.from('properties').update(data).eq('id', id);
+      if (propertyCheck.data?.management_company_id) {
+        query = query.eq('management_company_id', propertyCheck.data.management_company_id);
+      }
+      const { data: managedResult, error: managedError } = await query.select().single();
       
       if (managedError) throw managedError;
       return managedResult;

@@ -48,6 +48,14 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/mc/documents': { en: 'Documents', ru: 'Документы' },
   '/mc/rates': { en: 'Rates', ru: 'Тарифы' },
   '/mc/subscription': { en: 'Subscription', ru: 'Подписка' },
+  '/mc/settings': { en: 'Settings', ru: 'Настройки' },
+  '/mc/help': { en: 'Help Center', ru: 'Справочник' },
+  '/mc/modules': { en: 'All Modules', ru: 'Все модули' },
+  '/mc/guide': { en: 'Owner Guide', ru: 'Руководство' },
+  '/mc/sequences': { en: 'Sequences', ru: 'Цепочки' },
+  '/mc/quotes': { en: 'Quotes', ru: 'КП' },
+  '/mc/reviews-management': { en: 'Reviews', ru: 'Отзывы' },
+  '/mc/insurance': { en: 'Insurance & Docs', ru: 'Страховки' },
 };
 
 export function MCHeader() {
@@ -67,6 +75,13 @@ export function MCHeader() {
     const routeLabel = routeLabels[currentPath];
     if (routeLabel) {
       breadcrumbs.push({ path: currentPath, label: isRussian ? routeLabel.ru : routeLabel.en, isLast });
+    } else if (isLast && index >= 2) {
+      // Dynamic route segment (e.g. property ID) — show parent label + detail
+      const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+      const parentLabel = routeLabels[parentPath];
+      if (parentLabel) {
+        breadcrumbs.push({ path: currentPath, label: isRussian ? 'Детали' : 'Details', isLast: true });
+      }
     }
   });
 
@@ -120,7 +135,10 @@ export function MCHeader() {
       </Breadcrumb>
 
       <div className="md:hidden flex-1 min-w-0 overflow-hidden">
-        <h1 className="font-semibold text-sm leading-tight truncate">{pageTitle}</h1>
+        <div className="flex items-center gap-2">
+          <CompanySwitcher />
+          <h1 className="font-semibold text-sm leading-tight truncate">{pageTitle}</h1>
+        </div>
         {roleLabel && <span className="text-[10px] text-muted-foreground">{roleLabel}</span>}
       </div>
 

@@ -24,9 +24,9 @@ const MC_NAV: NavItem[] = [
 ];
 
 const QUICK_ACTIONS = [
-  { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/finance', color: 'bg-destructive/15 text-destructive' },
-  { id: 'task', icon: ListTodo, labelEn: 'Task', labelRu: 'Задача', path: '/mc/tasks', color: 'bg-primary/15 text-primary' },
-  { id: 'meeting', icon: CalendarPlus, labelEn: 'Meeting', labelRu: 'Встреча', path: '/mc/calendar', color: 'bg-accent/15 text-accent-foreground' },
+  { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/finance?action=create', color: 'bg-destructive/15 text-destructive' },
+  { id: 'task', icon: ListTodo, labelEn: 'Task', labelRu: 'Задача', path: '/mc/tasks?action=create', color: 'bg-primary/15 text-primary' },
+  { id: 'meeting', icon: CalendarPlus, labelEn: 'Meeting', labelRu: 'Встреча', path: '/mc/calendar?action=create', color: 'bg-accent/15 text-accent-foreground' },
   { id: 'services', icon: ShoppingBag, labelEn: 'myUNO', labelRu: 'myUNO', path: '/', color: 'bg-success/15 text-success' },
 ];
 
