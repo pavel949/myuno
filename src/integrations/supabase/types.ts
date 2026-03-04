@@ -10507,7 +10507,7 @@ export type Database = {
           metadata: Json | null
           stage_id: string
           stage_name: string | null
-          time_in_stage: unknown
+          time_in_stage: string | null
         }
         Insert: {
           entered_at?: string | null
@@ -10519,7 +10519,7 @@ export type Database = {
           metadata?: Json | null
           stage_id: string
           stage_name?: string | null
-          time_in_stage?: unknown
+          time_in_stage?: string | null
         }
         Update: {
           entered_at?: string | null
@@ -10531,7 +10531,7 @@ export type Database = {
           metadata?: Json | null
           stage_id?: string
           stage_name?: string | null
-          time_in_stage?: unknown
+          time_in_stage?: string | null
         }
         Relationships: [
           {
@@ -10552,7 +10552,7 @@ export type Database = {
       }
       mcc_funnels: {
         Row: {
-          avg_time_to_convert: unknown
+          avg_time_to_convert: string | null
           conversion_rate: number | null
           created_at: string | null
           created_by: string | null
@@ -10567,7 +10567,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          avg_time_to_convert?: unknown
+          avg_time_to_convert?: string | null
           conversion_rate?: number | null
           created_at?: string | null
           created_by?: string | null
@@ -10582,7 +10582,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          avg_time_to_convert?: unknown
+          avg_time_to_convert?: string | null
           conversion_rate?: number | null
           created_at?: string | null
           created_by?: string | null
