@@ -19,7 +19,7 @@ export function PropertyImageCarousel({
   alt = '',
   className,
   isHovered,
-  aspectClass = 'aspect-[4/5]',
+  aspectClass = 'aspect-[4/5] sm:aspect-square',
 }: PropertyImageCarouselProps) {
   const allImages = images.length > 0 ? images : [FALLBACK_IMAGE];
   const [selectedIndex, setSelectedIndex] = useState(0);
