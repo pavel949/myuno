@@ -545,6 +545,9 @@ export default function PropertyInquiry() {
                       discount_percent: pricing.discountPercent,
                       booking_mode: isInstantBooking ? 'instant' : 'request',
                       ...(isInstantBooking ? { prepayment: Math.round(pricing.total * 0.1) } : {}),
+                      // Manager contact for notifications
+                      ...((rentalTerms as any)?.manager_email ? { manager_email: (rentalTerms as any).manager_email } : {}),
+                      ...((rentalTerms as any)?.manager_phone ? { manager_phone: (rentalTerms as any).manager_phone } : {}),
                     },
                     items: [{
                       item_name: propertyTitle || 'Property booking',

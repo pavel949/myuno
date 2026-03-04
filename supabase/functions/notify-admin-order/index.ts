@@ -27,13 +27,16 @@ interface OrderNotificationPayload {
     address_type: string;
     address_text: string;
   }>;
+  // Manager (listing owner) contact
+  manager_email?: string | null;
+  manager_phone?: string | null;
 }
 
 const ADMIN_EMAILS = ['pavel@ignatevestate.com', 'pi@myuno.app']; // Admin emails
 const ADMIN_WHATSAPP = '66922407355'; // Admin WhatsApp number
 
 // Send WhatsApp notification via URL API
-async function sendWhatsAppNotification(payload: OrderNotificationPayload): Promise<void> {
+async function sendWhatsAppNotification(payload: OrderNotificationPayload, phoneOverride?: string): Promise<void> {
   try {
     const orderTypeEmoji: Record<string, string> = {
       restaurant: '🍽️',
@@ -100,11 +103,9 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
 
 🔗 View: https://uno.ae/admin/operations`;
 
-    // Use WhatsApp API URL - this creates a clickable link for webhook services
-    // For production, integrate with Twilio/MessageBird/UltraMsg API
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${ADMIN_WHATSAPP}&text=${encodeURIComponent(message)}`;
+    const targetPhone = phoneOverride || ADMIN_WHATSAPP;
     
-    console.log('[WhatsApp] Notification prepared for:', ADMIN_WHATSAPP);
+    console.log('[WhatsApp] Notification prepared for:', targetPhone);
     console.log('[WhatsApp] Message:', message);
     
     // Try to send via UltraMsg API if configured
@@ -117,7 +118,7 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           token: ultraMsgToken,
-          to: `+${ADMIN_WHATSAPP}`,
+          to: `+${targetPhone}`,
           body: message,
         }),
       });
@@ -152,10 +153,17 @@ Deno.serve(async (req) => {
 
     console.log('Sending admin notification for order:', payload.order_number);
 
-    // Send WhatsApp notification (non-blocking)
+    // Send WhatsApp notification to admin (non-blocking)
     sendWhatsAppNotification(payload).catch(err => 
       console.error('[WhatsApp] Failed to send:', err)
     );
+
+    // Send WhatsApp to manager if provided and different from admin
+    if (payload.manager_phone && payload.manager_phone !== ADMIN_WHATSAPP) {
+      sendWhatsAppNotification(payload, payload.manager_phone).catch(err =>
+        console.error('[WhatsApp] Failed to send to manager:', err)
+      );
+    }
 
     // Format order type for display
     const orderTypeLabels: Record<string, string> = {
@@ -299,9 +307,15 @@ Deno.serve(async (req) => {
       </html>
     `;
 
+    // Build recipient list: admins + manager (if provided)
+    const recipients = [...ADMIN_EMAILS];
+    if (payload.manager_email && !recipients.includes(payload.manager_email)) {
+      recipients.push(payload.manager_email);
+    }
+
     const emailResponse = await resend.emails.send({
       from: 'UNO Orders <orders@resend.dev>',
-      to: ADMIN_EMAILS,
+      to: recipients,
       subject: `🔔 New Order #${payload.order_number} - ${orderTypeLabel}`,
       html: emailHtml,
     });
