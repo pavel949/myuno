@@ -408,7 +408,7 @@ export default function PropertySearchPage() {
                 hintId="property-search-tap-card"
                 className="mb-4 w-fit mx-auto"
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {properties.map(property => {
                   const mc = (property as any).management_company_id ? companyMap.get((property as any).management_company_id) : undefined;
                   return (

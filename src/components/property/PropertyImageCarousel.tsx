@@ -19,7 +19,7 @@ export function PropertyImageCarousel({
   alt = '',
   className,
   isHovered,
-  aspectClass = 'aspect-square',
+  aspectClass = 'aspect-[4/5]',
 }: PropertyImageCarouselProps) {
   const allImages = images.length > 0 ? images : [FALLBACK_IMAGE];
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -56,7 +56,7 @@ export function PropertyImageCarousel({
   // Single image — no carousel
   if (allImages.length === 1) {
     return (
-      <div className={cn(aspectClass, "rounded-xl overflow-hidden", className)}>
+      <div className={cn(aspectClass, "rounded-lg sm:rounded-xl overflow-hidden", className)}>
         <img
           src={allImages[0]}
           alt={alt}
@@ -71,7 +71,7 @@ export function PropertyImageCarousel({
   }
 
   return (
-    <div className={cn(aspectClass, "rounded-xl overflow-hidden relative group/carousel", className)}>
+    <div className={cn(aspectClass, "rounded-lg sm:rounded-xl overflow-hidden relative group/carousel", className)}>
       <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {allImages.slice(0, 5).map((img, i) => (
