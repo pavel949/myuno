@@ -8,14 +8,14 @@ export function TripPositioningHero() {
 
   const benefits = isRu
     ? [
-        'Авиабилеты — подскажем лучшие маршруты и время покупки',
-        'Страховка — поможем выбрать и будем рядом при страховом случае',
+        'Авиабилеты — лучшие маршруты и время покупки',
+        'Страховка — подберём и поможем при страховом случае',
         'Arrival Card — заполним за вас или подскажем как',
         'Трансфер, аренда, фаст-трек — всё в одном месте',
       ]
     : [
         'Flights — best routes and when to book',
-        'Insurance — we help you choose and assist with claims on-site',
+        'Insurance — we help you choose and assist with claims',
         'Arrival Card — we fill it for you or guide you through',
         'Transfer, rentals, fast track — all in one place',
       ];
@@ -31,14 +31,14 @@ export function TripPositioningHero() {
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-          {isRu ? 'Почему myUNO' : 'Why myUNO'}
+          {isRu ? 'Ваша инфраструктура' : 'Your infrastructure'}
         </span>
       </div>
 
       <p className="text-sm font-medium text-foreground mb-3">
         {isRu
-          ? 'Мы — ваш локальный партнёр на Пхукете. Планируйте и проводите отпуск с экспертами, которые живут здесь.'
-          : 'We are your local partner in Phuket. Plan and enjoy your vacation with experts who live here.'}
+          ? 'Надёжная инфраструктура для подготовки к поездке — всё в одном месте.'
+          : 'Trusted infrastructure for trip planning — everything in one place.'}
       </p>
 
       <ul className="space-y-2">

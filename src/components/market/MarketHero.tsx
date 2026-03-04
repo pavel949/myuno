@@ -51,9 +51,9 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
       <div className="relative px-4 py-6 max-w-[1536px] mx-auto">
         {/* Header with badge */}
         <div className="flex items-center gap-2 mb-3">
-          <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">
+        <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">
             <Sparkles className="w-3 h-3 mr-1" />
-            {isRu ? 'Маркетплейс' : 'Marketplace'}
+            {isRu ? 'Всё для жизни за рубежом' : 'Everything abroad'}
           </Badge>
         </div>
         
@@ -69,8 +69,8 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
         {/* Subtitle */}
         <p className="text-white/80 text-sm mb-4 max-w-xs">
           {isRu 
-            ? `${totalProducts}+ товаров в ${totalCategories} категориях от проверенных продавцов`
-            : `${totalProducts}+ products in ${totalCategories} categories from verified sellers`
+            ? `${totalProducts}+ товаров в ${totalCategories} категориях — надёжная инфраструктура для повседневных покупок`
+            : `${totalProducts}+ products in ${totalCategories} categories — trusted infrastructure for daily shopping`
           }
         </p>
         
