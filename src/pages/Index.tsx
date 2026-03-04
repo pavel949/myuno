@@ -18,7 +18,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-import { PWAWelcomeScreen } from '@/components/pwa/PWAWelcomeScreen';
+
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
@@ -67,7 +67,7 @@ const Index = () => {
   return (
     <AppLayout showFooter>
       <SEOHead jsonLd={createOrganizationSchema()} />
-      <PWAWelcomeScreen />
+      
       <DocumentExpiryNotifier />
       
       {showOnboarding && (

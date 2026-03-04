@@ -38,10 +38,10 @@ export const DiscoverHero = memo(function DiscoverHero() {
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
         <h1 className="text-lg md:text-2xl font-extrabold text-white leading-tight tracking-tight">
-          {isRu ? 'Теперь всё просто' : 'Everything made simple'}
+          {isRu ? 'Всё для жизни за рубежом' : 'One place for everything abroad'}
         </h1>
         <p className="text-[11px] md:text-sm text-white/70 mt-0.5">
-          {isRu ? 'Всё для жизни на Пхукете в одном месте' : 'Everything for life in Phuket, in one place'}
+          {isRu ? 'Надёжная инфраструктура для путешествий и повседневных задач' : 'Trusted infrastructure for travel and daily life'}
         </p>
       </div>
     </motion.div>
