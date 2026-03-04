@@ -43,7 +43,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
       if (!filters.type || filters.type === 'all' || filters.type === 'service') {
         let servicesQuery = supabase
           .from('services')
-          .select('id, name_en, name_ru, price, currency, is_active, provider_id, created_at, images, created_by_uno_team')
+          .select('id, name_en, name_ru, price, currency, is_active, provider_id, category, created_at, images, created_by_uno_team, providers(name)')
           .order('created_at', { ascending: false })
           .limit(100);
 
@@ -61,7 +61,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (servicesError) throw servicesError;
 
         allItems.push(
-          ...(services || []).map((s) => ({
+          ...(services || []).map((s: any) => ({
             id: s.id,
             type: 'service' as CatalogItemType,
             name_en: s.name_en,
@@ -71,12 +71,13 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
             is_active: s.is_active ?? false,
             is_featured: false,
             provider_id: s.provider_id ?? undefined,
+            provider_name: s.providers?.name ?? undefined,
+            category: s.category ?? undefined,
             created_at: s.created_at,
             image: (s.images as string[] | null)?.[0] ?? undefined,
           }))
         );
       }
-
       // Fetch products if type is 'all' or 'product'
       if (!filters.type || filters.type === 'all' || filters.type === 'product') {
         let productsQuery = supabase
@@ -96,7 +97,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (productsError) throw productsError;
 
         allItems.push(
-          ...(products || []).map((p) => ({
+          ...(products || []).map((p: any) => ({
             id: p.id,
             type: 'product' as CatalogItemType,
             name_en: p.name_en,
@@ -117,7 +118,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
       if (!filters.type || filters.type === 'all' || filters.type === 'property') {
         let propertiesQuery = supabase
           .from('properties')
-          .select('id, title_en, title_ru, price, currency, is_active, is_featured, provider_id, created_at, cover_image')
+          .select('id, title_en, title_ru, price, currency, is_active, is_featured, provider_id, created_at, cover_image, providers(name)')
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
           .limit(100);
@@ -134,7 +135,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         if (propertiesError) throw propertiesError;
 
         allItems.push(
-          ...(properties || []).map((p) => ({
+          ...(properties || []).map((p: any) => ({
             id: p.id,
             type: 'property' as CatalogItemType,
             name_en: p.title_en,
@@ -144,6 +145,8 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
             is_active: p.is_active ?? false,
             is_featured: p.is_featured ?? false,
             provider_id: p.provider_id ?? undefined,
+            provider_name: p.providers?.name ?? undefined,
+            category: 'property',
             created_at: p.created_at,
             image: p.cover_image ?? undefined,
           }))
