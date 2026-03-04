@@ -123,9 +123,9 @@ const fetchGenericPopular = async (userId?: string): Promise<RecommendedItem[]> 
     reason: viewedTypes.includes('water_activity') ? 'history' : 'popular',
   }));
 
-  // Prioritize history items, shuffle rest
+  // Prioritize history items, then sort rest deterministically by rating
   const history = items.filter(i => i.reason === 'history');
-  const rest = items.filter(i => i.reason !== 'history').sort(() => Math.random() - 0.5);
+  const rest = items.filter(i => i.reason !== 'history').sort((a, b) => b.rating - a.rating);
   return [...history, ...rest].slice(0, 12);
 };
 
