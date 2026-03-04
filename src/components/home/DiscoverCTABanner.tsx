@@ -30,10 +30,10 @@ export const DiscoverCTABanner = memo(function DiscoverCTABanner() {
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-bold text-foreground">
-          {isRu ? 'Все сервисы и ситуации' : 'All services & situations'}
+          {isRu ? 'Всё для жизни за рубежом' : 'Everything abroad, in one place'}
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {isRu ? '30+ мини-приложений • 17 жизненных ситуаций' : '30+ mini-apps • 17 life situations'}
+          {isRu ? '30+ сервисов • 17 жизненных ситуаций' : '30+ services • 17 life situations'}
         </p>
       </div>
       <ArrowRight className="w-5 h-5 text-primary/60 shrink-0 group-hover:translate-x-1 group-hover:text-primary transition-all" />
