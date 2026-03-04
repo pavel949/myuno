@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Zap, Info, ChevronDown, ChevronUp, Calendar as CalendarIcon, MessageSquare } from 'lucide-react';
+import { Users, Zap, Info, ChevronDown, ChevronUp, Calendar as CalendarIcon, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
@@ -13,6 +14,7 @@ import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { GuestPriceProposal } from './GuestPriceProposal';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { format, differenceInDays, isBefore, startOfDay } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -64,6 +66,9 @@ export function PropertyBookingCard({
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
   const [showPriceDetails, setShowPriceDetails] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const { isDesktop } = useBreakpoint();
+  const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   
   const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
@@ -168,36 +173,83 @@ export function PropertyBookingCard({
           <span className="text-muted-foreground">/{isRu ? 'ночь' : 'night'}</span>
         </div>
         
-        {/* Date Selection */}
-        <div className="grid grid-cols-2 gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-auto py-3", !dateRange?.from && "text-muted-foreground")}>
-                <div className="flex flex-col items-start">
+        {/* Date Selection — unified range calendar */}
+        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal h-auto py-3 px-4"
+            >
+              <div className="grid grid-cols-2 divide-x w-full">
+                <div className="flex flex-col items-start pr-3">
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{isRu ? 'Заезд' : 'Check-in'}</span>
-                  <span className="text-sm">{dateRange?.from ? format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined }) : (isRu ? 'Дата' : 'Add date')}</span>
+                  <span className={cn("text-sm", !dateRange?.from && "text-muted-foreground")}>
+                    {dateRange?.from ? format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined }) : (isRu ? 'Дата' : 'Add date')}
+                  </span>
                 </div>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={1} disabled={(date) => isBefore(date, startOfDay(new Date())) || isDateBlocked(date)} modifiers={{ booked: blockedDates?.map(b => b.date) || [] }} modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }} locale={isRu ? ru : undefined} />
-            </PopoverContent>
-          </Popover>
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-auto py-3", !dateRange?.to && "text-muted-foreground")}>
-                <div className="flex flex-col items-start">
+                <div className="flex flex-col items-start pl-3">
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{isRu ? 'Выезд' : 'Check-out'}</span>
-                  <span className="text-sm">{dateRange?.to ? format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined }) : (isRu ? 'Дата' : 'Add date')}</span>
+                  <span className={cn("text-sm", !dateRange?.to && "text-muted-foreground")}>
+                    {dateRange?.to ? format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined }) : (isRu ? 'Дата' : 'Add date')}
+                  </span>
                 </div>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar mode="range" selected={dateRange} onSelect={setDateRange} numberOfMonths={1} disabled={(date) => isBefore(date, startOfDay(new Date())) || isDateBlocked(date)} locale={isRu ? ru : undefined} />
-            </PopoverContent>
-          </Popover>
-        </div>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
+            <div className="p-1">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  setDateRange(range);
+                  // Auto-close after both dates selected
+                  if (range?.from && range?.to) {
+                    clearTimeout(autoCloseTimer.current);
+                    autoCloseTimer.current = setTimeout(() => setCalendarOpen(false), 500);
+                  }
+                }}
+                numberOfMonths={isDesktop ? 2 : 1}
+                disabled={(date) => isBefore(date, startOfDay(new Date())) || isDateBlocked(date)}
+                modifiers={{ booked: blockedDates?.map(b => b.date) || [] }}
+                modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
+                locale={isRu ? ru : undefined}
+              />
+              {/* Footer with nights badge + actions */}
+              <div className="flex items-center justify-between px-3 py-2 border-t">
+                <div>
+                  {nights > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {nights} {isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ночей') : (nights === 1 ? 'night' : 'nights')}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {dateRange?.from && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => { setDateRange(undefined); }}
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      {isRu ? 'Очистить' : 'Clear'}
+                    </Button>
+                  )}
+                  {dateRange?.from && dateRange?.to && (
+                    <Button
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => setCalendarOpen(false)}
+                    >
+                      {isRu ? 'Готово' : 'Done'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
         
         {/* Guests Selection */}
         <Popover>

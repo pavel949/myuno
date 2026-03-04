@@ -297,6 +297,7 @@ export function useOrders() {
 
       // Send admin email notification (non-blocking)
       const primaryParticipant = input.participants?.find(p => p.role === 'primary') || input.participants?.[0];
+      const meta = input.metadata as Record<string, unknown> | undefined;
       supabase.functions.invoke('notify-admin-order', {
         body: {
           order_id: orderId,
@@ -320,6 +321,9 @@ export function useOrders() {
             type: a.address_type,
             address: a.address_text,
           })),
+          // Manager contact info from metadata
+          manager_email: meta?.manager_email || null,
+          manager_phone: meta?.manager_phone || null,
         },
       }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
