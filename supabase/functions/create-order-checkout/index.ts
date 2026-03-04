@@ -132,6 +132,9 @@ Deno.serve(async (req) => {
 
     if (itemsError) {
       console.error("Failed to create order items:", itemsError);
+      // Rollback: delete the orphaned order
+      await supabaseClient.from('orders').delete().eq('id', order.id);
+      throw new Error("Failed to create order items");
     }
 
     // Create participants if provided
