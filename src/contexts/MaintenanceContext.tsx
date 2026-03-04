@@ -30,11 +30,8 @@ const isLovablePreview = () => {
 };
 
 export function MaintenanceProvider({ children }: { children: ReactNode }) {
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(() => {
-    // Default: maintenance OFF — site is open
-    const stored = localStorage.getItem(MAINTENANCE_KEY);
-    return stored === 'true';
-  });
+  // Always start with maintenance OFF on fresh load; admins toggle it explicitly
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
   const [canBypass, setCanBypass] = useState(() => {
     // Check localStorage OR query param for bypass
