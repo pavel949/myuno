@@ -31,14 +31,14 @@ export function TripPositioningHero() {
           <Sparkles className="w-4 h-4 text-primary" />
         </div>
         <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-          {isRu ? 'Ваша инфраструктура' : 'Your infrastructure'}
+          {isRu ? 'Всё в одном месте' : 'All in one place'}
         </span>
       </div>
 
       <p className="text-sm font-medium text-foreground mb-3">
         {isRu
-          ? 'Надёжная инфраструктура для подготовки к поездке — всё в одном месте.'
-          : 'Trusted infrastructure for trip planning — everything in one place.'}
+          ? 'Подготовка к поездке — всё в одном месте.'
+          : 'Trip planning — everything in one place.'}
       </p>
 
       <ul className="space-y-2">
