@@ -1,7 +1,7 @@
 # myUNO Brand Book v1.0
 
 ## Позиционирование
-> «Мы — надёжная инфраструктура для путешествий и жизни за рубежом. One place for everything abroad.»
+> «One place for everything abroad» / «Всё для жизни за рубежом — в одном месте»
 
 **Архетип:** Caregiver × Architect — заботливый, но системный.
 
