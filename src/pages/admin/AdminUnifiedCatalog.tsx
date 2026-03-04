@@ -11,6 +11,8 @@ import { CatalogProductsTab } from '@/components/admin/catalog/CatalogProductsTa
 import { UnifiedCatalogTable } from '@/components/admin/catalog/UnifiedCatalogTable';
 import { ContentCreatorMenu } from '@/components/admin/ContentCreatorMenu';
 import { Badge } from '@/components/ui/badge';
+import { SectionHeader } from '@/components/ds';
+import { PageContainer } from '@/components/uno/PageContainer';
 
 export default function AdminUnifiedCatalog() {
   const { language } = useLanguage();
@@ -24,17 +26,15 @@ export default function AdminUnifiedCatalog() {
   const selectedProvider = providers.find(p => p.id === selectedProviderId);
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <PageContainer>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold">
-            {isRussian ? 'Единый каталог' : 'Unified Catalog'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {isRussian ? 'Все объекты и товары в одном месте' : 'All services and products in one place'}
-          </p>
-        </div>
+        <SectionHeader
+          title={isRussian ? 'Единый каталог' : 'Unified Catalog'}
+          subtitle={isRussian ? 'Все объекты и товары в одном месте' : 'All services and products in one place'}
+          icon={Package}
+          size="lg"
+        />
         
         {/* Provider Selector + Create Menu */}
         <div className="flex items-center gap-2">
@@ -95,7 +95,6 @@ export default function AdminUnifiedCatalog() {
         </TabsContent>
 
         <TabsContent value="services" className="mt-4">
-          {/* Filters for category tabs */}
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -151,6 +150,6 @@ export default function AdminUnifiedCatalog() {
           <CatalogProductsTab searchQuery={searchQuery} statusFilter={statusFilter} />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

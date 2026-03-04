@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProviderContracts, ProviderContract, ContractInsert } from '@/hooks/useProviderContracts';
- import { useContractEntities } from '@/hooks/useContractEntities';
+import { useContractEntities } from '@/hooks/useContractEntities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SectionHeader } from '@/components/ds';
+import { PageContainer } from '@/components/uno/PageContainer';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -210,27 +212,25 @@ export default function AdminContracts() {
 
   if (isLoading || entitiesLoading) {
     return (
-      <div className="p-4 md:p-6 space-y-4">
+      <PageContainer>
         <Skeleton className="h-8 w-48" />
         <div className="space-y-4">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <PageContainer>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold">
-            {isRu ? 'Контракты' : 'Contracts'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {isRu ? 'Договоры с поставщиками, вендорами, УК' : 'Contracts with providers, vendors, PM companies'}
-          </p>
-        </div>
+        <SectionHeader
+          title={isRu ? 'Контракты' : 'Contracts'}
+          subtitle={isRu ? 'Договоры с поставщиками, вендорами, УК' : 'Contracts with providers, vendors, PM companies'}
+          icon={FileText}
+          size="lg"
+        />
         <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           {isRu ? 'Новый контракт' : 'New Contract'}
@@ -593,6 +593,6 @@ export default function AdminContracts() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

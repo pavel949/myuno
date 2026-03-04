@@ -5,7 +5,9 @@ import { VendorProspectsPipeline } from '@/components/admin/prospects/VendorPros
 import { VendorProspectsTable } from '@/components/admin/prospects/VendorProspectsTable';
 import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspectsStats';
 import { VendorProspectImport } from '@/components/admin/prospects/VendorProspectImport';
-import { Kanban, Table, BarChart3, Upload } from 'lucide-react';
+import { SectionHeader } from '@/components/ds';
+import { PageContainer } from '@/components/uno/PageContainer';
+import { Kanban, Table, BarChart3, Upload, Users } from 'lucide-react';
 
 export default function AdminVendorProspects() {
   const { language } = useLanguage();
@@ -13,20 +15,14 @@ export default function AdminVendorProspects() {
   const [activeTab, setActiveTab] = useState('pipeline');
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold">
-          {isRussian ? 'Привлечение вендоров' : 'Vendor Acquisition'}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {isRussian 
-            ? 'AI-агент для привлечения и обработки потенциальных партнёров' 
-            : 'AI-powered vendor prospecting and outreach'}
-        </p>
-      </div>
+    <PageContainer>
+      <SectionHeader
+        title={isRussian ? 'Привлечение вендоров' : 'Vendor Acquisition'}
+        subtitle={isRussian ? 'AI-агент для привлечения и обработки потенциальных партнёров' : 'AI-powered vendor prospecting and outreach'}
+        icon={Users}
+        size="lg"
+      />
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
           <TabsTrigger value="pipeline" className="gap-2 data-[state=active]:bg-background">
@@ -50,19 +46,16 @@ export default function AdminVendorProspects() {
         <TabsContent value="pipeline" className="mt-4">
           <VendorProspectsPipeline />
         </TabsContent>
-
         <TabsContent value="table" className="mt-4">
           <VendorProspectsTable />
         </TabsContent>
-
         <TabsContent value="stats" className="mt-4">
           <VendorProspectsStats />
         </TabsContent>
-
         <TabsContent value="import" className="mt-4">
           <VendorProspectImport />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

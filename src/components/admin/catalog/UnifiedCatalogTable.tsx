@@ -24,7 +24,8 @@ import {
   MoreHorizontal,
   Trash2,
   Power,
-  PowerOff
+  PowerOff,
+  Building2
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -37,6 +38,8 @@ import { toast } from 'sonner';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getCatalogItemIcon, getNameInitials } from '@/lib/utils/catalogIconMapper';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { ru as ruLocale } from 'date-fns/locale';
 
 const typeIcons: Record<CatalogItemType, React.ReactNode> = {
   service: <Package className="h-4 w-4 text-info" />,
@@ -275,18 +278,21 @@ export function UnifiedCatalogTable() {
                   onCheckedChange={(checked) => checked ? selectAll() : deselectAll()}
                 />
               </TableHead>
-              <TableHead className="w-16"></TableHead>
-              <TableHead>{isRussian ? 'Название' : 'Name'}</TableHead>
+              <TableHead className="w-14"></TableHead>
+              <TableHead className="min-w-[200px]">{isRussian ? 'Название' : 'Name'}</TableHead>
               <TableHead className="w-24">{isRussian ? 'Тип' : 'Type'}</TableHead>
-              <TableHead className="w-32">{isRussian ? 'Цена' : 'Price'}</TableHead>
+              <TableHead className="hidden md:table-cell w-[180px]">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
+              <TableHead className="hidden lg:table-cell w-[120px]">{isRussian ? 'Категория' : 'Category'}</TableHead>
+              <TableHead className="w-28">{isRussian ? 'Цена' : 'Price'}</TableHead>
               <TableHead className="w-24">{isRussian ? 'Статус' : 'Status'}</TableHead>
-              <TableHead className="w-16"></TableHead>
+              <TableHead className="hidden md:table-cell w-[110px]">{isRussian ? 'Создано' : 'Created'}</TableHead>
+              <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                   {isRussian ? 'Нет элементов' : 'No items found'}
                 </TableCell>
               </TableRow>
@@ -307,7 +313,7 @@ export function UnifiedCatalogTable() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium line-clamp-1">
+                      <span className="font-medium line-clamp-1 text-foreground">
                         {isRussian ? item.name_ru : item.name_en}
                       </span>
                       {item.is_featured && (
@@ -326,7 +332,26 @@ export function UnifiedCatalogTable() {
                       </span>
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {item.provider_name ? (
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-foreground truncate max-w-[140px]">{item.provider_name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {item.category ? (
+                      <Badge variant="secondary" className="text-[11px]">
+                        {item.category}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-foreground">
                     {item.price ? formatPrice(item.price) : '—'}
                   </TableCell>
                   <TableCell>
@@ -336,6 +361,12 @@ export function UnifiedCatalogTable() {
                         : (isRussian ? 'Неактивен' : 'Inactive')
                       }
                     </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(item.created_at), { 
+                      addSuffix: true, 
+                      locale: isRussian ? ruLocale : undefined 
+                    })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
