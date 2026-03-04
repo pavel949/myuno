@@ -61,7 +61,7 @@ export function ReferralCard() {
     );
   }
 
-  const bonus = settings?.referrer_bonus || 200;
+  const bonus = settings?.referrer_bonus || 50;
 
   return (
     <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-primary/20 p-5 space-y-4">

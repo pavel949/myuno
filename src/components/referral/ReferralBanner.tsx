@@ -17,7 +17,7 @@ export function ReferralBanner() {
 
   if (!user || !referralCode) return null;
 
-  const bonus = settings?.referrer_bonus || 200;
+  const bonus = settings?.referrer_bonus || 50;
 
   return (
     <button
