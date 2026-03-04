@@ -10,7 +10,7 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { ProfileSkeleton } from '@/components/ui/page-skeletons';
 import { ReferralCard } from '@/components/uno/ReferralCard';
 import { EmailVerificationBadge } from '@/components/profile/EmailVerificationBadge';
-import { RoleSwitchMenu } from '@/components/profile/RoleSwitchMenu';
+
 import { ActiveRoleBadge } from '@/components/profile/ActiveRoleBadge';
 import { BecomePartnerCTA } from '@/components/profile/BecomePartnerCTA';
 import { UserRolesPermissions } from '@/components/profile/UserRolesPermissions';
@@ -122,9 +122,6 @@ export default function Profile() {
           <EmailVerificationBadge variant="inline" />
         </SectionCard>
 
-        {/* Switch to Hosting/Admin/Vendor Menu */}
-        <RoleSwitchMenu />
-        
         {/* CTA to become owner/vendor for regular users */}
         <BecomePartnerCTA />
 

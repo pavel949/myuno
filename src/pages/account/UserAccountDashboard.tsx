@@ -12,7 +12,7 @@ import { QuickActionsPanel } from '@/components/account/QuickActionsPanel';
 import { PersonalRecommendations } from '@/components/account/PersonalRecommendations';
 import { DashboardStatsBar } from '@/components/account/DashboardStatsBar';
 import { AccountSidebar } from '@/components/account/AccountSidebar';
-import { AccountRoleWidgets } from '@/components/account/AccountRoleWidgets';
+
 import { DownloadAppButton } from '@/components/pwa/DownloadAppButton';
 import { AppLayout } from '@/components/layout/AppLayout';
 
@@ -57,11 +57,6 @@ export default function UserAccountDashboard() {
               <AccountActivitySection />
               <PersonalRecommendations />
             </div>
-
-            <Separator className="bg-border/50" />
-
-            {/* Role-based workspace widgets */}
-            <AccountRoleWidgets />
 
             {/* Mobile-only: flat menu, download, logout */}
             <div className="lg:hidden space-y-6">

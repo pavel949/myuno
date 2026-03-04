@@ -14,7 +14,6 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
-import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { VendorCommandPalette } from './dashboard/VendorCommandPalette';
 import { VendorNotificationBell } from './dashboard/VendorNotificationBell';
@@ -121,7 +120,6 @@ export function VendorHeader() {
       <div className="flex-1 md:hidden" />
 
       <div className="flex items-center gap-1">
-        <RoleContextSwitcher compact />
         <Button 
           variant="ghost" 
           size="icon"
