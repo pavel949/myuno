@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PropertyLocationMapProps {
   lat?: number | null;
@@ -15,8 +16,8 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState(false);
 
-  // Default to Phuket center if no coordinates
   const hasCoords = lat != null && lng != null && lat !== 0 && lng !== 0;
   const mapLat = hasCoords ? lat : 7.8804;
   const mapLng = hasCoords ? lng : 98.3923;
@@ -28,11 +29,19 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
 
     const initMap = async () => {
       try {
+        // Fetch token from edge function (same as other map components)
+        const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+        const token = tokenData?.token;
+        
+        if (!token || cancelled) {
+          if (!cancelled) setMapError(true);
+          return;
+        }
+
         const mapboxgl = (await import('mapbox-gl')).default;
         await import('mapbox-gl/dist/mapbox-gl.css');
 
-        // Use env variable or fallback public token
-        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZWRldiIsImEiOiJjbTlsMXlrNzIwMDhrMmpzZGVtbXhwYTdoIn0.aekxNRmnsXK-BBNQ-Cn6Xg';
+        mapboxgl.accessToken = token;
 
         if (cancelled || !mapContainer.current) return;
 
@@ -52,15 +61,11 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
           setMapLoaded(true);
 
           if (hasCoords) {
-            // Add a blurred circle for privacy (approximate location)
             map.addSource('location-area', {
               type: 'geojson',
               data: {
                 type: 'Feature',
-                geometry: {
-                  type: 'Point',
-                  coordinates: [mapLng!, mapLat!],
-                },
+                geometry: { type: 'Point', coordinates: [mapLng!, mapLat!] },
                 properties: {},
               },
             });
@@ -79,7 +84,6 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
               },
             });
 
-            // Center marker
             map.addLayer({
               id: 'location-dot',
               type: 'circle',
@@ -93,9 +97,14 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
           }
         });
 
+        map.on('error', () => {
+          if (!cancelled) setMapError(true);
+        });
+
         mapRef.current = map;
       } catch (err) {
         console.warn('Map failed to load:', err);
+        if (!cancelled) setMapError(true);
       }
     };
 
@@ -114,7 +123,18 @@ export function PropertyLocationMap({ lat, lng, district, address }: PropertyLoc
         {isRu ? 'Где вы будете' : "Where you'll be"}
       </h2>
       
-      <div className="rounded-2xl overflow-hidden border border-border h-[300px] mb-3">
+      <div className="rounded-2xl overflow-hidden border border-border h-[300px] mb-3 relative">
+        {!mapLoaded && !mapError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {mapError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30 gap-2">
+            <MapPin className="w-8 h-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">{isRu ? 'Карта временно недоступна' : 'Map temporarily unavailable'}</p>
+          </div>
+        )}
         <div ref={mapContainer} className="w-full h-full" />
       </div>
 
