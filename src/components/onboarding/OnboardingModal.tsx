@@ -25,14 +25,14 @@ type Language = 'ru' | 'en' | 'th';
 
 const texts = {
   headline: { 
-    en: 'Your life abroad, organized', 
-    ru: 'Жизнь за рубежом — без хаоса', 
-    th: 'ชีวิตต่างแดน เป็นระเบียบ' 
+    en: 'Everything abroad, in one place', 
+    ru: 'Всё для жизни за рубежом — в одном месте', 
+    th: 'ทุกอย่างในต่างแดน ในที่เดียว' 
   },
   subtitle: { 
-    en: 'One system for housing, services, and daily needs', 
-    ru: 'Одна система для жилья, сервисов и повседневных задач', 
-    th: 'ระบบเดียวสำหรับที่อยู่ บริการ และความต้องการในชีวิตประจำวัน' 
+    en: 'Trusted infrastructure for housing, services, and daily life', 
+    ru: 'Надёжная система для жилья, сервисов и повседневных задач', 
+    th: 'โครงสร้างพื้นฐานที่เชื่อถือได้สำหรับที่อยู่ บริการ และชีวิตประจำวัน' 
   },
   comingSoon: { en: 'Coming soon', ru: 'Скоро', th: 'เร็วๆ นี้' },
   continue: { en: 'Continue', ru: 'Продолжить', th: 'ดำเนินการต่อ' },

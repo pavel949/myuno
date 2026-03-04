@@ -172,7 +172,7 @@ export const HeroBlock = memo(function HeroBlock() {
             <p className="text-sm text-white/60 mt-1">
               {user 
                 ? (isRu ? 'Чем можем помочь сегодня?' : 'How can we help today?')
-                : (isRu ? 'Всё для жизни на Пхукете в одном месте' : 'Everything for life in Phuket, in one place')}
+                : (isRu ? 'Надёжная инфраструктура для жизни за рубежом' : 'Your trusted infrastructure abroad')}
             </p>
             
             {/* Loyalty + streak chips */}
@@ -222,7 +222,7 @@ export const HeroBlock = memo(function HeroBlock() {
       <div className="relative flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-[15px] text-white/85 font-medium">
-            {isRu ? 'Ваш дом на острове' : 'Your home away from home'}
+            {isRu ? 'Ваша инфраструктура за рубежом' : 'Your infrastructure abroad'}
           </p>
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight font-display">
             {greeting}
