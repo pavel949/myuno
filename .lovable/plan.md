@@ -1,44 +1,32 @@
 
 
-# Plan: Canonicalize the Provider Form
+# Unified Messaging Implementation
 
-## Problem
-The provider create/edit form in `AdminProviders.tsx` (lines 454–677) is a raw `Dialog` with flat `useState` fields and manual `<Label>` + `<Input>` pairs. This violates the platform's canonical form standard:
+## Current State (after audit)
 
-- No `VendorFormSection` grouping (all fields are flat)
-- No `VendorFormWizard` step structure
-- No `TranslatableInput` for bilingual descriptions (uses two separate Textareas)
-- No `CompactField` / `FormFieldWithHelp` components
-- No visual grouping or collapsible sections
-- Form is a single scrollable blob — poor UX for 15+ fields
+Most of the unification is **already in place**:
+- **OnboardingModal** ✅ — already uses "Everything abroad, in one place" / "Всё для жизни за рубежом — в одном месте"
+- **DiscoverHero** ✅ — already uses "Всё для жизни за рубежом" / "One place for everything abroad"
+- **PWAWelcomeScreen** — file exists as dead code (not imported anywhere), needs deletion
+- **HeroBlock** — subtitle says "Надёжная инфраструктура для жизни за рубежом" — slightly off from unified message
+- **Brand book** — still has old positioning text, needs update
 
-## Solution
+## Changes
 
-Replace the inline form Dialog with a **structured wizard-style Sheet** using existing canonical components:
+### 1. Delete `src/components/pwa/PWAWelcomeScreen.tsx`
+Dead code — not imported in App.tsx or anywhere else. Remove entirely.
 
-### Step 1 — Extract form into `ProviderFormSheet.tsx`
-New file: `src/components/admin/ProviderFormSheet.tsx`
+### 2. Update `src/components/home/HeroBlock.tsx`
+Align the guest subtitle (line 175) to the unified message:
+- EN: "One place for everything abroad" (was "Your trusted infrastructure abroad")
+- RU: "Всё для жизни за рубежом — в одном месте" (was "Надёжная инфраструктура для жизни за рубежом")
+- Desktop tagline (line 225): same alignment
 
-Uses a `Sheet` (side panel) instead of Dialog for more space, with `VendorFormWizard` providing step navigation:
+### 3. Update `.lovable/brand-book.md`
+Update the positioning line to: "One place for everything abroad" / "Всё для жизни за рубежом — в одном месте"
 
-**Step 1 — Identity**: Name, Category (CategorySelector), Provider Type toggle, Logo upload  
-**Step 2 — Details**: TranslatableInput for descriptions (EN/RU), Service Domains, Languages  
-**Step 3 — Contact & Status**: Phone, Email, Website, Address (grid layout), Response Time, Switches (Active, Verified, Insurance, Guarantee)
-
-Each step wrapped in `VendorFormSection` with icons, badges ("Required"/"Optional"), and `helpText` tooltips.
-
-### Step 2 — Update `AdminProviders.tsx`
-- Remove the inline 200-line Dialog form (lines 454–677)
-- Import and use `<ProviderFormSheet>` instead
-- Pass `editingProvider`, `onSubmit`, `open/onOpenChange` props
-- Keep BusinessCardScanButton integration (pass scanned data as `initialData`)
-
-### Step 3 — Use canonical field components
-- `TranslatableInput` for description_en / description_ru (single component, tabbed)
-- `CompactField` for phone, email, website, address (reduces vertical space)
-- `VendorFormSection` with `collapsible={true}` for "Certifications & Badges" section
-
-### Files to Create/Edit
-- **Create**: `src/components/admin/ProviderFormSheet.tsx` — new canonical form component
-- **Edit**: `src/pages/admin/AdminProviders.tsx` — replace inline Dialog with ProviderFormSheet
+### Files
+- **Delete**: `src/components/pwa/PWAWelcomeScreen.tsx`
+- **Edit**: `src/components/home/HeroBlock.tsx` (2 text strings)
+- **Edit**: `.lovable/brand-book.md` (positioning section)
 
