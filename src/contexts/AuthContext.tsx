@@ -10,6 +10,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { clearAdminCache } from '@/hooks/useIsAdmin';
 
 interface SignUpResult {
   error: Error | null;
@@ -109,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    clearAdminCache();
     await supabase.auth.signOut();
   };
 
