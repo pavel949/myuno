@@ -31,10 +31,26 @@ export function CompanySwitcher() {
     });
   }, [companies, search, isRu]);
 
-  if (companies.length <= 1) return null;
-
   const getName = (c: typeof activeCompany) =>
     c ? (isRu ? c.name_ru : c.name_en) : '—';
+
+  // Single company: show name as context indicator without switcher
+  if (companies.length <= 1) {
+    if (!activeCompany) return null;
+    return (
+      <div className="flex items-center gap-2 max-w-[200px]">
+        <Avatar className="h-5 w-5">
+          <AvatarImage src={activeCompany.logo || undefined} />
+          <AvatarFallback className="text-[10px] bg-primary/20 text-primary">
+            {getName(activeCompany).charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+        <span className="truncate text-xs font-medium text-muted-foreground">
+          {getName(activeCompany)}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSearch(''); }}>
