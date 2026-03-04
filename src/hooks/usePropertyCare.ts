@@ -139,27 +139,17 @@ export function useCreateOwnerProperty() {
     mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       
-      // Get user profile for owner info
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, email')
-        .eq('id', user.id)
-        .single();
-
-      // Auto-detect management company if not explicitly provided
-      let managementCompanyId = (data as any).management_company_id || data._companyId || null;
-      if (!managementCompanyId) {
-        const { data: membership } = await supabase
-          .from('management_company_members')
-          .select('company_id')
-          .eq('user_id', user.id)
-          .eq('is_active', true)
-          .limit(1)
-          .maybeSingle();
-        if (membership) {
-          managementCompanyId = membership.company_id;
-        }
-      }
+      // Parallel: fetch profile + auto-detect company
+      const companyIdFromData = (data as any).management_company_id || data._companyId || null;
+      const [profileRes, membershipRes] = await Promise.all([
+        supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
+        !companyIdFromData
+          ? supabase.from('management_company_members').select('company_id').eq('user_id', user.id).eq('is_active', true).limit(1).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+      
+      const profile = profileRes.data;
+      const managementCompanyId = companyIdFromData || membershipRes.data?.company_id || null;
 
       const { _companyId, title, title_ru, description, description_ru, ...restData } = data as any;
       
@@ -277,6 +267,7 @@ export function useUpdateOwnerProperty() {
 export function usePublishToMarketplace() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
 
   return useMutation({
     mutationFn: async (data: {
@@ -288,8 +279,18 @@ export function usePublishToMarketplace() {
     }) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Verify access (owner or manager)
-      const hasAccess = await canAccessProperty(user.id, data.ownerPropertyId);
+      const activeCompanyId = activeCompany?.company_id || null;
+
+      // Verify access: owner OR assigned manager OR company member (parallel)
+      const [ownerCheck, assignmentCheck, companyCheck] = await Promise.all([
+        supabase.from('properties').select('id').eq('id', data.ownerPropertyId).eq('owner_id', user.id).maybeSingle(),
+        supabase.from('property_manager_assignments').select('id').eq('property_id', data.ownerPropertyId).eq('manager_user_id', user.id).eq('is_active', true).maybeSingle(),
+        activeCompanyId
+          ? supabase.from('properties').select('id').eq('id', data.ownerPropertyId).eq('management_company_id', activeCompanyId).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+
+      const hasAccess = !!ownerCheck.data || !!assignmentCheck.data || !!companyCheck.data;
       if (!hasAccess) throw new Error('Property not found or access denied');
 
       const { data: currentProperty, error: fetchError } = await supabase

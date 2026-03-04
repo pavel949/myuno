@@ -2,10 +2,10 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Building2, CalendarDays, Crown, CreditCard, DollarSign,
-  Users, Zap, FileText as FileTextIcon, Calendar, BarChart3 as DashboardIcon,
-  ContactRound, Home, ChevronDown, TrendingUp, Wrench, PackageOpen,
+  Users, Zap, FileText as FileTextIcon, BarChart3 as DashboardIcon,
+  ContactRound, Home, ChevronDown, TrendingUp, PackageOpen,
   Receipt, Settings, Tag, Star, ShieldCheck, BarChart3, MessageSquare, Radio,
-  BookOpen, FileText, Megaphone, Truck, ClipboardList, Search, Globe, Shuffle,
+  BookOpen, FileText, Megaphone, Truck, ClipboardList, Shuffle,
   ArrowLeftRight, Target,
 } from 'lucide-react';
 import {
