@@ -353,10 +353,10 @@ export default function AboutPage() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
               {isRu 
-                ? 'Единая инфраструктура для жизни за рубежом. От бытовых задач до управления инвестициями — онлайн и оффлайн.'
+                ? 'Всё для жизни за рубежом — в одном месте. От бытовых задач до управления инвестициями — онлайн и оффлайн.'
                 : isTh 
-                ? 'โครงสร้างพื้นฐานเดียวสำหรับการใช้ชีวิตในต่างประเทศ จากงานประจำวันไปจนถึงการจัดการการลงทุน — ออนไลน์และออฟไลน์'
-                : 'A unified infrastructure for living abroad. From everyday tasks to investment management — online and offline.'}
+                ? 'ทุกอย่างสำหรับชีวิตในต่างประเทศ — ในที่เดียว จากงานประจำวันไปจนถึงการจัดการการลงทุน — ออนไลน์และออฟไลน์'
+                : 'One place for everything abroad. From everyday tasks to investment management — online and offline.'}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <QuickInstallButton />
@@ -396,10 +396,10 @@ export default function AboutPage() {
               </h2>
               <p className="text-muted-foreground">
                 {isRu 
-                  ? 'myUNO — это не просто приложение. Это инфраструктура для комфортной жизни за рубежом.'
+                  ? 'myUNO — это не просто приложение. Всё для жизни за рубежом — в одном месте.'
                   : isTh 
-                  ? 'myUNO ไม่ใช่แค่แอป มันคือโครงสร้างพื้นฐานสำหรับชีวิตที่สะดวกสบายในต่างประเทศ'
-                  : 'myUNO is not just an app. It\'s an infrastructure for comfortable life abroad.'}
+                  ? 'myUNO ไม่ใช่แค่แอป ทุกอย่างสำหรับชีวิตในต่างประเทศ — ในที่เดียว'
+                  : 'myUNO is not just an app. One place for everything abroad.'}
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-4">

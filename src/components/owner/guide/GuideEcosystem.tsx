@@ -81,8 +81,8 @@ export function GuideEcosystem() {
         <div className="prose prose-invert max-w-none mb-8">
           <p className="text-lg text-muted-foreground leading-relaxed">
             {isRu 
-              ? 'myUNO — это не просто приложение, а полноценная инфраструктура для жизни и отдыха за рубежом. Платформа объединяет три компонента: цифровой сервис, команду на месте и сеть проверенных партнёров (G-Trust).'
-              : 'myUNO is not just an app, but a complete infrastructure for living and traveling abroad. The platform combines three components: a digital service, an on-ground team, and a network of verified partners (G-Trust).'
+              ? 'myUNO — это не просто приложение, а единое место для жизни и отдыха за рубежом. Платформа объединяет три компонента: цифровой сервис, команду на месте и сеть проверенных партнёров (G-Trust).'
+              : 'myUNO is not just an app — it\'s one place for everything abroad. The platform combines three components: a digital service, an on-ground team, and a network of verified partners (G-Trust).'
             }
           </p>
         </div>
