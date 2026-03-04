@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Star, Camera, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCreateReview } from "@/hooks/useReviews";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import browserImageCompression from "browser-image-compression";
 
 interface WriteReviewModalProps {
   isOpen: boolean;
@@ -23,6 +25,9 @@ interface WriteReviewModalProps {
   itemName: string;
   onSuccess?: () => void;
 }
+
+const MAX_PHOTOS = 5;
+const MAX_FILE_SIZE_MB = 2;
 
 export function WriteReviewModal({
   isOpen,
@@ -43,6 +48,54 @@ export function WriteReviewModal({
   const [pros, setPros] = useState("");
   const [cons, setCons] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (!user) {
+      toast.error(language === 'ru' ? 'Необходимо войти в аккаунт' : 'Please sign in first');
+      return;
+    }
+
+    const remaining = MAX_PHOTOS - images.length;
+    if (remaining <= 0) {
+      toast.error(language === 'ru' ? `Максимум ${MAX_PHOTOS} фото` : `Maximum ${MAX_PHOTOS} photos`);
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remaining);
+    setIsUploading(true);
+
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of filesToUpload) {
+        const compressed = await browserImageCompression(file, {
+          maxSizeMB: MAX_FILE_SIZE_MB,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+          fileType: 'image/webp',
+        });
+
+        const fileName = `reviews/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(fileName, compressed, { contentType: 'image/webp' });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('images').getPublicUrl(fileName);
+        uploadedUrls.push(urlData.publicUrl);
+      }
+      setImages(prev => [...prev, ...uploadedUrls]);
+    } catch {
+      toast.error(language === 'ru' ? 'Ошибка загрузки фото' : 'Failed to upload photo');
+    } finally {
+      setIsUploading(false);
+      // Reset input so same file can be selected again
+      e.target.value = '';
+    }
+  }, [user, images.length, language]);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -66,6 +119,18 @@ export function WriteReviewModal({
         cons: cons || undefined,
       });
       
+      // If images were uploaded, update the review with image URLs
+      if (images.length > 0) {
+        await supabase
+          .from('reviews')
+          .update({ images })
+          .eq('user_id', user.id)
+          .eq('item_id', itemId)
+          .eq('item_type', itemType)
+          .order('created_at', { ascending: false })
+          .limit(1);
+      }
+      
       toast.success(language === 'ru' ? 'Отзыв отправлен!' : 'Review submitted!');
       onSuccess?.();
       onClose();
@@ -87,7 +152,7 @@ export function WriteReviewModal({
     : ['Terrible', 'Poor', 'Average', 'Good', 'Excellent'];
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-display">
@@ -195,7 +260,7 @@ export function WriteReviewModal({
             </div>
           </div>
 
-          {/* Image Upload Placeholder */}
+          {/* Image Upload */}
           <div className="space-y-2">
             <Label>{language === 'ru' ? 'Фотографии' : 'Photos'}</Label>
             <div className="flex gap-2 flex-wrap">
@@ -211,15 +276,28 @@ export function WriteReviewModal({
                   </button>
                 </div>
               ))}
-              <button
-                type="button"
-                className="w-16 h-16 border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-              >
-                <Camera className="w-5 h-5" />
-              </button>
+              {images.length < MAX_PHOTOS && (
+                <label
+                  className={`w-16 h-16 border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  {isUploading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                </label>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Добавьте до 5 фото' : 'Add up to 5 photos'}
+              {language === 'ru' ? `Добавьте до ${MAX_PHOTOS} фото` : `Add up to ${MAX_PHOTOS} photos`}
             </p>
           </div>
         </div>
@@ -232,7 +310,7 @@ export function WriteReviewModal({
           <Button 
             className="flex-1" 
             onClick={handleSubmit}
-            disabled={isSubmitting || rating === 0}
+            disabled={isSubmitting || isUploading || rating === 0}
           >
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
