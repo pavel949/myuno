@@ -81,17 +81,38 @@ const MCOnboarding: React.FC = () => {
 
   // Step 1: Register company
   const handleRegister = useCallback(async () => {
-    if (!form.name_en.trim() || !form.name_ru.trim()) {
+    const nameEn = form.name_en.trim();
+    const nameRu = form.name_ru.trim();
+    if (!nameEn || !nameRu) {
       toast.error(isRu ? 'Заполните названия компании' : 'Fill in company names');
+      return;
+    }
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      toast.error(isRu ? 'Некорректный email' : 'Invalid email address');
+      return;
+    }
+    if (form.phone.trim() && !/^\+?[\d\s\-()]{7,20}$/.test(form.phone.trim())) {
+      toast.error(isRu ? 'Некорректный телефон' : 'Invalid phone number');
       return;
     }
     setLoading(true);
     try {
+      // Generate slug with uniqueness suffix
+      let slug = slugify(nameEn);
+      const { data: existing } = await supabase
+        .from('management_companies')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (existing) {
+        slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
+      }
+
       const { data, error } = await supabase.functions.invoke('register-mc', {
         body: {
-          name_en: form.name_en.trim(),
-          name_ru: form.name_ru.trim(),
-          slug: slugify(form.name_en),
+          name_en: nameEn,
+          name_ru: nameRu,
+          slug,
           email: form.email.trim() || undefined,
           phone: form.phone.trim() || undefined,
           address: form.address.trim() || undefined,

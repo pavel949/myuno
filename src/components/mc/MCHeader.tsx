@@ -56,6 +56,8 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/mc/quotes': { en: 'Quotes', ru: 'КП' },
   '/mc/reviews-management': { en: 'Reviews', ru: 'Отзывы' },
   '/mc/insurance': { en: 'Insurance & Docs', ru: 'Страховки' },
+  '/mc/support-chat': { en: 'Support', ru: 'Поддержка' },
+  '/mc/bookings': { en: 'Bookings', ru: 'Бронирования' },
 };
 
 export function MCHeader() {

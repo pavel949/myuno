@@ -192,7 +192,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             ? q(supabase.from('crm_tasks').select('id, title, task_type, priority, status, due_date')
                 .eq('company_id', companyId).neq('status', 'done')
                 .or(`due_date.lte.${todayStr}T23:59:59,due_date.is.null`)
-                .limit(20))
+                .limit(50))
             : Promise.resolve({ data: [] })
         );
         queryLabels.push('crmTasks');
@@ -313,7 +313,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           items.push({
             id: `bday-contact-${c.id}`, type: 'birthday', sectionOrder: ORDER.birthday,
             title: `${c.first_name} ${c.last_name}`,
-            subtitle: isToday_ ? undefined : `через ${dayIdx} дн.`,
+            subtitle: isToday_ ? undefined : `in ${dayIdx}d`,
             href: `/mc/contacts/${c.id}`,
             meta: { contactType: c.contact_type, daysUntil: dayIdx, avatarUrl: c.avatar_url },
           });
@@ -327,29 +327,29 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           items.push({
             id: `bday-staff-${s.id}`, type: 'birthday', sectionOrder: ORDER.birthday,
             title: s.name,
-            subtitle: isToday_ ? undefined : `через ${dayIdx} дн.`,
+            subtitle: isToday_ ? undefined : `in ${dayIdx}d`,
             href: '/mc/staff',
             meta: { contactType: 'staff', daysUntil: dayIdx, avatarUrl: s.photo_url },
           });
         }
 
         // ─── Bookings (check-in/out) ───
-        const propNameMap = new Map(allProperties.map(p => [p.property_id, p.title || 'Объект']));
+        const propNameMap = new Map(allProperties.map(p => [p.property_id, p.title || 'Property']));
         for (const b of (dataMap.bookings || []) as any[]) {
           const ci = new Date(b.check_in);
           const co = new Date(b.check_out);
-          const pName = propNameMap.get(b.property_id) || 'Объект';
+          const pName = propNameMap.get(b.property_id) || 'Property';
 
           if (isToday(ci)) {
             items.push({
               id: `ci-${b.id}`, type: 'check_in', sectionOrder: ORDER.schedule,
-              title: b.guest_name || 'Гость', subtitle: pName,
+              title: b.guest_name || 'Guest', subtitle: pName,
               href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           } else if (isTomorrow(ci)) {
             items.push({
               id: `ci-tm-${b.id}`, type: 'check_in_tomorrow', sectionOrder: ORDER.tomorrow,
-              title: b.guest_name || 'Гость', subtitle: pName,
+              title: b.guest_name || 'Guest', subtitle: pName,
               href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           }
@@ -357,13 +357,13 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           if (isToday(co)) {
             items.push({
               id: `co-${b.id}`, type: 'check_out', sectionOrder: ORDER.schedule,
-              title: b.guest_name || 'Гость', subtitle: pName,
+              title: b.guest_name || 'Guest', subtitle: pName,
               href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           } else if (isTomorrow(co)) {
             items.push({
               id: `co-tm-${b.id}`, type: 'check_out_tomorrow', sectionOrder: ORDER.tomorrow,
-              title: b.guest_name || 'Гость', subtitle: pName,
+              title: b.guest_name || 'Guest', subtitle: pName,
               href: `/mc/bookings/${b.id}`, meta: { propertyName: pName },
             });
           }
@@ -401,8 +401,8 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           items.push({
             id: `vo-${o.id}`, type: 'vendor_order',
             sectionOrder: isPending ? ORDER.overdue : ORDER.schedule,
-            title: o.order_number || `Заказ ${o.id.slice(0, 8)}`,
-            subtitle: o.status === 'pending' ? 'Ожидает подтверждения' : 'В работе',
+            title: o.order_number || `Order ${o.id.slice(0, 8)}`,
+            subtitle: o.status === 'pending' ? 'Pending confirmation' : 'In progress',
             href: `/vendor/bookings/${o.id}`,
             meta: { status: o.status, amount: o.total_amount },
           });
@@ -416,7 +416,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
           items.push({
             id: `st-${t.id}`, type: 'staff_task',
             sectionOrder: isInProgress ? ORDER.schedule : ORDER.tasks,
-            title: t.service_name || t.order_number || 'Задание',
+            title: t.service_name || t.order_number || 'Task',
             subtitle: t.scheduled_at
               ? format(new Date(t.scheduled_at), 'HH:mm')
               : undefined,
@@ -434,8 +434,8 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
             id: `mb-${b.id}`, type: 'my_booking',
             sectionOrder: days === 0 ? ORDER.schedule : days === 1 ? ORDER.tomorrow : ORDER.reminders,
             title: b.time_slot
-              ? `Бронирование в ${b.time_slot}`
-              : 'Бронирование',
+              ? `Booking at ${b.time_slot}`
+              : 'Booking',
             subtitle: b.booking_date,
             href: `/account/bookings`,
             meta: { daysUntil: days, status: b.status, amount: b.total_amount },
@@ -520,11 +520,11 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
 function formatDocType(type: string): string {
   const map: Record<string, string> = {
-    passport: 'Паспорт',
-    driver_license: 'Водительские права',
-    insurance: 'Страховка',
-    visa: 'Виза',
-    other: 'Документ',
+    passport: 'Passport',
+    driver_license: 'Driver License',
+    insurance: 'Insurance',
+    visa: 'Visa',
+    other: 'Document',
   };
   return map[type] || type;
 }
