@@ -1,11 +1,11 @@
 /**
- * LifeOS AI Insights Panel - READ-ONLY Analysis
+ * LifeOS AI Insights Panel
  * 
- * Displays AI suggestions without auto-execution.
- * All actions require explicit human confirmation.
+ * Displays AI suggestions with optional fix execution.
+ * All fix actions require explicit human confirmation.
  */
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
@@ -94,7 +94,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
                   <CardTitle className="text-base flex items-center gap-2">
                     {isRu ? 'ИИ Аналитик' : 'AI Insights'}
                     <Badge variant="outline" className="text-[10px] font-normal">
-                      {isRu ? 'Только чтение' : 'Read-Only'}
+                      {isRu ? 'Анализ + Фикс' : 'Analyze + Fix'}
                     </Badge>
                   </CardTitle>
                   <CardDescription className="text-xs">
@@ -212,11 +212,36 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
                   </div>
                 </ScrollArea>
 
+                {/* Apply All Fixable */}
+                {result.suggestions.some((s, i) => 
+                  s.suggestion_type !== 'risk' && !s.governance_conflict && !fixResults[i]
+                ) && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="w-full gap-2"
+                    disabled={!!isFixing}
+                    onClick={async () => {
+                      for (let i = 0; i < result.suggestions.length; i++) {
+                        const s = result.suggestions[i];
+                        if (s.suggestion_type !== 'risk' && !s.governance_conflict && !fixResults[i]) {
+                          await applySuggestion(s, i);
+                        }
+                      }
+                    }}
+                  >
+                    <Wrench className="w-4 h-4" />
+                    {isRu ? 'Применить все исправления' : 'Apply All Fixes'}
+                  </Button>
+                )}
+
                 {/* Disclaimer */}
                 <Alert className="bg-muted/30">
                   <ShieldAlert className="h-4 w-4" />
                   <AlertDescription className="text-xs">
-                    {result.disclaimer}
+                    {isRu 
+                      ? 'ИИ предоставляет рекомендации. Фиксы применяются после вашей команды и логируются в аудит.'
+                      : 'AI provides recommendations. Fixes are applied on your command and logged to audit.'}
                   </AlertDescription>
                 </Alert>
 
@@ -242,13 +267,14 @@ interface SuggestionCardProps {
   fixResult?: { success: boolean; actions: string[] };
 }
 
-function SuggestionCard({ suggestion, isRu, onCopy, onFix, isFixing, fixResult }: SuggestionCardProps) {
+const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function SuggestionCard({ suggestion, isRu, onCopy, onFix, isFixing, fixResult }, ref) {
   const [expanded, setExpanded] = useState(false);
   const isFixed = !!fixResult;
   const canFix = suggestion.suggestion_type !== 'risk' && !suggestion.governance_conflict && !isFixed;
 
   return (
     <div 
+      ref={ref}
       className={cn(
         "border rounded-lg p-3 space-y-2 transition-colors",
         getImpactStyle(suggestion.impact_level)
@@ -384,6 +410,6 @@ function SuggestionCard({ suggestion, isRu, onCopy, onFix, isFixing, fixResult }
       </Collapsible>
     </div>
   );
-}
+});
 
 export default LifeOSAIPanel;
