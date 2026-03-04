@@ -1,45 +1,51 @@
 
 
-# Plan: Admin User Management
+# Plan: Normalize Admin Dashboard UX + Improve Catalog Table
 
-## Problem
-The `profiles` table has no `status` column — there's no field to track whether a user is active, suspended, or deactivated. The `ControlUsersTab` component only has a "Reset Password" button with no management actions. There are no RLS policies allowing admins to UPDATE profiles, and no backend function to manage auth-level user status (ban/delete).
+## Problems Identified
+
+1. **Inconsistent page wrappers**: Some admin pages use `<PageContainer>` (with proper padding, max-width), others use raw `<div className="p-4 md:p-6">` (AdminDashboard, AdminUnifiedCatalog, AdminContracts, AdminVendorProspects). This creates different padding, spacing, and max-width behavior across sections.
+
+2. **Inconsistent headers**: Some pages use `<PageHeader>` (gradient banner), others use `<SectionHeader>` from DS components, others use raw `<h1>` tags with different font sizes/weights. The catalog page uses a plain `<h1 className="text-xl font-bold">` while providers uses `<PageHeader>`.
+
+3. **Catalog table is uninformative**: The `UnifiedCatalogTable` shows Name, Type, Price, Status — but missing: Provider/Owner, Category, Created date. No way to see who owns what.
+
+4. **Font/theme readability**: `PageHeader` uses hardcoded `text-white` which may not work in all theme contexts. The muted-foreground colors need verification across light/dark.
 
 ## Solution
 
-### 1. Database Migration
-- Add `status` column to `profiles` table: `TEXT DEFAULT 'active'` (values: `active`, `suspended`, `deactivated`)
-- Add `suspended_at`, `deactivated_at`, `status_changed_by` columns for audit
-- Add admin UPDATE policy on `profiles` for users with `admin` role
-- Log status changes to `admin_audit_logs`
+### 1. Normalize all admin pages to use `PageContainer` + `SectionHeader`
 
-### 2. Edge Function: `admin-manage-user`
-Create a new edge function that uses the **service role** key to perform auth-level operations:
-- **suspend** — sets `profiles.status = 'suspended'`, calls `auth.admin.updateUserById()` with `ban_duration: '876000h'` (100 years)
-- **activate** — sets `profiles.status = 'active'`, removes ban
-- **deactivate** — sets `profiles.status = 'deactivated'`, bans in auth
-- **delete** — soft-deletes by setting status to `deactivated` (or hard-delete via `auth.admin.deleteUser()` with confirmation)
-- **update_roles** — add/remove roles in `user_roles` table
-- All operations require the caller to have `admin` role (verified server-side)
-- All operations write to `admin_audit_logs`
+Replace inconsistent wrappers across all admin pages that currently use raw `<div className="p-4 ...">`:
+- `AdminDashboard.tsx` — already uses raw div, switch to `PageContainer`
+- `AdminUnifiedCatalog.tsx` — raw div, switch to `PageContainer` + `SectionHeader`
+- `AdminContracts.tsx` — raw div, switch to `PageContainer`
+- `AdminVendorProspects.tsx` — raw div, switch to `PageContainer`
 
-### 3. Update `ControlUsersTab` UI
-Expand the user detail panel with action buttons:
-- **Status badge** showing active/suspended/deactivated with color coding
-- **Activate / Suspend / Deactivate** buttons (contextual based on current status)
-- **Delete User** button with confirmation dialog
-- **Role management** — toggle roles (add/remove `vendor`, `owner`, `staff`, etc.)
-- Bulk actions using the existing `BulkActionsBar` component for multi-select operations
-- Toast notifications for success/error feedback
-- Refetch user list after any action
+Use `SectionHeader` (from DS2.0) consistently instead of mixing `PageHeader` gradient banners and raw `<h1>` in admin context. The gradient `PageHeader` is designed for guest-facing pages, not admin dashboards.
 
-### 4. Security
-- Edge function validates caller is admin via `has_role()` check server-side
-- Prevents admin from deactivating/deleting themselves
-- All changes logged with actor ID, action type, and timestamp
+### 2. Enrich Catalog Table columns
 
-### Files to Create/Edit
-- `supabase/migrations/new_migration.sql` — add status columns + RLS
-- `supabase/functions/admin-manage-user/index.ts` — new edge function
-- `src/components/admin/control/ControlUsersTab.tsx` — full UI rebuild with management actions
+Add to `UnifiedCatalogTable`:
+- **Provider/Owner** column — show `provider_name` with a small avatar/icon, linked to provider detail
+- **Category** column — show the category badge
+- **Created** column — show relative date (e.g. "3 days ago")
+- Fix column widths for better readability: Name gets `min-w-[200px]`, Provider `w-[180px]`, others stay compact
+- On mobile: hide Provider and Created columns (responsive `hidden md:table-cell`)
+
+Update `useUnifiedCatalog` hook to also fetch `category` field for services and `owner_id`/profile info for properties.
+
+### 3. Typography normalization
+
+- Create a shared admin page header pattern using `SectionHeader` with consistent `heading-lg` scale from DS2.0
+- Ensure all admin text uses `text-foreground` (not hardcoded colors) for dark mode compatibility
+- Verify `text-muted-foreground` contrast meets DS2.0 standard (42% lightness min)
+
+### Files to Edit
+- `src/pages/admin/AdminDashboard.tsx` — wrap in PageContainer, keep SectionHeader
+- `src/pages/admin/AdminUnifiedCatalog.tsx` — wrap in PageContainer, replace raw h1 with SectionHeader
+- `src/pages/admin/AdminContracts.tsx` — wrap in PageContainer
+- `src/pages/admin/AdminVendorProspects.tsx` — wrap in PageContainer
+- `src/components/admin/catalog/UnifiedCatalogTable.tsx` — add Provider, Category, Created columns
+- `src/hooks/useUnifiedCatalog.ts` — include category data in queries
 
