@@ -1,19 +1,17 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useNotifications } from '@/hooks/useNotifications';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { MiniCart } from '@/components/market/MiniCart';
-import { RoleContextSwitcher } from '@/components/uno/RoleContextSwitcher';
-import { useUserContext } from '@/hooks/useUserContext';
 import { Button } from '@/components/ui/button';
 import { DesktopNavTabs } from '@/components/layout/DesktopNavTabs';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
+import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 
 interface AppHeaderProps {
   title?: string;
@@ -30,9 +28,7 @@ interface AppHeaderProps {
 export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick, className }: AppHeaderProps) {
   const { user } = useAuth();
   const { t, language } = useLanguage();
-  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
-  const { availableRoles } = useUserContext();
   const isRu = language === 'ru';
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -128,33 +124,8 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
 
             <MiniCart className="rounded-lg hover:bg-muted transition-colors" />
 
-            {user && availableRoles.length > 1 && (
-              <RoleContextSwitcher compact />
-            )}
-
             {user ? (
-              <>
-                {/* Notification bell with dot */}
-                <button
-                  onClick={() => navigate('/notifications')}
-                  aria-label={t('nav.notifications')}
-                  className="relative flex items-center justify-center w-9 h-9 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <Bell className="w-[18px] h-[18px] text-muted-foreground" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background" />
-                  )}
-                </button>
-
-                {/* Avatar with hover ring */}
-                <Link to="/account" aria-label={t('nav.profile')}>
-                  <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-primary/10 flex items-center justify-center ml-0.5 transition-all duration-200 hover:ring-2 hover:ring-primary/20 hover:bg-primary/15">
-                    <span className="text-xs font-semibold text-primary">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </Link>
-              </>
+              <UserAvatarMenu />
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="h-8 text-xs px-4 ml-1 rounded-lg font-medium">
