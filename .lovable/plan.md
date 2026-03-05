@@ -1,32 +1,103 @@
 
 
-# Unified Messaging Implementation
+# GAP-анализ: myUNO vs Ignatev Group Business Model
 
-## Current State (after audit)
+## Что уже есть (построено)
 
-Most of the unification is **already in place**:
-- **OnboardingModal** ✅ — already uses "Everything abroad, in one place" / "Всё для жизни за рубежом — в одном месте"
-- **DiscoverHero** ✅ — already uses "Всё для жизни за рубежом" / "One place for everything abroad"
-- **PWAWelcomeScreen** — file exists as dead code (not imported anywhere), needs deletion
-- **HeroBlock** — subtitle says "Надёжная инфраструктура для жизни за рубежом" — slightly off from unified message
-- **Brand book** — still has old positioning text, needs update
+| Модуль бизнес-модели | Статус в myUNO | Детали |
+|---|---|---|
+| **MC модуль (Estate)** | ~80% готов | Объекты, задачи, финансы, календарь, Owner Portal, отчёты, CRM, Staff |
+| **CRM + Pipeline (Capital)** | ~70% готов | Контакты, воронки, задачи, web-формы, email-кампании, lead scoring |
+| **Marketplace (сервисы)** | ~60% готов | Трансфер, цветы, уборка, рестораны, яхты, медицина — страницы и заказы есть |
+| **Owner Portal** | ~85% готов | P&L, occupancy, документы, чат с УК, welcome message |
+| **Investment Hub** | ~70% готов | Проекты, скоринг, интерес инвесторов, dashboard |
+| **WhatsApp уведомления** | ~40% | Работает для заказов и трансферов через UltraMSG, но не для всех сценариев |
+| **Auto-messaging (booking triggers)** | ~50% | Правила сообщений при бронировании есть, но нет welcome-при-заселении через WhatsApp |
+| **Billing / SaaS подписка** | ~60% | Stripe интеграция, slot-модель для MC, но нет B2B onboarding для внешних УК |
 
-## Changes
+## Что нужно доработать (по приоритету из бизнес-модели)
 
-### 1. Delete `src/components/pwa/PWAWelcomeScreen.tsx`
-Dead code — not imported in App.tsx or anywhere else. Remove entirely.
+### НЕДЕЛЯ 1 — Критичные разблокировщики дохода
 
-### 2. Update `src/components/home/HeroBlock.tsx`
-Align the guest subtitle (line 175) to the unified message:
-- EN: "One place for everything abroad" (was "Your trusted infrastructure abroad")
-- RU: "Всё для жизни за рубежом — в одном месте" (was "Надёжная инфраструктура для жизни за рубежом")
-- Desktop tagline (line 225): same alignment
+**1. WhatsApp автозахват лидов (Capital)**
+- Сейчас: входящие WhatsApp-сообщения не попадают в CRM автоматически
+- Нужно: Webhook от WhatsApp Business API -> автосоздание лида в `consultation_requests` -> уведомление Павлу
+- Требуется: настройка WhatsApp Business API webhook (incoming messages), edge function `whatsapp-incoming-webhook`
 
-### 3. Update `.lovable/brand-book.md`
-Update the positioning line to: "One place for everything abroad" / "Всё для жизни за рубежом — в одном месте"
+**2. Welcome WhatsApp при заселении (Marketplace)**
+- Сейчас: guidebook с welcome message есть, но нет автоматической отправки в WhatsApp при check-in
+- Нужно: триггер при смене статуса бронирования на "checked_in" -> отправка WhatsApp гостю со списком сервисов (трансфер, цветы, медицина, рестораны)
+- Требуется: edge function `send-guest-welcome-whatsapp`, триггер в БД или cron-проверка
 
-### Files
-- **Delete**: `src/components/pwa/PWAWelcomeScreen.tsx`
-- **Edit**: `src/components/home/HeroBlock.tsx` (2 text strings)
-- **Edit**: `.lovable/brand-book.md` (positioning section)
+**3. Импорт данных из Odoo/Excel в CRM**
+- Сейчас: CSV импорт контактов есть (`ContactImportPage`)
+- Нужно: убедиться что формат Odoo поддерживается, investor pipeline создан
+- Статус: в основном готово, возможно нужна донастройка маппинга полей
+
+### НЕДЕЛЯ 2 — Высокий приоритет
+
+**4. CRM триггеры: 2й/3й визит -> задача Павлу (Capital)**
+- Сейчас: lead scoring есть, но нет триггеров на повторные визиты/бронирования
+- Нужно: автоматическое отслеживание количества бронирований клиента -> при 2+ бронированиях создавать CRM-задачу для Павла "Клиент готов к покупке"
+- Требуется: edge function или DB trigger на `property_bookings`, логика подсчёта визитов по guest email/phone
+
+**5. Estate полностью на платформе**
+- Сейчас: MC модуль функционален, но Тимоти может не использовать его как основной инструмент
+- Нужно: убедиться что 5 объектов заведены, задачи назначаются, финансы ведутся в системе
+- Это больше операционная задача, чем техническая
+
+### НЕДЕЛЯ 3-4
+
+**6. Подписание партнёров Marketplace**
+- Техническая часть: vendor onboarding flow уже есть
+- Нужно: убедиться что partner agreement, комиссии (15-20%) настроены для каждой вертикали
+- Операционная задача
+
+**7. Автоматический P&L отчёт владельцам**
+- Сейчас: `monthly-owner-statements` и `send-property-report` edge functions существуют
+- Нужно: автоматическая отправка 1-го числа через WhatsApp/email (cron job)
+- Частично готово, нужна настройка расписания
+
+### МЕСЯЦ 2+ — Рост
+
+**8. B2B SaaS онбординг для внешних УК/агентств**
+- Сейчас: НЕ существует. MC onboarding (`MCOnboarding.tsx`) только для внутреннего использования
+- Нужно: публичная landing page для УК, self-service signup, trial период, pricing page
+- Это самая большая недостающая часть — полноценный B2B SaaS flow
+
+**9. Nurturing последовательности**
+- Сейчас: CRM sequences page существует (`CrmSequencesPage`), но реальная автоматизация email/WhatsApp drip campaigns не реализована
+- Нужно: автоматические цепочки сообщений (раз в 6-8 недель) для всей базы контактов
+
+## Что нужно сделать технически (план реализации)
+
+### Фаза 1: WhatsApp автоматизация (разблокирует Capital + Marketplace)
+1. Edge function `whatsapp-incoming-webhook` — приём входящих сообщений, автосоздание лида
+2. Edge function `send-guest-welcome-whatsapp` — welcome при check-in со списком сервисов
+3. DB trigger на `property_bookings` для подсчёта визитов клиента и создания задачи Павлу
+
+### Фаза 2: Автоматизация отчётности (замыкает цикл Capital->Estate)
+1. Cron-расписание для `monthly-owner-statements` (1-е число каждого месяца)
+2. WhatsApp-доставка PDF отчёта владельцам
+
+### Фаза 3: B2B SaaS (новый поток MRR)
+1. Public landing page `/for-management-companies`
+2. Self-service MC registration с trial
+3. Pricing page с тарифами ($300-500/мес)
+4. Onboarding wizard для внешних УК
+
+### Фаза 4: Nurturing Engine
+1. Автоматические WhatsApp/email цепочки
+2. Контент-план на 6-8 недель
+3. Триггеры на основе сегментации (арендатор, владелец, инвестор)
+
+## Резюме
+
+Платформа myUNO покрывает примерно **65-70%** от целевой архитектуры. Главные пробелы:
+- **WhatsApp автоматизация** (входящие + welcome при заселении) — блокирует Capital и Marketplace
+- **Триггеры повторных визитов** — блокирует конверсию аренда->покупка
+- **B2B SaaS onboarding** — блокирует 4-й поток дохода
+- **Nurturing sequences** — блокирует удержание базы
+
+Начинать нужно с WhatsApp-интеграции, так как она разблокирует сразу два потока дохода.
 
