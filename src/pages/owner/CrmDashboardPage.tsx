@@ -19,6 +19,7 @@ import {
   Mail, Zap, FileText, Globe, Calendar, Building2, Copy, UserCog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { HotLeadsWidget } from '@/components/owner/crm/HotLeadsWidget';
 
 export default function CrmDashboardPage() {
   const navigate = useNavigate();
@@ -173,6 +174,9 @@ export default function CrmDashboardPage() {
           </button>
         ))}
       </div>
+
+      {/* Hot Leads - Repeat Guests */}
+      <HotLeadsWidget />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
