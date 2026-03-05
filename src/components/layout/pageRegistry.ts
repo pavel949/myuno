@@ -12,6 +12,7 @@ export const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
 export const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 
 // ── Core ──
+export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));
 export const Discover = lazy(() => import('@/pages/Discover'));
 export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));
 export const MapView = lazy(() => import('@/pages/MapView'));

@@ -49,10 +49,12 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  // Allow auth-related routes through
-  const isAuthRoute = location.pathname.startsWith('/auth');
+  // Allow auth and public marketing routes through
+  const isPublicRoute = location.pathname.startsWith('/auth') 
+    || location.pathname.startsWith('/for-management-companies')
+    || location.pathname.startsWith('/ref/');
 
-  if (isAuthRoute || isLoading) return <>{children}</>;
+  if (isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
   return <>{children}</>;
 }
