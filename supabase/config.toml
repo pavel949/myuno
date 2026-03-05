@@ -135,3 +135,7 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.send-guest-welcome-whatsapp]
     verify_jwt = false
+  [functions.send-nurture-messages]
+    verify_jwt = false
+  [functions.register-mc]
+    verify_jwt = false

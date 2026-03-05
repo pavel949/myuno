@@ -4300,6 +4300,74 @@ export type Database = {
           },
         ]
       }
+      crm_nurture_queue: {
+        Row: {
+          channel: string
+          company_id: string | null
+          contact_id: string | null
+          created_at: string | null
+          error: string | null
+          id: string
+          message_body: string
+          metadata: Json | null
+          recipient_email: string | null
+          recipient_phone: string | null
+          scheduled_at: string
+          sent_at: string | null
+          sequence_id: string | null
+          status: string
+          step_number: number | null
+          subject: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          channel?: string
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          message_body: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at: string
+          sent_at?: string | null
+          sequence_id?: string | null
+          status?: string
+          step_number?: number | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          message_body?: string
+          metadata?: Json | null
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          sequence_id?: string | null
+          status?: string
+          step_number?: number | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_nurture_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_pipeline_stages: {
         Row: {
           color: string | null
@@ -12563,6 +12631,86 @@ export type Database = {
           },
           {
             foreignKeyName: "owner_portal_settings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owner_report_preferences: {
+        Row: {
+          auto_send_enabled: boolean
+          created_at: string | null
+          currency: string | null
+          day_of_month: number
+          frequency: string
+          id: string
+          owner_id: string
+          property_id: string | null
+          recipient_emails: string | null
+          recipient_phone: string | null
+          report_type: string | null
+          sections: Json | null
+          send_whatsapp: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_send_enabled?: boolean
+          created_at?: string | null
+          currency?: string | null
+          day_of_month?: number
+          frequency?: string
+          id?: string
+          owner_id: string
+          property_id?: string | null
+          recipient_emails?: string | null
+          recipient_phone?: string | null
+          report_type?: string | null
+          sections?: Json | null
+          send_whatsapp?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_send_enabled?: boolean
+          created_at?: string | null
+          currency?: string | null
+          day_of_month?: number
+          frequency?: string
+          id?: string
+          owner_id?: string
+          property_id?: string | null
+          recipient_emails?: string | null
+          recipient_phone?: string | null
+          report_type?: string | null
+          sections?: Json | null
+          send_whatsapp?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_report_preferences_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_report_preferences_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_report_preferences_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_report_preferences_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_owner_properties"
