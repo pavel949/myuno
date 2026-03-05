@@ -154,6 +154,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/install" element={<LazyPage><Pages.Install /></LazyPage>} />
         <Route path="/booking/advance-requested" element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
+        <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
         
         {/* ── LifeOS ── */}
