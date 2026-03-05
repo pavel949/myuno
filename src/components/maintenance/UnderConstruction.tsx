@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, Sparkles, Clock, Bell, Mail, ShieldCheck } from 'lucide-react';
+import { Rocket, Sparkles, Clock, Bell, Mail, ShieldCheck, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -165,6 +165,24 @@ export function UnderConstruction() {
             className="py-4 px-6 bg-success/10 text-success rounded-xl"
           >
             ✓ You'll be notified when we launch!
+          </motion.div>
+        )}
+
+        {/* Sign in link for registered users */}
+        {!user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => window.location.href = '/auth'}
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </Button>
           </motion.div>
         )}
 
