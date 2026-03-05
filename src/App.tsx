@@ -37,10 +37,25 @@ import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
 });
+
+/** Gate that shows Coming Soon for unauthenticated users (except /auth routes) */
+function ComingSoonGate({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+
+  // Allow auth-related routes through
+  const isAuthRoute = location.pathname.startsWith('/auth');
+
+  if (isAuthRoute || isLoading) return <>{children}</>;
+  if (!user) return <UnderConstruction />;
+  return <>{children}</>;
+}
 
 // Inner component to use hooks
 function AppContent() {
@@ -48,7 +63,6 @@ function AppContent() {
   const { isMaintenanceMode, canBypass } = useMaintenance();
   
   // Show maintenance page if enabled and user can't bypass
-  // Admin routes (/admin/*, /owner/*, etc.) always bypass via context
   if (isMaintenanceMode && !canBypass) {
     return <UnderConstruction />;
   }
@@ -61,9 +75,11 @@ function AppContent() {
         <PWAUpdatePrompt />
         <LegalComplianceModal />
         <BrowserRouter>
-          <AnimatedRoutes />
-          <UnifiedChatFAB />
-          <CookieConsentBanner />
+          <ComingSoonGate>
+            <AnimatedRoutes />
+            <UnifiedChatFAB />
+            <CookieConsentBanner />
+          </ComingSoonGate>
         </BrowserRouter>
       </>
     );
