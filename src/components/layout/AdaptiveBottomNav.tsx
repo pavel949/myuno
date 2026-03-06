@@ -80,11 +80,14 @@ const teamNavItems: NavItem[] = [
 ];
 
 // Routes that have their own fixed bottom bar and should hide the global nav
+// Layouts that render their own mobile bottom nav
+const layoutsWithOwnNav = ['/mc', '/admin', '/staff', '/my-stay', '/guest', '/team'];
+
+// Detail/checkout pages that have their own fixed bottom bar
 const routesWithOwnBottomBar = [
   '/flowers/',
   '/yachts/',
   '/tours/',
-  '/property/',
   '/beauty/',
   '/cleaning/',
   '/fitness/booking',
@@ -104,6 +107,11 @@ const routesWithOwnBottomBar = [
 ];
 
 function shouldHideBottomNav(pathname: string): boolean {
+  // Hide for layouts that have their own mobile nav
+  if (layoutsWithOwnNav.some(prefix => pathname.startsWith(prefix))) return true;
+  // Hide for detail/checkout pages with own bottom bar
+  // Use exact startsWith for /property/ to avoid matching /mc/properties/
+  if (pathname.startsWith('/property/')) return true;
   return routesWithOwnBottomBar.some(route => pathname.includes(route));
 }
 
@@ -114,7 +122,10 @@ type NavConfig = {
 
 function getNavConfigForPath(pathname: string): NavConfig {
   if (pathname.includes('/onboarding')) return { items: guestNavItems, showAppsButton: true };
+  // These layouts have their own nav — should never reach here due to shouldHideBottomNav,
+  // but as a safety net return appropriate items
   if (pathname.startsWith('/admin')) return { items: adminNavItems, showAppsButton: false };
+  if (pathname.startsWith('/mc')) return { items: ownerNavItems, showAppsButton: false };
   if (pathname.startsWith('/owner')) return { items: ownerNavItems, showAppsButton: false };
   if (pathname.startsWith('/vendor')) return { items: vendorNavItems, showAppsButton: false };
   if (pathname.startsWith('/team')) return { items: teamNavItems, showAppsButton: false };

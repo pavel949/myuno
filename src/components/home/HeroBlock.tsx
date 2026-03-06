@@ -66,21 +66,21 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               "relative flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all duration-200",
               "focus-visible:ring-2 focus-visible:ring-primary/50",
               isActive
-                ? "bg-white shadow-lg border border-white/90 scale-[1.01]"
-                : "bg-white/8 border border-white/12 hover:bg-white/14 hover:border-white/20"
+                ? "bg-card shadow-lg border border-border scale-[1.01]"
+                : "bg-card/10 border border-card/15 hover:bg-card/20 hover:border-card/25"
             )}
           >
             <span className="text-xl shrink-0">{info.icon}</span>
             <div className="min-w-0 flex-1">
               <span className={cn(
                 "block text-[13px] font-bold leading-tight",
-                isActive ? "text-gray-900" : "text-white"
+                isActive ? "text-foreground" : "text-primary-foreground"
               )}>
                 {isRu ? info.labelRu : info.labelEn}
               </span>
               <span className={cn(
                 "block text-[11px] leading-tight mt-0.5",
-                isActive ? "text-gray-500" : "text-white/80"
+                isActive ? "text-muted-foreground" : "text-primary-foreground/80"
               )}>
                 {isRu ? info.descRu : info.descEn}
               </span>
