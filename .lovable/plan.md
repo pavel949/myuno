@@ -1,103 +1,84 @@
 
 
-# GAP-анализ: myUNO vs Ignatev Group Business Model
+# Vendor Onboarding UX — Fast First Listing with Progressive Completion
 
-## Что уже есть (построено)
+## Research: How Top Platforms Do It
 
-| Модуль бизнес-модели | Статус в myUNO | Детали |
-|---|---|---|
-| **MC модуль (Estate)** | ~80% готов | Объекты, задачи, финансы, календарь, Owner Portal, отчёты, CRM, Staff |
-| **CRM + Pipeline (Capital)** | ~70% готов | Контакты, воронки, задачи, web-формы, email-кампании, lead scoring |
-| **Marketplace (сервисы)** | ~60% готов | Трансфер, цветы, уборка, рестораны, яхты, медицина — страницы и заказы есть |
-| **Owner Portal** | ~85% готов | P&L, occupancy, документы, чат с УК, welcome message |
-| **Investment Hub** | ~70% готов | Проекты, скоринг, интерес инвесторов, dashboard |
-| **WhatsApp уведомления** | ~40% | Работает для заказов и трансферов через UltraMSG, но не для всех сценариев |
-| **Auto-messaging (booking triggers)** | ~50% | Правила сообщений при бронировании есть, но нет welcome-при-заселении через WhatsApp |
-| **Billing / SaaS подписка** | ~60% | Stripe интеграция, slot-модель для MC, но нет B2B onboarding для внешних УК |
+| Platform | Pattern | Time-to-First-Listing |
+|----------|---------|----------------------|
+| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
+| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
+| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
+| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
 
-## Что нужно доработать (по приоритету из бизнес-модели)
+**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
 
-### НЕДЕЛЯ 1 — Критичные разблокировщики дохода
+## Current State Analysis
 
-**1. WhatsApp автозахват лидов (Capital)**
-- Сейчас: входящие WhatsApp-сообщения не попадают в CRM автоматически
-- Нужно: Webhook от WhatsApp Business API -> автосоздание лида в `consultation_requests` -> уведомление Павлу
-- Требуется: настройка WhatsApp Business API webhook (incoming messages), edge function `whatsapp-incoming-webhook`
+**What exists:**
+- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
+- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
+- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
+- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
 
-**2. Welcome WhatsApp при заселении (Marketplace)**
-- Сейчас: guidebook с welcome message есть, но нет автоматической отправки в WhatsApp при check-in
-- Нужно: триггер при смене статуса бронирования на "checked_in" -> отправка WhatsApp гостю со списком сервисов (трансфер, цветы, медицина, рестораны)
-- Требуется: edge function `send-guest-welcome-whatsapp`, триггер в БД или cron-проверка
+**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
 
-**3. Импорт данных из Odoo/Excel в CRM**
-- Сейчас: CSV импорт контактов есть (`ContactImportPage`)
-- Нужно: убедиться что формат Odoo поддерживается, investor pipeline создан
-- Статус: в основном готово, возможно нужна донастройка маппинга полей
+## Proposed UX: "3-Screen Fast Start"
 
-### НЕДЕЛЯ 2 — Высокий приоритет
+```text
+Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
+┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
+│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
+│ [____________]   │           │ Name *            │              │                  │
+│                  │           │ [____________]    │              │  Your listing is │
+│ Category *       │           │                   │              │  pending review  │
+│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
+│                  │           │ [____] THB        │              │  Complete your   │
+│ Phone / WhatsApp │           │                   │              │  profile to get  │
+│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
+│                  │           │ [📷 Upload]       │              │                  │
+│         [Next →] │           │                   │              │  [→ Dashboard]   │
+└──────────────────┘           │ Brief description │              └──────────────────┘
+                               │ [____________]    │
+                               │         [List →]  │
+                               └──────────────────┘
+```
 
-**4. CRM триггеры: 2й/3й визит -> задача Павлу (Capital)**
-- Сейчас: lead scoring есть, но нет триггеров на повторные визиты/бронирования
-- Нужно: автоматическое отслеживание количества бронирований клиента -> при 2+ бронированиях создавать CRM-задачу для Павла "Клиент готов к покупке"
-- Требуется: edge function или DB trigger на `property_bookings`, логика подсчёта визитов по guest email/phone
+**Required fields total: 4** (business name, category, service name, price)
+Everything else: progressive completion via existing `VendorOnboardingChecklist`.
 
-**5. Estate полностью на платформе**
-- Сейчас: MC модуль функционален, но Тимоти может не использовать его как основной инструмент
-- Нужно: убедиться что 5 объектов заведены, задачи назначаются, финансы ведутся в системе
-- Это больше операционная задача, чем техническая
+## Implementation Plan
 
-### НЕДЕЛЯ 3-4
+### 1. Refactor VendorOnboarding into 3-step wizard
+Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
+- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
+- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
+- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
 
-**6. Подписание партнёров Marketplace**
-- Техническая часть: vendor onboarding flow уже есть
-- Нужно: убедиться что partner agreement, комиссии (15-20%) настроены для каждой вертикали
-- Операционная задача
+### 2. Update VendorOnboardingChecklist
+Expand from 3 to 6 progressive items:
+- ✅ Create account (auto-complete)
+- ✅ Add first listing (auto-complete from step 2)
+- ○ Add business description
+- ○ Upload logo / cover photo
+- ○ Add working hours
+- ○ Add payment details
 
-**7. Автоматический P&L отчёт владельцам**
-- Сейчас: `monthly-owner-statements` и `send-property-report` edge functions существуют
-- Нужно: автоматическая отправка 1-го числа через WhatsApp/email (cron job)
-- Частично готово, нужна настройка расписания
+Each item links to the relevant settings section.
 
-### МЕСЯЦ 2+ — Рост
+### 3. Wire the data flow
+- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
+- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
+- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
 
-**8. B2B SaaS онбординг для внешних УК/агентств**
-- Сейчас: НЕ существует. MC onboarding (`MCOnboarding.tsx`) только для внутреннего использования
-- Нужно: публичная landing page для УК, self-service signup, trial период, pricing page
-- Это самая большая недостающая часть — полноценный B2B SaaS flow
+### 4. Update entry points
+- `/vendor/onboarding` → renders new 3-step wizard
+- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
 
-**9. Nurturing последовательности**
-- Сейчас: CRM sequences page существует (`CrmSequencesPage`), но реальная автоматизация email/WhatsApp drip campaigns не реализована
-- Нужно: автоматические цепочки сообщений (раз в 6-8 недель) для всей базы контактов
-
-## Что нужно сделать технически (план реализации)
-
-### Фаза 1: WhatsApp автоматизация (разблокирует Capital + Marketplace)
-1. Edge function `whatsapp-incoming-webhook` — приём входящих сообщений, автосоздание лида
-2. Edge function `send-guest-welcome-whatsapp` — welcome при check-in со списком сервисов
-3. DB trigger на `property_bookings` для подсчёта визитов клиента и создания задачи Павлу
-
-### Фаза 2: Автоматизация отчётности (замыкает цикл Capital->Estate)
-1. Cron-расписание для `monthly-owner-statements` (1-е число каждого месяца)
-2. WhatsApp-доставка PDF отчёта владельцам
-
-### Фаза 3: B2B SaaS (новый поток MRR)
-1. Public landing page `/for-management-companies`
-2. Self-service MC registration с trial
-3. Pricing page с тарифами ($300-500/мес)
-4. Onboarding wizard для внешних УК
-
-### Фаза 4: Nurturing Engine
-1. Автоматические WhatsApp/email цепочки
-2. Контент-план на 6-8 недель
-3. Триггеры на основе сегментации (арендатор, владелец, инвестор)
-
-## Резюме
-
-Платформа myUNO покрывает примерно **65-70%** от целевой архитектуры. Главные пробелы:
-- **WhatsApp автоматизация** (входящие + welcome при заселении) — блокирует Capital и Marketplace
-- **Триггеры повторных визитов** — блокирует конверсию аренда->покупка
-- **B2B SaaS onboarding** — блокирует 4-й поток дохода
-- **Nurturing sequences** — блокирует удержание базы
-
-Начинать нужно с WhatsApp-интеграции, так как она разблокирует сразу два потока дохода.
+### Technical Details
+- Reuse existing `OnboardingLayout` component for step progress UI
+- Reuse `UnifiedMediaUploader` for photo upload in step 2
+- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
+- No new DB tables or migrations required
+- No new Edge Functions required
 
