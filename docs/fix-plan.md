@@ -9,9 +9,9 @@
 
 | # | Issue | Effort | Risk | Acceptance Criteria | Status |
 |---|-------|--------|------|---------------------|--------|
-| P0.1 | Delete unused `src/data/marketplaceProducts.ts` (783 lines, 0 imports) | 1pt | Low | File deleted, no build errors | 🔄 |
-| P0.2 | Delete unused `src/data/demo/properties.json` | 1pt | Low | File deleted, no build errors | 🔄 |
-| P0.3 | Delete unused `src/data/demo/restaurants.json` | 1pt | Low | File deleted, no build errors | 🔄 |
+| P0.1 | Delete unused `src/data/marketplaceProducts.ts` (783 lines, 0 imports) | 1pt | Low | File deleted, no build errors | ✅ Already deleted |
+| P0.2 | Delete unused `src/data/demo/properties.json` | 1pt | Low | File deleted, no build errors | ✅ Already deleted |
+| P0.3 | Delete unused `src/data/demo/restaurants.json` | 1pt | Low | File deleted, no build errors | ✅ Already deleted |
 | P0.4 | Consolidate duplicate owner expense routes (`/owner/expenses/quick` and `/owner/quick-expense`) | 1pt | Low | Single route, redirect from old | ✅ Already has both, keep both as aliases |
 
 **P0 Assessment:** No blocking bugs found. Dead code cleanup is the only concrete action.
