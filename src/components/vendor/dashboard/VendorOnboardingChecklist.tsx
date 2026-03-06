@@ -1,5 +1,5 @@
 /**
- * VendorOnboardingChecklist - Guided setup progress
+ * VendorOnboardingChecklist - Progressive completion checklist (6 items)
  * Benchmark: Stripe Dashboard, Shopify Onboarding
  */
 import React, { useState, useMemo } from 'react';
@@ -8,18 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
-  CheckCircle2, 
-  Circle, 
-  ChevronDown, 
-  ChevronUp,
-  Store,
-  Package,
-  CreditCard,
-  Image,
-  FileText,
-  Bell,
-  Rocket,
-  X
+  CheckCircle2, Circle, ChevronDown, ChevronUp,
+  Store, Package, Image, Clock, CreditCard, FileText,
+  Rocket, X
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,7 +32,6 @@ interface OnboardingStep {
 }
 
 interface VendorOnboardingChecklistProps {
-  // Pass completion status from parent or fetch from API
   completedSteps?: string[];
   onDismiss?: () => void;
   className?: string;
@@ -61,21 +51,18 @@ export function VendorOnboardingChecklist({
 
   const steps: OnboardingStep[] = useMemo(() => [
     {
-      id: 'profile',
-      titleEn: 'Complete your profile',
-      titleRu: 'Заполните профиль',
-      descriptionEn: 'Add your business name, logo, and contact info',
-      descriptionRu: 'Добавьте название, логотип и контактные данные',
+      id: 'account',
+      titleEn: 'Create account',
+      titleRu: 'Создать аккаунт',
+      descriptionEn: 'Sign up and verify your email',
+      descriptionRu: 'Зарегистрируйтесь и подтвердите email',
       icon: Store,
-      action: () => navigate('/vendor/settings'),
-      actionLabelEn: 'Edit Profile',
-      actionLabelRu: 'Редактировать',
-      isComplete: completedSteps.includes('profile') || !!user?.user_metadata?.name,
+      isComplete: true, // Always complete if they're seeing this
     },
     {
       id: 'first-listing',
-      titleEn: 'Add your first listing',
-      titleRu: 'Добавьте первое объявление',
+      titleEn: 'Add first listing',
+      titleRu: 'Добавить первое объявление',
       descriptionEn: 'Create a product or service to start selling',
       descriptionRu: 'Создайте товар или услугу для продажи',
       icon: Package,
@@ -85,16 +72,52 @@ export function VendorOnboardingChecklist({
       isComplete: completedSteps.includes('first-listing'),
     },
     {
+      id: 'description',
+      titleEn: 'Add business description',
+      titleRu: 'Добавить описание бизнеса',
+      descriptionEn: 'Help customers understand what you offer',
+      descriptionRu: 'Помогите клиентам понять, что вы предлагаете',
+      icon: FileText,
+      action: () => navigate('/vendor/settings'),
+      actionLabelEn: 'Edit Profile',
+      actionLabelRu: 'Редактировать',
+      isComplete: completedSteps.includes('description'),
+    },
+    {
       id: 'photos',
-      titleEn: 'Upload quality photos',
-      titleRu: 'Загрузите качественные фото',
+      titleEn: 'Upload logo & cover photo',
+      titleRu: 'Загрузить логотип и обложку',
       descriptionEn: 'Good photos increase bookings by 40%',
       descriptionRu: 'Хорошие фото увеличивают заказы на 40%',
       icon: Image,
-      action: () => navigate('/vendor/services'),
-      actionLabelEn: 'Manage Photos',
-      actionLabelRu: 'Управление',
+      action: () => navigate('/vendor/settings'),
+      actionLabelEn: 'Upload Photos',
+      actionLabelRu: 'Загрузить',
       isComplete: completedSteps.includes('photos'),
+    },
+    {
+      id: 'hours',
+      titleEn: 'Set working hours',
+      titleRu: 'Указать часы работы',
+      descriptionEn: 'Let customers know when you\'re available',
+      descriptionRu: 'Сообщите клиентам, когда вы работаете',
+      icon: Clock,
+      action: () => navigate('/vendor/settings'),
+      actionLabelEn: 'Set Hours',
+      actionLabelRu: 'Настроить',
+      isComplete: completedSteps.includes('hours'),
+    },
+    {
+      id: 'payment',
+      titleEn: 'Add payment details',
+      titleRu: 'Добавить реквизиты оплаты',
+      descriptionEn: 'Set up how you receive payments',
+      descriptionRu: 'Настройте способ получения оплаты',
+      icon: CreditCard,
+      action: () => navigate('/vendor/settings'),
+      actionLabelEn: 'Add Payment',
+      actionLabelRu: 'Настроить',
+      isComplete: completedSteps.includes('payment'),
     },
   ], [completedSteps, navigate, user]);
 
@@ -102,14 +125,7 @@ export function VendorOnboardingChecklist({
   const progress = (completedCount / steps.length) * 100;
   const isAllComplete = completedCount === steps.length;
 
-  const handleDismiss = () => {
-    setIsDismissed(true);
-    onDismiss?.();
-  };
-
-  if (isDismissed || isAllComplete) {
-    return null;
-  }
+  if (isDismissed || isAllComplete) return null;
 
   return (
     <AnimatePresence>
@@ -135,7 +151,7 @@ export function VendorOnboardingChecklist({
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </Button>
                   </CollapsibleTrigger>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDismiss}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setIsDismissed(true); onDismiss?.(); }}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -145,19 +161,19 @@ export function VendorOnboardingChecklist({
             
             <CollapsibleContent>
               <CardContent className="pt-2 space-y-2">
-                {steps.map((step, index) => (
+                {steps.map((step) => (
                   <div
                     key={step.id}
                     className={cn(
                       "flex items-start gap-3 p-3 rounded-lg transition-all",
                       step.isComplete 
-                        ? "bg-success/5 border border-success/20" 
+                        ? "bg-primary/5 border border-primary/15" 
                         : "bg-muted/30 border border-transparent hover:border-muted"
                     )}
                   >
                     <div className={cn(
                       "mt-0.5 shrink-0",
-                      step.isComplete ? "text-success" : "text-muted-foreground"
+                      step.isComplete ? "text-primary" : "text-muted-foreground"
                     )}>
                       {step.isComplete ? (
                         <CheckCircle2 className="h-5 w-5" />
