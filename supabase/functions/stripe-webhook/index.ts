@@ -237,6 +237,21 @@ Deno.serve(async (req) => {
           logStep("WARN", `Voucher generation failed (non-fatal): ${voucherError}`);
         }
 
+        // ===== NOTIFY VENDOR/SUPPLIER =====
+        try {
+          await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-vendor-order`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+            },
+            body: JSON.stringify({ order_id: orderId }),
+          });
+          logStep("Vendor notification triggered", { orderId: redactId(orderId) });
+        } catch (vendorNotifyError) {
+          logStep("WARN", `Vendor notification failed (non-fatal): ${vendorNotifyError}`);
+        }
+
         logStep("Order payment completed", { orderId });
       }
 

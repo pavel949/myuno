@@ -1,6 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
+import { useState } from 'react';
 import { 
   Clock, 
   CheckCircle2, 
@@ -276,6 +279,30 @@ export default function OrderTracking() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Review Prompt — only for completed orders */}
+        {status === 'completed' && (() => {
+          const reviewed = localStorage.getItem(`reviewed-order-${order.id}`);
+          if (reviewed) return null;
+          return (
+            <PostOrderReviewPrompt
+              open={true}
+              onClose={() => localStorage.setItem(`reviewed-order-${order.id}`, 'skipped')}
+              orderId={order.id}
+              entityType={order.order_type}
+              entityId={order.provider_org_id || order.id}
+            />
+          );
+        })()}
+
+        {/* Cross-sell Recommendations — for confirmed/completed orders */}
+        {['confirmed', 'completed'].includes(status) && (
+          <CrossSellRecommendations
+            orderType={order.order_type}
+            orderId={order.id}
+            className="mb-4"
+          />
+        )}
 
         {/* Action Buttons */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t safe-area-bottom">

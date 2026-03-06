@@ -27822,6 +27822,10 @@ export type Database = {
         Args: { p_base?: string; p_target?: string }
         Returns: number
       }
+      get_gmv_summary: {
+        Args: { p_period_end?: string; p_period_start?: string }
+        Returns: Json
+      }
       get_latest_ai_artifact: {
         Args: {
           p_artifact_type?: string

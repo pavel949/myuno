@@ -451,5 +451,6 @@ export const TeamModerationPage = lazy(() => import('@/pages/team/TeamModeration
 // ── MC Onboarding & Help ──
 export const MCOnboarding = lazy(() => import('@/pages/mc/MCOnboarding'));
 export const MCHelpPage = lazy(() => import('@/pages/mc/MCHelpPage'));
+export const MCRegistrationPage = lazy(() => import('@/pages/mc/MCRegistrationPage'));
 
 // ── Manager (removed — redirects to /owner) ──
