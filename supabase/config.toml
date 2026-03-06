@@ -139,3 +139,5 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.register-mc]
     verify_jwt = false
+  [functions.notify-vendor-order]
+    verify_jwt = false
