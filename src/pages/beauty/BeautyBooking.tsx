@@ -167,7 +167,7 @@ export default function BeautyBooking() {
 
         {/* Staff Selection */}
         {staff.length > 0 && (
-          <div className="bg-card rounded-2xl border p-5 mb-4">
+          <div className="bg-card rounded-xl border p-5 mb-4">
             <h3 className="font-semibold mb-3">
               {language === 'ru' ? 'Выберите мастера' : 'Choose Specialist'}
             </h3>
@@ -181,7 +181,7 @@ export default function BeautyBooking() {
         )}
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -196,7 +196,7 @@ export default function BeautyBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -209,7 +209,7 @@ export default function BeautyBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
