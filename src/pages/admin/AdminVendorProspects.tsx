@@ -42,6 +42,10 @@ export default function AdminVendorProspects() {
             <Upload className="h-4 w-4" />
             <span className="hidden sm:inline">{isRussian ? 'Импорт' : 'Import'}</span>
           </TabsTrigger>
+          <TabsTrigger value="discovery" className="gap-2 data-[state=active]:bg-background">
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'AI Поиск' : 'AI Discovery'}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pipeline" className="mt-4">
@@ -55,6 +59,9 @@ export default function AdminVendorProspects() {
         </TabsContent>
         <TabsContent value="import" className="mt-4">
           <VendorProspectImport />
+        </TabsContent>
+        <TabsContent value="discovery" className="mt-4">
+          <SupplierDiscoveryPanel />
         </TabsContent>
       </Tabs>
     </PageContainer>
