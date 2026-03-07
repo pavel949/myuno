@@ -40,7 +40,7 @@ export function DenseCard({
   return (
     <div 
       className={cn(
-        "rounded-lg border bg-card text-card-foreground shadow-sm",
+        "rounded-lg border bg-card text-card-foreground [box-shadow:var(--shadow-elevation-1)]",
         "p-4 lg:p-3",
         className
       )} 

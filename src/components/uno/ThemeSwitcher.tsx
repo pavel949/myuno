@@ -65,7 +65,7 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="min-w-[140px] bg-popover border border-border shadow-lg z-50"
+          className="min-w-[140px] bg-popover border border-border [box-shadow:var(--shadow-elevation-3)] z-50"
         >
           {themes.map((t) => (
             <DropdownMenuItem
