@@ -7,15 +7,15 @@ import { Shield, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BookingBottomBarProps {
-  total: number; // Always in THB
+  total: number;
   onSubmit: () => void;
   isSubmitting?: boolean;
   disabled?: boolean;
   submitLabel?: string;
-  showBreakdown?: { label: string; amount: number }[]; // amounts in THB
-  step?: number;           // Current step (0-3)
-  totalSteps?: number;     // Total number of steps
-  hint?: string;           // Optional custom hint
+  showBreakdown?: { label: string; amount: number }[];
+  step?: number;
+  totalSteps?: number;
+  hint?: string;
 }
 
 const stepHints = {
@@ -71,7 +71,7 @@ export function BookingBottomBar({
             className={cn(
               "px-4 py-2 text-sm text-center border-b",
               isFinalStep 
-                ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300" 
+                ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" 
                 : "bg-muted/50 text-muted-foreground"
             )}
           >
@@ -119,7 +119,7 @@ export function BookingBottomBar({
             disabled={disabled || isSubmitting}
             className={cn(
               "h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-semibold min-w-[140px] sm:min-w-[160px] touch-manipulation",
-              isFinalStep && "bg-green-600 hover:bg-green-700"
+              isFinalStep && "bg-[hsl(var(--success))] hover:bg-[hsl(var(--success))]/90 text-primary-foreground"
             )}
             size="lg"
           >

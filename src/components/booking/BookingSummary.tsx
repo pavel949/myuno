@@ -45,7 +45,7 @@ export function BookingSummary({
   const hasDiscount = originalPrice && originalPrice > price;
 
   return (
-    <div className="bg-card rounded-2xl border overflow-hidden">
+    <div className="bg-card rounded-xl border overflow-hidden">
       {/* Header with image */}
       <div className="flex gap-4 p-4 border-b">
         {image && (

@@ -174,7 +174,7 @@ export default function MedicalAppointment() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -189,7 +189,7 @@ export default function MedicalAppointment() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -201,7 +201,7 @@ export default function MedicalAppointment() {
         </div>
 
         {/* Symptoms */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <Label className="font-semibold mb-4 block">
             {language === 'ru' ? 'Опишите симптомы' : 'Describe Symptoms'}
           </Label>
@@ -215,7 +215,7 @@ export default function MedicalAppointment() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>

@@ -235,7 +235,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Select Services */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">
               {language === 'ru' ? 'Выберите услуги' : 'Select Services'}
@@ -285,7 +285,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -300,7 +300,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Address */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <Label className="font-semibold mb-4 flex items-center gap-2">
             <Home className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Адрес' : 'Address'}
@@ -315,7 +315,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -327,7 +327,7 @@ export default function ServiceBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -343,7 +343,7 @@ export default function ServiceBooking() {
 
         {/* Price Summary */}
         {selectedServices.length > 0 && (
-          <div className="bg-card rounded-2xl border p-5 mb-4">
+          <div className="bg-card rounded-xl border p-5 mb-4">
             <div className="space-y-2 text-sm">
               {selectedServicesData.map(service => (
                 <div key={service.id} className="flex justify-between">

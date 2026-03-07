@@ -148,7 +148,7 @@ export default function EducationBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -163,7 +163,7 @@ export default function EducationBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -184,7 +184,7 @@ export default function EducationBooking() {
         </div>
 
         {/* Additional Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <Label className="font-semibold mb-4 block">
             {language === 'ru' ? 'Дополнительно' : 'Additional Info'}
           </Label>
@@ -198,7 +198,7 @@ export default function EducationBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>

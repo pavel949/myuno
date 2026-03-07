@@ -185,7 +185,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Date & Time */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Дата и время' : 'Date & Time'}
           </h3>
@@ -200,7 +200,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Address */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <AddressPickerInput
             value={address}
             onChange={(addr) => setAddress(addr)}
@@ -212,7 +212,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -224,7 +224,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -239,7 +239,7 @@ export default function CleaningBooking() {
         </div>
 
         {/* Price Summary */}
-        <div className="bg-card rounded-2xl border p-5 mb-4">
+        <div className="bg-card rounded-xl border p-5 mb-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">
