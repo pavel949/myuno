@@ -2,7 +2,7 @@
  * LifeOS AI Fix — applies targeted fixes based on AI analyst suggestions
  * AUTH_REQUIRED: Admin-only. Requires `admin` role verified server-side.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 import { requireAuth } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {

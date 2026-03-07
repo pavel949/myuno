@@ -3,7 +3,7 @@
  * AUTH_REQUIRED: Analyzes listing quality with AI. Requires authentication.
  */
 // Deno.serve used (native edge runtime)
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
