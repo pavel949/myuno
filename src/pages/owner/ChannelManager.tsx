@@ -22,9 +22,10 @@ import { QuickConnectCards } from '@/components/owner/channel-manager/QuickConne
 import { ChannelStatsCard } from '@/components/owner/channel-manager/ChannelStatsCard';
 import { ChannelCard } from '@/components/owner/channel-manager/ChannelCard';
 import { ExportLinkCard } from '@/components/owner/channel-manager/ExportLinkCard';
+import { SourceOfTruthToggle } from '@/components/owner/channel-manager/SourceOfTruthToggle';
 import { CHANNELS, getChannelConfig } from '@/components/owner/channel-manager/channelConfig';
 import { 
-  RefreshCw, Plus, Link2, Calendar, TrendingUp,
+  RefreshCw, Plus, Link2, Calendar, TrendingUp, Crown,
   CheckCircle2, AlertCircle, Download, Upload, Activity, History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -115,10 +116,14 @@ export default function ChannelManager() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="health" className="gap-1 px-2">
               <Activity className="h-4 w-4" />
               <span className="hidden sm:inline">{isRu ? 'Статус' : 'Health'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="sync-mode" className="gap-1 px-2">
+              <Crown className="h-4 w-4" />
+              <span className="hidden sm:inline">{isRu ? 'Режим' : 'Mode'}</span>
             </TabsTrigger>
             <TabsTrigger value="import" className="gap-1 px-2">
               <Download className="h-4 w-4" />
@@ -146,6 +151,35 @@ export default function ChannelManager() {
                 <h2 className="text-lg font-semibold mb-3">{isRu ? 'Конфликты бронирований' : 'Booking Conflicts'}</h2>
                 <ConflictResolver propertyId={properties[0].id} propertyName={isRu ? properties[0].title_ru || properties[0].title : properties[0].title} />
               </div>
+            )}
+          </TabsContent>
+
+          {/* Sync Mode Tab */}
+          <TabsContent value="sync-mode" className="space-y-4 mt-4">
+            {properties && properties.length > 0 ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {isRu
+                    ? 'Выберите режим синхронизации для каждого объекта. В режиме «myUNO — главный источник» цены и доступность управляются здесь и пушатся на OTA.'
+                    : 'Choose sync mode per property. In "myUNO is Master" mode, prices and availability are managed here and pushed to OTAs.'}
+                </p>
+                {properties.map(property => (
+                  <SourceOfTruthToggle
+                    key={property.id}
+                    propertyId={property.id}
+                    currentMode={(property as any).sync_mode || 'import_only'}
+                    propertyTitle={isRu ? property.title_ru || property.title : property.title}
+                  />
+                ))}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-muted-foreground">
+                    {isRu ? 'Нет объектов для настройки' : 'No properties to configure'}
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
