@@ -145,3 +145,5 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.firecrawl-search]
     verify_jwt = false
+  [functions.rentals-united-sync]
+    verify_jwt = false
