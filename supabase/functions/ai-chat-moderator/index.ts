@@ -46,12 +46,11 @@ Deno.serve(async (req) => {
     }
 
     // Call AI for analysis
-    const aiResponse = await fetch('https://ai-gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        'x-project-id': Deno.env.get('SUPABASE_URL')?.match(/https:\/\/([^.]+)/)?.[1] || '',
+        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash-lite',
