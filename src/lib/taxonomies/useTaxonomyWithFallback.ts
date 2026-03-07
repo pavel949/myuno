@@ -53,7 +53,7 @@ const STATIC_FALLBACKS: Record<string, readonly StaticTaxonomyItem[]> = {
   [TAXONOMY_TYPES.TRANSMISSION]: TRANSMISSION_TYPES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.FUEL_TYPE]: FUEL_TYPES as unknown as StaticTaxonomyItem[],
   [TAXONOMY_TYPES.VEHICLE_FEATURE]: VEHICLE_FEATURES as unknown as StaticTaxonomyItem[],
-  [TAXONOMY_TYPES.SERVICE_CATEGORY]: ALL_SERVICE_CATEGORIES as unknown as StaticTaxonomyItem[],
+  [TAXONOMY_TYPES.HOME_SERVICE_CATEGORY]: ALL_SERVICE_CATEGORIES as unknown as StaticTaxonomyItem[],
 };
 
 /**
