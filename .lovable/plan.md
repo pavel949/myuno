@@ -1,123 +1,84 @@
 
 
-# Design System Consistency Audit
+# Vendor Onboarding UX — Fast First Listing with Progressive Completion
 
-## Summary of Issues Found
+## Research: How Top Platforms Do It
 
-The codebase has a well-defined DS2.0 foundation but suffers from **inconsistent application** across pages. Below are the specific violations grouped by category.
+| Platform | Pattern | Time-to-First-Listing |
+|----------|---------|----------------------|
+| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
+| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
+| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
+| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
 
----
+**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
 
-## 1. Two Competing Header Patterns
+## Current State Analysis
 
-**Problem**: Mini-apps use two different header components with completely different visual styles:
+**What exists:**
+- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
+- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
+- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
+- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
 
-- **`CatalogHeader`** (19 pages) — Dark navy gradient (`from-[hsl(222_47%_11%)]`), white text, hardcoded HSL colors
-- **`UnifiedHeader`** (7 pages via `MiniAppLayout`) — Light `bg-background/95` with backdrop blur, semantic tokens
+**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
 
-**Affected pages using CatalogHeader**: Flowers, Restaurants, Beauty, Cleaning, Events, Pets, Pharmacy, Education, Classifieds, and more.
+## Proposed UX: "3-Screen Fast Start"
 
-**Affected pages using MiniAppLayout/UnifiedHeader**: Discover, Market, Experiences, Investment, and more.
+```text
+Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
+┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
+│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
+│ [____________]   │           │ Name *            │              │                  │
+│                  │           │ [____________]    │              │  Your listing is │
+│ Category *       │           │                   │              │  pending review  │
+│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
+│                  │           │ [____] THB        │              │  Complete your   │
+│ Phone / WhatsApp │           │                   │              │  profile to get  │
+│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
+│                  │           │ [📷 Upload]       │              │                  │
+│         [Next →] │           │                   │              │  [→ Dashboard]   │
+└──────────────────┘           │ Brief description │              └──────────────────┘
+                               │ [____________]    │
+                               │         [List →]  │
+                               └──────────────────┘
+```
 
-**Fix**: Standardize all mini-apps to use one header pattern. `UnifiedHeader` is the DS2.0-compliant choice (semantic tokens, no hardcoded colors). Refactor `CatalogHeader` pages to use `MiniAppLayout` or deprecate `CatalogHeader`.
+**Required fields total: 4** (business name, category, service name, price)
+Everything else: progressive completion via existing `VendorOnboardingChecklist`.
 
----
+## Implementation Plan
 
-## 2. Hardcoded Colors (188 files, 2136 matches)
+### 1. Refactor VendorOnboarding into 3-step wizard
+Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
+- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
+- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
+- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
 
-**Violations of "no hardcoded colors" rule**:
+### 2. Update VendorOnboardingChecklist
+Expand from 3 to 6 progressive items:
+- ✅ Create account (auto-complete)
+- ✅ Add first listing (auto-complete from step 2)
+- ○ Add business description
+- ○ Upload logo / cover photo
+- ○ Add working hours
+- ○ Add payment details
 
-| Pattern | Count | Examples |
-|---------|-------|---------|
-| `text-white` | ~500+ | CatalogHeader, hero sections, badges, buttons |
-| `bg-[#hex]` | ~50 | SupportFAB (`bg-[#25D366]`, `bg-[#0088cc]`) |
-| `bg-green-500` | ~30 | ClinicDetail, GTrustPage, status indicators |
-| `bg-blue-500` | ~20 | GTrustPage, trust levels |
-| `bg-emerald-600` | ~5 | InvestmentIndex hero |
-| `bg-amber-500` | ~10 | Timeline, status indicators |
-| `text-green-800` | ~5 | TicketDetail resolution |
+Each item links to the relevant settings section.
 
-**Fix**: Replace with semantic tokens (`text-success`, `bg-success`, `bg-info`, `text-primary-foreground`, etc.). Brand-specific colors (WhatsApp green, Telegram blue) are acceptable exceptions.
+### 3. Wire the data flow
+- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
+- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
+- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
 
----
+### 4. Update entry points
+- `/vendor/onboarding` → renders new 3-step wizard
+- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
 
-## 3. Non-standard Shadows (70 files, 479 matches)
-
-**DS2.0 rule**: Use only `[box-shadow:var(--shadow-elevation-N)]` tokens.
-
-**Violations**:
-- `shadow-sm` / `shadow-md` / `shadow-lg` / `shadow-xl` used in 70 files
-- `shadow-2xl` on UnifiedHeader search results dropdown
-- `shadow-lg shadow-primary/20` on landing page CTAs
-
-**Fix**: Replace all Tailwind shadow utilities with elevation tokens. Map: `shadow-sm` → `elevation-1`, `shadow-md` → `elevation-2`, `shadow-lg` → `elevation-3`, `shadow-xl` → `elevation-4`.
-
----
-
-## 4. Border Radius Inconsistency
-
-**DS2.0 rule**: Interactive cards use `rounded-xl` (16px), not `rounded-2xl`.
-
-**Violations**: 710 matches of `rounded-2xl`/`rounded-3xl` across 69 files, many on interactive cards and form sections (booking forms, education forms, medical forms all use `rounded-2xl` on clickable/interactive containers).
-
-**Fix**: Audit and downgrade interactive containers from `rounded-2xl` → `rounded-xl`. Keep `rounded-2xl` only for hero/display cards per DS2.0 spec.
-
----
-
-## 5. Font Usage Inconsistencies
-
-**Mostly correct**: `font-display` (Space Grotesk) used on headings across 51 files. However:
-
-- Some headings use only `font-bold` without `font-display` (relying on global CSS `h1-h6` rules, which is fine)
-- `UnifiedSectionHeader` uses `text-lg font-bold` without `font-display` — this is OK since global h2 style applies
-- `CatalogHeader` title uses `text-lg font-bold` with `text-white` — hardcoded color, no `font-display`
-
-**Minor issue**: The `MiniAppHero` title uses `text-sm font-medium` which is too small for a hero component title.
-
----
-
-## 6. Spacing Inconsistencies
-
-**Content padding varies across layout patterns**:
-
-| Component | Padding |
-|-----------|---------|
-| `PageContainer` | `p-4 md:p-6 lg:p-8 xl:p-10` |
-| `MiniAppLayout` content | `px-4 md:px-6 lg:px-8` |
-| `CatalogHeader` pages | Manual `px-4` per page |
-
-Content spacing within pages: `space-y-4 md:space-y-6` (MiniAppLayout) vs `space-y-5 md:space-y-6` (PageContainer) — minor but inconsistent.
-
----
-
-## 7. Form Section Styling
-
-Booking/form pages (Education, Medical, Experience) use raw divs with `bg-card rounded-2xl border p-5` instead of the DS2.0 `Surface` component or `Card` component.
-
-**Fix**: Replace with `<Surface variant="card" padding="md">` or `<Card>` for consistency.
-
----
-
-## Recommended Fix Priority
-
-| Priority | Area | Impact | Effort |
-|----------|------|--------|--------|
-| **P1** | Unify header pattern (CatalogHeader → MiniAppLayout) | High — visual consistency across all verticals | Medium (19 pages) |
-| **P1** | Replace hardcoded colors with semantic tokens | High — dark mode breakage, brand consistency | High (188 files) |
-| **P2** | Replace Tailwind shadows with elevation tokens | Medium — visual hierarchy | Medium (70 files) |
-| **P2** | Fix rounded-2xl on interactive cards | Medium — DS2.0 compliance | Low-Medium |
-| **P3** | Standardize form sections with Surface/Card | Low — cosmetic consistency | Low |
-| **P3** | Normalize content spacing | Low — minor inconsistency | Low |
-
----
-
-## Proposed Implementation Approach
-
-Given the scale (188+ files with hardcoded colors), I recommend a **phased approach**:
-
-1. **Phase 1**: Unify all mini-app headers by migrating CatalogHeader pages to MiniAppLayout (highest visual impact, 19 pages)
-2. **Phase 2**: Fix hardcoded colors in the most-visible pages first (landing, discover, detail pages)
-3. **Phase 3**: Shadow and radius cleanup pass
-
-Shall I proceed with Phase 1 (header unification)?
+### Technical Details
+- Reuse existing `OnboardingLayout` component for step progress UI
+- Reuse `UnifiedMediaUploader` for photo upload in step 2
+- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
+- No new DB tables or migrations required
+- No new Edge Functions required
 

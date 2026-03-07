@@ -61,9 +61,9 @@ export const UnifiedCard = memo(function UnifiedCard({
       <div
         onClick={handleClick}
         className={cn(
-          "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
+          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
           "transition-all duration-200 cursor-pointer",
-          "hover:border-primary/30 hover:shadow-md",
+          "hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-2)]",
           "active:scale-[0.98]",
           "flex flex-col w-36 flex-shrink-0",
           className
@@ -109,9 +109,9 @@ export const UnifiedCard = memo(function UnifiedCard({
       <div
         onClick={handleClick}
         className={cn(
-          "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
+          "group relative overflow-hidden rounded-xl bg-card border border-border/50",
           "transition-all duration-200 cursor-pointer",
-          "hover:border-primary/30 hover:shadow-md",
+          "hover:border-primary/30 hover:[box-shadow:var(--shadow-elevation-2)]",
           "active:scale-[0.98]",
           "flex gap-3 p-3",
           className
@@ -185,9 +185,9 @@ export const UnifiedCard = memo(function UnifiedCard({
       <div
         onClick={handleClick}
         className={cn(
-          "group relative overflow-hidden rounded-2xl",
+          "group relative overflow-hidden rounded-xl",
           "transition-all duration-300 cursor-pointer",
-          "hover:shadow-xl hover:scale-[1.01]",
+          "hover:[box-shadow:var(--shadow-elevation-4)] hover:scale-[1.01]",
           "active:scale-[0.99]",
           className
         )}
@@ -269,7 +269,7 @@ export const UnifiedCard = memo(function UnifiedCard({
     <div
       onClick={handleClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card border border-border/50",
+        "group relative overflow-hidden rounded-xl bg-card border border-border/50",
         "transition-all duration-300 ease-out cursor-pointer",
         "hover:border-primary/30 hover:shadow-elevated hover:scale-[1.02]",
         "active:scale-[0.98] active:opacity-90",

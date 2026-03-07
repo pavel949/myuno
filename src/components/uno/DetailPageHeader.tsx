@@ -51,7 +51,7 @@ export const DetailPageHeader = memo(function DetailPageHeader({
         aria-label="Go back"
         className={cn(
           "flex items-center justify-center w-10 h-10 rounded-full",
-          "bg-background/80 backdrop-blur-sm shadow-lg",
+          "bg-background/80 backdrop-blur-sm [box-shadow:var(--shadow-elevation-3)]",
           "hover:bg-background/90 active:scale-95 transition-all",
           "touch-manipulation"
         )}
@@ -68,7 +68,7 @@ export const DetailPageHeader = memo(function DetailPageHeader({
             aria-label="Share"
             className={cn(
               "flex items-center justify-center w-10 h-10 rounded-full",
-              "bg-background/80 backdrop-blur-sm shadow-lg",
+              "bg-background/80 backdrop-blur-sm [box-shadow:var(--shadow-elevation-3)]",
               "hover:bg-background/90 active:scale-95 transition-all",
               "touch-manipulation"
             )}

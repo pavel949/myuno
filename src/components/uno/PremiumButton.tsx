@@ -12,7 +12,7 @@ const premiumButtonVariants = cva(
   {
     variants: {
       variant: {
-        default: "gradient-gold text-primary-foreground shadow-gold hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+        default: "gradient-gold text-primary-foreground shadow-gold hover:[box-shadow:var(--shadow-elevation-3)] hover:scale-[1.02] active:scale-[0.98]",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border",
         outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground",
         ghost: "text-foreground hover:bg-secondary hover:text-secondary-foreground",
