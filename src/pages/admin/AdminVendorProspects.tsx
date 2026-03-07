@@ -5,9 +5,10 @@ import { VendorProspectsPipeline } from '@/components/admin/prospects/VendorPros
 import { VendorProspectsTable } from '@/components/admin/prospects/VendorProspectsTable';
 import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspectsStats';
 import { VendorProspectImport } from '@/components/admin/prospects/VendorProspectImport';
+import { SupplierDiscoveryPanel } from '@/components/admin/prospects/SupplierDiscoveryPanel';
 import { SectionHeader } from '@/components/ds';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { Kanban, Table, BarChart3, Upload, Users } from 'lucide-react';
+import { Kanban, Table, BarChart3, Upload, Users, Search } from 'lucide-react';
 
 export default function AdminVendorProspects() {
   const { language } = useLanguage();
