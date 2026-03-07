@@ -88,6 +88,12 @@ const VendorOnboarding = () => {
       return;
     }
 
+    // If profile was already created (user went back), skip to step 2
+    if (createdProviderId) {
+      setCurrentStep(1);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { data, error } = await createProfile({
@@ -175,6 +181,7 @@ const VendorOnboarding = () => {
       onBack={() => currentStep > 0 && setCurrentStep(currentStep - 1)}
     >
       <PageContainer className="pb-8">
+        <div className="max-w-lg mx-auto">
         {/* Step Indicator */}
         <div className="flex items-center justify-center gap-2 mb-6">
           {[0, 1, 2].map((step) => (
@@ -470,6 +477,7 @@ const VendorOnboarding = () => {
             ? 'Нажимая кнопку, вы соглашаетесь с условиями партнёрской программы'
             : 'By continuing, you agree to the partner program terms'}
         </p>
+        </div>
       </PageContainer>
     </OnboardingLayout>
   );
