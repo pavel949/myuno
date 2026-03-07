@@ -14509,6 +14509,7 @@ export type Database = {
           key_handover: string | null
           last_minute_days: number | null
           last_minute_discount: number | null
+          last_push_sync_at: string | null
           lat: number | null
           late_checkout_penalty: number | null
           late_checkout_price: number | null
@@ -14577,12 +14578,14 @@ export type Database = {
           purchase_currency: string | null
           purchase_date: string | null
           purchase_price: number | null
+          push_sync_error: string | null
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           rating: number | null
           rejection_reason: string | null
           renovation_costs: number | null
           rental_platform: string | null
+          rentals_united_id: string | null
           report_frequency: string | null
           report_recipients: string[] | null
           review_count: number | null
@@ -14598,6 +14601,7 @@ export type Database = {
           smoking_penalty: number | null
           smoking_policy: string | null
           status: string | null
+          sync_mode: string
           tabien_baan: string | null
           title: string | null
           title_en: string
@@ -14723,6 +14727,7 @@ export type Database = {
           key_handover?: string | null
           last_minute_days?: number | null
           last_minute_discount?: number | null
+          last_push_sync_at?: string | null
           lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
@@ -14791,12 +14796,14 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          push_sync_error?: string | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
           renovation_costs?: number | null
           rental_platform?: string | null
+          rentals_united_id?: string | null
           report_frequency?: string | null
           report_recipients?: string[] | null
           review_count?: number | null
@@ -14812,6 +14819,7 @@ export type Database = {
           smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
+          sync_mode?: string
           tabien_baan?: string | null
           title?: string | null
           title_en: string
@@ -14937,6 +14945,7 @@ export type Database = {
           key_handover?: string | null
           last_minute_days?: number | null
           last_minute_discount?: number | null
+          last_push_sync_at?: string | null
           lat?: number | null
           late_checkout_penalty?: number | null
           late_checkout_price?: number | null
@@ -15005,12 +15014,14 @@ export type Database = {
           purchase_currency?: string | null
           purchase_date?: string | null
           purchase_price?: number | null
+          push_sync_error?: string | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           rating?: number | null
           rejection_reason?: string | null
           renovation_costs?: number | null
           rental_platform?: string | null
+          rentals_united_id?: string | null
           report_frequency?: string | null
           report_recipients?: string[] | null
           review_count?: number | null
@@ -15026,6 +15037,7 @@ export type Database = {
           smoking_penalty?: number | null
           smoking_policy?: string | null
           status?: string | null
+          sync_mode?: string
           tabien_baan?: string | null
           title?: string | null
           title_en?: string
