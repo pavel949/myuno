@@ -5,7 +5,7 @@
  * Returns 429 status when limit exceeded.
  */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
 export interface RateLimitConfig {
   maxRequests: number;    // Max requests per window
