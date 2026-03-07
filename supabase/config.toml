@@ -141,3 +141,7 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.notify-vendor-order]
     verify_jwt = false
+  [functions.supplier-discovery]
+    verify_jwt = false
+  [functions.firecrawl-search]
+    verify_jwt = false

@@ -5,9 +5,10 @@ import { VendorProspectsPipeline } from '@/components/admin/prospects/VendorPros
 import { VendorProspectsTable } from '@/components/admin/prospects/VendorProspectsTable';
 import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspectsStats';
 import { VendorProspectImport } from '@/components/admin/prospects/VendorProspectImport';
+import { SupplierDiscoveryPanel } from '@/components/admin/prospects/SupplierDiscoveryPanel';
 import { SectionHeader } from '@/components/ds';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { Kanban, Table, BarChart3, Upload, Users } from 'lucide-react';
+import { Kanban, Table, BarChart3, Upload, Users, Search } from 'lucide-react';
 
 export default function AdminVendorProspects() {
   const { language } = useLanguage();
@@ -41,6 +42,10 @@ export default function AdminVendorProspects() {
             <Upload className="h-4 w-4" />
             <span className="hidden sm:inline">{isRussian ? 'Импорт' : 'Import'}</span>
           </TabsTrigger>
+          <TabsTrigger value="discovery" className="gap-2 data-[state=active]:bg-background">
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRussian ? 'AI Поиск' : 'AI Discovery'}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pipeline" className="mt-4">
@@ -54,6 +59,9 @@ export default function AdminVendorProspects() {
         </TabsContent>
         <TabsContent value="import" className="mt-4">
           <VendorProspectImport />
+        </TabsContent>
+        <TabsContent value="discovery" className="mt-4">
+          <SupplierDiscoveryPanel />
         </TabsContent>
       </Tabs>
     </PageContainer>
