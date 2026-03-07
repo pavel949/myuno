@@ -3,7 +3,7 @@
  * Creates in-app notification + sends email via Resend.
  * Called from stripe-webhook after order is confirmed, or from order creation flow.
  */
-import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
 import { sendWhatsApp } from '../_shared/whatsapp.ts';
 

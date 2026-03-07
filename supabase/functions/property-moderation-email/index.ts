@@ -1,5 +1,5 @@
 // Deno.serve used (native edge runtime)
-import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
