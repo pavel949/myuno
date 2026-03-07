@@ -177,7 +177,7 @@ export default function BabysitterDetail() {
         {/* Info Cards */}
         <div className="px-4 space-y-4 mt-6">
           {/* About */}
-          <div className="bg-card rounded-2xl border p-5">
+          <div className="bg-card rounded-xl border p-5">
             <h3 className="font-semibold mb-3">
               {language === 'ru' ? 'Обо мне' : 'About Me'}
             </h3>
@@ -187,7 +187,7 @@ export default function BabysitterDetail() {
           </div>
 
           {/* Age Groups */}
-          <div className="bg-card rounded-2xl border p-5">
+          <div className="bg-card rounded-xl border p-5">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Baby className="w-5 h-5 text-primary" />
               {language === 'ru' ? 'Возраст детей' : 'Age Groups'}
@@ -200,7 +200,7 @@ export default function BabysitterDetail() {
           </div>
 
           {/* Languages */}
-          <div className="bg-card rounded-2xl border p-5">
+          <div className="bg-card rounded-xl border p-5">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Languages className="w-5 h-5 text-primary" />
               {language === 'ru' ? 'Языки' : 'Languages'}
@@ -213,7 +213,7 @@ export default function BabysitterDetail() {
           </div>
 
           {/* Certifications */}
-          <div className="bg-card rounded-2xl border p-5">
+          <div className="bg-card rounded-xl border p-5">
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <GraduationCap className="w-5 h-5 text-primary" />
               {language === 'ru' ? 'Сертификаты' : 'Certifications'}
