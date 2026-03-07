@@ -114,9 +114,9 @@ export function SourceOfTruthToggle({ propertyId, currentMode, propertyTitle, on
         </RadioGroup>
 
         {mode === 'myuno_master' && (
-          <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
-            <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+          <div className="flex items-start gap-2 rounded-md bg-warning/10 border border-warning/30 p-3">
+            <AlertCircle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+            <p className="text-sm text-warning-foreground">
               {isRu
                 ? 'Для полной синхронизации цен на OTA потребуется подключение Rentals United. iCal экспорт обновит только календарь доступности.'
                 : 'Full price sync to OTAs requires Rentals United connection. iCal export will only update availability calendar.'}
