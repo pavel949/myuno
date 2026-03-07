@@ -2,7 +2,7 @@
  * Edge Function: legal-accept
  * Securely records legal document acceptance with IP capture.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

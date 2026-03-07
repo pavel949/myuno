@@ -1,4 +1,4 @@
-import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
 import { generateOrderStatusChangeEmail } from '../_shared/email-templates.ts';
 

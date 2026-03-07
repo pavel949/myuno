@@ -1,6 +1,6 @@
 // Deno.serve used (native edge runtime)
 // Unified email service for myUNO — single entry point for all transactional emails
-import { Resend } from 'https://esm.sh/resend@2.0.0';
+import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
 
 const corsHeaders = {
