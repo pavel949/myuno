@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Brain, Bot, Send, Users, TrendingUp, Activity, RefreshCw, Zap, Calendar, UserPlus } from 'lucide-react';
+import { Brain, Bot, Send, Users, TrendingUp, Activity, RefreshCw, Zap, Calendar, UserPlus, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -20,7 +20,21 @@ export default function AdminAIOps() {
   const { data: agents } = useQuery({
     queryKey: ['ai-agents-status'],
     queryFn: async () => {
-      const { data } = await supabase.from('ai_agents').select('*').eq('is_active', true).order('slug');
+      const { data } = await supabase.from('ai_agents').select('*').order('slug');
+      return data || [];
+    },
+  });
+
+  // AI Agent Logs (last 30 days, aggregated per agent)
+  const { data: agentLogs } = useQuery({
+    queryKey: ['ai-agent-logs-30d'],
+    queryFn: async () => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from('ai_agent_logs')
+        .select('agent_id, is_success, response_time_ms, tokens_used, created_at, error_code, model')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false });
       return data || [];
     },
   });
@@ -97,10 +111,45 @@ export default function AdminAIOps() {
     },
   });
 
+  // Aggregate agent health metrics
+  const agentHealthMap = new Map<string, {
+    calls: number;
+    successes: number;
+    failures: number;
+    avgLatency: number;
+    totalTokens: number;
+    lastCall: string | null;
+    errors: string[];
+  }>();
+
+  if (agentLogs) {
+    for (const log of agentLogs) {
+      const existing = agentHealthMap.get(log.agent_id) || {
+        calls: 0, successes: 0, failures: 0, avgLatency: 0, totalTokens: 0, lastCall: null, errors: [],
+      };
+      existing.calls++;
+      if (log.is_success !== false) existing.successes++;
+      else {
+        existing.failures++;
+        if (log.error_code && !existing.errors.includes(log.error_code)) {
+          existing.errors.push(log.error_code);
+        }
+      }
+      existing.avgLatency = ((existing.avgLatency * (existing.calls - 1)) + (log.response_time_ms || 0)) / existing.calls;
+      existing.totalTokens += log.tokens_used || 0;
+      if (!existing.lastCall || log.created_at > existing.lastCall) {
+        existing.lastCall = log.created_at;
+      }
+      agentHealthMap.set(log.agent_id, existing);
+    }
+  }
+
   // Computed metrics
-  const totalTokens = decisions?.reduce((s, d) => s + (d.tokens_used || 0), 0) || 0;
+  const totalCalls30d = agentLogs?.length || 0;
+  const totalTokens30d = agentLogs?.reduce((s, l) => s + (l.tokens_used || 0), 0) || 0;
   const totalDecisions = decisions?.length || 0;
-  const errorRate = totalDecisions ? Math.round((decisions?.filter(d => d.status === 'error').length || 0) / totalDecisions * 100) : 0;
+  const errorRate = totalCalls30d ? Math.round((agentLogs?.filter(l => l.is_success === false).length || 0) / totalCalls30d * 100) : 0;
+  const activeAgentCount = agentHealthMap.size;
 
   const [runningAction, setRunningAction] = useState<string | null>(null);
 
@@ -119,6 +168,21 @@ export default function AdminAIOps() {
     }
   };
 
+  const getHealthBadge = (calls: number, successRate: number) => {
+    if (calls === 0) return <Badge variant="outline" className="text-xs gap-1"><Clock className="h-3 w-3" />{isRu ? 'Неактивен' : 'Idle'}</Badge>;
+    if (successRate >= 95) return <Badge className="text-xs gap-1 bg-emerald-600"><CheckCircle2 className="h-3 w-3" />{isRu ? 'Здоров' : 'Healthy'}</Badge>;
+    if (successRate >= 80) return <Badge variant="secondary" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" />{isRu ? 'Предупреждение' : 'Warning'}</Badge>;
+    return <Badge variant="destructive" className="text-xs gap-1"><XCircle className="h-3 w-3" />{isRu ? 'Критично' : 'Critical'}</Badge>;
+  };
+
+  const daysSince = (dateStr: string | null) => {
+    if (!dateStr) return '—';
+    const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+    if (days === 0) return isRu ? 'сегодня' : 'today';
+    if (days === 1) return isRu ? 'вчера' : 'yesterday';
+    return `${days}${isRu ? 'д назад' : 'd ago'}`;
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-[1536px] mx-auto">
       {/* Header */}
@@ -126,7 +190,7 @@ export default function AdminAIOps() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="h-7 w-7 text-primary" />
-            {isRu ? 'AI Command Center' : 'AI Command Center'}
+            AI Center
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             {isRu ? 'Мониторинг и управление всеми AI-процессами' : 'Monitor and manage all AI processes'}
@@ -144,12 +208,12 @@ export default function AdminAIOps() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="pt-4 pb-3 px-4">
-            <div className="text-sm text-muted-foreground">{isRu ? 'AI Решений (24ч)' : 'AI Decisions (24h)'}</div>
-            <div className="text-2xl font-bold">{totalDecisions}</div>
-            <div className="text-xs text-muted-foreground">{totalTokens.toLocaleString()} tokens</div>
+            <div className="text-sm text-muted-foreground">{isRu ? 'AI Вызовов (30д)' : 'AI Calls (30d)'}</div>
+            <div className="text-2xl font-bold">{totalCalls30d}</div>
+            <div className="text-xs text-muted-foreground">{totalTokens30d.toLocaleString()} tokens</div>
           </CardContent>
         </Card>
         <Card>
@@ -163,6 +227,15 @@ export default function AdminAIOps() {
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3 px-4">
+            <div className="text-sm text-muted-foreground">{isRu ? 'Активных (30д)' : 'Active (30d)'}</div>
+            <div className="text-2xl font-bold">{activeAgentCount}</div>
+            <div className="text-xs text-muted-foreground">
+              {isRu ? `из ${agents?.length || 0} зарег.` : `of ${agents?.length || 0} registered`}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 pb-3 px-4">
             <div className="text-sm text-muted-foreground">{isRu ? 'Посты (7д)' : 'Posts (7d)'}</div>
             <div className="text-2xl font-bold">{socialStats?.published || 0}</div>
             <div className="text-xs text-muted-foreground">
@@ -172,14 +245,18 @@ export default function AdminAIOps() {
         </Card>
         <Card>
           <CardContent className="pt-4 pb-3 px-4">
-            <div className="text-sm text-muted-foreground">{isRu ? 'Активных агентов' : 'Active Agents'}</div>
-            <div className="text-2xl font-bold">{agents?.length || 0}</div>
+            <div className="text-sm text-muted-foreground">{isRu ? 'Решений (24ч)' : 'Decisions (24h)'}</div>
+            <div className="text-2xl font-bold">{totalDecisions}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="pipelines">
+      <Tabs defaultValue="health">
         <TabsList>
+          <TabsTrigger value="health">
+            <Activity className="h-4 w-4 mr-1" />
+            {isRu ? 'Здоровье' : 'Health'}
+          </TabsTrigger>
           <TabsTrigger value="pipelines">
             <TrendingUp className="h-4 w-4 mr-1" />
             {isRu ? 'Воронки' : 'Pipelines'}
@@ -189,19 +266,84 @@ export default function AdminAIOps() {
             {isRu ? 'Соцсети' : 'Social'}
           </TabsTrigger>
           <TabsTrigger value="decisions">
-            <Activity className="h-4 w-4 mr-1" />
+            <Bot className="h-4 w-4 mr-1" />
             {isRu ? 'AI Лог' : 'AI Log'}
           </TabsTrigger>
-          <TabsTrigger value="agents">
-            <Bot className="h-4 w-4 mr-1" />
-            {isRu ? 'Агенты' : 'Agents'}
-          </TabsTrigger>
         </TabsList>
+
+        {/* Agent Health Tab */}
+        <TabsContent value="health">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">{isRu ? 'Матрица здоровья агентов (30 дней)' : 'Agent Health Matrix (30 days)'}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{isRu ? 'Агент' : 'Agent'}</TableHead>
+                    <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
+                    <TableHead className="text-right">{isRu ? 'Вызовы' : 'Calls'}</TableHead>
+                    <TableHead className="text-right">{isRu ? 'Успех %' : 'Success %'}</TableHead>
+                    <TableHead className="text-right">{isRu ? 'Ср. латенция' : 'Avg Latency'}</TableHead>
+                    <TableHead className="text-right">Tokens</TableHead>
+                    <TableHead>{isRu ? 'Последний' : 'Last Call'}</TableHead>
+                    <TableHead>{isRu ? 'Ошибки' : 'Errors'}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(agents || []).map((agent: any) => {
+                    const health = agentHealthMap.get(agent.id);
+                    const calls = health?.calls || 0;
+                    const successRate = calls > 0 ? Math.round((health!.successes / calls) * 100) : 0;
+                    return (
+                      <TableRow key={agent.id} className={!agent.is_active ? 'opacity-50' : ''}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span>{agent.icon || '🤖'}</span>
+                            <div>
+                              <div className="font-medium text-sm">{isRu ? agent.name_ru : agent.name_en}</div>
+                              <div className="text-xs text-muted-foreground">{agent.slug}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getHealthBadge(calls, successRate)}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{calls}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">
+                          {calls > 0 ? `${successRate}%` : '—'}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">
+                          {calls > 0 ? `${Math.round(health!.avgLatency)}ms` : '—'}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm">
+                          {health?.totalTokens ? health.totalTokens.toLocaleString() : '—'}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {daysSince(health?.lastCall || null)}
+                        </TableCell>
+                        <TableCell>
+                          {health?.errors && health.errors.length > 0 ? (
+                            <div className="flex gap-1 flex-wrap">
+                              {health.errors.slice(0, 2).map(e => (
+                                <Badge key={e} variant="destructive" className="text-xs">{e}</Badge>
+                              ))}
+                            </div>
+                          ) : calls > 0 ? (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Pipelines Tab */}
         <TabsContent value="pipelines" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Owner Pipeline */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center justify-between">
@@ -209,12 +351,7 @@ export default function AdminAIOps() {
                     <UserPlus className="h-4 w-4" />
                     {isRu ? 'Собственники' : 'Owner Pipeline'}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => runAction('Owner Nurture', 'ai-owner-nurture', { action: 'auto_nurture' })}
-                    disabled={!!runningAction}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => runAction('Owner Nurture', 'ai-owner-nurture', { action: 'auto_nurture' })} disabled={!!runningAction}>
                     <RefreshCw className={`h-3 w-3 ${runningAction === 'Owner Nurture' ? 'animate-spin' : ''}`} />
                   </Button>
                 </CardTitle>
@@ -223,7 +360,7 @@ export default function AdminAIOps() {
                 <div className="space-y-2">
                   {[
                     { label: isRu ? 'Новые' : 'New', value: ownerPipeline?.new || 0, color: 'bg-primary' },
-                    { label: isRu ? 'Nurturing' : 'Nurturing', value: ownerPipeline?.nurturing || 0, color: 'bg-accent-foreground' },
+                    { label: 'Nurturing', value: ownerPipeline?.nurturing || 0, color: 'bg-accent-foreground' },
                     { label: isRu ? 'Конвертированы' : 'Converted', value: ownerPipeline?.converted || 0, color: 'bg-chart-2' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center justify-between">
@@ -241,7 +378,6 @@ export default function AdminAIOps() {
               </CardContent>
             </Card>
 
-            {/* Vendor Pipeline */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center justify-between">
@@ -249,12 +385,7 @@ export default function AdminAIOps() {
                     <Users className="h-4 w-4" />
                     {isRu ? 'Вендоры' : 'Vendor Pipeline'}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => runAction('Vendor Nurture', 'auto-vendor-nurture')}
-                    disabled={!!runningAction}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => runAction('Vendor Nurture', 'auto-vendor-nurture')} disabled={!!runningAction}>
                     <RefreshCw className={`h-3 w-3 ${runningAction === 'Vendor Nurture' ? 'animate-spin' : ''}`} />
                   </Button>
                 </CardTitle>
@@ -263,8 +394,8 @@ export default function AdminAIOps() {
                 <div className="space-y-2">
                   {[
                     { label: isRu ? 'Новые' : 'New', value: vendorPipeline?.new || 0, color: 'bg-primary' },
-                    { label: isRu ? 'Contacted' : 'Contacted', value: vendorPipeline?.contacted || 0, color: 'bg-accent-foreground' },
-                    { label: isRu ? 'Onboarded' : 'Onboarded', value: vendorPipeline?.onboarded || 0, color: 'bg-chart-2' },
+                    { label: 'Contacted', value: vendorPipeline?.contacted || 0, color: 'bg-accent-foreground' },
+                    { label: 'Onboarded', value: vendorPipeline?.onboarded || 0, color: 'bg-chart-2' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -286,16 +417,11 @@ export default function AdminAIOps() {
         {/* Social Tab */}
         <TabsContent value="social" className="space-y-4">
           <div className="flex gap-2 flex-wrap">
-            <Button
-              size="sm"
-              onClick={() => runAction('Content Plan', 'ai-content-planner', { days: 7 })}
-              disabled={!!runningAction}
-            >
+            <Button size="sm" onClick={() => runAction('Content Plan', 'ai-content-planner', { days: 7 })} disabled={!!runningAction}>
               <Calendar className="h-4 w-4 mr-1" />
               {isRu ? 'Сгенерировать план на неделю' : 'Generate weekly plan'}
             </Button>
           </div>
-
           {calendarItems && calendarItems.length > 0 ? (
             <Card>
               <CardHeader className="pb-3">
@@ -327,24 +453,16 @@ export default function AdminAIOps() {
                         </TableCell>
                         <TableCell>
                           {item.status === 'planned' && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  const { error } = await untypedTables.socialContentCalendar()
-                                    .update({ status: 'approved' })
-                                    .eq('id', item.id);
-                                  if (error) throw error;
-                                  queryClient.invalidateQueries({ queryKey: ['content-calendar'] });
-                                  toast.success(isRu ? 'Одобрено' : 'Approved');
-                                } catch (e: any) {
-                                  toast.error(isRu ? 'Ошибка' : 'Error', { description: e.message });
-                                }
-                              }}
-                            >
-                              ✅
-                            </Button>
+                            <Button variant="ghost" size="sm" onClick={async () => {
+                              try {
+                                const { error } = await untypedTables.socialContentCalendar().update({ status: 'approved' }).eq('id', item.id);
+                                if (error) throw error;
+                                queryClient.invalidateQueries({ queryKey: ['content-calendar'] });
+                                toast.success(isRu ? 'Одобрено' : 'Approved');
+                              } catch (e: any) {
+                                toast.error(isRu ? 'Ошибка' : 'Error', { description: e.message });
+                              }
+                            }}>✅</Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -405,29 +523,6 @@ export default function AdminAIOps() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Agents Tab */}
-        <TabsContent value="agents">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {(agents || []).map((agent: any) => (
-              <Card key={agent.id}>
-                <CardContent className="pt-4 pb-3 px-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">{agent.icon || '🤖'}</span>
-                    <div>
-                      <div className="font-medium text-sm">{isRu ? agent.name_ru : agent.name_en}</div>
-                      <div className="text-xs text-muted-foreground">{agent.slug}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-xs">{agent.model?.split('/').pop()}</Badge>
-                    <span>T={agent.temperature}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </TabsContent>
       </Tabs>
     </div>
