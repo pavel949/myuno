@@ -9913,6 +9913,7 @@ export type Database = {
           email: string | null
           id: string
           is_active: boolean
+          is_demo: boolean | null
           is_verified: boolean | null
           logo_url: string | null
           name_en: string
@@ -9938,6 +9939,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean | null
           is_verified?: boolean | null
           logo_url?: string | null
           name_en: string
@@ -9963,6 +9965,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean | null
           is_verified?: boolean | null
           logo_url?: string | null
           name_en?: string
@@ -18909,6 +18912,7 @@ export type Database = {
           has_machine_translation: boolean | null
           id: string
           is_active: boolean | null
+          is_demo: boolean | null
           is_verified: boolean | null
           languages: string[] | null
           lat: number | null
@@ -18949,6 +18953,7 @@ export type Database = {
           has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
+          is_demo?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           lat?: number | null
@@ -18989,6 +18994,7 @@ export type Database = {
           has_machine_translation?: boolean | null
           id?: string
           is_active?: boolean | null
+          is_demo?: boolean | null
           is_verified?: boolean | null
           languages?: string[] | null
           lat?: number | null
