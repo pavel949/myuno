@@ -21,38 +21,38 @@
      icon: Shield,
      labelEn: 'Verified',
      labelRu: 'Проверен',
-     colorClass: 'bg-primary/10 text-primary border-primary/20',
-   },
-   insured: {
-     icon: CheckCircle,
-     labelEn: 'Insured',
-     labelRu: 'Застрахован',
-     colorClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-   },
-   'fast-response': {
-     icon: Clock,
-     labelEn: 'Fast Response',
-     labelRu: 'Быстрый ответ',
-     colorClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-   },
-   guaranteed: {
-     icon: Award,
-     labelEn: 'Guaranteed',
-     labelRu: 'Гарантия',
-     colorClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-   },
-   popular: {
-     icon: Users,
-     labelEn: 'Popular',
-     labelRu: 'Популярно',
-     colorClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-   },
-   'top-rated': {
-     icon: Award,
-     labelEn: 'Top Rated',
-     labelRu: 'Топ рейтинг',
-     colorClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-   },
+      colorClass: 'bg-primary/10 text-primary border-primary/20',
+    },
+    insured: {
+      icon: CheckCircle,
+      labelEn: 'Insured',
+      labelRu: 'Застрахован',
+      colorClass: 'bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/20',
+    },
+    'fast-response': {
+      icon: Clock,
+      labelEn: 'Fast Response',
+      labelRu: 'Быстрый ответ',
+      colorClass: 'bg-[hsl(var(--info))]/10 text-[hsl(var(--info))] border-[hsl(var(--info))]/20',
+    },
+    guaranteed: {
+      icon: Award,
+      labelEn: 'Guaranteed',
+      labelRu: 'Гарантия',
+      colorClass: 'bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/20',
+    },
+    popular: {
+      icon: Users,
+      labelEn: 'Popular',
+      labelRu: 'Популярно',
+      colorClass: 'bg-[hsl(var(--accent-purple))]/10 text-[hsl(var(--accent-purple))] border-[hsl(var(--accent-purple))]/20',
+    },
+    'top-rated': {
+      icon: Award,
+      labelEn: 'Top Rated',
+      labelRu: 'Топ рейтинг',
+      colorClass: 'bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/20',
+    },
  };
  
  export function TrustBadge({ type, value, size = 'sm', className }: TrustBadgeProps) {

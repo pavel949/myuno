@@ -40,7 +40,7 @@ export function CurrencySwitcher({ size = 'default', className }: CurrencySwitch
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="min-w-[160px] bg-popover border border-border shadow-lg z-50"
+        className="min-w-[160px] bg-popover border border-border [box-shadow:var(--shadow-elevation-3)] z-50"
       >
         {currencyList.map((curr) => (
           <DropdownMenuItem
