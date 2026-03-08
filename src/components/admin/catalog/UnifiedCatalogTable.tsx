@@ -305,7 +305,7 @@ export function UnifiedCatalogTable() {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto text-xs sm:text-sm">
         <Table>
           <TableHeader>
             <TableRow>
