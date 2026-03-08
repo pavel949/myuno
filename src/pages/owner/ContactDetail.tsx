@@ -314,7 +314,7 @@ export default function ContactDetail() {
 
               {/* Lifecycle Stage */}
               <LifecycleStageBar
-                currentStage={(contact as any).lifecycle_stage || 'lead'}
+                currentStage={contact.lifecycle_stage || 'lead'}
                 onChange={handleLifecycleChange}
               />
 
