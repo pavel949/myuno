@@ -74,7 +74,7 @@ export function LifecycleNotificationBell({ userId }: { userId: string }) {
 
   const handleAction = (notif: LifecycleNotification) => {
     markRead(notif.id);
-    const url = notif.metadata?.cta_url || notif.action_url;
+    const url = notif.data?.cta_url;
     if (url) {
       navigate(url);
       setOpen(false);
