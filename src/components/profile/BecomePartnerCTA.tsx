@@ -71,7 +71,7 @@ export function BecomePartnerCTA({ className }: BecomePartnerCTAProps) {
       icon: Store,
       title: t.vendor.title,
       desc: t.vendor.desc,
-      path: '/vendor/onboarding',
+      path: '/vendor/join',
       color: 'from-purple-500 to-purple-600',
       hidden: hasVendorRole,
     },
