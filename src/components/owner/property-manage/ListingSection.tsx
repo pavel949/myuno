@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Home, Bed, Bath, MapPin } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { HighlightsSection } from '@/components/owner/property-manage/HighlightsSection';
+import { AddressAutocomplete } from '@/components/transport/AddressAutocomplete';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
 
 interface ListingSectionProps {
@@ -186,9 +187,9 @@ export function PropertyManageListingSection({
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>{isRu ? 'Адрес' : 'Address'}</Label>
-                <Input
+                <AddressAutocomplete
                   value={formData.address || ''}
-                  onChange={(e) => updateFormData({ address: e.target.value })}
+                  onChange={(address) => updateFormData({ address })}
                   placeholder={isRu ? 'Полный адрес' : 'Full address'}
                 />
               </div>
