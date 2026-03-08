@@ -614,18 +614,90 @@ export default function ReportsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Send Email Dialog */}
+      {/* Wizard Dialog */}
+      <Dialog open={showWizard} onOpenChange={setShowWizard}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isRu ? 'Новый отчёт' : 'New Report'}</DialogTitle>
+            <DialogDescription>
+              {isRu ? 'Пошаговый мастер создания отчёта' : 'Step-by-step report wizard'}
+            </DialogDescription>
+          </DialogHeader>
+          <ReportWizard
+            properties={allSelectableProperties.map((p: any) => ({
+              id: p.id || p.property_id,
+              title: p.title || '',
+              title_ru: p.title_ru,
+              complex_id: p.complex_id,
+            }))}
+            complexes={(complexes || []).map((c: any) => ({ id: c.id, name: c.name, name_ru: c.name_ru }))}
+            ownerContacts={(ownerContacts || []).map((o: any) => ({
+              id: o.id, first_name: o.first_name, last_name: o.last_name, propertyIds: o.propertyIds || [],
+            }))}
+            onComplete={handleWizardComplete}
+            onCancel={() => setShowWizard(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview before send */}
+      <ReportDetailSheet
+        report={previewBeforeSend}
+        open={!!previewBeforeSend}
+        onOpenChange={(open) => { if (!open) { setPreviewBeforeSend(null); setSelectedReportForSend(null); } }}
+        actionSlot={
+          <Button className="w-full mt-3" onClick={handleConfirmSend}>
+            <Send className="h-4 w-4 mr-2" />
+            {isRu ? 'Перейти к отправке' : 'Proceed to Send'}
+          </Button>
+        }
+      />
+
+      {/* Send Email Dialog with CRM autocomplete */}
       <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isRu ? 'Отправить отчёт' : 'Send Report'}</DialogTitle>
+            <DialogDescription>
+              {isRu ? 'Выберите получателя или введите email' : 'Select a recipient or enter email'}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <Input
-              placeholder="email@example.com"
-              value={emailRecipients}
-              onChange={(e) => setEmailRecipients(e.target.value)}
-            />
+            {/* Quick select from CRM contacts */}
+            {(ownerContacts || []).filter((o: any) => o.email).length > 0 && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{isRu ? 'Собственники' : 'Owner contacts'}</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(ownerContacts || []).filter((o: any) => o.email).map((o: any) => (
+                    <button
+                      key={o.id}
+                      onClick={() => {
+                        const emails = emailRecipients.split(',').map((e: string) => e.trim()).filter(Boolean);
+                        if (!emails.includes(o.email)) {
+                          setEmailRecipients(emails.length ? `${emailRecipients}, ${o.email}` : o.email);
+                        }
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                        emailRecipients.includes(o.email)
+                          ? 'bg-primary/10 border-primary/30 text-primary'
+                          : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {o.first_name} {o.last_name?.[0]}.
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Email</Label>
+              <Input
+                placeholder="email@example.com"
+                value={emailRecipients}
+                onChange={(e) => setEmailRecipients(e.target.value)}
+              />
+              <p className="text-[10px] text-muted-foreground">{isRu ? 'Через запятую для нескольких' : 'Comma-separated for multiple'}</p>
+            </div>
             <Button onClick={handleSendEmail} className="w-full" disabled={!emailRecipients.trim() || sendReportEmail.isPending}>
               {sendReportEmail.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               {isRu ? 'Отправить' : 'Send'}
@@ -634,6 +706,7 @@ export default function ReportsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* View report detail */}
       <ReportDetailSheet report={viewReport} open={!!viewReport} onOpenChange={(open) => { if (!open) setViewReport(null); }} />
 
       <AlertDialog open={!!deleteReportId} onOpenChange={() => setDeleteReportId(null)}>
