@@ -411,7 +411,7 @@ export function UnifiedCatalogTable() {
                       locale: isRussian ? ruLocale : undefined 
                     })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
