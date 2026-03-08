@@ -248,7 +248,7 @@ export function UnifiedCatalogTable() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap">
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as CatalogItemType | 'all')}>
           <SelectTrigger className="w-[160px]">
             <Filter className="h-4 w-4 mr-2" />
