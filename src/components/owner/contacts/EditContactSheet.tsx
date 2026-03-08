@@ -217,6 +217,11 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
       </div>
       <div className="grid grid-cols-3 gap-3">
+        <div><Label>Instagram</Label><Input value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} placeholder="@username" /></div>
+        <div><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm(f => ({ ...f, facebook: e.target.value }))} placeholder="URL or username" /></div>
+        <div><Label>LinkedIn</Label><Input value={form.linkedin} onChange={e => setForm(f => ({ ...f, linkedin: e.target.value }))} placeholder="URL or username" /></div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>

@@ -93,7 +93,7 @@ export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_a
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
 export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent'] as const;
-export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social', 'agent_network', 'other'] as const;
+export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
 export function useCrmContacts(

@@ -379,6 +379,31 @@ export default function ContactDetail() {
                   <FieldRow label={isRu ? 'Язык' : 'Language'}>
                     {contact.language || <span className="text-muted-foreground/50">—</span>}
                   </FieldRow>
+                  {/* Social media */}
+                  {contact.instagram && (
+                    <FieldRow label="Instagram">
+                      <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        @{contact.instagram.replace('@', '')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
+                  {contact.facebook && (
+                    <FieldRow label="Facebook">
+                      <a href={contact.facebook.startsWith('http') ? contact.facebook : `https://facebook.com/${contact.facebook}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        {contact.facebook}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
+                  {contact.linkedin && (
+                    <FieldRow label="LinkedIn">
+                      <a href={contact.linkedin.startsWith('http') ? contact.linkedin : `https://linkedin.com/in/${contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        {contact.linkedin}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
                   <FieldRow label={isRu ? 'Теги' : 'Tags'}>
                     <ContactTagPicker
                       companyId={contact.company_id}
