@@ -64,7 +64,7 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
   const { icon: ItemIcon, color } = getCatalogItemIcon(itemName, item.type === 'listing' ? 'service' : item.type);
   
   return (
-    <Avatar className="h-10 w-10 rounded-lg">
+    <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg">
       <AvatarImage src={item.image} className="object-cover" />
       <AvatarFallback className={cn(
         "rounded-lg",
@@ -73,7 +73,7 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
         item.type === 'product' && "bg-success/10",
         item.type === 'property' && "bg-accent-amber/10"
       )}>
-        <ItemIcon className={cn("h-5 w-5", color)} />
+        <ItemIcon className={cn("h-4 w-4 sm:h-5 sm:w-5", color)} />
       </AvatarFallback>
     </Avatar>
   );
@@ -248,9 +248,9 @@ export function UnifiedCatalogTable() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap">
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as CatalogItemType | 'all')}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px] h-9 text-xs sm:text-sm">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
@@ -264,7 +264,7 @@ export function UnifiedCatalogTable() {
         </Select>
 
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[160px] h-9 text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -277,7 +277,7 @@ export function UnifiedCatalogTable() {
         </Select>
 
         <Select value={creatorFilter} onValueChange={(v) => setCreatorFilter(v as any)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] h-9 text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -293,11 +293,11 @@ export function UnifiedCatalogTable() {
             placeholder={isRussian ? 'Поиск по названию...' : 'Search by name...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9 text-xs sm:text-sm"
           />
         </div>
 
-        <Badge variant="secondary" className="h-10 px-3 flex items-center">
+        <Badge variant="secondary" className="h-9 px-3 flex items-center text-xs">
           {items.length} {isRussian ? 'элементов' : 'items'}
         </Badge>
 
@@ -305,25 +305,25 @@ export function UnifiedCatalogTable() {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto text-xs sm:text-sm">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">
+              <TableHead className="w-8 sm:w-12 px-1 sm:px-4">
                 <Checkbox
                   checked={selectedCount > 0 && selectedCount === items.length}
                   onCheckedChange={(checked) => checked ? selectAll() : deselectAll()}
                 />
               </TableHead>
-              <TableHead className="w-14"></TableHead>
-              <TableHead className="min-w-[200px]">{isRussian ? 'Название' : 'Name'}</TableHead>
-              <TableHead className="w-24">{isRussian ? 'Тип' : 'Type'}</TableHead>
+              <TableHead className="w-10 sm:w-14 px-1 sm:px-4"></TableHead>
+              <TableHead className="min-w-[120px] sm:min-w-[200px]">{isRussian ? 'Название' : 'Name'}</TableHead>
+              <TableHead className="hidden sm:table-cell w-24">{isRussian ? 'Тип' : 'Type'}</TableHead>
               <TableHead className="hidden lg:table-cell w-[120px]">{isRussian ? 'Вертикаль' : 'Vertical'}</TableHead>
               <TableHead className="hidden md:table-cell w-[180px]">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-              <TableHead className="w-28">{isRussian ? 'Цена' : 'Price'}</TableHead>
-              <TableHead className="w-24">{isRussian ? 'Статус' : 'Status'}</TableHead>
+              <TableHead className="w-20 sm:w-28">{isRussian ? 'Цена' : 'Price'}</TableHead>
+              <TableHead className="w-16 sm:w-24">{isRussian ? 'Статус' : 'Status'}</TableHead>
               <TableHead className="hidden md:table-cell w-[110px]">{isRussian ? 'Создано' : 'Created'}</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-8 sm:w-12 px-1 sm:px-4"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -339,31 +339,31 @@ export function UnifiedCatalogTable() {
                   key={`${item.type}-${item.id}`}
                   data-state={isSelected(item.id) ? 'selected' : undefined}
                 >
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <Checkbox
                       checked={isSelected(item.id)}
                       onCheckedChange={() => toggle(item.id)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <CatalogItemAvatar item={item} />
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-medium line-clamp-1 text-foreground">
+                      <span className="font-medium line-clamp-1 text-foreground text-xs sm:text-sm">
                         {isRussian ? (item.name_ru || item.name_en) : item.name_en}
                       </span>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {item.is_featured && (
-                          <span className="flex items-center gap-0.5 text-xs text-accent-amber">
-                            <Star className="h-3 w-3 fill-current" />
+                          <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-accent-amber">
+                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
                           </span>
                         )}
                         <ApprovalBadge status={item.approval_status} isRussian={isRussian} />
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline" className="gap-1">
                       {typeIcons[item.type]}
                       <span className="hidden sm:inline text-[11px]">
@@ -394,14 +394,14 @@ export function UnifiedCatalogTable() {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-foreground">
+                  <TableCell className="text-foreground text-xs sm:text-sm">
                     {item.price ? formatPrice(item.price) : '—'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                    <Badge variant={item.is_active ? 'default' : 'secondary'} className="text-[10px] sm:text-xs px-1.5 sm:px-2.5">
                       {item.is_active 
-                        ? (isRussian ? 'Активен' : 'Active')
-                        : (isRussian ? 'Неактивен' : 'Inactive')
+                        ? (isRussian ? 'Акт.' : 'Active')
+                        : (isRussian ? 'Неакт.' : 'Off')
                       }
                     </Badge>
                   </TableCell>
@@ -411,7 +411,7 @@ export function UnifiedCatalogTable() {
                       locale: isRussian ? ruLocale : undefined 
                     })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
