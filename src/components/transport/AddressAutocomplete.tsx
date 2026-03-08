@@ -146,7 +146,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       id: r.mapbox_id,
       name: r.name,
       address: r.address,
-      source: 'mapbox' as const,
+      source: 'geocode' as const,
     })),
   [geocodeResults]);
 
