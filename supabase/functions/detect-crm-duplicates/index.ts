@@ -1,4 +1,5 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,6 +50,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth guard: require authenticated user
+    const authResult = await requireAuth(req, corsHeaders);
+    if (authResult instanceof Response) return authResult;
+    
     const { company_id } = await req.json();
     if (!company_id) {
       return new Response(JSON.stringify({ error: 'company_id required' }), {
