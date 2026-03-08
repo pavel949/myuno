@@ -116,7 +116,7 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
       if (showServices) {
         let servicesQuery = supabase
           .from('services')
-          .select('id, name_en, name_ru, price, currency, is_active, provider_id, category, created_at, images, created_by_uno_team, providers(name)')
+          .select('id, name_en, name_ru, price, currency, is_active, provider_id, category:category_id, created_at, images, created_by_uno_team, providers(name)')
           .order('created_at', { ascending: false })
           .limit(200);
 
@@ -132,25 +132,28 @@ export function useUnifiedCatalog(filters: UnifiedCatalogFilters = {}) {
         }
 
         const { data: services, error: servicesError } = await servicesQuery;
-        if (servicesError) throw servicesError;
 
-        allItems.push(
-          ...(services || []).map((s: any) => ({
-            id: s.id,
-            type: 'service' as CatalogItemType,
-            name_en: s.name_en,
-            name_ru: s.name_ru,
-            price: s.price ?? undefined,
-            currency: s.currency ?? 'THB',
-            is_active: s.is_active ?? false,
-            is_featured: false,
-            provider_id: s.provider_id ?? undefined,
-            provider_name: s.providers?.name ?? undefined,
-            category: s.category ?? undefined,
-            created_at: s.created_at,
-            image: (s.images as string[] | null)?.[0] ?? undefined,
-          }))
-        );
+        if (servicesError) {
+          console.error('Failed to fetch services in unified catalog:', servicesError);
+        } else {
+          allItems.push(
+            ...(services || []).map((s: any) => ({
+              id: s.id,
+              type: 'service' as CatalogItemType,
+              name_en: s.name_en,
+              name_ru: s.name_ru,
+              price: s.price ?? undefined,
+              currency: s.currency ?? 'THB',
+              is_active: s.is_active ?? false,
+              is_featured: false,
+              provider_id: s.provider_id ?? undefined,
+              provider_name: s.providers?.name ?? undefined,
+              category: s.category ?? undefined,
+              created_at: s.created_at,
+              image: (s.images as string[] | null)?.[0] ?? undefined,
+            }))
+          );
+        }
       }
 
       // Fetch products
