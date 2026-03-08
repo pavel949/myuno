@@ -32,8 +32,9 @@ export function GoogleMapsStatusCard() {
   const keyLabel = hasKey
     ? isRu ? 'Ключ задан' : 'Key set'
     : isRu ? 'Ключ не задан (используется бэкенд)' : 'Key not set (using backend)';
-  const keyHint = hasKey && GOOGLE_MAPS_API_KEY
-    ? `…${GOOGLE_MAPS_API_KEY.slice(-6)}`
+  const currentKey = getGoogleMapsKey();
+  const keyHint = hasKey && currentKey
+    ? `…${currentKey.slice(-6)}`
     : '';
 
   const scriptLabel = !hasKey
