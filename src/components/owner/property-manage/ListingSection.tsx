@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Home, Bed, Bath, MapPin } from 'lucide-react';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { HighlightsSection } from '@/components/owner/property-manage/HighlightsSection';
+import { AddressAutocomplete } from '@/components/transport/AddressAutocomplete';
 import { useTaxonomy } from '@/hooks/useTaxonomy';
 
 interface ListingSectionProps {
