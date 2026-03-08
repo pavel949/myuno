@@ -108,9 +108,9 @@ export function LifecycleNotificationBell({ userId }: { userId: string }) {
                 {isRu ? 'Нет уведомлений' : 'No notifications yet'}
               </div>
             ) : notifications.map(notif => {
-              const title = isRu ? (notif.metadata?.title_ru || notif.title) : notif.title;
-              const body = isRu ? (notif.metadata?.body_ru || notif.message) : notif.message;
-              const ctaLabel = isRu ? (notif.metadata?.cta_label_ru || 'Подробнее') : (notif.metadata?.cta_label_en || 'View');
+              const title = isRu ? (notif.data?.title_ru || notif.title) : notif.title;
+              const bodyText = isRu ? (notif.data?.body_ru || notif.body) : notif.body;
+              const ctaLabel = isRu ? (notif.data?.cta_label_ru || 'Подробнее') : (notif.data?.cta_label_en || 'View');
 
               return (
                 <motion.div
