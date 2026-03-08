@@ -3,9 +3,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
 import { getGoogleMapsKey } from '@/lib/googleMaps';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
+import { MapPin, CheckCircle2, XCircle, Loader2, RefreshCw, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 const TEST_LAT = 7.8804;
 const TEST_LNG = 98.3923;
@@ -18,6 +20,7 @@ export function GoogleMapsStatusCard() {
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const { reverseGeocode } = useGoogleGeocode(language === 'ru' ? 'ru' : 'en');
   const [geocodeStatus, setGeocodeStatus] = useState<GeocodeTestStatus>('idle');
+  const [syncing, setSyncing] = useState(false);
 
   const runValidation = async () => {
     setGeocodeStatus('running');
@@ -29,10 +32,24 @@ export function GoogleMapsStatusCard() {
     }
   };
 
+  const syncKey = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-maps-key', { method: 'POST' });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isRu ? 'Ключ синхронизирован! Перезагрузите страницу.' : 'Key synced! Please reload the page.');
+    } catch (err: any) {
+      toast.error(err.message || 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const currentKey = getGoogleMapsKey();
   const keyLabel = hasKey
     ? isRu ? 'Ключ задан' : 'Key set'
     : isRu ? 'Ключ не задан (используется бэкенд)' : 'Key not set (using backend)';
-  const currentKey = getGoogleMapsKey();
   const keyHint = hasKey && currentKey
     ? `…${currentKey.slice(-6)}`
     : '';
@@ -100,20 +117,34 @@ export function GoogleMapsStatusCard() {
             <span className="font-medium truncate">{geocodeLabel}</span>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={runValidation}
-          disabled={geocodeStatus === 'running'}
-          className="gap-2"
-        >
-          {geocodeStatus === 'running' ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4" />
+        <div className="flex gap-2">
+          {!hasKey && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={syncKey}
+              disabled={syncing}
+              className="gap-2"
+            >
+              {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {isRu ? 'Синхронизировать ключ' : 'Sync key from backend'}
+            </Button>
           )}
-          {isRu ? 'Проверить геокодинг' : 'Test geocoding'}
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={runValidation}
+            disabled={geocodeStatus === 'running'}
+            className="gap-2"
+          >
+            {geocodeStatus === 'running' ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {isRu ? 'Проверить геокодинг' : 'Test geocoding'}
+          </Button>
+        </div>
         {loadError && (
           <p className="text-xs text-destructive mt-1">
             {loadError.message}
