@@ -27,6 +27,7 @@ const quickLinks: QuickLink[] = [
   { icon: TestTube, label: 'QA Tests', labelRu: 'QA Тесты', path: '/admin/qa-test-runner' },
   { icon: Scale, label: 'Legal Documents', labelRu: 'Юр. документы', path: '/admin/legal-documents' },
   { icon: FileEdit, label: 'Vendor Content', labelRu: 'Контент вендоров', path: '/admin/vendor-content' },
+  { icon: Key, label: 'API Keys & Secrets', labelRu: 'API ключи', path: '/admin/api-keys' },
 ];
 
 export default function AdminSystemSettings() {

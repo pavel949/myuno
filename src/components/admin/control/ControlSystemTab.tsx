@@ -11,6 +11,7 @@ const systemSections = [
   { key: 'translations', label: 'Translations', labelRu: 'Переводы', icon: FileText, path: '/admin/translations' },
   { key: 'lookups', label: 'Lookups', labelRu: 'Справочники', icon: Database, path: '/admin/lookups' },
   { key: 'knowledge', label: 'Knowledge Base', labelRu: 'База знаний', icon: FileText, path: '/admin/location-knowledge' },
+  { key: 'api-keys', label: 'API Keys & Secrets', labelRu: 'API ключи', icon: Key, path: '/admin/api-keys' },
 ];
 
 export function ControlSystemTab() {

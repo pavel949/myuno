@@ -1,5 +1,5 @@
 // Deno.serve used (native edge runtime)
-import { createClient } from "npm:@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
