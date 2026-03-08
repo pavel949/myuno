@@ -62,7 +62,7 @@ export interface CrmContact {
   website: string | null;
 }
 
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website'> & {
+export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin'> & {
   job_title?: string | null;
   birthday?: string | null;
   family_info?: string | null;
@@ -78,6 +78,17 @@ export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_a
   address_country?: string | null;
   tax_id?: string | null;
   website?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  linkedin?: string | null;
+  lead_score?: number | null;
+  lead_temperature?: string | null;
+  lifecycle_stage?: string | null;
+  linked_user_id?: string | null;
+  special_notes?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  emergency_contact_relation?: string | null;
 };
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
