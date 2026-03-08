@@ -374,6 +374,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth guard: allow internal calls (service role) or authenticated users
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) {
       console.error('[send-email] RESEND_API_KEY not configured');
