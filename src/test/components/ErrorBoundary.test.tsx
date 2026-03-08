@@ -38,7 +38,8 @@ describe('ErrorBoundary', () => {
     );
     
     expect(container.textContent).toContain('Something went wrong');
-    expect(container.textContent).toContain('Test error message');
+    // ErrorBoundary shows user-friendly message, not technical error details (by design)
+    expect(container.textContent).toContain('try again');
   });
 
   it('renders custom fallback when provided', () => {

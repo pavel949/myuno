@@ -68,6 +68,7 @@
     "exceljs": "^4.4.0",
     "framer-motion": "^12.25.0",
     "input-otp": "^1.4.2",
+    "jsdom": "^28.1.0",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.462.0",
