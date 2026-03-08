@@ -256,6 +256,13 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
             )}
           </>
         )}
+
+        {/* Action slot (e.g. "Proceed to Send" button) */}
+        {actionSlot && (
+          <div className="pt-4 border-t mt-4">
+            {actionSlot}
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
