@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getGoogleMapsKey } from '@/lib/googleMaps';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyWizard } from '@/hooks/usePropertyWizard';
