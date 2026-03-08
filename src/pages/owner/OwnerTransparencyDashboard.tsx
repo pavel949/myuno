@@ -16,6 +16,7 @@ import { ActivityFeed } from '@/components/owner/transparency/ActivityFeed';
 import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab';
 import { OwnerBookingsTab } from '@/components/owner/transparency/OwnerBookingsTab';
 import { OwnerTermsTab } from '@/components/owner/transparency/OwnerTermsTab';
+import { OwnerReportsTab } from '@/components/owner/transparency/OwnerReportsTab';
 import { OwnerNotificationBell } from '@/components/owner/transparency/OwnerNotificationBell';
 
 export default function OwnerTransparencyDashboard() {
