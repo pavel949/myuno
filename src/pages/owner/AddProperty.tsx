@@ -217,7 +217,7 @@ export default function AddProperty() {
           {wizard.formData.lat && wizard.formData.lng && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+ef4444(${wizard.formData.lng},${wizard.formData.lat})/${wizard.formData.lng},${wizard.formData.lat},14,0/320x200@2x?access_token=pk.eyJ1IjoibG92YWJsZWRldiIsImEiOiJjbTlsMXlrNzIwMDhrMmpzZGVtbXhwYTdoIn0.aekxNRmnsXK-BBNQ-Cn6Xg`}
+                src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=640x400&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}`}
                 alt="Property location"
                 className="w-full h-[200px] object-cover bg-muted"
                 loading="lazy"
