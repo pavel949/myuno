@@ -297,7 +297,7 @@ export function UnifiedCatalogTable() {
           />
         </div>
 
-        <Badge variant="secondary" className="h-10 px-3 flex items-center">
+        <Badge variant="secondary" className="h-9 px-3 flex items-center text-xs">
           {items.length} {isRussian ? 'элементов' : 'items'}
         </Badge>
 
