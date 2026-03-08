@@ -37,7 +37,7 @@ function useGuestHistory() {
         .select('id, status, total_amount, currency, created_at, vertical')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(20) as { data: any[] | null; error: any };
       
       if (error) throw error;
       
