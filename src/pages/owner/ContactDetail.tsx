@@ -162,9 +162,10 @@ export default function ContactDetail() {
   };
 
   const toggleTag = async (tag: string) => {
-    const newTags = contact.tags.includes(tag)
-      ? contact.tags.filter(t => t !== tag)
-      : [...contact.tags, tag];
+    const currentTags = contact.tags || [];
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter(t => t !== tag)
+      : [...currentTags, tag];
     await updateContact.mutateAsync({ id: contact.id, tags: newTags });
   };
 
