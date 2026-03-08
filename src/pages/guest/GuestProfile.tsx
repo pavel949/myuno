@@ -42,7 +42,7 @@ function useGuestHistory() {
       const orders = (result.data || []) as any[];
       if (result.error) throw result.error;
       
-      if (error) throw error;
+      
       
       const totalOrders = orders?.length || 0;
       const totalSpent = orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
