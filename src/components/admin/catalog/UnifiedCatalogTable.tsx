@@ -277,7 +277,7 @@ export function UnifiedCatalogTable() {
         </Select>
 
         <Select value={creatorFilter} onValueChange={(v) => setCreatorFilter(v as any)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] h-9 text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
