@@ -76,6 +76,72 @@ function detectErrorType(error: unknown): keyof typeof DEFAULT_MESSAGES {
 
 const getCurrentLanguage = getStoredLang;
 
+// Error queue for batching reports
+let errorQueue: Array<{ error: unknown; context: ErrorContext; severity: ErrorSeverity; timestamp: string }> = [];
+let flushTimeout: ReturnType<typeof setTimeout> | null = null;
+
+// Flush error queue to backend (batched)
+async function flushErrorQueue() {
+  if (errorQueue.length === 0) return;
+  
+  const batch = [...errorQueue];
+  errorQueue = [];
+  flushTimeout = null;
+  
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) return;
+    
+    // Log to analytics_events table (lightweight, no external service needed)
+    await fetch(`${supabaseUrl}/rest/v1/analytics_events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(batch.map(item => ({
+        event_name: `error_${item.severity}`,
+        page_path: window.location.pathname,
+        user_agent: navigator.userAgent,
+        session_id: sessionStorage.getItem('session_id') || crypto.randomUUID(),
+        event_data: {
+          message: item.error instanceof Error ? item.error.message : String(item.error),
+          stack: item.error instanceof Error ? item.error.stack?.split('\n').slice(0, 5).join('\n') : undefined,
+          component: item.context.component,
+          action: item.context.action,
+          timestamp: item.timestamp,
+          url: window.location.href,
+          metadata: item.context.metadata,
+        },
+      }))),
+    });
+  } catch {
+    // Silent fail - don't create error loops
+  }
+}
+
+// Queue error for batched reporting
+function queueErrorReport(error: unknown, context: ErrorContext, severity: ErrorSeverity) {
+  errorQueue.push({ 
+    error, 
+    context, 
+    severity, 
+    timestamp: new Date().toISOString() 
+  });
+  
+  // Flush after 2 seconds or when queue reaches 10 items
+  if (errorQueue.length >= 10) {
+    if (flushTimeout) clearTimeout(flushTimeout);
+    flushErrorQueue();
+  } else if (!flushTimeout) {
+    flushTimeout = setTimeout(flushErrorQueue, 2000);
+  }
+}
+
 // Format error for logging
 function formatError(error: unknown): string {
   if (error instanceof Error) {
@@ -139,10 +205,10 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
     });
   }
 
-  // In production, could send to error reporting service
-  // if (!isDev && severity === 'critical') {
-  //   sendToErrorReporting(error, context);
-  // }
+  // In production, report errors/critical issues to backend
+  if (!isDev && (severity === 'error' || severity === 'critical') && !silent) {
+    queueErrorReport(error, context, severity);
+  }
 }
 
 // Convenience wrappers

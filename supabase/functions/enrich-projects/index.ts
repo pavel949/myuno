@@ -1,9 +1,10 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 Deno.serve(async (req) => {
@@ -12,6 +13,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal/cron guard: require X-Internal-Secret header
+    const guardResponse = requireInternalSecret(req, corsHeaders);
+    if (guardResponse) return guardResponse;
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
