@@ -170,7 +170,7 @@ export default function ContactDetail() {
   };
 
   const handleLifecycleChange = async (stage: string) => {
-    await updateContact.mutateAsync({ id: contact.id, lifecycle_stage: stage } as any);
+    await updateContact.mutateAsync({ id: contact.id, lifecycle_stage: stage });
   };
 
   const handleToggleCompany = async () => {
