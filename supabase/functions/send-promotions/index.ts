@@ -1,4 +1,5 @@
 import { createClient, createServiceClient } from '../_shared/supabase.ts';
+import { requireAuth, AuthContext } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,9 +35,25 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth guard: require authenticated user with admin role
+    const authResult = await requireAuth(req, corsHeaders);
+    if (authResult instanceof Response) return authResult;
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Verify admin role
+    const { data: isAdmin } = await supabase.rpc('has_role', {
+      _user_id: authResult.user.id,
+      _role: 'admin',
+    });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin role required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const payload: PromotionPayload = await req.json();
     const segmentFilter = payload.segment_filter || 'all';
