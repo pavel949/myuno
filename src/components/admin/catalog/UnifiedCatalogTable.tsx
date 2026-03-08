@@ -64,7 +64,7 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
   const { icon: ItemIcon, color } = getCatalogItemIcon(itemName, item.type === 'listing' ? 'service' : item.type);
   
   return (
-    <Avatar className="h-10 w-10 rounded-lg">
+    <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg">
       <AvatarImage src={item.image} className="object-cover" />
       <AvatarFallback className={cn(
         "rounded-lg",
@@ -73,7 +73,7 @@ function CatalogItemAvatar({ item }: { item: UnifiedCatalogItem }) {
         item.type === 'product' && "bg-success/10",
         item.type === 'property' && "bg-accent-amber/10"
       )}>
-        <ItemIcon className={cn("h-5 w-5", color)} />
+        <ItemIcon className={cn("h-4 w-4 sm:h-5 sm:w-5", color)} />
       </AvatarFallback>
     </Avatar>
   );
