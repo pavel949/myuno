@@ -37,6 +37,10 @@ export function MCMobileNav() {
   const isRu = language === 'ru';
   const [fabOpen, setFabOpen] = useState(false);
 
+  // Hide on property manage pages (they have their own bottom nav)
+  const isPropertyManage = /^\/mc\/properties\/[^/]+\/manage/.test(location.pathname);
+  if (isPropertyManage) return null;
+
   const isActive = (path: string) => {
     if (path === '/mc') return location.pathname === '/mc' || location.pathname === '/mc/';
     return location.pathname.startsWith(path);
