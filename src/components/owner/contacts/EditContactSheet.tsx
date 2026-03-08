@@ -131,6 +131,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         email: form.email || null,
         whatsapp: form.whatsapp || null,
         telegram: form.telegram || null,
+        instagram: form.instagram || null,
+        facebook: form.facebook || null,
+        linkedin: form.linkedin || null,
         contact_type: form.contact_type,
         source: form.source,
         nationality: form.nationality || null,
@@ -158,7 +161,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         address_country: form.address_country || null,
         tax_id: form.tax_id || null,
         website: form.website || null,
-      } as any);
+      });
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
     } catch {
