@@ -1,4 +1,5 @@
 // Deno.serve used (native edge runtime)
+// Public endpoint - sitemap is meant to be publicly accessible
 import { createAnonClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
@@ -8,9 +9,31 @@ const corsHeaders = {
 
 const BASE_URL = "https://myuno.app";
 
+// Rate limiting via simple IP check (basic DDoS protection)
+const requestCounts = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10; // requests per minute
+const RATE_WINDOW = 60000;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Basic rate limiting for public endpoint
+  const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+  const now = Date.now();
+  const clientData = requestCounts.get(clientIP);
+  
+  if (clientData) {
+    if (now > clientData.resetAt) {
+      requestCounts.set(clientIP, { count: 1, resetAt: now + RATE_WINDOW });
+    } else if (clientData.count >= RATE_LIMIT) {
+      return new Response('Rate limit exceeded', { status: 429, headers: corsHeaders });
+    } else {
+      clientData.count++;
+    }
+  } else {
+    requestCounts.set(clientIP, { count: 1, resetAt: now + RATE_WINDOW });
   }
 
   try {

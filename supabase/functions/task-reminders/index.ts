@@ -1,8 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 Deno.serve(async (req) => {
@@ -11,6 +12,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal/cron guard
+    const guardResponse = requireInternalSecret(req, corsHeaders);
+    if (guardResponse) return guardResponse;
+    
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);

@@ -1,10 +1,11 @@
 // Cron: mark pending orders older than 2h as abandoned; expire Stripe Checkout Sessions.
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 const PENDING_MAX_AGE_HOURS = 2;
@@ -15,6 +16,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal/cron guard
+    const guardResponse = requireInternalSecret(req, corsHeaders);
+    if (guardResponse) return guardResponse;
+    
     const supabase = createServiceClient();
     const cutoff = new Date(Date.now() - PENDING_MAX_AGE_HOURS * 60 * 60 * 1000).toISOString();
 

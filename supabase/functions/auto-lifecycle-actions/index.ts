@@ -1,9 +1,10 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 interface LifecycleTemplate {
@@ -25,6 +26,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal/cron guard
+    const guardResponse = requireInternalSecret(req, corsHeaders);
+    if (guardResponse) return guardResponse;
+    
     const supabase = createServiceClient();
 
     // Get active templates
