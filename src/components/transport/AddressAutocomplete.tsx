@@ -273,8 +273,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             </>
           )}
 
-          {/* Popular areas - only when no mapbox results */}
-          {!hasMapbox && hasAreas && (
+          {/* Popular areas - only when no geocode results */}
+          {!hasGeocode && hasAreas && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">
                 {isRu ? 'Популярные районы' : 'Popular areas'}
