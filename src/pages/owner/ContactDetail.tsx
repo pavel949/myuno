@@ -162,18 +162,19 @@ export default function ContactDetail() {
   };
 
   const toggleTag = async (tag: string) => {
-    const newTags = contact.tags.includes(tag)
-      ? contact.tags.filter(t => t !== tag)
-      : [...contact.tags, tag];
+    const currentTags = contact.tags || [];
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter(t => t !== tag)
+      : [...currentTags, tag];
     await updateContact.mutateAsync({ id: contact.id, tags: newTags });
   };
 
   const handleLifecycleChange = async (stage: string) => {
-    await updateContact.mutateAsync({ id: contact.id, lifecycle_stage: stage } as any);
+    await updateContact.mutateAsync({ id: contact.id, lifecycle_stage: stage });
   };
 
   const handleToggleCompany = async () => {
-    await updateContact.mutateAsync({ id: contact.id, is_company: !contact.is_company } as any);
+    await updateContact.mutateAsync({ id: contact.id, is_company: !contact.is_company });
   };
 
   const handleCompleteTask = async (taskId: string) => {
@@ -313,7 +314,7 @@ export default function ContactDetail() {
 
               {/* Lifecycle Stage */}
               <LifecycleStageBar
-                currentStage={(contact as any).lifecycle_stage || 'lead'}
+                currentStage={contact.lifecycle_stage || 'lead'}
                 onChange={handleLifecycleChange}
               />
 
@@ -378,6 +379,31 @@ export default function ContactDetail() {
                   <FieldRow label={isRu ? 'Язык' : 'Language'}>
                     {contact.language || <span className="text-muted-foreground/50">—</span>}
                   </FieldRow>
+                  {/* Social media */}
+                  {contact.instagram && (
+                    <FieldRow label="Instagram">
+                      <a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        @{contact.instagram.replace('@', '')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
+                  {contact.facebook && (
+                    <FieldRow label="Facebook">
+                      <a href={contact.facebook.startsWith('http') ? contact.facebook : `https://facebook.com/${contact.facebook}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        {contact.facebook}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
+                  {contact.linkedin && (
+                    <FieldRow label="LinkedIn">
+                      <a href={contact.linkedin.startsWith('http') ? contact.linkedin : `https://linkedin.com/in/${contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        {contact.linkedin}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </FieldRow>
+                  )}
                   <FieldRow label={isRu ? 'Теги' : 'Tags'}>
                     <ContactTagPicker
                       companyId={contact.company_id}

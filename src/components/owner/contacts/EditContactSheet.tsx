@@ -42,6 +42,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     email: contact.email || '',
     whatsapp: contact.whatsapp || '',
     telegram: contact.telegram || '',
+    instagram: contact.instagram || '',
+    facebook: contact.facebook || '',
+    linkedin: contact.linkedin || '',
     contact_type: contact.contact_type || 'buyer',
     source: contact.source || 'website',
     nationality: contact.nationality || '',
@@ -60,7 +63,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     interests: contact.interests || [],
     scoring: contact.scoring?.toString() || '0',
     tags: contact.tags || [],
-    // Odoo-style fields
     mobile: contact.mobile || '',
     address_street: contact.address_street || '',
     address_street2: contact.address_street2 || '',
@@ -82,6 +84,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       email: contact.email || '',
       whatsapp: contact.whatsapp || '',
       telegram: contact.telegram || '',
+      instagram: contact.instagram || '',
+      facebook: contact.facebook || '',
+      linkedin: contact.linkedin || '',
       contact_type: contact.contact_type || 'buyer',
       source: contact.source || 'website',
       nationality: contact.nationality || '',
@@ -126,6 +131,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         email: form.email || null,
         whatsapp: form.whatsapp || null,
         telegram: form.telegram || null,
+        instagram: form.instagram || null,
+        facebook: form.facebook || null,
+        linkedin: form.linkedin || null,
         contact_type: form.contact_type,
         source: form.source,
         nationality: form.nationality || null,
@@ -153,7 +161,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         address_country: form.address_country || null,
         tax_id: form.tax_id || null,
         website: form.website || null,
-      } as any);
+      });
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
     } catch {
@@ -207,6 +215,11 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} /></div>
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div><Label>Instagram</Label><Input value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} placeholder="@username" /></div>
+        <div><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm(f => ({ ...f, facebook: e.target.value }))} placeholder="URL or username" /></div>
+        <div><Label>LinkedIn</Label><Input value={form.linkedin} onChange={e => setForm(f => ({ ...f, linkedin: e.target.value }))} placeholder="URL or username" /></div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div>

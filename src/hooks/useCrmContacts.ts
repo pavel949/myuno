@@ -15,6 +15,9 @@ export interface CrmContact {
   whatsapp: string | null;
   telegram: string | null;
   line_id: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  linkedin: string | null;
   nationality: string | null;
   language: string | null;
   source: string | null;
@@ -28,7 +31,7 @@ export interface CrmContact {
   preferred_types: string[] | null;
   bedrooms_min: number | null;
   notes: string | null;
-  tags: string[];
+  tags: string[] | null;
   avatar_url: string | null;
   is_archived: boolean;
   is_company: boolean;
@@ -37,6 +40,14 @@ export interface CrmContact {
   family_info: string | null;
   interests: string[] | null;
   scoring: number | null;
+  lead_score: number | null;
+  lead_temperature: string | null;
+  lifecycle_stage: string | null;
+  linked_user_id: string | null;
+  special_notes: string | null;
+  emergency_contact_name: string | null;
+  emergency_contact_phone: string | null;
+  emergency_contact_relation: string | null;
   created_at: string;
   updated_at: string;
   deal_count?: number;
@@ -51,7 +62,7 @@ export interface CrmContact {
   website: string | null;
 }
 
-export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website'> & {
+export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_at' | 'job_title' | 'birthday' | 'family_info' | 'interests' | 'scoring' | 'deal_count' | 'mobile' | 'is_company' | 'address_street' | 'address_street2' | 'address_city' | 'address_state' | 'address_zip' | 'address_country' | 'tax_id' | 'website' | 'lead_score' | 'lead_temperature' | 'lifecycle_stage' | 'linked_user_id' | 'special_notes' | 'emergency_contact_name' | 'emergency_contact_phone' | 'emergency_contact_relation' | 'instagram' | 'facebook' | 'linkedin'> & {
   job_title?: string | null;
   birthday?: string | null;
   family_info?: string | null;
@@ -67,11 +78,22 @@ export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_a
   address_country?: string | null;
   tax_id?: string | null;
   website?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  linkedin?: string | null;
+  lead_score?: number | null;
+  lead_temperature?: string | null;
+  lifecycle_stage?: string | null;
+  linked_user_id?: string | null;
+  special_notes?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
+  emergency_contact_relation?: string | null;
 };
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
 export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent'] as const;
-export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social', 'agent_network', 'other'] as const;
+export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
 export function useCrmContacts(

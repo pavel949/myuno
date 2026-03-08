@@ -3741,9 +3741,11 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relation: string | null
+          facebook: string | null
           family_info: string | null
           first_name: string
           id: string
+          instagram: string | null
           interests: string[] | null
           is_archived: boolean
           is_company: boolean
@@ -3755,6 +3757,7 @@ export type Database = {
           lifecycle_stage: string | null
           line_id: string | null
           linked_user_id: string | null
+          linkedin: string | null
           mobile: string | null
           nationality: string | null
           notes: string | null
@@ -3795,9 +3798,11 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          facebook?: string | null
           family_info?: string | null
           first_name?: string
           id?: string
+          instagram?: string | null
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
@@ -3809,6 +3814,7 @@ export type Database = {
           lifecycle_stage?: string | null
           line_id?: string | null
           linked_user_id?: string | null
+          linkedin?: string | null
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
@@ -3849,9 +3855,11 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          facebook?: string | null
           family_info?: string | null
           first_name?: string
           id?: string
+          instagram?: string | null
           interests?: string[] | null
           is_archived?: boolean
           is_company?: boolean
@@ -3863,6 +3871,7 @@ export type Database = {
           lifecycle_stage?: string | null
           line_id?: string | null
           linked_user_id?: string | null
+          linkedin?: string | null
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
