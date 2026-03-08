@@ -311,6 +311,7 @@ export const AdminVendorProspects = lazy(() => import('@/pages/admin/AdminVendor
 export const AdminCRM = lazy(() => import('@/pages/admin/AdminCRM'));
 export const AdminLifeOS = lazy(() => import('@/pages/admin/AdminLifeOS'));
 export const MarketingDashboard = lazy(() => import('@/pages/admin/marketing/MarketingDashboard'));
+export const LifecycleMessaging = lazy(() => import('@/pages/admin/LifecycleMessaging'));
 export const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/ExperienceCategoriesPage'));
 export const AdminUsersAccess = lazy(() => import('@/pages/admin/AdminUsersAccess'));
 export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
