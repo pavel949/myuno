@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +11,8 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { OnBehalfBanner } from '@/components/admin/OnBehalfBanner';
+import { VendorFormSection } from '@/components/vendor/VendorFormSection';
+import { MultiImageUpload } from '@/components/upload/ImageUpload';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +54,12 @@ import {
   Clock,
   Star,
   Building2,
-  Copy
+  Copy,
+  Image,
+  DollarSign,
+  FileText,
+  Settings,
+  FolderTree,
 } from 'lucide-react';
 
 export default function AdminServices() {
@@ -78,6 +85,7 @@ export default function AdminServices() {
   const [formData, setFormData] = useState({
     provider_id: providerId || '',
     category_id: '',
+    subcategory_id: '',
     name_en: '',
     name_ru: '',
     description_en: '',
@@ -85,6 +93,7 @@ export default function AdminServices() {
     price: '',
     duration_minutes: '',
     max_capacity: '1',
+    images: [] as string[],
     is_active: true,
     is_featured: false,
   });
