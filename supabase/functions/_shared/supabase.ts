@@ -3,9 +3,9 @@
  * Use this module to ensure consistent versioning across all functions.
  */
 
-import { createClient } from "npm:@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 export { createClient };
-export type { SupabaseClient } from "npm:@supabase/supabase-js@2.49.4";
+export type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 /**
  * Create a Supabase client with service role key
