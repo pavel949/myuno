@@ -339,24 +339,24 @@ export function UnifiedCatalogTable() {
                   key={`${item.type}-${item.id}`}
                   data-state={isSelected(item.id) ? 'selected' : undefined}
                 >
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <Checkbox
                       checked={isSelected(item.id)}
                       onCheckedChange={() => toggle(item.id)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="px-1 sm:px-4">
                     <CatalogItemAvatar item={item} />
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-medium line-clamp-1 text-foreground">
+                      <span className="font-medium line-clamp-1 text-foreground text-xs sm:text-sm">
                         {isRussian ? (item.name_ru || item.name_en) : item.name_en}
                       </span>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {item.is_featured && (
-                          <span className="flex items-center gap-0.5 text-xs text-accent-amber">
-                            <Star className="h-3 w-3 fill-current" />
+                          <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-accent-amber">
+                            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
                           </span>
                         )}
                         <ApprovalBadge status={item.approval_status} isRussian={isRussian} />
