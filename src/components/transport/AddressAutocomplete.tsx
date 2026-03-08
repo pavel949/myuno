@@ -20,7 +20,7 @@ const POPULAR_PLACES = [
 ];
 
 interface GeocodeSuggestion {
-  mapbox_id: string;
+  mapbox_id: string; // kept for backward compat with edge function response
   name: string;
   address: string;
   type: string;
@@ -30,7 +30,7 @@ interface Suggestion {
   id: string;
   name: string;
   address: string;
-  source: 'mapbox' | 'project' | 'area';
+  source: 'geocode' | 'project' | 'area';
 }
 
 interface AddressAutocompleteProps {
