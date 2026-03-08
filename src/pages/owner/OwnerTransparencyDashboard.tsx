@@ -102,6 +102,7 @@ export default function OwnerTransparencyDashboard() {
           <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
           <TabsTrigger value="activity">{isRu ? 'Лента' : 'Activity'}</TabsTrigger>
           <TabsTrigger value="finance">{isRu ? 'Финансы' : 'Finance'}</TabsTrigger>
+          <TabsTrigger value="reports">{isRu ? 'Отчёты' : 'Reports'}</TabsTrigger>
           <TabsTrigger value="bookings">{isRu ? 'Брони' : 'Bookings'}</TabsTrigger>
           <TabsTrigger value="terms">{isRu ? 'Условия' : 'Terms'}</TabsTrigger>
         </TabsList>
@@ -116,6 +117,10 @@ export default function OwnerTransparencyDashboard() {
 
         <TabsContent value="finance">
           <OwnerFinanceTab propertyId={propertyId!} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <OwnerReportsTab propertyId={propertyId!} />
         </TabsContent>
 
         <TabsContent value="bookings">

@@ -18,9 +18,10 @@ interface ReportDetailSheetProps {
   report: PropertyReport | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  actionSlot?: React.ReactNode;
 }
 
-export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSheetProps) {
+export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: ReportDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
