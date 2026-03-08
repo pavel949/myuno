@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
+import { getGoogleMapsKey } from '@/lib/googleMaps';
 import { useGoogleGeocode } from './useGoogleGeocode';
 
 export interface PlaceDetails {
@@ -19,17 +19,18 @@ export function usePlacesDetails() {
   const { reverseGeocode } = useGoogleGeocode();
 
   const getDetailsByPlaceId = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
-    if (!GOOGLE_MAPS_API_KEY) return null;
+    const key = getGoogleMapsKey();
+    if (!key) return null;
     try {
       const res = await fetch(
-        `https://places.googleapis.com/v1/places/${placeId}?fields=formattedAddress,rating,photos&key=${GOOGLE_MAPS_API_KEY}`
+        `https://places.googleapis.com/v1/places/${placeId}?fields=formattedAddress,rating,photos&key=${key}`
       );
       if (!res.ok) return null;
       const data = await res.json();
       const photoName = data.photos?.[0]?.name;
       let photoUrl: string | null = null;
       if (photoName) {
-        photoUrl = `https://places.googleapis.com/v1/${photoName}/media?key=${GOOGLE_MAPS_API_KEY}&maxWidthPx=400`;
+        photoUrl = `https://places.googleapis.com/v1/${photoName}/media?key=${key}&maxWidthPx=400`;
       }
       return {
         address: data.formattedAddress || '',
@@ -44,7 +45,8 @@ export function usePlacesDetails() {
 
   const getDetailsByLatLng = useCallback(
     async (lat: number, lng: number): Promise<PlaceDetails | null> => {
-      if (!GOOGLE_MAPS_API_KEY) return null;
+      const key = getGoogleMapsKey();
+      if (!key) return null;
       setLoading(true);
       setError(null);
       try {

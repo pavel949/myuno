@@ -1,29 +1,22 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
-import { GOOGLE_MAPS_API_KEY, hasGoogleMapsKey } from '@/lib/googleMaps';
+import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
 
 const LIBRARIES: ('places')[] = ['places'];
-
-const NO_KEY_ERROR = new Error('VITE_GOOGLE_MAPS_API_KEY is not set');
 
 interface GoogleMapsContextValue {
   isLoaded: boolean;
   loadError: Error | undefined;
   hasKey: boolean;
+  apiKey: string | null;
 }
 
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
 
-const noKeyValue: GoogleMapsContextValue = {
-  isLoaded: false,
-  loadError: NO_KEY_ERROR,
-  hasKey: false,
-};
-
-/** Inner provider that runs useJsApiLoader only when key is present. */
-function GoogleMapsLoader({ children }: { children: React.ReactNode }) {
+/** Inner provider that runs useJsApiLoader once key is available. */
+function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: React.ReactNode }) {
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY!,
+    googleMapsApiKey: apiKey,
     libraries: LIBRARIES,
     preventGoogleFontsLoading: true,
   });
@@ -33,8 +26,9 @@ function GoogleMapsLoader({ children }: { children: React.ReactNode }) {
       isLoaded,
       loadError: loadError ?? undefined,
       hasKey: true,
+      apiKey,
     }),
-    [isLoaded, loadError]
+    [isLoaded, loadError, apiKey]
   );
 
   return (
@@ -44,10 +38,47 @@ function GoogleMapsLoader({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
-  const hasKey = hasGoogleMapsKey();
+const noKeyValue: GoogleMapsContextValue = {
+  isLoaded: false,
+  loadError: new Error('Google Maps API key not available'),
+  hasKey: false,
+  apiKey: null,
+};
 
-  if (!hasKey) {
+const loadingValue: GoogleMapsContextValue = {
+  isLoaded: false,
+  loadError: undefined,
+  hasKey: false,
+  apiKey: null,
+};
+
+export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
+  const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
+  const [fetched, setFetched] = useState(!!apiKey);
+
+  useEffect(() => {
+    if (apiKey) return;
+    let cancelled = false;
+    fetchGoogleMapsKey().then((key) => {
+      if (!cancelled) {
+        setApiKey(key);
+        setFetched(true);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [apiKey]);
+
+  // Still fetching
+  if (!fetched) {
+    return (
+      <GoogleMapsContext.Provider value={loadingValue}>
+        {children}
+      </GoogleMapsContext.Provider>
+    );
+  }
+
+  // No key found
+  if (!apiKey) {
     return (
       <GoogleMapsContext.Provider value={noKeyValue}>
         {children}
@@ -55,7 +86,7 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     );
   }
 
-  return <GoogleMapsLoader>{children}</GoogleMapsLoader>;
+  return <GoogleMapsLoader apiKey={apiKey}>{children}</GoogleMapsLoader>;
 }
 
 export function useGoogleMaps() {
