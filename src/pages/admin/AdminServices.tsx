@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +11,8 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { AdminFormToolbar } from '@/components/admin/AdminFormToolbar';
 import { OnBehalfBanner } from '@/components/admin/OnBehalfBanner';
+import { VendorFormSection } from '@/components/vendor/VendorFormSection';
+import { MultiImageUpload } from '@/components/upload/ImageUpload';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +54,12 @@ import {
   Clock,
   Star,
   Building2,
-  Copy
+  Copy,
+  Image,
+  DollarSign,
+  FileText,
+  Settings,
+  FolderTree,
 } from 'lucide-react';
 
 export default function AdminServices() {
@@ -78,6 +85,7 @@ export default function AdminServices() {
   const [formData, setFormData] = useState({
     provider_id: providerId || '',
     category_id: '',
+    subcategory_id: '',
     name_en: '',
     name_ru: '',
     description_en: '',
@@ -85,6 +93,7 @@ export default function AdminServices() {
     price: '',
     duration_minutes: '',
     max_capacity: '1',
+    images: [] as string[],
     is_active: true,
     is_featured: false,
   });
@@ -122,6 +131,7 @@ export default function AdminServices() {
     setFormData({
       provider_id: providerId || '',
       category_id: '',
+      subcategory_id: '',
       name_en: '',
       name_ru: '',
       description_en: '',
@@ -129,6 +139,7 @@ export default function AdminServices() {
       price: '',
       duration_minutes: '',
       max_capacity: '1',
+      images: [],
       is_active: true,
       is_featured: false,
     });
@@ -137,9 +148,15 @@ export default function AdminServices() {
 
   const openEditDialog = (service: Service) => {
     setEditingService(service);
+    // Determine if category_id is actually a subcategory
+    const catId = service.category_id || '';
+    const cat = categories.find(c => c.id === catId);
+    const isSubcat = cat?.parent_id != null;
+    
     setFormData({
       provider_id: service.provider_id,
-      category_id: service.category_id || '',
+      category_id: isSubcat ? (cat?.parent_id || '') : catId,
+      subcategory_id: isSubcat ? catId : '',
       name_en: service.name_en || '',
       name_ru: service.name_ru || '',
       description_en: service.description_en || '',
@@ -147,11 +164,23 @@ export default function AdminServices() {
       price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes?.toString() || '',
       max_capacity: service.max_capacity?.toString() || '1',
+      images: service.images || [],
       is_active: service.is_active ?? true,
       is_featured: service.is_featured ?? false,
     });
     setIsDialogOpen(true);
   };
+
+  // Build category hierarchy
+  const parentCategories = useMemo(() => 
+    categories.filter(c => c.parent_id == null), 
+    [categories]
+  );
+  
+  const subcategories = useMemo(() => {
+    if (!formData.category_id) return [];
+    return categories.filter(c => c.parent_id === formData.category_id);
+  }, [categories, formData.category_id]);
 
   // Duplicate functionality
   const handleDuplicate = useCallback(() => {
@@ -174,9 +203,12 @@ export default function AdminServices() {
 
     setIsSubmitting(true);
     try {
+      // Use subcategory if selected, otherwise parent category
+      const finalCategoryId = formData.subcategory_id || formData.category_id || undefined;
+      
       const serviceData = {
         provider_id: formData.provider_id,
-        category_id: formData.category_id || undefined,
+        category_id: finalCategoryId,
         name_en: formData.name_en,
         name_ru: formData.name_ru || formData.name_en,
         description_en: formData.description_en || undefined,
@@ -185,6 +217,7 @@ export default function AdminServices() {
         currency: 'THB',
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
         max_capacity: parseInt(formData.max_capacity) || 1,
+        images: formData.images.length > 0 ? formData.images : undefined,
         is_active: formData.is_active,
         is_featured: formData.is_featured,
       };
@@ -483,127 +516,226 @@ export default function AdminServices() {
             </div>
 
             <ScrollArea className="max-h-[calc(90vh-240px)] px-6">
-              <div className="space-y-4 pb-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Провайдер *' : 'Provider *'}</Label>
-                  <Select
-                    value={formData.provider_id}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, provider_id: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {providers.map((provider) => (
-                        <SelectItem key={provider.id} value={provider.id}>
-                          {provider.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Категория' : 'Category'}</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
+              <div className="space-y-6 pb-4">
+                
+                {/* === Provider & Category === */}
+                <VendorFormSection
+                  title={isRussian ? 'Привязка' : 'Assignment'}
+                  icon={<FolderTree className="h-4 w-4" />}
+                  badge={isRussian ? 'Обязательно' : 'Required'}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={isRussian ? 'Выберите категорию' : 'Select category'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {isRussian ? cat.name_ru : cat.name_en}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Провайдер *' : 'Provider *'}</Label>
+                      <Select
+                        value={formData.provider_id}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, provider_id: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={isRussian ? 'Выберите провайдера' : 'Select provider'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {providers.map((provider) => (
+                            <SelectItem key={provider.id} value={provider.id}>
+                              {provider.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
-                <Input
-                  value={formData.name_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
-                  placeholder="Thai Massage"
-                />
-              </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Категория' : 'Category'}</Label>
+                        <Select
+                          value={formData.category_id}
+                          onValueChange={(value) => setFormData(prev => ({ 
+                            ...prev, 
+                            category_id: value,
+                            subcategory_id: '' // Reset subcategory when category changes
+                          }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={isRussian ? 'Выберите' : 'Select'} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {parentCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {isRussian ? cat.name_ru : cat.name_en}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Подкатегория' : 'Subcategory'}</Label>
+                        <Select
+                          value={formData.subcategory_id}
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}
+                          disabled={subcategories.length === 0}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={
+                              subcategories.length === 0 
+                                ? (isRussian ? 'Нет подкатегорий' : 'No subcategories')
+                                : (isRussian ? 'Выберите' : 'Select')
+                            } />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {subcategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {isRussian ? cat.name_ru : cat.name_en}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </VendorFormSection>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
-                <Input
-                  value={formData.name_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
-                  placeholder="Тайский массаж"
-                />
-              </div>
+                {/* === Basic Info === */}
+                <VendorFormSection
+                  title={isRussian ? 'Основная информация' : 'Basic Information'}
+                  icon={<FileText className="h-4 w-4" />}
+                  badge={isRussian ? 'Обязательно' : 'Required'}
+                >
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                        <Input
+                          value={formData.name_en}
+                          onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
+                          placeholder="Thai Massage"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
+                        <Input
+                          value={formData.name_ru}
+                          onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
+                          placeholder="Тайский массаж"
+                        />
+                      </div>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                <Textarea
-                  value={formData.description_en}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
-                  rows={2}
-                />
-              </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                        <Textarea
+                          value={formData.description_en}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
+                          rows={3}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                        <Textarea
+                          value={formData.description_ru}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </VendorFormSection>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
-                <Textarea
-                  value={formData.description_ru}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
-                  rows={2}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
-                  <Input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="1000"
+                {/* === Photos === */}
+                <VendorFormSection
+                  title={isRussian ? 'Фотографии' : 'Photos'}
+                  icon={<Image className="h-4 w-4" />}
+                  collapsible
+                  defaultOpen={formData.images.length > 0}
+                  badge={isRussian ? 'Рекомендуется' : 'Recommended'}
+                >
+                  <MultiImageUpload
+                    value={formData.images}
+                    onChange={(urls) => setFormData(prev => ({ ...prev, images: urls }))}
+                    folder="services"
+                    maxImages={6}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
-                  <Input
-                    type="number"
-                    value={formData.duration_minutes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
-                    placeholder="60"
-                  />
-                </div>
-              </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {isRussian 
+                      ? 'Добавьте до 6 фото услуги. Первое фото будет обложкой.' 
+                      : 'Add up to 6 service photos. First photo will be the cover.'}
+                  </p>
+                </VendorFormSection>
 
-              <div className="space-y-2">
-                <Label>{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
-                <Input
-                  type="number"
-                  value={formData.max_capacity}
-                  onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
-                  placeholder="1"
-                />
-              </div>
+                {/* === Pricing & Duration === */}
+                <VendorFormSection
+                  title={isRussian ? 'Цена и время' : 'Pricing & Duration'}
+                  icon={<DollarSign className="h-4 w-4" />}
+                  badge={isRussian ? 'Обязательно' : 'Required'}
+                >
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                      <Input
+                        type="number"
+                        value={formData.price}
+                        onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                        placeholder="1000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
+                      <Input
+                        type="number"
+                        value={formData.duration_minutes}
+                        onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
+                        placeholder="60"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
+                      <Input
+                        type="number"
+                        value={formData.max_capacity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
+                        placeholder="1"
+                      />
+                    </div>
+                  </div>
+                </VendorFormSection>
 
-              <div className="flex items-center justify-between">
-                <Label>{isRussian ? 'Активна' : 'Active'}</Label>
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-              </div>
+                {/* === Settings === */}
+                <VendorFormSection
+                  title={isRussian ? 'Настройки' : 'Settings'}
+                  icon={<Settings className="h-4 w-4" />}
+                  collapsible
+                  defaultOpen={false}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>{isRussian ? 'Активна' : 'Active'}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {isRussian ? 'Видна клиентам' : 'Visible to customers'}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                      />
+                    </div>
 
-              <div className="flex items-center justify-between">
-                <Label>{isRussian ? 'Рекомендуемая' : 'Featured'}</Label>
-                <Switch
-                  checked={formData.is_featured}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
-                />
-              </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>{isRussian ? 'Рекомендуемая' : 'Featured'}</Label>
+                        <p className="text-xs text-muted-foreground">
+                          {isRussian ? 'Показывать в топе' : 'Show in featured section'}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={formData.is_featured}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
+                      />
+                    </div>
+                  </div>
+                </VendorFormSection>
+
               </div>
             </ScrollArea>
 
