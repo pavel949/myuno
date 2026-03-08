@@ -32,12 +32,14 @@ function useGuestHistory() {
     queryFn: async () => {
       if (!user?.id) return { orders: [], stats: { totalOrders: 0, totalSpent: 0, categories: [] } };
       
-      const { data: orders, error } = await supabase
+      const result: any = await supabase
         .from('orders')
         .select('id, status, total_amount, currency, created_at, vertical')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(20) as { data: any[] | null; error: any };
+        .limit(20);
+      const orders = result.data as any[] | null;
+      const error = result.error;
       
       if (error) throw error;
       
