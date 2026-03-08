@@ -204,8 +204,6 @@ const VendorDashboard = () => {
         rating={0}
         bookingsCount={stats.completedCount || 0}
       />
-        </CardContent>
-      </Card>
 
       {/* KPI Cards with Comparison */}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
