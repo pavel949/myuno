@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
-import { GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
+import { getGoogleMapsKey } from '@/lib/googleMaps';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
