@@ -140,8 +140,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return items.filter(s => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q));
   }, [query, isRu]);
 
-  // Mapbox suggestions
-  const mapboxSuggestions = useMemo((): Suggestion[] =>
+  // Geocode suggestions
+  const geocodeSuggestions = useMemo((): Suggestion[] =>
     geocodeResults.map(r => ({
       id: r.mapbox_id,
       name: r.name,
