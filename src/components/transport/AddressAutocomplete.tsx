@@ -20,7 +20,7 @@ const POPULAR_PLACES = [
 ];
 
 interface GeocodeSuggestion {
-  mapbox_id: string;
+  mapbox_id: string; // kept for backward compat with edge function response
   name: string;
   address: string;
   type: string;
@@ -30,7 +30,7 @@ interface Suggestion {
   id: string;
   name: string;
   address: string;
-  source: 'mapbox' | 'project' | 'area';
+  source: 'geocode' | 'project' | 'area';
 }
 
 interface AddressAutocompleteProps {
@@ -140,13 +140,13 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return items.filter(s => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q));
   }, [query, isRu]);
 
-  // Mapbox suggestions
-  const mapboxSuggestions = useMemo((): Suggestion[] =>
+  // Geocode suggestions
+  const geocodeSuggestions = useMemo((): Suggestion[] =>
     geocodeResults.map(r => ({
       id: r.mapbox_id,
       name: r.name,
       address: r.address,
-      source: 'mapbox' as const,
+      source: 'geocode' as const,
     })),
   [geocodeResults]);
 
@@ -194,10 +194,10 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     );
   };
 
-  const hasMapbox = mapboxSuggestions.length > 0;
+  const hasGeocode = geocodeSuggestions.length > 0;
   const hasProjects = projectSuggestions.length > 0;
   const hasAreas = areaSuggestions.length > 0;
-  const showDropdown = isFocused && (hasMapbox || hasProjects || hasAreas || isSearching || query.length === 0);
+  const showDropdown = isFocused && (hasGeocode || hasProjects || hasAreas || isSearching || query.length === 0);
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -249,13 +249,13 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
           </button>
 
-          {/* Mapbox geocode results */}
-          {hasMapbox && (
+          {/* Geocode results */}
+          {hasGeocode && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
                 {isRu ? 'Результаты поиска' : 'Search results'}
               </div>
-              {mapboxSuggestions.map(s => (
+              {geocodeSuggestions.map(s => (
                 <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
               ))}
             </>
@@ -273,8 +273,8 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             </>
           )}
 
-          {/* Popular areas - only when no mapbox results */}
-          {!hasMapbox && hasAreas && (
+          {/* Popular areas - only when no geocode results */}
+          {!hasGeocode && hasAreas && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">
                 {isRu ? 'Популярные районы' : 'Popular areas'}
@@ -286,7 +286,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Loading state */}
-          {isSearching && !hasMapbox && (
+          {isSearching && !hasGeocode && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               {isRu ? 'Поиск...' : 'Searching...'}
@@ -294,7 +294,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Manual entry hint */}
-          {query.length >= 2 && !isSearching && !hasMapbox && (
+          {query.length >= 2 && !isSearching && !hasGeocode && (
             <div className="px-3 py-3 text-center text-xs text-muted-foreground border-t border-border/50 flex items-center justify-center gap-1.5">
               <Keyboard className="w-3.5 h-3.5" />
               {isRu ? 'Или введите адрес вручную' : 'Or type your address manually'}

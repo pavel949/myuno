@@ -10,7 +10,7 @@ const KNOWN_SECRETS = [
   { key: "STRIPE_SECRET_KEY", label: "Stripe Secret Key", description: "Payment processing", url: "https://dashboard.stripe.com/apikeys", managedBy: "manual" },
   { key: "STRIPE_WEBHOOK_SECRET", label: "Stripe Webhook Secret", description: "Webhook signature verification", url: "https://dashboard.stripe.com/webhooks", managedBy: "manual" },
   { key: "RESEND_API_KEY", label: "Resend API Key", description: "Email notifications", url: "https://resend.com/api-keys", managedBy: "manual" },
-  { key: "MAPBOX_PUBLIC_TOKEN", label: "Mapbox Public Token", description: "Map rendering (Mapbox)", url: "https://account.mapbox.com/access-tokens", managedBy: "manual" },
+  { key: "MAPBOX_PUBLIC_TOKEN", label: "Mapbox Public Token", description: "Map rendering (legacy, migrated to Google)", url: "https://account.mapbox.com/access-tokens", managedBy: "manual" },
   { key: "LOVABLE_API_KEY", label: "Lovable API Key", description: "AI features", url: "", managedBy: "system" },
   { key: "FIRECRAWL_API_KEY", label: "Firecrawl API Key", description: "Web scraping", url: "https://firecrawl.dev", managedBy: "connector" },
   { key: "TELEGRAM_BOT_TOKEN", label: "Telegram Bot Token", description: "Telegram bot integration", url: "https://t.me/BotFather", managedBy: "manual" },
