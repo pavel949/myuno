@@ -203,9 +203,12 @@ export default function AdminServices() {
 
     setIsSubmitting(true);
     try {
+      // Use subcategory if selected, otherwise parent category
+      const finalCategoryId = formData.subcategory_id || formData.category_id || undefined;
+      
       const serviceData = {
         provider_id: formData.provider_id,
-        category_id: formData.category_id || undefined,
+        category_id: finalCategoryId,
         name_en: formData.name_en,
         name_ru: formData.name_ru || formData.name_en,
         description_en: formData.description_en || undefined,
@@ -214,6 +217,7 @@ export default function AdminServices() {
         currency: 'THB',
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
         max_capacity: parseInt(formData.max_capacity) || 1,
+        images: formData.images.length > 0 ? formData.images : undefined,
         is_active: formData.is_active,
         is_featured: formData.is_featured,
       };
