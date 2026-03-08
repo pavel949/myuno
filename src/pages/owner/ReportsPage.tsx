@@ -543,7 +543,7 @@ export default function ReportsPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   {isRu ? 'Создайте первый отчёт' : 'Generate your first report'}
                 </p>
-                <Button onClick={() => setShowGenerateDialog(true)} size="sm">
+                <Button onClick={() => setShowWizard(true)} size="sm">
                   <Plus className="h-4 w-4 mr-1.5" />
                   {isRu ? 'Создать' : 'Create'}
                 </Button>
