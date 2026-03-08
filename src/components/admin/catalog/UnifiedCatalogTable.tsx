@@ -293,7 +293,7 @@ export function UnifiedCatalogTable() {
             placeholder={isRussian ? 'Поиск по названию...' : 'Search by name...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-9 h-9 text-xs sm:text-sm"
           />
         </div>
 
