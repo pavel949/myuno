@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
+import { getGoogleMapsKey } from '@/lib/googleMaps';
 
 export interface GeocodeResult {
   address: string;
@@ -12,8 +12,8 @@ const langParam = (language: string) => (language === 'ru' ? 'ru' : 'en');
 
 /**
  * Hook for Google Geocoding.
- * Uses frontend API key directly when available.
- * Falls back to edge function (geocode-address) when no frontend key is set.
+ * Uses dynamic API key from system_config when available.
+ * Falls back to edge function (geocode-address) when no key is set.
  */
 export function useGoogleGeocode(language: string = 'en') {
   const lang = langParam(language);
@@ -21,9 +21,10 @@ export function useGoogleGeocode(language: string = 'en') {
   const reverseGeocode = useCallback(
     async (lat: number, lng: number): Promise<GeocodeResult | null> => {
       try {
-        if (GOOGLE_MAPS_API_KEY) {
+        const key = getGoogleMapsKey();
+        if (key) {
           const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}&language=${lang}`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}&language=${lang}`
           );
           const data = await res.json();
           if (data.status !== 'OK' || !data.results?.length) return null;
@@ -61,8 +62,9 @@ export function useGoogleGeocode(language: string = 'en') {
     ): Promise<GeocodeResult[]> => {
       if (!query.trim()) return [];
       try {
-        if (GOOGLE_MAPS_API_KEY) {
-          let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${GOOGLE_MAPS_API_KEY}&language=${lang}`;
+        const key = getGoogleMapsKey();
+        if (key) {
+          let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${key}&language=${lang}`;
           if (options?.country) url += `&region=${options.country}`;
           const res = await fetch(url);
           const data = await res.json();
@@ -84,8 +86,6 @@ export function useGoogleGeocode(language: string = 'en') {
           },
         });
         const data = await res.json();
-        // Edge function doesn't return coordinates for forward geocoding in the same format
-        // Return what we have - the address autocomplete component handles this
         return (data.results || []).map((r: any) => ({
           address: r.address || r.name,
           placeId: r.mapbox_id || null,

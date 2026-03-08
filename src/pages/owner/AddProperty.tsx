@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { getGoogleMapsKey } from '@/lib/googleMaps';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyWizard } from '@/hooks/usePropertyWizard';
@@ -217,7 +218,7 @@ export default function AddProperty() {
           {wizard.formData.lat && wizard.formData.lng && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=640x400&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}`}
+                src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=640x400&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${getGoogleMapsKey() || ''}`}
                 alt="Property location"
                 className="w-full h-[200px] object-cover bg-muted"
                 loading="lazy"
