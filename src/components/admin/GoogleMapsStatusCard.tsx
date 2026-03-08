@@ -31,13 +31,13 @@ export function GoogleMapsStatusCard() {
 
   const keyLabel = hasKey
     ? isRu ? 'Ключ задан' : 'Key set'
-    : isRu ? 'Ключ не задан' : 'Key not set';
+    : isRu ? 'Ключ не задан (используется бэкенд)' : 'Key not set (using backend)';
   const keyHint = hasKey && GOOGLE_MAPS_API_KEY
     ? `…${GOOGLE_MAPS_API_KEY.slice(-6)}`
     : '';
 
   const scriptLabel = !hasKey
-    ? (isRu ? '—' : '—')
+    ? (isRu ? 'Через Edge Function' : 'Via Edge Function')
     : loadError
       ? (isRu ? 'Ошибка загрузки' : 'Load error')
       : isLoaded
@@ -58,7 +58,7 @@ export function GoogleMapsStatusCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <MapPin className="h-5 w-5 text-primary" />
-          {isRu ? 'Google Maps' : 'Google Maps'}
+          Google Maps
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -67,14 +67,14 @@ export function GoogleMapsStatusCard() {
             {hasKey ? (
               <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
             ) : (
-              <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <span className="h-4 w-4 flex-shrink-0 text-muted-foreground">—</span>
             )}
-            <span className="text-muted-foreground">{isRu ? 'API ключ:' : 'API key:'}</span>
+            <span className="text-muted-foreground">{isRu ? 'Фронтенд ключ:' : 'Frontend key:'}</span>
             <span className="font-medium truncate">{keyLabel} {keyHint}</span>
           </div>
           <div className="flex items-center gap-2">
             {!hasKey ? (
-              <span className="h-4 w-4 flex-shrink-0 text-muted-foreground">—</span>
+              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0" />
             ) : loadError ? (
               <XCircle className="h-4 w-4 text-destructive flex-shrink-0" />
             ) : isLoaded ? (
@@ -82,7 +82,7 @@ export function GoogleMapsStatusCard() {
             ) : (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground flex-shrink-0" />
             )}
-            <span className="text-muted-foreground">{isRu ? 'Скрипт карты:' : 'Map script:'}</span>
+            <span className="text-muted-foreground">{isRu ? 'Карта:' : 'Map:'}</span>
             <span className="font-medium truncate">{scriptLabel}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function GoogleMapsStatusCard() {
           variant="outline"
           size="sm"
           onClick={runValidation}
-          disabled={!hasKey || geocodeStatus === 'running'}
+          disabled={geocodeStatus === 'running'}
           className="gap-2"
         >
           {geocodeStatus === 'running' ? (
@@ -111,7 +111,7 @@ export function GoogleMapsStatusCard() {
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          {isRu ? 'Проверить карты' : 'Validate maps'}
+          {isRu ? 'Проверить геокодинг' : 'Test geocoding'}
         </Button>
         {loadError && (
           <p className="text-xs text-destructive mt-1">

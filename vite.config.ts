@@ -124,7 +124,7 @@ export default defineConfig(({ mode }) => {
             'vendor-motion': ['framer-motion'],
             'vendor-query': ['@tanstack/react-query'],
             'vendor-charts': ['recharts'],
-            'vendor-map': ['mapbox-gl'],
+            'vendor-map': ['@react-google-maps/api'],
             'vendor-pdf': ['jspdf', 'jspdf-autotable', 'exceljs'],
             'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
 
