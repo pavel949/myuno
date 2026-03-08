@@ -234,23 +234,18 @@ export default function ReportsPage() {
     }
   };
 
-  const handleGenerate = async () => {
-    const period = getReportPeriod(selectedReportType);
-    const ids = scopePropertyIds;
+  const handleWizardComplete = async (result: WizardResult) => {
+    const ids = result.propertyIds;
     if (ids.length === 0) return;
 
     if (ids.length === 1) {
       generateReport.mutate({
         property_id: ids[0],
-        report_type: selectedReportType,
-        period_start: period.start,
-        period_end: period.end,
+        report_type: result.reportType,
+        period_start: result.periodStart,
+        period_end: result.periodEnd,
       }, {
-        onSuccess: () => {
-          setShowGenerateDialog(false);
-          setSelectedPropertyId('');
-          setSelectedReportType('monthly');
-        }
+        onSuccess: () => setShowWizard(false),
       });
     } else {
       setIsBatchGenerating(true);
@@ -258,15 +253,12 @@ export default function ReportsPage() {
         for (const propId of ids) {
           await generateReport.mutateAsync({
             property_id: propId,
-            report_type: selectedReportType,
-            period_start: period.start,
-            period_end: period.end,
+            report_type: result.reportType,
+            period_start: result.periodStart,
+            period_end: result.periodEnd,
           });
         }
-        setShowGenerateDialog(false);
-        setSelectedPropertyId('');
-        setSelectedReportType('monthly');
-        setGenerateScope('property');
+        setShowWizard(false);
       } finally {
         setIsBatchGenerating(false);
       }
