@@ -105,7 +105,7 @@ export function useAdminDashboardStats() {
 
       const pendingProperties = pendingPropertiesRes.count || 0;
       const pendingListings = pendingListingsRes.count || 0;
-      const totalPendingContent = pendingProperties + pendingListings + (pendingProvidersRes.count || 0);
+      const totalPendingContent = pendingProperties + pendingListings;
 
       return {
         providers: providersRes.count || 0,

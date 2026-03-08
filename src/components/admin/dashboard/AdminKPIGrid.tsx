@@ -95,10 +95,12 @@ export function AdminKPIGrid() {
     return `${symbol}${value.toFixed(0)}`;
   };
 
-  // Count active listings from stats
+  // Count active listings from ALL verticals
   const activeListings = (stats?.properties || 0) + (stats?.yachts || 0) + (stats?.tours || 0) + 
     (stats?.restaurants || 0) + (stats?.salons || 0) + (stats?.clinics || 0) + (stats?.gyms || 0) +
-    (stats?.events || 0) + (stats?.vehicles || 0);
+    (stats?.events || 0) + (stats?.vehicles || 0) + (stats?.education || 0) + (stats?.pets || 0) +
+    (stats?.cleaning || 0) + (stats?.babysitters || 0) + (stats?.flowers || 0) + (stats?.pharmacies || 0) +
+    (stats?.stores || 0) + (stats?.insurance || 0) + (stats?.waterActivities || 0) + (stats?.services || 0);
 
   const pendingApprovals = (stats?.pendingContent || 0);
 
@@ -109,6 +111,7 @@ export function AdminKPIGrid() {
       change: summary?.userGrowth,
       icon: Users,
       color: 'bg-info',
+      onClick: () => navigate('/admin/users'),
     },
     {
       title: isRu ? 'Провайдеры' : 'Providers',
@@ -116,12 +119,14 @@ export function AdminKPIGrid() {
       change: summary?.providerGrowth,
       icon: UserPlus,
       color: 'bg-success',
+      onClick: () => navigate('/admin/providers'),
     },
     {
       title: isRu ? 'Листинги' : 'Active Listings',
       value: activeListings,
       icon: Package,
       color: 'bg-primary',
+      onClick: () => navigate('/admin/catalog'),
     },
     {
       title: isRu ? 'Доход' : 'Revenue',
@@ -129,13 +134,14 @@ export function AdminKPIGrid() {
       change: summary?.revenueGrowth,
       icon: DollarSign,
       color: 'bg-warning',
+      onClick: () => navigate('/admin/finance'),
     },
     {
       title: isRu ? 'На модерации' : 'Pending',
       value: pendingApprovals,
       icon: AlertCircle,
       color: pendingApprovals > 0 ? 'bg-destructive' : 'bg-muted-foreground',
-      onClick: pendingApprovals > 0 ? () => navigate('/admin/catalog?status=pending') : undefined,
+      onClick: () => navigate('/admin/operations?tab=moderation'),
     },
     {
       title: isRu ? 'Здоровье' : 'System Health',
