@@ -33,7 +33,7 @@ export default function AdminUnifiedCatalog() {
           title={isRussian ? 'Единый каталог' : 'Unified Catalog'}
           subtitle={isRussian ? 'Все объекты и товары в одном месте' : 'All services and products in one place'}
           icon={Package}
-          size="lg"
+          size="md"
         />
         
         {/* Provider Selector + Create Menu */}
