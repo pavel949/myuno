@@ -194,10 +194,10 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     );
   };
 
-  const hasMapbox = mapboxSuggestions.length > 0;
+  const hasGeocode = geocodeSuggestions.length > 0;
   const hasProjects = projectSuggestions.length > 0;
   const hasAreas = areaSuggestions.length > 0;
-  const showDropdown = isFocused && (hasMapbox || hasProjects || hasAreas || isSearching || query.length === 0);
+  const showDropdown = isFocused && (hasGeocode || hasProjects || hasAreas || isSearching || query.length === 0);
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
