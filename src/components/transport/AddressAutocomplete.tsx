@@ -286,7 +286,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Loading state */}
-          {isSearching && !hasMapbox && (
+          {isSearching && !hasGeocode && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               {isRu ? 'Поиск...' : 'Searching...'}
