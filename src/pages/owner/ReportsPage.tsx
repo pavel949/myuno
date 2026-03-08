@@ -449,151 +449,15 @@ export default function ReportsPage() {
             {isRu ? 'Финансовые отчёты по объектам' : 'Financial reports for properties'}
           </p>
         </div>
-        <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setShowOwnerInvite(true)}>
               <UserPlus className="h-4 w-4" />
             </Button>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-1.5" />
-                {isRu ? 'Создать' : 'Create'}
-              </Button>
-            </DialogTrigger>
+            <Button size="sm" onClick={() => setShowWizard(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              {isRu ? 'Создать' : 'Create'}
+            </Button>
           </div>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{isRu ? 'Новый отчёт' : 'New Report'}</DialogTitle>
-              <DialogDescription>
-                {isRu ? 'Выберите объект, тип и период' : 'Select property, type and period'}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* Scope */}
-              {scopeOptions.length > 1 && (
-                <div className="flex gap-1.5 flex-wrap">
-                  {scopeOptions.map(s => {
-                    const Icon = s.icon;
-                    return (
-                      <button
-                        key={s.value}
-                        onClick={() => setGenerateScope(s.value)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                          generateScope === s.value
-                            ? 'bg-primary/10 border-primary/30 text-primary'
-                            : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        {s.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Property selector */}
-              {generateScope === 'property' && (
-                <div className="space-y-2">
-                  <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-                    <SelectTrigger><SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} /></SelectTrigger>
-                    <SelectContent>
-                      {allSelectableProperties.map((p: any) => (
-                        <SelectItem key={p.id || p.property_id} value={p.id || p.property_id}>
-                          {isRu ? p.title_ru || p.title : p.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedPropertyId && (() => {
-                    const policy = (accountingPolicies || []).find((p: any) => p.property_id === selectedPropertyId);
-                    return policy ? (
-                      <Badge variant="secondary" className="text-[10px]">
-                        <FileText className="h-3 w-3 mr-1" />
-                        {policy.policy_name || (isRu ? 'Политика настроена' : 'Policy set')}
-                      </Badge>
-                    ) : null;
-                  })()}
-                </div>
-              )}
-
-              {generateScope === 'complex' && (
-                <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
-                  <SelectTrigger><SelectValue placeholder={isRu ? 'Комплекс' : 'Complex'} /></SelectTrigger>
-                  <SelectContent>
-                    {(complexes || []).map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{isRu ? c.name_ru || c.name : c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {generateScope === 'owner' && (
-                <Select value={selectedOwnerId} onValueChange={setSelectedOwnerId}>
-                  <SelectTrigger><SelectValue placeholder={isRu ? 'Собственник' : 'Owner'} /></SelectTrigger>
-                  <SelectContent>
-                    {(ownerContacts || []).map((o: any) => (
-                      <SelectItem key={o.id} value={o.id}>{o.first_name} {o.last_name} ({o.propertyIds?.length || 0})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {generateScope === 'portfolio' && (
-                <p className="text-sm text-muted-foreground rounded-lg border bg-muted/30 p-3">
-                  {isRu ? `Для всех ${scopePropertyIds.length} объектов` : `For all ${scopePropertyIds.length} properties`}
-                </p>
-              )}
-
-              {/* Report type */}
-              <Select value={selectedReportType} onValueChange={(v) => setSelectedReportType(v as ReportType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">{isRu ? 'Ежемесячный' : 'Monthly'}</SelectItem>
-                  <SelectItem value="quarterly">{isRu ? 'Квартальный' : 'Quarterly'}</SelectItem>
-                  <SelectItem value="annual">{isRu ? 'Годовой' : 'Annual'}</SelectItem>
-                  <SelectItem value="per_booking">{isRu ? 'По заездам' : 'Per Booking'}</SelectItem>
-                  <SelectItem value="owner_statement">{isRu ? 'Отчёт собственнику' : 'Owner Statement'}</SelectItem>
-                  <SelectItem value="pnl">{isRu ? 'P&L' : 'P&L'}</SelectItem>
-                  <SelectItem value="management">{isRu ? 'Управленческий' : 'Management'}</SelectItem>
-                  <SelectItem value="custom">{isRu ? 'Свой период' : 'Custom period'}</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {selectedReportType === 'custom' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">{isRu ? 'С' : 'From'}</Label>
-                    <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">{isRu ? 'По' : 'To'}</Label>
-                    <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              {scopePropertyIds.length > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  {isRu ? `Будет создано ${scopePropertyIds.length} отчётов` : `${scopePropertyIds.length} reports will be created`}
-                </p>
-              )}
-
-              <Button
-                onClick={handleGenerate}
-                className="w-full"
-                disabled={scopePropertyIds.length === 0 || generateReport.isPending || isBatchGenerating}
-              >
-                {(generateReport.isPending || isBatchGenerating) ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{isRu ? 'Генерация...' : 'Generating...'}</>
-                ) : (
-                  <><Plus className="h-4 w-4 mr-2" />{isRu ? 'Создать отчёт' : 'Generate Report'}</>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Tabs */}
