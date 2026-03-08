@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Search, Navigation, Loader2, X, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,11 +6,9 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
-import { hasGoogleMapsKey } from '@/lib/googleMaps';
-import { supabase } from '@/integrations/supabase/client';
+import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { cn } from '@/lib/utils';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 
 interface AddressPickerInputProps {
   value: string;
@@ -33,6 +31,8 @@ const popularLocations = [
   { name: 'Central Phuket', nameRu: 'Централ Пхукет', lat: 7.8939, lng: 98.3523 },
 ];
 
+const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
+
 export function AddressPickerInput({
   value,
   onChange,
@@ -44,8 +44,8 @@ export function AddressPickerInput({
 }: AddressPickerInputProps) {
   const { language } = useLanguage();
   const { latitude, longitude, getPosition, loading: geoLoading, hasLocation } = useGeolocation();
-  const googleGeocode = useGoogleGeocode(language);
-  const useGoogle = hasGoogleMapsKey();
+  const { reverseGeocode, searchAddress } = useGoogleGeocode(language);
+  const { hasKey, isLoaded } = useGoogleMaps();
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,157 +53,35 @@ export function AddressPickerInput({
   const [isSearching, setIsSearching] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(value);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const [isLoadingMap, setIsLoadingMap] = useState(true);
+  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(null);
 
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
-  // Fetch Mapbox token
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        if (!isMounted) return;
-        
-        if (data?.token) {
-          setMapboxToken(data.token);
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Failed to fetch mapbox token:', err);
-        }
-      }
-    };
-    fetchToken();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Initialize map when dialog opens
-  useEffect(() => {
-    if (!isOpen || !mapboxToken || !mapContainer.current) return;
-
-    setIsLoadingMap(true);
-    mapboxgl.accessToken = mapboxToken;
-
-    const initialCenter = selectedCoords 
-      ? [selectedCoords.lng, selectedCoords.lat] as [number, number]
-      : [98.3380, 7.8804] as [number, number]; // Default to Phuket center
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: initialCenter,
-      zoom: 14,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    map.current.on('load', () => {
-      setIsLoadingMap(false);
-      
-      if (selectedCoords) {
-        updateMarker(selectedCoords.lng, selectedCoords.lat);
-      }
-    });
-
-    map.current.on('click', async (e) => {
-      const { lng, lat } = e.lngLat;
-      updateMarker(lng, lat);
-      await reverseGeocode(lng, lat);
-    });
-
-    return () => {
-      if (marker.current) marker.current.remove();
-      if (map.current) map.current.remove();
-    };
-  }, [isOpen, mapboxToken]);
-
-  const updateMarker = (lng: number, lat: number) => {
-    if (!map.current) return;
-    
-    if (marker.current) {
-      marker.current.setLngLat([lng, lat]);
-    } else {
-      marker.current = new mapboxgl.Marker({ color: '#8B5CF6', draggable: true })
-        .setLngLat([lng, lat])
-        .addTo(map.current);
-      
-      marker.current.on('dragend', async () => {
-        const lngLat = marker.current?.getLngLat();
-        if (lngLat) {
-          await reverseGeocode(lngLat.lng, lngLat.lat);
-        }
-      });
-    }
-    
+  const handleMapClick = useCallback(async (e: google.maps.MapMouseEvent) => {
+    if (!e.latLng) return;
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    setMarkerPosition({ lat, lng });
     setSelectedCoords({ lat, lng });
-  };
-
-  const reverseGeocode = async (lng: number, lat: number): Promise<void> => {
-    if (useGoogle) {
-      const result = await googleGeocode.reverseGeocode(lat, lng);
-      if (result) {
-        setSelectedAddress(result.address);
-        setSelectedCoords({ lat, lng });
-      }
-      return;
+    const result = await reverseGeocode(lat, lng);
+    if (result) {
+      setSelectedAddress(result.address);
     }
-    if (!mapboxToken) return;
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${language}`
-      );
-      const data = await response.json();
-      if (data.features?.length > 0) {
-        const address = data.features[0].place_name;
-        setSelectedAddress(address);
-        setSelectedCoords({ lat, lng });
-      }
-    } catch (err) {
-      console.error('Reverse geocoding failed:', err);
-    }
-  };
+  }, [reverseGeocode]);
 
   const searchLocation = async () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
-      if (useGoogle) {
-        const results = await googleGeocode.searchAddress(searchQuery, { country: 'TH' });
-        setSearchResults(
-          results.map((r) => ({
-            name: r.address.split(',')[0]?.trim() || r.address,
-            address: r.address,
-            lat: r.lat,
-            lng: r.lng,
-          }))
-        );
-        setIsSearching(false);
-        return;
-      }
-      if (!mapboxToken) {
-        setIsSearching(false);
-        return;
-      }
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=98.3380,7.8804&language=${language}&limit=5`
+      const results = await searchAddress(searchQuery, { country: 'TH' });
+      setSearchResults(
+        results.map((r) => ({
+          name: r.address.split(',')[0]?.trim() || r.address,
+          address: r.address,
+          lat: r.lat,
+          lng: r.lng,
+        }))
       );
-      const data = await response.json();
-      const results =
-        data.features?.map((feature: { text: string; place_name: string; center: [number, number] }) => ({
-          name: feature.text,
-          address: feature.place_name,
-          lat: feature.center[1],
-          lng: feature.center[0],
-        })) || [];
-      setSearchResults(results);
     } catch (err) {
       console.error('Search failed:', err);
     } finally {
@@ -211,24 +89,24 @@ export function AddressPickerInput({
     }
   };
 
-  const getCurrentLocation = async () => {
-    getPosition();
-  };
-
-  // Handle geolocation result
   useEffect(() => {
     if (hasLocation && latitude && longitude && isOpen) {
-      updateMarker(longitude, latitude);
-      map.current?.flyTo({ center: [longitude, latitude], zoom: 16 });
-      reverseGeocode(longitude, latitude);
+      setMarkerPosition({ lat: latitude, lng: longitude });
+      setSelectedCoords({ lat: latitude, lng: longitude });
+      mapRef.current?.panTo({ lat: latitude, lng: longitude });
+      mapRef.current?.setZoom(16);
+      reverseGeocode(latitude, longitude).then(result => {
+        if (result) setSelectedAddress(result.address);
+      });
     }
-  }, [hasLocation, latitude, longitude, isOpen]);
+  }, [hasLocation, latitude, longitude, isOpen, reverseGeocode]);
 
   const selectLocation = (lat: number, lng: number, address: string) => {
     setSelectedAddress(address);
     setSelectedCoords({ lat, lng });
-    updateMarker(lng, lat);
-    map.current?.flyTo({ center: [lng, lat], zoom: 16 });
+    setMarkerPosition({ lat, lng });
+    mapRef.current?.panTo({ lat, lng });
+    mapRef.current?.setZoom(16);
     setSearchResults([]);
     setSearchQuery('');
   };
@@ -240,12 +118,9 @@ export function AddressPickerInput({
 
   const getTypeLabel = () => {
     switch (type) {
-      case 'pickup':
-        return language === 'ru' ? 'Адрес забора' : 'Pickup Address';
-      case 'service':
-        return language === 'ru' ? 'Адрес' : 'Service Address';
-      default:
-        return language === 'ru' ? 'Адрес доставки' : 'Delivery Address';
+      case 'pickup': return language === 'ru' ? 'Адрес забора' : 'Pickup Address';
+      case 'service': return language === 'ru' ? 'Адрес' : 'Service Address';
+      default: return language === 'ru' ? 'Адрес доставки' : 'Delivery Address';
     }
   };
 
@@ -272,9 +147,7 @@ export function AddressPickerInput({
             <MapPin className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm text-muted-foreground">
-              {label || getTypeLabel()}
-            </div>
+            <div className="text-sm text-muted-foreground">{label || getTypeLabel()}</div>
             {value ? (
               <div className="font-medium truncate">{value}</div>
             ) : (
@@ -297,7 +170,6 @@ export function AddressPickerInput({
           </DialogHeader>
 
           <div className="flex-1 flex flex-col min-h-0 p-4 pt-2 gap-3">
-            {/* Search Bar */}
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -309,14 +181,7 @@ export function AddressPickerInput({
                   className="pl-9"
                 />
                 {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSearchResults([]);
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
-                  >
+                  <button type="button" onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="absolute right-2 top-1/2 -translate-y-1/2 p-1">
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
@@ -324,30 +189,15 @@ export function AddressPickerInput({
               <Button onClick={searchLocation} disabled={isSearching} size="icon">
                 {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               </Button>
-              <Button
-                onClick={getCurrentLocation}
-                disabled={geoLoading}
-                size="icon"
-                variant="outline"
-              >
-                {geoLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Navigation className="w-4 h-4" />
-                )}
+              <Button onClick={() => getPosition()} disabled={geoLoading} size="icon" variant="outline">
+                {geoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
               </Button>
             </div>
 
-            {/* Search Results */}
             {searchResults.length > 0 && (
               <div className="bg-muted/50 rounded-lg divide-y divide-border overflow-hidden">
                 {searchResults.map((result, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => selectLocation(result.lat, result.lng, result.address)}
-                    className="w-full p-3 text-left hover:bg-muted transition-colors flex items-start gap-3"
-                  >
+                  <button key={index} type="button" onClick={() => selectLocation(result.lat, result.lng, result.address)} className="w-full p-3 text-left hover:bg-muted transition-colors flex items-start gap-3">
                     <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                     <div>
                       <div className="font-medium text-sm">{result.name}</div>
@@ -358,7 +208,6 @@ export function AddressPickerInput({
               </div>
             )}
 
-            {/* Popular Locations */}
             {!searchResults.length && (
               <div className="space-y-2">
                 <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -366,12 +215,7 @@ export function AddressPickerInput({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {popularLocations.map((loc) => (
-                    <button
-                      key={loc.name}
-                      type="button"
-                      onClick={() => selectLocation(loc.lat, loc.lng, language === 'ru' ? loc.nameRu : loc.name)}
-                      className="px-3 py-1.5 text-sm bg-muted/50 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
+                    <button key={loc.name} type="button" onClick={() => selectLocation(loc.lat, loc.lng, language === 'ru' ? loc.nameRu : loc.name)} className="px-3 py-1.5 text-sm bg-muted/50 rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                       {language === 'ru' ? loc.nameRu : loc.name}
                     </button>
                   ))}
@@ -379,33 +223,47 @@ export function AddressPickerInput({
               </div>
             )}
 
-            {/* Map */}
             <div className="flex-1 relative rounded-xl overflow-hidden border min-h-[200px]">
-              {isLoadingMap && (
+              {!hasKey || !isLoaded ? (
                 <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
+              ) : (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={selectedCoords || { lat: 7.8804, lng: 98.3380 }}
+                  zoom={14}
+                  onClick={handleMapClick}
+                  onLoad={(map) => { mapRef.current = map; }}
+                  options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: false }}
+                >
+                  {markerPosition && (
+                    <Marker
+                      position={markerPosition}
+                      draggable
+                      onDragEnd={async (e) => {
+                        if (!e.latLng) return;
+                        const lat = e.latLng.lat();
+                        const lng = e.latLng.lng();
+                        setMarkerPosition({ lat, lng });
+                        setSelectedCoords({ lat, lng });
+                        const result = await reverseGeocode(lat, lng);
+                        if (result) setSelectedAddress(result.address);
+                      }}
+                    />
+                  )}
+                </GoogleMap>
               )}
-              <div ref={mapContainer} className="absolute inset-0" />
             </div>
 
-            {/* Selected Address */}
             {selectedAddress && (
               <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-                <div className="text-xs text-muted-foreground mb-1">
-                  {language === 'ru' ? 'Выбранный адрес:' : 'Selected address:'}
-                </div>
+                <div className="text-xs text-muted-foreground mb-1">{language === 'ru' ? 'Выбранный адрес:' : 'Selected address:'}</div>
                 <div className="font-medium text-sm">{selectedAddress}</div>
               </div>
             )}
 
-            {/* Confirm Button */}
-            <Button
-              onClick={handleConfirm}
-              disabled={!selectedAddress}
-              className="w-full"
-              size="lg"
-            >
+            <Button onClick={handleConfirm} disabled={!selectedAddress} className="w-full" size="lg">
               {language === 'ru' ? 'Подтвердить адрес' : 'Confirm Address'}
             </Button>
           </div>

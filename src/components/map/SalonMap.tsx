@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
 import { Loader2 } from 'lucide-react';
-import { createMapPopupHtml, escapeHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 
 export interface SalonMarker {
@@ -23,13 +21,13 @@ interface SalonMapProps {
   salons: SalonMarker[];
   onSalonSelect?: (salonId: string) => void;
   userLocation?: { lat: number; lng: number } | null;
-  distanceFilter?: number; // in km
+  distanceFilter?: number;
   className?: string;
-  /** Custom marker icon emoji (default: 💆 for salons) */
   icon?: string;
-  /** Custom marker background color class (default: bg-primary) */
   iconBgColor?: string;
 }
+
+const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
 const SalonMap: React.FC<SalonMapProps> = ({
   salons,
@@ -38,199 +36,114 @@ const SalonMap: React.FC<SalonMapProps> = ({
   distanceFilter,
   className = '',
   icon = '💆',
-  iconBgColor = 'bg-primary',
 }) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const { language } = useLanguage();
+  const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const { getCityConfig } = useLocationContext();
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedSalon, setSelectedSalon] = useState<SalonMarker | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
-  // Fetch Mapbox token from edge function
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        if (!isMounted) return;
-        
-        if (error) throw error;
-        if (data?.token) {
-          setMapboxToken(data.token);
-        } else {
-          throw new Error('No token received');
-        }
-      } catch (err) {
-        if (isMounted) {
-          console.error('Failed to fetch Mapbox token:', err);
-          setError('Failed to load map');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    fetchToken();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  // Calculate distance between two points (Haversine formula)
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    const a = Math.sin(dLat / 2) ** 2 +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+      Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  // Filter salons by distance
-  const filteredSalons = salons.filter(salon => {
+  const filteredSalons = useMemo(() => salons.filter(salon => {
     if (!distanceFilter || !userLocation) return true;
-    const distance = calculateDistance(
-      userLocation.lat,
-      userLocation.lng,
-      salon.lat,
-      salon.lng
-    );
-    return distance <= distanceFilter;
-  });
+    return calculateDistance(userLocation.lat, userLocation.lng, salon.lat, salon.lng) <= distanceFilter;
+  }), [salons, distanceFilter, userLocation]);
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
-
-    mapboxgl.accessToken = mapboxToken;
-
-    // Get city config for dynamic center - fallback to centralized geography config
+  const defaultCenter = useMemo(() => {
+    if (userLocation) return userLocation;
     const cityConfig = getCityConfig();
-    const defaultCenter: [number, number] = cityConfig 
-      ? [cityConfig.lng, cityConfig.lat] 
-      : getMapCenter(DEFAULT_CITY);
-    const center = userLocation 
-      ? [userLocation.lng, userLocation.lat] as [number, number]
-      : defaultCenter;
+    if (cityConfig) return { lat: cityConfig.lat, lng: cityConfig.lng };
+    const c = getMapCenter(DEFAULT_CITY);
+    return { lat: c[1], lng: c[0] };
+  }, [userLocation, getCityConfig]);
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center,
-      zoom: 12,
-      pitch: 45,
-    });
-
-    map.current.addControl(
-      new mapboxgl.NavigationControl({ visualizePitch: true }),
-      'top-right'
-    );
-
-    map.current.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true,
-        showUserHeading: true,
-      }),
-      'top-right'
-    );
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [mapboxToken, userLocation]);
-
-  // Update markers when salons change
-  useEffect(() => {
-    if (!map.current || !mapboxToken) return;
-
-    // Store event listeners for cleanup
-    const clickListeners: Array<{ el: HTMLElement; handler: () => void }> = [];
-
-    // Remove existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    // Add new markers
-    filteredSalons.forEach(salon => {
-      const el = document.createElement('div');
-      el.className = 'salon-marker';
-      el.innerHTML = `
-        <div class="w-10 h-10 rounded-full ${iconBgColor} flex items-center justify-center shadow-lg cursor-pointer transform hover:scale-110 transition-transform border-2 border-white">
-          <span class="text-white text-lg">${icon}</span>
-        </div>
-      `;
-
-      const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '240px' }).setHTML(
-        createMapPopupHtml({
-          name: language === 'ru' ? salon.nameRu : salon.name,
-          rating: salon.rating,
-          price: `฿${escapeHtml(salon.priceFrom)}+`,
-          image: salon.image,
-        })
-      );
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([salon.lng, salon.lat])
-        .setPopup(popup)
-        .addTo(map.current!);
-
-      const clickHandler = () => {
-        onSalonSelect?.(salon.id);
-      };
-      el.addEventListener('click', clickHandler);
-      clickListeners.push({ el, handler: clickHandler });
-
-      markersRef.current.push(marker);
-    });
-
-    // Fit bounds if we have salons
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
     if (filteredSalons.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      filteredSalons.forEach(salon => {
-        bounds.extend([salon.lng, salon.lat]);
-      });
-      if (userLocation) {
-        bounds.extend([userLocation.lng, userLocation.lat]);
-      }
-      map.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+      const bounds = new google.maps.LatLngBounds();
+      filteredSalons.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+      if (userLocation) bounds.extend(userLocation);
+      map.fitBounds(bounds, 50);
     }
+  }, [filteredSalons, userLocation]);
 
-    // Cleanup event listeners on unmount or re-render
-    return () => {
-      clickListeners.forEach(({ el, handler }) => {
-        el.removeEventListener('click', handler);
-      });
-    };
-  }, [filteredSalons, mapboxToken, language, onSalonSelect, userLocation, icon, iconBgColor]);
+  useEffect(() => {
+    if (!mapRef.current || filteredSalons.length === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    filteredSalons.forEach(s => bounds.extend({ lat: s.lat, lng: s.lng }));
+    if (userLocation) bounds.extend(userLocation);
+    mapRef.current.fitBounds(bounds, 50);
+  }, [filteredSalons, userLocation]);
 
-  if (isLoading) {
+  if (!hasKey || !isLoaded) {
     return (
       <div className={`flex items-center justify-center bg-card ${className}`}>
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`flex items-center justify-center bg-card ${className}`}>
-        <p className="text-muted-foreground">{error}</p>
+        {loadError ? (
+          <p className="text-muted-foreground">{loadError.message}</p>
+        ) : (
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        )}
       </div>
     );
   }
 
   return (
     <div className={`relative ${className}`}>
-      <div ref={mapContainer} className="absolute inset-0 rounded-xl overflow-hidden" />
+      <div className="absolute inset-0 rounded-xl overflow-hidden">
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={defaultCenter}
+          zoom={12}
+          onLoad={onMapLoad}
+          options={{
+            streetViewControl: false,
+            fullscreenControl: true,
+            zoomControl: true,
+            mapTypeControl: false,
+          }}
+        >
+          {filteredSalons.map(salon => (
+            <Marker
+              key={salon.id}
+              position={{ lat: salon.lat, lng: salon.lng }}
+              label={{ text: icon, fontSize: '16px' }}
+              title={language === 'ru' ? salon.nameRu : salon.name}
+              onClick={() => {
+                setSelectedSalon(salon);
+                onSalonSelect?.(salon.id);
+              }}
+            />
+          ))}
+          {selectedSalon && (
+            <InfoWindow
+              position={{ lat: selectedSalon.lat, lng: selectedSalon.lng }}
+              onCloseClick={() => setSelectedSalon(null)}
+            >
+              <div className="min-w-[180px] p-1">
+                {selectedSalon.image && (
+                  <img src={selectedSalon.image} alt="" className="w-full h-24 object-cover rounded mb-2" />
+                )}
+                <h3 className="font-semibold text-sm">
+                  {language === 'ru' ? selectedSalon.nameRu : selectedSalon.name}
+                </h3>
+                <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                  <span>⭐ {selectedSalon.rating}</span>
+                  <span>฿{selectedSalon.priceFrom}+</span>
+                </div>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
+      </div>
     </div>
   );
 };
