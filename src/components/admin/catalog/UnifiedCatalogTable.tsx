@@ -309,21 +309,21 @@ export function UnifiedCatalogTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">
+              <TableHead className="w-8 sm:w-12 px-1 sm:px-4">
                 <Checkbox
                   checked={selectedCount > 0 && selectedCount === items.length}
                   onCheckedChange={(checked) => checked ? selectAll() : deselectAll()}
                 />
               </TableHead>
-              <TableHead className="w-14"></TableHead>
-              <TableHead className="min-w-[200px]">{isRussian ? 'Название' : 'Name'}</TableHead>
-              <TableHead className="w-24">{isRussian ? 'Тип' : 'Type'}</TableHead>
+              <TableHead className="w-10 sm:w-14 px-1 sm:px-4"></TableHead>
+              <TableHead className="min-w-[120px] sm:min-w-[200px]">{isRussian ? 'Название' : 'Name'}</TableHead>
+              <TableHead className="hidden sm:table-cell w-24">{isRussian ? 'Тип' : 'Type'}</TableHead>
               <TableHead className="hidden lg:table-cell w-[120px]">{isRussian ? 'Вертикаль' : 'Vertical'}</TableHead>
               <TableHead className="hidden md:table-cell w-[180px]">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-              <TableHead className="w-28">{isRussian ? 'Цена' : 'Price'}</TableHead>
-              <TableHead className="w-24">{isRussian ? 'Статус' : 'Status'}</TableHead>
+              <TableHead className="w-20 sm:w-28">{isRussian ? 'Цена' : 'Price'}</TableHead>
+              <TableHead className="w-16 sm:w-24">{isRussian ? 'Статус' : 'Status'}</TableHead>
               <TableHead className="hidden md:table-cell w-[110px]">{isRussian ? 'Создано' : 'Created'}</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-8 sm:w-12 px-1 sm:px-4"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
