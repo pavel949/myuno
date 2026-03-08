@@ -62,6 +62,8 @@ export const MyStay = lazy(() => import('@/pages/guest/MyStay'));
 export const GuestCheckIn = lazy(() => import('@/pages/guest/GuestCheckIn'));
 export const GuestGuidebook = lazy(() => import('@/pages/guest/GuestGuidebook'));
 export const PublicGuidebook = lazy(() => import('@/pages/guest/PublicGuidebook'));
+export const WelcomeFlow = lazy(() => import('@/pages/guest/WelcomeFlow'));
+export const GuestProfile = lazy(() => import('@/pages/guest/GuestProfile'));
 
 // ── Restaurants ──
 export const RestaurantsIndex = lazy(() => import('@/pages/restaurants/RestaurantsIndex'));
