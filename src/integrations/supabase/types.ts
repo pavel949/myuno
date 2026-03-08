@@ -8401,16 +8401,76 @@ export type Database = {
           },
         ]
       }
+      lifecycle_executions: {
+        Row: {
+          booking_id: string
+          channel: string
+          created_at: string
+          error_message: string | null
+          guest_user_id: string
+          id: string
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          template_id: string
+        }
+        Insert: {
+          booking_id: string
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          guest_user_id: string
+          id?: string
+          scheduled_at: string
+          sent_at?: string | null
+          status?: string
+          template_id: string
+        }
+        Update: {
+          booking_id?: string
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          guest_user_id?: string
+          id?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lifecycle_executions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lifecycle_executions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "lifecycle_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lifecycle_templates: {
         Row: {
           body_en: string
           body_ru: string
           channel: string
           created_at: string
+          cta_label_en: string | null
+          cta_label_ru: string | null
+          cta_url: string | null
           discount_percent: number | null
           id: string
           is_active: boolean
+          offset_hours: number
           promo_code: string | null
+          sort_order: number
+          stage: string
           title_en: string
           title_ru: string
           trigger_type: string
@@ -8421,10 +8481,16 @@ export type Database = {
           body_ru?: string
           channel?: string
           created_at?: string
+          cta_label_en?: string | null
+          cta_label_ru?: string | null
+          cta_url?: string | null
           discount_percent?: number | null
           id?: string
           is_active?: boolean
+          offset_hours?: number
           promo_code?: string | null
+          sort_order?: number
+          stage?: string
           title_en?: string
           title_ru?: string
           trigger_type: string
@@ -8435,10 +8501,16 @@ export type Database = {
           body_ru?: string
           channel?: string
           created_at?: string
+          cta_label_en?: string | null
+          cta_label_ru?: string | null
+          cta_url?: string | null
           discount_percent?: number | null
           id?: string
           is_active?: boolean
+          offset_hours?: number
           promo_code?: string | null
+          sort_order?: number
+          stage?: string
           title_en?: string
           title_ru?: string
           trigger_type?: string
