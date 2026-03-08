@@ -42,6 +42,9 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     email: contact.email || '',
     whatsapp: contact.whatsapp || '',
     telegram: contact.telegram || '',
+    instagram: contact.instagram || '',
+    facebook: contact.facebook || '',
+    linkedin: contact.linkedin || '',
     contact_type: contact.contact_type || 'buyer',
     source: contact.source || 'website',
     nationality: contact.nationality || '',
@@ -60,7 +63,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     interests: contact.interests || [],
     scoring: contact.scoring?.toString() || '0',
     tags: contact.tags || [],
-    // Odoo-style fields
     mobile: contact.mobile || '',
     address_street: contact.address_street || '',
     address_street2: contact.address_street2 || '',
