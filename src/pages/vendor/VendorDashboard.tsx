@@ -195,9 +195,15 @@ const VendorDashboard = () => {
             <h1 className="font-semibold">{currentOrg?.name || (isRu ? 'Мой бизнес' : 'My Business')}</h1>
             <p className="text-sm text-muted-foreground">{isRu ? 'Панель поставщика' : 'Vendor Dashboard'}</p>
           </div>
-          <Badge variant="outline" className={currentOrg?.is_verified ? 'text-success border-success/30' : ''}>
-            {currentOrg?.is_verified ? (isRu ? 'Верифицирован' : 'Verified') : (isRu ? 'На модерации' : 'Pending')}
-          </Badge>
+        </CardContent>
+      </Card>
+
+      {/* Verification Level Badge */}
+      <VendorVerificationBadge
+        isVerified={currentOrg?.is_verified || false}
+        rating={0}
+        bookingsCount={stats.completedCount || 0}
+      />
         </CardContent>
       </Card>
 
