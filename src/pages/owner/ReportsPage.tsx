@@ -132,9 +132,10 @@ export default function ReportsPage() {
   const { getValue, setValue } = useUrlFilters();
   const activeTab = getValue('tab', 'all') as 'all' | 'portfolio';
   const setActiveTab = (v: 'all' | 'portfolio') => setValue('tab', v === 'all' ? null : v);
-  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedReportForSend, setSelectedReportForSend] = useState<string | null>(null);
+  const [previewBeforeSend, setPreviewBeforeSend] = useState<PropertyReport | null>(null);
   const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
   const [emailRecipients, setEmailRecipients] = useState('');
