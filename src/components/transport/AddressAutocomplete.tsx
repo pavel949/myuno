@@ -249,13 +249,13 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
           </button>
 
-          {/* Mapbox geocode results */}
-          {hasMapbox && (
+          {/* Geocode results */}
+          {hasGeocode && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
                 {isRu ? 'Результаты поиска' : 'Search results'}
               </div>
-              {mapboxSuggestions.map(s => (
+              {geocodeSuggestions.map(s => (
                 <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
               ))}
             </>
