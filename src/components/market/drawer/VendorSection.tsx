@@ -58,7 +58,7 @@ export function VendorSection({ onNavigate }: VendorSectionProps) {
         iconBg="bg-success/10"
         label={language === 'ru' ? 'Стать продавцом' : 'Become a Seller'}
         description={language === 'ru' ? 'Продавайте на myUNO' : 'Sell on myUNO'}
-        onClick={() => handleNav('/vendor/onboarding')}
+        onClick={() => handleNav('/vendor/join')}
       />
       <VendorLink
         icon={<LayoutDashboard className="w-5 h-5 text-accent-purple" />}

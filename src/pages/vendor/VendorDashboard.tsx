@@ -36,6 +36,7 @@ import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
 import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
 import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
 import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorOnboardingChecklist';
+import { VendorVerificationBadge } from '@/components/vendor/dashboard/VendorVerificationBadge';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
@@ -194,11 +195,15 @@ const VendorDashboard = () => {
             <h1 className="font-semibold">{currentOrg?.name || (isRu ? 'Мой бизнес' : 'My Business')}</h1>
             <p className="text-sm text-muted-foreground">{isRu ? 'Панель поставщика' : 'Vendor Dashboard'}</p>
           </div>
-          <Badge variant="outline" className={currentOrg?.is_verified ? 'text-success border-success/30' : ''}>
-            {currentOrg?.is_verified ? (isRu ? 'Верифицирован' : 'Verified') : (isRu ? 'На модерации' : 'Pending')}
-          </Badge>
         </CardContent>
       </Card>
+
+      {/* Verification Level Badge */}
+      <VendorVerificationBadge
+        isVerified={currentOrg?.is_verified || false}
+        rating={0}
+        bookingsCount={stats.completedCount || 0}
+      />
 
       {/* KPI Cards with Comparison */}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
