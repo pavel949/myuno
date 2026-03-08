@@ -124,8 +124,8 @@ export function LifecycleNotificationBell({ userId }: { userId: string }) {
                     {!notif.is_read && <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium line-clamp-1">{title}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{body}</p>
-                      {notif.metadata?.cta_url && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{bodyText}</p>
+                      {notif.data?.cta_url && (
                         <Badge variant="outline" className="mt-1.5 text-[10px] cursor-pointer">
                           {ctaLabel} →
                         </Badge>
