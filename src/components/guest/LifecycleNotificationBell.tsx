@@ -44,7 +44,7 @@ export function LifecycleNotificationBell({ userId }: { userId: string }) {
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
-      return (data || []) as LifecycleNotification[];
+      return (data || []) as unknown as LifecycleNotification[];
     },
     enabled: !!userId,
   });
