@@ -18,6 +18,7 @@ import {
 } from '@/hooks/usePropertyReports';
 import { usePropertyComplexes, type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
+import { ReportWizard, type WizardResult } from '@/components/owner/reports/ReportWizard';
 import { AccountingPolicyEditor } from '@/components/owner/reports/AccountingPolicyEditor';
 import { useAccountingPolicies } from '@/hooks/useAccountingPolicies';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
