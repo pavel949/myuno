@@ -384,3 +384,9 @@ export function isValidRoute(path: string): boolean {
 export function getLegacyRedirect(path: string): string | null {
   return LEGACY_REDIRECTS[path] || null;
 }
+
+/** Full URL for password reset redirect. Use in resetPasswordForEmail. Allowlist in Supabase: Authentication → URL Configuration → Redirect URLs. */
+export function getPasswordResetRedirectUrl(): string {
+  if (typeof window === 'undefined') return '';
+  return `${window.location.origin}${APP_ROUTES.AUTH_RESET_PASSWORD}`;
+}

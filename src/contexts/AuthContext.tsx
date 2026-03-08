@@ -10,6 +10,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { clearAdminCache } from '@/hooks/useIsAdmin';
 
 interface SignUpResult {
@@ -116,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: getPasswordResetRedirectUrl(),
     });
     return { error: error as Error | null };
   };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PremiumButton } from '@/components/uno/PremiumButton';
@@ -8,9 +8,12 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+
+type LinkStatus = 'checking' | 'valid' | 'invalid';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -19,30 +22,42 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
+  const [linkStatus, setLinkStatus] = useState<LinkStatus>('checking');
+  const [linkError, setLinkError] = useState<string | null>(null);
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  // Check if user came from email link (has access token)
+  // When user clicks link in email: Supabase redirects to /auth/reset-password#access_token=...&refresh_token=...&type=recovery
   useEffect(() => {
-    const checkSession = async () => {
+    const applySessionFromEmailLink = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        // No session, check if there's an access token in URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        
-        if (accessToken && refreshToken) {
-          // Set session from URL tokens
-          await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
+      if (session) {
+        setLinkStatus('valid');
+        return;
+      }
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
+      if (accessToken && refreshToken && type === 'recovery') {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (error) {
+          setLinkError(error.message);
+          setLinkStatus('invalid');
+          return;
         }
+        // Remove tokens from URL for security
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        setLinkStatus('valid');
+      } else {
+        setLinkError(null);
+        setLinkStatus('invalid');
       }
     };
-    
-    checkSession();
+    applySessionFromEmailLink();
   }, []);
 
   const validateForm = () => {
@@ -85,11 +100,11 @@ export default function ResetPassword() {
             ? 'Пароль успешно изменён'
             : 'Password updated successfully'
         );
-        
-        // Redirect to home after 2 seconds
+        await supabase.auth.signOut();
+        // Redirect to login so user can sign in with new password
         setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 2000);
+          navigate(APP_ROUTES.AUTH, { replace: true });
+        }, 2500);
       }
     } catch (error) {
       toast.error(
@@ -118,7 +133,46 @@ export default function ResetPassword() {
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          {isSuccess ? (
+          {linkStatus === 'checking' ? (
+            <div className="text-center space-y-6 py-8">
+              <div className="w-12 h-12 mx-auto border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-muted-foreground">
+                {language === 'ru' ? 'Проверка ссылки...' : 'Checking link...'}
+              </p>
+            </div>
+          ) : linkStatus === 'invalid' ? (
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="w-8 h-8 text-destructive" />
+              </div>
+              <h1 className="text-2xl font-display font-bold">
+                {language === 'ru' ? 'Недействительная или устаревшая ссылка' : 'Invalid or expired link'}
+              </h1>
+              <p className="text-muted-foreground">
+                {language === 'ru'
+                  ? 'Ссылка для сброса пароля недействительна или уже использована. Запросите новую.'
+                  : 'This password reset link is invalid or has already been used. Request a new one.'}
+              </p>
+              {linkError && (
+                <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+                  {linkError}
+                </p>
+              )}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link to="/auth/forgot-password">
+                  <PremiumButton variant="default" className="w-full sm:w-auto">
+                    {language === 'ru' ? 'Запросить новую ссылку' : 'Request new link'}
+                  </PremiumButton>
+                </Link>
+                <Link to={APP_ROUTES.AUTH}>
+                  <PremiumButton variant="outline" className="w-full sm:w-auto gap-2">
+                    <ArrowLeft className="w-4 h-4" />
+                    {language === 'ru' ? 'К входу' : 'Back to login'}
+                  </PremiumButton>
+                </Link>
+              </div>
+            </div>
+          ) : isSuccess ? (
             <div className="text-center space-y-6">
               <div className="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -128,9 +182,15 @@ export default function ResetPassword() {
               </h1>
               <p className="text-muted-foreground">
                 {language === 'ru'
-                  ? 'Вы будете перенаправлены на главную страницу...'
-                  : 'You will be redirected to the home page...'}
+                  ? 'Войдите в аккаунт с новым паролем. Перенаправление на страницу входа...'
+                  : 'Sign in with your new password. Redirecting to login...'}
               </p>
+              <Link to="/auth">
+                <PremiumButton variant="outline" className="mt-2 gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  {language === 'ru' ? 'Перейти к входу' : 'Go to login'}
+                </PremiumButton>
+              </Link>
             </div>
           ) : (
             <div className="space-y-8">
@@ -176,6 +236,9 @@ export default function ResetPassword() {
                   {errors.password && (
                     <p className="text-sm text-destructive">{errors.password}</p>
                   )}
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'ru' ? 'Минимум 6 символов' : 'At least 6 characters'}
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -214,7 +277,7 @@ export default function ResetPassword() {
               </form>
 
               <div className="text-center">
-                <Link to="/auth" className="text-primary font-medium hover:underline inline-flex items-center gap-2">
+                <Link to={APP_ROUTES.AUTH} className="text-primary font-medium hover:underline inline-flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
                 </Link>

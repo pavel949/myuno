@@ -3,6 +3,8 @@ import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink 
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
+import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
+import { hasGoogleMapsKey } from '@/lib/googleMaps';
 import { cn } from '@/lib/utils';
 
 // Popular Phuket areas (static fallback)
@@ -42,6 +44,9 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: projects } = usePropertyProjects();
+  const googleGeocode = useGoogleGeocode(language);
+  const useGoogle = hasGoogleMapsKey();
+
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
   const [geocodeResults, setGeocodeResults] = useState<GeocodeSuggestion[]>([]);
@@ -61,27 +66,42 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Geocode search
-  const searchGeocode = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setGeocodeResults([]);
-      return;
-    }
-    setIsSearching(true);
-    try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=${encodeURIComponent(q)}&language=${language}`;
-      const res = await fetch(url, {
-        headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-      });
-      const json = await res.json();
-      setGeocodeResults(json.results || []);
-    } catch (err) {
-      console.error('[AddressAutocomplete] geocode error:', err);
-      setGeocodeResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [language]);
+  // Geocode search (Google when key set, else Supabase edge)
+  const searchGeocode = useCallback(
+    async (q: string) => {
+      if (q.length < 2) {
+        setGeocodeResults([]);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        if (useGoogle) {
+          const results = await googleGeocode.searchAddress(q, { country: 'TH' });
+          setGeocodeResults(
+            results.map((r) => ({
+              mapbox_id: r.placeId || `${r.lat},${r.lng}`,
+              name: r.address.split(',')[0]?.trim() || r.address,
+              address: r.address,
+              type: 'address',
+            }))
+          );
+        } else {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=${encodeURIComponent(q)}&language=${language}`;
+          const res = await fetch(url, {
+            headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          });
+          const json = await res.json();
+          setGeocodeResults(json.results || []);
+        }
+      } catch (err) {
+        console.error('[AddressAutocomplete] geocode error:', err);
+        setGeocodeResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [language, useGoogle, googleGeocode]
+  );
 
   // Debounced search
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +163,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     setQuery(value);
   };
 
-  // "Use my location" via browser geolocation + reverse geocode
+  // "Use my location" via browser geolocation + reverse geocode (Google or Supabase)
   const handleUseLocation = async () => {
     if (!navigator.geolocation) return;
     setGeolocating(true);
@@ -151,13 +171,16 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
-          const res = await fetch(url, {
-            headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-          });
-          const json = await res.json();
-          if (json.results?.[0]) {
-            onChange(json.results[0].address || json.results[0].name);
+          if (useGoogle) {
+            const result = await googleGeocode.reverseGeocode(latitude, longitude);
+            if (result?.address) onChange(result.address);
+          } else {
+            const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
+            const res = await fetch(url, {
+              headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+            });
+            const json = await res.json();
+            if (json.results?.[0]) onChange(json.results[0].address || json.results[0].name);
           }
         } catch (err) {
           console.error('[AddressAutocomplete] reverse geocode error:', err);

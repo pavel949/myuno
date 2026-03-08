@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useGeolocation, formatDistance, calculateDistance } from '@/hooks/useGeolocation';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
+import { hasGoogleMapsKey } from '@/lib/googleMaps';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import mapboxgl from 'mapbox-gl';
@@ -41,8 +43,10 @@ export function AddressPickerInput({
   type = 'delivery',
 }: AddressPickerInputProps) {
   const { language } = useLanguage();
-  const { latitude, longitude, getPosition, loading: geoLoading, hasLocation, error: geoError } = useGeolocation();
-  
+  const { latitude, longitude, getPosition, loading: geoLoading, hasLocation } = useGeolocation();
+  const googleGeocode = useGoogleGeocode(language);
+  const useGoogle = hasGoogleMapsKey();
+
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ name: string; address: string; lat: number; lng: number }>>([]);
@@ -51,7 +55,7 @@ export function AddressPickerInput({
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isLoadingMap, setIsLoadingMap] = useState(true);
-  
+
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const marker = useRef<mapboxgl.Marker | null>(null);
@@ -143,14 +147,20 @@ export function AddressPickerInput({
   };
 
   const reverseGeocode = async (lng: number, lat: number): Promise<void> => {
+    if (useGoogle) {
+      const result = await googleGeocode.reverseGeocode(lat, lng);
+      if (result) {
+        setSelectedAddress(result.address);
+        setSelectedCoords({ lat, lng });
+      }
+      return;
+    }
     if (!mapboxToken) return;
-    
     try {
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${language}`
       );
       const data = await response.json();
-      
       if (data.features?.length > 0) {
         const address = data.features[0].place_name;
         setSelectedAddress(address);
@@ -162,22 +172,37 @@ export function AddressPickerInput({
   };
 
   const searchLocation = async () => {
-    if (!searchQuery.trim() || !mapboxToken) return;
-    
+    if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
+      if (useGoogle) {
+        const results = await googleGeocode.searchAddress(searchQuery, { country: 'TH' });
+        setSearchResults(
+          results.map((r) => ({
+            name: r.address.split(',')[0]?.trim() || r.address,
+            address: r.address,
+            lat: r.lat,
+            lng: r.lng,
+          }))
+        );
+        setIsSearching(false);
+        return;
+      }
+      if (!mapboxToken) {
+        setIsSearching(false);
+        return;
+      }
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=98.3380,7.8804&language=${language}&limit=5`
       );
       const data = await response.json();
-      
-      const results = data.features?.map((feature: any) => ({
-        name: feature.text,
-        address: feature.place_name,
-        lat: feature.center[1],
-        lng: feature.center[0],
-      })) || [];
-      
+      const results =
+        data.features?.map((feature: { text: string; place_name: string; center: [number, number] }) => ({
+          name: feature.text,
+          address: feature.place_name,
+          lat: feature.center[1],
+          lng: feature.center[0],
+        })) || [];
       setSearchResults(results);
     } catch (err) {
       console.error('Search failed:', err);

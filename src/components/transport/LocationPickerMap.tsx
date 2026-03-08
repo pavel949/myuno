@@ -4,6 +4,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
+import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
+import { hasGoogleMapsKey } from '@/lib/googleMaps';
 import { Loader2, Navigation, MapPin, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +80,9 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   const { language } = useLanguage();
   const { getCityConfig, currentCity } = useLocationContext();
-  
+  const googleGeocode = useGoogleGeocode(language);
+  const useGoogle = hasGoogleMapsKey();
+
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -282,35 +286,38 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
     });
   }, [updateMarker, language]);
 
-  // Search for location
+  // Search for location (Google when key set, else Mapbox)
   const searchLocation = useCallback(async () => {
-    if (!searchQuery.trim() || !mapboxToken) return;
-    
+    if (!searchQuery.trim()) return;
     try {
-      // Use dynamic city config for proximity and country
       const countryCode = cityConfig?.countryCode || 'TH';
+      if (useGoogle) {
+        const results = await googleGeocode.searchAddress(searchQuery, { country: countryCode });
+        if (results.length > 0) {
+          const r = results[0];
+          if (map.current) map.current.flyTo({ center: [r.lng, r.lat], zoom: 16 });
+          updateMarker(r.lng, r.lat);
+          setSelectedLocation({ address: r.address, lat: r.lat, lng: r.lng });
+        }
+        return;
+      }
+      if (!mapboxToken) return;
       const proximity = `${mapCenter[0]},${mapCenter[1]}`;
-      
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=${proximity}&country=${countryCode}`
       );
       const data = await response.json();
-      
-      if (data.features && data.features.length > 0) {
+      if (data.features?.length > 0) {
         const [lng, lat] = data.features[0].center;
         const address = data.features[0].place_name;
-        
-        if (map.current) {
-          map.current.flyTo({ center: [lng, lat], zoom: 16 });
-        }
-        
+        if (map.current) map.current.flyTo({ center: [lng, lat], zoom: 16 });
         updateMarker(lng, lat);
         setSelectedLocation({ address, lat, lng });
       }
     } catch (err) {
       console.error('Search error:', err);
     }
-  }, [searchQuery, mapboxToken, cityConfig, mapCenter, updateMarker]);
+  }, [searchQuery, mapboxToken, cityConfig, mapCenter, updateMarker, useGoogle, googleGeocode]);
 
   // Confirm selection
   const handleConfirm = useCallback(() => {

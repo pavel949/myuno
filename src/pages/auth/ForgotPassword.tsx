@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { APP_ROUTES, getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { toast } from 'sonner';
 
 const emailSchema = z.string().email('Invalid email address');
@@ -36,10 +37,10 @@ export default function ForgotPassword() {
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       });
-      
       if (error) {
+        setError(error.message);
         toast.error(error.message);
       } else {
         setIsSuccess(true);
@@ -89,7 +90,7 @@ export default function ForgotPassword() {
                   ? `Мы отправили инструкции для сброса пароля на ${email}`
                   : `We've sent password reset instructions to ${email}`}
               </p>
-              <Link to="/auth">
+              <Link to={APP_ROUTES.AUTH}>
                 <PremiumButton variant="outline" className="mt-4">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
@@ -146,7 +147,7 @@ export default function ForgotPassword() {
               </form>
 
               <div className="text-center">
-                <Link to="/auth" className="text-primary font-medium hover:underline inline-flex items-center gap-2">
+                <Link to={APP_ROUTES.AUTH} className="text-primary font-medium hover:underline inline-flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   {language === 'ru' ? 'Вернуться к входу' : 'Back to login'}
                 </Link>

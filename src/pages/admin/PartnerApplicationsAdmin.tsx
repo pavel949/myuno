@@ -187,40 +187,55 @@ export default function PartnerApplicationsAdmin() {
 
     setIsProcessing(true);
     try {
-      const updateData: Record<string, unknown> = {
-        status: newStatus,
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      };
+      if (newStatus === 'approved') {
+        const { data, error } = await supabase.functions.invoke('approve-partner-application', {
+          body: { application_id: selectedApp.id },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
 
-      if (newStatus === 'rejected' && rejectionReason) {
-        updateData.rejection_reason = rejectionReason;
-      }
-
-      const { error } = await supabase
-        .from('partner_applications')
-        .update(updateData)
-        .eq('id', selectedApp.id);
-
-      if (error) throw error;
-
-      // Update local state
-      setApplications(prev => 
-        prev.map(app => 
-          app.id === selectedApp.id 
-            ? { ...app, ...updateData, status: newStatus } as PartnerApplication
-            : app
-        )
-      );
-
-      toast({
-        title: language === 'ru' ? 'Успешно' : 'Success',
-        description: newStatus === 'approved' 
-          ? (language === 'ru' ? 'Заявка одобрена' : 'Application approved')
-          : newStatus === 'rejected'
+        const updateData = {
+          status: 'approved' as const,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        };
+        setApplications(prev =>
+          prev.map(app =>
+            app.id === selectedApp.id ? { ...app, ...updateData, status: 'approved' } as PartnerApplication : app
+          )
+        );
+        toast({
+          title: language === 'ru' ? 'Успешно' : 'Success',
+          description: data?.vendor_granted
+            ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан' : 'Application approved, vendor access granted')
+            : (language === 'ru' ? 'Заявка одобрена (без user_id — доступ не создан)' : 'Application approved (no user_id — access not created)'),
+        });
+      } else {
+        const updateData: Record<string, unknown> = {
+          status: newStatus,
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+        };
+        if (newStatus === 'rejected' && rejectionReason) {
+          updateData.rejection_reason = rejectionReason;
+        }
+        const { error } = await supabase
+          .from('partner_applications')
+          .update(updateData)
+          .eq('id', selectedApp.id);
+        if (error) throw error;
+        setApplications(prev =>
+          prev.map(app =>
+            app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
+          )
+        );
+        toast({
+          title: language === 'ru' ? 'Успешно' : 'Success',
+          description: newStatus === 'rejected'
             ? (language === 'ru' ? 'Заявка отклонена' : 'Application rejected')
             : (language === 'ru' ? 'Статус обновлён' : 'Status updated'),
-      });
+        });
+      }
 
       setIsActionDialogOpen(false);
       setIsDetailOpen(false);
@@ -230,8 +245,8 @@ export default function PartnerApplicationsAdmin() {
       console.error('Error updating application:', error);
       toast({
         title: language === 'ru' ? 'Ошибка' : 'Error',
-        description: language === 'ru' 
-          ? 'Не удалось обновить статус' 
+        description: language === 'ru'
+          ? 'Не удалось обновить статус'
           : 'Failed to update status',
         variant: 'destructive',
       });

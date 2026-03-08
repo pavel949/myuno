@@ -3,6 +3,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
+import { hasGoogleMapsKey } from '@/lib/googleMaps';
 import { Loader2, Navigation, MapPin, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +36,9 @@ const popularLocations = [
 export function ProjectLocationPicker({ value, onChange }: ProjectLocationPickerProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const googleGeocode = useGoogleGeocode(language);
+  const useGoogle = hasGoogleMapsKey();
+
   const [isOpen, setIsOpen] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,23 +97,27 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
     }
   }, []);
 
-  // Reverse geocode to get address
-  const reverseGeocode = useCallback(async (lng: number, lat: number) => {
-    if (!mapboxToken) return null;
-    
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${language}`
-      );
-      const data = await response.json();
-      if (data.features && data.features.length > 0) {
-        return data.features[0].place_name;
+  // Reverse geocode to get address (Google when key set, else Mapbox)
+  const reverseGeocode = useCallback(
+    async (lng: number, lat: number): Promise<string | null> => {
+      if (useGoogle) {
+        const result = await googleGeocode.reverseGeocode(lat, lng);
+        return result?.address ?? null;
       }
-    } catch (err) {
-      console.error('Geocoding error:', err);
-    }
-    return null;
-  }, [mapboxToken, language]);
+      if (!mapboxToken) return null;
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=${language}`
+        );
+        const data = await response.json();
+        if (data.features?.length > 0) return data.features[0].place_name;
+      } catch (err) {
+        console.error('Geocoding error:', err);
+      }
+      return null;
+    },
+    [mapboxToken, language, useGoogle, googleGeocode]
+  );
 
   // Initialize map
   useEffect(() => {
@@ -175,24 +184,29 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
     };
   }, [mapboxToken, isOpen, value, updateMarker, reverseGeocode]);
 
-  // Search for location
+  // Search for location (Google when key set, else Mapbox)
   const searchLocation = async () => {
-    if (!searchQuery.trim() || !mapboxToken) return;
-    
+    if (!searchQuery.trim()) return;
     try {
+      if (useGoogle) {
+        const results = await googleGeocode.searchAddress(searchQuery, { country: 'TH' });
+        if (results.length > 0) {
+          const r = results[0];
+          if (map.current) map.current.flyTo({ center: [r.lng, r.lat], zoom: 16 });
+          updateMarker(r.lng, r.lat);
+          setSelectedLocation({ address: r.address, lat: r.lat, lng: r.lng });
+        }
+        return;
+      }
+      if (!mapboxToken) return;
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxToken}&proximity=98.3923,7.8804&country=TH`
       );
       const data = await response.json();
-      
-      if (data.features && data.features.length > 0) {
+      if (data.features?.length > 0) {
         const [lng, lat] = data.features[0].center;
         const address = data.features[0].place_name;
-        
-        if (map.current) {
-          map.current.flyTo({ center: [lng, lat], zoom: 16 });
-        }
-        
+        if (map.current) map.current.flyTo({ center: [lng, lat], zoom: 16 });
         updateMarker(lng, lat);
         setSelectedLocation({ address, lat, lng });
       }

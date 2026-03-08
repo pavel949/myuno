@@ -80,26 +80,35 @@ export default function BecomePartnerPage() {
     setIsSubmitting(true);
 
     try {
-      // Insert into partner_applications table
-      const { error } = await supabase.from('partner_applications').insert({
-        user_id: user?.id || null,
-        business_name: formData.businessName,
-        business_category: selectedCategory,
-        business_description: formData.description,
-        contact_name: formData.contactName,
-        contact_email: formData.email,
-        contact_phone: formData.phone,
-        website: formData.website || null,
-        status: 'pending',
-      });
+      const { data: inserted, error } = await supabase
+        .from('partner_applications')
+        .insert({
+          user_id: user?.id || null,
+          business_name: formData.businessName,
+          business_category: selectedCategory,
+          business_description: formData.description,
+          contact_name: formData.contactName,
+          contact_email: formData.email,
+          contact_phone: formData.phone,
+          website: formData.website || null,
+          status: 'pending',
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      if (inserted?.id) {
+        supabase.functions.invoke('notify-admin-partner-application', {
+          body: { application_id: inserted.id },
+        }).catch(() => {});
+      }
 
       setIsSubmitted(true);
       toast({
         title: language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!',
-        description: language === 'ru' 
-          ? 'Мы свяжемся с вами в ближайшее время' 
+        description: language === 'ru'
+          ? 'Мы свяжемся с вами в ближайшее время'
           : 'We will contact you soon',
       });
     } catch (error) {

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Settings, Globe, FileText, Database, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleMapsStatusCard } from '@/components/admin/GoogleMapsStatusCard';
 
 const systemSections = [
   { key: 'cities', label: 'Cities', labelRu: 'Города', icon: Globe, path: '/admin/cities' },
@@ -19,6 +20,7 @@ export function ControlSystemTab() {
 
   return (
     <div className="space-y-4">
+      <GoogleMapsStatusCard />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

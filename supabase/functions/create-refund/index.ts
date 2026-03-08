@@ -36,14 +36,11 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
     if (authError || !user) throw new Error("Unauthorized");
 
-    // Check admin role
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
+    // Check admin role via user_roles (profiles.role does not exist in schema)
+    const { data: isAdmin, error: roleError } = await supabaseClient
+      .rpc("has_role", { _user_id: user.id, _role: "admin" });
 
-    if (!profile || !['admin', 'superadmin'].includes(profile.role)) {
+    if (roleError || !isAdmin) {
       return new Response(
         JSON.stringify({ error: "Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -10,6 +10,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { Search, Users, ChevronDown, Shield, Mail, Phone, KeyRound, Ban, CheckCircle, XCircle, Trash2, Plus, Minus } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -79,7 +80,7 @@ export function ControlUsersTab() {
     setLoadingAction(`reset-${userId}`);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       });
       if (error) throw error;
       toast.success(isRu ? `Ссылка отправлена на ${email}` : `Reset link sent to ${email}`);

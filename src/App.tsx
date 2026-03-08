@@ -6,7 +6,8 @@
  * ErrorBoundary → HelmetProvider → QueryClientProvider → ThemeProvider →
  * MaintenanceProvider → LanguageProvider → LocationProvider → CurrencyProvider →
  * AuthProvider → CartProvider → PWAInstallProvider → LifeSituationProvider →
- * TooltipProvider → HintProvider → PrefetchProvider → AppContent
+ * StorefrontProvider → GoogleMapsProvider → TooltipProvider → HintProvider →
+ * PrefetchProvider → AppContent
  *
  * @see docs/ARCHITECTURE.md for full architecture overview
  */
@@ -28,11 +29,13 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { ChatWidget } from "@/components/ai/ChatWidget";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
 import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { StorefrontProvider } from "@/contexts/StorefrontContext";
+import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
 import { HintProvider } from "@/components/hints/HintProvider";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
@@ -44,17 +47,18 @@ const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
 });
 
-/** Gate that shows Coming Soon for unauthenticated users (except /auth routes) */
+/** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
 
   // Allow auth and public marketing routes through
-  const isPublicRoute = location.pathname.startsWith('/auth') 
+  const isPublicRoute = location.pathname.startsWith('/auth')
     || location.pathname.startsWith('/for-management-companies')
     || location.pathname.startsWith('/ref/');
 
-  if (isPublicRoute || isLoading) return <>{children}</>;
+  if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
   return <>{children}</>;
 }
@@ -80,6 +84,7 @@ function AppContent() {
           <ComingSoonGate>
             <AnimatedRoutes />
             <UnifiedChatFAB />
+            <ChatWidget vertical="concierge" placeholder="Ask me anything about Phuket..." />
             <CookieConsentBanner />
           </ComingSoonGate>
         </BrowserRouter>
@@ -101,6 +106,7 @@ const App = () => (
                       <PWAInstallProvider>
                         <LifeSituationProvider>
                           <StorefrontProvider>
+                            <GoogleMapsProvider>
                             <TooltipProvider>
                               <HintProvider>
                                 <PrefetchProvider>
@@ -108,6 +114,7 @@ const App = () => (
                                 </PrefetchProvider>
                               </HintProvider>
                             </TooltipProvider>
+                            </GoogleMapsProvider>
                           </StorefrontProvider>
                         </LifeSituationProvider>
                       </PWAInstallProvider>

@@ -3,6 +3,8 @@ project_id = "kakkwibljrjsawxgnupk"
 [functions]
   [functions.admin-manage-user]
     verify_jwt = false
+  [functions.approve-partner-application]
+    verify_jwt = true
   [functions.ai-agent]
     verify_jwt = false
   [functions.ai-concierge]
@@ -94,6 +96,8 @@ project_id = "kakkwibljrjsawxgnupk"
   [functions.leads-factory]
     verify_jwt = false
   [functions.monthly-owner-statements]
+    verify_jwt = false
+  [functions.notify-admin-partner-application]
     verify_jwt = false
   [functions.notify-lead-whatsapp]
     verify_jwt = false
