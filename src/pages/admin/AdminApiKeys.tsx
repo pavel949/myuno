@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Key, Shield, Globe, CheckCircle2, XCircle, ExternalLink, Copy, Save, RefreshCw, Lock, Settings2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Key, Shield, Globe, CheckCircle2, XCircle, ExternalLink, Copy, Save, RefreshCw, Lock, Settings2, Eye, EyeOff, Plus, Trash2, Pencil } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -35,6 +37,12 @@ const FRONTEND_VARS = [
   { key: 'VITE_BYPASS_COMING_SOON', label: 'Bypass Coming Soon Gate', managedBy: 'manual' },
 ];
 
+const DEFAULT_CONFIG_KEYS = [
+  { key: 'GOOGLE_MAPS_API_KEY', description: 'Google Maps (Places, Geocoding)', descriptionRu: 'Google Maps (Places, Геокодинг)' },
+  { key: 'BYPASS_COMING_SOON', description: 'Bypass Coming Soon gate', descriptionRu: 'Обойти заглушку Coming Soon' },
+  { key: 'PLATFORM_MAINTENANCE_MODE', description: 'Enable maintenance mode', descriptionRu: 'Режим обслуживания' },
+];
+
 export default function AdminApiKeys() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -43,6 +51,15 @@ export default function AdminApiKeys() {
   const [loading, setLoading] = useState(true);
   const [configEdits, setConfigEdits] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const [revealedSecrets, setRevealedSecrets] = useState<Set<string>>(new Set());
+  const [revealedFrontend, setRevealedFrontend] = useState<Set<string>>(new Set());
+  const [revealedConfigs, setRevealedConfigs] = useState<Set<string>>(new Set());
+
+  // Add new config dialog
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newConfigKey, setNewConfigKey] = useState('');
+  const [newConfigValue, setNewConfigValue] = useState('');
+  const [newConfigDesc, setNewConfigDesc] = useState('');
 
   const fetchStatus = async () => {
     setLoading(true);
@@ -81,9 +98,57 @@ export default function AdminApiKeys() {
     }
   };
 
+  const deleteConfig = async (key: string) => {
+    setSaving(key);
+    try {
+      const { error } = await supabase.from('system_config').delete().eq('key', key);
+      if (error) throw error;
+      toast.success(isRu ? 'Удалено' : 'Deleted');
+      fetchStatus();
+    } catch (e) {
+      toast.error(isRu ? 'Ошибка удаления' : 'Delete failed');
+      console.error(e);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const addNewConfig = async () => {
+    if (!newConfigKey.trim()) return;
+    setSaving(newConfigKey);
+    try {
+      const { error } = await supabase
+        .from('system_config')
+        .upsert({ 
+          key: newConfigKey.trim().toUpperCase(), 
+          value: newConfigValue, 
+          description: newConfigDesc || null,
+          updated_at: new Date().toISOString() 
+        }, { onConflict: 'key' });
+      if (error) throw error;
+      toast.success(isRu ? 'Добавлено' : 'Added');
+      setNewConfigKey('');
+      setNewConfigValue('');
+      setNewConfigDesc('');
+      setAddDialogOpen(false);
+      fetchStatus();
+    } catch (e) {
+      toast.error(isRu ? 'Ошибка добавления' : 'Add failed');
+      console.error(e);
+    } finally {
+      setSaving(null);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success(isRu ? 'Скопировано' : 'Copied');
+  };
+
+  const toggleReveal = (set: Set<string>, setFn: React.Dispatch<React.SetStateAction<Set<string>>>, key: string) => {
+    const next = new Set(set);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setFn(next);
   };
 
   const getConfigValue = (key: string) => {
@@ -91,6 +156,12 @@ export default function AdminApiKeys() {
     if (edit !== undefined) return edit;
     const existing = configs.find(c => c.key === key);
     return existing?.value || '';
+  };
+
+  const maskValue = (value: string, revealed: boolean) => {
+    if (revealed || !value) return value;
+    if (value.length <= 8) return '••••••••';
+    return value.slice(0, 4) + '•'.repeat(Math.min(value.length - 8, 20)) + value.slice(-4);
   };
 
   const getManagedBadge = (managedBy: string) => {
@@ -162,7 +233,7 @@ export default function AdminApiKeys() {
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="flex-shrink-0">
                     {secret.configured 
-                      ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      ? <CheckCircle2 className="h-5 w-5 text-primary" />
                       : <XCircle className="h-5 w-5 text-destructive" />
                     }
                   </div>
@@ -170,10 +241,16 @@ export default function AdminApiKeys() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-sm font-medium">{secret.key}</span>
                       {getManagedBadge(secret.managedBy)}
+                      <Badge variant={secret.configured ? 'default' : 'destructive'} className="text-xs">
+                        {secret.configured ? (isRu ? 'Настроен' : 'Active') : (isRu ? 'Не настроен' : 'Missing')}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-0.5">{secret.description}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{secret.label} — {secret.description}</p>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleReveal(revealedSecrets, setRevealedSecrets, secret.key)} title={isRu ? 'Показать статус' : 'Show status'}>
+                      {revealedSecrets.has(secret.key) ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(secret.key)}>
                       <Copy className="h-3.5 w-3.5" />
                     </Button>
@@ -186,14 +263,29 @@ export default function AdminApiKeys() {
                     )}
                   </div>
                 </CardContent>
+                {revealedSecrets.has(secret.key) && (
+                  <div className="px-4 pb-4 pt-0">
+                    <div className="rounded-md bg-muted/50 p-3 font-mono text-xs text-muted-foreground">
+                      {secret.configured 
+                        ? (isRu ? '✅ Ключ настроен и доступен в edge functions' : '✅ Key is configured and available in edge functions')
+                        : (isRu ? '❌ Ключ отсутствует. Добавьте через Lovable Cloud → Settings → Secrets' : '❌ Key is missing. Add via Lovable Cloud → Settings → Secrets')}
+                      {secret.url && !secret.configured && (
+                        <span className="block mt-1">
+                          {isRu ? 'Получить ключ: ' : 'Get key: '}
+                          <a href={secret.url} target="_blank" rel="noopener noreferrer" className="underline text-primary">{secret.url}</a>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Card>
             ))
           )}
           <Surface variant="card" padding="md" radius="lg" className="bg-muted/30">
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? '⚠️ Backend секреты управляются через Lovable Cloud → Settings → Secrets. Здесь отображается только их статус (настроен/не настроен).'
-                : '⚠️ Backend secrets are managed via Lovable Cloud → Settings → Secrets. Only their status (configured/missing) is shown here.'}
+                ? '⚠️ Backend секреты управляются через Lovable Cloud → Settings → Secrets. Значения никогда не передаются на клиент.'
+                : '⚠️ Backend secrets are managed via Lovable Cloud → Settings → Secrets. Values are never exposed to the client.'}
             </p>
           </Surface>
         </TabsContent>
@@ -201,15 +293,18 @@ export default function AdminApiKeys() {
         {/* Frontend Variables Tab */}
         <TabsContent value="frontend" className="mt-4 space-y-3">
           {FRONTEND_VARS.map((v) => {
-            const value = import.meta.env[v.key];
+            const value = import.meta.env[v.key] as string | undefined;
             const isSet = !!value;
-            const masked = isSet ? (value.length > 20 ? value.slice(0, 8) + '•••' + value.slice(-4) : '••••••') : '';
+            const isRevealed = revealedFrontend.has(v.key);
+            const displayValue = isSet 
+              ? (isRevealed ? value : maskValue(value!, false))
+              : (isRu ? 'Не задано' : 'Not set');
             return (
               <Card key={v.key}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="flex-shrink-0">
                     {isSet 
-                      ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      ? <CheckCircle2 className="h-5 w-5 text-primary" />
                       : <XCircle className="h-5 w-5 text-destructive" />
                     }
                   </div>
@@ -218,13 +313,20 @@ export default function AdminApiKeys() {
                       <span className="font-mono text-sm font-medium">{v.key}</span>
                       {getManagedBadge(v.managedBy)}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {isSet ? masked : (isRu ? 'Не задано' : 'Not set')}
+                    <p className="text-sm text-muted-foreground mt-0.5 font-mono">
+                      {displayValue}
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(v.key)}>
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {isSet && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleReveal(revealedFrontend, setRevealedFrontend, v.key)}>
+                        {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(isSet && isRevealed ? value! : v.key)}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -241,59 +343,106 @@ export default function AdminApiKeys() {
         {/* System Config Tab */}
         <TabsContent value="config" className="mt-4 space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-base">{isRu ? 'Динамическая конфигурация' : 'Dynamic Configuration'}</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                {isRu ? 'Добавить' : 'Add Key'}
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              {['GOOGLE_MAPS_API_KEY', 'BYPASS_COMING_SOON', 'PLATFORM_MAINTENANCE_MODE'].map((configKey) => (
-                <div key={configKey} className="flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <label className="font-mono text-sm font-medium block mb-1">{configKey}</label>
-                    <Input
-                      value={getConfigValue(configKey)}
-                      onChange={(e) => setConfigEdits(prev => ({ ...prev, [configKey]: e.target.value }))}
-                      placeholder={isRu ? 'Введите значение...' : 'Enter value...'}
-                      className="font-mono text-sm"
-                    />
-                  </div>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="mt-5"
-                    disabled={configEdits[configKey] === undefined || saving === configKey}
-                    onClick={() => saveConfig(configKey)}
-                  >
-                    <Save className="h-3.5 w-3.5 mr-1" />
-                    {saving === configKey ? '...' : (isRu ? 'Сохранить' : 'Save')}
-                  </Button>
-                </div>
-              ))}
-
-              {/* Show any additional configs from DB */}
-              {configs
-                .filter(c => !['GOOGLE_MAPS_API_KEY', 'BYPASS_COMING_SOON', 'PLATFORM_MAINTENANCE_MODE'].includes(c.key))
-                .map((config) => (
-                  <div key={config.key} className="flex items-center gap-3">
-                    <div className="flex-1 min-w-0">
-                      <label className="font-mono text-sm font-medium block mb-1">{config.key}</label>
-                      <Input
-                        value={getConfigValue(config.key)}
-                        onChange={(e) => setConfigEdits(prev => ({ ...prev, [config.key]: e.target.value }))}
-                        className="font-mono text-sm"
-                      />
+              {DEFAULT_CONFIG_KEYS.map(({ key: configKey, description, descriptionRu }) => {
+                const val = getConfigValue(configKey);
+                const isRevealed = revealedConfigs.has(configKey);
+                const hasValue = !!configs.find(c => c.key === configKey)?.value;
+                return (
+                  <div key={configKey} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <label className="font-mono text-sm font-medium">{configKey}</label>
+                        {hasValue && <Badge variant="secondary" className="text-xs">{isRu ? 'Задан' : 'Set'}</Badge>}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{isRu ? descriptionRu : description}</span>
                     </div>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="mt-5"
-                      disabled={configEdits[config.key] === undefined || saving === config.key}
-                      onClick={() => saveConfig(config.key)}
-                    >
-                      <Save className="h-3.5 w-3.5 mr-1" />
-                      {saving === config.key ? '...' : (isRu ? 'Сохранить' : 'Save')}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          type={isRevealed ? 'text' : 'password'}
+                          value={configEdits[configKey] !== undefined ? configEdits[configKey] : val}
+                          onChange={(e) => setConfigEdits(prev => ({ ...prev, [configKey]: e.target.value }))}
+                          placeholder={isRu ? 'Введите значение...' : 'Enter value...'}
+                          className="font-mono text-sm pr-10"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                          onClick={() => toggleReveal(revealedConfigs, setRevealedConfigs, configKey)}
+                        >
+                          {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </Button>
+                      </div>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        disabled={configEdits[configKey] === undefined || saving === configKey}
+                        onClick={() => saveConfig(configKey)}
+                      >
+                        <Save className="h-3.5 w-3.5 mr-1" />
+                        {saving === configKey ? '...' : (isRu ? 'Сохранить' : 'Save')}
+                      </Button>
+                    </div>
                   </div>
-                ))}
+                );
+              })}
+
+              {/* Additional configs from DB */}
+              {configs
+                .filter(c => !DEFAULT_CONFIG_KEYS.some(d => d.key === c.key))
+                .map((config) => {
+                  const isRevealed = revealedConfigs.has(config.key);
+                  return (
+                    <div key={config.key} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <label className="font-mono text-sm font-medium">{config.key}</label>
+                          <Badge variant="secondary" className="text-xs">{isRu ? 'Пользовательский' : 'Custom'}</Badge>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteConfig(config.key)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                      {config.description && <p className="text-xs text-muted-foreground">{config.description}</p>}
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            type={isRevealed ? 'text' : 'password'}
+                            value={configEdits[config.key] !== undefined ? configEdits[config.key] : (config.value || '')}
+                            onChange={(e) => setConfigEdits(prev => ({ ...prev, [config.key]: e.target.value }))}
+                            className="font-mono text-sm pr-10"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                            onClick={() => toggleReveal(revealedConfigs, setRevealedConfigs, config.key)}
+                          >
+                            {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          disabled={configEdits[config.key] === undefined || saving === config.key}
+                          onClick={() => saveConfig(config.key)}
+                        >
+                          <Save className="h-3.5 w-3.5 mr-1" />
+                          {saving === config.key ? '...' : (isRu ? 'Сохранить' : 'Save')}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
             </CardContent>
           </Card>
           <Surface variant="card" padding="md" radius="lg" className="bg-muted/30">
@@ -305,6 +454,52 @@ export default function AdminApiKeys() {
           </Surface>
         </TabsContent>
       </Tabs>
+
+      {/* Add New Config Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isRu ? 'Добавить конфигурацию' : 'Add Configuration'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>{isRu ? 'Ключ' : 'Key'}</Label>
+              <Input
+                value={newConfigKey}
+                onChange={(e) => setNewConfigKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ''))}
+                placeholder="MY_API_KEY"
+                className="font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Значение' : 'Value'}</Label>
+              <Input
+                value={newConfigValue}
+                onChange={(e) => setNewConfigValue(e.target.value)}
+                placeholder={isRu ? 'Введите значение...' : 'Enter value...'}
+                className="font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{isRu ? 'Описание (необязательно)' : 'Description (optional)'}</Label>
+              <Input
+                value={newConfigDesc}
+                onChange={(e) => setNewConfigDesc(e.target.value)}
+                placeholder={isRu ? 'Для чего этот ключ' : 'What this key is for'}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
+              {isRu ? 'Отмена' : 'Cancel'}
+            </Button>
+            <Button onClick={addNewConfig} disabled={!newConfigKey.trim()}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              {isRu ? 'Добавить' : 'Add'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
