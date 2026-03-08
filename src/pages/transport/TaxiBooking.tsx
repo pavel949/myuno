@@ -106,28 +106,34 @@ export default function TaxiBooking() {
 
       const { latitude, longitude } = position.coords;
       
-      // Get mapbox token and reverse geocode
-      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
-      if (tokenData?.token) {
-        const response = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${tokenData.token}&language=${language}`
-        );
-        const data = await response.json();
-        
-        const address = data.features?.[0]?.place_name || 
-          (language === 'ru' ? 'Текущее местоположение' : 'Current location');
-        
-        setPickupLocation({
-          address,
-          lat: latitude,
-          lng: longitude,
-        });
-        
-        toast({
-          title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
-          description: address,
-        });
-      }
+      // Reverse geocode via Google Geocoding edge function
+      const { data: geocodeData } = await supabase.functions.invoke('geocode-address', {
+        body: null,
+        headers: {},
+      });
+      // Use the edge function with query params
+      const geocodeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
+      const geocodeRes = await fetch(geocodeUrl, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+      });
+      const geoData = await geocodeRes.json();
+      
+      const address = geoData.results?.[0]?.address || geoData.results?.[0]?.name ||
+        (language === 'ru' ? 'Текущее местоположение' : 'Current location');
+      
+      setPickupLocation({
+        address,
+        lat: latitude,
+        lng: longitude,
+      });
+      
+      toast({
+        title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
+        description: address,
+      });
     } catch (error: any) {
       let message = language === 'ru' ? 'Не удалось определить местоположение' : 'Could not get location';
       

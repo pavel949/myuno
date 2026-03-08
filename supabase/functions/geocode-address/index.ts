@@ -20,9 +20,9 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const language = url.searchParams.get("language") || "en";
 
-    const mapboxToken = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
-    if (!mapboxToken) {
-      throw new Error("MAPBOX_PUBLIC_TOKEN not configured");
+    const googleApiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
+    if (!googleApiKey) {
+      throw new Error("GOOGLE_MAPS_API_KEY not configured");
     }
 
     // Check for reverse geocoding mode (lat + lng params)
@@ -30,28 +30,29 @@ Deno.serve(async (req) => {
     const lng = url.searchParams.get("lng");
 
     if (lat && lng) {
-      // Reverse geocoding via Mapbox Geocoding v5
-      const reverseUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json` +
-        `?access_token=${mapboxToken}` +
-        `&types=poi,address` +
-        `&limit=1` +
-        `&language=${language}`;
+      // Reverse geocoding via Google Geocoding API
+      const reverseUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleApiKey}&language=${language}`;
 
       console.log(`[geocode-address] Reverse geocoding: ${lat},${lng}`);
 
       const response = await fetch(reverseUrl);
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error(`[geocode-address] Mapbox reverse error ${response.status}:`, errorBody);
-        throw new Error(`Mapbox API error: ${response.status}`);
+        console.error(`[geocode-address] Google reverse error ${response.status}:`, errorBody);
+        throw new Error(`Google Geocoding API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const results = (data.features || []).map((f: any) => ({
-        mapbox_id: f.id,
-        name: f.text || f.place_name,
-        address: f.place_name || '',
-        type: f.place_type?.[0] || 'address',
+      if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        console.error(`[geocode-address] Google Geocoding status: ${data.status}`);
+        throw new Error(`Google Geocoding status: ${data.status}`);
+      }
+
+      const results = (data.results || []).slice(0, 3).map((r: any) => ({
+        mapbox_id: r.place_id, // keeping field name for backward compatibility
+        name: r.formatted_address?.split(',')[0]?.trim() || r.formatted_address,
+        address: r.formatted_address || '',
+        type: r.types?.[0] || 'address',
       }));
 
       return new Response(JSON.stringify({ results }), {
@@ -59,9 +60,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Forward geocoding via Search Box API v1
+    // Forward geocoding via Google Geocoding API
     const query = url.searchParams.get("query")?.trim();
-    const sessionToken = url.searchParams.get("session_token") || crypto.randomUUID();
 
     if (!query || query.length < 2) {
       return new Response(JSON.stringify({ results: [] }), {
@@ -70,38 +70,29 @@ Deno.serve(async (req) => {
     }
 
     const encodedQuery = encodeURIComponent(query);
-    const searchUrl = `https://api.mapbox.com/search/searchbox/v1/suggest?` +
-      `q=${encodedQuery}` +
-      `&access_token=${mapboxToken}` +
-      `&session_token=${sessionToken}` +
-      `&proximity=98.3923,7.8804` +
-      `&bbox=98.2,7.7,98.5,8.2` +
-      `&types=poi,address,place` +
-      `&limit=5` +
-      `&language=${language}` +
-      `&country=TH`;
+    const searchUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedQuery}&key=${googleApiKey}&language=${language}&region=TH&bounds=7.7,98.2|8.2,98.5`;
 
-    console.log(`[geocode-address] Searching: "${query}" via Search Box API`);
+    console.log(`[geocode-address] Searching: "${query}" via Google Geocoding API`);
 
     const response = await fetch(searchUrl);
     
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error(`[geocode-address] Mapbox error ${response.status}:`, errorBody);
-      throw new Error(`Mapbox API error: ${response.status}`);
+      console.error(`[geocode-address] Google error ${response.status}:`, errorBody);
+      throw new Error(`Google Geocoding API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`[geocode-address] Got ${data.suggestions?.length || 0} suggestions`);
+    console.log(`[geocode-address] Got ${data.results?.length || 0} results`);
 
-    const results = (data.suggestions || []).map((s: any) => ({
-      mapbox_id: s.mapbox_id,
-      name: s.name || s.full_address,
-      address: s.full_address || s.place_formatted || '',
-      type: s.feature_type || 'place',
+    const results = (data.results || []).slice(0, 5).map((r: any) => ({
+      mapbox_id: r.place_id,
+      name: r.formatted_address?.split(',')[0]?.trim() || r.formatted_address,
+      address: r.formatted_address || '',
+      type: r.types?.[0] || 'place',
     }));
 
-    return new Response(JSON.stringify({ results, session_token: sessionToken }), {
+    return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
