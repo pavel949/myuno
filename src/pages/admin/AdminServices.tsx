@@ -131,6 +131,7 @@ export default function AdminServices() {
     setFormData({
       provider_id: providerId || '',
       category_id: '',
+      subcategory_id: '',
       name_en: '',
       name_ru: '',
       description_en: '',
@@ -138,6 +139,7 @@ export default function AdminServices() {
       price: '',
       duration_minutes: '',
       max_capacity: '1',
+      images: [],
       is_active: true,
       is_featured: false,
     });
@@ -146,9 +148,15 @@ export default function AdminServices() {
 
   const openEditDialog = (service: Service) => {
     setEditingService(service);
+    // Determine if category_id is actually a subcategory
+    const catId = service.category_id || '';
+    const cat = categories.find(c => c.id === catId);
+    const isSubcat = cat?.parent_id != null;
+    
     setFormData({
       provider_id: service.provider_id,
-      category_id: service.category_id || '',
+      category_id: isSubcat ? (cat?.parent_id || '') : catId,
+      subcategory_id: isSubcat ? catId : '',
       name_en: service.name_en || '',
       name_ru: service.name_ru || '',
       description_en: service.description_en || '',
@@ -156,11 +164,23 @@ export default function AdminServices() {
       price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes?.toString() || '',
       max_capacity: service.max_capacity?.toString() || '1',
+      images: service.images || [],
       is_active: service.is_active ?? true,
       is_featured: service.is_featured ?? false,
     });
     setIsDialogOpen(true);
   };
+
+  // Build category hierarchy
+  const parentCategories = useMemo(() => 
+    categories.filter(c => c.parent_id == null), 
+    [categories]
+  );
+  
+  const subcategories = useMemo(() => {
+    if (!formData.category_id) return [];
+    return categories.filter(c => c.parent_id === formData.category_id);
+  }, [categories, formData.category_id]);
 
   // Duplicate functionality
   const handleDuplicate = useCallback(() => {
