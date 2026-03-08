@@ -187,9 +187,9 @@ export function PropertyManageListingSection({
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>{isRu ? 'Адрес' : 'Address'}</Label>
-                <Input
+                <AddressAutocomplete
                   value={formData.address || ''}
-                  onChange={(e) => updateFormData({ address: e.target.value })}
+                  onChange={(address) => updateFormData({ address })}
                   placeholder={isRu ? 'Полный адрес' : 'Full address'}
                 />
               </div>
