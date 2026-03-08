@@ -394,7 +394,7 @@ export function UnifiedCatalogTable() {
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-foreground">
+                  <TableCell className="text-foreground text-xs sm:text-sm">
                     {item.price ? formatPrice(item.price) : '—'}
                   </TableCell>
                   <TableCell>
