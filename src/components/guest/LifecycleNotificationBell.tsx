@@ -12,11 +12,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface LifecycleNotification {
   id: string;
   title: string;
-  message: string;
-  action_url: string | null;
+  body: string;
   is_read: boolean;
   created_at: string;
-  metadata: {
+  type: string;
+  data: {
     title_ru?: string;
     body_ru?: string;
     cta_label_en?: string;
