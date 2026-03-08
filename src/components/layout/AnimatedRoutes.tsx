@@ -504,7 +504,12 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/my-stay" element={<Pages.MyStay />} />
           <Route path="/guest/check-in/:bookingId" element={<Pages.GuestCheckIn />} />
           <Route path="/guest/guidebook/:propertyId" element={<Pages.GuestGuidebook />} />
+          <Route path="/guest/profile" element={<Pages.GuestProfile />} />
         </Route>
+        
+        {/* Welcome Flow — public, no auth required */}
+        <Route path="/welcome" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
+        <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
         {/* ── Provider/Vendor ── */}
         <Route path="/provider/onboarding" element={<LazyPage><Pages.ProviderOnboarding /></LazyPage>} />
