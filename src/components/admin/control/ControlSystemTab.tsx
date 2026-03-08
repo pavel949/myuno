@@ -2,7 +2,7 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Globe, FileText, Database, ExternalLink } from 'lucide-react';
+import { Settings, Globe, FileText, Database, ExternalLink, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleMapsStatusCard } from '@/components/admin/GoogleMapsStatusCard';
 
@@ -11,6 +11,7 @@ const systemSections = [
   { key: 'translations', label: 'Translations', labelRu: 'Переводы', icon: FileText, path: '/admin/translations' },
   { key: 'lookups', label: 'Lookups', labelRu: 'Справочники', icon: Database, path: '/admin/lookups' },
   { key: 'knowledge', label: 'Knowledge Base', labelRu: 'База знаний', icon: FileText, path: '/admin/location-knowledge' },
+  { key: 'api-keys', label: 'API Keys & Secrets', labelRu: 'API ключи', icon: Key, path: '/admin/api-keys' },
 ];
 
 export function ControlSystemTab() {

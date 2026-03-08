@@ -135,7 +135,7 @@ export default function MapView() {
     if (filteredMarkers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       filteredMarkers.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
-      map.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+      map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
     }
   }, []);
 
@@ -148,7 +148,7 @@ export default function MapView() {
     if (!mapRef.current || filteredMarkers.length === 0) return;
     const bounds = new google.maps.LatLngBounds();
     filteredMarkers.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
-    mapRef.current.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+    mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
   }, [filteredMarkers]);
 
   const handleFilterChange = (value: VerticalFilter) => {

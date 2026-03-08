@@ -474,6 +474,7 @@ export const AnimatedRoutes: React.FC = () => {
            <Route path="/admin/lifeos" element={<Navigate to="/admin/life-situations" replace />} />
            <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
            <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
+           <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
         </Route>
         
         {/* ── Staff ── */}

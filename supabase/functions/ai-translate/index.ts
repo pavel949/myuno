@@ -1,6 +1,6 @@
 // Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

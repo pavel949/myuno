@@ -3,7 +3,7 @@
  * Validates JWT tokens and extracts user identity.
  */
 
-import { createClient } from "npm:@supabase/supabase-js@2.49.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 export type AuthContext = {
   user: { id: string; email?: string | null };

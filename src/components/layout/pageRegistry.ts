@@ -313,6 +313,7 @@ export const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/Experie
 export const AdminUsersAccess = lazy(() => import('@/pages/admin/AdminUsersAccess'));
 export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
+export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 
 // ── Provider ──
 export const ProviderOnboarding = lazy(() => import('@/pages/provider/ProviderOnboarding'));
