@@ -409,7 +409,7 @@ export default function ReportsPage() {
               <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
               Excel
             </Button>
-            <Button variant="ghost" size="sm" className="h-8" onClick={() => { setSelectedReportForSend(report.id); setShowSendDialog(true); }}>
+            <Button variant="ghost" size="sm" className="h-8" onClick={() => handleOpenSendFlow(report)}>
               <Send className="h-3.5 w-3.5 mr-1" />
               <span className="hidden md:inline">{isRu ? 'Отправить' : 'Send'}</span>
             </Button>
