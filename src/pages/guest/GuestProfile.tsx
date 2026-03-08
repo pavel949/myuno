@@ -34,7 +34,7 @@ function useGuestHistory() {
       
       const { data: orders, error } = await supabase
         .from('orders')
-        .select('id, status, total_amount, currency, created_at, vertical, items_count')
+        .select('id, status, total_amount, currency, created_at, vertical')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);

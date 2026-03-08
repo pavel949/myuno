@@ -108,7 +108,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
   const isRu = language === 'ru';
   
   // Use wallet bonus_balance as loyalty points
-  const points = wallet?.bonus_balance || 0;
+  const points = wallet?.balance || 0;
   const { current, next, progress } = getCurrentTier(points);
   const TierIcon = current.icon;
 
