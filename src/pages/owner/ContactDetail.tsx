@@ -174,7 +174,7 @@ export default function ContactDetail() {
   };
 
   const handleToggleCompany = async () => {
-    await updateContact.mutateAsync({ id: contact.id, is_company: !contact.is_company } as any);
+    await updateContact.mutateAsync({ id: contact.id, is_company: !contact.is_company });
   };
 
   const handleCompleteTask = async (taskId: string) => {
