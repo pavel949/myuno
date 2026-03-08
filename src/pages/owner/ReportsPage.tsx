@@ -281,9 +281,28 @@ export default function ReportsPage() {
       onSuccess: () => {
         setShowSendDialog(false);
         setSelectedReportForSend(null);
+        setPreviewBeforeSend(null);
         setEmailRecipients('');
       }
     });
+  };
+
+  // Open send flow with preview first
+  const handleOpenSendFlow = (report: PropertyReport) => {
+    setSelectedReportForSend(report.id);
+    setPreviewBeforeSend(report);
+    // Auto-fill email from owner contact
+    const ownerContact = (ownerContacts || []).find(o => o.propertyIds?.includes(report.property_id));
+    if (ownerContact?.email) {
+      setEmailRecipients(ownerContact.email);
+    } else {
+      setEmailRecipients('');
+    }
+  };
+
+  const handleConfirmSend = () => {
+    setPreviewBeforeSend(null);
+    setShowSendDialog(true);
   };
 
   const getReportTypeLabel = (type: ReportType) => {
