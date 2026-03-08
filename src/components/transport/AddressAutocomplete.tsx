@@ -294,7 +294,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           )}
 
           {/* Manual entry hint */}
-          {query.length >= 2 && !isSearching && !hasMapbox && (
+          {query.length >= 2 && !isSearching && !hasGeocode && (
             <div className="px-3 py-3 text-center text-xs text-muted-foreground border-t border-border/50 flex items-center justify-center gap-1.5">
               <Keyboard className="w-3.5 h-3.5" />
               {isRu ? 'Или введите адрес вручную' : 'Or type your address manually'}
