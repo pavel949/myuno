@@ -278,7 +278,7 @@ export default function WelcomeFlow() {
           >
             {isRu 
               ? 'Мы подготовили для вас лучшие сервисы. Всё в одном месте — просто выберите.' 
-              : 'We've curated the best services for your stay. Everything in one place — just pick what you need.'}
+              : 'We\'ve curated the best services for your stay. Everything in one place — just pick what you need.'}
           </motion.p>
         </div>
       </motion.div>
