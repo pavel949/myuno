@@ -398,10 +398,10 @@ export function UnifiedCatalogTable() {
                     {item.price ? formatPrice(item.price) : '—'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.is_active ? 'default' : 'secondary'}>
+                    <Badge variant={item.is_active ? 'default' : 'secondary'} className="text-[10px] sm:text-xs px-1.5 sm:px-2.5">
                       {item.is_active 
-                        ? (isRussian ? 'Активен' : 'Active')
-                        : (isRussian ? 'Неактивен' : 'Inactive')
+                        ? (isRussian ? 'Акт.' : 'Active')
+                        : (isRussian ? 'Неакт.' : 'Off')
                       }
                     </Badge>
                   </TableCell>
