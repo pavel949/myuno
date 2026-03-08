@@ -320,6 +320,7 @@ export const ProviderOnboarding = lazy(() => import('@/pages/provider/ProviderOn
 
 // ── Vendor ──
 export const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
+export const VendorLanding = lazy(() => import('@/pages/vendor/VendorLanding'));
 export const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
 export const VendorBookings = lazy(() => import('@/pages/vendor/VendorBookings'));
 export const VendorServices = lazy(() => import('@/pages/vendor/VendorServices'));

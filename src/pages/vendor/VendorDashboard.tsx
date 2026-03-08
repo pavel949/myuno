@@ -36,6 +36,7 @@ import { VendorCategoryGrid } from '@/components/vendor/VendorCategoryGrid';
 import { VendorQuickCreateFAB } from '@/components/vendor/wizard';
 import { BulkImportSheet, ImportVertical } from '@/components/vendor/wizard';
 import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorOnboardingChecklist';
+import { VendorVerificationBadge } from '@/components/vendor/dashboard/VendorVerificationBadge';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
