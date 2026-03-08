@@ -10,11 +10,12 @@
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version, x-internal-secret",
 };
 
 Deno.serve(async (req) => {
@@ -23,6 +24,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Internal/cron guard: require X-Internal-Secret header
+    const guardResponse = requireInternalSecret(req, corsHeaders);
+    if (guardResponse) return guardResponse;
+    
     const supabase = createServiceClient();
 
     // Fetch pending nurture messages that are due
