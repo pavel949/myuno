@@ -363,7 +363,7 @@ export function UnifiedCatalogTable() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline" className="gap-1">
                       {typeIcons[item.type]}
                       <span className="hidden sm:inline text-[11px]">
