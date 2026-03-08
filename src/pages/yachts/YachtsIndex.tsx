@@ -67,14 +67,14 @@ function YachtCard({ yacht, language }: { yacht: Yacht; language: string }) {
         )}
         {/* Booking flow badge */}
         <span className={cn(
-          "absolute top-2 right-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full",
+          "absolute top-2 right-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
           yacht.booking_flow === 'instant'
             ? "bg-success/90 text-white"
             : "bg-muted/90 text-foreground"
         )}>
           {yacht.booking_flow === 'instant'
-            ? <><Zap className="w-2.5 h-2.5" />{isRu ? 'Сразу' : 'Instant'}</>
-            : <><Clock className="w-2.5 h-2.5" />{isRu ? 'По запросу' : 'On request'}</>
+            ? <><Zap className="w-2.5 h-2.5 shrink-0" />{isRu ? 'Сразу' : 'Instant'}</>
+            : <><Clock className="w-2.5 h-2.5 shrink-0" />{isRu ? 'Запрос' : 'Request'}</>
           }
         </span>
         {card.experienceLabel && (
