@@ -18,9 +18,10 @@ interface ReportDetailSheetProps {
   report: PropertyReport | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  actionSlot?: React.ReactNode;
 }
 
-export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSheetProps) {
+export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: ReportDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -254,6 +255,13 @@ export function ReportDetailSheet({ report, open, onOpenChange }: ReportDetailSh
               </div>
             )}
           </>
+        )}
+
+        {/* Action slot (e.g. "Proceed to Send" button) */}
+        {actionSlot && (
+          <div className="pt-4 border-t mt-4">
+            {actionSlot}
+          </div>
         )}
       </SheetContent>
     </Sheet>

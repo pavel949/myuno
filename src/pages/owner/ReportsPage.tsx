@@ -18,6 +18,7 @@ import {
 } from '@/hooks/usePropertyReports';
 import { usePropertyComplexes, type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
+import { ReportWizard, type WizardResult } from '@/components/owner/reports/ReportWizard';
 import { AccountingPolicyEditor } from '@/components/owner/reports/AccountingPolicyEditor';
 import { useAccountingPolicies } from '@/hooks/useAccountingPolicies';
 import { OwnerAccessInviteDialog } from '@/components/owner/reports/OwnerAccessInviteDialog';
@@ -131,9 +132,10 @@ export default function ReportsPage() {
   const { getValue, setValue } = useUrlFilters();
   const activeTab = getValue('tab', 'all') as 'all' | 'portfolio';
   const setActiveTab = (v: 'all' | 'portfolio') => setValue('tab', v === 'all' ? null : v);
-  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [selectedReportForSend, setSelectedReportForSend] = useState<string | null>(null);
+  const [previewBeforeSend, setPreviewBeforeSend] = useState<PropertyReport | null>(null);
   const [deleteReportId, setDeleteReportId] = useState<string | null>(null);
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
   const [emailRecipients, setEmailRecipients] = useState('');
@@ -232,23 +234,18 @@ export default function ReportsPage() {
     }
   };
 
-  const handleGenerate = async () => {
-    const period = getReportPeriod(selectedReportType);
-    const ids = scopePropertyIds;
+  const handleWizardComplete = async (result: WizardResult) => {
+    const ids = result.propertyIds;
     if (ids.length === 0) return;
 
     if (ids.length === 1) {
       generateReport.mutate({
         property_id: ids[0],
-        report_type: selectedReportType,
-        period_start: period.start,
-        period_end: period.end,
+        report_type: result.reportType,
+        period_start: result.periodStart,
+        period_end: result.periodEnd,
       }, {
-        onSuccess: () => {
-          setShowGenerateDialog(false);
-          setSelectedPropertyId('');
-          setSelectedReportType('monthly');
-        }
+        onSuccess: () => setShowWizard(false),
       });
     } else {
       setIsBatchGenerating(true);
@@ -256,15 +253,12 @@ export default function ReportsPage() {
         for (const propId of ids) {
           await generateReport.mutateAsync({
             property_id: propId,
-            report_type: selectedReportType,
-            period_start: period.start,
-            period_end: period.end,
+            report_type: result.reportType,
+            period_start: result.periodStart,
+            period_end: result.periodEnd,
           });
         }
-        setShowGenerateDialog(false);
-        setSelectedPropertyId('');
-        setSelectedReportType('monthly');
-        setGenerateScope('property');
+        setShowWizard(false);
       } finally {
         setIsBatchGenerating(false);
       }
@@ -287,9 +281,28 @@ export default function ReportsPage() {
       onSuccess: () => {
         setShowSendDialog(false);
         setSelectedReportForSend(null);
+        setPreviewBeforeSend(null);
         setEmailRecipients('');
       }
     });
+  };
+
+  // Open send flow with preview first
+  const handleOpenSendFlow = (report: PropertyReport) => {
+    setSelectedReportForSend(report.id);
+    setPreviewBeforeSend(report);
+    // Auto-fill email from owner contact
+    const ownerContact = (ownerContacts || []).find(o => o.propertyIds?.includes(report.property_id));
+    if (ownerContact?.email) {
+      setEmailRecipients(ownerContact.email);
+    } else {
+      setEmailRecipients('');
+    }
+  };
+
+  const handleConfirmSend = () => {
+    setPreviewBeforeSend(null);
+    setShowSendDialog(true);
   };
 
   const getReportTypeLabel = (type: ReportType) => {
@@ -396,7 +409,7 @@ export default function ReportsPage() {
               <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
               Excel
             </Button>
-            <Button variant="ghost" size="sm" className="h-8" onClick={() => { setSelectedReportForSend(report.id); setShowSendDialog(true); }}>
+            <Button variant="ghost" size="sm" className="h-8" onClick={() => handleOpenSendFlow(report)}>
               <Send className="h-3.5 w-3.5 mr-1" />
               <span className="hidden md:inline">{isRu ? 'Отправить' : 'Send'}</span>
             </Button>
@@ -436,151 +449,15 @@ export default function ReportsPage() {
             {isRu ? 'Финансовые отчёты по объектам' : 'Financial reports for properties'}
           </p>
         </div>
-        <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setShowOwnerInvite(true)}>
               <UserPlus className="h-4 w-4" />
             </Button>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-1.5" />
-                {isRu ? 'Создать' : 'Create'}
-              </Button>
-            </DialogTrigger>
+            <Button size="sm" onClick={() => setShowWizard(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              {isRu ? 'Создать' : 'Create'}
+            </Button>
           </div>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{isRu ? 'Новый отчёт' : 'New Report'}</DialogTitle>
-              <DialogDescription>
-                {isRu ? 'Выберите объект, тип и период' : 'Select property, type and period'}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* Scope */}
-              {scopeOptions.length > 1 && (
-                <div className="flex gap-1.5 flex-wrap">
-                  {scopeOptions.map(s => {
-                    const Icon = s.icon;
-                    return (
-                      <button
-                        key={s.value}
-                        onClick={() => setGenerateScope(s.value)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                          generateScope === s.value
-                            ? 'bg-primary/10 border-primary/30 text-primary'
-                            : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        {s.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Property selector */}
-              {generateScope === 'property' && (
-                <div className="space-y-2">
-                  <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-                    <SelectTrigger><SelectValue placeholder={isRu ? 'Выберите объект' : 'Select property'} /></SelectTrigger>
-                    <SelectContent>
-                      {allSelectableProperties.map((p: any) => (
-                        <SelectItem key={p.id || p.property_id} value={p.id || p.property_id}>
-                          {isRu ? p.title_ru || p.title : p.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedPropertyId && (() => {
-                    const policy = (accountingPolicies || []).find((p: any) => p.property_id === selectedPropertyId);
-                    return policy ? (
-                      <Badge variant="secondary" className="text-[10px]">
-                        <FileText className="h-3 w-3 mr-1" />
-                        {policy.policy_name || (isRu ? 'Политика настроена' : 'Policy set')}
-                      </Badge>
-                    ) : null;
-                  })()}
-                </div>
-              )}
-
-              {generateScope === 'complex' && (
-                <Select value={selectedComplexId} onValueChange={setSelectedComplexId}>
-                  <SelectTrigger><SelectValue placeholder={isRu ? 'Комплекс' : 'Complex'} /></SelectTrigger>
-                  <SelectContent>
-                    {(complexes || []).map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{isRu ? c.name_ru || c.name : c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {generateScope === 'owner' && (
-                <Select value={selectedOwnerId} onValueChange={setSelectedOwnerId}>
-                  <SelectTrigger><SelectValue placeholder={isRu ? 'Собственник' : 'Owner'} /></SelectTrigger>
-                  <SelectContent>
-                    {(ownerContacts || []).map((o: any) => (
-                      <SelectItem key={o.id} value={o.id}>{o.first_name} {o.last_name} ({o.propertyIds?.length || 0})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {generateScope === 'portfolio' && (
-                <p className="text-sm text-muted-foreground rounded-lg border bg-muted/30 p-3">
-                  {isRu ? `Для всех ${scopePropertyIds.length} объектов` : `For all ${scopePropertyIds.length} properties`}
-                </p>
-              )}
-
-              {/* Report type */}
-              <Select value={selectedReportType} onValueChange={(v) => setSelectedReportType(v as ReportType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="monthly">{isRu ? 'Ежемесячный' : 'Monthly'}</SelectItem>
-                  <SelectItem value="quarterly">{isRu ? 'Квартальный' : 'Quarterly'}</SelectItem>
-                  <SelectItem value="annual">{isRu ? 'Годовой' : 'Annual'}</SelectItem>
-                  <SelectItem value="per_booking">{isRu ? 'По заездам' : 'Per Booking'}</SelectItem>
-                  <SelectItem value="owner_statement">{isRu ? 'Отчёт собственнику' : 'Owner Statement'}</SelectItem>
-                  <SelectItem value="pnl">{isRu ? 'P&L' : 'P&L'}</SelectItem>
-                  <SelectItem value="management">{isRu ? 'Управленческий' : 'Management'}</SelectItem>
-                  <SelectItem value="custom">{isRu ? 'Свой период' : 'Custom period'}</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {selectedReportType === 'custom' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">{isRu ? 'С' : 'From'}</Label>
-                    <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">{isRu ? 'По' : 'To'}</Label>
-                    <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              {scopePropertyIds.length > 1 && (
-                <p className="text-xs text-muted-foreground">
-                  {isRu ? `Будет создано ${scopePropertyIds.length} отчётов` : `${scopePropertyIds.length} reports will be created`}
-                </p>
-              )}
-
-              <Button
-                onClick={handleGenerate}
-                className="w-full"
-                disabled={scopePropertyIds.length === 0 || generateReport.isPending || isBatchGenerating}
-              >
-                {(generateReport.isPending || isBatchGenerating) ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{isRu ? 'Генерация...' : 'Generating...'}</>
-                ) : (
-                  <><Plus className="h-4 w-4 mr-2" />{isRu ? 'Создать отчёт' : 'Generate Report'}</>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Tabs */}
@@ -666,7 +543,7 @@ export default function ReportsPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   {isRu ? 'Создайте первый отчёт' : 'Generate your first report'}
                 </p>
-                <Button onClick={() => setShowGenerateDialog(true)} size="sm">
+                <Button onClick={() => setShowWizard(true)} size="sm">
                   <Plus className="h-4 w-4 mr-1.5" />
                   {isRu ? 'Создать' : 'Create'}
                 </Button>
@@ -737,18 +614,90 @@ export default function ReportsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Send Email Dialog */}
+      {/* Wizard Dialog */}
+      <Dialog open={showWizard} onOpenChange={setShowWizard}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isRu ? 'Новый отчёт' : 'New Report'}</DialogTitle>
+            <DialogDescription>
+              {isRu ? 'Пошаговый мастер создания отчёта' : 'Step-by-step report wizard'}
+            </DialogDescription>
+          </DialogHeader>
+          <ReportWizard
+            properties={allSelectableProperties.map((p: any) => ({
+              id: p.id || p.property_id,
+              title: p.title || '',
+              title_ru: p.title_ru,
+              complex_id: p.complex_id,
+            }))}
+            complexes={(complexes || []).map((c: any) => ({ id: c.id, name: c.name, name_ru: c.name_ru }))}
+            ownerContacts={(ownerContacts || []).map((o: any) => ({
+              id: o.id, first_name: o.first_name, last_name: o.last_name, propertyIds: o.propertyIds || [],
+            }))}
+            onComplete={handleWizardComplete}
+            onCancel={() => setShowWizard(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview before send */}
+      <ReportDetailSheet
+        report={previewBeforeSend}
+        open={!!previewBeforeSend}
+        onOpenChange={(open) => { if (!open) { setPreviewBeforeSend(null); setSelectedReportForSend(null); } }}
+        actionSlot={
+          <Button className="w-full mt-3" onClick={handleConfirmSend}>
+            <Send className="h-4 w-4 mr-2" />
+            {isRu ? 'Перейти к отправке' : 'Proceed to Send'}
+          </Button>
+        }
+      />
+
+      {/* Send Email Dialog with CRM autocomplete */}
       <Dialog open={showSendDialog} onOpenChange={setShowSendDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{isRu ? 'Отправить отчёт' : 'Send Report'}</DialogTitle>
+            <DialogDescription>
+              {isRu ? 'Выберите получателя или введите email' : 'Select a recipient or enter email'}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <Input
-              placeholder="email@example.com"
-              value={emailRecipients}
-              onChange={(e) => setEmailRecipients(e.target.value)}
-            />
+            {/* Quick select from CRM contacts */}
+            {(ownerContacts || []).filter((o: any) => o.email).length > 0 && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{isRu ? 'Собственники' : 'Owner contacts'}</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(ownerContacts || []).filter((o: any) => o.email).map((o: any) => (
+                    <button
+                      key={o.id}
+                      onClick={() => {
+                        const emails = emailRecipients.split(',').map((e: string) => e.trim()).filter(Boolean);
+                        if (!emails.includes(o.email)) {
+                          setEmailRecipients(emails.length ? `${emailRecipients}, ${o.email}` : o.email);
+                        }
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+                        emailRecipients.includes(o.email)
+                          ? 'bg-primary/10 border-primary/30 text-primary'
+                          : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      {o.first_name} {o.last_name?.[0]}.
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Email</Label>
+              <Input
+                placeholder="email@example.com"
+                value={emailRecipients}
+                onChange={(e) => setEmailRecipients(e.target.value)}
+              />
+              <p className="text-[10px] text-muted-foreground">{isRu ? 'Через запятую для нескольких' : 'Comma-separated for multiple'}</p>
+            </div>
             <Button onClick={handleSendEmail} className="w-full" disabled={!emailRecipients.trim() || sendReportEmail.isPending}>
               {sendReportEmail.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               {isRu ? 'Отправить' : 'Send'}
@@ -757,6 +706,7 @@ export default function ReportsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* View report detail */}
       <ReportDetailSheet report={viewReport} open={!!viewReport} onOpenChange={(open) => { if (!open) setViewReport(null); }} />
 
       <AlertDialog open={!!deleteReportId} onOpenChange={() => setDeleteReportId(null)}>

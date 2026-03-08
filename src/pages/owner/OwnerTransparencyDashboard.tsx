@@ -16,6 +16,7 @@ import { ActivityFeed } from '@/components/owner/transparency/ActivityFeed';
 import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab';
 import { OwnerBookingsTab } from '@/components/owner/transparency/OwnerBookingsTab';
 import { OwnerTermsTab } from '@/components/owner/transparency/OwnerTermsTab';
+import { OwnerReportsTab } from '@/components/owner/transparency/OwnerReportsTab';
 import { OwnerNotificationBell } from '@/components/owner/transparency/OwnerNotificationBell';
 
 export default function OwnerTransparencyDashboard() {
@@ -101,6 +102,7 @@ export default function OwnerTransparencyDashboard() {
           <TabsTrigger value="overview">{isRu ? 'Обзор' : 'Overview'}</TabsTrigger>
           <TabsTrigger value="activity">{isRu ? 'Лента' : 'Activity'}</TabsTrigger>
           <TabsTrigger value="finance">{isRu ? 'Финансы' : 'Finance'}</TabsTrigger>
+          <TabsTrigger value="reports">{isRu ? 'Отчёты' : 'Reports'}</TabsTrigger>
           <TabsTrigger value="bookings">{isRu ? 'Брони' : 'Bookings'}</TabsTrigger>
           <TabsTrigger value="terms">{isRu ? 'Условия' : 'Terms'}</TabsTrigger>
         </TabsList>
@@ -115,6 +117,10 @@ export default function OwnerTransparencyDashboard() {
 
         <TabsContent value="finance">
           <OwnerFinanceTab propertyId={propertyId!} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <OwnerReportsTab propertyId={propertyId!} />
         </TabsContent>
 
         <TabsContent value="bookings">
