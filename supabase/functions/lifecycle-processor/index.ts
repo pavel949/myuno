@@ -115,10 +115,9 @@ Deno.serve(async (req) => {
           await supabase.from("notifications").insert({
             user_id: exec.guest_user_id,
             title: tmpl.title_en,
-            message: tmpl.body_en,
+            body: tmpl.body_en,
             type: "booking",
-            action_url: ctaUrl,
-            metadata: {
+            data: {
               title_ru: tmpl.title_ru,
               body_ru: tmpl.body_ru,
               cta_label_en: tmpl.cta_label_en,
