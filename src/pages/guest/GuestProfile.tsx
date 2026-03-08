@@ -32,14 +32,15 @@ function useGuestHistory() {
     queryFn: async () => {
       if (!user?.id) return { orders: [], stats: { totalOrders: 0, totalSpent: 0, categories: [] } };
       
-      const result: any = await supabase
-        .from('orders')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ordersTable = (supabase as any).from('orders');
+      const result = await ordersTable
         .select('id, status, total_amount, currency, created_at, vertical')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
-      const orders = result.data as any[] | null;
-      const error = result.error;
+      const orders = (result.data || []) as any[];
+      if (result.error) throw result.error;
       
       if (error) throw error;
       
