@@ -17,6 +17,26 @@ import {
 } from 'lucide-react';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Map situation codes to relevant category slugs
+const SITUATION_CATEGORY_MAP: Record<string, string[]> = {
+  arrival: ['transport', 'property', 'insurance', 'transfer', 'banking', 'visa'],
+  living: ['cleaning', 'services', 'restaurants', 'market', 'fitness', 'medical'],
+  leisure: ['yachts', 'water', 'events', 'restaurants', 'experiences', 'beauty'],
+  health: ['medical', 'pharmacy', 'fitness', 'insurance'],
+  family: ['babysitter', 'education', 'medical', 'events', 'pets'],
+  property: ['property', 'services', 'cleaning', 'legal'],
+  relocation: ['visa', 'legal', 'banking', 'insurance', 'property', 'transport'],
+  business: ['legal', 'banking', 'services', 'market'],
+  pets: ['pets', 'veterinary', 'services'],
+  education: ['education', 'events'],
+  shopping: ['market', 'flowers', 'restaurants'],
+  nightlife: ['events', 'restaurants', 'transport'],
+  sports: ['fitness', 'water', 'experiences'],
+  visa_travel: ['visa', 'insurance', 'transport', 'transfer'],
+};
 
 const iconMap: Record<string, LucideIcon> = {
   Plane, Home, Palmtree, Heart, Users, Building, Globe, Briefcase,

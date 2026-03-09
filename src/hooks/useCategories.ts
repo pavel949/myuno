@@ -155,7 +155,7 @@ function transformCategory(raw: RawCategory): Category {
     slug: raw.slug,
     nameEn: raw.name_en,
     nameRu: raw.name_ru,
-    icon: iconMap[iconName] || LucideIcons.Package,
+    icon: iconMap[iconName] || Package,
     iconName,
     color: raw.color || 'from-gray-500 to-gray-600',
     path: getPath(raw),
