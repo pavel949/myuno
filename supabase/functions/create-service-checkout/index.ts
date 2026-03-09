@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
       payment_method_types: paymentMethods,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/services/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}/services/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/services/booking/${provider_id}?canceled=true`,
       metadata: {
         user_id: user.id,
