@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { usePetService } from '@/hooks/usePetServices';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function PetServiceDetail() {
