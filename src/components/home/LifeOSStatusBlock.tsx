@@ -119,10 +119,6 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
   if (!activeCode) return null;
 
   const activeSituation = situations?.find(s => s.code === activeCode);
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
 
   const actions = CONTEXT_ACTIONS[activeCode] || [];
   const isArrival = activeCode === 'arrival';
