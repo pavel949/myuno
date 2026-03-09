@@ -140,7 +140,7 @@ const StoreDetail = () => {
       <div className="pb-32">
         {/* Hero Image */}
         <div className="relative h-48">
-          <img src={store.cover_image || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800'} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
+          <img src={store.cover_image || PLACEHOLDER_IMAGES.store} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
           <div className="absolute top-4 left-4 right-4 flex justify-between">

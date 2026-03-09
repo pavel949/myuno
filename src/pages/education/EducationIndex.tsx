@@ -73,7 +73,7 @@ export default function EducationIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={provider.cover_image || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400'}
+                      src={provider.cover_image || PLACEHOLDER_IMAGES.education}
                       alt={name}
                       width={400}
                       height={300}

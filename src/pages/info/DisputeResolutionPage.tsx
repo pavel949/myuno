@@ -391,7 +391,7 @@ export default function DisputeResolutionPage() {
               </div>
               <div className="text-center p-4 bg-muted rounded-lg">
                 <Phone className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm font-medium">+66 76 XXX XXX</p>
+                <p className="text-sm font-medium">{COMPANY_CONTACTS.phone.display}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Срочная линия' : 'Urgent line'}</p>
               </div>
             </div>
