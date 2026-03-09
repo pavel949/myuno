@@ -169,7 +169,7 @@ const FlowerShopDetail = () => {
                 return (
                   <div key={product.id} className="rounded-xl bg-card border border-border/50 overflow-hidden">
                     <div className="relative aspect-square">
-                      <img src={product.image || 'https://images.unsplash.com/photo-15611812PLACEHOLDER_IMAGES.flowerProduct: product.name_en} className="w-full h-full object-cover" />
+                      <img src={product.image || PLACEHOLDER_IMAGES.flowerProduct} alt={language === 'ru' ? product.name_ru : product.name_en} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-3">
                       <h3 className="font-medium text-sm truncate">{language === 'ru' ? product.name_ru : product.name_en}</h3>

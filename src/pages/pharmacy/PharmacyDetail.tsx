@@ -185,7 +185,9 @@ export default function PharmacyDetail() {
                 <div key={product.id} className="bg-card rounded-xl border overflow-hidden">
                   <div className="relative">
                     <img
-                      src={product.image || 'https://images.unsplash.com/photo-158430PLACEHOLDER_IMAGES.pharmacyProduct            className="w-full h-28 object-cover"
+                      src={product.image || PLACEHOLDER_IMAGES.pharmacyProduct}
+                      alt=""
+                      className="w-full h-28 object-cover"
                     />
                     {product.requires_prescription && (
                       <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px]">
