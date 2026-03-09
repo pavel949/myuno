@@ -365,7 +365,7 @@ export function MultiImageUpload({
           };
           const ext = extMap[contentType] || 'jpg';
           
-          const fileName = `${Date.now()}-${Math.racrypto.randomUUID().slice(0, 12t}`;
+          const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12)}.${ext}`;
           const filePath = `${user.id}/${folder}/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
