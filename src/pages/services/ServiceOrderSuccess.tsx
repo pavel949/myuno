@@ -1,18 +1,20 @@
- import { useNavigate, useLocation } from 'react-router-dom';
- import { CheckCircle2, Home, ArrowRight } from 'lucide-react';
- import { resolveIcon } from '@/lib/iconMap';
- import { Button } from '@/components/ui/button';
- import { Card, CardContent } from '@/components/ui/card';
- import { useLanguage } from '@/contexts/LanguageContext';
- import { motion } from 'framer-motion';
- 
- export default function ServiceOrderSuccess() {
-   const navigate = useNavigate();
-   const location = useLocation();
-   const { language } = useLanguage();
-   const isRu = language === 'ru';
-   
-   const { functionName, functionIcon } = location.state || {};
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, Home, ArrowRight } from 'lucide-react';
+import { resolveIcon } from '@/lib/iconMap';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { motion } from 'framer-motion';
+
+export default function ServiceOrderSuccess() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  
+  const sessionId = searchParams.get('session_id');
+  const { functionName, functionIcon } = location.state || {};
  
    return (
      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
