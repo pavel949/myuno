@@ -13,6 +13,7 @@ import {
   FileText,
   CheckCircle2
 } from 'lucide-react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
