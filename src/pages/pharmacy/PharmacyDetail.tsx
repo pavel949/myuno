@@ -84,9 +84,7 @@ export default function PharmacyDetail() {
         {/* Header */}
         <div className="relative -mx-4 -mt-4">
           <img
-            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacy}
-            alt=""
-            className="w-full h-48 object-cover"
+            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacye="w-full h-48 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
           <Button
@@ -185,9 +183,7 @@ export default function PharmacyDetail() {
                 <div key={product.id} className="bg-card rounded-xl border overflow-hidden">
                   <div className="relative">
                     <img
-                      src={product.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200'}
-                      alt=""
-                      className="w-full h-28 object-cover"
+                      src={product.image || 'https://images.unsplash.com/photo-158430PLACEHOLDER_IMAGES.pharmacyProduct            className="w-full h-28 object-cover"
                     />
                     {product.requires_prescription && (
                       <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px]">

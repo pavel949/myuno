@@ -128,7 +128,7 @@ const FlowerShopDetail = () => {
     <AppLayout showBottomNav={false}>
       <div className="min-h-screen bg-background pb-24">
         <div className="relative h-64">
-          <img src={shop.cover_image || PLACEHOLDER_IMAGES.flower} alt={shopName} className="w-full h-full object-cover" />
+          <img src={shop.cover_image || PLACEHOLDER_IMAGES.flowerbject-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
@@ -168,7 +168,7 @@ const FlowerShopDetail = () => {
                 return (
                   <div key={product.id} className="rounded-xl bg-card border border-border/50 overflow-hidden">
                     <div className="relative aspect-square">
-                      <img src={product.image || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=400'} alt={language === 'ru' ? product.name_ru : product.name_en} className="w-full h-full object-cover" />
+                      <img src={product.image || 'https://images.unsplash.com/photo-15611812PLACEHOLDER_IMAGES.flowerProduct: product.name_en} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-3">
                       <h3 className="font-medium text-sm truncate">{language === 'ru' ? product.name_ru : product.name_en}</h3>

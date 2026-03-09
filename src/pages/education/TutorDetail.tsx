@@ -77,7 +77,7 @@ export default function TutorDetail() {
   const name = tutor.name_en;
   const specialty = language === "ru" ? tutor.name_ru : tutor.name_en;
   const description = language === "ru" ? tutor.description_ru : tutor.description_en;
-  const image = tutor.cover_image || tutor.images?.[0] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800';
+  const image = tutor.cover_image || tutor.images?.[0] || PLACEHOLDER_IMAGES.tutor;
 
   return (
     <div className="min-h-screen bg-background pb-24">

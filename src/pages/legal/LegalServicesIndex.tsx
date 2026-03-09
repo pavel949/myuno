@@ -124,7 +124,7 @@ export default function LegalServicesIndex() {
                         {filteredProviders.map((provider) => (
                           <ItemCard
                             key={provider.id}
-                            image={provider.cover_image || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=200'}
+                            image={provider.cover_image || PLACEHOLDER_IMAGES.legal}
                             title={isRu ? provider.name_ru : provider.name_en}
                             subtitle={isRu ? provider.description_ru : provider.description_en}
                             rating={provider.rating}

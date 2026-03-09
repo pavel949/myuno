@@ -82,7 +82,7 @@ export default function CourseDetail() {
   const title = language === "ru" ? course.name_ru : course.name_en;
   const description = language === "ru" ? course.description_ru : course.description_en;
   const images = course.images || (course.cover_image ? [course.cover_image] : []);
-  const heroImage = course.cover_image || images[0] || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800';
+  const heroImage = course.cover_image || images[0] || PLACEHOLDER_IMAGES.education;
   const price = course.price_per_course || course.price_per_hour || 0;
   const isKids = course.age_groups?.includes('kids');
 

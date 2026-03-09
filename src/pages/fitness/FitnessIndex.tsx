@@ -86,7 +86,7 @@ export default function FitnessIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={gym.cover_image || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400'}
+                      src={gym.cover_image || PLACEHOLDER_IMAGES.gym}
                       alt={name}
                       width={400}
                       height={300}

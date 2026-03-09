@@ -142,7 +142,7 @@ export default function RestaurantsIndex() {
                   >
                     <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                       <OptimizedImage
-                        src={heroImage || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'}
+                        src={heroImage || PLACEHOLDER_IMAGES.food}
                         alt={isRu ? restaurant.name_ru : restaurant.name_en}
                         width={400}
                         height={300}

@@ -120,7 +120,7 @@ export default function MedicalIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={clinic.cover_image || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400'}
+                      src={clinic.cover_image || PLACEHOLDER_IMAGES.medical}
                       alt={name}
                       width={400}
                       height={300}
