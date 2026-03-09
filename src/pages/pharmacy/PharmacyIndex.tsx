@@ -8,6 +8,7 @@ import { CatalogHeader } from "@/components/shared/CatalogHeader";
 import { ItemCard } from "@/components/miniapp";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/uno/EmptyState";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { FilterValues, pharmacyFilterConfig } from "@/components/filters";
 
 const PHARMACY_CATEGORIES = [

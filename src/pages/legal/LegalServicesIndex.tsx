@@ -13,6 +13,7 @@ import { useLegalServices } from "@/hooks/useLegalServices";
 import { VisaServicesSection } from "./VisaServicesSection";
 import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },

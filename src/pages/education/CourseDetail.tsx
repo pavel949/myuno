@@ -8,6 +8,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { FavoriteButton } from "@/components/uno/FavoriteButton";
 import { useViewHistory } from "@/hooks/useViewHistory";
 import { useSupabaseSingle } from "@/hooks/useSupabaseQuery";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useCallback } from "react";
 import { RelatedServicesSection } from '@/components/crosssell';
 

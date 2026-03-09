@@ -23,6 +23,7 @@ import { TrustBadges } from '@/components/uno/TrustBadges';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { getTransmissionLabel, getFuelLabel, getLocalizedFeatures, getCategoryConfig } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function VehicleDetail() {
   const { id } = useParams();

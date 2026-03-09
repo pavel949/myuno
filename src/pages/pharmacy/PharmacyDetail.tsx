@@ -13,6 +13,7 @@ import {
   ArrowLeft, Star, MapPin, Shield, Phone, Truck, 
   Plus, FileText 
 } from "lucide-react";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from "@/components/cart/StickyCartBar";
 import { useCartToast } from "@/hooks/useCartToast";
 
