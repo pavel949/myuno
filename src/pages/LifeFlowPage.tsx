@@ -21,8 +21,7 @@ import { LifeFlowCatalogGrid } from '@/components/life-flow/LifeFlowCatalogGrid'
 import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
 import { ArrowLeft, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion } from 'framer-motion';
 
 export default function LifeFlowPage() {
@@ -46,12 +45,7 @@ export default function LifeFlowPage() {
     }
   }, [currentSituation, isRussian, setLifeSituation]);
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || Compass;
-  };
-
-  const SituationIcon = currentSituation ? getIcon(currentSituation.icon) : Compass;
+  const situationIconName = currentSituation?.icon || 'compass';
   const isLoading = routeLoading;
 
   return (
@@ -78,7 +72,7 @@ export default function LifeFlowPage() {
                 className="flex items-start gap-4"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-                  <SituationIcon className="w-6 h-6 text-primary" />
+                  <DynamicIcon name={situationIconName} className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0 pt-1">
                   <h1 className="text-xl font-bold">

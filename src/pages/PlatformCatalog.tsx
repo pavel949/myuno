@@ -9,8 +9,13 @@ import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useCategories, Category, CategoryGroup } from '@/hooks/useCategories';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { cn } from '@/lib/utils';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon, LayoutGrid, Layers } from 'lucide-react';
+import {
+  Plane, Home, Palmtree, Heart, Users, Building, Globe, Briefcase,
+  PawPrint, GraduationCap, ShoppingBag, Music, Trophy, Stamp,
+  Compass, Sun, MapPin, LayoutGrid, Layers,
+  type LucideIcon
+} from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,27 +39,13 @@ const SITUATION_CATEGORY_MAP: Record<string, string[]> = {
 };
 
 const iconMap: Record<string, LucideIcon> = {
-  Plane: LucideIcons.Plane,
-  Home: LucideIcons.Home,
-  Palmtree: LucideIcons.Palmtree,
-  Heart: LucideIcons.Heart,
-  Users: LucideIcons.Users,
-  Building: LucideIcons.Building,
-  Globe: LucideIcons.Globe,
-  Briefcase: LucideIcons.Briefcase,
-  PawPrint: LucideIcons.PawPrint,
-  GraduationCap: LucideIcons.GraduationCap,
-  ShoppingBag: LucideIcons.ShoppingBag,
-  Music: LucideIcons.Music,
-  Trophy: LucideIcons.Trophy,
-  Stamp: LucideIcons.Stamp,
-  Compass: LucideIcons.Compass,
-  Sun: LucideIcons.Sun,
-  MapPin: LucideIcons.MapPin,
+  Plane, Home, Palmtree, Heart, Users, Building, Globe, Briefcase,
+  PawPrint, GraduationCap, ShoppingBag, Music, Trophy, Stamp,
+  Compass, Sun, MapPin,
 };
 
 function resolveIcon(name: string): LucideIcon {
-  return iconMap[name] || LucideIcons.Compass;
+  return iconMap[name] || Compass;
 }
 
 export default memo(function PlatformCatalog() {

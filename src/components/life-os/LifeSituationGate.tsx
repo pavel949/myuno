@@ -11,8 +11,7 @@ import { useLifeSituations } from '@/hooks/useLifeOS';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Compass, ArrowRight, HelpCircle } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -49,10 +48,6 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
   const { data: situations, isLoading } = useLifeSituations();
   const isRu = language === 'ru';
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || Compass;
-  };
 
   const handleSelect = (situation: {
     code: string;
@@ -104,7 +99,6 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {situations?.slice(0, 8).map((situation) => {
-              const Icon = getIcon(situation.icon);
               return (
                 <motion.button
                   key={situation.id}
@@ -123,7 +117,7 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
                     className="w-11 h-11 rounded-xl flex items-center justify-center"
                     style={{ backgroundColor: `${situation.color}15` }}
                   >
-                    <Icon className="w-6 h-6" style={{ color: situation.color }} />
+                    <DynamicIcon name={situation.icon} className="w-6 h-6" style={{ color: situation.color }} />
                   </div>
                   <span className="text-xs font-medium leading-tight line-clamp-2">
                     {isRu ? situation.title_ru : situation.title_en}

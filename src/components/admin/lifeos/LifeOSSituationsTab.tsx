@@ -17,8 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import { Plus, Lock, Eye, EyeOff, Save } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 
 export function LifeOSSituationsTab() {
@@ -40,10 +39,6 @@ export function LifeOSSituationsTab() {
     priority: 100,
   });
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
 
   const handleToggleActive = async (situation: LifeSituation) => {
     const { error } = await supabase
@@ -233,7 +228,6 @@ export function LifeOSSituationsTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {situations?.map((situation) => {
-            const Icon = getIcon(situation.icon);
             const isEditing = editingSituation?.id === situation.id;
 
             return (
@@ -251,7 +245,7 @@ export function LifeOSSituationsTab() {
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{ backgroundColor: `${situation.color}20` }}
                     >
-                      <Icon className="w-6 h-6" style={{ color: situation.color }} />
+                      <DynamicIcon name={situation.icon} className="w-6 h-6" style={{ color: situation.color }} />
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={situation.is_active ? 'default' : 'secondary'}>

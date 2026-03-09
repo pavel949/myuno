@@ -23,8 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Plus, Trash2, Link2, Settings2, Sparkles, Users } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 
 const ENTITY_TYPES = [
@@ -62,10 +61,6 @@ export default function AdminLifeSituations() {
     role_scope: ['guest', 'resident', 'owner', 'investor'] as LifeOSRole[],
   });
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
 
   const handleToggleActive = async (situation: LifeSituation) => {
     const { error } = await supabase
@@ -186,7 +181,6 @@ export default function AdminLifeSituations() {
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : (
               situations?.map((situation) => {
-                const Icon = getIcon(situation.icon);
                 const isSelected = selectedSituation?.id === situation.id;
 
                 return (
@@ -204,7 +198,7 @@ export default function AdminLifeSituations() {
                       className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                       style={{ backgroundColor: `${situation.color}15` }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: situation.color }} />
+                      <DynamicIcon name={situation.icon} className="w-5 h-5" style={{ color: situation.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">

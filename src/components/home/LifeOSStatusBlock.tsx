@@ -10,8 +10,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useTripChecklist } from '@/hooks/useTripChecklist';
 import { CheckCircle2, Circle, ArrowRight, ListChecks } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 
@@ -120,10 +119,6 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
   if (!activeCode) return null;
 
   const activeSituation = situations?.find(s => s.code === activeCode);
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
 
   const actions = CONTEXT_ACTIONS[activeCode] || [];
   const isArrival = activeCode === 'arrival';
@@ -147,10 +142,7 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: 'color-mix(in srgb, var(--situation-color) 12%, transparent)' }}
               >
-                {React.createElement(getIcon(activeSituation.icon), {
-                  className: "w-4 h-4",
-                  style: { color: 'var(--situation-color)' },
-                })}
+                <DynamicIcon name={activeSituation.icon} className="w-4 h-4" style={{ color: 'var(--situation-color)' }} />
               </div>
             )}
             <div>
@@ -194,14 +186,13 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
           </p>
           <div className="space-y-1.5">
             {actions.map((action) => {
-              const Icon = getIcon(action.icon);
               return (
                 <button
                   key={action.path}
                   onClick={() => navigate(action.path)}
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl bg-card border border-border/50 hover:border-border text-left transition-all active:scale-[0.98]"
                 >
-                  <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <DynamicIcon name={action.icon} className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-[13px] font-medium text-foreground flex-1">
                     {isRu ? action.labelRu : action.labelEn}
                   </span>
