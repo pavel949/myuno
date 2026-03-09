@@ -77,7 +77,7 @@ export const UnifiedCard = memo(function UnifiedCard({
               alt={title}
               loading="lazy"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=300';
+                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGES.cardFallback;
               }}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             />
