@@ -17,7 +17,7 @@ const babysitters = [
     id: 'bs-1',
     nameEn: 'Anna Petrova',
     nameRu: 'Анна Петрова',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    image: PLACEHOLDER_IMAGES.babysitter,
     rating: 4.9,
     reviewCount: 87,
     experience: '5 years',
