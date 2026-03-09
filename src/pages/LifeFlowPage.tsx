@@ -45,12 +45,7 @@ export default function LifeFlowPage() {
     }
   }, [currentSituation, isRussian, setLifeSituation]);
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || Compass;
-  };
-
-  const SituationIcon = currentSituation ? getIcon(currentSituation.icon) : Compass;
+  const situationIconName = currentSituation?.icon || 'compass';
   const isLoading = routeLoading;
 
   return (
