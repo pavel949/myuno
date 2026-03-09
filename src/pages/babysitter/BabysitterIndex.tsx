@@ -49,7 +49,7 @@ const babysitters = [
     id: 'bs-2',
     nameEn: 'Maria Ivanova',
     nameRu: 'Мария Иванова',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
+    image: PLACEHOLDER_IMAGES.avatar,
     rating: 4.8,
     reviewCount: 65,
     experienceEn: '8 years',
