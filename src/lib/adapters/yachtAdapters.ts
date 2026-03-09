@@ -27,7 +27,9 @@ export interface YachtCardProps {
   location?: string;
 }
 
-const DEFAULT_YACHT_IMAGE = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=600';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+
+const DEFAULT_YACHT_IMAGE = PLACEHOLDER_IMAGES.yacht;
 
 const YACHT_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
   motor_yacht: { en: 'Motor Yacht', ru: 'Моторная яхта' },

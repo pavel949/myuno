@@ -30,7 +30,9 @@ export interface VehicleCardProps {
   badge?: { text: string; className?: string };
 }
 
-const DEFAULT_VEHICLE_IMAGE = 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+
+const DEFAULT_VEHICLE_IMAGE = PLACEHOLDER_IMAGES.vehicle;
 
 /**
  * Map a Vehicle from DB to ItemCard props

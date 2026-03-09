@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { triggerRipple } from '@/hooks/useRipple';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 type CardVariant = 'vertical' | 'horizontal' | 'compact' | 'featured';
 

@@ -2,28 +2,24 @@
  * Default fallback values for images, placeholders, and mock data indicators
  */
 
-// Default images for different entity types
+// Default images — re-exported from centralized placeholders for backward compat
+import { PLACEHOLDER_IMAGES } from './placeholders';
+
 export const DEFAULT_IMAGES = {
   // User/Profile
   avatar: '/placeholder.svg',
   userPlaceholder: '/placeholder.svg',
   
-  // Properties
-  property: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
-  villa: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-  apartment: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
-  
-  // Services
-  service: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
-  restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
-  salon: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800',
-  
-  // Products
-  product: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
-  
-  // Experiences
-  tour: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800',
-  yacht: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
+  // Re-use centralized placeholders
+  property: PLACEHOLDER_IMAGES.property,
+  villa: PLACEHOLDER_IMAGES.villa,
+  apartment: PLACEHOLDER_IMAGES.apartment,
+  service: PLACEHOLDER_IMAGES.service,
+  restaurant: PLACEHOLDER_IMAGES.restaurant,
+  salon: PLACEHOLDER_IMAGES.salon,
+  product: PLACEHOLDER_IMAGES.product,
+  tour: PLACEHOLDER_IMAGES.tour,
+  yacht: PLACEHOLDER_IMAGES.yacht,
   
   // Placeholder for any content
   placeholder: '/placeholder.svg',

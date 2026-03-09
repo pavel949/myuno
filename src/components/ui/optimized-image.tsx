@@ -62,7 +62,7 @@ export const OptimizedImage = memo(forwardRef<HTMLDivElement, OptimizedImageProp
     sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
     onLoad,
     onError,
-    fallback = 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&q=60',
+    fallback = PLACEHOLDER_IMAGES.imageFallback,
   }: OptimizedImageProps, forwardedRef) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
