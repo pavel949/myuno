@@ -22,6 +22,7 @@ import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
+// TODO: Replace mock product data with database queries
 // Products data
 const storeProducts: Record<string, Array<{
   id: string;
