@@ -56,7 +56,7 @@ export function DocumentUpload({
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${Date.now()}-${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}.${fileExt}`;
       const filePath = `${user.id}/${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
