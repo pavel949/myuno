@@ -229,7 +229,10 @@ export default function OwnerProperties() {
   const handleBulkDelete = async () => {
     setBulkProcessing(true);
     const ids = Array.from(selectedIds);
-    const { error } = await supabase.from('properties').delete().in('id', ids);
+    const { error } = await supabase
+      .from('properties')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .in('id', ids);
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
     if (error) {
