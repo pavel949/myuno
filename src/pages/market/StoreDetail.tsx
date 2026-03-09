@@ -37,37 +37,37 @@ const storeProducts: Record<string, Array<{
   inStock: boolean;
 }>> = {
   'villa-market': [
-    { id: 'vm-1', nameEn: 'Organic Avocado', nameRu: 'Органическое авокадо', category: 'fruits', price: 89, image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'vm-2', nameEn: 'Australian Beef Steak', nameRu: 'Австралийский стейк', category: 'meat', price: 890, originalPrice: 1100, image: 'https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=400', unit: '500g', unitRu: '500г', inStock: true },
-    { id: 'vm-3', nameEn: 'French Cheese Selection', nameRu: 'Французские сыры', category: 'dairy', price: 650, image: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=400', unit: '300g', unitRu: '300г', inStock: true },
-    { id: 'vm-4', nameEn: 'Italian Olive Oil', nameRu: 'Итальянское оливковое масло', category: 'pantry', price: 450, image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', unit: '500ml', unitRu: '500мл', inStock: true },
+    { id: 'vm-1', nameEn: 'Organic Avocado', nameRu: 'Органическое авокадо', category: 'fruits', price: 89, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'vm-2', nameEn: 'Australian Beef Steak', nameRu: 'Австралийский стейк', category: 'meat', price: 890, originalPrice: 1100, image: PLACEHOLDER_IMAGES.store, unit: '500g', unitRu: '500г', inStock: true },
+    { id: 'vm-3', nameEn: 'French Cheese Selection', nameRu: 'Французские сыры', category: 'dairy', price: 650, image: PLACEHOLDER_IMAGES.store, unit: '300g', unitRu: '300г', inStock: true },
+    { id: 'vm-4', nameEn: 'Italian Olive Oil', nameRu: 'Итальянское оливковое масло', category: 'pantry', price: 450, image: PLACEHOLDER_IMAGES.store, unit: '500ml', unitRu: '500мл', inStock: true },
   ],
   'thai-souvenirs': [
-    { id: 'ts-1', nameEn: 'Elephant Figurine', nameRu: 'Фигурка слона', category: 'figurines', price: 450, image: 'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'ts-2', nameEn: 'Thai Silk Scarf', nameRu: 'Шёлковый шарф', category: 'textiles', price: 890, image: 'https://images.unsplash.com/photo-1601244005535-a48d21d951ac?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'ts-1', nameEn: 'Elephant Figurine', nameRu: 'Фигурка слона', category: 'figurines', price: 450, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'ts-2', nameEn: 'Thai Silk Scarf', nameRu: 'Шёлковый шарф', category: 'textiles', price: 890, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
   ],
   'pearl-gallery': [
-    { id: 'pg-1', nameEn: 'Pearl Necklace Classic', nameRu: 'Жемчужное ожерелье классика', category: 'necklaces', price: 8900, image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'pg-2', nameEn: 'Pearl Earrings Drop', nameRu: 'Серьги с жемчугом капля', category: 'earrings', price: 4500, image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400', unit: 'pair', unitRu: 'пара', inStock: true },
+    { id: 'pg-1', nameEn: 'Pearl Necklace Classic', nameRu: 'Жемчужное ожерелье классика', category: 'necklaces', price: 8900, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'pg-2', nameEn: 'Pearl Earrings Drop', nameRu: 'Серьги с жемчугом капля', category: 'earrings', price: 4500, image: PLACEHOLDER_IMAGES.store, unit: 'pair', unitRu: 'пара', inStock: true },
   ],
   'thai-cosmetics': [
-    { id: 'tc-1', nameEn: 'Coconut Oil Hair Mask', nameRu: 'Маска для волос с кокосом', category: 'hair', price: 320, image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400', unit: '200ml', unitRu: '200мл', inStock: true },
-    { id: 'tc-2', nameEn: 'Aloe Vera Gel', nameRu: 'Гель алоэ вера', category: 'skincare', price: 180, image: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400', unit: '250ml', unitRu: '250мл', inStock: true },
+    { id: 'tc-1', nameEn: 'Coconut Oil Hair Mask', nameRu: 'Маска для волос с кокосом', category: 'hair', price: 320, image: PLACEHOLDER_IMAGES.store, unit: '200ml', unitRu: '200мл', inStock: true },
+    { id: 'tc-2', nameEn: 'Aloe Vera Gel', nameRu: 'Гель алоэ вера', category: 'skincare', price: 180, image: PLACEHOLDER_IMAGES.store, unit: '250ml', unitRu: '250мл', inStock: true },
   ],
   'home-decor': [
-    { id: 'hd-1', nameEn: 'Rattan Pendant Lamp', nameRu: 'Подвесной светильник из ротанга', category: 'lighting', price: 2800, image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'hd-1', nameEn: 'Rattan Pendant Lamp', nameRu: 'Подвесной светильник из ротанга', category: 'lighting', price: 2800, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
   ],
   'thai-silk': [
-    { id: 'silk-1', nameEn: 'Silk Sarong', nameRu: 'Шёлковый саронг', category: 'clothing', price: 1500, image: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400', unit: 'piece', unitRu: 'шт', inStock: true },
+    { id: 'silk-1', nameEn: 'Silk Sarong', nameRu: 'Шёлковый саронг', category: 'clothing', price: 1500, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
   ],
   'wine-cellar': [
-    { id: 'wine-1', nameEn: 'French Bordeaux Red', nameRu: 'Французское красное Бордо', category: 'wine', price: 1800, image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400', unit: '750ml', unitRu: '750мл', inStock: true },
+    { id: 'wine-1', nameEn: 'French Bordeaux Red', nameRu: 'Французское красное Бордо', category: 'wine', price: 1800, image: PLACEHOLDER_IMAGES.store, unit: '750ml', unitRu: '750мл', inStock: true },
   ],
   'thai-sweets': [
-    { id: 'sw-1', nameEn: 'Mango Sticky Rice Box', nameRu: 'Манго с клейким рисом', category: 'desserts', price: 180, image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400', unit: 'box', unitRu: 'коробка', inStock: true },
+    { id: 'sw-1', nameEn: 'Mango Sticky Rice Box', nameRu: 'Манго с клейким рисом', category: 'desserts', price: 180, image: PLACEHOLDER_IMAGES.store, unit: 'box', unitRu: 'коробка', inStock: true },
   ],
   'makro': [
-    { id: 'mk-1', nameEn: 'Rice 5kg', nameRu: 'Рис 5 кг', category: 'staples', price: 220, image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', unit: '5kg', unitRu: '5кг', inStock: true },
+    { id: 'mk-1', nameEn: 'Rice 5kg', nameRu: 'Рис 5 кг', category: 'staples', price: 220, image: PLACEHOLDER_IMAGES.store, unit: '5kg', unitRu: '5кг', inStock: true },
   ],
 };
 
