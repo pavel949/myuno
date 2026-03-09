@@ -26,6 +26,7 @@ import {
 } from '@/components/booking';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
