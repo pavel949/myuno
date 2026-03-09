@@ -42,7 +42,6 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
         {nextRoutes.map((routeCode, i) => {
           const situation = situations?.find(s => s.code === routeCode);
           if (!situation) return null;
-          const Icon = getIcon(situation.icon);
 
           return (
             <button
@@ -58,7 +57,7 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
                 className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${situation.color}15` }}
               >
-                <Icon className="w-4.5 h-4.5" style={{ color: situation.color }} />
+                <DynamicIcon name={situation.icon} className="w-4.5 h-4.5" style={{ color: situation.color }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-tight">

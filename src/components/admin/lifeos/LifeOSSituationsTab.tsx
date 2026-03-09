@@ -228,7 +228,6 @@ export function LifeOSSituationsTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {situations?.map((situation) => {
-            const Icon = getIcon(situation.icon);
             const isEditing = editingSituation?.id === situation.id;
 
             return (
@@ -246,7 +245,7 @@ export function LifeOSSituationsTab() {
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
                       style={{ backgroundColor: `${situation.color}20` }}
                     >
-                      <Icon className="w-6 h-6" style={{ color: situation.color }} />
+                      <DynamicIcon name={situation.icon} className="w-6 h-6" style={{ color: situation.color }} />
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={situation.is_active ? 'default' : 'secondary'}>

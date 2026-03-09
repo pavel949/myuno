@@ -181,7 +181,6 @@ export default function AdminLifeSituations() {
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : (
               situations?.map((situation) => {
-                const Icon = getIcon(situation.icon);
                 const isSelected = selectedSituation?.id === situation.id;
 
                 return (
@@ -199,7 +198,7 @@ export default function AdminLifeSituations() {
                       className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                       style={{ backgroundColor: `${situation.color}15` }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: situation.color }} />
+                      <DynamicIcon name={situation.icon} className="w-5 h-5" style={{ color: situation.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">
