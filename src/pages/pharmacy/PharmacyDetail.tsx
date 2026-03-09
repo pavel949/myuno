@@ -84,7 +84,7 @@ export default function PharmacyDetail() {
         {/* Header */}
         <div className="relative -mx-4 -mt-4">
           <img
-            src={pharmacy.cover_image || 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800'}
+            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacy}
             alt=""
             className="w-full h-48 object-cover"
           />
