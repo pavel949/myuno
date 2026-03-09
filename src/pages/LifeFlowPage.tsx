@@ -21,8 +21,7 @@ import { LifeFlowCatalogGrid } from '@/components/life-flow/LifeFlowCatalogGrid'
 import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
 import { ArrowLeft, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion } from 'framer-motion';
 
 export default function LifeFlowPage() {
