@@ -104,6 +104,7 @@ function useAllComplexesAndProjects() {
 
 export default function OwnerProperties() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { roles } = useUserRoles();
