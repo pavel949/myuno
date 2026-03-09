@@ -8,7 +8,8 @@ import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspec
 import { MCCLeadsTab } from '@/components/admin/marketing/MCCLeadsTab';
 import { AdminOwnerProspects } from '@/components/admin/crm/AdminOwnerProspects';
 import { AdminCrmActivityLog } from '@/components/admin/crm/AdminCrmActivityLog';
-import { BarChart3, Target, Users, Building2, Activity, Kanban, Table } from 'lucide-react';
+import { VendorOutreachPanel } from '@/components/admin/crm/VendorOutreachPanel';
+import { BarChart3, Target, Users, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
 
 export default function AdminCRM() {
   const { language } = useLanguage();
