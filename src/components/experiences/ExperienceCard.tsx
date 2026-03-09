@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Compass, Waves, Star, Shield, Clock, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Experience, formatDuration } from '@/hooks/useExperiences';
