@@ -16,6 +16,7 @@ import {
   Loader2, MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { motion } from 'framer-motion';
 
 export default function VendorLanding() {
