@@ -207,7 +207,9 @@ export function useGenerateReport() {
           .from('property_bookings')
           .select('*')
           .eq('property_id', input.property_id)
-          .or(`check_in.gte.${input.period_start},check_out.lte.${input.period_end}`),
+          // overlap: check_in <= period_end AND check_out >= period_start
+          .lte('check_in', input.period_end)
+          .gte('check_out', input.period_start),
       ]);
 
       if (finError) throw finError;
