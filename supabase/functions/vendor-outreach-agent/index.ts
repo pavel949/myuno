@@ -36,7 +36,7 @@ interface OutreachResult {
 }
 
 const FOLLOW_UP_DELAYS_DAYS = [3, 7, 14]; // Days between follow-ups
-const INVITE_URL = "https://uno-connect-hub.lovable.app/vendor/join";
+const INVITE_URL = (Deno.env.get("SITE_URL") || "https://uno.ae") + "/vendor/join";
 
 /**
  * Generate personalized message using Lovable AI (Gemini)
