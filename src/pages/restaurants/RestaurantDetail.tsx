@@ -127,7 +127,7 @@ export default function RestaurantDetail() {
         {/* Hero Image */}
         <div className="relative h-56">
           <img
-            src={heroImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800'}
+            src={heroImage || PLACEHOLDER_IMAGES.restaurant}
             alt={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
             className="w-full h-full object-cover"
           />

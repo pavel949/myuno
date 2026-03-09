@@ -60,7 +60,7 @@ export default function SalonDetail() {
 
   const name = language === 'ru' ? salon.name_ru : salon.name_en;
   const description = language === 'ru' ? salon.description_ru : salon.description_en;
-  const heroImage = salon.cover_image || salon.images?.[0] || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800';
+  const heroImage = salon.cover_image || salon.images?.[0] || PLACEHOLDER_IMAGES.salon;
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => 

@@ -157,7 +157,7 @@ export default function InsuranceIndex() {
                     {providers.map((provider) => (
                       <ItemCard
                         key={provider.id}
-                        image={provider.cover_image || 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=200'}
+                        image={provider.cover_image || PLACEHOLDER_IMAGES.insurance}
                         title={isRu ? provider.name_ru : provider.name_en}
                         subtitle={isRu ? provider.description_ru : provider.description_en}
                         rating={provider.rating}
