@@ -142,10 +142,7 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: 'color-mix(in srgb, var(--situation-color) 12%, transparent)' }}
               >
-                {React.createElement(getIcon(activeSituation.icon), {
-                  className: "w-4 h-4",
-                  style: { color: 'var(--situation-color)' },
-                })}
+                <DynamicIcon name={activeSituation.icon} className="w-4 h-4" style={{ color: 'var(--situation-color)' }} />
               </div>
             )}
             <div>
