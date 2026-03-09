@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
