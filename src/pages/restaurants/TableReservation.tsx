@@ -8,6 +8,7 @@ import { useBooking } from '@/hooks/useBooking';
 import { useRestaurant } from '@/hooks/useRestaurants';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { 
   BookingDateTimeSelect, 
   BookingParticipants,

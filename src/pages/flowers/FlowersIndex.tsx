@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useBouquets } from '@/hooks/useBouquets';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 

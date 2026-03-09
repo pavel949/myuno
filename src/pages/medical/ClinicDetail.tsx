@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { useClinic, useDoctors, useMedicalServices } from '@/hooks/useClinics';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const ClinicDetail = () => {
   const { id } = useParams();

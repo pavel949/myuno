@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { CITY_GEOGRAPHY } from '@/lib/config/geography';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Loader2 } from 'lucide-react';
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };

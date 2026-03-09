@@ -16,6 +16,7 @@ import { CrossSellSection, RelatedServicesSection } from '@/components/crosssell
 import { getContextualCrossSell } from '@/lib/crossSellConfig';
 import { SEOHead, createTouristAttractionSchema } from '@/components/seo';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function ExperienceDetail() {
   const { id } = useParams<{ id: string }>();

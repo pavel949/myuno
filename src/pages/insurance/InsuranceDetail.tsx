@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
