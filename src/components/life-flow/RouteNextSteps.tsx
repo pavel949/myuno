@@ -8,8 +8,7 @@ import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLifeSituations } from '@/hooks/useLifeOS';
-import * as LucideIcons from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 
 interface RouteNextStepsProps {
   nextRoutes: string[];
