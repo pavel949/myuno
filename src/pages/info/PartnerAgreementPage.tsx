@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
-  Building2, Shield, CreditCard, Users, Star, Clock, 
+  Building2, Shield, CreditCard, Star, 
   CheckCircle, Scale, FileText, BadgeCheck, Crown,
-  AlertTriangle, Ban, ArrowRight, MessageCircle
+  ArrowRight, MessageCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,7 @@ export default function PartnerAgreementPage() {
             { emoji: '1️⃣', text: isRu ? 'Вы регистрируетесь и добавляете свои услуги — бесплатно' : 'Register and add your services — free' },
             { emoji: '2️⃣', text: isRu ? 'Клиенты находят вас на платформе и бронируют' : 'Clients find you on the platform and book' },
             { emoji: '3️⃣', text: isRu ? 'Вы оказываете услугу, мы переводим оплату каждую пятницу' : 'You deliver the service, we transfer payment every Friday' },
-            { emoji: '4️⃣', text: isRu ? 'Платформа удерживает согласованную комиссию' : 'Platform deducts the agreed commission' },
+            { emoji: '4️⃣', text: isRu ? 'Платформа удерживает комиссию по правилам ниже' : 'Platform deducts commission according to the rules below' },
           ].map((item, i) => (
             <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
               <span className="text-lg">{item.emoji}</span>
@@ -65,8 +65,14 @@ export default function PartnerAgreementPage() {
             <ConditionRow 
               icon="💰" 
               text={isRu 
-                ? 'Комиссия обсуждается индивидуально и фиксируется в договоре. Зависит от категории и объёма.' 
-                : 'Commission is discussed individually and fixed in contract. Depends on category and volume.'}
+                ? 'Flat rate: 10% для всех сервисных вертикалей платформы.' 
+                : 'Flat rate: 10% for all service verticals on the platform.'}
+            />
+            <ConditionRow 
+              icon="🏠" 
+              text={isRu 
+                ? 'Исключения: продажа недвижимости — 5%; property management — модель 70/30 (не комиссия листинга).' 
+                : 'Exceptions: property sale — 5%; property management — 70/30 model (not a listing commission).'}
             />
             <ConditionRow 
               icon="📅" 
@@ -120,14 +126,15 @@ export default function PartnerAgreementPage() {
           />
         </div>
 
-        {/* 4. Ваши обязательства */}
-        <SectionTitle icon={FileText} title={isRu ? 'Что мы ожидаем от партнёров' : 'What We Expect'} />
+        {/* 4. Правила листинга */}
+        <SectionTitle icon={FileText} title={isRu ? 'Правила листинга' : 'Listing Rules'} />
         <Card className="mb-8">
           <CardContent className="p-5 space-y-3">
-            <ConditionRow icon="⏱" text={isRu ? 'Ответ на запрос клиента — в течение 2 часов' : 'Reply to client requests within 2 hours'} />
-            <ConditionRow icon="📸" text={isRu ? 'Актуальные цены, фото и описания' : 'Up-to-date prices, photos and descriptions'} />
-            <ConditionRow icon="⭐" text={isRu ? 'Минимальный рейтинг 4.0 для активного статуса' : 'Minimum 4.0 rating for active status'} />
-            <ConditionRow icon="🤝" text={isRu ? 'Клиенты myUNO обслуживаются через платформу' : 'myUNO clients are served through the platform'} />
+            <ConditionRow icon="📸" text={isRu ? 'Минимум 3 реальные фотографии (стоковые изображения запрещены).' : 'Minimum 3 real photos (stock images are prohibited).'} />
+            <ConditionRow icon="💱" text={isRu ? 'Цены должны быть актуальны и указаны в THB.' : 'Prices must be up to date and listed in THB.'} />
+            <ConditionRow icon="🌐" text={isRu ? 'Описание листинга обязательно на двух языках: RU и EN.' : 'Listing description is required in two languages: RU and EN.'} />
+            <ConditionRow icon="⏱" text={isRu ? 'Ответ на запрос клиента — в течение 2 часов.' : 'Reply to client requests within 2 hours.'} />
+            <ConditionRow icon="⭐" text={isRu ? 'Минимальный рейтинг 4.0 для сохранения активного статуса.' : 'Minimum rating of 4.0 to keep active status.'} />
           </CardContent>
         </Card>
 
