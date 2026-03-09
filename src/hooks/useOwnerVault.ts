@@ -72,7 +72,7 @@ export function useUploadVaultFile() {
       if (!user) throw new Error('Not authenticated');
 
       const ext = file.name.split('.').pop();
-      const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const path = `${user.id}/${Date.now()}_${crypto.randomUUID().slice(0, 12)}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from('owner-vault')

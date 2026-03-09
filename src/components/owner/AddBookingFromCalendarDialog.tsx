@@ -191,7 +191,7 @@ export function AddBookingFromCalendarDialog({
         }
         
         const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const fileName = `${propertyId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const fileName = `${propertyId}/${Date.now()}_${crypto.randomUUID().slice(0, 12)}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('booking-documents')

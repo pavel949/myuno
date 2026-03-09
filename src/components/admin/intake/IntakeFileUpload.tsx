@@ -116,7 +116,7 @@ export function IntakeFileUpload({
 
       const fileType = getFileType(file.type);
       const uploadedFile: UploadedFile = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${crypto.randomUUID().slice(0, 12)}`,
         file,
         type: fileType,
         status: 'pending',
