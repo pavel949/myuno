@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Compass, Waves, Star, Shield, Clock, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { Experience, formatDuration } from '@/hooks/useExperiences';
@@ -46,7 +47,7 @@ export function ExperienceCard({ experience, language, className }: ExperienceCa
       >
         <div className="relative h-44 overflow-hidden">
           <OptimizedImage
-            src={experience.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
+            src={experience.cover_image || PLACEHOLDER_IMAGES.experience}
             alt={isRu ? experience.title_ru : experience.title_en}
             width={400}
             height={176}

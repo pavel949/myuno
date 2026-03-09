@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
 import { MarketplaceCategory } from '@/types/marketplace';
 import { Badge } from '@/components/ui/badge';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 interface CategoryGridProps {
   categories: MarketplaceCategory[];
@@ -14,20 +15,7 @@ interface CategoryGridProps {
   variant?: 'large' | 'compact';
 }
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  'groceries': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80',
-  'thai-fashion': 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&q=80',
-  'cosmetics': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80',
-  'souvenirs': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&q=80',
-  'home-decor': 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&q=80',
-  'baby-kids': 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80',
-  'health-pharmacy': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80',
-  'seafood': 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=400&q=80',
-  'organic': 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&q=80',
-  'meat': 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&q=80',
-  'drinks': 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80',
-  'thai-delicacies': 'https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?w=400&q=80',
-};
+const CATEGORY_IMAGES = PLACEHOLDER_IMAGES.marketCategories;
 
 export const CategoryGrid: React.FC<CategoryGridProps> = ({
   categories,

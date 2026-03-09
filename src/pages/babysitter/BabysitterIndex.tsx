@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -27,7 +28,7 @@ const babysitters = [
     id: 'bs-1',
     nameEn: 'Anna Petrova',
     nameRu: 'Анна Петрова',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    image: PLACEHOLDER_IMAGES.avatar,
     rating: 4.9,
     reviewCount: 87,
     experienceEn: '5 years',
@@ -48,7 +49,7 @@ const babysitters = [
     id: 'bs-2',
     nameEn: 'Maria Ivanova',
     nameRu: 'Мария Иванова',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
+    image: PLACEHOLDER_IMAGES.avatar,
     rating: 4.8,
     reviewCount: 65,
     experienceEn: '8 years',
@@ -68,7 +69,7 @@ const babysitters = [
     id: 'bs-3',
     nameEn: 'Olga Smirnova',
     nameRu: 'Ольга Смирнова',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+    image: PLACEHOLDER_IMAGES.avatar,
     rating: 4.7,
     reviewCount: 42,
     experienceEn: '3 years',
@@ -88,7 +89,7 @@ const babysitters = [
     id: 'bs-4',
     nameEn: 'Natalia Kozlova',
     nameRu: 'Наталья Козлова',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+    image: PLACEHOLDER_IMAGES.avatar,
     rating: 5.0,
     reviewCount: 28,
     experienceEn: '10 years',

@@ -18,34 +18,13 @@ interface ServiceItem {
   images: string[] | null;
 }
 
-const SERVICE_FALLBACK_IMAGES: Record<string, string> = {
-  clean: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400',
-  electr: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400',
-  plumb: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
-  pipe: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
-  drain: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
-  garden: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
-  pool: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=400',
-  beauty: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
-  spa: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
-  massage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400',
-  fitness: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
-  repair: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400',
-  renovat: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400',
-  inspect: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400',
-  ac: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400',
-  water: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
-  leak: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400',
-};
-const FALLBACK_DEFAULT = 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400';
+import { PLACEHOLDER_IMAGES, getServiceFallbackImage } from '@/lib/config/placeholders';
+
+const FALLBACK_DEFAULT = PLACEHOLDER_IMAGES.service;
 
 function getServiceImage(service: ServiceItem): string {
   if (service.images?.[0]) return service.images[0];
-  const name = service.name_en.toLowerCase();
-  for (const [key, url] of Object.entries(SERVICE_FALLBACK_IMAGES)) {
-    if (name.includes(key)) return url;
-  }
-  return FALLBACK_DEFAULT;
+  return getServiceFallbackImage(service.name_en);
 }
 
 export function PopularServicesStrip() {

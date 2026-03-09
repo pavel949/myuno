@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { Share2, Heart, Shield, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -42,7 +43,7 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
                   const target = e.currentTarget;
                   if (!target.dataset.fallback) {
                     target.dataset.fallback = '1';
-                    target.src = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800';
+                    target.src = PLACEHOLDER_IMAGES.yacht;
                   }
                 }}
               />

@@ -8,6 +8,7 @@ import { CatalogHeader } from "@/components/shared/CatalogHeader";
 import { ItemCard } from "@/components/miniapp";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/uno/EmptyState";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { FilterValues, pharmacyFilterConfig } from "@/components/filters";
 
 const PHARMACY_CATEGORIES = [
@@ -89,7 +90,7 @@ export default function PharmacyIndex() {
               {filteredPharmacies.map(pharmacy => (
                 <ItemCard
                   key={pharmacy.id}
-                  image={pharmacy.cover_image || 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400'}
+                  image={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacy}
                   title={isRu ? pharmacy.name_ru : pharmacy.name_en}
                   rating={pharmacy.rating ?? undefined}
                   reviewCount={pharmacy.review_count ?? undefined}

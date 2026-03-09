@@ -12,7 +12,9 @@ interface PropertyImageCarouselProps {
   aspectClass?: string;
 }
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+
+const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
 export function PropertyImageCarousel({
   images,

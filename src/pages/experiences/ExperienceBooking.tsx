@@ -26,6 +26,7 @@ import {
 } from '@/components/booking';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
@@ -230,7 +231,7 @@ export default function ExperienceBooking() {
         <Card>
           <CardContent className="p-4 flex gap-4">
             <img 
-              src={experience.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100'} 
+              src={experience.cover_image || PLACEHOLDER_IMAGES.experience} 
               alt=""
               className="w-20 h-20 rounded-xl object-cover"
             />

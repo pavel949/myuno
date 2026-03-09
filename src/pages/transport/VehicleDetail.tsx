@@ -23,6 +23,7 @@ import { TrustBadges } from '@/components/uno/TrustBadges';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { getTransmissionLabel, getFuelLabel, getLocalizedFeatures, getCategoryConfig } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -78,7 +79,7 @@ export default function VehicleDetail() {
     ? vehicle.images
     : vehicle.cover_image
       ? [vehicle.cover_image]
-      : ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=800'];
+      : [PLACEHOLDER_IMAGES.vehicle];
 
   const name = isRu ? vehicle.name_ru : vehicle.name_en;
   const description = isRu ? vehicle.description_ru : vehicle.description_en;

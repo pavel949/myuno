@@ -13,6 +13,7 @@ import {
   ArrowLeft, Star, MapPin, Shield, Phone, Truck, 
   Plus, FileText 
 } from "lucide-react";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from "@/components/cart/StickyCartBar";
 import { useCartToast } from "@/hooks/useCartToast";
 
@@ -84,7 +85,7 @@ export default function PharmacyDetail() {
         {/* Header */}
         <div className="relative -mx-4 -mt-4">
           <img
-            src={pharmacy.cover_image || 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800'}
+            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacy}
             alt=""
             className="w-full h-48 object-cover"
           />
@@ -185,7 +186,7 @@ export default function PharmacyDetail() {
                 <div key={product.id} className="bg-card rounded-xl border overflow-hidden">
                   <div className="relative">
                     <img
-                      src={product.image || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200'}
+                      src={product.image || PLACEHOLDER_IMAGES.pharmacyProduct}
                       alt=""
                       className="w-full h-28 object-cover"
                     />
