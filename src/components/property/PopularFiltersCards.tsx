@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { cn } from '@/lib/utils';
 import { FilterValues } from '@/components/filters/UniversalFilter';
 
