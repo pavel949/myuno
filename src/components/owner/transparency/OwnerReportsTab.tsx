@@ -32,7 +32,7 @@ export function OwnerReportsTab({ propertyId }: Props) {
         .order('period_end', { ascending: false })
         .limit(20);
       if (error) throw error;
-      return (data || []) as PropertyReport[];
+      return (data || []) as unknown as PropertyReport[];
     },
     enabled: !!propertyId,
   });
