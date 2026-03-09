@@ -24,15 +24,15 @@ export function OwnerReportsTab({ propertyId }: Props) {
   const { data: reports, isLoading } = useQuery({
     queryKey: ['owner-transparency-reports', propertyId],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('property_reports')
-        .select('*, property:properties(id, title, title_ru)')
+        .select('*, property:properties(id, title_en, title_ru)')
         .eq('property_id', propertyId)
         .in('status', ['ready', 'sent', 'viewed'])
         .order('period_end', { ascending: false })
         .limit(20);
       if (error) throw error;
-      return (data || []) as PropertyReport[];
+      return (data || []) as unknown as PropertyReport[];
     },
     enabled: !!propertyId,
   });
