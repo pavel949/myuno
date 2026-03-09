@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const AGE_GROUPS = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
