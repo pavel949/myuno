@@ -101,24 +101,24 @@ export function useUserTracking() {
       }
     }, 60000); // Every minute
 
-    // End session on page unload — use sendBeacon for reliability
+    // End session on page unload — use keepalive fetch for PATCH with auth headers
     const handleUnload = () => {
       try {
         const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_sessions?id=eq.${sessionId}`;
         const body = JSON.stringify({ is_active: false, ended_at: new Date().toISOString() });
-        const headers = {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          'Prefer': 'return=minimal',
-        };
-        // sendBeacon guarantees delivery even during page unload
-        const blob = new Blob([body], { type: 'application/json' });
-        const sent = navigator.sendBeacon(url, blob);
-        if (!sent) {
-          // Fallback: keepalive fetch (works in most modern browsers)
-          fetch(url, { method: 'PATCH', headers, body, keepalive: true }).catch(() => {});
-        }
+        // sendBeacon only supports POST and cannot set custom headers (apikey/Authorization),
+        // so we use keepalive fetch which supports PATCH + headers and survives page unload.
+        fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+          body,
+          keepalive: true,
+        }).catch(() => {});
       } catch {
         // Silent fail on unload
       }
