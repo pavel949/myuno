@@ -13,6 +13,7 @@ import { useSalon, useSalonServices } from '@/hooks/useSalons';
 import { Button } from '@/components/ui/button';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { RelatedServicesSection } from '@/components/crosssell';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 export default function SalonDetail() {
   const { id } = useParams<{ id: string }>();
