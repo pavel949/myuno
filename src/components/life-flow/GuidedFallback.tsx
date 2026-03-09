@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MessageCircle, Phone, ArrowRight, Compass, HeartHandshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getTelLink } from '@/lib/config/contacts';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
