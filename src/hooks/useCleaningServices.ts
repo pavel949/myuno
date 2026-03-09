@@ -205,7 +205,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Генеральная уборка',
     descEn: 'Complete deep clean of your entire home.',
     descRu: 'Полная генеральная уборка вашего дома.',
-    image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800',
+    image: PLACEHOLDER_IMAGES.deepClean,
     priceFrom: 2500,
     duration: '4-6h',
     rating: 4.8,
