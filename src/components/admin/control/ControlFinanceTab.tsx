@@ -12,16 +12,23 @@ export function ControlFinanceTab() {
   const { data: financeStats } = useQuery({
     queryKey: ['admin-finance-overview'],
     queryFn: async () => {
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('total_amount, currency')
-        .eq('status', 'completed');
+      // Get property financials instead of platform orders for proper MC revenue tracking
+      const { data: financials } = await supabase
+        .from('property_financials')
+        .select('amount, transaction_type, currency');
       
-      const totalRevenue = orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
+      const totalRevenue = financials
+        ?.filter(f => f.transaction_type === 'income')
+        .reduce((sum, f) => sum + Number(f.amount || 0), 0) || 0;
+      
+      const totalExpenses = financials
+        ?.filter(f => f.transaction_type === 'expense')
+        .reduce((sum, f) => sum + Number(f.amount || 0), 0) || 0;
       
       return {
         revenue: totalRevenue,
-        transactions: orders?.length || 0,
+        expenses: totalExpenses,
+        transactions: financials?.length || 0,
       };
     }
   });
@@ -29,9 +36,15 @@ export function ControlFinanceTab() {
   const metrics = [
     { 
       label: isRussian ? 'Общий доход' : 'Total Revenue', 
-      value: `$${(financeStats?.revenue || 0).toLocaleString()}`, 
+      value: `฿${(financeStats?.revenue || 0).toLocaleString()}`, 
       icon: DollarSign, 
       color: 'text-success' 
+    },
+    { 
+      label: isRussian ? 'Общие расходы' : 'Total Expenses', 
+      value: `฿${(financeStats?.expenses || 0).toLocaleString()}`, 
+      icon: TrendingUp, 
+      color: 'text-destructive' 
     },
     { 
       label: isRussian ? 'Транзакции' : 'Transactions', 
@@ -40,16 +53,10 @@ export function ControlFinanceTab() {
       color: 'text-info' 
     },
     { 
-      label: isRussian ? 'Комиссия' : 'Commission', 
-      value: `$${Math.round((financeStats?.revenue || 0) * 0.1).toLocaleString()}`, 
-      icon: TrendingUp, 
-      color: 'text-accent-purple' 
-    },
-    { 
-      label: isRussian ? 'Выплаты' : 'Payouts', 
-      value: `$${Math.round((financeStats?.revenue || 0) * 0.9).toLocaleString()}`, 
+      label: isRussian ? 'Чистый доход' : 'Net Income', 
+      value: `฿${Math.round((financeStats?.revenue || 0) - (financeStats?.expenses || 0)).toLocaleString()}`, 
       icon: Wallet, 
-      color: 'text-accent-amber' 
+      color: (financeStats?.revenue || 0) - (financeStats?.expenses || 0) >= 0 ? 'text-success' : 'text-destructive'
     },
   ];
 

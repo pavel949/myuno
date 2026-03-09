@@ -45,11 +45,11 @@ export function OwnerKPISummary({ propertyId }: OwnerKPISummaryProps) {
 
   const totalIncome = financials
     .filter((f: any) => f.transaction_type === 'income')
-    .reduce((sum: number, f: any) => sum + (f.amount || 0), 0);
+    .reduce((sum: number, f: any) => sum + Number(f.amount || 0), 0);
 
   const totalExpenses = financials
     .filter((f: any) => f.transaction_type === 'expense')
-    .reduce((sum: number, f: any) => sum + (f.amount || 0), 0);
+    .reduce((sum: number, f: any) => sum + Number(f.amount || 0), 0);
 
   // Simple occupancy: count days booked / days in month
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
