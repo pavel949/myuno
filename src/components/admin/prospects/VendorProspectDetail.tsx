@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
-  Send, Bot, Copy, MessageSquare,
+  Send, Bot, Copy, MessageSquare, UserPlus,
   Sparkles, Loader2, Facebook
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
