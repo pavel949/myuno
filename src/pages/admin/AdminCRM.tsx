@@ -8,7 +8,8 @@ import { VendorProspectsStats } from '@/components/admin/prospects/VendorProspec
 import { MCCLeadsTab } from '@/components/admin/marketing/MCCLeadsTab';
 import { AdminOwnerProspects } from '@/components/admin/crm/AdminOwnerProspects';
 import { AdminCrmActivityLog } from '@/components/admin/crm/AdminCrmActivityLog';
-import { BarChart3, Target, Users, Building2, Activity, Kanban, Table } from 'lucide-react';
+import { VendorOutreachPanel } from '@/components/admin/crm/VendorOutreachPanel';
+import { BarChart3, Target, Users, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
 
 export default function AdminCRM() {
   const { language } = useLanguage();
@@ -47,6 +48,10 @@ export default function AdminCRM() {
             <Activity className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Активность' : 'Activity'}</span>
           </TabsTrigger>
+          <TabsTrigger value="outreach" className="gap-2 data-[state=active]:bg-background">
+            <Send className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRu ? 'Аутрич' : 'Outreach'}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-4">
@@ -82,6 +87,10 @@ export default function AdminCRM() {
 
         <TabsContent value="activity" className="mt-4">
           <AdminCrmActivityLog />
+        </TabsContent>
+
+        <TabsContent value="outreach" className="mt-4">
+          <VendorOutreachPanel />
         </TabsContent>
       </Tabs>
     </div>

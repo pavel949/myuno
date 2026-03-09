@@ -133,6 +133,8 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.vendor-acquisition]
     verify_jwt = false
+  [functions.vendor-outreach-agent]
+    verify_jwt = false
   [functions.vendor-portal]
     verify_jwt = false
   [functions.whatsapp-incoming-webhook]
