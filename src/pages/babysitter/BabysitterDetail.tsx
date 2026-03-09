@@ -180,7 +180,7 @@ const BabysitterDetail = () => {
           </div>
         </div>
 
-        <RelatedServicesSection />
+        <RelatedServicesSection currentVertical="babysitter" />
       </PageContainer>
     </AppLayout>
   );
