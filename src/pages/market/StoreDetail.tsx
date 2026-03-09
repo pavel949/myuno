@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/hooks/useStores';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
