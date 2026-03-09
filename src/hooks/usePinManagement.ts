@@ -79,7 +79,10 @@ export function usePinManagement() {
 
       if (setError) throw setError;
 
-      // No refresh token stored in localStorage for security
+      // Update stored refresh token
+      if (session?.refresh_token) {
+        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+      }
 
       return { success: true };
     } catch (error: unknown) {
