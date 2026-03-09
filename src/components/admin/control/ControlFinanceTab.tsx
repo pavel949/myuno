@@ -12,16 +12,23 @@ export function ControlFinanceTab() {
   const { data: financeStats } = useQuery({
     queryKey: ['admin-finance-overview'],
     queryFn: async () => {
-      const { data: orders } = await supabase
-        .from('orders')
-        .select('total_amount, currency')
-        .eq('status', 'completed');
+      // Get property financials instead of platform orders for proper MC revenue tracking
+      const { data: financials } = await supabase
+        .from('property_financials')
+        .select('amount, transaction_type, currency');
       
-      const totalRevenue = orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
+      const totalRevenue = financials
+        ?.filter(f => f.transaction_type === 'income')
+        .reduce((sum, f) => sum + (f.amount || 0), 0) || 0;
+      
+      const totalExpenses = financials
+        ?.filter(f => f.transaction_type === 'expense')
+        .reduce((sum, f) => sum + (f.amount || 0), 0) || 0;
       
       return {
         revenue: totalRevenue,
-        transactions: orders?.length || 0,
+        expenses: totalExpenses,
+        transactions: financials?.length || 0,
       };
     }
   });
