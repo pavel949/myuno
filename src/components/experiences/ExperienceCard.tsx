@@ -46,7 +46,7 @@ export function ExperienceCard({ experience, language, className }: ExperienceCa
       >
         <div className="relative h-44 overflow-hidden">
           <OptimizedImage
-            src={experience.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
+            src={experience.cover_image || PLACEHOLDER_IMAGES.experience}
             alt={isRu ? experience.title_ru : experience.title_en}
             width={400}
             height={176}

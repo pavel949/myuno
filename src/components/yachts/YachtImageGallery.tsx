@@ -42,7 +42,7 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
                   const target = e.currentTarget;
                   if (!target.dataset.fallback) {
                     target.dataset.fallback = '1';
-                    target.src = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800';
+                    target.src = PLACEHOLDER_IMAGES.yacht;
                   }
                 }}
               />
