@@ -24,6 +24,7 @@ export function VendorProspectsPipeline() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { data: prospects, isLoading, refetch } = useVendorProspects();
+  const updateProspect = useUpdateProspect();
   const [selectedProspect, setSelectedProspect] = useState<VendorProspect | null>(null);
 
   const getProspectsByStatus = (status: string) => {
@@ -36,7 +37,10 @@ export function VendorProspectsPipeline() {
 
   const handleDrop = (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
-    // Would need updateProspect mutation here
+    const prospectId = e.dataTransfer.getData('prospectId');
+    if (prospectId) {
+      updateProspect.mutate({ id: prospectId, status: newStatus });
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {

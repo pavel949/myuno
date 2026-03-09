@@ -311,7 +311,7 @@ If you can't determine a field, use null.`,
       const { error: insertErr } = await supabase
         .from('vendor_prospects')
         .insert({
-          source_type: 'ai_discovery',
+          source_type: 'google_maps',
           source_url: supplier.website,
           business_name: supplier.business_name,
           category: config.category,
@@ -322,7 +322,7 @@ If you can't determine a field, use null.`,
           district: supplier.district,
           city: location,
           ai_score: supplier.ai_score,
-          ai_priority: supplier.ai_score >= 80 ? 'high' : supplier.ai_score >= 60 ? 'medium' : 'low',
+          ai_priority: supplier.ai_score >= 80 ? 'hot' : supplier.ai_score >= 60 ? 'warm' : 'cold',
           ai_reasoning: supplier.ai_reasoning,
           ai_talking_points: supplier.languages,
           ai_analyzed_at: new Date().toISOString(),
