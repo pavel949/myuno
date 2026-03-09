@@ -48,6 +48,10 @@ export default function AdminCRM() {
             <Activity className="h-4 w-4" />
             <span className="hidden sm:inline">{isRu ? 'Активность' : 'Activity'}</span>
           </TabsTrigger>
+          <TabsTrigger value="outreach" className="gap-2 data-[state=active]:bg-background">
+            <Send className="h-4 w-4" />
+            <span className="hidden sm:inline">{isRu ? 'Аутрич' : 'Outreach'}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-4">
