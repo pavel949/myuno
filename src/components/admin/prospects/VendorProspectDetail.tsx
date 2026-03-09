@@ -37,6 +37,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isScoring, setIsScoring] = useState(false);
+  const [isConvertingToCrm, setIsConvertingToCrm] = useState(false);
   const [noteText, setNoteText] = useState('');
 
   const handleStatusChange = (newStatus: string) => {
