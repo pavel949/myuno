@@ -161,7 +161,16 @@ export function usePropertyReports(propertyId?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as unknown as PropertyReport[];
+
+      // Map title_en -> title for backward compatibility across UI
+      return (data || []).map((r: any) => ({
+        ...r,
+        property: r.property ? {
+          id: r.property.id,
+          title: r.property.title_en,
+          title_ru: r.property.title_ru,
+        } : undefined,
+      })) as unknown as PropertyReport[];
     },
     enabled: !!user,
   });

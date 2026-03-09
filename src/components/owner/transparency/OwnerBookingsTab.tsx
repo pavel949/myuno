@@ -27,9 +27,9 @@ export function OwnerBookingsTab({ propertyId }: OwnerBookingsTabProps) {
 
   const { data: bookings = [], isLoading } = useSupabaseQuery<any>({
     table: 'property_bookings',
-    select: 'id, guest_name, check_in_date, check_out_date, total_price, currency, status, source, nights',
+    select: 'id, guest_name, check_in, check_out, total_amount, currency, status, source',
     filters: [{ column: 'property_id', value: propertyId }],
-    orderBy: { column: 'check_in_date', ascending: false },
+    orderBy: { column: 'check_in', ascending: false },
     limit: 50,
     enabled: !!user && !!propertyId,
   });
