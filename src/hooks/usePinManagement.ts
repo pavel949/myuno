@@ -40,10 +40,9 @@ export function usePinManagement() {
 
       if (error) throw error;
 
-      // Save user info and refresh token for PIN login
+      // Save user info for PIN login (no refresh token stored for security)
       localStorage.setItem(PIN_USER_KEY, user.id);
       localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
       
       await checkHasPin();
       return { success: true };
