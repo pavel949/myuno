@@ -22,12 +22,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Baby, Clock, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const babysitters: Record<string, { nameEn: string; nameRu: string; pricePerHour: number; image: string }> = {
-  'bs-1': { nameEn: 'Anna Petrova', nameRu: 'Анна Петрова', pricePerHour: 500, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
-  'bs-2': { nameEn: 'Maria Ivanova', nameRu: 'Мария Иванова', pricePerHour: 600, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' },
-  'bs-3': { nameEn: 'Olga Smirnova', nameRu: 'Ольга Смирнова', pricePerHour: 400, image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100' },
-  'bs-4': { nameEn: 'Natalia Kozlova', nameRu: 'Наталья Козлова', pricePerHour: 800, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100' },
+  'bs-1': { nameEn: 'Anna Petrova', nameRu: 'Анна Петрова', pricePerHour: 500, image: PLACEHOLDER_IMAGES.avatar },
+  'bs-2': { nameEn: 'Maria Ivanova', nameRu: 'Мария Иванова', pricePerHour: 600, image: PLACEHOLDER_IMAGES.avatar },
+  'bs-3': { nameEn: 'Olga Smirnova', nameRu: 'Ольга Смирнова', pricePerHour: 400, image: PLACEHOLDER_IMAGES.avatar },
+  'bs-4': { nameEn: 'Natalia Kozlova', nameRu: 'Наталья Козлова', pricePerHour: 800, image: PLACEHOLDER_IMAGES.avatar },
 };
 
 export default function BabysitterBooking() {
