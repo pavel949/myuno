@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { useInsuranceProviders, useInsurancePlans } from '@/hooks/useInsurance';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const categories = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
