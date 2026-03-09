@@ -24,11 +24,7 @@ const FALLBACK_DEFAULT = PLACEHOLDER_IMAGES.service;
 
 function getServiceImage(service: ServiceItem): string {
   if (service.images?.[0]) return service.images[0];
-  const name = service.name_en.toLowerCase();
-  for (const [key, url] of Object.entries(SERVICE_FALLBACK_IMAGES)) {
-    if (name.includes(key)) return url;
-  }
-  return FALLBACK_DEFAULT;
+  return getServiceFallbackImage(service.name_en);
 }
 
 export function PopularServicesStrip() {
