@@ -118,7 +118,7 @@ const ServiceProviderDetail = () => {
     available: true,
     verified: true,
     responseTime: language === "ru" ? "Отвечает за 15 мин" : "Responds in 15 min",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
+    image: PLACEHOLDER_IMAGES.provider,
     about: language === "ru"
       ? "Профессионал с многолетним опытом работы. Выполняю все виды работ в своей сфере. Работаю быстро и качественно. Гарантия на все услуги."
       : "Professional with years of experience. I perform all types of work in my field. Fast and quality work. Warranty on all services.",
