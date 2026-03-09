@@ -64,7 +64,7 @@ const popularServices = [
     nameRu: 'Продукты из магазина',
     descEn: 'We buy and deliver',
     descRu: 'Купим и доставим',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
+    image: PLACEHOLDER_IMAGES.grocery,
   },
   {
     id: 'documents',
