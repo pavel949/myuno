@@ -43,6 +43,7 @@ const navigationItems: NavItem[] = [
   { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
   { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
   { title: 'Partners', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, badgeKey: 'pendingProviders' },
+  { title: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: BadgeIcon },
   { title: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings },
 ];
 
