@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { BackButton } from "@/components/uno/BackButton";
 import { useCartToast } from "@/hooks/useCartToast";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 // Services data by category
 const getServicesByCategory = (category: string, language: string) => {
