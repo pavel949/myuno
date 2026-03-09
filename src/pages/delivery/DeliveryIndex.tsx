@@ -64,24 +64,18 @@ const popularServices = [
     nameRu: 'Продукты из магазина',
     descEn: 'We buy and deliver',
     descRu: 'Купим и доставим',
-    image: PLACEHOLDER_IMAGES.groceryn: FileText,
-    nameEn: 'Document Delivery',
+    image: PLACEHOLDER_IMAGES.groceryvery',
     nameRu: 'Доставка документов',
     descEn: 'Safe and fast',
     descRu: 'Безопасно и быстро',
     image: 'https://images.unsplash.com/photo-1568PLACEHOLDER_IMAGES.document Box,
-    nameEn: 'Parcel Delivery',
-    nameRu: 'Посылки',
-    descEn: 'Any size packages',
+    naPLACEHOLDER_IMAGES.documentAny size packages',
     descRu: 'Посылки любого размера',
     image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400',
   },
 ];
 
-const recentOrders = [
-  {
-    id: 'order-1',
-    from: 'Central Festival',
+cPLACEHOLDER_IMAGES.deliveryival',
     to: 'Patong Beach',
     status: 'delivered',
     statusEn: 'Delivered',

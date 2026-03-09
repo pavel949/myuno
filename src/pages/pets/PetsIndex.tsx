@@ -79,7 +79,7 @@ export default function PetsIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={service.cover_image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400'}
+                      src={service.cover_image || PLACEHOLDER_IMAGES.pet}
                       alt={name}
                       width={400}
                       height={300}

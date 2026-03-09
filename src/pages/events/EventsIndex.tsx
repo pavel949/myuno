@@ -84,7 +84,7 @@ export default function EventsIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={event.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400'}
+                      src={event.cover_image || PLACEHOLDER_IMAGES.event}
                       alt={name}
                       width={400}
                       height={300}

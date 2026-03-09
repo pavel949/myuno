@@ -115,7 +115,7 @@ export default function RestaurantMap() {
             <div className="bg-card rounded-xl border shadow-lg p-4">
               <div className="flex gap-3">
                 <img
-                  src={selected.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'}
+                  src={selected.cover_image || PLACEHOLDER_IMAGES.restaurant}
                   alt={language === 'ru' ? selected.name_ru : selected.name_en}
                   className="w-20 h-20 rounded-lg object-cover"
                 />

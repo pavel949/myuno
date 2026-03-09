@@ -200,7 +200,7 @@ export default function TableReservation() {
           {/* Restaurant Card */}
           <div className="flex gap-4 p-4 rounded-xl bg-card border border-border/50">
             <img 
-              src={restaurant.cover_image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400'} 
+              src={restaurant.cover_image || PLACEHOLDER_IMAGES.restaurant} 
               alt={restaurant.name_en}
               className="w-20 h-20 rounded-lg object-cover"
             />

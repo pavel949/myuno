@@ -242,7 +242,7 @@ export default function FlowersIndex() {
                   >
                     <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2">
                       <OptimizedImage
-                        src={bouquet.image || 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400'}
+                        src={bouquet.image || PLACEHOLDER_IMAGES.flower}
                         alt={name}
                         width={400}
                         height={533}

@@ -31,6 +31,14 @@ export const PLACEHOLDER_IMAGES = {
   tutor: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
   product: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
   food: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80',
+  babysitter: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+  delivery: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80',
+  grocery: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80',
+  document: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=400&q=80',
+  cleaning: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+  laundry: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800',
+  deepClean: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800',
+  store: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800',
 
   // Generic card/image error fallback
   cardFallback: 'https://images.unsplash.com/photo-1540555700478-4be289fbec6c?w=600&q=80',

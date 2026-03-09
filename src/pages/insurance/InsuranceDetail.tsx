@@ -74,7 +74,7 @@ export default function InsuranceDetail() {
         <div className="relative h-48">
           <BackButton fallbackPath="/insurance" variant="overlay" className="absolute top-4 left-4 z-10" />
           <img
-            src={provider.cover_image || 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800'}
+            src={provider.cover_image || PLACEHOLDER_IMAGES.insurance}
             alt={provider.name_en}
             className="w-full h-full object-cover"
           />

@@ -91,7 +91,7 @@ export default function ExperienceDetail() {
         <div className="relative -mx-4 -mt-4">
           <div className="h-64 sm:h-80 relative">
             <OptimizedImage
-              src={images[activeImage] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'}
+              src={images[activeImage] || PLACEHOLDER_IMAGES.experience}
               alt={isRu ? experience.title_ru : experience.title_en}
               width={800}
               height={400}
