@@ -17,6 +17,7 @@ import { YachtPolicies } from '@/components/yachts/YachtPolicies';
 import { YachtOperatorCard } from '@/components/yachts/YachtOperatorCard';
 import { YachtSimilarSection } from '@/components/yachts/YachtSimilarSection';
 import { RelatedServicesSection } from '@/components/crosssell';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { SEOHead, createServiceSchema } from '@/components/seo';
 
 export default function YachtDetail() {
@@ -46,7 +47,7 @@ export default function YachtDetail() {
     );
   }
 
-  const fallbackImage = 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800';
+  const fallbackImage = PLACEHOLDER_IMAGES.yacht;
   const coverImage = yacht.cover_image || fallbackImage;
   const galleryImages = yacht.images?.filter(img => img && img !== yacht.cover_image) || [];
   const images = [coverImage, ...galleryImages];

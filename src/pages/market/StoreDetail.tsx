@@ -17,10 +17,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/hooks/useStores';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
+// TODO: Replace mock product data with database queries
 // Products data
 const storeProducts: Record<string, Array<{
   id: string;
@@ -139,7 +141,7 @@ const StoreDetail = () => {
       <div className="pb-32">
         {/* Hero Image */}
         <div className="relative h-48">
-          <img src={store.cover_image || 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=800'} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
+          <img src={store.cover_image || PLACEHOLDER_IMAGES.store} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
           <div className="absolute top-4 left-4 right-4 flex justify-between">

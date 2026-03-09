@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const EVENT_CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -84,7 +85,7 @@ export default function EventsIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={event.cover_image || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400'}
+                      src={event.cover_image || PLACEHOLDER_IMAGES.event}
                       alt={name}
                       width={400}
                       height={300}

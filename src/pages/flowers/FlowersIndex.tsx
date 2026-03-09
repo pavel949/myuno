@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useBouquets } from '@/hooks/useBouquets';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 
@@ -242,7 +243,7 @@ export default function FlowersIndex() {
                   >
                     <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-2">
                       <OptimizedImage
-                        src={bouquet.image || 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400'}
+                        src={bouquet.image || PLACEHOLDER_IMAGES.flower}
                         alt={name}
                         width={400}
                         height={533}

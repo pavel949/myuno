@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,7 @@ const LegalProviderDetail = () => {
         <div className="relative h-48">
           <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4 z-10" />
           <img
-            src={service.cover_image || 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=400&fit=crop'}
+            src={service.cover_image || PLACEHOLDER_IMAGES.legal}
             alt={name}
             className="w-full h-full object-cover"
           />

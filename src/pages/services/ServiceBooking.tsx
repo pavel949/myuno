@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/contexts/CartContext";
@@ -65,13 +66,13 @@ export default function ServiceBooking() {
       return {
         id: dbProvider.id,
         name: dbProvider.name,
-        image: dbProvider.logo_url || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
+        image: dbProvider.logo_url || PLACEHOLDER_IMAGES.provider,
       };
     }
     return {
       id: id,
       name: language === "ru" ? "Специалист" : "Specialist",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
+      image: PLACEHOLDER_IMAGES.provider,
     };
   }, [dbProvider, language, id]);
 

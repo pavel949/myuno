@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -75,7 +76,7 @@ export default function BeautySpaIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={salon.cover_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
+                      src={salon.cover_image || PLACEHOLDER_IMAGES.salon}
                       alt={name}
                       width={400}
                       height={300}

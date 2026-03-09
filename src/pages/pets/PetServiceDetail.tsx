@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { usePetService } from '@/hooks/usePetServices';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { RelatedServicesSection } from '@/components/crosssell';
 
 export default function PetServiceDetail() {
@@ -54,7 +55,7 @@ export default function PetServiceDetail() {
 
   const name = language === 'ru' ? service.name_ru : service.name_en;
   const description = language === 'ru' ? service.description_ru : service.description_en;
-  const heroImage = service.cover_image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800';
+  const heroImage = service.cover_image || PLACEHOLDER_IMAGES.pet;
   const features = service.features || [];
   const petTypes = service.pet_types || [];
 

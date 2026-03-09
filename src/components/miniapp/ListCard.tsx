@@ -1,4 +1,5 @@
 import React from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { Star, Clock, Users, MapPin, BadgeCheck, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
@@ -57,7 +58,7 @@ export function ListCard({
         {/* Image */}
         <div className="w-32 h-32 flex-shrink-0 relative">
           <img
-            src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
+            src={image || PLACEHOLDER_IMAGES.cardFallback}
             alt={title}
             className="w-full h-full object-cover"
           />

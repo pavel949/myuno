@@ -4,6 +4,7 @@
   */
  import { useQuery } from '@tanstack/react-query';
  import { supabase } from '@/integrations/supabase/client';
+ import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
  
  export interface CleaningService {
    id: string;
@@ -188,7 +189,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Регулярная уборка',
     descEn: 'Weekly or bi-weekly home cleaning service. Our professional team will thoroughly clean your home including floors, surfaces, bathrooms, and kitchen.',
     descRu: 'Еженедельная уборка дома. Наша профессиональная команда тщательно уберёт ваш дом, включая полы, поверхности, ванные комнаты и кухню.',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+    image: PLACEHOLDER_IMAGES.cleaning,
     priceFrom: 800,
     duration: '2-3h',
     rating: 4.9,
@@ -204,7 +205,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Генеральная уборка',
     descEn: 'Complete deep clean of your entire home.',
     descRu: 'Полная генеральная уборка вашего дома.',
-    image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800',
+    image: PLACEHOLDER_IMAGES.deepClean,
     priceFrom: 2500,
     duration: '4-6h',
     rating: 4.8,
@@ -220,7 +221,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Стирка и глажка',
     descEn: 'Pickup, wash, iron and deliver.',
     descRu: 'Заберём, постираем, погладим и доставим.',
-    image: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800',
+    image: PLACEHOLDER_IMAGES.laundry,
     priceFrom: 200,
     duration: '24h',
     rating: 4.7,
@@ -352,7 +353,7 @@ export function useCleaningServiceById(id: string) {
       nameRu: dbService.name_ru,
       descEn: dbService.description_en || '',
       descRu: dbService.description_ru || dbService.description_en || '',
-      image: dbService.cover_image || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+      image: dbService.cover_image || PLACEHOLDER_IMAGES.cleaning,
       priceFrom: dbService.price,
       duration: dbService.duration_hours ? `${dbService.duration_hours}h` : '2-3h',
       rating: dbService.rating || 4.8,

@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { useClinic, useDoctors, useMedicalServices } from '@/hooks/useClinics';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const ClinicDetail = () => {
   const { id } = useParams();
@@ -56,7 +57,7 @@ const ClinicDetail = () => {
     );
   }
 
-  const images = clinic.images?.length ? clinic.images : [clinic.cover_image || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'];
+  const images = clinic.images?.length ? clinic.images : [clinic.cover_image || PLACEHOLDER_IMAGES.medical];
   const name = language === 'ru' ? clinic.name_ru : clinic.name_en;
   const description = language === 'ru' ? clinic.description_ru : clinic.description_en;
   const clinicLanguages = clinic.languages || [];

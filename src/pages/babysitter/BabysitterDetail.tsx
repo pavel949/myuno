@@ -1,4 +1,5 @@
 import React from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Baby, Star, Shield, Languages, GraduationCap, CheckCircle2, Calendar
@@ -16,7 +17,7 @@ const babysitters = [
     id: 'bs-1',
     nameEn: 'Anna Petrova',
     nameRu: 'Анна Петрова',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    image: PLACEHOLDER_IMAGES.babysitter,
     rating: 4.9,
     reviewCount: 87,
     experience: '5 years',
@@ -38,7 +39,7 @@ const babysitters = [
     id: 'bs-2',
     nameEn: 'Maria Ivanova',
     nameRu: 'Мария Иванова',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400', // TODO: load from DB
     rating: 4.8,
     reviewCount: 65,
     experience: '8 years',
@@ -60,7 +61,7 @@ const babysitters = [
     id: 'bs-3',
     nameEn: 'Olga Smirnova',
     nameRu: 'Ольга Смирнова',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400', // TODO: load from DB
     rating: 4.7,
     reviewCount: 42,
     experience: '3 years',
@@ -82,7 +83,7 @@ const babysitters = [
     id: 'bs-4',
     nameEn: 'Natalia Kozlova',
     nameRu: 'Наталья Козлова',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400', // TODO: load from DB
     rating: 5.0,
     reviewCount: 28,
     experience: '10 years',

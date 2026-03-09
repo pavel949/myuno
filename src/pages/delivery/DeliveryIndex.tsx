@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate } from 'react-router-dom';
 import { 
   Package, Truck, Clock, MapPin, Star, Shield, 
@@ -64,7 +65,7 @@ const popularServices = [
     nameRu: 'Продукты из магазина',
     descEn: 'We buy and deliver',
     descRu: 'Купим и доставим',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
+    image: PLACEHOLDER_IMAGES.grocery,
   },
   {
     id: 'documents',
@@ -73,7 +74,7 @@ const popularServices = [
     nameRu: 'Доставка документов',
     descEn: 'Safe and fast',
     descRu: 'Безопасно и быстро',
-    image: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=400',
+    image: PLACEHOLDER_IMAGES.document,
   },
   {
     id: 'parcels',
@@ -82,7 +83,7 @@ const popularServices = [
     nameRu: 'Посылки',
     descEn: 'Any size packages',
     descRu: 'Посылки любого размера',
-    image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400',
+    image: PLACEHOLDER_IMAGES.delivery,
   },
 ];
 

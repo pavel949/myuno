@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -79,7 +80,7 @@ export default function PetsIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={service.cover_image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400'}
+                      src={service.cover_image || PLACEHOLDER_IMAGES.pet}
                       alt={name}
                       width={400}
                       height={300}

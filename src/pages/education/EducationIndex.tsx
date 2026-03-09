@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
@@ -72,7 +73,7 @@ export default function EducationIndex() {
                 >
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
                     <OptimizedImage
-                      src={provider.cover_image || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400'}
+                      src={provider.cover_image || PLACEHOLDER_IMAGES.education}
                       alt={name}
                       width={400}
                       height={300}
