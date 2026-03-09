@@ -19,11 +19,11 @@ export function ControlFinanceTab() {
       
       const totalRevenue = financials
         ?.filter(f => f.transaction_type === 'income')
-        .reduce((sum, f) => sum + (f.amount || 0), 0) || 0;
+        .reduce((sum, f) => sum + Number(f.amount || 0), 0) || 0;
       
       const totalExpenses = financials
         ?.filter(f => f.transaction_type === 'expense')
-        .reduce((sum, f) => sum + (f.amount || 0), 0) || 0;
+        .reduce((sum, f) => sum + Number(f.amount || 0), 0) || 0;
       
       return {
         revenue: totalRevenue,
