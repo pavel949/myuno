@@ -83,7 +83,7 @@ const babysitters = [
     id: 'bs-4',
     nameEn: 'Natalia Kozlova',
     nameRu: 'Наталья Козлова',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400', // TODO: load from DB
     rating: 5.0,
     reviewCount: 28,
     experience: '10 years',

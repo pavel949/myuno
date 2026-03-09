@@ -353,7 +353,7 @@ export function useCleaningServiceById(id: string) {
       nameRu: dbService.name_ru,
       descEn: dbService.description_en || '',
       descRu: dbService.description_ru || dbService.description_en || '',
-      image: dbService.cover_image || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+      image: dbService.cover_image || PLACEHOLDER_IMAGES.cleaning,
       priceFrom: dbService.price,
       duration: dbService.duration_hours ? `${dbService.duration_hours}h` : '2-3h',
       rating: dbService.rating || 4.8,
