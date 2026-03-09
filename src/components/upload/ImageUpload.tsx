@@ -250,7 +250,7 @@ export function MultiImageUpload({
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12)}.${fileExt}`;
+        const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12leExt}`;
         const filePath = `${user.id}/${folder}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -365,7 +365,7 @@ export function MultiImageUpload({
           };
           const ext = extMap[contentType] || 'jpg';
           
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+          const fileName = `${Date.now()}-${Math.racrypto.randomUUID().slice(0, 12t}`;
           const filePath = `${user.id}/${folder}/${fileName}`;
 
           const { error: uploadError } = await supabase.storage
