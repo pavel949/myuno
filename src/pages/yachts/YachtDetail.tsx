@@ -17,6 +17,7 @@ import { YachtPolicies } from '@/components/yachts/YachtPolicies';
 import { YachtOperatorCard } from '@/components/yachts/YachtOperatorCard';
 import { YachtSimilarSection } from '@/components/yachts/YachtSimilarSection';
 import { RelatedServicesSection } from '@/components/crosssell';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { SEOHead, createServiceSchema } from '@/components/seo';
 
 export default function YachtDetail() {
