@@ -107,6 +107,43 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
     });
   };
 
+  const handleConvertToCrm = async () => {
+    setIsConvertingToCrm(true);
+    try {
+      const nameParts = (prospect.contact_name || prospect.business_name || '').split(' ');
+      const firstName = nameParts[0] || prospect.business_name;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { error } = await supabase.from('crm_contacts').insert({
+        first_name: firstName,
+        last_name: lastName || null,
+        email: prospect.email,
+        phone: prospect.phone,
+        contact_type: 'vendor',
+        source: 'ai_discovery',
+        notes: `[Supplier Discovery] ${prospect.business_name}. ${prospect.category || ''}. Score: ${prospect.ai_score || 'N/A'}. ${prospect.ai_reasoning || ''}`.trim(),
+      } as any);
+
+      if (error) throw error;
+
+      // Mark prospect as converted
+      updateProspect.mutate({ id: prospect.id, status: 'won' });
+
+      toast({
+        title: isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM',
+        description: isRussian ? `${firstName} ${lastName}` : `${firstName} ${lastName}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsConvertingToCrm(false);
+    }
+  };
+
   const status = statusConfig[prospect.status];
   const priority = priorityConfig[prospect.ai_priority || ''];
   const location = prospect.district || prospect.address || prospect.city;
