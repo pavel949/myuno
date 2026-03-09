@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate } from 'react-router-dom';
 import { 
   Package, Truck, Clock, MapPin, Star, Shield, 
