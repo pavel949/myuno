@@ -65,7 +65,7 @@ export default function ServiceBooking() {
       return {
         id: dbProvider.id,
         name: dbProvider.name,
-        image: dbProvider.logo_url || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop",
+        image: dbProvider.logo_url || PLACEHOLDER_IMAGES.provider,
       };
     }
     return {
