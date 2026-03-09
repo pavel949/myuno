@@ -189,7 +189,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Регулярная уборка',
     descEn: 'Weekly or bi-weekly home cleaning service. Our professional team will thoroughly clean your home including floors, surfaces, bathrooms, and kitchen.',
     descRu: 'Еженедельная уборка дома. Наша профессиональная команда тщательно уберёт ваш дом, включая полы, поверхности, ванные комнаты и кухню.',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
+    image: PLACEHOLDER_IMAGES.cleaning,
     priceFrom: 800,
     duration: '2-3h',
     rating: 4.9,
