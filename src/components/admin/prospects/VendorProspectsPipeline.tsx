@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVendorProspects, statusConfig, priorityConfig, type VendorProspect } from '@/hooks/useVendorAcquisition';
+import { useVendorProspects, useUpdateProspect, statusConfig, priorityConfig, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
