@@ -88,6 +88,10 @@ export default function AdminCRM() {
         <TabsContent value="activity" className="mt-4">
           <AdminCrmActivityLog />
         </TabsContent>
+
+        <TabsContent value="outreach" className="mt-4">
+          <VendorOutreachPanel />
+        </TabsContent>
       </Tabs>
     </div>
   );
