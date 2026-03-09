@@ -61,7 +61,7 @@ const babysitters = [
     id: 'bs-3',
     nameEn: 'Olga Smirnova',
     nameRu: 'Ольга Смирнова',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400', // TODO: load from DB
     rating: 4.7,
     reviewCount: 42,
     experience: '3 years',
