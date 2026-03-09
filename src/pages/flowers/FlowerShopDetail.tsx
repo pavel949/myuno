@@ -12,6 +12,7 @@ import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { useSupabaseSingle, useSupabaseQuery, QueryFilter } from '@/hooks/useSupabaseQuery';
 import { useMemo, useCallback } from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 interface FlowerShop {
   id: string;
