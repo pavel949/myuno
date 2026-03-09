@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { COMPANY_CONTACTS, getWhatsAppUrl, getTelLink } from '@/lib/config/contacts';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Phone, MessageCircle, Headphones } from 'lucide-react';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
