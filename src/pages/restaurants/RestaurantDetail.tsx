@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { Card, CardContent } from '@/components/ui/card';
