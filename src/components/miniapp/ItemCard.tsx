@@ -102,7 +102,7 @@ export const ItemCard = React.forwardRef<HTMLDivElement, ItemCardProps>(
         {/* Image */}
         <div className="relative aspect-square overflow-hidden">
           <OptimizedImage
-            src={image || 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=400'}
+            src={image || PLACEHOLDER_IMAGES.service}
             alt={title}
             aspectRatio="1:1"
             width={200}
