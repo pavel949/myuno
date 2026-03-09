@@ -59,7 +59,7 @@ import { createClient } from "../_shared/supabase.ts";
        customerId = customer.id;
      }
  
-     const origin = req.headers.get("origin") || "https://uno.ae";
+     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
      
      // Enable PromptPay for THB
      const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 

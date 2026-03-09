@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     }
 
     // Get origin for redirect URLs
-    const origin = req.headers.get("origin") || "http://localhost:5173";
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
     
     // Create Checkout Session with card and PromptPay (Thai QR)
     // Note: PromptPay only works with THB currency

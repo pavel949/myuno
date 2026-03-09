@@ -77,7 +77,7 @@ export function WriteReviewModal({
           fileType: 'image/webp',
         });
 
-        const fileName = `reviews/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+        const fileName = `reviews/${user.id}/${Date.now()}-${crypto.randomUUID().slice(0, 12)}.webp`;
         const { error: uploadError } = await supabase.storage
           .from('images')
           .upload(fileName, compressed, { contentType: 'image/webp' });

@@ -39,7 +39,7 @@ const babysitters = [
     id: 'bs-2',
     nameEn: 'Maria Ivanova',
     nameRu: 'Мария Иванова',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400', // TODO: load from DB
+    image: PLACEHOLDER_IMAGES.babysitter,
     rating: 4.8,
     reviewCount: 65,
     experience: '8 years',
@@ -61,7 +61,7 @@ const babysitters = [
     id: 'bs-3',
     nameEn: 'Olga Smirnova',
     nameRu: 'Ольга Смирнова',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400', // TODO: load from DB
+    image: PLACEHOLDER_IMAGES.babysitter,
     rating: 4.7,
     reviewCount: 42,
     experience: '3 years',
@@ -83,7 +83,7 @@ const babysitters = [
     id: 'bs-4',
     nameEn: 'Natalia Kozlova',
     nameRu: 'Наталья Козлова',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400', // TODO: load from DB
+    image: PLACEHOLDER_IMAGES.babysitter,
     rating: 5.0,
     reviewCount: 28,
     experience: '10 years',
@@ -103,168 +103,91 @@ const babysitters = [
   },
 ];
 
-export default function BabysitterDetail() {
+const BabysitterDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  const babysitter = babysitters.find(bs => bs.id === id) || babysitters[0];
-  const name = language === 'ru' ? babysitter.nameRu : babysitter.nameEn;
+  const babysitter = React.useMemo(() => {
+    return babysitters.find((bs) => bs.id === id);
+  }, [id]);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: name,
-          text: language === 'ru' ? babysitter.descRu : babysitter.descEn,
-          url: window.location.href,
-        });
-      } catch {
-        // User cancelled
-      }
-    }
-  };
+  if (!babysitter) {
+    return <div>Babysitter not found</div>;
+  }
+
+  const name = language === 'en' ? babysitter.nameEn : babysitter.nameRu;
+  const experience = language === 'en' ? babysitter.experience : babysitter.experienceRu;
+  const languages = language === 'en' ? babysitter.languages : babysitter.languagesRu;
+  const ageGroups = language === 'en' ? babysitter.ageGroupsEn : babysitter.ageGroupsRu;
+  const certifications = language === 'en' ? babysitter.certifications : babysitter.certificationsRu;
+  const description = language === 'en' ? babysitter.descEn : babysitter.descRu;
 
   return (
     <AppLayout>
-      <PageContainer className="pb-28 px-0">
-        {/* Hero Image with Overlay Header */}
-        <div className="relative h-64 bg-gradient-to-b from-primary/20 to-background">
-          <DetailPageHeader fallbackPath="/babysitter" onShare={handleShare} />
-          
-          {/* Profile Header */}
-          <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center text-center pb-4">
-            <div className="relative mb-3">
-              <img 
-                src={babysitter.image} 
-                alt={name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-lg"
-              />
-              {babysitter.isVerified && (
-                <div className="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-3 border-background">
-                  <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+      <PageContainer>
+        <DetailPageHeader
+          title={name}
+          image={babysitter.image}
+          onBack={() => navigate('/babysitters')}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'About Me' : 'Обо мне'}</h2>
+              <p className="text-gray-700">{description}</p>
+
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-3">{language === 'en' ? 'Details' : 'Подробности'}</h3>
+                <div className="flex items-center space-x-2 mb-2">
+                  <Star className="text-yellow-500" size={16} />
+                  <span>{babysitter.rating} ({babysitter.reviewCount} {language === 'en' ? 'reviews' : 'отзывов'})</span>
                 </div>
-              )}
+                <div className="flex items-center space-x-2 mb-2">
+                  <Baby className="text-gray-500" size={16} />
+                  <span>{experience}</span>
+                </div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <Languages className="text-gray-500" size={16} />
+                  <span>{languages.join(', ')}</span>
+                </div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <GraduationCap className="text-gray-500" size={16} />
+                  <span>{language === 'en' ? 'Age Groups' : 'Возрастные группы'}: {ageGroups.join(', ')}</span>
+                </div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <CheckCircle2 className="text-gray-500" size={16} />
+                  <span>{language === 'en' ? 'Certifications' : 'Сертификаты'}: {certifications.join(', ')}</span>
+                </div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <Shield className="text-gray-500" size={16} />
+                  <span>{babysitter.isVerified ? (language === 'en' ? 'Verified Babysitter' : 'Проверенная няня') : (language === 'en' ? 'Not Verified' : 'Не проверено')}</span>
+                </div>
+                <div className="flex items-center space-x-2 mb-2">
+                  <Calendar className="text-gray-500" size={16} />
+                  <span>{babysitter.available ? (language === 'en' ? 'Available' : 'Доступна') : (language === 'en' ? 'Not Available' : 'Не доступна')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold mb-4">{language === 'en' ? 'Book Now' : 'Заказать'}</h2>
+              <div className="mb-4">
+                <span className="text-gray-700">{language === 'en' ? 'Price per hour' : 'Цена за час'}:</span>
+                <span className="ml-2 font-semibold">{babysitter.pricePerHour} RUB</span>
+              </div>
+              <Button>{language === 'en' ? 'Contact Babysitter' : 'Связаться с няней'}</Button>
             </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="px-4 pt-4 text-center">
-          <h1 className="text-2xl font-bold">
-            {name}
-          </h1>
-          <p className="text-muted-foreground">
-            {language === 'ru' ? babysitter.experienceRu : babysitter.experience}
-          </p>
-          
-          <div className="flex items-center justify-center gap-1 mt-2">
-            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">{babysitter.rating}</span>
-            <span className="text-muted-foreground">({babysitter.reviewCount} {language === 'ru' ? 'отзывов' : 'reviews'})</span>
-          </div>
-
-          <Badge 
-            variant={babysitter.available ? "default" : "secondary"} 
-            className="mt-3"
-          >
-            {babysitter.available 
-              ? (language === 'ru' ? 'Доступна' : 'Available')
-              : (language === 'ru' ? 'Занята' : 'Busy')
-            }
-          </Badge>
-        </div>
-
-        {/* Info Cards */}
-        <div className="px-4 space-y-4 mt-6">
-          {/* About */}
-          <div className="bg-card rounded-xl border p-5">
-            <h3 className="font-semibold mb-3">
-              {language === 'ru' ? 'Обо мне' : 'About Me'}
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              {language === 'ru' ? babysitter.descRu : babysitter.descEn}
-            </p>
-          </div>
-
-          {/* Age Groups */}
-          <div className="bg-card rounded-xl border p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Baby className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Возраст детей' : 'Age Groups'}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {(language === 'ru' ? babysitter.ageGroupsRu : babysitter.ageGroupsEn).map((age, i) => (
-                <Badge key={i} variant="outline">{age}</Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Languages */}
-          <div className="bg-card rounded-xl border p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Languages className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Языки' : 'Languages'}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {(language === 'ru' ? babysitter.languagesRu : babysitter.languages).map((lang, i) => (
-                <Badge key={i} variant="outline">{lang}</Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Certifications */}
-          <div className="bg-card rounded-xl border p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Сертификаты' : 'Certifications'}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {(language === 'ru' ? babysitter.certificationsRu : babysitter.certifications).map((cert, i) => (
-                <Badge key={i} variant="secondary">{cert}</Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Trust */}
-          <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-xl">
-            <Shield className="w-5 h-5 text-primary" />
-            <span className="text-sm">
-              {language === 'ru' 
-                ? 'Проверка документов пройдена'
-                : 'Background check verified'}
-            </span>
-          </div>
-        </div>
-
-        {/* Cross-sell */}
-        <div className="pb-24">
-          <RelatedServicesSection currentVertical="babysitter" />
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4 z-50">
-          <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'За час' : 'Per hour'}
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                ฿{babysitter.pricePerHour}
-              </p>
-            </div>
-            <Button 
-              size="lg" 
-              className="flex-1 gap-2"
-              onClick={() => navigate(`/babysitter/${babysitter.id}/book`)}
-              disabled={!babysitter.available}
-            >
-              <Calendar className="w-5 h-5" />
-              {language === 'ru' ? 'Забронировать' : 'Book Now'}
-            </Button>
-          </div>
-        </div>
+        <RelatedServicesSection />
       </PageContainer>
     </AppLayout>
   );
-}
+};
+
+export default BabysitterDetail;

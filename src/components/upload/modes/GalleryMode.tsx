@@ -318,7 +318,7 @@ export function GalleryMode({
         img.id === id ? { ...img, status: 'uploading' as const, progress: 30 } : img
       ));
 
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+      const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12)}.webp`;
       const filePath = `${user?.id}/${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -369,7 +369,7 @@ export function GalleryMode({
     const filesToProcess = files.slice(0, remainingSlots);
     
     const newUploadingImages: UploadingImage[] = filesToProcess.map(file => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      id: `${Date.now()}-${crypto.randomUUID().slice(0, 12)}`,
       file,
       preview: URL.createObjectURL(file),
       progress: 0,
@@ -444,7 +444,7 @@ export function GalleryMode({
           u.id === uploadingId ? { ...u, status: 'uploading' as const, progress: 50 } : u
         ));
         
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+        const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12)}.webp`;
         const filePath = `${user.id}/${folder}/${fileName}`;
         
         const { error } = await supabase.storage.from(bucket).upload(filePath, compressedFile, {

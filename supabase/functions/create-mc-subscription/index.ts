@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     }
 
     // Create checkout session for new subscription
-    const origin = req.headers.get("origin") || "https://uno-connect-hub.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",

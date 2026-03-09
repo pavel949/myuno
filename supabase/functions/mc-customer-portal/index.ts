@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     if (!company?.stripe_customer_id) throw new Error("No Stripe customer for this company");
 
     const stripe = createStripeClient();
-    const origin = req.headers.get("origin") || "https://uno-connect-hub.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: company.stripe_customer_id,

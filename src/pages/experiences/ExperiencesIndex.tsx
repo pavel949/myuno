@@ -3,6 +3,7 @@
  * Clean header, category ribbon, sort, responsive grid
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
@@ -44,7 +45,7 @@ function ExperienceCard({ experience, language }: { experience: Experience; lang
     >
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-2">
         <OptimizedImage
-          src={experience.cover_image || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
+          src={experience.cover_image || PLACEHOLDER_IMAGES.experience}
           alt={isRu ? experience.title_ru : experience.title_en}
           width={400}
           height={300}

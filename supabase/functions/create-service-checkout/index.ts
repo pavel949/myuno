@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       customerId = customer.id;
     }
 
-    const origin = req.headers.get("origin") || "https://id-preview--dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = services.map(s => ({
       price_data: {

@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     const truncatedMessage = (messagePreview || "").substring(0, 300);
     const guestName = senderName || "Гость";
 
-    const siteUrl = Deno.env.get("SITE_URL") || "https://uno-connect-hub.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://uno.ae";
 
     const emailHtml = `
       <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">

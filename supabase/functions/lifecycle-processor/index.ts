@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
               const title = isRu ? tmpl.title_ru : tmpl.title_en;
               const body = isRu ? tmpl.body_ru : tmpl.body_en;
               const ctaLabel = isRu ? (tmpl.cta_label_ru || "Подробнее") : (tmpl.cta_label_en || "Learn more");
-              const baseUrl = "https://uno-connect-hub.lovable.app";
+              const baseUrl = Deno.env.get("SITE_URL") || "https://uno.ae";
 
               const emailRes = await fetch("https://api.resend.com/emails", {
                 method: "POST",
