@@ -5,7 +5,8 @@ import { usePinAuth } from './usePinAuth';
 
 const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
-const PIN_REFRESH_TOKEN_KEY = 'uno_pin_refresh_token';
+// SECURITY: Refresh token is no longer stored in localStorage.
+// PIN login re-authenticates via stored email + PIN verification on the server.
 
 export function usePinManagement() {
   const { user, session } = useAuth();
