@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
-  Send, Bot, Copy, MessageSquare,
+  Send, Bot, Copy, MessageSquare, UserPlus,
   Sparkles, Loader2, Facebook
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +37,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isScoring, setIsScoring] = useState(false);
+  const [isConvertingToCrm, setIsConvertingToCrm] = useState(false);
   const [noteText, setNoteText] = useState('');
 
   const handleStatusChange = (newStatus: string) => {
@@ -105,6 +107,43 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
     });
   };
 
+  const handleConvertToCrm = async () => {
+    setIsConvertingToCrm(true);
+    try {
+      const nameParts = (prospect.contact_name || prospect.business_name || '').split(' ');
+      const firstName = nameParts[0] || prospect.business_name;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const { error } = await supabase.from('crm_contacts').insert({
+        first_name: firstName,
+        last_name: lastName || null,
+        email: prospect.email,
+        phone: prospect.phone,
+        contact_type: 'vendor',
+        source: 'ai_discovery',
+        notes: `[Supplier Discovery] ${prospect.business_name}. ${prospect.category || ''}. Score: ${prospect.ai_score || 'N/A'}. ${prospect.ai_reasoning || ''}`.trim(),
+      } as any);
+
+      if (error) throw error;
+
+      // Mark prospect as converted
+      updateProspect.mutate({ id: prospect.id, status: 'won' });
+
+      toast({
+        title: isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM',
+        description: isRussian ? `${firstName} ${lastName}` : `${firstName} ${lastName}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsConvertingToCrm(false);
+    }
+  };
+
   const status = statusConfig[prospect.status];
   const priority = priorityConfig[prospect.ai_priority || ''];
   const location = prospect.district || prospect.address || prospect.city;
@@ -163,6 +202,26 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
             <Badge className={cn(priority.bgColor, priority.color)}>
               {priority.label}
             </Badge>
+          </div>
+        )}
+
+        {/* Convert to CRM button */}
+        {!prospect.converted_provider_id && (
+          <div className="pb-4">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full"
+              onClick={handleConvertToCrm}
+              disabled={isConvertingToCrm}
+            >
+              {isConvertingToCrm ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <UserPlus className="h-4 w-4 mr-2" />
+              )}
+              {isRussian ? 'Добавить в CRM' : 'Add to CRM'}
+            </Button>
           </div>
         )}
 

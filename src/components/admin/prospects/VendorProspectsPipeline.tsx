@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVendorProspects, statusConfig, priorityConfig, type VendorProspect } from '@/hooks/useVendorAcquisition';
+import { useVendorProspects, useUpdateProspect, statusConfig, priorityConfig, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ export function VendorProspectsPipeline() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
   const { data: prospects, isLoading, refetch } = useVendorProspects();
+  const updateProspect = useUpdateProspect();
   const [selectedProspect, setSelectedProspect] = useState<VendorProspect | null>(null);
 
   const getProspectsByStatus = (status: string) => {
@@ -36,7 +37,10 @@ export function VendorProspectsPipeline() {
 
   const handleDrop = (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
-    // Would need updateProspect mutation here
+    const prospectId = e.dataTransfer.getData('prospectId');
+    if (prospectId) {
+      updateProspect.mutate({ id: prospectId, status: newStatus });
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
