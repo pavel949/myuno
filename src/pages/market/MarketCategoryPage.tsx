@@ -29,7 +29,7 @@ const SPECIAL_CATEGORIES = {
     description_ru: 'Лучшие цены на популярные товары',
     icon: '🔥',
     gradient: 'from-orange-600/90 to-red-500/80',
-    image_url: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&q=80',
+    image_url: PLACEHOLDER_IMAGES.marketCategories['hot'],
   },
   popular: {
     slug: 'popular',
