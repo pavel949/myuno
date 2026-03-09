@@ -287,7 +287,7 @@ export default function VendorLanding() {
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Button size="lg" variant="ghost" className="h-12 text-base" asChild>
-                <a href="https://wa.me/66612345678" target="_blank" rel="noopener noreferrer">
+                <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   {isRu ? 'Задать вопрос' : 'Ask a question'}
                 </a>

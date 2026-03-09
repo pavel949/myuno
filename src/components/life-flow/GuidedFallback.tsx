@@ -73,7 +73,7 @@ export const GuidedFallback = memo(function GuidedFallback({
 
         {/* Secondary: Call */}
         <button
-          onClick={() => window.location.href = 'tel:+66123456789'}
+          onClick={() => window.location.href = getTelLink()}
           className="w-full flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/60 text-left hover:shadow-sm active:scale-[0.98] transition-all touch-manipulation"
         >
           <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
