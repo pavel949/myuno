@@ -114,14 +114,60 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
       const firstName = nameParts[0] || prospect.business_name;
       const lastName = nameParts.slice(1).join(' ') || '';
 
+      // Check for duplicate by email or phone
+      if (prospect.email) {
+        const { data: byEmail } = await supabase
+          .from('crm_contacts')
+          .select('id, first_name')
+          .eq('email', prospect.email)
+          .maybeSingle();
+        if (byEmail) {
+          toast({
+            title: isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM',
+            description: `${byEmail.first_name} (${prospect.email})`,
+          });
+          setIsConvertingToCrm(false);
+          return;
+        }
+      }
+
+      // Extract enriched data from source_data
+      const sd = (prospect.source_data || {}) as Record<string, any>;
+      const tags = [
+        prospect.category,
+        sd.price_tier,
+        ...(sd.is_verified ? ['verified'] : []),
+        'ai_discovery',
+      ].filter(Boolean) as string[];
+
+      // Rich CRM mapping
       const { error } = await supabase.from('crm_contacts').insert({
         first_name: firstName,
         last_name: lastName || null,
         email: prospect.email,
         phone: prospect.phone,
+        whatsapp: prospect.whatsapp || prospect.phone,
+        instagram: prospect.instagram,
+        facebook: prospect.facebook,
+        website: prospect.website,
+        company_name: prospect.business_name,
         contact_type: 'vendor',
         source: 'ai_discovery',
-        notes: `[Supplier Discovery] ${prospect.business_name}. ${prospect.category || ''}. Score: ${prospect.ai_score || 'N/A'}. ${prospect.ai_reasoning || ''}`.trim(),
+        lead_score: prospect.ai_score,
+        lead_temperature: prospect.ai_priority === 'hot' ? 'hot' : prospect.ai_priority === 'warm' ? 'warm' : 'cold',
+        address_city: prospect.city || 'Phuket',
+        address_street: prospect.address,
+        tags,
+        notes: [
+          `[Supplier Discovery] ${prospect.business_name}`,
+          prospect.category ? `Category: ${prospect.category}` : null,
+          `AI Score: ${prospect.ai_score || 'N/A'}`,
+          prospect.ai_reasoning,
+          sd.services_offered?.length ? `Services: ${sd.services_offered.join(', ')}` : null,
+          sd.working_hours ? `Hours: ${sd.working_hours}` : null,
+          sd.description_ru ? `RU: ${sd.description_ru}` : null,
+        ].filter(Boolean).join(' | '),
+        lifecycle_stage: 'lead',
       } as any);
 
       if (error) throw error;
@@ -131,7 +177,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
       toast({
         title: isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM',
-        description: isRussian ? `${firstName} ${lastName}` : `${firstName} ${lastName}`,
+        description: `${firstName} ${lastName} — ${tags.join(', ')}`,
       });
     } catch (error: any) {
       toast({
