@@ -84,7 +84,9 @@ export default function PharmacyDetail() {
         {/* Header */}
         <div className="relative -mx-4 -mt-4">
           <img
-            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacye="w-full h-48 object-cover"
+            src={pharmacy.cover_image || PLACEHOLDER_IMAGES.pharmacy}
+            alt=""
+            className="w-full h-48 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
           <Button
