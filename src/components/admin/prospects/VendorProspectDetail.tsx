@@ -205,6 +205,26 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
           </div>
         )}
 
+        {/* Convert to CRM button */}
+        {!prospect.converted_provider_id && (
+          <div className="pb-4">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full"
+              onClick={handleConvertToCrm}
+              disabled={isConvertingToCrm}
+            >
+              {isConvertingToCrm ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <UserPlus className="h-4 w-4 mr-2" />
+              )}
+              {isRussian ? 'Добавить в CRM' : 'Add to CRM'}
+            </Button>
+          </div>
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="info" className="w-full">
           <TabsList className="grid grid-cols-3 w-full">
