@@ -419,6 +419,109 @@ Deno.serve(async (req) => {
           logStep("Wallet top-up completed", { userId: redactId(userId) });
         }
       }
+
+      // ===== SERVICE PAYMENT =====
+      if (session.metadata?.type === "service_payment") {
+        const userId = session.metadata.user_id;
+        const providerId = session.metadata.provider_id;
+        const providerName = session.metadata.provider_name;
+        const scheduledAt = session.metadata.scheduled_at;
+        const address = session.metadata.address;
+        const contactName = session.metadata.contact_name;
+        const contactPhone = session.metadata.contact_phone;
+        const contactEmail = session.metadata.contact_email;
+        const notes = session.metadata.notes;
+        const totalAmount = parseFloat(session.metadata.total_amount || "0");
+        const currency = session.metadata.currency || "THB";
+
+        logStep("Processing service_payment", { userId: redactId(userId), providerId: redactId(providerId) });
+
+        // ===== IDEMPOTENCY CHECK =====
+        const { data: existingServiceOrder } = await supabaseAdmin
+          .from('orders')
+          .select('id')
+          .eq('order_type', 'service')
+          .filter('metadata->>stripe_session_id', 'eq', session.id)
+          .limit(1);
+
+        if (existingServiceOrder && existingServiceOrder.length > 0) {
+          logStep("IDEMPOTENCY: Service order already exists, skipping", { sessionId: session.id });
+        } else {
+          const { data: newOrder, error: orderInsertError } = await supabaseAdmin
+            .from('orders')
+            .insert({
+              order_type: 'service',
+              customer_user_id: userId,
+              provider_org_id: providerId,
+              total_amount: totalAmount,
+              currency: currency.toUpperCase(),
+              status: 'confirmed',
+              paid_at: new Date().toISOString(),
+              start_at: scheduledAt,
+              vertical: 'services',
+              notes: notes || null,
+              metadata: {
+                stripe_session_id: session.id,
+                provider_name: providerName,
+                address,
+                contact_name: contactName,
+                contact_phone: contactPhone,
+                contact_email: contactEmail,
+              },
+            })
+            .select('id, order_number')
+            .single();
+
+          if (orderInsertError) {
+            logStep("ERROR", `Failed to create service order: ${orderInsertError.message}`);
+            throw orderInsertError;
+          }
+
+          logStep("Service order created", { orderId: redactId(newOrder.id) });
+
+          await supabaseAdmin.from('order_status_history').insert({
+            order_id: newOrder.id,
+            from_status: 'pending',
+            to_status: 'confirmed',
+            reason: `Payment confirmed via Stripe. Session: ${session.id}`,
+          });
+
+          await supabaseAdmin.from('notifications').insert({
+            user_id: userId,
+            title: 'Service Payment Confirmed',
+            body: `Your service order with ${providerName} has been confirmed.`,
+            type: 'payment',
+            data: {
+              order_id: newOrder.id,
+              order_type: 'service',
+              session_id: session.id,
+              provider_name: providerName,
+              scheduled_at: scheduledAt,
+            },
+          });
+
+          try {
+            await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-order-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              },
+              body: JSON.stringify({
+                type: 'order_confirmation',
+                order_id: newOrder.id,
+                user_id: userId,
+              }),
+            });
+            logStep("Service order confirmation email sent");
+          } catch (emailError) {
+            logStep("WARN", `Failed to send service confirmation email: ${emailError}`);
+          }
+
+          logStep("Service payment completed", { orderId: redactId(newOrder.id) });
+        }
+      }
+
     }
 
     // =====================================================
