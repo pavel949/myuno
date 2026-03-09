@@ -49,7 +49,7 @@ const SPECIAL_CATEGORIES = {
     description_ru: 'Свежие товары только что добавлены',
     icon: '✨',
     gradient: 'from-purple-600/90 to-pink-500/80',
-    image_url: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800&q=80',
+    image_url: PLACEHOLDER_IMAGES.marketCategories['new'],
   },
 };
 

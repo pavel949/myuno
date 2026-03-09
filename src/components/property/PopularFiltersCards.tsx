@@ -14,15 +14,15 @@ interface PopularFilter {
 
 const popularFilters: PopularFilter[] = [
   // Popular districts
-  { id: 'bang-tao', sectionId: 'district', labelEn: 'Bang Tao', labelRu: 'Банг Тао', icon: '⛱️', image: 'https://images.unsplash.com/photo-1559628233-100c798642d4?w=300' },
-  { id: 'kamala', sectionId: 'district', labelEn: 'Kamala', labelRu: 'Камала', icon: '🌅', image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=300' },
-  { id: 'rawai', sectionId: 'district', labelEn: 'Rawai', labelRu: 'Равай', icon: '🐚', image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=300' },
-  { id: 'surin', sectionId: 'district', labelEn: 'Surin', labelRu: 'Сурин', icon: '🏝️', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300' },
+  { id: 'bang-tao', sectionId: 'district', labelEn: 'Bang Tao', labelRu: 'Банг Тао', icon: '⛱️', image: PLACEHOLDER_IMAGES.districts['bang-tao'] },
+  { id: 'kamala', sectionId: 'district', labelEn: 'Kamala', labelRu: 'Камала', icon: '🌅', image: PLACEHOLDER_IMAGES.districts['kamala'] },
+  { id: 'rawai', sectionId: 'district', labelEn: 'Rawai', labelRu: 'Равай', icon: '🐚', image: PLACEHOLDER_IMAGES.districts['rawai'] },
+  { id: 'surin', sectionId: 'district', labelEn: 'Surin', labelRu: 'Сурин', icon: '🏝️', image: PLACEHOLDER_IMAGES.districts['surin'] },
   // Popular amenities
-  { id: 'pool', sectionId: 'amenities', labelEn: 'With Pool', labelRu: 'С бассейном', icon: '🏊', image: 'https://images.unsplash.com/photo-1572331165267-854da2b021aa?w=300' },
-  { id: 'sea-view', sectionId: 'amenities', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊', image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=300' },
-  { id: 'beachfront', sectionId: 'amenities', labelEn: 'Beachfront', labelRu: 'На пляже', icon: '🏖️', image: 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=300' },
-  { id: 'pet-friendly', sectionId: 'amenities', labelEn: 'Pet Friendly', labelRu: 'С питомцами', icon: '🐕', image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300' },
+  { id: 'pool', sectionId: 'amenities', labelEn: 'With Pool', labelRu: 'С бассейном', icon: '🏊', image: PLACEHOLDER_IMAGES.amenities['pool'] },
+  { id: 'sea-view', sectionId: 'amenities', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊', image: PLACEHOLDER_IMAGES.amenities['sea-view'] },
+  { id: 'beachfront', sectionId: 'amenities', labelEn: 'Beachfront', labelRu: 'На пляже', icon: '🏖️', image: PLACEHOLDER_IMAGES.amenities['beachfront'] },
+  { id: 'pet-friendly', sectionId: 'amenities', labelEn: 'Pet Friendly', labelRu: 'С питомцами', icon: '🐕', image: PLACEHOLDER_IMAGES.amenities['pet-friendly'] },
 ];
 
 interface PopularFiltersCardsProps {
