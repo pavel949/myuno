@@ -4,6 +4,7 @@
   */
  import { useQuery } from '@tanstack/react-query';
  import { supabase } from '@/integrations/supabase/client';
+ import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
  
  export interface CleaningService {
    id: string;
