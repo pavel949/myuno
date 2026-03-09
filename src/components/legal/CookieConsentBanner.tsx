@@ -41,23 +41,25 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
   useEffect(() => {
     const existing = getStoredConsent();
     if (!existing) {
-      // Show banner after a delay; also wait for any blocking modals (e.g. legal compliance) to close
+      let intervalId: ReturnType<typeof setInterval> | null = null;
       const timer = setTimeout(() => {
-        // Don't show if a blocking dialog overlay is present
         const hasBlockingModal = document.querySelector('[data-radix-dialog-overlay]');
         if (hasBlockingModal) {
-          // Re-check periodically until modal is closed
-          const interval = setInterval(() => {
+          intervalId = setInterval(() => {
             if (!document.querySelector('[data-radix-dialog-overlay]')) {
               setVisible(true);
-              clearInterval(interval);
+              if (intervalId) clearInterval(intervalId);
+              intervalId = null;
             }
           }, 1000);
           return;
         }
         setVisible(true);
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (intervalId) clearInterval(intervalId);
+      };
     }
   }, []);
 

@@ -318,7 +318,10 @@ export default function OwnerProperties() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from('properties').delete().eq('id', deleteTarget);
+    const { error } = await supabase
+      .from('properties')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .eq('id', deleteTarget);
     if (error) {
       toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
     } else {
