@@ -101,13 +101,24 @@ export function useUserTracking() {
       }
     }, 60000); // Every minute
 
-    // End session on page unload
-    const handleUnload = async () => {
+    // End session on page unload — use sendBeacon for reliability
+    const handleUnload = () => {
       try {
-        await supabase
-          .from('user_sessions')
-          .update({ is_active: false, ended_at: new Date().toISOString() })
-          .eq('id', sessionId);
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_sessions?id=eq.${sessionId}`;
+        const body = JSON.stringify({ is_active: false, ended_at: new Date().toISOString() });
+        const headers = {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'Prefer': 'return=minimal',
+        };
+        // sendBeacon guarantees delivery even during page unload
+        const blob = new Blob([body], { type: 'application/json' });
+        const sent = navigator.sendBeacon(url, blob);
+        if (!sent) {
+          // Fallback: keepalive fetch (works in most modern browsers)
+          fetch(url, { method: 'PATCH', headers, body, keepalive: true }).catch(() => {});
+        }
       } catch {
         // Silent fail on unload
       }

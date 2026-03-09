@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
@@ -103,6 +104,7 @@ function useAllComplexesAndProjects() {
 
 export default function OwnerProperties() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { roles } = useUserRoles();
@@ -229,7 +231,10 @@ export default function OwnerProperties() {
   const handleBulkDelete = async () => {
     setBulkProcessing(true);
     const ids = Array.from(selectedIds);
-    const { error } = await supabase.from('properties').delete().in('id', ids);
+    const { error } = await supabase
+      .from('properties')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .in('id', ids);
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
     if (error) {
@@ -315,7 +320,10 @@ export default function OwnerProperties() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from('properties').delete().eq('id', deleteTarget);
+    const { error } = await supabase
+      .from('properties')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
+      .eq('id', deleteTarget);
     if (error) {
       toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
     } else {
