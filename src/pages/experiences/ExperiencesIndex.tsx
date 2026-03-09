@@ -3,6 +3,7 @@
  * Clean header, category ribbon, sort, responsive grid
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, SlidersHorizontal, Star, Clock, MapPin, Loader2, Waves } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
