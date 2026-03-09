@@ -105,9 +105,9 @@ const ServiceProviderDetail = () => {
 
   const servicesInCart = items.filter(item => item.type === 'service' && item.providerId === id);
 
-  // Dynamic provider data based on category
+  // TODO: Replace mock provider data with real DB query (e.g. useProvider(id))
+  // Currently hardcoded stats (rating, reviews, completedJobs) — should come from `providers` table
   const provider = {
-    id: id,
     name: providerName,
     category: category,
     categoryName: getCategoryName(category, language),
