@@ -1,4 +1,5 @@
 import React from 'react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Baby, Star, Shield, Languages, GraduationCap, CheckCircle2, Calendar
