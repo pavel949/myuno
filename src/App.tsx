@@ -84,7 +84,7 @@ function AppContent() {
           <ComingSoonGate>
             <AnimatedRoutes />
             <UnifiedChatFAB />
-            <ChatWidget vertical="concierge" placeholder="Ask me anything about Phuket..." />
+            
             <CookieConsentBanner />
           </ComingSoonGate>
         </BrowserRouter>
