@@ -48,10 +48,6 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
   const { data: situations, isLoading } = useLifeSituations();
   const isRu = language === 'ru';
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || Compass;
-  };
 
   const handleSelect = (situation: {
     code: string;
