@@ -11,8 +11,7 @@ import { useLifeSituations } from '@/hooks/useLifeOS';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Compass, ArrowRight, HelpCircle } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
