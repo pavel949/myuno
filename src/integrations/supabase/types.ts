@@ -3761,6 +3761,9 @@ export type Database = {
           mobile: string | null
           nationality: string | null
           notes: string | null
+          outreach_channel: string | null
+          outreach_sent_at: string | null
+          outreach_status: string | null
           phone: string | null
           phone2: string | null
           preferred_districts: string[] | null
@@ -3818,6 +3821,9 @@ export type Database = {
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
+          outreach_channel?: string | null
+          outreach_sent_at?: string | null
+          outreach_status?: string | null
           phone?: string | null
           phone2?: string | null
           preferred_districts?: string[] | null
@@ -3875,6 +3881,9 @@ export type Database = {
           mobile?: string | null
           nationality?: string | null
           notes?: string | null
+          outreach_channel?: string | null
+          outreach_sent_at?: string | null
+          outreach_status?: string | null
           phone?: string | null
           phone2?: string | null
           preferred_districts?: string[] | null
@@ -23501,6 +23510,87 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_outreach_log: {
+        Row: {
+          ai_model: string | null
+          ai_personalization_data: Json | null
+          channel: string
+          clicked_at: string | null
+          contact_id: string | null
+          created_at: string
+          error_message: string | null
+          followup_sequence: number | null
+          id: string
+          invite_link: string | null
+          message_body: string | null
+          next_followup_at: string | null
+          opened_at: string | null
+          registered_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+          vendor_prospect_id: string | null
+        }
+        Insert: {
+          ai_model?: string | null
+          ai_personalization_data?: Json | null
+          channel?: string
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          followup_sequence?: number | null
+          id?: string
+          invite_link?: string | null
+          message_body?: string | null
+          next_followup_at?: string | null
+          opened_at?: string | null
+          registered_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          vendor_prospect_id?: string | null
+        }
+        Update: {
+          ai_model?: string | null
+          ai_personalization_data?: Json | null
+          channel?: string
+          clicked_at?: string | null
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          followup_sequence?: number | null
+          id?: string
+          invite_link?: string | null
+          message_body?: string | null
+          next_followup_at?: string | null
+          opened_at?: string | null
+          registered_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          vendor_prospect_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_outreach_log_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_outreach_log_vendor_prospect_id_fkey"
+            columns: ["vendor_prospect_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_prospects"
             referencedColumns: ["id"]
           },
         ]
