@@ -10,8 +10,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useTripChecklist } from '@/hooks/useTripChecklist';
 import { CheckCircle2, Circle, ArrowRight, ListChecks } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 
