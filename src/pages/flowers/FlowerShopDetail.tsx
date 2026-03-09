@@ -129,7 +129,7 @@ const FlowerShopDetail = () => {
     <AppLayout showBottomNav={false}>
       <div className="min-h-screen bg-background pb-24">
         <div className="relative h-64">
-          <img src={shop.cover_image || PLACEHOLDER_IMAGES.flowerbject-cover" />
+          <img src={shop.cover_image || PLACEHOLDER_IMAGES.flower} alt={shopName} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
             <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
