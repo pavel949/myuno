@@ -63,12 +63,17 @@ export function OwnerBookingsTab({ propertyId }: OwnerBookingsTabProps) {
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <CalendarDays className="w-3.5 h-3.5" />
-                {format(new Date(b.check_in_date), 'd MMM', { locale: isRu ? ru : undefined })} → {format(new Date(b.check_out_date), 'd MMM', { locale: isRu ? ru : undefined })}
-                {b.nights && ` (${b.nights} ${isRu ? 'н.' : 'n.'})`}
+                {format(new Date(b.check_in), 'd MMM', { locale: isRu ? ru : undefined })} → {format(new Date(b.check_out), 'd MMM', { locale: isRu ? ru : undefined })}
+                {(() => {
+                  const ci = new Date(b.check_in);
+                  const co = new Date(b.check_out);
+                  const nights = Math.max(0, Math.ceil((co.getTime() - ci.getTime()) / 86400000));
+                  return nights ? ` (${nights} ${isRu ? 'н.' : 'n.'})` : '';
+                })()}
               </div>
               <div className="flex items-center gap-1">
                 <DollarSign className="w-3.5 h-3.5" />
-                ฿{b.total_price?.toLocaleString()}
+                ฿{Number(b.total_amount || 0).toLocaleString()}
               </div>
               {b.source && <span className="text-[11px] bg-muted px-1.5 py-0.5 rounded">{b.source}</span>}
             </div>

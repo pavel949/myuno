@@ -89,7 +89,7 @@ export function PropertyStatusCard({ propertyId }: Props) {
             <div>
               <p className="text-sm font-medium">{current.guest_name || (isRu ? 'Гость' : 'Guest')}</p>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'до' : 'until'} {format(new Date(current.check_out_date), 'd MMM', { locale: isRu ? ru : undefined })}
+                {isRu ? 'до' : 'until'} {format(new Date(current.check_out), 'd MMM', { locale: isRu ? ru : undefined })}
               </p>
             </div>
           </div>
@@ -102,7 +102,7 @@ export function PropertyStatusCard({ propertyId }: Props) {
             <div>
               <p className="text-xs text-muted-foreground">{isRu ? 'Следующее' : 'Next booking'}</p>
               <p className="text-sm font-medium">
-                {next.guest_name} — {format(new Date(next.check_in_date), 'd MMM', { locale: isRu ? ru : undefined })}
+                {next.guest_name} — {format(new Date(next.check_in), 'd MMM', { locale: isRu ? ru : undefined })}
               </p>
             </div>
           </div>

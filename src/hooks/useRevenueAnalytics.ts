@@ -112,14 +112,19 @@ export function useRevenueAnalytics(monthsBack = 6) {
     const range = { start: subDays(new Date(), 30), end: new Date() };
 
     return allProperties.map(p => {
-      const pFin = financials.filter(f => f.property_id === p.id);
+      const pId = p.property_id;
+      const pFin = financials.filter(f => {
+        if (f.property_id !== pId) return false;
+        const td = new Date(f.transaction_date);
+        return td >= range.start && td <= range.end;
+      });
       const income = pFin.filter(f => f.transaction_type === 'income').reduce((s, f) => s + Number(f.amount), 0);
       const expenses = pFin.filter(f => f.transaction_type === 'expense').reduce((s, f) => s + Number(f.amount), 0);
 
       let bookedDays = 0;
       let count = 0;
       bookings.forEach(b => {
-        if (b.property_id !== p.property_id || b.status === 'cancelled') return;
+        if (b.property_id !== pId || b.status === 'cancelled') return;
         const ci = new Date(b.check_in);
         const co = new Date(b.check_out);
         if (co < range.start || ci > range.end) return;
@@ -134,7 +139,7 @@ export function useRevenueAnalytics(monthsBack = 6) {
       const revpar = income / 30;
 
       return {
-        id: p.property_id,
+        id: pId,
         title: p.title,
         coverImage: p.cover_image,
         income, expenses, occupancy, adr, revpar, bookingCount: count,

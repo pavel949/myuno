@@ -276,15 +276,20 @@ export function useGenerateReport() {
 
       // Calculate occupancy
       const startDate = new Date(input.period_start);
-      const endDate = new Date(input.period_end);
-      const totalNights = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const endDateInclusive = new Date(input.period_end);
+      // Treat period_end as inclusive day; convert to exclusive by adding 1 day
+      const endExclusiveMs = endDateInclusive.getTime() + 86400000;
+      const totalNights = Math.max(0, Math.ceil((endExclusiveMs - startDate.getTime()) / 86400000));
 
       let nightsBooked = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (bookings || []).forEach((b: any) => {
         const checkIn = new Date(b.check_in);
         const checkOut = new Date(b.check_out);
-        const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+
+        const overlapStart = Math.max(checkIn.getTime(), startDate.getTime());
+        const overlapEnd = Math.min(checkOut.getTime(), endExclusiveMs);
+        const nights = Math.max(0, Math.ceil((overlapEnd - overlapStart) / 86400000));
         nightsBooked += nights;
       });
 
