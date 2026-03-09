@@ -369,7 +369,7 @@ export function GalleryMode({
     const filesToProcess = files.slice(0, remainingSlots);
     
     const newUploadingImages: UploadingImage[] = filesToProcess.map(file => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      id: `${Date.now()}-${crypto.randomUUID().slice(0, 12)}`,
       file,
       preview: URL.createObjectURL(file),
       progress: 0,
