@@ -29,7 +29,7 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
-import { ChatWidget } from "@/components/ai/ChatWidget";
+
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
