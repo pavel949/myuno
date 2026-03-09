@@ -117,12 +117,9 @@ export function usePinManagement() {
       if (setError) throw setError;
 
       // Refresh session tokens after re-auth
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData.session?.refresh_token) {
-        localStorage.setItem(PIN_USER_KEY, user.id);
-        localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, sessionData.session.refresh_token);
-      }
+      // Update stored user info (no refresh token for security)
+      localStorage.setItem(PIN_USER_KEY, user.id);
+      localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
 
       await checkHasPin();
       return { success: true };
