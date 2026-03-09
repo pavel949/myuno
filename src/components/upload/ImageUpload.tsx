@@ -250,7 +250,7 @@ export function MultiImageUpload({
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12leExt}`;
+        const fileName = `${Date.now()}-${crypto.randomUUID().slice(0, 12)}.${fileExt}`;
         const filePath = `${user.id}/${folder}/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
