@@ -86,6 +86,18 @@ const popularServices = [
     image: PLACEHOLDER_IMAGES.delivery,
   },
 ];
+
+const recentOrders = [
+  {
+    id: 'order-1',
+    from: 'Central Festival',
+    to: 'Patong Beach',
+    status: 'delivered',
+    statusEn: 'Delivered',
+    statusRu: 'Доставлено',
+    time: '45 min',
+    price: 150,
+  },
   {
     id: 'order-2',
     from: 'HomePro Phuket',

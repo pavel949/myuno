@@ -66,8 +66,17 @@ export default function ServiceBooking() {
       return {
         id: dbProvider.id,
         name: dbProvider.name,
-        image: dbProvider.logo_url || PLACEHOLDER_IMAGES.providere: language === "ru" ? "Специалист" : "Specialist",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528PLACEHOLDER_IMAGES.provider state
+        image: dbProvider.logo_url || PLACEHOLDER_IMAGES.provider,
+      };
+    }
+    return {
+      id: id,
+      name: language === "ru" ? "Специалист" : "Specialist",
+      image: PLACEHOLDER_IMAGES.provider,
+    };
+  }, [dbProvider, language, id]);
+
+  // Form state
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [time, setTime] = useState<string>("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
