@@ -22,10 +22,6 @@ export function RouteNextSteps({ nextRoutes, labels, currentLabel }: RouteNextSt
 
   if (!nextRoutes.length) return null;
 
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
 
   return (
     <motion.div

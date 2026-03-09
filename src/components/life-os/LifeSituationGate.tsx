@@ -99,7 +99,6 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {situations?.slice(0, 8).map((situation) => {
-              const Icon = getIcon(situation.icon);
               return (
                 <motion.button
                   key={situation.id}
@@ -118,7 +117,7 @@ const LifeSituationSelector = memo(function LifeSituationSelector({
                     className="w-11 h-11 rounded-xl flex items-center justify-center"
                     style={{ backgroundColor: `${situation.color}15` }}
                   >
-                    <Icon className="w-6 h-6" style={{ color: situation.color }} />
+                    <DynamicIcon name={situation.icon} className="w-6 h-6" style={{ color: situation.color }} />
                   </div>
                   <span className="text-xs font-medium leading-tight line-clamp-2">
                     {isRu ? situation.title_ru : situation.title_en}

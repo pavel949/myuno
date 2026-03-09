@@ -186,14 +186,13 @@ export const LifeOSStatusBlock = memo(forwardRef<HTMLElement>(function LifeOSSta
           </p>
           <div className="space-y-1.5">
             {actions.map((action) => {
-              const Icon = getIcon(action.icon);
               return (
                 <button
                   key={action.path}
                   onClick={() => navigate(action.path)}
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl bg-card border border-border/50 hover:border-border text-left transition-all active:scale-[0.98]"
                 >
-                  <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <DynamicIcon name={action.icon} className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-[13px] font-medium text-foreground flex-1">
                     {isRu ? action.labelRu : action.labelEn}
                   </span>
