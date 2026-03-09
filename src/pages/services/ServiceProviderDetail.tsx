@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { BackButton } from "@/components/uno/BackButton";
 import { useCartToast } from "@/hooks/useCartToast";
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 // Services data by category
 const getServicesByCategory = (category: string, language: string) => {
@@ -104,9 +105,9 @@ const ServiceProviderDetail = () => {
 
   const servicesInCart = items.filter(item => item.type === 'service' && item.providerId === id);
 
-  // Dynamic provider data based on category
+  // TODO: Replace mock provider data with real DB query (e.g. useProvider(id))
+  // Currently hardcoded stats (rating, reviews, completedJobs) — should come from `providers` table
   const provider = {
-    id: id,
     name: providerName,
     category: category,
     categoryName: getCategoryName(category, language),
@@ -118,7 +119,7 @@ const ServiceProviderDetail = () => {
     available: true,
     verified: true,
     responseTime: language === "ru" ? "Отвечает за 15 мин" : "Responds in 15 min",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
+    image: PLACEHOLDER_IMAGES.provider,
     about: language === "ru"
       ? "Профессионал с многолетним опытом работы. Выполняю все виды работ в своей сфере. Работаю быстро и качественно. Гарантия на все услуги."
       : "Professional with years of experience. I perform all types of work in my field. Fast and quality work. Warranty on all services.",

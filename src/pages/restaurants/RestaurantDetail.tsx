@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
 import { DetailPageHeader } from '@/components/uno/DetailPageHeader';
 import { useViewHistory } from '@/hooks/useViewHistory';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { Card, CardContent } from '@/components/ui/card';
@@ -126,7 +127,7 @@ export default function RestaurantDetail() {
         {/* Hero Image */}
         <div className="relative h-56">
           <img
-            src={heroImage || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800'}
+            src={heroImage || PLACEHOLDER_IMAGES.restaurant}
             alt={language === 'ru' ? restaurant.name_ru : restaurant.name_en}
             className="w-full h-full object-cover"
           />

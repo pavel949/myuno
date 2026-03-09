@@ -17,6 +17,7 @@ import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 // Special virtual categories
 const SPECIAL_CATEGORIES = {
@@ -28,7 +29,7 @@ const SPECIAL_CATEGORIES = {
     description_ru: 'Лучшие цены на популярные товары',
     icon: '🔥',
     gradient: 'from-orange-600/90 to-red-500/80',
-    image_url: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&q=80',
+    image_url: PLACEHOLDER_IMAGES.marketCategories['hot'],
   },
   popular: {
     slug: 'popular',
@@ -38,7 +39,7 @@ const SPECIAL_CATEGORIES = {
     description_ru: 'Самые популярные товары',
     icon: '⭐',
     gradient: 'from-amber-600/90 to-yellow-500/80',
-    image_url: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+    image_url: PLACEHOLDER_IMAGES.marketCategories['popular'],
   },
   new: {
     slug: 'new',
@@ -48,7 +49,7 @@ const SPECIAL_CATEGORIES = {
     description_ru: 'Свежие товары только что добавлены',
     icon: '✨',
     gradient: 'from-purple-600/90 to-pink-500/80',
-    image_url: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800&q=80',
+    image_url: PLACEHOLDER_IMAGES.marketCategories['new'],
   },
 };
 

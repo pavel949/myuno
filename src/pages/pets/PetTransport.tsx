@@ -13,6 +13,7 @@ import {
   FileText,
   CheckCircle2
 } from 'lucide-react';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -95,7 +96,7 @@ export default function PetTransport() {
         {/* Hero */}
         <div className="relative rounded-2xl overflow-hidden mb-6">
           <img
-            src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800"
+            src={PLACEHOLDER_IMAGES.pet}
             alt="Pet Transport"
             className="w-full h-48 object-cover"
           />

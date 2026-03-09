@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { useGym } from '@/hooks/useGyms';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const GymDetail = () => {
   const { id } = useParams();
@@ -68,7 +69,7 @@ const GymDetail = () => {
     );
   }
 
-  const images = gym.images?.length ? gym.images : [gym.cover_image || 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800'];
+  const images = gym.images?.length ? gym.images : [gym.cover_image || PLACEHOLDER_IMAGES.gym];
   const name = language === 'ru' ? gym.name_ru : gym.name_en;
   const description = language === 'ru' ? gym.description_ru : gym.description_en;
   const amenities = gym.amenities || [];
