@@ -17,6 +17,7 @@ import { useCartToast } from '@/hooks/useCartToast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 // Special virtual categories
 const SPECIAL_CATEGORIES = {
