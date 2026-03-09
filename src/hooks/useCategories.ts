@@ -1,49 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import {
+  Home, Car, UtensilsCrossed, Compass, Waves, Ship, Anchor,
+  Sparkles, Dumbbell, Stethoscope, GraduationCap, Ticket,
+  Flower2, Pill, PawPrint, Wrench, Scale, Baby, Shirt,
+  Package, Bike, Plane, Brush, ShoppingBag, Zap, Wind,
+  Bug, Hammer, Key, CarFront, Building, Shield, Landmark,
+  Warehouse, Stamp, Globe,
+  type LucideIcon
+} from 'lucide-react';
 import { CACHE_PROFILES, queryKeys } from '@/lib/queryConfig';
 
 // Icon mapping from string to component
 const iconMap: Record<string, LucideIcon> = {
-  Home: LucideIcons.Home,
-  Car: LucideIcons.Car,
-  UtensilsCrossed: LucideIcons.UtensilsCrossed,
-  Compass: LucideIcons.Compass,
-  Waves: LucideIcons.Waves,
-  Ship: LucideIcons.Ship,
-  Anchor: LucideIcons.Anchor,
-  Sparkles: LucideIcons.Sparkles,
-  Dumbbell: LucideIcons.Dumbbell,
-  Stethoscope: LucideIcons.Stethoscope,
-  GraduationCap: LucideIcons.GraduationCap,
-  Ticket: LucideIcons.Ticket,
-  Flower2: LucideIcons.Flower2,
-  Pill: LucideIcons.Pill,
-  PawPrint: LucideIcons.PawPrint,
-  Wrench: LucideIcons.Wrench,
-  Scale: LucideIcons.Scale,
-  Baby: LucideIcons.Baby,
-  Shirt: LucideIcons.Shirt,
-  Package: LucideIcons.Package,
-  Bike: LucideIcons.Bike,
-  Plane: LucideIcons.Plane,
-  Brush: LucideIcons.Brush,
-  ShoppingBag: LucideIcons.ShoppingBag,
-  Zap: LucideIcons.Zap,
-  Wind: LucideIcons.Wind,
-  Bug: LucideIcons.Bug,
-  Hammer: LucideIcons.Hammer,
-  Key: LucideIcons.Key,
-  CarFront: LucideIcons.CarFront,
-  Building: LucideIcons.Building,
-  // New icons for added categories
-  Shield: LucideIcons.Shield,         // Insurance
-  Landmark: LucideIcons.Landmark,     // Banking
-  Warehouse: LucideIcons.Warehouse,   // Storage
-  Stamp: LucideIcons.Stamp,           // Visa
-  Globe: LucideIcons.Globe,           // Expat Services
+  Home, Car, UtensilsCrossed, Compass, Waves, Ship, Anchor,
+  Sparkles, Dumbbell, Stethoscope, GraduationCap, Ticket,
+  Flower2, Pill, PawPrint, Wrench, Scale, Baby, Shirt,
+  Package, Bike, Plane, Brush, ShoppingBag, Zap, Wind,
+  Bug, Hammer, Key, CarFront, Building, Shield, Landmark,
+  Warehouse, Stamp, Globe,
 };
 
 export interface CategoryGroup {

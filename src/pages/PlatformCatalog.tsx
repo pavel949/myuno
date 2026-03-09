@@ -9,52 +9,23 @@ import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useCategories, Category, CategoryGroup } from '@/hooks/useCategories';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
 import { cn } from '@/lib/utils';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon, LayoutGrid, Layers } from 'lucide-react';
+import {
+  Plane, Home, Palmtree, Heart, Users, Building, Globe, Briefcase,
+  PawPrint, GraduationCap, ShoppingBag, Music, Trophy, Stamp,
+  Compass, Sun, MapPin, LayoutGrid, Layers,
+  type LucideIcon
+} from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-
-// Map situation codes to relevant category slugs
-const SITUATION_CATEGORY_MAP: Record<string, string[]> = {
-  arrival: ['transport', 'property', 'insurance', 'transfer', 'banking', 'visa'],
-  living: ['cleaning', 'services', 'restaurants', 'market', 'fitness', 'medical'],
-  leisure: ['yachts', 'water', 'events', 'restaurants', 'experiences', 'beauty'],
-  health: ['medical', 'pharmacy', 'fitness', 'insurance'],
-  family: ['babysitter', 'education', 'medical', 'events', 'pets'],
-  property: ['property', 'services', 'cleaning', 'legal'],
-  relocation: ['visa', 'legal', 'banking', 'insurance', 'property', 'transport'],
-  business: ['legal', 'banking', 'services', 'market'],
-  pets: ['pets', 'veterinary', 'services'],
-  education: ['education', 'events'],
-  shopping: ['market', 'flowers', 'restaurants'],
-  nightlife: ['events', 'restaurants', 'transport'],
-  sports: ['fitness', 'water', 'experiences'],
-  visa_travel: ['visa', 'insurance', 'transport', 'transfer'],
-};
 
 const iconMap: Record<string, LucideIcon> = {
-  Plane: LucideIcons.Plane,
-  Home: LucideIcons.Home,
-  Palmtree: LucideIcons.Palmtree,
-  Heart: LucideIcons.Heart,
-  Users: LucideIcons.Users,
-  Building: LucideIcons.Building,
-  Globe: LucideIcons.Globe,
-  Briefcase: LucideIcons.Briefcase,
-  PawPrint: LucideIcons.PawPrint,
-  GraduationCap: LucideIcons.GraduationCap,
-  ShoppingBag: LucideIcons.ShoppingBag,
-  Music: LucideIcons.Music,
-  Trophy: LucideIcons.Trophy,
-  Stamp: LucideIcons.Stamp,
-  Compass: LucideIcons.Compass,
-  Sun: LucideIcons.Sun,
-  MapPin: LucideIcons.MapPin,
+  Plane, Home, Palmtree, Heart, Users, Building, Globe, Briefcase,
+  PawPrint, GraduationCap, ShoppingBag, Music, Trophy, Stamp,
+  Compass, Sun, MapPin,
 };
 
 function resolveIcon(name: string): LucideIcon {
-  return iconMap[name] || LucideIcons.Compass;
+  return iconMap[name] || Compass;
 }
 
 export default memo(function PlatformCatalog() {

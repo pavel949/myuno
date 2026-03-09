@@ -20,16 +20,12 @@ export const ActiveSituationBanner = memo(forwardRef<HTMLDivElement>(function Ac
   if (!activeCode || activeCode === 'browsing') return null;
 
   const activeSituation = situations?.find(s => s.code === activeCode);
-  const getIcon = (iconName: string): LucideIcon => {
-    const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-    return icons[iconName] || LucideIcons.Compass;
-  };
-  const Icon = activeSituation ? getIcon(activeSituation.icon) : LucideIcons.Compass;
+  const iconName = activeSituation?.icon || 'compass';
 
   return (
     <div ref={ref} className="flex items-center gap-2.5 px-4 py-2 text-sm border-b border-border/50 bg-muted/30">
       {/* Icon */}
-      <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+      <DynamicIcon name={iconName} className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
 
       {/* Title */}
       <button
