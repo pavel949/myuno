@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { useGym } from '@/hooks/useGyms';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const GymDetail = () => {
   const { id } = useParams();
