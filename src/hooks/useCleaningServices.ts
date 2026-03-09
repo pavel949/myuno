@@ -221,7 +221,7 @@ export const FALLBACK_CLEANING_DETAIL: CleaningServiceDetail[] = [
     nameRu: 'Стирка и глажка',
     descEn: 'Pickup, wash, iron and deliver.',
     descRu: 'Заберём, постираем, погладим и доставим.',
-    image: 'https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800',
+    image: PLACEHOLDER_IMAGES.laundry,
     priceFrom: 200,
     duration: '24h',
     rating: 4.7,
