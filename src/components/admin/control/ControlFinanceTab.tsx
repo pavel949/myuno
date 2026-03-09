@@ -36,9 +36,15 @@ export function ControlFinanceTab() {
   const metrics = [
     { 
       label: isRussian ? 'Общий доход' : 'Total Revenue', 
-      value: `$${(financeStats?.revenue || 0).toLocaleString()}`, 
+      value: `฿${(financeStats?.revenue || 0).toLocaleString()}`, 
       icon: DollarSign, 
       color: 'text-success' 
+    },
+    { 
+      label: isRussian ? 'Общие расходы' : 'Total Expenses', 
+      value: `฿${(financeStats?.expenses || 0).toLocaleString()}`, 
+      icon: TrendingUp, 
+      color: 'text-destructive' 
     },
     { 
       label: isRussian ? 'Транзакции' : 'Transactions', 
@@ -47,16 +53,10 @@ export function ControlFinanceTab() {
       color: 'text-info' 
     },
     { 
-      label: isRussian ? 'Комиссия' : 'Commission', 
-      value: `$${Math.round((financeStats?.revenue || 0) * 0.1).toLocaleString()}`, 
-      icon: TrendingUp, 
-      color: 'text-accent-purple' 
-    },
-    { 
-      label: isRussian ? 'Выплаты' : 'Payouts', 
-      value: `$${Math.round((financeStats?.revenue || 0) * 0.9).toLocaleString()}`, 
+      label: isRussian ? 'Чистый доход' : 'Net Income', 
+      value: `฿${Math.round((financeStats?.revenue || 0) - (financeStats?.expenses || 0)).toLocaleString()}`, 
       icon: Wallet, 
-      color: 'text-accent-amber' 
+      color: (financeStats?.revenue || 0) - (financeStats?.expenses || 0) >= 0 ? 'text-success' : 'text-destructive'
     },
   ];
 
