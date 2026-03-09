@@ -8,8 +8,7 @@ import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { X, ChevronRight } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { DynamicIcon } from '@/components/ui/dynamic-icon';
 
 export const ActiveSituationBanner = memo(forwardRef<HTMLDivElement>(function ActiveSituationBanner(_props, ref) {
   const { activeCode, activeTitle, activeColor, clearLifeSituation } = useLifeSituationContext();
