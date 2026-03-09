@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { useClinics } from '@/hooks/useClinics';
 import { cn } from '@/lib/utils';
 

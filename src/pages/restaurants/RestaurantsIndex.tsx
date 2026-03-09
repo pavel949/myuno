@@ -16,6 +16,7 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const CUISINES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },

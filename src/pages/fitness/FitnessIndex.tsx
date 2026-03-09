@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useGyms } from '@/hooks/useGyms';
+import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
 const CATEGORIES = [
   { id: 'all', labelEn: 'All', labelRu: 'Все' },
