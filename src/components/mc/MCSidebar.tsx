@@ -23,6 +23,7 @@ import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 import { useProfile } from '@/hooks/useProfile';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface NavItem {
   title: string;
@@ -41,30 +42,24 @@ interface NavGroup {
 
 const navigationGroups: NavGroup[] = [
   {
-    label: 'Main',
-    labelRu: 'Главное',
+    label: 'Control Tower',
+    labelRu: 'Центр управления',
     defaultOpen: true,
     items: [
-      { title: 'Dashboard', titleRu: 'Обзор', path: '/mc', icon: LayoutDashboard },
-      { title: 'Properties', titleRu: 'Объекты', path: '/mc/properties', icon: Building2 },
-      { title: 'Calendar', titleRu: 'Календарь', path: '/mc/calendar', icon: CalendarDays },
-      { title: 'Messages', titleRu: 'Сообщения', path: '/mc/messages', icon: MessageSquare, badgeKey: 'messages' },
-      { title: 'Owner Guide', titleRu: 'Руководство', path: '/mc/guide', icon: BookOpen },
+      { title: 'Dashboard', titleRu: 'Обзор', path: APP_ROUTES.MC, icon: LayoutDashboard },
+      { title: 'Calendar', titleRu: 'Календарь', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
+      { title: 'Tasks', titleRu: 'Задачи', path: APP_ROUTES.MC_TASKS, icon: ClipboardList, badgeKey: 'tasks' },
+      { title: 'Messages', titleRu: 'Сообщения', path: APP_ROUTES.MC_MESSAGES, icon: MessageSquare, badgeKey: 'messages' },
     ],
   },
   {
-    label: 'CRM & Sales',
-    labelRu: 'CRM и продажи',
+    label: 'Properties',
+    labelRu: 'Объекты',
     defaultOpen: false,
     items: [
-      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: '/mc/crm-dashboard', icon: DashboardIcon },
-      { title: 'Owners', titleRu: 'Собственники', path: '/mc/owners', icon: Crown },
-      { title: 'Contacts', titleRu: 'Контакты', path: '/mc/contacts', icon: ContactRound },
-      { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: '/mc/sales', icon: TrendingUp },
-      { title: 'Sequences', titleRu: 'Цепочки', path: '/mc/sequences', icon: Zap },
-      { title: 'Quotes', titleRu: 'КП', path: '/mc/quotes', icon: FileTextIcon },
-      { title: 'Reviews', titleRu: 'Отзывы', path: '/mc/reviews-management', icon: Star },
-      { title: 'Marketing', titleRu: 'Маркетинг', path: '/mc/marketing', icon: Megaphone },
+      { title: 'Properties', titleRu: 'Объекты', path: APP_ROUTES.MC_PROPERTIES, icon: Building2 },
+      { title: 'Inventory', titleRu: 'Инвентарь', path: APP_ROUTES.MC_INVENTORY, icon: PackageOpen },
+      { title: 'Vendors', titleRu: 'Поставщики', path: APP_ROUTES.MC_VENDORS, icon: Truck },
     ],
   },
   {
@@ -72,13 +67,19 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Операции',
     defaultOpen: false,
     items: [
-      { title: 'Tasks', titleRu: 'Задачи', path: '/mc/tasks', icon: ClipboardList, badgeKey: 'tasks' },
+      { title: 'Task Inbox', titleRu: 'Пул задач', path: APP_ROUTES.MC_TASKS, icon: ClipboardList, badgeKey: 'tasks' },
       { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/mc/rates', icon: Tag },
-      { title: 'Channel Manager', titleRu: 'Каналы', path: '/mc/channels', icon: Radio },
-      { title: 'Inventory', titleRu: 'Инвентарь', path: '/mc/inventory', icon: PackageOpen },
-      { title: 'Vendors', titleRu: 'Поставщики', path: '/mc/vendors', icon: Truck },
       { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/mc/insurance', icon: ShieldCheck },
       { title: 'Templates', titleRu: 'Шаблоны', path: '/mc/documents', icon: FileText },
+    ],
+  },
+  {
+    label: 'Distribution',
+    labelRu: 'Дистрибуция',
+    defaultOpen: false,
+    items: [
+      { title: 'Channel Manager', titleRu: 'Channel Manager', path: APP_ROUTES.MC_CHANNELS, icon: Radio },
+      { title: 'Calendar Sync', titleRu: 'Синхронизация', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
     ],
   },
   {
@@ -86,12 +87,27 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Overview', titleRu: 'Обзор', path: '/mc/finance', icon: DollarSign },
+      { title: 'Overview', titleRu: 'Обзор', path: APP_ROUTES.MC_FINANCE, icon: DollarSign },
       { title: 'Payouts', titleRu: 'Выплаты', path: '/mc/management-terms', icon: Shuffle },
-      { title: 'Transactions', titleRu: 'Транзакции', path: '/mc/financials', icon: ArrowLeftRight },
-      { title: 'Reports', titleRu: 'Отчёты', path: '/mc/reports', icon: BarChart3 },
-      { title: 'Budget', titleRu: 'Бюджет', path: '/mc/budget', icon: Target },
-      { title: 'Invoices', titleRu: 'Инвойсы', path: '/mc/invoices', icon: Receipt },
+      { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
+      { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
+      { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
+      { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
+    ],
+  },
+  {
+    label: 'CRM & Sales',
+    labelRu: 'CRM и продажи',
+    defaultOpen: false,
+    items: [
+      { title: 'CRM Dashboard', titleRu: 'CRM Обзор', path: APP_ROUTES.MC_CRM_DASHBOARD, icon: DashboardIcon },
+      { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
+      { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
+      { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
+      { title: 'Sequences', titleRu: 'Цепочки', path: '/mc/sequences', icon: Zap },
+      { title: 'Quotes', titleRu: 'КП', path: '/mc/quotes', icon: FileTextIcon },
+      { title: 'Reviews', titleRu: 'Отзывы', path: '/mc/reviews-management', icon: Star },
+      { title: 'Marketing', titleRu: 'Маркетинг', path: APP_ROUTES.MC_MARKETING, icon: Megaphone },
     ],
   },
   {
@@ -99,37 +115,37 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Команда',
     defaultOpen: false,
     items: [
-      { title: 'Staff & Access', titleRu: 'Сотрудники', path: '/mc/staff', icon: Users },
-      { title: 'Subscription', titleRu: 'Подписка', path: '/mc/subscription', icon: CreditCard },
+      { title: 'Staff & Access', titleRu: 'Сотрудники', path: APP_ROUTES.MC_STAFF, icon: Users },
+      { title: 'Subscription', titleRu: 'Подписка', path: APP_ROUTES.MC_SUBSCRIPTION, icon: CreditCard },
       { title: 'Help Center', titleRu: 'Справочник', path: '/mc/help', icon: BookOpen },
     ],
   },
 ];
 
 const PATH_TO_MODULE: Record<string, ModuleKey> = {
-  '/mc/properties': 'properties',
+  [APP_ROUTES.MC_PROPERTIES]: 'properties',
   '/mc/complexes': 'properties',
-  '/mc/owners': 'crm',
-  '/mc/calendar': 'bookings',
-  '/mc/sales': 'crm',
-  '/mc/contacts': 'crm',
-  '/mc/crm-dashboard': 'crm',
+  [APP_ROUTES.MC_OWNERS]: 'crm',
+  [APP_ROUTES.MC_CALENDAR]: 'bookings',
+  [APP_ROUTES.MC_SALES]: 'crm',
+  [APP_ROUTES.MC_CONTACTS]: 'crm',
+  [APP_ROUTES.MC_CRM_DASHBOARD]: 'crm',
   '/mc/sequences': 'crm',
   '/mc/quotes': 'crm',
   '/mc/reviews-management': 'crm',
   '/mc/settings': 'staff',
-  '/mc/marketing': 'crm',
-  '/mc/tasks': 'tasks',
-  '/mc/inventory': 'properties',
-  '/mc/vendors': 'properties',
+  [APP_ROUTES.MC_MARKETING]: 'crm',
+  [APP_ROUTES.MC_TASKS]: 'tasks',
+  [APP_ROUTES.MC_INVENTORY]: 'properties',
+  [APP_ROUTES.MC_VENDORS]: 'properties',
   '/mc/rates': 'finance',
-  '/mc/finance': 'finance',
+  [APP_ROUTES.MC_FINANCE]: 'finance',
   '/mc/management-terms': 'finance',
-  '/mc/financials': 'finance',
-  '/mc/invoices': 'finance',
-  '/mc/reports': 'reports',
-  '/mc/budget': 'finance',
-  '/mc/staff': 'staff',
+  [APP_ROUTES.MC_FINANCIALS]: 'finance',
+  [APP_ROUTES.MC_INVOICES]: 'finance',
+  [APP_ROUTES.MC_REPORTS]: 'reports',
+  [APP_ROUTES.MC_BUDGET]: 'finance',
+  [APP_ROUTES.MC_STAFF]: 'staff',
 };
 
 export function MCSidebar() {
@@ -151,7 +167,7 @@ export function MCSidebar() {
     : 'myUNO MC';
 
   const isActive = (path: string) => {
-    if (path === '/mc') return location.pathname === '/mc';
+    if (path === APP_ROUTES.MC) return location.pathname === APP_ROUTES.MC;
     return location.pathname.startsWith(path);
   };
 

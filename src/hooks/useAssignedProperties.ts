@@ -69,7 +69,8 @@ export function useAssignedProperties() {
             currency,
             owner_id,
             complex_id,
-            project_id
+            project_id,
+            deleted_at
           )
         `)
         .eq('manager_user_id', user.id)
@@ -117,7 +118,12 @@ export function useAssignedProperties() {
         }
       });
 
-      return assignments.map(assignment => {
+      const visibleAssignments = assignments.filter((assignment) => {
+        const property = assignment.properties as any;
+        return !property?.deleted_at;
+      });
+
+      return visibleAssignments.map(assignment => {
         const property = assignment.properties as any;
         const propStats = bookingsByProperty.get(assignment.property_id) || { upcoming: 0, today: 'available' as const };
         

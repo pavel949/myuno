@@ -77,8 +77,29 @@ import { EmptyState } from '@/components/ui/empty-state';
 />
 ```
 
+## Token source (DS 2.0)
+- **Single source:** `src/styles/tokens.css` (loaded via `src/design-system/index.css`).
+- **JS/TS:** Use `@/design-system/tokens-bridge` for typed token names and `hslVar()` in dynamic styles.
+- **ESLint:** Prefer semantic classes (`bg-primary`, `text-foreground`) over arbitrary values (`bg-[#...]`, `text-[hsl(...)]`).
+
+## Typography scale (tokens.json)
+| Token | Size | Line height | Weight | Use |
+|-------|------|-------------|--------|-----|
+| display-lg | 2.5rem | 1.15 | 700 | Hero titles |
+| display-md | 2rem | 1.15 | 700 | Section titles |
+| heading-lg | 1.5rem | 1.2 | 600 | Card titles |
+| heading-md | 1.25rem | 1.25 | 600 | Subsections |
+| heading-sm | 1.125rem | 1.3 | 600 | List headers |
+| body-lg | 1rem | 1.65 | 400 | Lead copy |
+| body-md | 0.875rem | 1.6 | 400 | Body |
+| body-sm | 0.8125rem | 1.5 | 400 | Secondary |
+| caption | 0.75rem | 1.4 | 500 | Labels |
+| overline | 0.625rem | 1.2 | 600 | Category labels |
+
+Use Tailwind: `font-display`, `text-xl`… and semantic tokens; avoid arbitrary font sizes when a scale value exists.
+
 ## Quality Gates
-- ❌ No hardcoded colors
+- ❌ No hardcoded colors (use `bg-primary`, `text-foreground`, `hsl(var(--chart-1))` in JS)
 - ❌ No `shadow-sm/md/lg` — use `[box-shadow:var(--shadow-elevation-N)]`
 - ❌ No `rounded-2xl` on interactive cards — use `rounded-xl`
 - ✅ All borders use `border-border/60` (not `/40` or `/50`)

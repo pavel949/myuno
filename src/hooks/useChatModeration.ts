@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { analyzeMessage, ModerationResult } from '@/lib/chatModerationPatterns';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 export interface ChatMessageFlag {
   id: string;
@@ -138,7 +139,7 @@ export function useChatModeration(propertyId?: string) {
         .maybeSingle();
 
       if (error) {
-        console.warn('chat_violation_history query error:', error.message);
+        logger.warn('chat_violation_history query error:', error.message);
         return null;
       }
       return data;

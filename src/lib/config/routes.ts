@@ -237,6 +237,7 @@ export const APP_ROUTES = {
   MC_PROPERTIES: '/mc/properties',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
+  MC_CONTACTS_IMPORT: '/mc/contacts/import',
   MC_SALES: '/mc/sales',
   MC_TASKS: '/mc/tasks',
   MC_FINANCE: '/mc/finance',

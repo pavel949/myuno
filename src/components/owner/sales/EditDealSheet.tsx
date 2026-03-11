@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS, AgentDeal, DealType } from '@/hooks/useAgentDeals';
 import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
@@ -11,7 +12,7 @@ import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Pencil } from 'lucide-react';
+import { Crown, Pencil } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
@@ -44,7 +45,13 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
     next_action_date: '',
     priority: 0,
     tags: [] as string[],
+    is_vip: false,
   });
+  const [errors, setErrors] = useState<{
+    client_name?: string;
+    client_email?: string;
+    budget?: string;
+  }>({});
 
   useEffect(() => {
     if (deal && open) {
@@ -65,6 +72,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         next_action_date: deal.next_action_date ? deal.next_action_date.slice(0, 10) : '',
         priority: (deal as any).priority || 0,
         tags: (deal as any).tags || [],
+        is_vip: (deal as any).is_vip || false,
       });
     }
   }, [deal, open]);
@@ -83,9 +91,26 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
     }));
   };
 
-  const handleSubmit = async () => {
+  const validateForm = () => {
+    const nextErrors: { client_name?: string; client_email?: string; budget?: string } = {};
     if (!form.client_name.trim()) {
-      toast({ title: isRu ? 'Введите имя клиента' : 'Enter client name', variant: 'destructive' });
+      nextErrors.client_name = isRu ? 'Введите имя клиента' : 'Enter client name';
+    }
+    if (form.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.client_email.trim())) {
+      nextErrors.client_email = isRu ? 'Неверный формат email' : 'Invalid email format';
+    }
+    const bMin = form.budget_min ? Number(form.budget_min) : null;
+    const bMax = form.budget_max ? Number(form.budget_max) : null;
+    if (bMin !== null && bMax !== null && bMin > bMax) {
+      nextErrors.budget = isRu ? 'Бюджет "от" не может быть больше "до"' : 'Budget min cannot be greater than max';
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
       return;
     }
     try {
@@ -106,6 +131,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         next_action_date: form.next_action_date || null,
         priority: form.priority,
         tags: form.tags,
+        is_vip: form.is_vip,
       };
 
       const changes = diffDealFields(deal as any, updates, TRACKED_DEAL_FIELDS);
@@ -116,8 +142,12 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       await updateDeal.mutateAsync({ id: deal.id, ...updates });
       toast({ title: isRu ? 'Сделка обновлена' : 'Deal updated' });
       onOpenChange(false);
-    } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    } catch (updateError: any) {
+      toast({
+        title: isRu ? 'Ошибка сохранения сделки' : 'Failed to save deal',
+        description: updateError?.message || String(updateError),
+        variant: 'destructive',
+      });
     }
   };
 
@@ -127,13 +157,15 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       onOpenChange={onOpenChange}
       title={isRu ? 'Редактировать сделку' : 'Edit Deal'}
       icon={<Pencil className="w-5 h-5 text-primary" />}
-      size="lg"
+      size="2xl"
+      mobileHeight="max-h-[92vh]"
       footer={
         <Button onClick={handleSubmit} disabled={updateDeal.isPending} className="w-full sm:w-auto min-w-[200px]">
           {updateDeal.isPending ? '...' : (isRu ? 'Сохранить' : 'Save')}
         </Button>
       }
     >
+      <div className="overflow-y-auto max-h-[calc(100vh-120px)] overscroll-contain space-y-4 pr-1">
       {/* Deal Type */}
       <div>
         <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
@@ -158,19 +190,34 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
 
       <div>
         <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
-        <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
+        <Input value={form.client_name} onChange={e => { setForm(f => ({ ...f, client_name: e.target.value })); setErrors(prev => ({ ...prev, client_name: undefined })); }} />
+        {errors.client_name && <p className="text-xs text-destructive mt-1">{errors.client_name}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
           <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
         </div>
         <div>
           <Label>Email</Label>
-          <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
+          <Input type="email" value={form.client_email} onChange={e => { setForm(f => ({ ...f, client_email: e.target.value })); setErrors(prev => ({ ...prev, client_email: undefined })); }} />
+          {errors.client_email && <p className="text-xs text-destructive mt-1">{errors.client_email}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Crown className="h-4 w-4 text-warning" />
+          <Label htmlFor="deal-edit-vip" className="cursor-pointer">
+            {isRu ? 'VIP клиент (сделка)' : 'VIP client (deal)'}
+          </Label>
+        </div>
+        <Checkbox
+          id="deal-edit-vip"
+          checked={form.is_vip}
+          onCheckedChange={(checked) => setForm(f => ({ ...f, is_vip: Boolean(checked) }))}
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Источник' : 'Source'}</Label>
           <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
@@ -190,7 +237,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
           </Select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
           <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
@@ -204,6 +251,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
           <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} />
         </div>
       </div>
+      {errors.budget && <p className="text-xs text-destructive -mt-1">{errors.budget}</p>}
 
       {/* Property Types */}
       <div>
@@ -252,6 +300,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       <div>
         <Label className="mb-1.5 block">{isRu ? 'Теги' : 'Tags'}</Label>
         <DealTagsInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
+      </div>
       </div>
     </ResponsiveModal>
   );

@@ -211,8 +211,9 @@ export function useDataImport() {
         const value = row[mapping.sourceColumn];
         if (value !== undefined && value !== '') {
           // Type conversions
-          if (mapping.targetField?.includes('price') || mapping.targetField?.includes('rating')) {
-            transformed[mapping.targetField] = parseFloat(String(value)) || 0;
+          if (mapping.targetField?.includes('price') || mapping.targetField?.includes('rating') || mapping.targetField?.includes('budget') || mapping.targetField?.includes('bedrooms')) {
+            const num = parseFloat(String(value));
+            transformed[mapping.targetField] = Number.isNaN(num) ? null : num;
           } else if (mapping.targetField?.startsWith('is_') || mapping.targetField?.includes('stock')) {
             transformed[mapping.targetField] = Boolean(value) || value === 'true' || value === '1' || value === 'yes';
           } else if (mapping.targetField?.includes('quantity')) {

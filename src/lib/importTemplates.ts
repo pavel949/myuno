@@ -2,6 +2,7 @@
  * Field mapping templates for Data Import Hub
  * Maps common Excel/CSV column names to database field names
  */
+import { CONTACT_IMPORT_FIELDS } from './contactsImportFields';
 
 export interface ImportTarget {
   id: string;
@@ -34,6 +35,11 @@ export const autoMappingDictionary: Record<string, string> = {
   'phone': 'phone',
   'telephone': 'phone',
   'email': 'email',
+  'firstname': 'first_name',
+  'first_name': 'first_name',
+  'lastname': 'last_name',
+  'last_name': 'last_name',
+  'company_id': 'company_id',
   'address': 'address',
   'website': 'website',
   'url': 'website',
@@ -275,6 +281,24 @@ export const importTargets: ImportTarget[] = [
       currency: { en: 'Currency', ru: 'Валюта' },
       category_id: { en: 'Category ID', ru: 'ID категории' },
       is_active: { en: 'Active', ru: 'Активен' },
+    },
+  },
+  {
+    id: 'crm_contacts',
+    name: 'CRM Contacts',
+    nameRu: 'Контакты CRM',
+    table: 'crm_contacts',
+    requiredFields: ['first_name', 'last_name', 'company_id'],
+    optionalFields: CONTACT_IMPORT_FIELDS.filter((f) => !f.required).map((f) => f.key),
+    fieldLabels: {
+      ...CONTACT_IMPORT_FIELDS.reduce<Record<string, { en: string; ru: string }>>(
+        (acc, f) => {
+          acc[f.key] = { en: f.labelEn, ru: f.labelRu };
+          return acc;
+        },
+        {}
+      ),
+      company_id: { en: 'Company ID (UUID)', ru: 'ID компании (UUID)' },
     },
   },
   {

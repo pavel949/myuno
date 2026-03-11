@@ -1,4 +1,5 @@
 import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
+import { logger } from '@/lib/logger';
 
 type VitalsCallback = (metric: Metric) => void;
 
@@ -25,7 +26,7 @@ function sendToAnalytics(metric: Metric, options: { analyticsId?: string; debug?
   };
 
   if (debug) {
-    console.log('[Web Vitals]', metric.name, metric.value, metric.rating);
+    logger.log('[Web Vitals]', metric.name, metric.value, metric.rating);
   }
 
   // Store in localStorage for admin dashboard

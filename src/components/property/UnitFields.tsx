@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePropertyFormOptions } from '@/hooks/usePropertyFormOptions';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,7 +40,7 @@ interface UnitFieldsProps {
   poolType?: string;
   gardenType?: string;
   // Common fields
-  viewType?: string;
+  viewType?: string[];
   furnishingLevel?: string;
   equipment?: string[];
   // Multi-unit handlers
@@ -53,30 +54,10 @@ interface UnitFieldsProps {
   onPoolTypeChange?: (type: string) => void;
   onGardenTypeChange?: (type: string) => void;
   // Common handlers
-  onViewTypeChange: (viewType: string) => void;
+  onViewTypeChange: (viewTypes: string[]) => void;
   onFurnishingLevelChange: (level: string) => void;
   onEquipmentChange: (equipment: string[]) => void;
 }
-
-const viewTypes = [
-  { id: 'sea', labelEn: 'Sea View', labelRu: 'Вид на море' },
-  { id: 'pool', labelEn: 'Pool View', labelRu: 'Вид на бассейн' },
-  { id: 'garden', labelEn: 'Garden View', labelRu: 'Вид на сад' },
-  { id: 'mountain', labelEn: 'Mountain View', labelRu: 'Вид на горы' },
-  { id: 'city', labelEn: 'City View', labelRu: 'Вид на город' },
-  { id: 'parking', labelEn: 'Parking View', labelRu: 'Вид на парковку' },
-  { id: 'interior', labelEn: 'Interior View', labelRu: 'Внутренний вид' },
-  // Additional views for standalone properties
-  { id: 'panoramic', labelEn: 'Panoramic View', labelRu: 'Панорамный вид' },
-  { id: 'jungle', labelEn: 'Jungle / Forest View', labelRu: 'Вид на джунгли' },
-];
-
-const furnishingLevels = [
-  { id: 'unfurnished', labelEn: 'Unfurnished', labelRu: 'Без мебели' },
-  { id: 'partially', labelEn: 'Partially Furnished', labelRu: 'Частичная меблировка' },
-  { id: 'fully', labelEn: 'Fully Furnished', labelRu: 'Полная меблировка' },
-  { id: 'luxury', labelEn: 'Luxury Furnished', labelRu: 'Люкс меблировка' },
-];
 
 // Options for standalone property characteristics
 const parkingTypes = [
@@ -374,7 +355,7 @@ function UnitFieldsInner({
   parkingType,
   poolType,
   gardenType,
-  viewType,
+  viewType = [],
   furnishingLevel,
   equipment = [],
   onFloorChange,
@@ -389,8 +370,9 @@ function UnitFieldsInner({
   onFurnishingLevelChange,
   onEquipmentChange,
 }: UnitFieldsProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
+  const { viewTypes, furnishingLevels } = usePropertyFormOptions();
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['essentials', 'kitchen']);
 
   const isStandalone = STANDALONE_TYPES.includes(propertyType);
@@ -417,6 +399,7 @@ function UnitFieldsInner({
   };
 
   const totalSelected = equipment.length;
+  const selectedViewTypes = Array.isArray(viewType) ? viewType : (viewType ? [viewType] : []);
 
   // Get property type label for header
   const getPropertyTypeLabel = () => {
@@ -428,6 +411,14 @@ function UnitFieldsInner({
 
   // Get header icon based on property type
   const HeaderIcon = isStandalone ? Home : Layers;
+
+  const toggleViewType = (value: string) => {
+    const nextValues = selectedViewTypes.includes(value)
+      ? selectedViewTypes.filter((item) => item !== value)
+      : [...selectedViewTypes, value];
+
+    onViewTypeChange(nextValues);
+  };
 
   return (
     <Card>
@@ -587,27 +578,32 @@ function UnitFieldsInner({
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Eye className="h-4 w-4" />
-            {isRu ? 'Вид из окна' : 'View Type'}
+            {t('propertyForm.viewType')}
           </Label>
-          <Select value={viewType || ''} onValueChange={onViewTypeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder={isRu ? 'Выберите' : 'Select'} />
-            </SelectTrigger>
-            <SelectContent>
-              {viewTypes.map((view) => (
-                <SelectItem key={view.id} value={view.id}>
+          <div className="flex flex-wrap gap-2">
+            {viewTypes.map((view) => {
+              const selected = selectedViewTypes.includes(view.value);
+              return (
+                <Button
+                  key={view.id}
+                  type="button"
+                  variant={selected ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => toggleViewType(view.value)}
+                  className="h-8 rounded-full px-3 text-xs"
+                >
                   {isRu ? view.labelRu : view.labelEn}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Furnishing Level - Common for all */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Sofa className="h-4 w-4" />
-            {isRu ? 'Уровень меблировки' : 'Furnishing Level'}
+            {t('propertyForm.furnishingLevelDesign')}
           </Label>
           <Select value={furnishingLevel || ''} onValueChange={onFurnishingLevelChange}>
             <SelectTrigger>
@@ -615,8 +611,8 @@ function UnitFieldsInner({
             </SelectTrigger>
             <SelectContent>
               {furnishingLevels.map((level) => (
-                <SelectItem key={level.id} value={level.id}>
-                  {isRu ? level.labelRu : level.labelEn}
+                <SelectItem key={level.id} value={level.value}>
+                  {t(`propertyForm.furnishingOption.${level.value}`)}
                 </SelectItem>
               ))}
             </SelectContent>

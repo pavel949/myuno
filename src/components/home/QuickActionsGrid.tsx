@@ -37,78 +37,78 @@ interface QuickAction {
 }
 
 const TOURIST_ACTIONS: QuickAction[] = [
-  { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
-  { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/15' },
-  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-accent-coral/15' },
-  { id: 'delivery', icon: Droplets, label: 'Delivery', labelRu: 'Доставка', path: '/market?category=groceries', tint: 'bg-accent-cyan/15' },
-  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/15' },
-  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/15' },
-  { id: 'yachts', icon: Anchor, label: 'Charters', labelRu: 'Чартер', path: '/yachts', tint: 'bg-info/15' },
-  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/15' },
+  { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', tint: 'bg-success/20' },
+  { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/20' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-rose-200/95 dark:bg-rose-900/40' },
+  { id: 'delivery', icon: Droplets, label: 'Delivery', labelRu: 'Доставка', path: '/market?category=groceries', tint: 'bg-accent-cyan/20' },
+  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/20' },
+  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/20' },
+  { id: 'yachts', icon: Anchor, label: 'Charters', labelRu: 'Чартер', path: '/yachts', tint: 'bg-info/20' },
+  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/20' },
 ];
 
 const RESIDENT_ACTIONS: QuickAction[] = [
-  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Визы', path: '/visa', tint: 'bg-primary/15' },
-  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
-  { id: 'education', icon: GraduationCap, label: 'Education', labelRu: 'Обучение', path: '/education', tint: 'bg-warning/15' },
-  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-accent-coral/15' },
+  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Визы', path: '/visa', tint: 'bg-primary/20' },
+  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/20' },
+  { id: 'education', icon: GraduationCap, label: 'Education', labelRu: 'Обучение', path: '/education', tint: 'bg-warning/20' },
+  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-accent-coral/25' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-muted' },
-  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-accent-cyan/15' },
-  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', tint: 'bg-success/15' },
+  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-accent-cyan/20' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', tint: 'bg-success/20' },
 ];
 
 const OWNER_ACTIONS: QuickAction[] = [
-  { id: 'my-properties', icon: Key, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-success/15' },
-  { id: 'owner-crm', icon: Users, label: 'CRM', labelRu: 'CRM', path: '/mc/crm-dashboard', tint: 'bg-primary/15', requiresFullAccess: true },
-  { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/mc/calendar', tint: 'bg-info/15', requiresFullAccess: true },
-  { id: 'owner-finance', icon: BarChart3, label: 'Finance', labelRu: 'Финансы', path: '/mc/finance', tint: 'bg-success/15', requiresFullAccess: true },
-  { id: 'owner-tasks', icon: ClipboardList, label: 'Tasks', labelRu: 'Задачи', path: '/mc/tasks', tint: 'bg-warning/15', requiresFullAccess: true },
-  { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-accent-cyan/15' },
-  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', tint: 'bg-accent-amber/15' },
+  { id: 'my-properties', icon: Key, label: 'My Properties', labelRu: 'Мои объекты', path: '/owner', tint: 'bg-success/20' },
+  { id: 'owner-crm', icon: Users, label: 'CRM', labelRu: 'CRM', path: '/mc/crm-dashboard', tint: 'bg-primary/20', requiresFullAccess: true },
+  { id: 'owner-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/mc/calendar', tint: 'bg-info/20', requiresFullAccess: true },
+  { id: 'owner-finance', icon: BarChart3, label: 'Finance', labelRu: 'Финансы', path: '/mc/finance', tint: 'bg-success/20', requiresFullAccess: true },
+  { id: 'owner-tasks', icon: ClipboardList, label: 'Tasks', labelRu: 'Задачи', path: '/mc/tasks', tint: 'bg-warning/20', requiresFullAccess: true },
+  { id: 'cleaning', icon: Sparkles, label: 'Cleaning', labelRu: 'Клининг', path: '/cleaning', tint: 'bg-accent-cyan/20' },
+  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервис', path: '/services', tint: 'bg-accent-amber/20' },
 ];
 
 const INVESTOR_ACTIONS: QuickAction[] = [
-  { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-success/15' },
-  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', tint: 'bg-accent-cyan/15' },
-  { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', tint: 'bg-success/15' },
+  { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', tint: 'bg-success/20' },
+  { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', tint: 'bg-accent-cyan/20' },
+  { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', tint: 'bg-success/20' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-muted' },
-  { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-primary/15' },
-  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-info/15' },
+  { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-primary/20' },
+  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', tint: 'bg-info/20' },
 ];
 
 const VENDOR_ACTIONS: QuickAction[] = [
-  { id: 'vendor-dashboard', icon: Building2, label: 'Dashboard', labelRu: 'Панель', path: '/vendor', tint: 'bg-primary/15' },
-  { id: 'vendor-orders', icon: ShoppingBag, label: 'Orders', labelRu: 'Заказы', path: '/vendor/orders', tint: 'bg-accent-amber/15' },
-  { id: 'vendor-services', icon: Wrench, label: 'Services', labelRu: 'Услуги', path: '/vendor/services', tint: 'bg-warning/15' },
-  { id: 'vendor-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/vendor/calendar', tint: 'bg-info/15' },
-  { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market', tint: 'bg-accent-coral/15' },
-  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-success/15' },
+  { id: 'vendor-dashboard', icon: Building2, label: 'Dashboard', labelRu: 'Панель', path: '/vendor', tint: 'bg-primary/20' },
+  { id: 'vendor-orders', icon: ShoppingBag, label: 'Orders', labelRu: 'Заказы', path: '/vendor/orders', tint: 'bg-accent-amber/20' },
+  { id: 'vendor-services', icon: Wrench, label: 'Services', labelRu: 'Услуги', path: '/vendor/services', tint: 'bg-warning/20' },
+  { id: 'vendor-calendar', icon: Calendar, label: 'Calendar', labelRu: 'Календарь', path: '/vendor/calendar', tint: 'bg-info/20' },
+  { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market', tint: 'bg-accent-coral/25' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банкинг', path: '/banking', tint: 'bg-success/20' },
 ];
 
 const ADMIN_ACTIONS: QuickAction[] = [
-  { id: 'admin-dashboard', icon: Shield, label: 'Admin', labelRu: 'Админ', path: '/admin', tint: 'bg-primary/15' },
-  { id: 'team-dashboard', icon: Building2, label: 'Team', labelRu: 'Команда', path: '/team', tint: 'bg-accent-cyan/15' },
-  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервисы', path: '/services', tint: 'bg-warning/15' },
-  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
-  { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market', tint: 'bg-accent-coral/15' },
+  { id: 'admin-dashboard', icon: Shield, label: 'Admin', labelRu: 'Админ', path: '/admin', tint: 'bg-primary/20' },
+  { id: 'team-dashboard', icon: Building2, label: 'Team', labelRu: 'Команда', path: '/team', tint: 'bg-accent-cyan/20' },
+  { id: 'services', icon: Wrench, label: 'Services', labelRu: 'Сервисы', path: '/services', tint: 'bg-warning/20' },
+  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/20' },
+  { id: 'market', icon: ShoppingBag, label: 'Market', labelRu: 'Маркет', path: '/market', tint: 'bg-accent-coral/25' },
   { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', tint: 'bg-muted' },
 ];
 
 const getMoreAction = (contentMode: 'services' | 'products'): QuickAction => ({
   id: 'more', icon: MoreHorizontal, label: 'More', labelRu: 'Ещё',
   path: contentMode === 'products' ? '/market' : '/discover',
-  tint: 'bg-muted/60',
+  tint: 'bg-muted',
 });
 
 const DEFAULT_ACTIONS: QuickAction[] = [
-  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/15' },
-  { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/15' },
-  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-accent-coral/15' },
-  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/15' },
-  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/15' },
-  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/15' },
-  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', tint: 'bg-accent-coral/15' },
-  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-destructive/15' },
+  { id: 'property', icon: Home, label: 'Property', labelRu: 'Жильё', path: '/property', tint: 'bg-success/20' },
+  { id: 'transfer', icon: Plane, label: 'Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', tint: 'bg-accent-cyan/20' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', tint: 'bg-rose-200/95 dark:bg-rose-900/40' },
+  { id: 'transport', icon: Car, label: 'Transport', labelRu: 'Транспорт', path: '/transport', tint: 'bg-warning/20' },
+  { id: 'experiences', icon: Compass, label: 'Experiences', labelRu: 'Впечатления', path: '/experiences', tint: 'bg-accent-purple/20' },
+  { id: 'restaurants', icon: Utensils, label: 'Food', labelRu: 'Еда', path: '/restaurants', tint: 'bg-accent-amber/20' },
+  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', tint: 'bg-accent-coral/25' },
+  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', tint: 'bg-destructive/20' },
 ];
 
 function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
@@ -145,19 +145,32 @@ interface QuickActionsGridProps {
   contentMode?: 'services' | 'products';
 }
 
-/** Icon tint color mapping */
+/** Icon tint color mapping — ensure sufficient contrast (WCAG) */
 const ICON_TINT_COLORS: Record<string, string> = {
   'bg-success/15': 'text-success',
+  'bg-success/20': 'text-success',
   'bg-accent-cyan/15': 'text-accent-cyan',
+  'bg-accent-cyan/20': 'text-accent-cyan',
   'bg-accent-coral/15': 'text-accent-coral',
+  'bg-accent-coral/25': 'text-accent-coral',
+  'bg-accent-coral/30': 'text-accent-coral',
+  'bg-accent-coral/40': 'text-accent-coral',
+  'bg-rose-200/95': 'text-rose-800',
+  'dark:bg-rose-900/40': 'text-rose-200',
   'bg-warning/15': 'text-warning',
+  'bg-warning/20': 'text-warning',
   'bg-accent-purple/15': 'text-accent-purple',
+  'bg-accent-purple/20': 'text-accent-purple',
   'bg-info/15': 'text-info',
+  'bg-info/20': 'text-info',
   'bg-accent-amber/15': 'text-accent-amber',
+  'bg-accent-amber/20': 'text-accent-amber',
   'bg-destructive/15': 'text-destructive',
+  'bg-destructive/20': 'text-destructive',
   'bg-primary/15': 'text-primary',
-  'bg-muted': 'text-muted-foreground',
-  'bg-muted/60': 'text-muted-foreground',
+  'bg-primary/20': 'text-primary',
+  'bg-muted': 'text-foreground',
+  'bg-muted/60': 'text-foreground',
 };
 
 export const QuickActionsGrid = memo(function QuickActionsGrid({ 
@@ -233,8 +246,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         const Icon = action.icon;
         const label = language === 'ru' ? action.labelRu : action.label;
         const isMore = action.id === 'more';
+        const isFlowers = action.id === 'flowers';
         const tint = action.tint || 'bg-primary/[0.07]';
-        const iconColor = ICON_TINT_COLORS[tint] || 'text-primary';
+        const iconColor = isFlowers
+          ? 'text-rose-800 dark:text-rose-200'
+          : (ICON_TINT_COLORS[tint] || 'text-primary');
         const isLocked = action.requiresFullAccess && !hasFullAccess;
         
         return (
@@ -255,14 +271,14 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             <div className={cn(
               "relative w-14 h-14 rounded-2xl flex items-center justify-center",
               "transition-all duration-200 group-hover:scale-105 group-active:scale-95",
-              "shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]",
-              "border border-transparent",
+              "shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]",
+              "border border-black/[0.04] dark:border-white/[0.06]",
               tint,
               "lg:w-16 lg:h-16"
             )}>
               <Icon 
                 className={cn(
-                  isMore ? "text-muted-foreground" : iconColor,
+                  isMore ? "text-foreground" : iconColor,
                   "lg:!w-7 lg:!h-7 drop-shadow-sm"
                 )}
                 style={{ width: 26, height: 26 }}
@@ -276,7 +292,8 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
             </div>
             
             <span className={cn(
-              "text-[11px] font-semibold text-center leading-tight text-foreground/90",
+              "text-[11px] font-semibold text-center leading-tight",
+              "text-gray-900 dark:text-gray-100",
               "lg:text-[13px]"
             )}>
               {label}

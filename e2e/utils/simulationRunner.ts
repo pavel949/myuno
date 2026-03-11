@@ -180,23 +180,24 @@ export async function executeStep(
         await page.waitForLoadState('networkidle');
         break;
         
-      case 'switch_language':
+      case 'switch_language': {
         // Toggle language via UI
         const langButton = page.locator('[data-testid="language-toggle"], button:has-text("EN"), button:has-text("RU")').first();
         if (await langButton.isVisible()) {
           await langButton.click();
         }
         break;
-        
-      case 'select_life_situation':
+      }
+
+      case 'select_life_situation': {
         await page.goto('/life-situations');
         await page.waitForLoadState('networkidle');
-        // Click first available life situation
         const firstSituation = page.locator('[data-testid="life-situation-card"], .life-situation-card').first();
         if (await firstSituation.isVisible()) {
           await firstSituation.click();
         }
         break;
+      }
         
       case 'visit_admin_dashboard':
         await page.goto('/admin');
@@ -213,12 +214,12 @@ export async function executeStep(
         await page.waitForLoadState('networkidle');
         break;
 
-      case 'random_navigation':
-        // Chaotic: random page navigation
+      case 'random_navigation': {
         const pages = ['/', '/property', '/yacht-charter', '/services', '/restaurants'];
         const randomPage = pages[Math.floor(Math.random() * pages.length)];
         await page.goto(randomPage);
         break;
+      }
         
       default:
         // Unknown step - just wait

@@ -43,7 +43,7 @@ export function useAdminDashboardStats() {
     queryFn: async (): Promise<DashboardStats> => {
       const countOptions = { count: 'exact' as const, head: false };
       
-      // Query unified listings table grouped by vertical
+      // Verticals: canonical source is listings (see docs/DATA_SOURCE_MAPPING.md)
       const { data: listingCounts, error: listingsError } = await supabase
         .from('listings')
         .select('vertical');
@@ -57,7 +57,7 @@ export function useAdminDashboardStats() {
         });
       }
 
-      // Parallel queries for non-listings tables
+      // Non-listings tables: salons, gyms, events, flower_shops, etc. (see DATA_SOURCE_MAPPING.md)
       const [
         providersRes,
         servicesRes,

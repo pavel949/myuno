@@ -67,7 +67,7 @@ export function QuickServiceIcons() {
                 gradient={gradient}
                 className="shadow-md"
               />
-              <span className="text-[10px] font-medium text-center text-muted-foreground leading-tight line-clamp-2">
+              <span className="text-[10px] font-medium text-center text-gray-900 dark:text-gray-100 leading-tight line-clamp-2">
                 {cat.label}
               </span>
             </button>

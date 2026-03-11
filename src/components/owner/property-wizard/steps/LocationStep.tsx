@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { MapPin, AlertTriangle, Lock, EyeOff } from 'lucide-react';
+import { MapPin, AlertTriangle, Lock, EyeOff, Pencil } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
@@ -17,6 +19,10 @@ interface LocationStepProps {
 export function LocationStep({ formData, updateFormData }: LocationStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [showEditAddress, setShowEditAddress] = useState(false);
+
+  const hasLocationFromSearch = !!(formData.address && formData.lat != null && formData.lng != null);
+  const showCompactLocation = hasLocationFromSearch && !showEditAddress;
 
   return (
     <div className="space-y-6">
@@ -26,48 +32,75 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
             <MapPin className="h-4 w-4" />
             {isRu ? 'Расположение' : 'Location'}
           </CardTitle>
+          {showCompactLocation && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {isRu ? 'Адрес задан на предыдущем шаге. Уточните точку на карте при необходимости.' : 'Address was set on the previous step. Refine the pin on the map if needed.'}
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
-            <Input
-              value={formData.address}
-              onChange={(e) => updateFormData({ address: e.target.value })}
-              placeholder="123 Beach Road, Patong"
-            />
-          </div>
+          {showCompactLocation ? (
+            <>
+              <div className="flex items-center justify-between gap-2 rounded-lg bg-muted/50 p-3">
+                <p className="text-sm truncate flex-1" title={formData.address}>
+                  <MapPin className="h-3.5 w-3 inline-block mr-1.5 text-muted-foreground" />
+                  {formData.address || (formData.lat != null && formData.lng != null ? `${formData.lat.toFixed(4)}, ${formData.lng.toFixed(4)}` : '')}
+                </p>
+                <Button type="button" variant="ghost" size="sm" className="shrink-0 gap-1" onClick={() => setShowEditAddress(true)}>
+                  <Pencil className="h-3.5 w-3.5" />
+                  {isRu ? 'Изменить' : 'Edit'}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
+                <Input
+                  value={formData.address}
+                  onChange={(e) => updateFormData({ address: e.target.value })}
+                  placeholder="123 Beach Road, Patong"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label>{isRu ? 'Район' : 'District'}</Label>
-            <Select 
-              value={formData.district}
-              onValueChange={(value) => {
-                const district = PHUKET_DISTRICTS.find(d => d.id === value);
-                const updates: Partial<PropertyFormData> = { district: value };
-                if (!formData.address.trim() && district) {
-                  updates.address = `${isRu ? district.labelRu : district.labelEn}, Phuket`;
-                }
-                updateFormData(updates);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
-              </SelectTrigger>
-              <SelectContent>
-                {[...PHUKET_DISTRICTS]
-                  .sort((a, b) => {
-                    const labelA = isRu ? a.labelRu : a.labelEn;
-                    const labelB = isRu ? b.labelRu : b.labelEn;
-                    return labelA.localeCompare(labelB, isRu ? 'ru' : 'en');
-                  })
-                  .map((district) => (
-                  <SelectItem key={district.id} value={district.id}>
-                    {isRu ? district.labelRu : district.labelEn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label>{isRu ? 'Район' : 'District'}</Label>
+                <Select 
+                  value={formData.district}
+                  onValueChange={(value) => {
+                    const district = PHUKET_DISTRICTS.find(d => d.id === value);
+                    const updates: Partial<PropertyFormData> = { district: value };
+                    if (!formData.address.trim() && district) {
+                      updates.address = `${isRu ? district.labelRu : district.labelEn}, Phuket`;
+                    }
+                    updateFormData(updates);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isRu ? 'Выберите район' : 'Select district'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...PHUKET_DISTRICTS]
+                      .sort((a, b) => {
+                        const labelA = isRu ? a.labelRu : a.labelEn;
+                        const labelB = isRu ? b.labelRu : b.labelEn;
+                        return labelA.localeCompare(labelB, isRu ? 'ru' : 'en');
+                      })
+                      .map((district) => (
+                      <SelectItem key={district.id} value={district.id}>
+                        {isRu ? district.labelRu : district.labelEn}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {hasLocationFromSearch && (
+                <Button type="button" variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setShowEditAddress(false)}>
+                  {isRu ? 'Свернуть' : 'Collapse'}
+                </Button>
+              )}
+            </>
+          )}
 
           <ProjectLocationPicker
             value={formData.lat && formData.lng ? { 

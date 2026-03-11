@@ -1,0 +1,6 @@
+/**
+ * myUNO Design System — DS 2.0 master token file
+ * Single source of truth: imports token layers in correct order.
+ * Import this file once at app entry (e.g. before @tailwind in index.css).
+ */
+@import '../styles/tokens.css';

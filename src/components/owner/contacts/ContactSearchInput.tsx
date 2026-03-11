@@ -39,10 +39,10 @@ export function ContactSearchInput({ companyId, onSelect, onClear, selectedConta
   return (
     <div ref={ref} className="relative">
       <Input
-        placeholder={isRu ? 'Поиск контакта по имени/телефону...' : 'Search contact by name/phone...'}
+        placeholder={isRu ? 'Поиск: имя, телефон, email, компания...' : 'Search: name, phone, email, company...'}
         value={query}
         onChange={e => { setQuery(e.target.value); setOpen(true); }}
-        onFocus={() => query.length >= 2 && setOpen(true)}
+        onFocus={() => query.length >= 1 && setOpen(true)}
       />
       {open && results.length > 0 && (
         <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg max-h-48 overflow-y-auto">

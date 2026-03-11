@@ -146,6 +146,46 @@ export function usePropertyBookings(propertyId?: string) {
     mutationFn: async (input: CreateBookingInput) => {
       if (!user?.id) throw new Error('Not authenticated');
 
+      // P1: Overlap validation — check existing orders and manual blocks
+      const checkInTime = input.check_in_time || '14:00';
+      const checkOutTime = input.check_out_time || '12:00';
+      const newStart = `${input.check_in}T${checkInTime}:00Z`;
+      const newEnd = `${input.check_out}T${checkOutTime}:00Z`;
+
+      const [{ data: ordersInRange }, { data: blockedDates }] = await Promise.all([
+        supabase
+          .from('orders')
+          .select('id')
+          .eq('vertical', 'property')
+          .is('deleted_at', null)
+          .not('status', 'eq', 'cancelled')
+          .gt('end_at', newStart)
+          .lt('start_at', newEnd),
+        supabase
+          .from('property_availability')
+          .select('date')
+          .eq('property_id', input.property_id)
+          .eq('status', 'blocked')
+          .gte('date', input.check_in)
+          .lte('date', input.check_out),
+      ]);
+
+      const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
+      const overlappingForProperty = orderIds.length
+        ? (await supabase
+            .from('order_items')
+            .select('order_id')
+            .eq('item_type', 'property')
+            .eq('resource_id', input.property_id)
+            .in('order_id', orderIds)).data || []
+        : [];
+      if (overlappingForProperty.length > 0) {
+        throw new Error('Выбранные даты пересекаются с существующим бронированием');
+      }
+      if ((blockedDates || []).length > 0) {
+        throw new Error('Выбранные даты заблокированы в календаре');
+      }
+
       // Create order with order_type = 'property' (matches DB constraint)
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -226,6 +266,46 @@ export function usePropertyBookings(propertyId?: string) {
         }
       }
 
+      // P1: Booking message rules — fire booking_confirmed for confirmed bookings
+      if (input.status === 'confirmed') {
+        supabase.functions.invoke('execute-booking-message-rules', {
+          body: { immediate_order_id: order.id },
+        }).then(({ error }) => {
+          if (error) errorLog.silent(error, 'booking_message_rules');
+        });
+      }
+
+      // P1: Booking lifecycle automation — create operational tasks for check-in, check-out, cleaning
+      if (input.status === 'confirmed' || !input.status) {
+        const guestName = input.guest_name || 'Guest';
+        const checkInDate = input.check_in;
+        const checkOutDate = input.check_out;
+        const cleaningDate = (() => {
+          const d = new Date(checkInDate);
+          d.setDate(d.getDate() - 1);
+          return d.toISOString().split('T')[0];
+        })();
+        const today = new Date().toISOString().split('T')[0];
+        const effectiveCleaningDate = cleaningDate < today ? today : cleaningDate;
+
+        const tasks = [
+          { task_type: 'cleaning', scheduled_date: effectiveCleaningDate, title: `Pre-arrival cleaning: ${guestName}`, title_ru: `Уборка перед заездом: ${guestName}` },
+          { task_type: 'check_in', scheduled_date: checkInDate, title: `Check-in: ${guestName}`, title_ru: `Заезд: ${guestName}` },
+          { task_type: 'check_out', scheduled_date: checkOutDate, title: `Check-out: ${guestName}`, title_ru: `Выезд: ${guestName}` },
+        ];
+        for (const t of tasks) {
+          await supabase.from('property_operational_tasks').insert({
+            property_id: input.property_id,
+            task_type: t.task_type,
+            title: t.title,
+            title_ru: t.title_ru,
+            scheduled_date: t.scheduled_date,
+            priority: t.task_type === 'check_out' ? 'normal' : 'high',
+            status: 'pending',
+          });
+        }
+      }
+
       return mapOrderToBooking(order, input.property_id);
     },
     onSuccess: () => {
@@ -237,7 +317,60 @@ export function usePropertyBookings(propertyId?: string) {
   const updateBooking = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PropertyBooking> & { id: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
-      
+
+      // P1: Overlap validation when dates change (exclude current booking)
+      if (updates.check_in || updates.check_out) {
+        const { data: currentOrder } = await supabase
+          .from('orders')
+          .select('start_at, end_at, order_items!inner(resource_id)')
+          .eq('id', id)
+          .single();
+        const curr = currentOrder as { start_at?: string; end_at?: string; order_items?: { resource_id: string }[] } | null;
+        const propertyId = curr?.order_items?.[0]?.resource_id;
+        const checkIn = updates.check_in ?? curr?.start_at?.split('T')[0];
+        const checkOut = updates.check_out ?? curr?.end_at?.split('T')[0];
+        if (propertyId && checkIn && checkOut) {
+          const checkInTime = (updates as Record<string, string>).check_in_time || '14:00';
+          const checkOutTime = (updates as Record<string, string>).check_out_time || '12:00';
+          const newStart = `${checkIn}T${checkInTime}:00Z`;
+          const newEnd = `${checkOut}T${checkOutTime}:00Z`;
+
+          const { data: ordersInRange } = await supabase
+            .from('orders')
+            .select('id')
+            .eq('vertical', 'property')
+            .is('deleted_at', null)
+            .not('status', 'eq', 'cancelled')
+            .neq('id', id)
+            .gt('end_at', newStart)
+            .lt('start_at', newEnd);
+
+          const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
+          const overlappingForProperty = orderIds.length
+            ? (await supabase
+                .from('order_items')
+                .select('order_id')
+                .eq('item_type', 'property')
+                .eq('resource_id', propertyId)
+                .in('order_id', orderIds)).data || []
+            : [];
+          if (overlappingForProperty.length > 0) {
+            throw new Error('Выбранные даты пересекаются с существующим бронированием');
+          }
+
+          const { data: blockedDates } = await supabase
+            .from('property_availability')
+            .select('date')
+            .eq('property_id', propertyId)
+            .eq('status', 'blocked')
+            .gte('date', checkIn)
+            .lte('date', checkOut);
+          if ((blockedDates || []).length > 0) {
+            throw new Error('Выбранные даты заблокированы в календаре');
+          }
+        }
+      }
+
       // Update the order
       const orderUpdates: Record<string, string | number> = {};
       if (updates.check_in) {

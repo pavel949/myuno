@@ -96,6 +96,90 @@ export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord
 export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
+const RU_TO_EN_MAP: Record<string, string> = {
+  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y',
+  к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f',
+  х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
+};
+
+const EN_TO_RU_MAP: Record<string, string> = {
+  a: 'а', b: 'б', c: 'к', d: 'д', e: 'е', f: 'ф', g: 'г', h: 'х', i: 'и', j: 'дж', k: 'к',
+  l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', q: 'к', r: 'р', s: 'с', t: 'т', u: 'у', v: 'в',
+  w: 'в', x: 'кс', y: 'й', z: 'з',
+};
+
+function normalizeSearchText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^a-zа-я0-9\s]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function translitRuToEn(value: string): string {
+  return normalizeSearchText(value)
+    .split('')
+    .map((char) => RU_TO_EN_MAP[char] ?? char)
+    .join('');
+}
+
+function translitEnToRu(value: string): string {
+  return normalizeSearchText(value)
+    .split('')
+    .map((char) => EN_TO_RU_MAP[char] ?? char)
+    .join('');
+}
+
+function makeBigrams(value: string): Set<string> {
+  const normalized = normalizeSearchText(value).replace(/\s+/g, '');
+  const set = new Set<string>();
+  if (normalized.length <= 1) {
+    if (normalized) set.add(normalized);
+    return set;
+  }
+  for (let i = 0; i < normalized.length - 1; i += 1) {
+    set.add(normalized.slice(i, i + 2));
+  }
+  return set;
+}
+
+function diceCoefficient(a: string, b: string): number {
+  const aBigrams = makeBigrams(a);
+  const bBigrams = makeBigrams(b);
+  if (!aBigrams.size || !bBigrams.size) return 0;
+  let intersect = 0;
+  aBigrams.forEach((bi) => {
+    if (bBigrams.has(bi)) intersect += 1;
+  });
+  return (2 * intersect) / (aBigrams.size + bBigrams.size);
+}
+
+function scoreContact(candidate: CrmContact, queryVariants: string[]): number {
+  const name = normalizeSearchText(`${candidate.first_name ?? ''} ${candidate.last_name ?? ''}`);
+  const company = normalizeSearchText(candidate.company_name ?? '');
+  const phone = normalizeSearchText(candidate.phone ?? '');
+  const mobile = normalizeSearchText(candidate.mobile ?? '');
+  const email = normalizeSearchText(candidate.email ?? '');
+  const telegram = normalizeSearchText(candidate.telegram ?? '');
+  const whatsapp = normalizeSearchText(candidate.whatsapp ?? '');
+  const haystacks = [name, company, phone, mobile, email, telegram, whatsapp].filter(Boolean);
+
+  let score = 0;
+  for (const variant of queryVariants) {
+    if (!variant) continue;
+    if (name.startsWith(variant)) score = Math.max(score, 120);
+    if (company.startsWith(variant)) score = Math.max(score, 110);
+    if (haystacks.some((h) => h.includes(variant))) score = Math.max(score, 90);
+
+    const fuzzyName = diceCoefficient(name, variant);
+    const fuzzyCompany = diceCoefficient(company, variant);
+    if (fuzzyName >= 0.5) score = Math.max(score, Math.round(fuzzyName * 100));
+    if (fuzzyCompany >= 0.55) score = Math.max(score, Math.round(fuzzyCompany * 95));
+  }
+  return score;
+}
+
 export function useCrmContacts(
   companyId: string | undefined,
   page = 0,
@@ -114,7 +198,7 @@ export function useCrmContacts(
 
       let q = supabase
         .from('crm_contacts')
-        .select('*, agent_deals(id)', { count: 'exact' })
+        .select('*', { count: 'exact' })
         .eq('company_id', companyId!)
         .order(sortField, { ascending })
         .range(from, to);
@@ -152,13 +236,13 @@ export function useCrmContacts(
 
       const { data, error, count } = await q;
       if (error) throw error;
-      // Attach deal_count to each contact
-      const enriched = (data || []).map((c: Record<string, unknown>) => ({
-        ...c,
-        deal_count: Array.isArray(c.agent_deals) ? c.agent_deals.length : 0,
-        agent_deals: undefined,
-      }));
-      return { data: enriched as unknown as CrmContact[], count: count || 0 };
+      const rows = (data || []) as Record<string, unknown>[];
+      const enriched = rows.map((c) => {
+        const { agent_deals, ...rest } = c;
+        const dealCount = Array.isArray(agent_deals) ? agent_deals.length : 0;
+        return { ...rest, deal_count: dealCount } as unknown as CrmContact;
+      });
+      return { data: enriched, count: count || 0 };
     },
     enabled: !!companyId,
   });
@@ -237,18 +321,55 @@ export function useContactSearch(companyId: string | undefined, query: string) {
   return useQuery({
     queryKey: ['crm-contact-search', companyId, query],
     queryFn: async (): Promise<CrmContact[]> => {
-      const q = sanitizeSearchTerm(query);
-      if (!q) return [];
+      const raw = sanitizeSearchTerm(query);
+      const normalized = normalizeSearchText(raw);
+      if (!normalized) return [];
+
+      const ruToEn = translitRuToEn(normalized);
+      const enToRu = translitEnToRu(normalized);
+      const queryVariants = Array.from(new Set([normalized, ruToEn, enToRu])).filter(Boolean);
+      const orQuery = [
+        `first_name.ilike.%${normalized}%`,
+        `last_name.ilike.%${normalized}%`,
+        `phone.ilike.%${normalized}%`,
+        `email.ilike.%${normalized}%`,
+        `company_name.ilike.%${normalized}%`,
+        `mobile.ilike.%${normalized}%`,
+        `telegram.ilike.%${normalized}%`,
+        `whatsapp.ilike.%${normalized}%`,
+      ].join(',');
+
       const { data, error } = await supabase
         .from('crm_contacts')
         .select('*')
         .eq('company_id', companyId!)
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,phone.ilike.%${q}%,email.ilike.%${q}%`)
-        .limit(10);
+        .eq('is_archived', false)
+        .or(orQuery)
+        .limit(100);
       if (error) throw error;
-      return (data || []) as unknown as CrmContact[];
+
+      // Fallback: translit/fuzzy matching needs local candidate set if SQL ILIKE missed results.
+      let candidates = (data || []) as unknown as CrmContact[];
+      if (candidates.length === 0) {
+        const { data: fallback, error: fallbackError } = await supabase
+          .from('crm_contacts')
+          .select('*')
+          .eq('company_id', companyId!)
+          .eq('is_archived', false)
+          .order('updated_at', { ascending: false })
+          .limit(250);
+        if (fallbackError) throw fallbackError;
+        candidates = (fallback || []) as unknown as CrmContact[];
+      }
+
+      return candidates
+        .map((contact) => ({ contact, score: scoreContact(contact, queryVariants) }))
+        .filter((entry) => entry.score >= 45)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 20)
+        .map((entry) => entry.contact);
     },
-    enabled: !!companyId && query.trim().length >= 2,
+    enabled: !!companyId && query.trim().length >= 1,
   });
 }
 

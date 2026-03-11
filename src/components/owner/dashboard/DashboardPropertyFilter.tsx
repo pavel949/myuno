@@ -10,9 +10,10 @@ export function DashboardPropertyFilter() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { selectedPropertyId, setSelectedPropertyId } = useDashboardFilter();
-  const { allProperties, isLoading } = useMyProperties();
+  const { activeProperties, isLoading } = useMyProperties();
+  const properties = activeProperties || [];
 
-  if (isLoading || allProperties.length <= 1) return null;
+  if (isLoading || properties.length <= 1) return null;
 
   return (
     <div className="space-y-1.5">
@@ -44,10 +45,10 @@ export function DashboardPropertyFilter() {
           >
             {isRu ? 'Все' : 'All'}
             <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0">
-              {allProperties.length}
+              {properties.length}
             </Badge>
           </button>
-          {allProperties.map((property) => {
+          {properties.map((property) => {
             const isSelected = selectedPropertyId === property.property_id;
             const title = isRu ? property.title_ru : property.title;
             return (

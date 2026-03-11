@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { LogIn, UserPlus, ArrowLeft, Shield, Sparkles, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -68,7 +69,7 @@ export function LoginRequiredModal({
   
   const handleLogin = () => {
     onOpenChange(false);
-    navigate('/auth', { 
+    navigate(APP_ROUTES.AUTH, { 
       state: { 
         from: returnPath || location.pathname,
         preserveState,
@@ -78,7 +79,7 @@ export function LoginRequiredModal({
 
   const handleSignup = () => {
     onOpenChange(false);
-    navigate('/auth?mode=signup', { 
+    navigate(`${APP_ROUTES.AUTH}?mode=signup`, { 
       state: { 
         from: returnPath || location.pathname,
         preserveState,

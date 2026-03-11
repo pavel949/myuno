@@ -13,6 +13,7 @@ import { ru, enUS } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const STATUS_CONFIG = {
   healthy: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
@@ -68,7 +69,7 @@ export function ChannelSyncWidget() {
           <p className="text-sm text-muted-foreground mb-3">
             {isRu ? 'Подключите OTA-каналы для синхронизации' : 'Connect OTA channels to sync'}
           </p>
-          <Button size="sm" variant="outline" onClick={() => navigate('/mc/channels')}>
+          <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}>
             {isRu ? 'Подключить' : 'Connect'}
           </Button>
         </CardContent>
@@ -105,7 +106,7 @@ export function ChannelSyncWidget() {
               variant="ghost"
               size="icon"
               className="h-7 w-7"
-              onClick={() => navigate('/mc/channels')}
+              onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -160,7 +161,7 @@ export function ChannelSyncWidget() {
           })}
           {channels.length > 5 && (
             <button
-              onClick={() => navigate('/mc/channels')}
+              onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}
               className="text-xs text-primary hover:underline w-full text-left py-1"
             >
               {isRu ? `Ещё ${channels.length - 5} каналов...` : `${channels.length - 5} more channels...`}

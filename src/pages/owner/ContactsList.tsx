@@ -14,10 +14,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, MapPin, Briefcase, Clock, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
-import { ContactImportSheet } from '@/components/owner/contacts/ContactImportSheet';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 24;
@@ -45,6 +45,15 @@ const typeBadgeColors: Record<string, string> = {
   agent: 'bg-muted text-muted-foreground border-border',
 };
 
+const CONTACT_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
+  buyer: { en: 'Buyer', ru: 'Покупатель' },
+  seller: { en: 'Seller', ru: 'Продавец' },
+  investor: { en: 'Investor', ru: 'Инвестор' },
+  tenant: { en: 'Tenant', ru: 'Арендатор' },
+  landlord: { en: 'Landlord', ru: 'Арендодатель' },
+  agent: { en: 'Agent', ru: 'Агент' },
+};
+
 const SORT_OPTIONS = [
   { value: 'updated_at', labelEn: 'Last Updated', labelRu: 'Обновлён' },
   { value: 'created_at', labelEn: 'Created', labelRu: 'Создан' },
@@ -55,8 +64,10 @@ const SORT_OPTIONS = [
 function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact; isOwnerOrAdmin: boolean; onClick: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const avatarColor = getAvatarColor(contact.first_name + contact.last_name);
-  const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+  const firstName = contact.first_name ?? '';
+  const lastName = contact.last_name ?? '';
+  const avatarColor = getAvatarColor(firstName + lastName);
+  const fullName = `${firstName} ${lastName}`.trim();
   const scoring = contact.scoring;
 
   return (
@@ -67,7 +78,7 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className={cn("h-12 w-12 rounded-full flex items-center justify-center shrink-0 text-base font-semibold", avatarColor)}>
-            {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
+            {firstName.charAt(0) || '?'}{lastName.charAt(0) || '?'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm leading-tight line-clamp-2">{fullName}</p>
@@ -86,7 +97,7 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
 
         {/* Lifecycle stage compact */}
         <div className="mt-2">
-          <LifecycleStageBar currentStage={(contact as any).lifecycle_stage || 'lead'} compact readonly />
+          <LifecycleStageBar currentStage={contact.lifecycle_stage ?? 'lead'} compact readonly />
         </div>
 
         {/* Tags row */}
@@ -149,6 +160,58 @@ function ContactCard({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact
   );
 }
 
+function ContactListRow({ contact, isOwnerOrAdmin, onClick }: { contact: CrmContact; isOwnerOrAdmin: boolean; onClick: () => void }) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const firstName = contact.first_name ?? '';
+  const lastName = contact.last_name ?? '';
+  const fullName = `${firstName} ${lastName}`.trim();
+  const typeKey = contact.contact_type ?? '';
+  const typeLabel = CONTACT_TYPE_LABELS[typeKey] ? (isRu ? CONTACT_TYPE_LABELS[typeKey].ru : CONTACT_TYPE_LABELS[typeKey].en) : (typeKey || '—');
+  const avatarColor = getAvatarColor(firstName + lastName);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border bg-card hover:bg-accent/30 transition-colors text-left"
+    >
+      <div className={cn('h-10 w-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold', avatarColor)}>
+        {firstName.charAt(0) || '?'}{lastName.charAt(0) || '?'}
+      </div>
+      <div className="min-w-0 flex-1 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-3 gap-y-1">
+        <div className="col-span-2 md:col-span-1">
+          <p className="font-medium text-sm truncate">{fullName}</p>
+          {(contact.company_name || contact.job_title) && (
+            <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+              <Briefcase className="h-3 w-3 shrink-0" />
+              {contact.company_name || contact.job_title}
+            </p>
+          )}
+          <div className="mt-1 md:hidden">
+            <LifecycleStageBar currentStage={contact.lifecycle_stage ?? 'lead'} compact readonly />
+          </div>
+        </div>
+        <div className="hidden sm:block">
+          <Badge variant="outline" className={cn('text-[10px] h-5', typeBadgeColors[contact.contact_type ?? ''] || '')}>
+            {typeLabel}
+          </Badge>
+        </div>
+        <div className="text-xs text-muted-foreground truncate">
+          {contact.phone ? (isOwnerOrAdmin ? contact.phone : maskPhone(contact.phone)) : '—'}
+        </div>
+        <div className="text-xs text-muted-foreground truncate">
+          {contact.email || '—'}
+        </div>
+        <div className="hidden md:block">
+          <LifecycleStageBar currentStage={contact.lifecycle_stage ?? 'lead'} compact readonly />
+        </div>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+    </button>
+  );
+}
+
 function TagFilterChips({ companyId, tagFilter, onTagChange }: { companyId?: string; tagFilter: string | null; onTagChange: (v: string | null) => void }) {
   const { data: tags = [] } = useContactTags(companyId);
   if (!tags.length) return <p className="text-xs text-muted-foreground">—</p>;
@@ -174,7 +237,8 @@ export default function ContactsList() {
   const isRu = language === 'ru';
   const { user } = useAuth();
   const { roles } = useUserRoles();
-  const isOwnerOrAdmin = roles.some(r => r.role === 'admin' || r.role === 'owner');
+  const safeRoles = roles ?? [];
+  const isOwnerOrAdmin = safeRoles.some(r => r.role === 'admin' || r.role === 'owner');
   const { data: membership } = useMyCompanyId();
   const companyId = membership?.company_id;
 
@@ -185,9 +249,9 @@ export default function ContactsList() {
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [lifecycleFilter, setLifecycleFilter] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [showImport, setShowImport] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<string>('updated_at');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const handleSearchChange = (v: string) => { setSearch(v); setPage(0); };
   const handleTypeChange = (v: string | null) => { setTypeFilter(v); setPage(0); };
@@ -195,16 +259,16 @@ export default function ContactsList() {
   const handleTagChange = (v: string | null) => { setTagFilter(v); setPage(0); };
   const handleLifecycleChange = (v: string | null) => { setLifecycleFilter(v); setPage(0); };
 
-  const { data: result, isLoading } = useCrmContacts(companyId, page, PAGE_SIZE, {
+  const { data: result, isLoading, isError, error, refetch } = useCrmContacts(companyId, page, PAGE_SIZE, {
     search: search.trim(),
     contactType: typeFilter || undefined,
     tag: tagFilter || undefined,
     source: sourceFilter || undefined,
     lifecycleStage: lifecycleFilter || undefined,
-    sortBy: sortBy as any,
+    sortBy,
   });
-  const contacts = result?.data || [];
-  const totalCount = result?.count || 0;
+  const contacts = result?.data ?? [];
+  const totalCount = result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const activeFiltersCount = [typeFilter, sourceFilter, tagFilter, lifecycleFilter].filter(Boolean).length;
@@ -213,6 +277,25 @@ export default function ContactsList() {
     return (
       <div className="p-4 md:p-6 text-center pt-20 max-w-[1536px] mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Вы не состоите в управляющей компании' : 'You are not a member of a management company'}</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 md:p-6 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки контактов' : 'Failed to load contacts'}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {error instanceof Error ? error.message : String(error)}
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={() => refetch()}
+        >
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
       </div>
     );
   }
@@ -229,7 +312,7 @@ export default function ContactsList() {
         </div>
         <div className="flex items-center gap-2 flex-wrap md:justify-end">
           <ContactExportButton contacts={contacts} />
-          <Button variant="default" size="sm" onClick={() => setShowImport(true)} className="font-semibold">
+          <Button variant="default" size="sm" onClick={() => navigate(APP_ROUTES.MC_CONTACTS_IMPORT)} className="font-semibold">
             <Upload className="h-4 w-4 mr-1" />
             {isRu ? 'Импорт контактов' : 'Import Contacts'}
           </Button>
@@ -240,9 +323,35 @@ export default function ContactsList() {
         </div>
       </div>
 
-      {/* Search + Sort */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
+      {/* Type chips — быстрый выбор типа контактов */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-xs text-muted-foreground mr-1">{isRu ? 'Тип:' : 'Type:'}</span>
+        <button
+          onClick={() => handleTypeChange(null)}
+          className={cn(
+            'px-2.5 py-1 text-xs rounded-full border transition-colors',
+            !typeFilter ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+          )}
+        >
+          {isRu ? 'Все' : 'All'}
+        </button>
+        {CONTACT_TYPES.map(t => (
+          <button
+            key={t}
+            onClick={() => handleTypeChange(typeFilter === t ? null : t)}
+            className={cn(
+              'px-2.5 py-1 text-xs rounded-full border transition-colors',
+              typeFilter === t ? typeBadgeColors[t] || 'bg-muted' : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+            )}
+          >
+            {isRu ? CONTACT_TYPE_LABELS[t]?.ru ?? t : CONTACT_TYPE_LABELS[t]?.en ?? t}
+          </button>
+        ))}
+      </div>
+
+      {/* Search + Sort + View mode */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={isRu ? 'Поиск по имени, телефону, email...' : 'Search by name, phone, email...'}
@@ -250,6 +359,24 @@ export default function ContactsList() {
             onChange={e => handleSearchChange(e.target.value)}
             className="pl-9"
           />
+        </div>
+        <div className="flex items-center gap-1 border rounded-md p-0.5">
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            className={cn('p-1.5 rounded', viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
+            title={isRu ? 'Сетка' : 'Grid'}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={cn('p-1.5 rounded', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')}
+            title={isRu ? 'Список' : 'List'}
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[140px]">
@@ -319,11 +446,19 @@ export default function ContactsList() {
         </div>
       )}
 
-      {/* Grid */}
+      {/* Grid or List */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
-        </div>
+        viewMode === 'list' ? (
+          <div className="space-y-1.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-xl" />)}
+          </div>
+        )
       ) : contacts.length === 0 ? (
         <div className="text-center py-12">
           <UserCircle className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
@@ -332,6 +467,28 @@ export default function ContactsList() {
             <Plus className="h-4 w-4 mr-1" />
             {isRu ? 'Добавить контакт' : 'Add contact'}
           </Button>
+        </div>
+      ) : viewMode === 'list' ? (
+        <div className="space-y-1.5">
+          {/* List header (desktop) */}
+          <div className="hidden md:grid grid-cols-[auto_1fr] gap-3 px-3 py-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="w-10" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-4">
+              <span>{isRu ? 'Имя / Компания' : 'Name / Company'}</span>
+              <span>{isRu ? 'Тип' : 'Type'}</span>
+              <span>{isRu ? 'Телефон' : 'Phone'}</span>
+              <span className="hidden md:inline">{isRu ? 'Email' : 'Email'}</span>
+              <span className="hidden lg:inline">{isRu ? 'Стадия' : 'Stage'}</span>
+            </div>
+          </div>
+          {contacts.map(contact => (
+            <ContactListRow
+              key={contact.id}
+              contact={contact}
+              isOwnerOrAdmin={isOwnerOrAdmin}
+              onClick={() => navigate(`/mc/contacts/${contact.id}`)}
+            />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
@@ -362,10 +519,7 @@ export default function ContactsList() {
       )}
 
       {companyId && (
-        <>
-          <CreateContactSheet open={showCreate} onOpenChange={setShowCreate} companyId={companyId} />
-          <ContactImportSheet open={showImport} onOpenChange={setShowImport} companyId={companyId} />
-        </>
+        <CreateContactSheet open={showCreate} onOpenChange={setShowCreate} companyId={companyId} />
       )}
     </div>
   );

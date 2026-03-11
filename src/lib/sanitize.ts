@@ -32,6 +32,20 @@ export const escapeHtml = (text: string | number | null | undefined): string => 
   return str.replace(/[&<>"']/g, (m) => map[m]);
 };
 
+/** Allowed URL protocols for img src in map popups (XSS prevention). */
+const ALLOWED_IMAGE_PROTOCOLS = ['https:', 'http:', 'data:'];
+
+function isAllowedImageUrl(url: string | null | undefined): boolean {
+  if (url == null || url === '') return false;
+  try {
+    const base = typeof window !== 'undefined' ? window.location.href : 'https://myuno.app';
+    const parsed = new URL(url, base);
+    return ALLOWED_IMAGE_PROTOCOLS.includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Creates a safe popup HTML content for map markers
  * @param params - Object with name, rating, and price
@@ -48,13 +62,16 @@ export const createMapPopupHtml = (params: {
   const escapedRating = escapeHtml(params.rating);
   const escapedPrice = escapeHtml(params.price);
   const escapedDescription = escapeHtml(params.description);
-  const escapedImage = escapeHtml(params.image);
+  const safeImageUrl =
+    params.image && isAllowedImageUrl(params.image)
+      ? escapeHtml(params.image)
+      : '';
 
   return `
     <div class="p-2 min-w-[180px] max-w-[220px]">
-      ${params.image ? `
+      ${safeImageUrl ? `
         <img 
-          src="${escapedImage}" 
+          src="${safeImageUrl}" 
           alt="${escapedName}"
           class="w-full h-24 object-cover rounded-lg mb-2"
           onerror="this.style.display='none'"

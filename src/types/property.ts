@@ -73,7 +73,7 @@ export interface OwnerProperty extends BaseProperty {
   complex_id?: string | null;
   floor?: number;
   unit_number?: string;
-  view_type?: string;
+  view_type?: string[];
   furnishing_level?: string;
   equipment?: string[];
   

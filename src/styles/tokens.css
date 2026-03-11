@@ -1,6 +1,7 @@
 /**
- * MyUNO Design System — Phuket Premium
- * Tropical teal + gold, trust + premium. Use these tokens everywhere; no hardcoded hex.
+ * MyUNO Design System — DS 2.0 Navy Premium
+ * Single source of truth for Tailwind HSL vars. Aligned with design-system/tokens.json.
+ * Use semantic tokens (--primary, --card, etc.); no hardcoded hex in components.
  */
 
 :root {
@@ -51,8 +52,8 @@
   --border-default: var(--color-neutral-300);
   --border-strong: var(--color-neutral-500);
 
-  /* ═══ Typography ═══ */
-  --font-display: 'Playfair Display', Georgia, serif;
+  /* ═══ Typography (DS 2.0 — Space Grotesk display) ═══ */
+  --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -102,13 +103,19 @@
   --transition-normal: 250ms ease;
   --transition-slow: 400ms ease;
 
-  /* ═══ Tailwind/HSL compatibility (derived from tokens) ═══ */
+  /* ═══ Tailwind/HSL compatibility (DS 2.0 Navy — single source) ═══ */
   --background: 0 0% 99%;
   --foreground: 210 11% 15%;
-  --primary: 177 69% 33%;
+  --primary: 224 55% 32%;
+  --primary-hover: 224 55% 26%;
+  --primary-light: 224 45% 48%;
   --primary-foreground: 0 0% 100%;
   --card: 0 0% 100%;
   --card-foreground: 210 11% 15%;
+  --card-elevated: 0 0% 100%;
+  --card-hover: 220 14% 97%;
+  --secondary: 220 16% 95%;
+  --secondary-foreground: 222 47% 11%;
   --muted: 210 17% 96%;
   --muted-foreground: 215 16% 47%;
   --accent: 45 81% 52%;
@@ -116,40 +123,132 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
   --border: 214 13% 87%;
+  --border-strong: 220 14% 70%;
+  --border-subtle: 220 14% 92%;
   --input: 214 13% 87%;
-  --ring: 177 69% 33%;
+  --ring: 224 55% 32%;
   --success: 152 60% 34%;
   --warning: 45 81% 52%;
   --info: 210 75% 45%;
   --radius: 0.5rem;
+  --card-radius: 1rem;
+  --card-radius-compact: 0.75rem;
+  --card-padding: 1rem;
+  --card-padding-compact: 0.75rem;
+  --card-gap: 0.75rem;
+  --gold: 45 81% 52%;
+  --gold-light: 45 90% 70%;
+  --gold-dark: 38 85% 35%;
+  --accent-coral: 12 65% 52%;
+  --accent-teal: 180 55% 38%;
+  --accent-purple: 270 55% 50%;
+  --accent-cyan: 190 65% 40%;
+  --accent-amber: 38 85% 48%;
+  --icon-dark: 222 47% 15%;
+  /* State tokens (disabled, focus, skeleton, validation) */
+  --color-disabled: 220 14% 90%;
+  --opacity-disabled: 0.6;
+  --ring-offset: 0 0% 100%;
+  --color-skeleton-base: 220 14% 96%;
+  --color-skeleton-highlight: 220 14% 92%;
+  --color-success-border: 152 60% 34%;
+  --color-warning-border: 38 85% 48%;
+  /* Sidebar references primary system (no duplication) */
   --sidebar-background: 210 11% 11%;
   --sidebar-foreground: 210 14% 89%;
-  --sidebar-primary: 177 69% 33%;
-  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: 210 14% 18%;
   --sidebar-accent-foreground: 210 14% 89%;
   --sidebar-border: 210 12% 18%;
-  --sidebar-ring: 177 69% 33%;
+  --sidebar-ring: var(--ring);
+
+  /* Popover (dropdowns, menus) */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* Chart palette */
+  --chart-1: 224 55% 32%;
+  --chart-2: 152 60% 34%;
+  --chart-3: 12 65% 52%;
+  --chart-4: 190 65% 40%;
+  --chart-5: 270 55% 50%;
+
+  /* Elevation scale */
+  --shadow-elevation-0: none;
+  --shadow-elevation-1: 0 1px 3px -1px hsl(222 47% 11% / 0.06), 0 1px 2px hsl(222 47% 11% / 0.04);
+  --shadow-elevation-2: 0 2px 8px -2px hsl(222 47% 11% / 0.08), 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+  --shadow-elevation-3: 0 8px 24px -4px hsl(224 55% 32% / 0.16), 0 2px 6px -1px hsl(222 47% 11% / 0.08);
+  --shadow-elevation-4: 0 12px 32px -8px hsl(224 55% 32% / 0.2), 0 4px 12px -4px hsl(222 47% 11% / 0.1);
+  --shadow-elevation-5: 0 20px 48px -12px hsl(224 55% 32% / 0.24), 0 8px 16px -4px hsl(222 47% 11% / 0.1);
+  --shadow-card: var(--shadow-elevation-2);
+  --shadow-card-hover: var(--shadow-elevation-3);
+  --shadow-elevated: var(--shadow-elevation-4);
+  --shadow-float: var(--shadow-elevation-5);
+  --shadow-btn: 0 2px 8px -2px hsl(224 55% 32% / 0.3), 0 1px 2px hsl(222 47% 11% / 0.12);
+  --shadow-btn-hover: 0 6px 20px -4px hsl(224 55% 32% / 0.4), 0 2px 4px hsl(222 47% 11% / 0.12);
+  --shadow-neu-inset: inset 0 1px 2px hsl(222 20% 50% / 0.1);
+
+  /* Glow (gradient borders) */
+  --glow-from: 224 70% 55%;
+  --glow-via: 260 60% 58%;
+  --glow-to: 190 70% 50%;
 }
 
 .dark {
   --background: 210 11% 7%;
   --foreground: 210 14% 95%;
-  --primary: 177 55% 45%;
+  --primary: 224 50% 58%;
+  --primary-hover: 224 50% 64%;
+  --primary-light: 224 45% 68%;
   --primary-foreground: 0 0% 100%;
   --card: 210 11% 9%;
   --card-foreground: 210 14% 95%;
+  --card-elevated: 222 25% 11%;
+  --card-hover: 222 25% 14%;
+  --secondary: 222 18% 14%;
+  --secondary-foreground: 210 12% 92%;
   --muted: 210 12% 18%;
   --muted-foreground: 215 12% 65%;
   --accent: 45 75% 55%;
   --accent-foreground: 210 11% 11%;
   --destructive: 0 62% 55%;
   --border: 210 12% 20%;
+  --border-strong: 222 14% 30%;
+  --border-subtle: 222 14% 14%;
   --input: 210 12% 20%;
-  --ring: 177 55% 45%;
+  --ring: 224 50% 58%;
   --sidebar-background: 210 11% 6%;
   --sidebar-foreground: 210 14% 92%;
-  --sidebar-primary: 177 55% 45%;
+  --sidebar-primary: var(--primary);
+  --sidebar-ring: var(--ring);
   --sidebar-accent: 210 12% 14%;
   --sidebar-border: 210 12% 14%;
+  --color-disabled: 222 14% 22%;
+  --color-skeleton-base: 222 14% 14%;
+  --color-skeleton-highlight: 222 14% 18%;
+
+  --popover: 222 25% 9%;
+  --popover-foreground: 210 12% 93%;
+  --chart-1: 224 50% 58%;
+  --chart-2: 152 58% 42%;
+  --chart-3: 12 65% 58%;
+  --chart-4: 190 60% 52%;
+  --chart-5: 270 50% 62%;
+  --shadow-elevation-0: none;
+  --shadow-elevation-1: 0 1px 3px -1px hsl(222 30% 4% / 0.3), 0 1px 2px hsl(222 30% 4% / 0.2);
+  --shadow-elevation-2: 0 2px 8px -2px hsl(222 30% 4% / 0.5), 0 1px 2px hsl(222 30% 4% / 0.25);
+  --shadow-elevation-3: 0 8px 24px -4px hsl(224 50% 58% / 0.22), 0 2px 6px hsl(222 30% 4% / 0.35);
+  --shadow-elevation-4: 0 12px 32px -8px hsl(224 50% 58% / 0.28), 0 4px 12px hsl(222 30% 4% / 0.35);
+  --shadow-elevation-5: 0 20px 48px -12px hsl(224 50% 58% / 0.35), 0 8px 16px hsl(222 30% 4% / 0.3);
+  --shadow-card: var(--shadow-elevation-2);
+  --shadow-card-hover: var(--shadow-elevation-3);
+  --shadow-elevated: var(--shadow-elevation-4);
+  --shadow-float: var(--shadow-elevation-5);
+  --shadow-btn: 0 2px 8px -2px hsl(224 50% 58% / 0.35), 0 1px 2px hsl(222 30% 4% / 0.25);
+  --shadow-btn-hover: 0 6px 20px -4px hsl(224 50% 58% / 0.5), 0 2px 4px hsl(222 30% 4% / 0.25);
+  --shadow-neu-inset: inset 0 1px 3px hsl(222 30% 2% / 0.35);
+  --glow-from: 224 70% 62%;
+  --glow-via: 260 60% 65%;
+  --glow-to: 190 70% 58%;
 }

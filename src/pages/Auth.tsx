@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift, Phone, ChevronLeft } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +47,7 @@ export default function Auth() {
   
   const redirectPath = (location.state as { from?: string })?.from || 
     searchParams.get('redirect') || 
-    '/';
+    APP_ROUTES.HOME;
 
   // Redirect authenticated users immediately
   useEffect(() => {
@@ -238,7 +239,7 @@ export default function Auth() {
       
       {/* Header */}
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to="/" className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
           <span className="text-xl font-bold text-primary-foreground">U</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -315,7 +316,7 @@ export default function Auth() {
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground" />
-                    <Link to="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                    <Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD} className="text-sm text-primary hover:underline">
                       {t('auth.forgotPassword')}
                     </Link>
                   </div>
@@ -331,7 +332,7 @@ export default function Auth() {
                       </p>
                       <p className="text-muted-foreground">
                         {isRu ? 'Может быть, ' : 'Maybe '}
-                        <Link to="/auth/forgot-password" className="text-primary font-medium hover:underline">
+                        <Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD} className="text-primary font-medium hover:underline">
                           {isRu ? 'восстановить пароль?' : 'reset your password?'}
                         </Link>
                       </p>
@@ -595,9 +596,9 @@ export default function Auth() {
                           />
                           <p className="text-xs text-muted-foreground">
                             {isRu ? (
-                              <>Я принимаю <Link to="/terms" target="_blank" className="text-primary hover:underline">Условия использования</Link> и <Link to="/privacy" target="_blank" className="text-primary hover:underline">Политику конфиденциальности</Link></>
+                              <>Я принимаю <Link to={APP_ROUTES.TERMS} target="_blank" className="text-primary hover:underline">Условия использования</Link> и <Link to={APP_ROUTES.PRIVACY} target="_blank" className="text-primary hover:underline">Политику конфиденциальности</Link></>
                             ) : (
-                              <>I agree to the <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link></>
+                              <>I agree to the <Link to={APP_ROUTES.TERMS} target="_blank" className="text-primary hover:underline">Terms of Service</Link> and <Link to={APP_ROUTES.PRIVACY} target="_blank" className="text-primary hover:underline">Privacy Policy</Link></>
                             )}
                           </p>
                         </label>

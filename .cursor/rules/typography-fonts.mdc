@@ -1,0 +1,28 @@
+---
+description: Typography and font usage — keep consistent with design system
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+# Typography & Fonts (Design System)
+
+## Font stack (Tailwind + index.html)
+
+| Role | Tailwind class | Font | Use for |
+|------|----------------|------|---------|
+| Body / UI | `font-sans` (default) | DM Sans | All body text, labels, buttons, inputs |
+| Headings | `font-display` | Space Grotesk | Page titles, section titles, card titles |
+| Accent | `font-serif` | Instrument Serif | Optional: quotes, editorial accents |
+| Code / keys | `font-mono` | System monospace | Doc keys, kbd, technical IDs |
+
+## Rules
+
+1. **Use semantic headings** — Prefer `<h1>`, `<h2>`, `<h3>` so base styles in `src/index.css` apply (they set `font-display` and size scale). Do not override with `font-sans` on headings unless intentionally de-emphasizing.
+
+2. **Non-semantic titles** — If you use a `<div>` or `<span>` for a hero/section title, add `font-display` so it matches headings: e.g. `className="font-display text-2xl font-bold"`.
+
+3. **Do not** introduce new font families or load extra Google Fonts without updating both `index.html` and `tailwind.config.ts` and this rule.
+
+4. **Mono** — Use `font-mono` for document keys, API IDs, keyboard shortcuts (e.g. `<kbd className="font-mono">`).
+
+5. **Weights** — Use `font-medium`, `font-semibold`, `font-bold` as needed; avoid inline `font-weight` values so the design scale stays consistent.

@@ -4,11 +4,13 @@ import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
 
 const LIBRARIES: ('places')[] = ['places'];
 
-interface GoogleMapsContextValue {
+export interface GoogleMapsContextValue {
   isLoaded: boolean;
   loadError: Error | undefined;
   hasKey: boolean;
   apiKey: string | null;
+  /** True when key is set, script loaded successfully, and no load error (API is usable). */
+  apiAvailable: boolean;
 }
 
 const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
@@ -27,6 +29,7 @@ function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: Reac
       loadError: loadError ?? undefined,
       hasKey: true,
       apiKey,
+      apiAvailable: isLoaded && !loadError,
     }),
     [isLoaded, loadError, apiKey]
   );
@@ -43,6 +46,7 @@ const noKeyValue: GoogleMapsContextValue = {
   loadError: new Error('Google Maps API key not available'),
   hasKey: false,
   apiKey: null,
+  apiAvailable: false,
 };
 
 const loadingValue: GoogleMapsContextValue = {
@@ -50,6 +54,7 @@ const loadingValue: GoogleMapsContextValue = {
   loadError: undefined,
   hasKey: false,
   apiKey: null,
+  apiAvailable: false,
 };
 
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {

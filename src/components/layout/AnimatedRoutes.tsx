@@ -19,6 +19,7 @@ import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
 import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 // Core pages - eagerly loaded for fast initial navigation
 import Index from '@/pages/Index';
@@ -115,44 +116,44 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
-        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/auth/account-type" element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
-        <Route path="/auth/forgot-password" element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
-        <Route path="/auth/reset-password" element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
+        <Route path={APP_ROUTES.HOME} element={<PageTransition><Index /></PageTransition>} />
+        <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
+        <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
+        <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
+        <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
         
         {/* ── User ── */}
-        <Route path="/discover" element={<LazyPage><Pages.Discover /></LazyPage>} />
+        <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
         <Route path="/catalog" element={<LazyPage><Pages.PlatformCatalog /></LazyPage>} />
-        <Route path="/categories" element={<Navigate to="/discover" replace />} />
-        <Route path="/map" element={<LazyPage><Pages.MapView /></LazyPage>} />
-        <Route path="/bookings" element={<LazyPage><Pages.Bookings /></LazyPage>} />
+        <Route path="/categories" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path={APP_ROUTES.MAP} element={<LazyPage><Pages.MapView /></LazyPage>} />
+        <Route path={APP_ROUTES.BOOKINGS} element={<LazyPage><Pages.Bookings /></LazyPage>} />
         <Route path="/bookings/:id" element={<LazyPage><Pages.BookingDetail /></LazyPage>} />
         <Route path="/orders/:id/tracking" element={<LazyPage><Pages.OrderTracking /></LazyPage>} />
-        <Route path="/profile" element={<LazyPage><Pages.Profile /></LazyPage>} />
-        <Route path="/profile/edit" element={<LazyPage><Pages.EditProfile /></LazyPage>} />
-        <Route path="/profile/settings" element={<LazyPage><Pages.ProfileSettings /></LazyPage>} />
+        <Route path={APP_ROUTES.PROFILE} element={<LazyPage><Pages.Profile /></LazyPage>} />
+        <Route path={APP_ROUTES.PROFILE_EDIT} element={<LazyPage><Pages.EditProfile /></LazyPage>} />
+        <Route path={APP_ROUTES.PROFILE_SETTINGS} element={<LazyPage><Pages.ProfileSettings /></LazyPage>} />
         <Route path="/profile/referral" element={<LazyPage><Pages.ReferralPage /></LazyPage>} />
-        <Route path="/account" element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
-        <Route path="/favorites" element={<LazyPage><Pages.Favorites /></LazyPage>} />
-        <Route path="/search" element={<LazyPage><Pages.Search /></LazyPage>} />
-        <Route path="/notifications" element={<LazyPage><Pages.Notifications /></LazyPage>} />
-        <Route path="/profile/notifications" element={<LazyPage><Pages.NotificationSettingsEnhanced /></LazyPage>} />
-        <Route path="/messages" element={<LazyPage><Pages.GuestMessages /></LazyPage>} />
+        <Route path={APP_ROUTES.ACCOUNT} element={<LazyPage><Pages.UserAccountDashboard /></LazyPage>} />
+        <Route path={APP_ROUTES.FAVORITES} element={<LazyPage><Pages.Favorites /></LazyPage>} />
+        <Route path={APP_ROUTES.SEARCH} element={<LazyPage><Pages.Search /></LazyPage>} />
+        <Route path={APP_ROUTES.NOTIFICATIONS} element={<LazyPage><Pages.Notifications /></LazyPage>} />
+        <Route path={APP_ROUTES.NOTIFICATION_SETTINGS} element={<LazyPage><Pages.NotificationSettingsEnhanced /></LazyPage>} />
+        <Route path={APP_ROUTES.MESSAGES} element={<LazyPage><Pages.GuestMessages /></LazyPage>} />
         <Route path="/trip/:id" element={<LazyPage><Pages.GuestTripDetail /></LazyPage>} />
-        <Route path="/history" element={<LazyPage><Pages.ViewHistory /></LazyPage>} />
-        <Route path="/cart" element={<LazyPage><Pages.Cart /></LazyPage>} />
-        <Route path="/wallet" element={<LazyPage><Pages.Wallet /></LazyPage>} />
-        <Route path="/wallet/history" element={<LazyPage><Pages.TransactionHistory /></LazyPage>} />
-        <Route path="/wallet/cards" element={<LazyPage><Pages.WalletCards /></LazyPage>} />
-        <Route path="/sos" element={<LazyPage><Pages.SOS /></LazyPage>} />
-        <Route path="/vip-concierge" element={<LazyPage><Pages.VipConcierge /></LazyPage>} />
-        <Route path="/support" element={<LazyPage><Pages.Support /></LazyPage>} />
-        <Route path="/support/new-ticket" element={<LazyPage><Pages.NewTicket /></LazyPage>} />
-        <Route path="/support/tickets" element={<LazyPage><Pages.MyTickets /></LazyPage>} />
+        <Route path={APP_ROUTES.VIEW_HISTORY} element={<LazyPage><Pages.ViewHistory /></LazyPage>} />
+        <Route path={APP_ROUTES.CART} element={<LazyPage><Pages.Cart /></LazyPage>} />
+        <Route path={APP_ROUTES.WALLET} element={<LazyPage><Pages.Wallet /></LazyPage>} />
+        <Route path={APP_ROUTES.WALLET_HISTORY} element={<LazyPage><Pages.TransactionHistory /></LazyPage>} />
+        <Route path={APP_ROUTES.WALLET_CARDS} element={<LazyPage><Pages.WalletCards /></LazyPage>} />
+        <Route path={APP_ROUTES.SOS} element={<LazyPage><Pages.SOS /></LazyPage>} />
+        <Route path={APP_ROUTES.VIP_CONCIERGE} element={<LazyPage><Pages.VipConcierge /></LazyPage>} />
+        <Route path={APP_ROUTES.SUPPORT} element={<LazyPage><Pages.Support /></LazyPage>} />
+        <Route path={APP_ROUTES.SUPPORT_NEW_TICKET} element={<LazyPage><Pages.NewTicket /></LazyPage>} />
+        <Route path={APP_ROUTES.SUPPORT_TICKETS} element={<LazyPage><Pages.MyTickets /></LazyPage>} />
         <Route path="/support/tickets/:ticketId" element={<LazyPage><Pages.TicketDetail /></LazyPage>} />
-        <Route path="/install" element={<LazyPage><Pages.Install /></LazyPage>} />
-        <Route path="/booking/advance-requested" element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
+        <Route path={APP_ROUTES.INSTALL} element={<LazyPage><Pages.Install /></LazyPage>} />
+        <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
         <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
         <Route path="/b/:slug" element={<LazyPage><Pages.StorefrontPage /></LazyPage>} />
@@ -164,20 +165,20 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/list-with-us" element={<LazyPage><Pages.ListWithUsPage /></LazyPage>} />
         
         {/* ── Beauty & Spa ── */}
-        <Route path="/beauty" element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.BEAUTY} element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
         <Route path="/beauty/salon/:id" element={<LazyPage><Pages.SalonDetail /></LazyPage>} />
         <Route path="/beauty/booking/:id" element={<LazyPage><Pages.BeautyBooking /></LazyPage>} />
-        <Route path="/beauty/services" element={<LazyPage><Pages.BeautyServices /></LazyPage>} />
-        <Route path="/beauty/map" element={<LazyPage><Pages.BeautyMap /></LazyPage>} />
-        <Route path="/salons" element={<Navigate to="/beauty" replace />} />
-        <Route path="/spa" element={<Navigate to="/beauty" replace />} />
-        <Route path="/gyms" element={<Navigate to="/fitness" replace />} />
-        <Route path="/clinics" element={<Navigate to="/medical" replace />} />
-        <Route path="/water_activities" element={<Navigate to="/experiences?type=activity" replace />} />
+        <Route path={APP_ROUTES.BEAUTY_SERVICES} element={<LazyPage><Pages.BeautyServices /></LazyPage>} />
+        <Route path={APP_ROUTES.BEAUTY_MAP} element={<LazyPage><Pages.BeautyMap /></LazyPage>} />
+        <Route path="/salons" element={<Navigate to={APP_ROUTES.BEAUTY} replace />} />
+        <Route path="/spa" element={<Navigate to={APP_ROUTES.BEAUTY} replace />} />
+        <Route path="/gyms" element={<Navigate to={APP_ROUTES.FITNESS} replace />} />
+        <Route path="/clinics" element={<Navigate to={APP_ROUTES.MEDICAL} replace />} />
+        <Route path="/water_activities" element={<Navigate to={`${APP_ROUTES.EXPERIENCES}?type=activity`} replace />} />
         
         {/* ── Property Hub ── */}
-        <Route path="/properties" element={<Navigate to="/property" replace />} />
-        <Route path="/property" element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
+        <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
+        <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>
           <Route index element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
           <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
           <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
@@ -208,110 +209,110 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/company/:slug" element={<LazyPage><Pages.ManagementCompanyProfile /></LazyPage>} />
         
         {/* ── Legacy Property Hub Redirects ── */}
-        <Route path="/offplan" element={<Navigate to="/property/offplan" replace />} />
+        <Route path="/offplan" element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/offplan/:id" element={<OffplanIdRedirect />} />
-        <Route path="/developers" element={<Navigate to="/property/developers" replace />} />
+        <Route path="/developers" element={<Navigate to={APP_ROUTES.DEVELOPERS} replace />} />
         <Route path="/developers/:id" element={<DeveloperIdRedirect />} />
-        <Route path="/complexes" element={<Navigate to="/property/projects" replace />} />
-        <Route path="/invest" element={<Navigate to="/property/invest" replace />} />
-        <Route path="/invest/dashboard" element={<Navigate to="/property/invest/dashboard" replace />} />
-        <Route path="/invest/raise" element={<Navigate to="/property/invest/raise" replace />} />
+        <Route path="/complexes" element={<Navigate to={APP_ROUTES.COMPLEXES} replace />} />
+        <Route path="/invest" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
+        <Route path="/invest/dashboard" element={<Navigate to={APP_ROUTES.INVEST_DASHBOARD} replace />} />
+        <Route path="/invest/raise" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
         <Route path="/invest/:id" element={<InvestIdRedirect />} />
         
         {/* ── Restaurants ── */}
-        <Route path="/food" element={<Navigate to="/restaurants" replace />} />
+        <Route path="/food" element={<Navigate to={APP_ROUTES.RESTAURANTS} replace />} />
         <Route path="/food/restaurant/:id" element={<FoodRestaurantIdRedirect />} />
-        <Route path="/food/checkout" element={<Navigate to="/restaurants" replace />} />
-        <Route path="/restaurants" element={<LazyPage><Pages.RestaurantsIndex /></LazyPage>} />
-        <Route path="/restaurants/map" element={<LazyPage><Pages.RestaurantMap /></LazyPage>} />
+        <Route path="/food/checkout" element={<Navigate to={APP_ROUTES.RESTAURANTS} replace />} />
+        <Route path={APP_ROUTES.RESTAURANTS} element={<LazyPage><Pages.RestaurantsIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.RESTAURANT_MAP} element={<LazyPage><Pages.RestaurantMap /></LazyPage>} />
         <Route path="/restaurants/:id" element={<LazyPage><Pages.RestaurantDetail /></LazyPage>} />
         <Route path="/restaurants/:id/reserve" element={<LazyPage><Pages.TableReservation /></LazyPage>} />
         <Route path="/restaurants/:id/delivery" element={<LazyPage><Pages.DeliveryCheckout /></LazyPage>} />
         <Route path="/restaurants/:id/experience/:setId" element={<LazyPage><Pages.SetMenuBooking /></LazyPage>} />
         
         {/* ── Transport ── */}
-        <Route path="/transport" element={<LazyPage><Pages.TransportIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.TRANSPORT} element={<LazyPage><Pages.TransportIndex /></LazyPage>} />
         <Route path="/transport/vehicle/:id" element={<LazyPage><Pages.VehicleDetail /></LazyPage>} />
         <Route path="/transport/booking/:id" element={<LazyPage><Pages.TransportBooking /></LazyPage>} />
-        <Route path="/transport/airport-transfer" element={<LazyPage><Pages.AirportTransferBooking /></LazyPage>} />
-        <Route path="/transport/transfer-success" element={<LazyPage><Pages.TransferSuccess /></LazyPage>} />
-        <Route path="/transport/fast-track" element={<LazyPage><Pages.AirportFastTrackPage /></LazyPage>} />
-        <Route path="/transport/airport" element={<Navigate to="/transport/airport-transfer" replace />} />
-        <Route path="/airport-transfer" element={<Navigate to="/transport/airport-transfer" replace />} />
-        <Route path="/transfer" element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
-        <Route path="/flower-delivery" element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
-        <Route path="/rent-phuket" element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
-        <Route path="/new-developments" element={<Navigate to="/property/offplan" replace />} />
-        <Route path="/transport/taxi" element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
-        <Route path="/taxi-booking" element={<Navigate to="/transport/taxi" replace />} />
-        <Route path="/transfers" element={<Navigate to="/transfer" replace />} />
-        <Route path="/life" element={<Navigate to="/discover" replace />} />
+        <Route path={APP_ROUTES.AIRPORT_TRANSFER} element={<LazyPage><Pages.AirportTransferBooking /></LazyPage>} />
+        <Route path={APP_ROUTES.TRANSFER_SUCCESS} element={<LazyPage><Pages.TransferSuccess /></LazyPage>} />
+        <Route path={APP_ROUTES.FAST_TRACK} element={<LazyPage><Pages.AirportFastTrackPage /></LazyPage>} />
+        <Route path="/transport/airport" element={<Navigate to={APP_ROUTES.AIRPORT_TRANSFER} replace />} />
+        <Route path="/airport-transfer" element={<Navigate to={APP_ROUTES.AIRPORT_TRANSFER} replace />} />
+        <Route path={APP_ROUTES.LANDING_AIRPORT_TRANSFER} element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.LANDING_FLOWER_DELIVERY} element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.LANDING_RENTAL} element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
+        <Route path="/taxi-booking" element={<Navigate to={APP_ROUTES.TAXI} replace />} />
+        <Route path="/transfers" element={<Navigate to={APP_ROUTES.LANDING_AIRPORT_TRANSFER} replace />} />
+        <Route path="/life" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
         <Route path="/transport/:id" element={<TransportIdRedirect />} />
         
         {/* ── Fitness ── */}
-        <Route path="/fitness" element={<LazyPage><Pages.FitnessIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.FITNESS} element={<LazyPage><Pages.FitnessIndex /></LazyPage>} />
         <Route path="/fitness/gym/:id" element={<LazyPage><Pages.GymDetail /></LazyPage>} />
         <Route path="/fitness/booking/:id" element={<LazyPage><Pages.FitnessBooking /></LazyPage>} />
         
         {/* ── Medical ── */}
-        <Route path="/medical" element={<LazyPage><Pages.MedicalIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.MEDICAL} element={<LazyPage><Pages.MedicalIndex /></LazyPage>} />
         <Route path="/medical/clinic/:id" element={<LazyPage><Pages.ClinicDetail /></LazyPage>} />
         <Route path="/medical/appointment/:id" element={<LazyPage><Pages.MedicalAppointment /></LazyPage>} />
         
         {/* ── Events ── */}
-        <Route path="/events" element={<LazyPage><Pages.EventsIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.EVENTS} element={<LazyPage><Pages.EventsIndex /></LazyPage>} />
         <Route path="/events/:id" element={<LazyPage><Pages.EventDetail /></LazyPage>} />
         <Route path="/events/booking/:id" element={<LazyPage><Pages.EventBooking /></LazyPage>} />
         <Route path="/venues/:id" element={<LazyPage><Pages.VenueDetail /></LazyPage>} />
         
         {/* ── Education ── */}
-        <Route path="/education" element={<LazyPage><Pages.EducationIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.EDUCATION} element={<LazyPage><Pages.EducationIndex /></LazyPage>} />
         <Route path="/education/course/:id" element={<LazyPage><Pages.CourseDetail /></LazyPage>} />
         <Route path="/education/tutor/:id" element={<LazyPage><Pages.TutorDetail /></LazyPage>} />
         <Route path="/education/booking/:id" element={<LazyPage><Pages.EducationBooking /></LazyPage>} />
         
         {/* ── Flowers ── */}
-        <Route path="/flowers" element={<LazyPage><Pages.FlowersIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.FLOWERS} element={<LazyPage><Pages.FlowersIndex /></LazyPage>} />
         <Route path="/flowers/bouquet/:id" element={<LazyPage><Pages.BouquetDetail /></LazyPage>} />
-        <Route path="/flowers/shop" element={<Navigate to="/flowers" replace />} />
+        <Route path="/flowers/shop" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
         <Route path="/flowers/shop/:id" element={<LazyPage><Pages.FlowerShopDetail /></LazyPage>} />
         <Route path="/flowers/order" element={<LazyPage><Pages.FlowersOrder /></LazyPage>} />
         <Route path="/flowers/order/:id" element={<LazyPage><Pages.FlowersOrder /></LazyPage>} />
         <Route path="/flowers/success" element={<LazyPage><Pages.FlowersSuccess /></LazyPage>} />
         
         {/* ── Home Services ── */}
-        <Route path="/services" element={<LazyPage><Pages.ServicesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.SERVICES} element={<LazyPage><Pages.ServicesIndex /></LazyPage>} />
         <Route path="/services/provider/:id" element={<LazyPage><Pages.ServiceProviderDetail /></LazyPage>} />
         <Route path="/services/booking/:id" element={<LazyPage><Pages.ServiceBooking /></LazyPage>} />
-        <Route path="/services/map" element={<LazyPage><Pages.ServicesMap /></LazyPage>} />
+        <Route path={APP_ROUTES.SERVICES_MAP} element={<LazyPage><Pages.ServicesMap /></LazyPage>} />
         <Route path="/services/order/:functionId" element={<LazyPage><Pages.ServiceFunctionOrder /></LazyPage>} />
         <Route path="/services/order/success" element={<LazyPage><Pages.ServiceOrderSuccess /></LazyPage>} />
         
         {/* ── Legal ── */}
-        <Route path="/legal" element={<LazyPage><Pages.LegalServicesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.LEGAL} element={<LazyPage><Pages.LegalServicesIndex /></LazyPage>} />
         <Route path="/legal/provider/:id" element={<LazyPage><Pages.LegalProviderDetail /></LazyPage>} />
         <Route path="/legal/visa/:id" element={<LazyPage><Pages.VisaServiceDetail /></LazyPage>} />
         <Route path="/legal/booking/:id" element={<LazyPage><Pages.LegalBooking /></LazyPage>} />
-        <Route path="/visa" element={<LazyPage><Pages.VisaImmigrationPage /></LazyPage>} />
+        <Route path={APP_ROUTES.VISA_IMMIGRATION} element={<LazyPage><Pages.VisaImmigrationPage /></LazyPage>} />
         
         {/* ── Insurance ── */}
-        <Route path="/insurance" element={<LazyPage><Pages.InsuranceIndex /></LazyPage>} />
-        <Route path="/insurance/travel" element={<LazyPage><Pages.TravelInsurance /></LazyPage>} />
+        <Route path={APP_ROUTES.INSURANCE} element={<LazyPage><Pages.InsuranceIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.INSURANCE_TRAVEL} element={<LazyPage><Pages.TravelInsurance /></LazyPage>} />
         <Route path="/insurance/plan/:planId" element={<LazyPage><Pages.InsurancePlanDetail /></LazyPage>} />
         <Route path="/insurance/:id" element={<LazyPage><Pages.InsuranceDetail /></LazyPage>} />
         <Route path="/insurance/:id/quote" element={<LazyPage><Pages.InsuranceQuote /></LazyPage>} />
         
         {/* ── Expat ── */}
-        <Route path="/banking" element={<LazyPage><Pages.BankingPage /></LazyPage>} />
-        <Route path="/veterinary" element={<LazyPage><Pages.VeterinaryPage /></LazyPage>} />
+        <Route path={APP_ROUTES.BANKING} element={<LazyPage><Pages.BankingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.VETERINARY} element={<LazyPage><Pages.VeterinaryPage /></LazyPage>} />
         
         {/* ── Knowledge ── */}
-        <Route path="/knowledge" element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
+        <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
         <Route path="/knowledge/:section" element={<LazyPage><Pages.KnowledgeSectionPage /></LazyPage>} />
         <Route path="/knowledge/:section/:slug" element={<LazyPage><Pages.KnowledgeArticlePage /></LazyPage>} />
         
         {/* ── Experiences ── */}
-        <Route path="/experiences" element={<LazyPage><Pages.ExperiencesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.EXPERIENCES} element={<LazyPage><Pages.ExperiencesIndex /></LazyPage>} />
         <Route path="/experiences/:id" element={<LazyPage><Pages.ExperienceDetail /></LazyPage>} />
         <Route path="/experiences/:id/book" element={<LazyPage><Pages.ExperienceBooking /></LazyPage>} />
         
@@ -443,7 +444,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/quick-listings" element={<Pages.AdminQuickListings />} />
           <Route path="/admin/water-activities" element={<Pages.AdminWaterActivities />} />
           <Route path="/admin/experiences" element={<Pages.AdminExperiences />} />
-          <Route path="/admin/moderation" element={<Navigate to="/admin/operations" replace />} />
+          <Route path="/admin/moderation" element={<Navigate to="/admin/operations?tab=moderation" replace />} />
           <Route path="/admin/consultations" element={<Pages.AdminConsultations />} />
           <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
           <Route path="/admin/leads" element={<Navigate to="/admin/operations" replace />} />
@@ -567,6 +568,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
           <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
           <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />
+          <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
           <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
           <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
           <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />

@@ -194,9 +194,8 @@ export function useGenerateReport() {
       if (propError) throw propError;
       const ownerId = prop.owner_id;
 
-      // Fetch financial data, bookings, and security deposit operations for the period
-      const bookingIds: string[] = [];
-      const [{ data: financials, error: finError }, { data: bookings, error: bookError }] = await Promise.all([
+      // Fetch financial data and bookings (P1: use orders — same source as usePropertyBookings)
+      const [{ data: financials, error: finError }, { data: ordersData, error: bookError }] = await Promise.all([
         supabase
           .from('property_financials')
           .select('*')
@@ -204,19 +203,44 @@ export function useGenerateReport() {
           .gte('transaction_date', input.period_start)
           .lte('transaction_date', input.period_end),
         supabase
-          .from('property_bookings')
-          .select('*')
-          .eq('property_id', input.property_id)
-          // overlap: check_in <= period_end AND check_out >= period_start
-          .lte('check_in', input.period_end)
-          .gte('check_out', input.period_start),
+          .from('orders')
+          .select(`
+            id, start_at, end_at, total_amount, currency, status, notes, metadata,
+            order_items!inner(id, resource_id, item_type, start_at, end_at, amount, metadata),
+            order_participants(id, role, name, phone, email)
+          `)
+          .eq('vertical', 'property')
+          .eq('order_items.item_type', 'property')
+          .eq('order_items.resource_id', input.property_id)
+          .is('deleted_at', null)
+          .lte('start_at', `${input.period_end}T23:59:59Z`)
+          .gte('end_at', `${input.period_start}T00:00:00Z`),
       ]);
 
       if (finError) throw finError;
       if (bookError) throw bookError;
 
-      // Fetch booking_operations for security deposits
-      const bIds = (bookings || []).map((b: any) => b.id);
+      // Map orders to report booking shape (align with usePropertyBookings)
+      const bookings = (ordersData || []).map((o: any) => {
+        const guest = o.order_participants?.find((p: { role: string }) => p.role === 'guest');
+        const item = o.order_items?.[0];
+        const checkIn = (item?.start_at || o.start_at || '').split('T')[0];
+        const checkOut = (item?.end_at || o.end_at || '').split('T')[0];
+        const meta = o.metadata || {};
+        return {
+          id: o.id,
+          guest_name: guest?.name || 'Guest',
+          check_in: checkIn,
+          check_out: checkOut,
+          total_amount: Number(o.total_amount || 0),
+          source: meta.source || 'direct',
+          deposit_amount: meta.deposit_amount || 0,
+          deposit_paid_at: null, // deposit tracking via booking_operations when available
+        };
+      });
+
+      // Fetch booking_operations for security deposits (legacy: references property_bookings; empty for orders)
+      const bIds = bookings.map((b: { id: string }) => b.id);
       let operations: any[] = [];
       if (bIds.length > 0) {
         const { data: ops } = await supabase

@@ -45,7 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
+    // Fallback: if Supabase doesn't respond (e.g. offline, wrong URL), stop loading after 5s so app can render
+    const timeoutId = setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 5000);
+
     // Check for existing session FIRST (synchronously set initial state)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (isMounted) {
@@ -53,8 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setIsLoading(false);
       }
+    }).catch(() => {
+      if (isMounted) setIsLoading(false);
     });
-    
+
     // Set up auth state listener for subsequent changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -68,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
       subscription.unsubscribe();
     };
   }, []);

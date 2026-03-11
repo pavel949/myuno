@@ -39,7 +39,7 @@ export interface Property {
   project_id?: string;
   floor?: number;
   unit_number?: string;
-  view_type?: string;
+  view_type?: string[];
   furnishing_level?: string;
   equipment?: string[];
   // Quick filter fields

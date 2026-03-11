@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { normalizeFurnishingLevel } from '@/lib/propertyFormNormalizers';
 
 interface LivePropertyPreviewProps {
   data: {
@@ -44,6 +45,7 @@ interface LivePropertyPreviewProps {
     floor?: number;
     unitNumber?: string;
     // Common
+    viewTypes?: string[];
     viewType?: string;
     furnishingLevel?: string;
     equipment?: string[];
@@ -95,6 +97,12 @@ function LivePropertyPreviewInner({ data, className, collapsed, onToggle }: Live
 
   const isStandalone = STANDALONE_TYPES.includes(data.propertyType || '');
   const coverImage = data.coverImage || (data.images && data.images[0]);
+  const normalizedFurnishingLevel = normalizeFurnishingLevel(data.furnishingLevel);
+  const viewTypeValues = data.viewTypes && data.viewTypes.length > 0
+    ? data.viewTypes
+    : data.viewType
+      ? [data.viewType]
+      : [];
 
   const formatPrice = (price: string | number | undefined) => {
     if (!price) return null;
@@ -305,9 +313,17 @@ function LivePropertyPreviewInner({ data, className, collapsed, onToggle }: Live
           )}
 
           {/* View type */}
-          {data.viewType && (
-            <Badge variant="secondary" className="text-[10px] py-0">
-              {isRu ? viewTypeLabels[data.viewType]?.ru : viewTypeLabels[data.viewType]?.en}
+          {viewTypeValues
+            .filter((viewType) => viewTypeLabels[viewType])
+            .map((viewType) => (
+              <Badge key={viewType} variant="secondary" className="text-[10px] py-0">
+                {isRu ? viewTypeLabels[viewType]?.ru : viewTypeLabels[viewType]?.en}
+              </Badge>
+            ))}
+
+          {normalizedFurnishingLevel && (
+            <Badge variant="outline" className="text-[10px] py-0">
+              {normalizedFurnishingLevel.replace(/_/g, ' ')}
             </Badge>
           )}
 

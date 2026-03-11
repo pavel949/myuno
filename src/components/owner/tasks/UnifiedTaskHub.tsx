@@ -30,6 +30,7 @@ import { TaskDetailSheet, UnifiedTask } from './TaskDetailSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
+import { isTaskClosedStatus, isTaskCompletedStatus } from '@/lib/tasks/taskStatus';
 
 const PRIORITY_ICONS: Record<string, React.ReactNode> = {
   high: <AlertTriangle className="h-3 w-3 text-destructive" />,
@@ -102,7 +103,8 @@ export function UnifiedTaskHub() {
   const { data: crmTasks = [], isLoading: crmLoading } = useCrmTasks();
   const { tasks: opsTasks, isLoading: opsLoading } = useOperationalTasks();
   const { data: members = [] } = useCompanyMembers(companyId);
-  const { allProperties } = useMyProperties();
+  const { activeProperties } = useMyProperties();
+  const allProperties = activeProperties || [];
   const createCrmTask = useCreateCrmTask();
   const updateCrmTask = useUpdateCrmTask();
   const deleteCrmTask = useDeleteCrmTask();
@@ -125,8 +127,8 @@ export function UnifiedTaskHub() {
       : activeTab === 'operations' ? allUnified.filter(t => t.source === 'ops')
       : allUnified;
 
-    if (statusFilter === 'active') items = items.filter(t => t.status !== 'completed' && t.status !== 'cancelled');
-    else if (statusFilter === 'completed') items = items.filter(t => t.status === 'completed');
+    if (statusFilter === 'active') items = items.filter(t => !isTaskClosedStatus(t.status));
+    else if (statusFilter === 'completed') items = items.filter(t => isTaskCompletedStatus(t.status));
 
     if (assigneeParam) items = items.filter(t => t.assigned_to === assigneeParam);
 
@@ -153,6 +155,14 @@ export function UnifiedTaskHub() {
       entity_id: entityId ?? null,
       metadata: meta ?? null,
     } as any).then(() => {});
+  };
+
+  const invalidateOverviewQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['day-briefing'] });
+    queryClient.invalidateQueries({ queryKey: ['property-financials-full'] });
+    queryClient.invalidateQueries({ queryKey: ['property-financials-paginated'] });
+    queryClient.invalidateQueries({ queryKey: ['financial-stats'] });
   };
 
   const handleCreate = async () => {
@@ -191,7 +201,7 @@ export function UnifiedTaskHub() {
           status: 'pending',
         } as any).select('id').single();
         if (error) throw error;
-        queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+        invalidateOverviewQueries();
         logActivity('task_created', 'ops_task', data?.id, { title: title.trim(), task_type: opsTaskType });
         const realAssignee = assignedTo === 'self' ? user.id : assignedTo;
         if (realAssignee !== user.id) {
@@ -214,10 +224,22 @@ export function UnifiedTaskHub() {
 
   const handleUpdate = async (id: string, source: 'crm' | 'ops', updates: Record<string, any>) => {
     if (source === 'crm') {
-      updateCrmTask.mutate({ id, ...updates });
+      const next = { ...updates };
+      if (next.status && next.status !== 'completed' && next.completed_at === undefined) {
+        next.completed_at = null;
+      }
+      updateCrmTask.mutate({ id, ...next });
     } else {
-      await supabase.from('property_operational_tasks').update(updates as any).eq('id', id);
-      queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+      const next = { ...updates };
+      if (next.status === 'completed' && next.completed_by === undefined) {
+        next.completed_by = user?.id ?? null;
+      }
+      if (next.status && next.status !== 'completed') {
+        if (next.completed_at === undefined) next.completed_at = null;
+        if (next.completed_by === undefined) next.completed_by = null;
+      }
+      await supabase.from('property_operational_tasks').update(next as any).eq('id', id);
+      invalidateOverviewQueries();
     }
     queryClient.invalidateQueries({ queryKey: ['day-briefing'] });
   };
@@ -227,7 +249,7 @@ export function UnifiedTaskHub() {
       deleteCrmTask.mutate(id);
     } else {
       await supabase.from('property_operational_tasks').delete().eq('id', id);
-      queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
+      invalidateOverviewQueries();
     }
     logActivity('task_deleted', source === 'crm' ? 'crm_task' : 'ops_task', id);
   };
@@ -443,7 +465,7 @@ export function UnifiedTaskHub() {
         <div className="space-y-2">
           {filtered.map(task => {
             const dueLabel = getDueDateLabel(task.due_date);
-            const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date)) && task.status !== 'completed';
+            const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date)) && !isTaskCompletedStatus(task.status);
             const isCrm = task.source === 'crm';
             const config = isCrm ? getCrmTaskConfig(task.task_type) : getTaskConfig(task.task_type);
             const TypeIcon = config.icon;
@@ -458,13 +480,13 @@ export function UnifiedTaskHub() {
                 className={cn(
                   'p-3 flex items-center gap-3 cursor-pointer hover:bg-muted/30 transition-colors',
                   isOverdue && 'border-destructive/40',
-                  task.status === 'completed' && 'opacity-60'
+                  isTaskCompletedStatus(task.status) && 'opacity-60'
                 )}
                 onClick={() => { setDetailTask(task); setDetailOpen(true); }}
               >
                 <Checkbox
-                  checked={task.status === 'completed'}
-                  onCheckedChange={(e) => { e && task.status !== 'completed' && handleQuickComplete(task); }}
+                  checked={isTaskCompletedStatus(task.status)}
+                  onCheckedChange={(e) => { e && !isTaskCompletedStatus(task.status) && handleQuickComplete(task); }}
                   onClick={(e) => e.stopPropagation()}
                   className="flex-shrink-0"
                 />
@@ -474,7 +496,7 @@ export function UnifiedTaskHub() {
                   <TypeIcon className={cn('h-4 w-4', isCrm ? (config as any).color : (config as any).color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm font-medium truncate', task.status === 'completed' && 'line-through text-muted-foreground')}>
+                  <p className={cn('text-sm font-medium truncate', isTaskCompletedStatus(task.status) && 'line-through text-muted-foreground')}>
                     {task.title}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">

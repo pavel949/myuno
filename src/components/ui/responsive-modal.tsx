@@ -26,13 +26,14 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 
 const SIZE_CLASSES: Record<ModalSize, string> = {
   sm: 'sm:max-w-md',
   md: 'sm:max-w-lg',
   lg: 'sm:max-w-2xl',
   xl: 'sm:max-w-4xl',
+  '2xl': 'sm:max-w-5xl',
   full: 'sm:max-w-[90vw]',
 };
 
@@ -76,7 +77,7 @@ export function ResponsiveModal({
           className={cn(
             SIZE_CLASSES[size],
             'p-0 gap-0 overflow-hidden rounded-2xl border-border/60',
-            'max-h-[85vh] flex flex-col',
+            'max-h-[90vh] flex flex-col',
             className,
           )}
         >
@@ -100,7 +101,7 @@ export function ResponsiveModal({
           </div>
 
           {/* Scrollable body */}
-          <ScrollArea className="flex-1 min-h-0">
+          <ScrollArea className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
             <div className="px-6 py-5 space-y-5">
               {children}
             </div>
@@ -150,7 +151,7 @@ export function ResponsiveModal({
         </div>
 
         {/* Scrollable body */}
-        <ScrollArea className="flex-1 min-h-0">
+        <ScrollArea className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           <div className="px-4 py-4 space-y-4">
             {children}
           </div>

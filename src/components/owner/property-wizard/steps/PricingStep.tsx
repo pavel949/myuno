@@ -10,7 +10,6 @@ import { DollarSign, Clock, Users, Landmark, Building2, Briefcase, BadgeDollarSi
 import { Button } from '@/components/ui/button';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
-import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { toast } from 'sonner';
 import { HouseRulesSection } from './HouseRulesSection';
 import { DiscountsSection } from './DiscountsSection';
@@ -108,13 +107,16 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
 
   return (
     <div className="space-y-3">
-      {/* ─── Ownership — always open ─── */}
+      {/* ─── Ownership structure (legal form for reporting) — distinct from "Management rights" on step 1 ─── */}
       <CollapsibleSection
         icon={<Landmark className="h-4 w-4" />}
         title={isRu ? 'Форма собственности' : 'Ownership Structure'}
         defaultOpen
         badge={formData.ownership_form ? (ownershipOptions.find(o => o.value === formData.ownership_form)?.[isRu ? 'labelRu' : 'labelEn']) : undefined}
       >
+        <p className="text-xs text-muted-foreground mb-3">
+          {isRu ? 'Юридическая форма владения для отчётности и аналитики' : 'Legal ownership form for reporting and analytics'}
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {ownershipOptions.map((option) => (
             <button
@@ -356,13 +358,18 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </div>
       </CollapsibleSection>
 
-      {/* ─── Description — collapsed ─── */}
+      {/* ─── Description — edited on step 1 (Основное); here only summary + optional "Use project description" ─── */}
       <CollapsibleSection
         icon={<FileText className="h-4 w-4" />}
         title={isRu ? 'Описание объекта' : 'Property Description'}
-        badge={formData.description ? '✓' : undefined}
+        badge={formData.description || formData.description_ru ? '✓' : undefined}
       >
         <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {isRu
+              ? 'Описание задаётся на шаге «Основное». Здесь можно подставить описание из проекта.'
+              : 'Description is set on step «Basic Info». You can fill it from the project here.'}
+          </p>
           {hasProjectDescription && isDescriptionEmpty && (
             <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
               <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
@@ -395,18 +402,6 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               </div>
             </div>
           )}
-
-          <TranslatableInput
-            label={isRu ? 'Описание' : 'Description'}
-            value={isRu ? formData.description_ru : formData.description}
-            translatedValue={isRu ? formData.description : formData.description_ru}
-            onChange={(val) => updateFormData({ [isRu ? 'description_ru' : 'description']: val })}
-            onTranslatedChange={(val) => updateFormData({ [isRu ? 'description' : 'description_ru']: val })}
-            placeholder={isRu ? 'Опишите вашу недвижимость...' : 'Describe your property...'}
-            translatedPlaceholder={isRu ? 'Describe your property...' : 'Опишите вашу недвижимость...'}
-            multiline
-            rows={3}
-          />
 
           <div className="p-4 bg-muted rounded-lg flex items-start gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />

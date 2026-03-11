@@ -8,6 +8,7 @@
 import { IntakeItem, ExtractedField } from '@/hooks/useIntakeAgent';
 import { CanonicalPropertyFormData } from '@/components/property/canonical-form';
 import { CanonicalListingData } from '@/components/vendor/wizard/CanonicalListingWizard';
+import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // ==================== HELPERS ====================
 
@@ -58,8 +59,8 @@ export function mapIntakeToPropertyForm(item: IntakeItem): CanonicalPropertyForm
     parking_type: f.parking_type || '',
     pool_type: f.pool_type || '',
     garden_type: f.garden_type || '',
-    view_type: f.view_type || '',
-    furnishing_level: f.furnishing_level || '',
+    view_type: normalizeViewTypes(f.view_type),
+    furnishing_level: normalizeFurnishingLevel(f.furnishing_level),
     equipment: f.equipment || [],
     amenities: f.amenities || [],
     highlights: f.highlights || [],
@@ -126,7 +127,7 @@ export function mapPropertyFormToIntake(
     pool_type: formData.pool_type,
     garden_type: formData.garden_type,
     view_type: formData.view_type,
-    furnishing_level: formData.furnishing_level,
+    furnishing_level: normalizeFurnishingLevel(formData.furnishing_level),
     equipment: formData.equipment,
     highlights: formData.highlights,
     // (price_per_night already set above)

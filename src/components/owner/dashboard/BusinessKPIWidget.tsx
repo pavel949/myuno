@@ -5,6 +5,7 @@ import { OwnerKPICard } from '@/components/owner/OwnerKPICard';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { type BusinessRole } from '@/lib/businessRoles';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 type OpsCardKey = 'tasks' | 'deals' | 'bookings' | 'staff' | 'service' | 'inventory';
 
@@ -55,7 +56,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: String(ops?.openTasks ?? 0),
       icon: ClipboardList,
       iconColor: 'text-primary',
-      href: '/mc/operations',
+      href: APP_ROUTES.MC_TASKS,
       badge: ops && ops.openTasks > 5 ? alertBadge(ops.openTasks) : undefined,
     },
     deals: {
@@ -63,28 +64,28 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: ops ? `${ops.activeDeals} / ฿${fmt(ops.dealsPipelineValue)}` : '0',
       icon: Handshake,
       iconColor: 'text-accent-foreground',
-      href: '/mc/sales',
+      href: APP_ROUTES.MC_SALES,
     },
     bookings: {
       title: isRu ? 'Брони' : 'Bookings',
       value: String(ops?.upcomingBookings ?? 0),
       icon: BedDouble,
       iconColor: 'text-success',
-      href: '/mc/calendar',
+      href: APP_ROUTES.MC_CALENDAR,
     },
     staff: {
       title: isRu ? 'Персонал' : 'Staff',
       value: String(ops?.staffCount ?? 0),
       icon: Users,
       iconColor: 'text-primary',
-      href: '/mc/staff',
+      href: APP_ROUTES.MC_STAFF,
     },
     service: {
       title: isRu ? 'Заявки' : 'Requests',
       value: String(ops?.openServiceRequests ?? 0),
       icon: Wrench,
       iconColor: 'text-warning',
-      href: '/mc/operations',
+      href: APP_ROUTES.MC_TASKS,
       badge: ops && ops.openServiceRequests > 3 ? alertBadge(ops.openServiceRequests) : undefined,
     },
     inventory: {
@@ -92,7 +93,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       value: ops?.lowStockItems ? `!${ops.lowStockItems}` : '✓',
       icon: PackageOpen,
       iconColor: ops?.lowStockItems ? 'text-destructive' : 'text-success',
-      href: '/mc/inventory',
+      href: APP_ROUTES.MC_INVENTORY,
       badge: ops?.lowStockItems ? alertBadge(ops.lowStockItems) : undefined,
     },
   };
@@ -109,7 +110,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           change={revChange}
           trend={revChange >= 0 ? 'up' : 'down'}
           changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href="/mc/financials"
+          href={APP_ROUTES.MC_FINANCIALS}
           loading={loading}
         />
         <OwnerKPICard
@@ -120,7 +121,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           change={expChange}
           trend={expChange <= 0 ? 'up' : 'down'}
           changeLabel={isRu ? 'vs прошлый месяц' : 'vs last month'}
-          href="/mc/financials"
+          href={APP_ROUTES.MC_FINANCIALS}
           loading={loading}
         />
         <OwnerKPICard
@@ -129,7 +130,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={Percent}
           iconColor="text-primary"
           trend={data && data.margin >= 30 ? 'up' : data && data.margin >= 0 ? 'neutral' : 'down'}
-          href="/mc/financials"
+          href={APP_ROUTES.MC_FINANCIALS}
           loading={loading}
         />
         <OwnerKPICard
@@ -138,7 +139,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={CalendarCheck}
           iconColor="text-accent-foreground"
           trend={data && data.occupancyRate >= 70 ? 'up' : data && data.occupancyRate >= 40 ? 'neutral' : 'down'}
-          href="/mc/calendar"
+          href={APP_ROUTES.MC_CALENDAR}
           loading={loading}
         />
         <OwnerKPICard
@@ -147,7 +148,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={BarChart3}
           iconColor="text-primary"
           trend={data && data.adr > 0 ? 'up' : 'neutral'}
-          href="/owner/analytics"
+          href={APP_ROUTES.MC_REPORTS}
           loading={loading}
         />
         <OwnerKPICard
@@ -156,7 +157,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           icon={TrendingUp}
           iconColor="text-accent-foreground"
           trend={data && data.revpar > 0 ? 'up' : 'neutral'}
-          href="/owner/analytics"
+          href={APP_ROUTES.MC_REPORTS}
           loading={loading}
         />
       </div>

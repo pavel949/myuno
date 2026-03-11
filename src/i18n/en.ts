@@ -43,6 +43,16 @@ export const en: Record<string, string> = {
   'action.back': 'Back',
   'action.next': 'Next',
   'action.submit': 'Submit',
+  'propertyForm.furnishingLevelDesign': 'Furnishing Level & Design',
+  'propertyForm.furnishingOption.unfurnished': 'Unfurnished',
+  'propertyForm.furnishingOption.basic_furnishing': 'Basic furnishing',
+  'propertyForm.furnishingOption.full_furnishing': 'Full furnishing',
+  'propertyForm.furnishingOption.designer_interior': 'Designer interior',
+  'propertyForm.furnishingOption.premium_designer_interior': 'Premium designer interior',
+  'propertyForm.viewType': 'View Type',
+  'propertyForm.saved': 'Saved',
+  'propertyForm.unsavedChanges': 'Unsaved changes',
+  'propertyForm.saving': 'Saving...',
   
   // Booking statuses
   'status.draft': 'Draft',

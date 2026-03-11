@@ -13,6 +13,7 @@ import {
   VIEW_TYPES, 
   FURNISHING_LEVELS, 
 } from '@/lib/propertyTaxonomy';
+import { normalizeFurnishingLevel } from '@/lib/propertyFormNormalizers';
 
 interface UnitSpecsProps {
   floor?: number;
@@ -23,7 +24,7 @@ interface UnitSpecsProps {
   parkingType?: string;
   poolType?: string;
   gardenType?: string;
-  viewType?: string;
+  viewTypes?: string[];
   furnishingLevel?: string;
   equipment?: string[];
   propertyType?: string;
@@ -201,7 +202,7 @@ export function UnitSpecs({
   parkingType,
   poolType,
   gardenType,
-  viewType, 
+  viewTypes = [], 
   furnishingLevel, 
   equipment,
   propertyType,
@@ -213,8 +214,9 @@ export function UnitSpecs({
   
   const safeEquipment = equipment ?? [];
   const isStandalone = STANDALONE_TYPES.includes(propertyType || '');
+  const normalizedFurnishingLevel = normalizeFurnishingLevel(furnishingLevel);
 
-  const hasPropertyBadges = floor !== undefined || unitNumber || viewType || furnishingLevel || 
+  const hasPropertyBadges = floor !== undefined || unitNumber || viewTypes.length > 0 || normalizedFurnishingLevel || 
     totalFloors !== undefined || plotSizeSqm !== undefined ||
     parkingType || poolType || gardenType;
 
@@ -288,16 +290,18 @@ export function UnitSpecs({
               {isRu ? gardenTypeLabels[gardenType].ru : gardenTypeLabels[gardenType].en}
             </Badge>
           )}
-          {viewType && viewTypeLabels[viewType] && (
-            <Badge variant="secondary" className="gap-1">
-              <Eye className="h-3 w-3" />
-              {isRu ? viewTypeLabels[viewType].ru : viewTypeLabels[viewType].en}
-            </Badge>
-          )}
-          {furnishingLevel && furnishingLabels[furnishingLevel] && (
+          {viewTypes
+            .filter((viewType) => viewTypeLabels[viewType])
+            .map((viewType) => (
+              <Badge key={viewType} variant="secondary" className="gap-1">
+                <Eye className="h-3 w-3" />
+                {isRu ? viewTypeLabels[viewType].ru : viewTypeLabels[viewType].en}
+              </Badge>
+            ))}
+          {normalizedFurnishingLevel && furnishingLabels[normalizedFurnishingLevel] && (
             <Badge className="gap-1 bg-primary/10 text-primary border-primary/20">
               <Sofa className="h-3 w-3" />
-              {isRu ? furnishingLabels[furnishingLevel].ru : furnishingLabels[furnishingLevel].en}
+              {isRu ? furnishingLabels[normalizedFurnishingLevel].ru : furnishingLabels[normalizedFurnishingLevel].en}
             </Badge>
           )}
         </div>

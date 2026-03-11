@@ -13,6 +13,7 @@ interface PropertyWizardProps {
   validateStep?: (stepId: string) => boolean;
   onSaveDraft?: () => void;
   lastSaved?: Date | null;
+  saveState?: 'idle' | 'saving' | 'saved' | 'unsaved' | 'error';
 }
 
 function PropertyWizardInner({ 
@@ -22,6 +23,7 @@ function PropertyWizardInner({
   validateStep,
   onSaveDraft,
   lastSaved,
+  saveState = 'idle',
 }: PropertyWizardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -192,11 +194,12 @@ function PropertyWizardInner({
         </Button>
       </div>
 
-      {/* Last saved indicator */}
-      {lastSaved && (
+      {(saveState !== 'idle' || lastSaved) && (
         <p className="text-[10px] text-muted-foreground text-center mt-1">
-          {isRu ? 'Автосохранение: ' : 'Auto-saved: '}
-          {lastSaved.toLocaleTimeString()}
+          {saveState === 'saving' && (isRu ? 'Сохранение...' : 'Saving...')}
+          {saveState === 'unsaved' && (isRu ? 'Не сохранено' : 'Unsaved changes')}
+          {saveState === 'error' && (isRu ? 'Ошибка сохранения' : 'Save failed')}
+          {saveState === 'saved' && `${isRu ? 'Сохранено' : 'Saved'}${lastSaved ? ` · ${lastSaved.toLocaleTimeString()}` : ''}`}
         </p>
       )}
     </div>

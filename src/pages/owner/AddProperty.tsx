@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getGoogleMapsKey } from '@/lib/googleMaps';
+import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyWizard } from '@/hooks/usePropertyWizard';
@@ -7,7 +6,6 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyWizard } from '@/components/owner/PropertyWizard';
 import { PropertySubmissionSuccess } from '@/components/owner/PropertySubmissionSuccess';
-import { DraftRestorationBanner } from '@/components/vendor/DraftIndicator';
 import { LivePropertyPreview } from '@/components/property/LivePropertyPreview';
 import { 
   AIIntakePanel,
@@ -22,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Copy, MapPin, Plus, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { GOOGLE_MAPS_API_KEY } from '@/lib/googleMaps';
 
 export default function AddProperty() {
   const { language } = useLanguage();
@@ -31,12 +30,6 @@ export default function AddProperty() {
   // All form logic from the hook
   const wizard = usePropertyWizard();
 
-  // State for showing restoration banner (only on initial load)
-  const [showRestorationBanner, setShowRestorationBanner] = useState(() => {
-    const hasLocalDraft = localStorage.getItem('vendor_draft_owner_property_wizard');
-    return !!hasLocalDraft && !wizard.cloneFromId;
-  });
-
   // Apply prefill data from AI Intake or OTA import
   const prefillData = (location.state as any)?.prefillData;
   useEffect(() => {
@@ -45,21 +38,8 @@ export default function AddProperty() {
     }
   }, [prefillData, wizard.isCloneDataApplied, wizard.applyPrefillData]);
 
-  const handleRestoreDraft = useCallback(() => {
-    wizard.restoreDraft();
-    setShowRestorationBanner(false);
-    toast.success(isRu ? 'Черновик восстановлен' : 'Draft restored');
-  }, [wizard.restoreDraft, isRu]);
-
-  const handleDiscardDraft = useCallback(() => {
-    wizard.clearDraft();
-    setShowRestorationBanner(false);
-    toast.info(isRu ? 'Черновик удалён' : 'Draft discarded');
-  }, [wizard.clearDraft, isRu]);
-
   const handleNewObject = useCallback(() => {
     wizard.resetForm();
-    setShowRestorationBanner(false);
     toast.info(isRu ? 'Форма очищена — создайте новый объект' : 'Form cleared — create a new property');
   }, [wizard.resetForm, isRu]);
 
@@ -115,8 +95,8 @@ export default function AddProperty() {
     );
   }
 
-  // Loading state for clone
-  if (wizard.cloneFromId && wizard.isLoadingSource) {
+  // Loading state for clone or latest server draft
+  if ((wizard.cloneFromId && wizard.isLoadingSource) || wizard.isLoadingDraft) {
     return (
       <PageContainer>
         <PageHeader 
@@ -172,14 +152,6 @@ export default function AddProperty() {
         </div>
       </div>
 
-      {/* Draft Restoration Banner */}
-      {showRestorationBanner && (
-        <DraftRestorationBanner
-          onRestore={handleRestoreDraft}
-          onDiscard={handleDiscardDraft}
-        />
-      )}
-
       {/* Import Panels */}
       <div className="grid gap-3 sm:grid-cols-2">
         <OtaImportPanel onDataExtracted={wizard.applyPrefillData} />
@@ -199,13 +171,14 @@ export default function AddProperty() {
       )}
 
       {/* Main Wizard with Live Preview */}
-      <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6 mt-6">
+      <div className="lg:grid lg:grid-cols-[1fr,320px] lg:gap-6 mt-6" onBlurCapture={wizard.saveDraftOnBlur}>
         <PropertyWizard
           onSubmit={wizard.handleSubmit}
           isSubmitting={wizard.isSubmitting}
           validateStep={wizard.validateStep}
           onSaveDraft={wizard.handleSaveDraft}
           lastSaved={wizard.lastSaved}
+          saveState={wizard.saveState}
         >
           {renderStep}
         </PropertyWizard>
@@ -217,15 +190,17 @@ export default function AddProperty() {
           {/* Map preview when coordinates are set */}
           {wizard.formData.lat && wizard.formData.lng && (
             <div className="rounded-lg overflow-hidden border">
-              <img
-                src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=640x400&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${getGoogleMapsKey() || ''}`}
-                alt="Property location"
-                className="w-full h-[200px] object-cover bg-muted"
-                loading="lazy"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              {GOOGLE_MAPS_API_KEY && (
+                <img
+                  src={`https://maps.googleapis.com/maps/api/staticmap?center=${wizard.formData.lat},${wizard.formData.lng}&zoom=14&size=320x200&scale=2&markers=color:red%7C${wizard.formData.lat},${wizard.formData.lng}&key=${GOOGLE_MAPS_API_KEY}`}
+                  alt="Property location"
+                  className="w-full h-[200px] object-cover bg-muted"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              )}
               <div className="bg-muted/30 px-3 py-1.5 text-[10px] text-muted-foreground flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {wizard.formData.lat.toFixed(4)}, {wizard.formData.lng.toFixed(4)}

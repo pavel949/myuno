@@ -10,6 +10,7 @@ import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { useDashboardFilter } from '@/contexts/DashboardFilterContext';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { CRM_TASK_ACTIVE_STATUSES } from '@/lib/tasks/taskStatus';
 
 export interface DashboardKPI {
   revenue: number;
@@ -98,12 +99,12 @@ export function useDashboardMetrics() {
         // CRM tasks (open)
         companyId
           ? supabase.from('crm_tasks').select('id', { count: 'exact', head: true })
-              .eq('company_id', companyId).neq('status', 'done')
+              .eq('company_id', companyId).in('status', [...CRM_TASK_ACTIVE_STATUSES])
           : Promise.resolve({ count: 0, error: null }),
         // CRM tasks (overdue)
         companyId
           ? supabase.from('crm_tasks').select('id', { count: 'exact', head: true })
-              .eq('company_id', companyId).neq('status', 'done').lt('due_date', today)
+              .eq('company_id', companyId).in('status', [...CRM_TASK_ACTIVE_STATUSES]).lt('due_date', today)
           : Promise.resolve({ count: 0, error: null }),
         // Deals
         companyId

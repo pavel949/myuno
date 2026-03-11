@@ -160,6 +160,7 @@ export type Database = {
           deal_type: string
           deal_value: number | null
           id: string
+          is_vip: boolean
           lost_reason: string | null
           next_action: string | null
           next_action_date: string | null
@@ -193,6 +194,7 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
+          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
+          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
@@ -14707,7 +14710,7 @@ export type Database = {
           verified_at: string | null
           verified_by: string | null
           video_url: string | null
-          view_type: string | null
+          view_type: string[] | null
           water_included: boolean | null
           water_meter_id: string | null
           water_notes: string | null
@@ -14925,7 +14928,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -15143,7 +15146,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -25910,7 +25913,7 @@ export type Database = {
           updated_at: string | null
           verified_at: string | null
           verified_by: string | null
-          view_type: string | null
+          view_type: string[] | null
           water_included: boolean | null
           water_notes: string | null
           water_notes_ru: string | null
@@ -26015,7 +26018,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -26120,7 +26123,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -26614,7 +26617,7 @@ export type Database = {
           title_en: string | null
           title_ru: string | null
           unit_number: string | null
-          view_type: string | null
+          view_type: string[] | null
         }
         Insert: {
           amenities?: string[] | null
@@ -26659,7 +26662,7 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
         }
         Update: {
           amenities?: string[] | null
@@ -26704,7 +26707,7 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
         }
         Relationships: [
           {
@@ -26916,7 +26919,7 @@ export type Database = {
           updated_at: string | null
           verified_at: string | null
           verified_by: string | null
-          view_type: string | null
+          view_type: string[] | null
           water_included: boolean | null
           water_meter_id: string | null
           water_notes: string | null
@@ -27119,7 +27122,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -27322,7 +27325,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string | null
+          view_type?: string[] | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null

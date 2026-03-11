@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { CrmTask } from '@/hooks/useCrmTasks';
 import { OperationalTask } from '@/hooks/useOperationalTasks';
 import { isPast, isToday, isThisWeek } from 'date-fns';
+import { isTaskClosedStatus, isTaskCompletedStatus } from '@/lib/tasks/taskStatus';
 
 interface TaskSummaryKPIsProps {
   crmTasks: CrmTask[];
@@ -21,10 +22,10 @@ export function TaskSummaryKPIs({ crmTasks, opsTasks }: TaskSummaryKPIsProps) {
     ...opsTasks.map(t => ({ due: t.scheduled_date, status: t.status })),
   ];
 
-  const overdue = allItems.filter(t => t.status !== 'completed' && t.status !== 'cancelled' && t.due && isPast(new Date(t.due)) && !isToday(new Date(t.due))).length;
-  const today = allItems.filter(t => t.status !== 'completed' && t.status !== 'cancelled' && t.due && isToday(new Date(t.due))).length;
-  const thisWeek = allItems.filter(t => t.status !== 'completed' && t.status !== 'cancelled' && t.due && isThisWeek(new Date(t.due))).length;
-  const completed = allItems.filter(t => t.status === 'completed').length;
+  const overdue = allItems.filter(t => !isTaskClosedStatus(t.status) && t.due && isPast(new Date(t.due)) && !isToday(new Date(t.due))).length;
+  const today = allItems.filter(t => !isTaskClosedStatus(t.status) && t.due && isToday(new Date(t.due))).length;
+  const thisWeek = allItems.filter(t => !isTaskClosedStatus(t.status) && t.due && isThisWeek(new Date(t.due))).length;
+  const completed = allItems.filter(t => isTaskCompletedStatus(t.status)).length;
 
   const kpis = [
     { label: isRu ? 'Просрочено' : 'Overdue', value: overdue, icon: AlertTriangle, color: 'text-destructive' },

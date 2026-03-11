@@ -54,6 +54,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
         preferred_types: form.preferred_types.length ? form.preferred_types : null,
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
+        lifecycle_stage: 'lead',
         notes: form.notes || null, tags: form.tags, avatar_url: null, is_archived: false,
         created_by: user?.id || null,
       });
@@ -82,19 +83,19 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         </Button>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Имя *' : 'First Name *'}</Label><Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Фамилия' : 'Last Name'}</Label><Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
         <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} placeholder={isRu ? 'Если отличается' : 'If different'} /></div>
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} placeholder="@username" /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
@@ -111,7 +112,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         </div>
         <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} placeholder="RU" /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
         <div>

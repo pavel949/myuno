@@ -1,14 +1,15 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info, Building2, Video } from 'lucide-react';
+import { Home, Bed, Bath, SquareStack, FileSignature, MessageCircle, Shield, Phone, Upload, UserPlus, X, Info, Building2, Video, ChevronDown } from 'lucide-react';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
-import { ProjectSelector } from '@/components/property/ProjectSelector';
+import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
+import { LocationProjectSearch } from '@/components/property/LocationProjectSearch';
 import { UnitFields } from '@/components/property/UnitFields';
 import { PropertyFormData, OwnershipData, OwnershipType } from '@/hooks/usePropertyWizard';
 import { PropertyFeaturesSelector } from '../PropertyFeaturesSelector';
@@ -27,78 +28,6 @@ interface BasicInfoStepProps {
   setSelectedProject: (project: PropertyProject | null) => void;
   ownershipData?: OwnershipData;
   updateOwnershipData?: (updates: Partial<OwnershipData>) => void;
-}
-
-function ProjectSection({ 
-  projectId,
-  selectedProject,
-  onProjectChange,
-  setSelectedProject,
-  updateFormData,
-  formData,
-  projectTypeLabels,
-}: { 
-  projectId?: string;
-  selectedProject: PropertyProject | null;
-  onProjectChange: (id?: string, project?: PropertyProject) => void;
-  setSelectedProject: (project: PropertyProject | null) => void;
-  updateFormData: (updates: Partial<PropertyFormData>) => void;
-  formData: PropertyFormData;
-  projectTypeLabels?: ReturnType<typeof getTypeAwareLabels>;
-}) {
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Building2 className="h-4 w-4" />
-          {isRu ? (projectTypeLabels?.projectLabelRu || 'Проект / ЖК') : (projectTypeLabels?.projectLabel || 'Project / Complex')}
-        </CardTitle>
-        <p className="text-xs text-muted-foreground mt-1">
-          {isRu 
-            ? 'Выберите проект или комплекс, к которому относится объект. Удобства наследуются автоматически.' 
-            : 'Select the project or complex this property belongs to. Amenities are inherited automatically.'}
-        </p>
-      </CardHeader>
-      <CardContent>
-        <ProjectSelector
-          value={projectId}
-          selectedProject={selectedProject}
-          onChange={(pid, project) => {
-            setSelectedProject(project || null);
-            onProjectChange(pid, project || undefined);
-            if (project) {
-              const updates: Partial<PropertyFormData> = { 
-                project_id: pid,
-                address: project.address || formData.address,
-                district: project.district || formData.district,
-                lat: project.lat ?? formData.lat,
-                lng: project.lng ?? formData.lng,
-              };
-              // Auto-fill description from project if empty
-              if (!formData.description.trim() && project.description_en) {
-                updates.description = project.description_en;
-              }
-              if (!formData.description_ru?.trim() && project.description_ru) {
-                updates.description_ru = project.description_ru;
-              }
-              updateFormData(updates);
-              const projectName = isRu 
-                ? (project.name_ru || project.name_en) 
-                : project.name_en;
-              toast.success(
-                isRu 
-                  ? `Данные проекта "${projectName}" загружены` 
-                  : `Project data loaded: "${projectName}"`
-              );
-            }
-          }}
-        />
-      </CardContent>
-    </Card>
-  );
 }
 
 interface OwnershipOption {
@@ -175,7 +104,15 @@ function BasicInfoStepInner({
   }, []);
   return (
     <div className="space-y-6">
-      {/* Basic Info — Title FIRST (most important) */}
+      {/* Airbnb-style: Where is your listing? Type → projects & addresses appear → select fills address + map */}
+      <LocationProjectSearch
+        formData={formData}
+        updateFormData={updateFormData}
+        selectedProject={selectedProject}
+        setSelectedProject={setSelectedProject}
+      />
+
+      {/* Basic Info — Title (most important) */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -194,23 +131,16 @@ function BasicInfoStepInner({
             translatedPlaceholder={isRu ? 'Modern Villa with Pool' : 'Современная вилла с бассейном'}
           />
 
-          {/* Airbnb-style Description */}
-          <div className="space-y-3">
-            <Label>{isRu ? 'Описание' : 'Description'}</Label>
-            <Textarea
-              value={isRu ? (formData.description_ru || '') : (formData.description || '')}
-              onChange={(e) => updateFormData({ [isRu ? 'description_ru' : 'description']: e.target.value })}
-              placeholder={isRu ? 'Расскажите гостям, чем уникален ваш объект...' : 'Tell guests what makes your place special...'}
-              rows={4}
-            />
-            <Textarea
-              value={isRu ? (formData.description || '') : (formData.description_ru || '')}
-              onChange={(e) => updateFormData({ [isRu ? 'description' : 'description_ru']: e.target.value })}
-              placeholder={isRu ? 'Description in English (optional)' : 'Описание на русском (необязательно)'}
-              rows={3}
-              className="text-sm"
-            />
-          </div>
+          <TranslatableTextarea
+            label={isRu ? 'Описание' : 'Description'}
+            value={isRu ? (formData.description_ru || '') : (formData.description || '')}
+            translatedValue={isRu ? (formData.description || '') : (formData.description_ru || '')}
+            onChange={(val) => updateFormData({ [isRu ? 'description_ru' : 'description']: val })}
+            onTranslatedChange={(val) => updateFormData({ [isRu ? 'description' : 'description_ru']: val })}
+            placeholder={isRu ? 'Расскажите гостям, чем уникален ваш объект...' : 'Tell guests what makes your place special...'}
+            translatedPlaceholder={isRu ? 'Description in English' : 'Описание на русском'}
+            rows={4}
+          />
 
           <div className="space-y-2">
             <Label>{isRu ? 'Внутреннее название' : 'Internal Name'}</Label>
@@ -262,16 +192,26 @@ function BasicInfoStepInner({
         </CardContent>
       </Card>
 
-      {/* Ownership Type Selection (Compact) */}
+      {/* Ownership Type Selection (Compact) — who manages the property */}
       {ownershipData && updateOwnershipData && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              {isRu ? 'Право на управление' : 'Management Rights'}
-            </CardTitle>
-          </CardHeader>
+        <Collapsible defaultOpen={ownershipData.ownership_type !== 'own'} className="group/ownership">
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg flex flex-row items-center justify-between gap-2 [&>div]:flex-1">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  <CardTitle className="text-base">
+                    {isRu ? 'Право на управление' : 'Management Rights'}
+                  </CardTitle>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-data-[state=open]/ownership:rotate-180" />
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
           <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              {isRu ? 'Кто управляет объектом' : 'Who manages this property'}
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {ownershipOptions.map((option) => (
                 <button
@@ -386,7 +326,9 @@ function BasicInfoStepInner({
               </div>
             )}
           </CardContent>
-        </Card>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       )}
 
       {/* Property Type — FIRST like Airbnb */}
@@ -415,19 +357,6 @@ function BasicInfoStepInner({
           </Select>
         </CardContent>
       </Card>
-
-      {/* Project selector */}
-      <ProjectSection
-        projectId={formData.project_id}
-        selectedProject={selectedProject}
-        projectTypeLabels={typeLabels}
-        onProjectChange={(projectId, project) => {
-          updateFormData({ project_id: projectId });
-        }}
-        setSelectedProject={setSelectedProject}
-        updateFormData={updateFormData}
-        formData={formData}
-      />
 
       {/* Unit Fields — always shown after type is selected */}
       <UnitFields

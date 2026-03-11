@@ -14,6 +14,7 @@ import {
   ClipboardCheck, Flame,
 } from 'lucide-react';
 import { isPast, isToday, format } from 'date-fns';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface PropertyPriority {
   propertyId: string;
@@ -133,7 +134,7 @@ export function PropertyPriorityWidget() {
               'cursor-pointer',
               p.overdueTasks > 0 && 'border-l-4 border-l-destructive'
             )}
-            onClick={() => navigate(`/mc/properties/${p.propertyId}/manage`)}
+            onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${p.propertyId}/manage`)}
           >
             <CardContent className="p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">

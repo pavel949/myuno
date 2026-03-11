@@ -91,7 +91,7 @@ export default function AdminUnifiedCatalog() {
         </TabsList>
 
         <TabsContent value="data" className="mt-4">
-          <UnifiedCatalogTable />
+          <UnifiedCatalogTable providerId={selectedProviderId || undefined} />
         </TabsContent>
 
         <TabsContent value="services" className="mt-4">

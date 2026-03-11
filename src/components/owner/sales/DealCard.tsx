@@ -3,10 +3,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, daysSince } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronRight, Calendar, AlertCircle, Clock } from 'lucide-react';
+import { ChevronRight, Calendar, AlertCircle, Clock, Crown } from 'lucide-react';
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { getDealTypeEyebrow, getDealTypeFacts, getDealTypePresentation } from '@/components/owner/sales/dealTypePresentation';
 
 const stageBadgeVariant: Record<DealStage, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = {
   new: 'default',
@@ -30,6 +31,8 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const stageLabel = isRu ? DEAL_STAGE_LABELS[deal.stage].ru : DEAL_STAGE_LABELS[deal.stage].en;
+  const typePresentation = getDealTypePresentation(deal.deal_type);
+  const typeFacts = getDealTypeFacts(deal, isRu);
 
   const nextDate = deal.next_action_date ? new Date(deal.next_action_date) : null;
   const isOverdue = nextDate ? isPast(nextDate) && !isToday(nextDate) : false;
@@ -39,11 +42,12 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
   return (
     <div
       className={cn(
-        'w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3',
+        'w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3 border-l-4',
         isOverdue && 'border-destructive/50 bg-destructive/5',
         isDueToday && 'border-primary/50 bg-primary/5',
         age > 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-destructive',
         age > 14 && age <= 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-warning',
+        age <= 14 && !isOverdue && !isDueToday && typePresentation.accentClassName,
       )}
     >
       {selectable && (
@@ -57,6 +61,9 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         onClick={() => navigate(`/mc/sales/${deal.id}`)}
         className="flex-1 text-left min-w-0"
       >
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+          {getDealTypeEyebrow(deal.deal_type, isRu)}
+        </p>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             {/* Row 1: Name + Stage */}
@@ -66,9 +73,15 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
               <Badge variant={stageBadgeVariant[deal.stage]} className="text-[10px] shrink-0">
                 {stageLabel}
               </Badge>
-              {deal.deal_type && deal.deal_type !== 'sale' && (
-                <Badge variant="outline" className="text-[10px] shrink-0">
+              {deal.deal_type && (
+                <Badge variant="outline" className={cn('text-[10px] shrink-0', typePresentation.badgeClassName)}>
                   {isRu ? DEAL_TYPE_LABELS[deal.deal_type]?.ru : DEAL_TYPE_LABELS[deal.deal_type]?.en}
+                </Badge>
+              )}
+              {deal.is_vip && (
+                <Badge variant="outline" className="text-[10px] shrink-0 border-warning/40 text-warning">
+                  <Crown className="h-3 w-3 mr-1" />
+                  VIP
                 </Badge>
               )}
               {age > 14 && (
@@ -84,6 +97,15 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
                 {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
               </p>
             )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+              {typeFacts.slice(0, 2).map((fact) => (
+                <div key={fact.key} className="rounded-lg border bg-background/80 px-2.5 py-2">
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
+                  <p className="text-xs font-medium truncate mt-0.5">{fact.value}</p>
+                </div>
+              ))}
+            </div>
 
             {/* Row 3: Next action */}
             {nextDate && (

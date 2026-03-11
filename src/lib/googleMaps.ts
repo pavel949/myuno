@@ -14,9 +14,16 @@ let _fetchPromise: Promise<string | null> | null = null;
 
 /**
  * Synchronous getter – returns the key if already resolved.
+ * If not yet resolved, tries env var once so first render can have the key without waiting for fetch.
  */
 export function getGoogleMapsKey(): string | null {
-  return _resolvedKey;
+  if (_resolvedKey) return _resolvedKey;
+  const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+  if (envKey?.trim()) {
+    _resolvedKey = envKey.trim();
+    return _resolvedKey;
+  }
+  return null;
 }
 
 /**
@@ -59,7 +66,18 @@ export async function fetchGoogleMapsKey(): Promise<string | null> {
 }
 
 export function hasGoogleMapsKey(): boolean {
-  return Boolean(_resolvedKey && _resolvedKey.length > 0);
+  return Boolean(getGoogleMapsKey());
+}
+
+/**
+ * Sync summary of key availability (for non-React code or logging).
+ * Does not check script load or runtime API response — use useGoogleMaps() for full status.
+ */
+export function getGoogleMapsAvailabilitySummary(): { hasKey: boolean; source: 'env' | 'memory' | 'none' } {
+  const key = getGoogleMapsKey();
+  if (!key) return { hasKey: false, source: 'none' };
+  const fromEnv = Boolean((import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string)?.trim());
+  return { hasKey: true, source: fromEnv ? 'env' : 'memory' };
 }
 
 // Legacy export for backwards compat (will be null until fetched)

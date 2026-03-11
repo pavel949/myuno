@@ -13,12 +13,14 @@ import { isPast, isToday } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getCrmTaskConfig } from '@/config/crmTaskTypes';
+import { isTaskClosedStatus } from '@/lib/tasks/taskStatus';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export function CrmTasksWidget() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { data: tasks } = useCrmTasks({ status: 'pending' });
+  const { data: tasks } = useCrmTasks({ status: 'active' });
   const updateTask = useUpdateCrmTask();
   const { data: staffList } = useStaffMembers();
   const staffMap = React.useMemo(() => {
@@ -29,6 +31,7 @@ export function CrmTasksWidget() {
 
   // Show only tasks due today or overdue, max 5
   const urgentTasks = (tasks || [])
+    .filter(t => !isTaskClosedStatus(t.status))
     .filter(t => t.due_date && (isToday(new Date(t.due_date)) || isPast(new Date(t.due_date))))
     .slice(0, 5);
 
@@ -65,7 +68,7 @@ export function CrmTasksWidget() {
             {urgentTasks.length}
           </Badge>
         </div>
-        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/mc/tasks')}>
+        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate(APP_ROUTES.MC_TASKS)}>
           {isRu ? 'Все' : 'All'} <ChevronRight className="h-3 w-3 ml-0.5" />
         </Button>
       </div>

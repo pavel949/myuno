@@ -19,12 +19,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -79,7 +81,7 @@ export default function SalesDealDetail() {
     return (
       <div className="p-4 text-center pt-20 max-w-lg mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Сделка не найдена' : 'Deal not found'}</p>
-        <Button variant="link" onClick={() => navigate('/mc/sales')}>{isRu ? 'Назад' : 'Back'}</Button>
+        <Button variant="link" onClick={() => navigate(APP_ROUTES.MC_SALES)}>{isRu ? 'Назад' : 'Back'}</Button>
       </div>
     );
   }
@@ -141,7 +143,7 @@ export default function SalesDealDetail() {
     try {
       await deleteDeal.mutateAsync(deal.id);
       toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
-      navigate('/mc/sales');
+      navigate(APP_ROUTES.MC_SALES);
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
@@ -151,12 +153,15 @@ export default function SalesDealDetail() {
   const dealStatus = deal.deal_status || 'active';
   const dealType = deal.deal_type || 'sale';
   const whatsappUrl = deal.client_phone ? `https://wa.me/${deal.client_phone.replace(/[^0-9]/g, '')}` : null;
+  const typeFacts = getDealTypeFacts(deal, isRu);
+  const typeEyebrow = getDealTypeEyebrow(dealType, isRu);
+  const typeNote = deal.notes?.trim() || getDealTypeEmptyNote(dealType, isRu);
 
   return (
     <div className="px-4 pt-4 pb-24 max-w-lg mx-auto space-y-4">
       {/* Back */}
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/mc/sales')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <button onClick={() => navigate(APP_ROUTES.MC_SALES)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" />
           {isRu ? 'Назад' : 'Back'}
         </button>
@@ -200,6 +205,12 @@ export default function SalesDealDetail() {
               {isRu ? DEAL_STATUS_LABELS[dealStatus as DealStatus]?.ru : DEAL_STATUS_LABELS[dealStatus as DealStatus]?.en}
             </Badge>
           )}
+          {deal.is_vip && (
+            <Badge variant="outline" className="text-[10px] border-warning/40 text-warning">
+              <Crown className="h-3 w-3 mr-1" />
+              VIP
+            </Badge>
+          )}
           <span className={cn('flex items-center gap-1 text-xs', stageAge > 30 ? 'text-destructive' : stageAge > 14 ? 'text-warning' : 'text-muted-foreground')}>
             <Clock className="h-3 w-3" />
             {dealAge}d {isRu ? 'всего' : 'total'} · {stageAge}d {isRu ? 'в этапе' : 'in stage'}
@@ -234,36 +245,45 @@ export default function SalesDealDetail() {
           )}
           {deal.client_source && <Badge variant="secondary" className="text-[10px]">{deal.client_source}</Badge>}
         </div>
-        {deal.budget_max && (
-          <p className="text-sm mt-2">
-            {isRu ? 'Бюджет' : 'Budget'}: {deal.budget_min ? `${Number(deal.budget_min).toLocaleString()}–` : ''}{Number(deal.budget_max).toLocaleString()} {deal.currency}
-          </p>
-        )}
-        {(deal.preferred_types?.length || deal.preferred_districts?.length) && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {deal.preferred_types?.map(t => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
-            {deal.preferred_districts?.map(d => <Badge key={d} variant="secondary" className="text-[10px]">{d}</Badge>)}
-            {deal.bedrooms_min && <Badge variant="secondary" className="text-[10px]">{deal.bedrooms_min}+ {isRu ? 'спален' : 'beds'}</Badge>}
-          </div>
-        )}
-        {deal.next_action && (
-          <p className="text-sm mt-1 text-primary">
-            {isRu ? 'Следующий шаг' : 'Next'}: {deal.next_action}
-            {deal.next_action_date && ` — ${format(new Date(deal.next_action_date), 'dd.MM.yy')}`}
-          </p>
-        )}
-        {deal.notes && <p className="text-sm text-muted-foreground mt-2">{deal.notes}</p>}
         {deal.tags?.length > 0 && (
           <div className="mt-2">
             <DealTagsDisplay tags={deal.tags} />
           </div>
         )}
-        {deal.deal_value && (
-          <div className="mt-2 p-2 rounded-lg bg-success/10 text-success text-sm">
-            {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
-            {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
-          </div>
-        )}
+      </div>
+
+      {/* Deal-type brief */}
+      <div className="border rounded-xl p-4 bg-card space-y-3">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{typeEyebrow}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isRu ? 'Ключевые поля для этого типа сделки' : 'Key fields for this deal type'}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {typeFacts.map((fact) => (
+            <div key={fact.key} className="rounded-lg border bg-background/70 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
+              <p className="text-sm font-medium mt-1 break-words">{fact.value}</p>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{isRu ? 'Контекст:' : 'Context:'}</span> {typeNote}
+          {deal.deal_value && (
+            <span className="block mt-1 text-success">
+              {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
+              {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
+            </span>
+          )}
+          {(deal.preferred_types?.length || deal.preferred_districts?.length || deal.bedrooms_min) && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {deal.preferred_types?.map(t => <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>)}
+              {deal.preferred_districts?.map(d => <Badge key={d} variant="secondary" className="text-[10px]">{d}</Badge>)}
+              {deal.bedrooms_min && <Badge variant="secondary" className="text-[10px]">{deal.bedrooms_min}+ {isRu ? 'спален' : 'beds'}</Badge>}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stage bar */}

@@ -4,7 +4,8 @@ import { Home, ArrowLeft, Search, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { getLegacyRedirect } from "@/lib/config/routes";
+import { getLegacyRedirect, APP_ROUTES } from "@/lib/config/routes";
+import { logger } from "@/lib/logger";
 
 const NotFound = () => {
   const location = useLocation();
@@ -18,7 +19,7 @@ const NotFound = () => {
       navigate(redirect, { replace: true });
       return;
     }
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    logger.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname, navigate]);
 
   return (
@@ -42,7 +43,7 @@ const NotFound = () => {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(APP_ROUTES.HOME)}
             className="flex-1 gap-2"
           >
             <Home className="w-4 h-4" />
@@ -60,14 +61,14 @@ const NotFound = () => {
 
         <div className="mt-8 flex gap-4">
           <button
-            onClick={() => navigate('/discover')}
+            onClick={() => navigate(APP_ROUTES.DISCOVER)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <Search className="w-3.5 h-3.5" />
             {isRu ? 'Поиск услуг' : 'Browse Services'}
           </button>
           <button
-            onClick={() => navigate('/contact')}
+            onClick={() => navigate(APP_ROUTES.CONTACT)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <HelpCircle className="w-3.5 h-3.5" />

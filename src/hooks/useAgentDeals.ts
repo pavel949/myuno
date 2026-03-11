@@ -90,6 +90,7 @@ export interface AgentDeal {
   lost_reason: string | null;
   tags: string[];
   priority: number;
+  is_vip: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -246,8 +247,11 @@ export function useCreateDeal() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
+      if (data?.id) {
+        qc.setQueryData(['agent-deal', data.id], data as AgentDeal);
+      }
     },
   });
 }

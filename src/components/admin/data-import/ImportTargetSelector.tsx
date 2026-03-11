@@ -12,7 +12,8 @@ import {
   Ship, 
   Map, 
   Wrench,
-  CheckCircle
+  CheckCircle,
+  ContactRound
 } from 'lucide-react';
 
 interface ImportTargetSelectorProps {
@@ -29,6 +30,7 @@ const targetIcons: Record<string, React.ReactNode> = {
   yachts: <Ship className="h-5 w-5" />,
   tours: <Map className="h-5 w-5" />,
   services: <Wrench className="h-5 w-5" />,
+  crm_contacts: <ContactRound className="h-5 w-5" />,
 };
 
 export function ImportTargetSelector({ selectedTarget, onSelect }: ImportTargetSelectorProps) {

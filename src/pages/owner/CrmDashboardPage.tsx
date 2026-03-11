@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HotLeadsWidget } from '@/components/owner/crm/HotLeadsWidget';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function CrmDashboardPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function CrmDashboardPage() {
   const isRu = language === 'ru';
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
   const companyId = membership?.company_id;
-  const { data: dealsResult, isLoading } = useAgentDeals(companyId);
+  const { data: dealsResult, isLoading, isError: dealsError, error: dealsErrorDetails, refetch: refetchDeals } = useAgentDeals(companyId);
   const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(companyId);
   const { data: contactsResult } = useCrmContacts(companyId, 0, 1);
@@ -110,13 +111,27 @@ export default function CrmDashboardPage() {
     );
   }
 
+  if (dealsError) {
+    return (
+      <div className="p-4 md:p-6 text-center pt-20">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки CRM' : 'Failed to load CRM dashboard'}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {dealsErrorDetails instanceof Error ? dealsErrorDetails.message : String(dealsErrorDetails)}
+        </p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchDeals()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
+
   const kpiItems = [
     { label: isRu ? 'В работе' : 'Active', value: String(kpis.activeCount), icon: Target, color: 'text-primary' },
     { label: isRu ? 'Воронка' : 'Pipeline', value: formatValue(kpis.totalPipeline), icon: DollarSign, color: 'text-primary' },
     { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.weighted), icon: TrendingUp, color: 'text-warning' },
     { label: isRu ? 'Конверсия' : 'Win Rate', value: `${kpis.winRate}%`, icon: Percent, color: 'text-success' },
-    { label: isRu ? 'Контакты' : 'Contacts', value: String(kpis.totalContacts), icon: Users, color: 'text-info', onClick: () => navigate('/mc/contacts') },
-    { label: isRu ? 'Задачи' : 'Tasks', value: String(kpis.todayTasks), icon: ListTodo, color: 'text-warning', onClick: () => navigate('/mc/tasks') },
+    { label: isRu ? 'Контакты' : 'Contacts', value: String(kpis.totalContacts), icon: Users, color: 'text-info', onClick: () => navigate(APP_ROUTES.MC_CONTACTS) },
+    { label: isRu ? 'Задачи' : 'Tasks', value: String(kpis.todayTasks), icon: ListTodo, color: 'text-warning', onClick: () => navigate(APP_ROUTES.MC_TASKS) },
   ];
 
   return (
@@ -141,10 +156,10 @@ export default function CrmDashboardPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/settings')} title={isRu ? 'Настройки' : 'Settings'}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`${APP_ROUTES.MC_SALES}/settings`)} title={isRu ? 'Настройки' : 'Settings'}>
             <Settings className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/analytics')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`${APP_ROUTES.MC_SALES}/analytics`)}>
             <BarChart3 className="h-4 w-4" />
           </Button>
           <Button size="sm" onClick={() => setShowCreate(true)}>

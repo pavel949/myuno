@@ -6,6 +6,7 @@ import {
   Grid3X3, Plus, Receipt, CalendarPlus, ShoppingBag, ListTodo,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface NavItem {
   id: string;
@@ -16,18 +17,18 @@ interface NavItem {
 }
 
 const MC_NAV: NavItem[] = [
-  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: '/mc' },
-  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: '/mc/properties' },
-  { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/mc/calendar' },
-  { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: '/mc/tasks' },
+  { id: 'dashboard', icon: LayoutDashboard, labelEn: 'Home', labelRu: 'Главная', path: APP_ROUTES.MC },
+  { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: APP_ROUTES.MC_PROPERTIES },
+  { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: APP_ROUTES.MC_CALENDAR },
+  { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: APP_ROUTES.MC_TASKS },
   { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/mc/modules' },
 ];
 
 const QUICK_ACTIONS = [
-  { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/finance?action=create', color: 'bg-destructive/15 text-destructive' },
-  { id: 'task', icon: ListTodo, labelEn: 'Task', labelRu: 'Задача', path: '/mc/tasks?action=create', color: 'bg-primary/15 text-primary' },
-  { id: 'meeting', icon: CalendarPlus, labelEn: 'Meeting', labelRu: 'Встреча', path: '/mc/calendar?action=create', color: 'bg-accent/15 text-accent-foreground' },
-  { id: 'services', icon: ShoppingBag, labelEn: 'myUNO', labelRu: 'myUNO', path: '/', color: 'bg-success/15 text-success' },
+  { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: `${APP_ROUTES.MC_FINANCE}?action=create`, color: 'bg-destructive/15 text-destructive' },
+  { id: 'task', icon: ListTodo, labelEn: 'Task', labelRu: 'Задача', path: `${APP_ROUTES.MC_TASKS}?action=create`, color: 'bg-primary/15 text-primary' },
+  { id: 'meeting', icon: CalendarPlus, labelEn: 'Meeting', labelRu: 'Встреча', path: `${APP_ROUTES.MC_CALENDAR}?action=create`, color: 'bg-accent/15 text-accent-foreground' },
+  { id: 'services', icon: ShoppingBag, labelEn: 'myUNO', labelRu: 'myUNO', path: APP_ROUTES.HOME, color: 'bg-success/15 text-success' },
 ];
 
 export function MCMobileNav() {
@@ -42,7 +43,7 @@ export function MCMobileNav() {
   if (isPropertyManage) return null;
 
   const isActive = (path: string) => {
-    if (path === '/mc') return location.pathname === '/mc' || location.pathname === '/mc/';
+    if (path === APP_ROUTES.MC) return location.pathname === APP_ROUTES.MC || location.pathname === `${APP_ROUTES.MC}/`;
     return location.pathname.startsWith(path);
   };
 

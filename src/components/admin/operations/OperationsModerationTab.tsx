@@ -13,7 +13,7 @@ import { format } from 'date-fns';
 
 type ModerationItem = {
   id: string;
-  type: 'service' | 'property' | 'product' | 'provider';
+  type: 'service' | 'property' | 'product' | 'provider' | 'listing';
   name: string;
   created_at: string;
   status: string;
@@ -26,59 +26,82 @@ export function OperationsModerationTab() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('pending');
 
-  // Fetch items pending moderation
+  // Fetch items pending moderation (same sources as dashboard "pendingContent": listings + properties; plus services/products)
   const { data: moderationItems, isLoading } = useQuery({
     queryKey: ['moderation-queue'],
     queryFn: async () => {
       const items: ModerationItem[] = [];
 
-      // Fetch services pending approval (is_active = false means pending)
-      const { data: services } = await supabase
-        .from('services')
-        .select('id, name_en, name_ru, created_at, is_active, providers:provider_id (name)')
+      // Listings (yachts, restaurants, experiences, clinics, etc.) — main source of "252 need attention"
+      const { data: listings } = await supabase
+        .from('listings')
+        .select('id, name_en, name_ru, created_at, approval_status, provider_id, providers:provider_id (name)')
+        .eq('approval_status', 'pending')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(500);
 
-      services?.forEach(s => {
+      (listings || []).forEach((l: { id: string; name_en?: string; name_ru?: string; created_at: string; approval_status?: string; providers?: { name?: string } | null }) => {
         items.push({
-          id: s.id,
-          type: 'service',
-          name: isRussian ? s.name_ru : s.name_en,
-          created_at: s.created_at,
-          status: s.is_active ? 'approved' : 'pending',
-          provider_name: s.providers?.name,
+          id: l.id,
+          type: 'listing',
+          name: isRussian ? (l.name_ru || l.name_en || '') : (l.name_en || l.name_ru || ''),
+          created_at: l.created_at,
+          status: l.approval_status === 'approved' ? 'approved' : 'pending',
+          provider_name: l.providers && typeof l.providers === 'object' && 'name' in l.providers ? (l.providers as { name?: string }).name : undefined,
         });
       });
 
-      // Fetch properties pending approval
+      // Properties pending approval
       const { data: properties } = await supabase
         .from('properties')
         .select('id, title_en, title_ru, created_at, status, approval_status')
+        .eq('approval_status', 'pending')
         .not('owner_id', 'is', null)
-        .limit(50);
+        .order('created_at', { ascending: false })
+        .limit(500);
 
-      properties?.forEach(p => {
+      (properties || []).forEach((p: { id: string; title_en?: string; title_ru?: string; created_at: string; approval_status?: string }) => {
         items.push({
           id: p.id,
           type: 'property',
-          name: isRussian ? (p as any).title_ru || (p as any).title_en : (p as any).title_en,
+          name: isRussian ? (p.title_ru || p.title_en || '') : (p.title_en || p.title_ru || ''),
           created_at: p.created_at,
-          status: (p as any).approval_status === 'approved' || p.status === 'active' ? 'approved' : 'pending',
+          status: p.approval_status === 'approved' ? 'approved' : 'pending',
         });
       });
 
-      // Fetch products pending approval
+      // Services pending (is_active = false) — optional, limit to avoid huge list
+      const { data: services } = await supabase
+        .from('services')
+        .select('id, name_en, name_ru, created_at, is_active, providers:provider_id (name)')
+        .eq('is_active', false)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      (services || []).forEach((s: { id: string; name_en?: string; name_ru?: string; created_at: string; is_active?: boolean; providers?: { name?: string } | null }) => {
+        items.push({
+          id: s.id,
+          type: 'service',
+          name: isRussian ? (s.name_ru || s.name_en || '') : (s.name_en || s.name_ru || ''),
+          created_at: s.created_at,
+          status: s.is_active ? 'approved' : 'pending',
+          provider_name: s.providers && typeof s.providers === 'object' && 'name' in s.providers ? (s.providers as { name?: string }).name : undefined,
+        });
+      });
+
+      // Products pending (is_active = false)
       const { data: products } = await supabase
         .from('marketplace_products')
         .select('id, name_en, name_ru, created_at, is_active')
+        .eq('is_active', false)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
-      products?.forEach(p => {
+      (products || []).forEach((p: { id: string; name_en?: string; name_ru?: string; created_at: string; is_active?: boolean }) => {
         items.push({
           id: p.id,
           type: 'product',
-          name: isRussian ? p.name_ru : p.name_en,
+          name: isRussian ? (p.name_ru || p.name_en || '') : (p.name_en || p.name_ru || ''),
           created_at: p.created_at,
           status: p.is_active ? 'approved' : 'pending',
         });
@@ -92,19 +115,32 @@ export function OperationsModerationTab() {
 
   const approveMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: string }) => {
-      const table = type === 'service' ? 'services' 
-        : type === 'property' ? 'properties' 
-        : 'marketplace_products';
-      
+      if (type === 'listing') {
+        const { error } = await supabase
+          .from('listings')
+          .update({ approval_status: 'approved', is_active: true })
+          .eq('id', id);
+        if (error) throw error;
+        return;
+      }
+      if (type === 'property') {
+        const { error } = await supabase
+          .from('properties')
+          .update({ approval_status: 'approved', is_active: true })
+          .eq('id', id);
+        if (error) throw error;
+        return;
+      }
+      const table = type === 'service' ? 'services' : 'marketplace_products';
       const { error } = await supabase
         .from(table)
         .update({ is_active: true })
         .eq('id', id);
-      
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
       toast.success(isRussian ? 'Одобрено' : 'Approved');
     },
     onError: () => {
@@ -114,20 +150,32 @@ export function OperationsModerationTab() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: string }) => {
-      const table = type === 'service' ? 'services' 
-        : type === 'property' ? 'properties' 
-        : 'marketplace_products';
-      
-      // For rejection, we could add a rejection_reason field or just keep inactive
+      if (type === 'listing') {
+        const { error } = await supabase
+          .from('listings')
+          .update({ approval_status: 'rejected', is_active: false })
+          .eq('id', id);
+        if (error) throw error;
+        return;
+      }
+      if (type === 'property') {
+        const { error } = await supabase
+          .from('properties')
+          .update({ approval_status: 'rejected', is_active: false })
+          .eq('id', id);
+        if (error) throw error;
+        return;
+      }
+      const table = type === 'service' ? 'services' : 'marketplace_products';
       const { error } = await supabase
         .from(table)
         .update({ is_active: false })
         .eq('id', id);
-      
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
       toast.success(isRussian ? 'Отклонено' : 'Rejected');
     },
     onError: () => {
@@ -140,6 +188,7 @@ export function OperationsModerationTab() {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, { en: string; ru: string }> = {
+      listing: { en: 'Listing', ru: 'Листинг' },
       service: { en: 'Service', ru: 'Услуга' },
       property: { en: 'Property', ru: 'Недвижимость' },
       product: { en: 'Product', ru: 'Товар' },

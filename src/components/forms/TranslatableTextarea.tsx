@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useMemo, useRef, memo } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -40,11 +40,19 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
   const [isAutoTranslated, setIsAutoTranslated] = useState(false);
   const [isEditingTranslation, setIsEditingTranslation] = useState(false);
   const [editedTranslation, setEditedTranslation] = useState('');
+  const translatedFromRef = useRef('');
 
-  const sourceLang = isRu ? 'ru' : 'en';
   const targetLang = isRu ? 'en' : 'ru';
   const sourceLangLabel = isRu ? 'RU' : 'EN';
   const targetLangLabel = isRu ? 'EN' : 'RU';
+  const translateActionLabel = isRu ? `Перевести в ${targetLangLabel}` : `Translate to ${targetLangLabel}`;
+
+  const needsTranslationOffer = useMemo(() => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return false;
+
+    return !translatedValue.trim() || translatedFromRef.current !== trimmedValue;
+  }, [translatedValue, value]);
 
   const handleTranslate = useCallback(async () => {
     if (!value.trim()) {
@@ -57,15 +65,15 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
       const { data, error } = await supabase.functions.invoke('ai-translate', {
         body: {
           text: value,
-          sourceLang,
           targetLang,
         },
       });
 
       if (error) throw error;
       
-      if (data?.translatedText) {
-        onTranslatedChange(data.translatedText);
+      if (data?.translated) {
+        onTranslatedChange(data.translated);
+        translatedFromRef.current = value.trim();
         setIsAutoTranslated(true);
         toast.success(isRu ? 'Переведено!' : 'Translated!');
       }
@@ -75,7 +83,7 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
     } finally {
       setIsTranslating(false);
     }
-  }, [value, sourceLang, targetLang, onTranslatedChange, isRu]);
+  }, [value, targetLang, onTranslatedChange, isRu]);
 
   const handleStartEditTranslation = () => {
     setEditedTranslation(translatedValue);
@@ -120,7 +128,7 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
             ) : (
               <>
                 <Sparkles className="h-3 w-3" />
-                {isRu ? `→ ${targetLangLabel}` : `→ ${targetLangLabel}`}
+                {translateActionLabel}
               </>
             )}
           </Button>
@@ -135,6 +143,21 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
           rows={rows}
           disabled={disabled}
         />
+        {needsTranslationOffer && (
+          <div className="flex justify-end pt-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleTranslate}
+              disabled={isTranslating || disabled}
+              className="h-7 gap-1.5 text-xs text-primary"
+            >
+              <Sparkles className="h-3 w-3" />
+              {translateActionLabel}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Translated textarea */}

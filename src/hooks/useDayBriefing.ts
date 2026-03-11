@@ -13,6 +13,7 @@ import { useUserContext } from '@/hooks/useUserContext';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import { type AppRole } from '@/types/auth';
 import { isToday, isTomorrow, differenceInCalendarDays, format } from 'date-fns';
+import { CRM_TASK_ACTIVE_STATUSES } from '@/lib/tasks/taskStatus';
 
 /* ─── Types ─── */
 export type DayItemType =
@@ -178,7 +179,7 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
         queries.push(
           companyId
-            ? q(supabase.from('deal_scheduled_activities').select('id, summary, activity_type, due_date, due_time, deal_id')
+            ? q(supabase.from('deal_scheduled_activities').select('id, summary, activity_type, due_date, due_time, deal_id, deal:agent_deals(property_id)')
                 .eq('company_id', companyId).is('completed_at', null).is('cancelled_at', null)
                 .gte('due_date', todayStr).lte('due_date', tomorrowStr)
                 .eq('assigned_to', user.id)
@@ -190,8 +191,10 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
         queries.push(
           companyId
             ? q(supabase.from('crm_tasks').select('id, title, task_type, priority, status, due_date')
-                .eq('company_id', companyId).neq('status', 'done')
-                .or(`due_date.lte.${todayStr}T23:59:59,due_date.is.null`)
+                .eq('company_id', companyId)
+                .in('status', [...CRM_TASK_ACTIVE_STATUSES])
+                .not('due_date', 'is', null)
+                .lte('due_date', `${todayStr}T23:59:59`)
                 .limit(50))
             : Promise.resolve({ data: [] })
         );
@@ -371,13 +374,20 @@ export function useDayBriefing(options?: UseDayBriefingOptions) {
 
         // ─── CRM scheduled activities ───
         for (const a of (dataMap.activities || []) as any[]) {
+          const activityPropertyId = a.deal?.property_id || null;
+          if (selectedPropertyId && activityPropertyId && activityPropertyId !== selectedPropertyId) {
+            continue;
+          }
+          if (selectedPropertyId && !activityPropertyId) {
+            continue;
+          }
           const isToday_ = a.due_date === todayStr;
           items.push({
             id: `act-${a.id}`, type: 'crm_activity',
             sectionOrder: isToday_ ? ORDER.schedule : ORDER.tomorrow,
             title: a.summary,
             href: `/mc/sales/${a.deal_id}`,
-            meta: { dueTime: a.due_time || undefined },
+            meta: { dueTime: a.due_time || undefined, propertyName: activityPropertyId ? propNameMap.get(activityPropertyId) : undefined },
           });
         }
 

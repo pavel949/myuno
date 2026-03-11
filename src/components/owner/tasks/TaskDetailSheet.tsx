@@ -12,9 +12,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Trash2, CheckCircle2, Clock, Play, MessageSquareMore, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
 import { TaskComments } from '@/components/owner/tasks/TaskComments';
+import { TaskDueDateTimeField } from '@/components/owner/tasks/TaskDueDateTimeField';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { isTaskCompletedStatus } from '@/lib/tasks/taskStatus';
 
 export interface UnifiedTask {
   id: string;
@@ -79,11 +81,16 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
   const handleSave = () => {
     const updates: Record<string, any> = { title, priority };
     const prevAssignee = task.assigned_to;
+    const willBeCompleted = isTaskCompletedStatus(status);
+    const existingCompletedAt = task.raw?.completed_at ?? null;
+    const existingCompletedBy = task.raw?.completed_by ?? null;
     if (task.source === 'crm') {
       updates.description = description || null;
       updates.status = status;
-      if (dueDate) updates.due_date = new Date(dueDate).toISOString();
-      if (status === 'completed') updates.completed_at = new Date().toISOString();
+      updates.due_date = dueDate ? new Date(dueDate).toISOString() : null;
+      updates.completed_at = willBeCompleted
+        ? existingCompletedAt || new Date().toISOString()
+        : null;
     } else {
       updates.status = status;
       updates.notes = description || null;
@@ -91,14 +98,16 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
         updates.scheduled_date = format(new Date(dueDate), 'yyyy-MM-dd');
         updates.scheduled_time = format(new Date(dueDate), 'HH:mm');
       }
-      if (status === 'completed') {
-        updates.completed_at = new Date().toISOString();
+      if (willBeCompleted) {
+        updates.completed_at = existingCompletedAt || new Date().toISOString();
+        updates.completed_by = existingCompletedBy || (user?.id ?? null);
+      } else {
+        updates.completed_at = null;
+        updates.completed_by = null;
       }
-      if (actualCost) {
-        updates.actual_cost = Number(actualCost) || 0;
-      }
+      updates.actual_cost = actualCost ? Number(actualCost) || 0 : null;
     }
-    if (assignedTo !== 'none') updates.assigned_to = assignedTo;
+    updates.assigned_to = assignedTo !== 'none' ? assignedTo : null;
 
     // Notify if assignee changed
     if (assignedTo !== 'none' && assignedTo !== prevAssignee && assignedTo !== user?.id) {
@@ -243,15 +252,11 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
               />
             </div>
 
-            {/* Due date */}
-            <div>
-              <Label>{t('Due Date', 'Срок')}</Label>
-              <Input
-                type="datetime-local"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-              />
-            </div>
+            <TaskDueDateTimeField
+              value={dueDate}
+              onChange={setDueDate}
+              allowClear={task.source === 'crm'}
+            />
 
             {/* Cost (ops tasks only) */}
             {task.source === 'ops' && (
@@ -277,7 +282,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
             <TaskComments taskId={task.id} taskSource={task.source} />
 
             {/* Request Status */}
-            {task.assigned_to && task.assigned_to !== user?.id && task.status !== 'completed' && (
+            {task.assigned_to && task.assigned_to !== user?.id && !isTaskCompletedStatus(task.status) && (
               <Button variant="outline" className="w-full" onClick={handleRequestStatus}>
                 <MessageSquareMore className="h-4 w-4 mr-2" />
                 {t('Request Status Update', 'Запросить статус')}

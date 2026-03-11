@@ -63,7 +63,7 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
 
     // Fetch profiles for each member
     const memberIds = (data || []).map(m => m.user_id);
-    let profiles: Record<string, any> = {};
+    const profiles: Record<string, { id: string; full_name: string | null; email?: string; phone?: string | null }> = {};
     if (memberIds.length > 0) {
       const { data: profileData } = await supabase
         .from('profiles')

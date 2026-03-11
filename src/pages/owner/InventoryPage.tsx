@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +17,8 @@ import { Plus, Package, AlertTriangle, Search, Camera, ClipboardCheck } from 'lu
 import { toast } from 'sonner';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import InspectionChecklist from '@/components/owner/inventory/InspectionChecklist';
+import { useNavigate, useParams } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const CATEGORIES = [
   { value: 'consumable', en: 'Consumable', ru: 'Расходник' },
@@ -31,9 +33,12 @@ const CATEGORIES = [
 export default function InventoryPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { id: routePropertyId } = useParams();
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
-  const { allProperties, isLoading: propsLoading } = useMyProperties();
+  const { activeProperties, isLoading: propsLoading } = useMyProperties();
+  const allProperties = activeProperties || [];
 
   const [search, setSearch] = useState('');
   const [filterLow, setFilterLow] = useState(false);
@@ -50,6 +55,16 @@ export default function InventoryPage() {
   const [reorderNote, setReorderNote] = useState('');
   const [propertyId, setPropertyId] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (routePropertyId && filterPropertyId === 'all') {
+      setFilterPropertyId(routePropertyId);
+      return;
+    }
+    if (filterPropertyId === 'all' && allProperties.length === 1) {
+      setFilterPropertyId(allProperties[0].property_id);
+    }
+  }, [allProperties, filterPropertyId, routePropertyId]);
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['inventory-items', user?.id],
@@ -225,6 +240,22 @@ export default function InventoryPage() {
         </TabsList>
 
         <TabsContent value="items">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            {allProperties.slice(0, 8).map((p) => {
+              const isActive = filterPropertyId === p.property_id;
+              return (
+                <button
+                  key={p.property_id}
+                  onClick={() => setFilterPropertyId(isActive ? 'all' : p.property_id)}
+                  className={`text-left p-3 rounded-xl border transition ${isActive ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-muted/40'}`}
+                >
+                  <p className="text-xs text-muted-foreground">{isRu ? 'Объект' : 'Property'}</p>
+                  <p className="text-sm font-medium truncate">{isRu ? p.title_ru : p.title}</p>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Filters */}
           <div className="space-y-2 mb-4">
             <div className="flex gap-2">
@@ -250,6 +281,15 @@ export default function InventoryPage() {
                 ))}
               </SelectContent>
             </Select>
+            {filterPropertyId !== 'all' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${filterPropertyId}/manage`)}
+              >
+                {isRu ? 'Открыть карточку объекта' : 'Open property operations'}
+              </Button>
+            )}
           </div>
 
           {isLoading || propsLoading ? (

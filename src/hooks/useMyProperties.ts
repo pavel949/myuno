@@ -50,8 +50,9 @@ function useCompanyProperties() {
       if (!companyId) return [];
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency, lat, lng, approval_status')
+        .select('id, title_en, title_ru, title, cover_image, images, address, district, is_active, bedrooms, bathrooms, price_per_night, currency, complex_id, project_id, property_type, deposit_currency, lat, lng, approval_status, deleted_at')
         .eq('management_company_id', companyId)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
@@ -173,6 +174,11 @@ export function useMyProperties() {
     return result;
   }, [ownedProperties, managedProperties, companyProperties]);
 
+  const activeProperties = useMemo(
+    () => allProperties.filter((p) => p.is_active),
+    [allProperties]
+  );
+
   const accessRole: PropertyAccessRole = useMemo(() => {
     const hasOwned = ownedProperties.length > 0 || isOwner;
     const hasManaged = managedProperties.length > 0 || companyProperties.length > 0 || isManager;
@@ -187,6 +193,7 @@ export function useMyProperties() {
     managedProperties,
     companyProperties,
     allProperties,
+    activeProperties,
     accessRole,
     isLoading: ownedLoading || managedLoading || companyLoading,
     isOwner,

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { logger } from '@/lib/logger';
 
 export interface WeatherData {
   temp: number;
@@ -23,27 +24,19 @@ async function fetchWeather(): Promise<WeatherData> {
     const { data, error } = await supabase.functions.invoke('get-weather');
     
     if (error) {
-      // Log at debug level to avoid console noise during development
-      if (import.meta.env.DEV) {
-        console.debug('[Weather] Service unavailable, using fallback:', error.message);
-      }
+      logger.debug('[Weather] Service unavailable, using fallback:', error.message);
       return fallbackWeather;
     }
     
     // Handle edge function returning error in data
     if (data?.error) {
-      if (import.meta.env.DEV) {
-        console.debug('[Weather] API returned error, using fallback:', data.error);
-      }
+      logger.debug('[Weather] API returned error, using fallback:', data.error);
       return { ...fallbackWeather, ...data };
     }
     
     return data as WeatherData;
   } catch (err) {
-    // Silently fallback on network errors (404, CORS, etc.)
-    if (import.meta.env.DEV) {
-      console.debug('[Weather] Network error, using fallback');
-    }
+    logger.debug('[Weather] Network error, using fallback');
     return fallbackWeather;
   }
 }

@@ -20,7 +20,7 @@ const POPULAR_PLACES = [
 ];
 
 interface GeocodeSuggestion {
-  mapbox_id: string; // kept for backward compat with edge function response
+  place_id: string;
   name: string;
   address: string;
   type: string;
@@ -30,7 +30,7 @@ interface Suggestion {
   id: string;
   name: string;
   address: string;
-  source: 'geocode' | 'project' | 'area';
+  source: 'google' | 'project' | 'area';
 }
 
 interface AddressAutocompleteProps {
@@ -66,7 +66,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Geocode search (Google when key set, else Supabase edge)
+  // Geocode search (Google Maps Geocoding API only)
   const searchGeocode = useCallback(
     async (q: string) => {
       if (q.length < 2) {
@@ -79,19 +79,14 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           const results = await googleGeocode.searchAddress(q, { country: 'TH' });
           setGeocodeResults(
             results.map((r) => ({
-              mapbox_id: r.placeId || `${r.lat},${r.lng}`,
+              place_id: r.placeId || `${r.lat},${r.lng}`,
               name: r.address.split(',')[0]?.trim() || r.address,
               address: r.address,
               type: 'address',
             }))
           );
         } else {
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=${encodeURIComponent(q)}&language=${language}`;
-          const res = await fetch(url, {
-            headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-          });
-          const json = await res.json();
-          setGeocodeResults(json.results || []);
+          setGeocodeResults([]);
         }
       } catch (err) {
         console.error('[AddressAutocomplete] geocode error:', err);
@@ -100,7 +95,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
         setIsSearching(false);
       }
     },
-    [language, useGoogle, googleGeocode]
+    [useGoogle, googleGeocode]
   );
 
   // Debounced search
@@ -140,15 +135,16 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return items.filter(s => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q));
   }, [query, isRu]);
 
-  // Geocode suggestions
+  // Google geocode suggestions
   const geocodeSuggestions = useMemo((): Suggestion[] =>
-    geocodeResults.map(r => ({
-      id: r.mapbox_id,
+    geocodeResults.map((r) => ({
+      id: r.place_id,
       name: r.name,
       address: r.address,
-      source: 'geocode' as const,
+      source: 'google' as const,
     })),
-  [geocodeResults]);
+    [geocodeResults]
+  );
 
   const handleSelect = (s: Suggestion) => {
     const full = s.address && s.address !== s.name ? `${s.name}, ${s.address}` : s.name;
@@ -249,13 +245,13 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
           </button>
 
-          {/* Geocode results */}
+          {/* Google geocode results */}
           {hasGeocode && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
                 {isRu ? 'Результаты поиска' : 'Search results'}
               </div>
-              {geocodeSuggestions.map(s => (
+              {geocodeSuggestions.map((s) => (
                 <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
               ))}
             </>
@@ -273,7 +269,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             </>
           )}
 
-          {/* Popular areas - only when no geocode results */}
+          {/* Popular areas - only when no mapbox results */}
           {!hasGeocode && hasAreas && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">

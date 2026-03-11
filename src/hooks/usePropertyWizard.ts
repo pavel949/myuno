@@ -1,13 +1,14 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCreateOwnerProperty, useOwnerProperty } from '@/hooks/usePropertyCare';
+import { useCreateOwnerProperty, useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { useSendOwnershipInvite } from '@/hooks/usePropertyOwnership';
 import { useUserContext } from '@/hooks/useUserContext';
-import { useFormDraft } from '@/hooks/useFormDraft';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const untypedFrom = (table: string) => (supabase as any).from(table);
@@ -61,7 +62,7 @@ export interface PropertyFormData {
   parking_type: string;
   pool_type: string;
   garden_type: string;
-  view_type: string;
+  view_type: string[];
   furnishing_level: string;
   equipment: string[];
   price_per_night: string;
@@ -153,7 +154,7 @@ const initialFormData: PropertyFormData = {
   parking_type: '',
   pool_type: '',
   garden_type: '',
-  view_type: '',
+  view_type: [],
   furnishing_level: '',
   equipment: [],
   price_per_night: '',
@@ -198,10 +199,87 @@ const initialOwnershipData: OwnershipData = {
   ownership_document_name: '',
 };
 
+function mapPropertyToFormData(property: any): PropertyFormData {
+  return {
+    title: property.title_en || property.title || '',
+    title_ru: property.title_ru || '',
+    internal_name: property.internal_name || '',
+    address: property.address || '',
+    district: property.district || '',
+    lat: property.lat ?? undefined,
+    lng: property.lng ?? undefined,
+    property_type: property.property_type || 'apartment',
+    bedrooms: property.bedrooms || 1,
+    bathrooms: property.bathrooms || 1,
+    area_sqm: property.area_sqm?.toString() || '',
+    description: property.description_en || '',
+    description_ru: property.description_ru || '',
+    cover_image: property.cover_image || '',
+    images: property.images || [],
+    management_type: property.management_type || 'full',
+    is_rented: property.is_rented || false,
+    rental_platforms: property.rental_platform ? [property.rental_platform] : [],
+    custom_platform: '',
+    project_id: property.project_id ?? undefined,
+    complex_id: property.complex_id ?? undefined,
+    video_url: property.video_url || '',
+    floor: property.floor ?? undefined,
+    unit_number: property.unit_number || '',
+    total_floors: property.total_floors ?? undefined,
+    plot_size_sqm: property.plot_size_sqm ?? undefined,
+    has_elevator: property.has_elevator || false,
+    parking_type: property.parking_type || '',
+    pool_type: property.pool_type || '',
+    garden_type: property.garden_type || '',
+    view_type: normalizeViewTypes(property.view_type),
+    furnishing_level: normalizeFurnishingLevel(property.furnishing_level),
+    equipment: property.equipment || [],
+    price_per_night: property.price_per_night ? String(property.price_per_night) : '',
+    min_stay_nights: property.min_stay_nights || 1,
+    max_guests: property.max_guests || 2,
+    deposit_amount: property.deposit_amount ? String(property.deposit_amount) : '',
+    check_in_time: property.check_in_time || '14:00',
+    check_out_time: property.check_out_time || '12:00',
+    instant_booking: property.instant_booking || false,
+    ownership_form: property.ownership_form || undefined,
+    is_for_sale: property.is_for_sale || false,
+    sale_price: property.sale_price ? String(property.sale_price) : '',
+    pets_allowed: property.pets_allowed || false,
+    pet_deposit: property.pet_deposit ?? undefined,
+    smoking_allowed: property.smoking_policy === 'allowed' || property.smoking_allowed || false,
+    smoking_penalty: property.smoking_penalty ?? undefined,
+    parties_allowed: property.parties_allowed || false,
+    max_party_guests: property.max_party_guests ?? undefined,
+    children_friendly: property.children_friendly ?? true,
+    has_crib: property.has_crib || false,
+    has_high_chair: property.has_high_chair || false,
+    quiet_hours_start: property.quiet_hours_start || '22:00',
+    quiet_hours_end: property.quiet_hours_end || '08:00',
+    house_rules: property.house_rules || '',
+    house_rules_ru: property.house_rules_ru || '',
+    cancellation_policy: property.cancellation_policy || 'flexible',
+    weekly_discount: property.weekly_discount || 0,
+    monthly_discount: property.monthly_discount || 0,
+    seasonal_pricing: property.seasonal_pricing || [],
+    highlights: property.highlights || [],
+    platform_listed: property.listing_modes?.includes('platform') ?? false,
+    early_booking_discount: property.early_booking_discount ?? undefined,
+    early_booking_days: property.early_booking_days ?? undefined,
+    last_minute_discount: property.last_minute_discount ?? undefined,
+    last_minute_days: property.last_minute_days ?? undefined,
+    payment_policy: property.payment_policy || 'prepay_10',
+    prepay_percent: property.prepay_percent ?? undefined,
+    balance_due_days: property.balance_due_days ?? undefined,
+    deposit_currency: property.deposit_currency || 'USD',
+    negotiation_enabled: property.negotiation_enabled || false,
+    custom_length_discounts: property.custom_length_discounts || [],
+    lock_code: property.lock_code || '',
+  };
+}
+
 export function usePropertyWizard() {
   const { language } = useLanguage();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
   
@@ -209,23 +287,19 @@ export function usePropertyWizard() {
   const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined);
   
   const createProperty = useCreateOwnerProperty();
+  const updateProperty = useUpdateOwnerProperty();
+  const draftCreateProperty = useCreateOwnerProperty();
+  const draftUpdateProperty = useUpdateOwnerProperty();
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
-  
-  // Use draft persistence for form data
-  const {
-    formData,
-    setFormData,
-    updateFields: updateFormData,
-    hasDraft,
-    clearDraft,
-    lastSaved,
-    restoreDraft,
-  } = useFormDraft<PropertyFormData>({
-    key: 'owner_property_wizard',
-    initialData: initialFormData,
-    debounceMs: 1000,
-  });
+
+  const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [draftPropertyId, setDraftPropertyId] = useState<string>();
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'unsaved' | 'error'>('idle');
+  const [isLoadingDraft, setIsLoadingDraft] = useState(!cloneFromId);
+  const lastSavedSnapshotRef = useRef(JSON.stringify(initialFormData));
 
   const [ownershipData, setOwnershipData] = useState<OwnershipData>(initialOwnershipData);
   const [selectedProject, setSelectedProject] = useState<PropertyProject | null>(null);
@@ -233,31 +307,81 @@ export function usePropertyWizard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdPropertyId, setCreatedPropertyId] = useState<string>();
   const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+
+  const hasUnsavedChanges = useMemo(
+    () => JSON.stringify(formData) !== lastSavedSnapshotRef.current,
+    [formData]
+  );
+
+  const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+    setSaveState('unsaved');
+  }, []);
+
+  const clearDraft = useCallback(() => {
+    setHasDraft(false);
+    setLastSaved(null);
+    setDraftPropertyId(undefined);
+    lastSavedSnapshotRef.current = JSON.stringify(initialFormData);
+    setSaveState('idle');
+  }, []);
+
+  const restoreDraft = useCallback(() => {
+    // Latest draft is loaded automatically from Supabase on open.
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id || cloneFromId) {
+      setIsLoadingDraft(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadLatestDraft = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('owner_id', user.id)
+          .eq('approval_status', 'draft')
+          .is('deleted_at', null)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data || cancelled) return;
+
+        const mappedDraft = mapPropertyToFormData(data);
+        setFormData(mappedDraft);
+        setDraftPropertyId(data.id);
+        setHasDraft(true);
+        setLastSaved(new Date(data.updated_at));
+        lastSavedSnapshotRef.current = JSON.stringify(mappedDraft);
+        setSaveState('saved');
+      } catch (error) {
+        errorLog.silent(error, 'load_latest_property_draft');
+      } finally {
+        if (!cancelled) {
+          setIsLoadingDraft(false);
+        }
+      }
+    };
+
+    loadLatestDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, cloneFromId]);
 
   // Apply clone data when loaded
   useEffect(() => {
     if (sourceProperty && !isCloneDataApplied && cloneFromId) {
-      setFormData({
-        title: sourceProperty.title || '',
-        title_ru: sourceProperty.title_ru || '',
-        internal_name: (sourceProperty as any).internal_name || '',
-        address: sourceProperty.address || '',
-        district: sourceProperty.district || '',
-        lat: sourceProperty.lat ?? undefined,
-        lng: sourceProperty.lng ?? undefined,
-        property_type: sourceProperty.property_type || 'apartment',
-        bedrooms: sourceProperty.bedrooms || 1,
-        bathrooms: sourceProperty.bathrooms || 1,
-        area_sqm: sourceProperty.area_sqm?.toString() || '',
-        description: sourceProperty.description_en || '',
-        description_ru: sourceProperty.description_ru || '',
-        cover_image: sourceProperty.cover_image || '',
-        images: sourceProperty.images || [],
-        management_type: sourceProperty.management_type || 'full',
-        is_rented: sourceProperty.is_rented || false,
-        rental_platforms: sourceProperty.rental_platform ? [sourceProperty.rental_platform] : [],
-        custom_platform: '',
-        project_id: sourceProperty.project_id ?? undefined,
+      const mappedSource = {
+        ...mapPropertyToFormData(sourceProperty),
         floor: undefined,
         unit_number: '',
         total_floors: undefined,
@@ -266,25 +390,16 @@ export function usePropertyWizard() {
         parking_type: '',
         pool_type: '',
         garden_type: '',
-        view_type: sourceProperty.view_type || '',
-        furnishing_level: sourceProperty.furnishing_level || '',
-        equipment: sourceProperty.equipment || [],
-        price_per_night: sourceProperty.price_per_night ? sourceProperty.price_per_night.toString() : '',
-        min_stay_nights: sourceProperty.min_stay_nights || 1,
-        max_guests: sourceProperty.max_guests || 2,
-        deposit_amount: sourceProperty.deposit_amount?.toString() || '',
-        check_in_time: sourceProperty.check_in_time || '14:00',
-        check_out_time: sourceProperty.check_out_time || '12:00',
-        instant_booking: sourceProperty.instant_booking || false,
-        ownership_form: undefined,
         is_for_sale: false,
         sale_price: '',
-        highlights: sourceProperty.highlights || [],
-      });
+      };
+      setFormData(mappedSource);
+      lastSavedSnapshotRef.current = JSON.stringify(mappedSource);
       setIsCloneDataApplied(true);
+      setIsLoadingDraft(false);
       toast.success(isRu ? 'Данные объекта загружены' : 'Property data loaded');
     }
-  }, [sourceProperty, isCloneDataApplied, cloneFromId, setFormData, isRu]);
+  }, [sourceProperty, isCloneDataApplied, cloneFromId, isRu]);
 
   // Update ownership data
   const updateOwnershipData = useCallback((updates: Partial<OwnershipData>) => {
@@ -359,8 +474,8 @@ export function usePropertyWizard() {
       
       // Physical attributes
       if (prefillData.floor) updated.floor = prefillData.floor;
-      if (prefillData.view_type) updated.view_type = prefillData.view_type;
-      if (prefillData.furnishing_level) updated.furnishing_level = prefillData.furnishing_level;
+      if (prefillData.view_type) updated.view_type = normalizeViewTypes(prefillData.view_type);
+      if (prefillData.furnishing_level) updated.furnishing_level = normalizeFurnishingLevel(prefillData.furnishing_level);
       if (prefillData.pool_type) updated.pool_type = prefillData.pool_type;
       if (prefillData.parking_type) updated.parking_type = prefillData.parking_type;
       
@@ -407,43 +522,42 @@ export function usePropertyWizard() {
     }
   }, [formData, ownershipData, isRu]);
 
-  // Submit property
-  const handleSubmit = useCallback(async () => {
-    try {
+  const hasMeaningfulDraftData = useMemo(() => {
+    return Boolean(
+      formData.title.trim() ||
+      formData.title_ru.trim() ||
+      formData.description.trim() ||
+      formData.description_ru.trim() ||
+      formData.address.trim() ||
+      formData.images.length > 0
+    );
+  }, [formData]);
+
+  const buildPropertyPayload = useCallback((approvalStatus: 'draft' | 'pending') => {
     const isOnBehalf = ownershipData.ownership_type !== 'own';
-    
-    // Strip fields that don't exist on the properties table
-    // IMPORTANT: property_type MUST be preserved — it's a required DB column
-    const { 
+    const {
       title, title_ru, description, description_ru,
       rental_platforms, custom_platform, platform_listed,
       is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
       smoking_allowed, seasonal_pricing,
-      ...cleanData 
+      ...cleanData
     } = formData;
-    
-    // Determine approval_status based on platform_listed flag
-    // If user wants to list on myUNO platform → pending (goes for moderation)
-    // If not → draft (stays in user's cabinet without moderation)
-    const approvalStatus = platform_listed ? 'pending' : 'draft';
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const submitPayload: any = {
+
+    const payload: Record<string, unknown> = {
       ...cleanData,
       area_sqm: area_sqm ? Number(area_sqm) : undefined,
       price_per_night: price_per_night ? Number(price_per_night) : undefined,
       deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
       sale_price: sale_price ? Number(sale_price) : undefined,
       is_for_sale,
-      // Map smoking_allowed boolean to smoking_policy text column
       smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
       seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,
-      // These will be remapped by useCreateOwnerProperty
       title,
       title_ru,
       description,
       description_ru,
       approval_status: approvalStatus,
+      is_active: approvalStatus === 'draft' ? false : undefined,
       rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
       listing_modes: [
         ...(platform_listed ? ['platform'] : []),
@@ -462,12 +576,90 @@ export function usePropertyWizard() {
       ownership_verification_status: isOnBehalf ? 'pending' : 'verified',
     };
 
-    // Clean undefined values to prevent DB errors
-    Object.keys(submitPayload).forEach(key => {
-      if (submitPayload[key] === undefined) delete submitPayload[key];
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === undefined) {
+        delete payload[key];
+      }
     });
 
-    const property = await createProperty.mutateAsync(submitPayload);
+    return payload;
+  }, [formData, ownershipData, activeOrgId]);
+
+  const persistDraft = useCallback(async (showToast = false) => {
+    if (!hasMeaningfulDraftData || !user?.id) return null;
+
+    setIsSavingDraft(true);
+    setSaveState('saving');
+
+    try {
+      const draftPayload = buildPropertyPayload('draft');
+      const property = draftPropertyId
+        ? await draftUpdateProperty.mutateAsync({ id: draftPropertyId, ...draftPayload, _silent: true } as any)
+        : await draftCreateProperty.mutateAsync({ ...draftPayload, _silent: true } as any);
+
+      if (property?.id) {
+        setDraftPropertyId(property.id);
+      }
+
+      const savedAt = new Date();
+      setHasDraft(true);
+      setLastSaved(savedAt);
+      lastSavedSnapshotRef.current = JSON.stringify(formData);
+      setSaveState('saved');
+
+      if (showToast) {
+        toast.success(isRu ? 'Черновик сохранён' : 'Draft saved');
+      }
+
+      return property;
+    } catch (error) {
+      setSaveState('error');
+      if (showToast) {
+        toast.error(isRu ? 'Ошибка сохранения черновика' : 'Error saving draft');
+      }
+      errorLog.silent(error, 'persist_property_draft');
+      return null;
+    } finally {
+      setIsSavingDraft(false);
+    }
+  }, [buildPropertyPayload, draftCreateProperty, draftPropertyId, draftUpdateProperty, formData, hasMeaningfulDraftData, isRu, user?.id]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    setSaveState('unsaved');
+  }, [hasUnsavedChanges]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || !hasMeaningfulDraftData) return;
+
+    const timer = window.setTimeout(() => {
+      void persistDraft(false);
+    }, 30000);
+
+    return () => window.clearTimeout(timer);
+  }, [hasMeaningfulDraftData, hasUnsavedChanges, persistDraft]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Submit property
+  const handleSubmit = useCallback(async () => {
+    try {
+    const isOnBehalf = ownershipData.ownership_type !== 'own';
+    const approvalStatus = formData.platform_listed ? 'pending' : 'draft';
+    const submitPayload = buildPropertyPayload(approvalStatus);
+
+    const property = draftPropertyId
+      ? await updateProperty.mutateAsync({ id: draftPropertyId, ...submitPayload } as any)
+      : await createProperty.mutateAsync(submitPayload as any);
 
     // Save documents
     if (property?.id) {
@@ -550,6 +742,7 @@ export function usePropertyWizard() {
 
     // Clear draft on successful save
     clearDraft();
+    lastSavedSnapshotRef.current = JSON.stringify(formData);
     
     setCreatedPropertyId(property?.id);
     setCreatedPropertyTitle(formData.title || formData.title_ru);
@@ -559,7 +752,7 @@ export function usePropertyWizard() {
       const msg = error instanceof Error ? error.message : String(error);
       toast.error(isRu ? `Ошибка сохранения: ${msg}` : `Error saving: ${msg}`);
     }
-  }, [formData, ownershipData, createProperty, sendInvite, activeOrgId, isRu]);
+  }, [formData, ownershipData, buildPropertyPayload, clearDraft, createProperty, draftPropertyId, isRu, sendInvite, updateProperty]);
 
   // Preview data for live preview
   const previewData = useMemo(() => ({
@@ -585,8 +778,9 @@ export function usePropertyWizard() {
     poolType: formData.pool_type,
     gardenType: formData.garden_type,
     parkingType: formData.parking_type,
-    viewType: formData.view_type,
-    furnishingLevel: formData.furnishing_level,
+    viewTypes: formData.view_type,
+    viewType: primaryViewType(formData.view_type),
+    furnishingLevel: normalizeFurnishingLevel(formData.furnishing_level),
     equipment: formData.equipment,
     lat: formData.lat,
     lng: formData.lng,
@@ -597,60 +791,15 @@ export function usePropertyWizard() {
     clearDraft();
   }, [clearDraft]);
 
+  const saveDraftOnBlur = useCallback(() => {
+    if (!hasUnsavedChanges || !hasMeaningfulDraftData) return;
+    void persistDraft(false);
+  }, [hasMeaningfulDraftData, hasUnsavedChanges, persistDraft]);
+
   // Save current form as a draft to the database
-  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const handleSaveDraft = useCallback(async () => {
-    if (!formData.title.trim() && !formData.title_ru.trim()) {
-      toast.error(isRu ? 'Введите название объекта' : 'Enter property title');
-      return;
-    }
-
-    setIsSavingDraft(true);
-    try {
-      const { 
-        title, title_ru, description, description_ru,
-        rental_platforms, custom_platform, platform_listed,
-        is_for_sale, sale_price, area_sqm, price_per_night, deposit_amount,
-        smoking_allowed, seasonal_pricing,
-        ...cleanData 
-      } = formData;
-
-      const draftPayload: any = {
-        ...cleanData,
-        seasonal_pricing: seasonal_pricing && seasonal_pricing.length > 0 ? seasonal_pricing : null,
-        area_sqm: area_sqm ? Number(area_sqm) : undefined,
-        price_per_night: price_per_night ? Number(price_per_night) : undefined,
-        deposit_amount: deposit_amount ? Number(deposit_amount) : undefined,
-        sale_price: sale_price ? Number(sale_price) : undefined,
-        is_for_sale,
-        smoking_policy: smoking_allowed ? 'allowed' : 'not_allowed',
-        title,
-        title_ru,
-        description,
-        description_ru,
-        approval_status: 'draft',
-        is_active: false,
-        rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
-        listing_modes: [
-          ...(platform_listed ? ['platform'] : []),
-          ...(is_for_sale ? ['sale'] : []),
-          ...(price_per_night ? ['rent'] : []),
-        ],
-      };
-
-      const property = await createProperty.mutateAsync(draftPayload);
-      clearDraft();
-      toast.success(isRu ? 'Черновик сохранён в список объектов' : 'Draft saved to property list');
-      setCreatedPropertyId(property?.id);
-      setCreatedPropertyTitle(formData.title || formData.title_ru);
-      setShowSuccess(true);
-    } catch (error) {
-      errorLog.error(error, 'save_draft');
-      toast.error(isRu ? 'Ошибка сохранения черновика' : 'Error saving draft');
-    } finally {
-      setIsSavingDraft(false);
-    }
-  }, [formData, createProperty, clearDraft, isRu]);
+    await persistDraft(true);
+  }, [persistDraft]);
 
   // Reset form to start a new property from scratch
   const resetForm = useCallback(() => {
@@ -662,7 +811,7 @@ export function usePropertyWizard() {
     setCreatedPropertyId(undefined);
     setCreatedPropertyTitle(undefined);
     clearDraft();
-  }, [setFormData, clearDraft]);
+  }, [clearDraft]);
 
   return {
     formData,
@@ -673,11 +822,14 @@ export function usePropertyWizard() {
     createdPropertyId,
     createdPropertyTitle,
     isLoadingSource,
+    isLoadingDraft,
     cloneFromId,
     sourceProperty,
     previewData,
     isSubmitting: createProperty.isPending,
     isSavingDraft,
+    saveState,
+    hasUnsavedChanges,
     // Draft-related
     hasDraft,
     lastSaved,
@@ -691,6 +843,7 @@ export function usePropertyWizard() {
     validateStep,
     handleSubmit,
     handleSaveDraft,
+    saveDraftOnBlur,
     resetForm,
     setShowSuccess,
     handleSuccessfulSubmission,

@@ -16,7 +16,7 @@ interface ListingData {
   max_guests?: number;
   area_sqm?: number;
   floor?: number;
-  view_type?: string;
+  view_type?: string[];
   furnishing_level?: string;
   equipment?: string[];
   highlights?: string[];
@@ -63,6 +63,42 @@ const PLATFORM_HINTS: Record<string, string> = {
   cian: 'CIAN.ru listing. Content in Russian. Look for price (руб/мес or сут), address, area, rooms count, floor.',
 };
 
+function normalizeViewTypes(value: unknown): string[] | undefined {
+  const values = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? value.split(',').map((item) => item.trim())
+      : [];
+
+  const normalized = Array.from(
+    new Set(values.filter((item): item is string => typeof item === 'string' && item.trim().length > 0))
+  );
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function extractDescriptionFallback(markdown: string): string | undefined {
+  const headingMatch = markdown.match(
+    /(?:description|описание|about|about this property|about this place|о жилье|об этом|об объекте)\s*\n+([\s\S]{80,2200}?)(?=\n#|\n##|\n\*\*|$)/i
+  );
+  if (headingMatch?.[1]) {
+    return headingMatch[1].trim().slice(0, 2000);
+  }
+
+  const paragraphs = markdown
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 100)
+    .filter((part) => !part.startsWith('#'))
+    .filter((part) => !part.startsWith('!['))
+    .filter((part) => !/^[-*]\s/.test(part))
+    .filter((part) => !/(guests?|bedrooms?|bathrooms?|reviews?|amenities|facilities|check-in|check-out)/i.test(part.slice(0, 80)));
+
+  if (paragraphs.length === 0) return undefined;
+
+  return paragraphs.slice(0, 2).join('\n\n').slice(0, 2000);
+}
+
 // Extract structured data from scraped markdown using AI
 async function extractWithAI(markdown: string, platform: string, platformName: string): Promise<ListingData> {
   const hint = PLATFORM_HINTS[platform] || `${platformName} listing page.`;
@@ -101,7 +137,7 @@ Return a JSON object with these fields (omit if not found):
 - max_guests: number
 - area_sqm: number (total area in square meters)
 - floor: number
-- view_type: "sea" | "mountain" | "pool" | "garden" | "city" | "ocean" | "lake" | "forest" | "none"
+- view_type: string[] (array of one or more values from: sea, mountain, pool, garden, city, ocean, lake, forest, panoramic, none)
 - furnishing_level: "fully_furnished" | "partially_furnished" | "unfurnished"
 
 ## Location
@@ -193,7 +229,9 @@ IMPORTANT: Return ONLY valid JSON, no markdown code fences. Extract as many fiel
     
     // Clean and parse JSON
     const jsonStr = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(jsonStr);
+    const parsed = JSON.parse(jsonStr) as ListingData;
+    parsed.view_type = normalizeViewTypes(parsed.view_type);
+    parsed.description = parsed.description || extractDescriptionFallback(markdown);
     return parsed as ListingData;
   } catch (err) {
     console.error('AI extraction failed, falling back to regex:', err);
@@ -249,8 +287,17 @@ function parseWithRegex(markdown: string): ListingData {
   }
   
   // Description
-  const descMatch = markdown.match(/(?:description|описание|about|о жилье|об этом)\s*\n+([\s\S]{50,2000}?)(?=\n#|\n\*\*|$)/i);
-  if (descMatch) data.description = descMatch[1].trim().slice(0, 2000);
+  data.description = extractDescriptionFallback(markdown);
+
+  // View type
+  const detectedViews = new Set<string>();
+  if (/(sea view|вид на море|ocean view|вид на океан)/i.test(markdown)) detectedViews.add('sea');
+  if (/(mountain view|вид на горы)/i.test(markdown)) detectedViews.add('mountain');
+  if (/(pool view|вид на бассейн)/i.test(markdown)) detectedViews.add('pool');
+  if (/(garden view|вид на сад)/i.test(markdown)) detectedViews.add('garden');
+  if (/(city view|вид на город)/i.test(markdown)) detectedViews.add('city');
+  if (/(panoramic view|панорамный вид)/i.test(markdown)) detectedViews.add('panoramic');
+  if (detectedViews.size > 0) data.view_type = Array.from(detectedViews);
   
   // Equipment — map keywords to equipment IDs
   const equipmentMap: Record<string, string[]> = {
@@ -461,6 +508,10 @@ Deno.serve(async (req) => {
 
     // Extract listing data (AI-enhanced or regex fallback)
     const listing = await extractWithAI(markdown, platform || 'generic', platform_name || 'OTA');
+    if (!listing.description) {
+      listing.description = extractDescriptionFallback(markdown);
+    }
+    listing.view_type = normalizeViewTypes(listing.view_type);
 
     // Extract photos
     const photos = extractPhotos(scrapeData, platform);
@@ -470,11 +521,15 @@ Deno.serve(async (req) => {
     }
 
     console.log('Extracted listing:', JSON.stringify({
+      fields: Object.keys(listing).sort(),
       title: listing.title,
+      descriptionLength: listing.description?.length || 0,
+      descriptionRuLength: listing.description_ru?.length || 0,
+      viewTypes: listing.view_type || [],
       bedrooms: listing.bedrooms,
       price_per_night: listing.price_per_night,
       photosCount: photos.length,
-      amenitiesCount: listing.amenities?.length || 0,
+      equipmentCount: listing.equipment?.length || 0,
     }));
 
     return new Response(

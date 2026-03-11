@@ -1,0 +1,85 @@
+# myUNO — Cursor AI Rules
+# Project by Pavel Ignatev | Ignatev Group | Phuket, Thailand
+
+## PROJECT IDENTITY
+myUNO is a super-app platform consolidating Phuket services into one ecosystem.
+It is part of a three-division flywheel:
+- Ignatev Capital → brings investors
+- Ignatev Estate → manages properties
+- myUNO → serves residents of those assets, generates data and cashflow
+
+Target users: Russian-speaking tourists, expats, property owners, investors in Phuket.
+Current stage: Pre-PMF. 7 users, 0 transactions. Validation is the priority.
+
+## TECH STACK
+- Frontend: React + TypeScript + Vite
+- Styling: Tailwind CSS
+- Backend/DB: Supabase (PostgreSQL + Auth + Storage + Realtime)
+- Hosting: Vercel (auto-deploy from GitHub main branch)
+- Testing: Vitest + Playwright (e2e)
+- Routing: React Router with APP_ROUTES constants (never hardcode route strings)
+
+## USER ROLES (4 personas — always code with these in mind)
+1. **Турист** — short stay, needs tours, transfers, experiences
+2. **Резидент** — expat living in Phuket, needs household services, delivery, repairs
+3. **Собственник** — property owner, needs property management, rental income tracking
+4. **Инвестор** — HNWI, needs real estate deals, ROI data, market analytics
+
+## ARCHITECTURE RULES
+- Always use APP_ROUTES constants for navigation — never hardcode paths
+- Supabase client is initialized once — import from existing client file, never create new instances
+- All API calls must have error handling and loading states
+- Use existing component patterns before creating new ones — check /src/components first
+- Prefer composition over creating large monolithic components
+- Keep business logic in hooks (/src/hooks), not in components
+
+## CODE QUALITY
+- TypeScript strict mode — avoid `any`, use proper types
+- No console.log in production code — use proper error boundaries
+- All user-facing text must support Russian and English (i18n-ready)
+- Mobile-first responsive design — primary users are on phones
+- Performance: use React.lazy for route-level code splitting
+
+## SUPABASE PATTERNS
+- Always use Row Level Security (RLS) — never bypass it
+- Use Supabase realtime for live updates where appropriate
+- Edge functions for sensitive business logic (payments, OTA sync)
+- Never expose service role key in frontend code
+
+## BUSINESS LOGIC PRIORITIES (in order)
+1. User onboarding and role selection (Турист/Резидент/Собственник/Инвестор)
+2. Service catalog and booking flow
+3. Vendor/provider management
+4. Payment processing
+5. Property owner dashboard
+6. Investor analytics
+
+## WHEN ADDING FEATURES — ALWAYS ASK:
+- Which of the 4 user personas does this serve?
+- Does this move myUNO toward first 100 real transactions?
+- Is there an existing component/hook/utility to reuse?
+- Does this work on mobile?
+
+## CURRENT PRIORITIES (focus here first)
+- Stability over new features
+- Fix existing bugs before adding new functionality
+- Every feature needs a working happy path before edge cases
+- Real data flows over mock/placeholder data
+
+## LANGUAGE
+- UI strings: Russian primary, English secondary
+- Code, comments, variable names: English only
+- Commit messages: English
+
+## DO NOT
+- Do not create duplicate Supabase client instances
+- Do not hardcode route strings — use APP_ROUTES
+- Do not add dependencies without checking if existing ones cover the need
+- Do not remove existing error handling
+- Do not make breaking changes to database schema without migration files
+- Do not skip TypeScript types — no implicit any
+
+## DEPLOYMENT
+- main branch = production (auto-deploys to Vercel)
+- Always test locally with `npm run dev` before pushing
+- Run `npm run build` to check for build errors before `git push`

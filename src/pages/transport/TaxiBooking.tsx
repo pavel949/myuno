@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useBooking } from '@/hooks/useBooking';
 import { useVehicleTypes, VehicleType } from '@/hooks/useTransportConfig';
+import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
+import { hasGoogleMapsKey } from '@/lib/googleMaps';
 import { cn } from '@/lib/utils';
 import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
@@ -68,6 +70,7 @@ export default function TaxiBooking() {
   const { toast } = useToast();
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('taxi');
   const { createBooking, isSubmitting } = useBooking();
+  const googleGeocode = useGoogleGeocode(language);
 
   const [isSuccess, setIsSuccess] = useState(false);
   const [locationPickerType, setLocationPickerType] = useState<'pickup' | 'destination' | null>(null);
@@ -105,31 +108,29 @@ export default function TaxiBooking() {
       });
 
       const { latitude, longitude } = position.coords;
-      
-      // Reverse geocode via Google Geocoding edge function
-      const { data: geocodeData } = await supabase.functions.invoke('geocode-address', {
-        body: null,
-        headers: {},
-      });
-      // Use the edge function with query params
-      const geocodeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
-      const geocodeRes = await fetch(geocodeUrl, {
-        headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-      });
-      const geoData = await geocodeRes.json();
-      
-      const address = geoData.results?.[0]?.address || geoData.results?.[0]?.name ||
-        (language === 'ru' ? 'Текущее местоположение' : 'Current location');
-      
+
+      if (!hasGoogleMapsKey()) {
+        setPickupLocation({
+          address: language === 'ru' ? 'Текущее местоположение' : 'Current location',
+          lat: latitude,
+          lng: longitude,
+        });
+        toast({
+          title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
+          description: language === 'ru' ? 'Координаты установлены' : 'Coordinates set',
+        });
+        return;
+      }
+
+      const result = await googleGeocode.reverseGeocode(latitude, longitude);
+      const address = result?.address ?? (language === 'ru' ? 'Текущее местоположение' : 'Current location');
+
       setPickupLocation({
         address,
         lat: latitude,
         lng: longitude,
       });
-      
+
       toast({
         title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
         description: address,

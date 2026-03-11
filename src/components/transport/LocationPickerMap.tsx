@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo, forwardRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, forwardRef } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
@@ -7,8 +7,8 @@ import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
 import { Loader2, Navigation, MapPin, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { getMapCenter, PHUKET_LANDMARKS, DEFAULT_CITY } from '@/lib/config';
+import { cn } from '@/lib/utils';
 
 interface LocationPickerMapProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ const cityPopularLocations: Record<string, typeof defaultPopularLocations> = {
     { id: 'danang-airport', nameEn: 'Da Nang Airport', nameRu: 'Аэропорт Дананга', lat: 16.0439, lng: 108.1999 },
   ],
   hongkong: [
-    { id: 'hk-central', nameEn: 'Central', nameRu: 'Централ', lat: 22.2800, lng: 114.1588 },
+    { id: 'central', nameEn: 'Central', nameRu: 'Централ', lat: 22.2800, lng: 114.1588 },
     { id: 'tst', nameEn: 'Tsim Sha Tsui', nameRu: 'Цим Ша Цуй', lat: 22.2988, lng: 114.1722 },
     { id: 'wan-chai', nameEn: 'Wan Chai', nameRu: 'Ван Чай', lat: 22.2780, lng: 114.1733 },
     { id: 'hk-airport', nameEn: 'Hong Kong Airport', nameRu: 'Аэропорт Гонконга', lat: 22.3080, lng: 113.9185 },
@@ -71,55 +71,87 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
 }, ref) => {
   const { language } = useLanguage();
   const { getCityConfig, currentCity } = useLocationContext();
-  const { hasKey, isLoaded } = useGoogleMaps();
-  const { reverseGeocode, searchAddress } = useGoogleGeocode(language);
-
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
-  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(
-    initialLocation || null
-  );
+  const { hasKey, isLoaded, loadError } = useGoogleMaps();
+  const googleGeocode = useGoogleGeocode(language);
 
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const cityConfig = getCityConfig();
   const mapCenter = useMemo(() => {
-    if (initialLocation) return initialLocation;
     if (cityConfig) return { lat: cityConfig.lat, lng: cityConfig.lng };
     const c = getMapCenter(DEFAULT_CITY);
     return { lat: c[1], lng: c[0] };
-  }, [cityConfig, initialLocation]);
+  }, [cityConfig]);
+
+  const initialCenter = useMemo(() => {
+    if (initialLocation) return { lat: initialLocation.lat, lng: initialLocation.lng };
+    return mapCenter;
+  }, [initialLocation, mapCenter]);
+
+  const [markerPosition, setMarkerPosition] = useState(initialCenter);
 
   const popularLocations = useMemo(() => {
     const citySlug = currentCity?.slug || 'phuket';
     return cityPopularLocations[citySlug] || defaultPopularLocations;
   }, [currentCity]);
 
-  const handleMapClick = useCallback(async (e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
-    const lat = e.latLng.lat();
-    const lng = e.latLng.lng();
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    const result = await googleGeocode.reverseGeocode(lat, lng);
+    return result?.address ?? null;
+  }, [googleGeocode]);
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    const lat = e.latLng?.lat();
+    const lng = e.latLng?.lng();
+    if (lat == null || lng == null) return;
     setMarkerPosition({ lat, lng });
-    const result = await reverseGeocode(lat, lng);
-    if (result) {
-      setSelectedLocation({ address: result.address, lat, lng });
-    }
+    reverseGeocode(lat, lng).then((address) => {
+      if (address) setSelectedLocation({ address, lat, lng });
+    });
   }, [reverseGeocode]);
+
+  const handleMarkerDragEnd = useCallback((e: google.maps.MapMouseEvent) => {
+    const lat = e.latLng?.lat();
+    const lng = e.latLng?.lng();
+    if (lat == null || lng == null) return;
+    setMarkerPosition({ lat, lng });
+    reverseGeocode(lat, lng).then((address) => {
+      if (address) setSelectedLocation({ address, lat, lng });
+    });
+  }, [reverseGeocode]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setMarkerPosition(initialCenter);
+    reverseGeocode(initialCenter.lat, initialCenter.lng).then((address) => {
+      if (address) setSelectedLocation({ address, ...initialCenter });
+      else setSelectedLocation(null);
+    });
+  }, [isOpen, initialCenter.lat, initialCenter.lng]);
 
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) return;
     setIsGettingLocation(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
-        setMarkerPosition({ lat: latitude, lng: longitude });
-        mapRef.current?.panTo({ lat: latitude, lng: longitude });
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setMarkerPosition({ lat, lng });
+        mapRef.current?.panTo({ lat, lng });
         mapRef.current?.setZoom(16);
-        const result = await reverseGeocode(latitude, longitude);
-        if (result) {
-          setSelectedLocation({ address: result.address, lat: latitude, lng: longitude });
-        }
+        const address = await reverseGeocode(lat, lng);
+        if (address) setSelectedLocation({ address, lat, lng });
         setIsGettingLocation(false);
       },
       () => setIsGettingLocation(false),
@@ -130,19 +162,19 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
   const selectPopularLocation = useCallback((location: typeof popularLocations[0]) => {
     const pos = { lat: location.lat, lng: location.lng };
     setMarkerPosition(pos);
+    mapRef.current?.panTo(pos);
+    mapRef.current?.setZoom(16);
     setSelectedLocation({
       address: language === 'ru' ? location.nameRu : location.nameEn,
       lat: location.lat,
       lng: location.lng,
     });
-    mapRef.current?.panTo(pos);
-    mapRef.current?.setZoom(16);
   }, [language]);
 
-  const handleSearch = useCallback(async () => {
+  const searchLocation = useCallback(async () => {
     if (!searchQuery.trim()) return;
     const countryCode = cityConfig?.countryCode || 'TH';
-    const results = await searchAddress(searchQuery, { country: countryCode });
+    const results = await googleGeocode.searchAddress(searchQuery, { country: countryCode });
     if (results.length > 0) {
       const r = results[0];
       setMarkerPosition({ lat: r.lat, lng: r.lng });
@@ -150,7 +182,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       mapRef.current?.panTo({ lat: r.lat, lng: r.lng });
       mapRef.current?.setZoom(16);
     }
-  }, [searchQuery, searchAddress, cityConfig]);
+  }, [searchQuery, cityConfig, googleGeocode]);
 
   const handleConfirm = useCallback(() => {
     if (selectedLocation) {
@@ -161,11 +193,11 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
 
   if (!isOpen) return null;
 
-  const isMapLoading = !hasKey || !isLoaded;
+  const noKey = !hasKey || loadError;
+  const isLoading = hasKey && !isLoaded;
 
   return (
     <div ref={ref} className="fixed inset-0 z-50 bg-background">
-      {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
           <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground">
@@ -179,61 +211,77 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
             </h2>
           </div>
         </div>
-
         <div className="px-4 pb-3 flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && searchLocation()}
               placeholder={language === 'ru' ? 'Поиск адреса...' : 'Search address...'}
               className="pl-10"
             />
           </div>
-          <Button onClick={handleSearch} size="icon" variant="outline">
+          <Button onClick={searchLocation} size="icon" variant="outline">
             <Search className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {/* Map */}
       <div className="absolute inset-0 pt-28">
-        {isMapLoading ? (
-          <div className="flex-1 flex items-center justify-center h-full">
+        {noKey ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
+            <p className="text-muted-foreground">
+              {language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set'}
+            </p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              {language === 'ru'
+                ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env и включите Maps JavaScript API в Google Cloud.'
+                : 'Set VITE_GOOGLE_MAPS_API_KEY in .env and enable Maps JavaScript API in Google Cloud.'}
+            </p>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=7.8804,98.3923"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline"
+            >
+              {language === 'ru' ? 'Открыть карту в Google Maps' : 'Open in Google Maps'}
+            </a>
+          </div>
+        ) : isLoading ? (
+          <div className="flex items-center justify-center h-full">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
-            center={mapCenter}
+            center={markerPosition}
             zoom={14}
+            onLoad={onMapLoad}
+            onUnmount={onMapUnmount}
             onClick={handleMapClick}
-            onLoad={(map) => { mapRef.current = map; }}
-            options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: false }}
+            options={{
+              mapTypeControl: true,
+              streetViewControl: false,
+              fullscreenControl: true,
+              zoomControl: true,
+            }}
           >
-            {markerPosition && (
-              <Marker
-                position={markerPosition}
-                draggable
-                onDragEnd={async (e) => {
-                  if (!e.latLng) return;
-                  const lat = e.latLng.lat();
-                  const lng = e.latLng.lng();
-                  setMarkerPosition({ lat, lng });
-                  const result = await reverseGeocode(lat, lng);
-                  if (result) setSelectedLocation({ address: result.address, lat, lng });
-                }}
-              />
-            )}
+            <Marker
+              position={markerPosition}
+              draggable
+              onDragEnd={handleMarkerDragEnd}
+            />
           </GoogleMap>
         )}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div className="w-1 h-1 bg-primary rounded-full shadow-lg" />
+        </div>
       </div>
 
-      {/* My Location Button */}
       <button
         onClick={getCurrentLocation}
-        disabled={isGettingLocation}
+        disabled={isGettingLocation || noKey || isLoading}
         className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
       >
         {isGettingLocation ? (
@@ -243,7 +291,6 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
         )}
       </button>
 
-      {/* Bottom panel */}
       <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border rounded-t-2xl">
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground mb-2">
@@ -261,7 +308,6 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
             ))}
           </div>
         </div>
-
         <div className="px-4 pb-4">
           <div className="p-3 rounded-xl bg-muted/50 border border-border/50 mb-3 flex items-start gap-3">
             <div className={cn(
@@ -284,8 +330,12 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
               </p>
             </div>
           </div>
-
-          <Button onClick={handleConfirm} disabled={!selectedLocation} className="w-full" size="lg">
+          <Button
+            onClick={handleConfirm}
+            disabled={!selectedLocation}
+            className="w-full"
+            size="lg"
+          >
             {language === 'ru' ? 'Подтвердить' : 'Confirm location'}
           </Button>
         </div>
@@ -295,5 +345,4 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
 });
 
 LocationPickerMap.displayName = 'LocationPickerMap';
-
 export default LocationPickerMap;

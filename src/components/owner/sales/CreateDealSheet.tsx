@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Handshake } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertCircle, Crown, Handshake } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
@@ -15,15 +16,24 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
   prefilledContact?: CrmContact | null;
+  prefilledStage?: string;
 }
 
-export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact }: Props) {
+const CONTACT_TYPE_BY_DEAL_TYPE = {
+  sale: 'buyer',
+  rent: 'tenant',
+  investment: 'investor',
+  management: 'landlord',
+} as const;
+
+export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContact, prefilledStage = 'new' }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
@@ -48,6 +58,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         bedrooms_min: prefilledContact.bedrooms_min ? String(prefilledContact.bedrooms_min) : '',
         preferred_types: prefilledContact.preferred_types || [],
         preferred_districts: prefilledContact.preferred_districts || [],
+        is_vip: f.is_vip || (prefilledContact.tags?.some(tag => tag.toLowerCase() === 'vip') ?? false),
       }));
     }
   }, [prefilledContact, open]);
@@ -65,7 +76,14 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     bedrooms_min: '',
     preferred_types: [] as string[],
     preferred_districts: [] as string[],
+    is_vip: false,
   });
+  const [errors, setErrors] = useState<{
+    client_name?: string;
+    client_email?: string;
+    budget?: string;
+  }>({});
+  const selectedContactIsVip = selectedContact?.tags?.some(tag => tag.toLowerCase() === 'vip') || false;
 
   const { data: duplicates = [] } = useDuplicateCheck(companyId, form.client_phone, form.client_email);
 
@@ -87,9 +105,26 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     }));
   };
 
-  const handleSubmit = async () => {
+  const validateForm = () => {
+    const nextErrors: { client_name?: string; client_email?: string; budget?: string } = {};
     if (!form.client_name.trim() && !selectedContact) {
-      toast({ title: isRu ? 'Введите имя клиента или выберите контакт' : 'Enter client name or select a contact', variant: 'destructive' });
+      nextErrors.client_name = isRu ? 'Введите имя клиента или выберите контакт' : 'Enter client name or select a contact';
+    }
+    if (form.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.client_email.trim())) {
+      nextErrors.client_email = isRu ? 'Неверный формат email' : 'Invalid email format';
+    }
+    const bMin = form.budget_min ? Number(form.budget_min) : null;
+    const bMax = form.budget_max ? Number(form.budget_max) : null;
+    if (bMin !== null && bMax !== null && bMin > bMax) {
+      nextErrors.budget = isRu ? 'Бюджет "от" не может быть больше "до"' : 'Budget min cannot be greater than max';
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
       return;
     }
     try {
@@ -109,7 +144,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             phone2: null, email: form.client_email || null,
             whatsapp: null, telegram: null, line_id: null,
             nationality: null, language: 'en',
-            source: form.client_source, contact_type: 'buyer',
+            source: form.client_source, contact_type: CONTACT_TYPE_BY_DEAL_TYPE[form.deal_type as keyof typeof CONTACT_TYPE_BY_DEAL_TYPE],
             company_name: null,
             budget_min: form.budget_min ? Number(form.budget_min) : null,
             budget_max: form.budget_max ? Number(form.budget_max) : null,
@@ -121,10 +156,16 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             created_by: user?.id || null,
           });
           contactId = (newContact as any)?.id || null;
-        } catch { /* ignore contact creation failure */ }
+        } catch (contactError: any) {
+          toast({
+            title: isRu ? 'Не удалось создать контакт' : 'Failed to create contact',
+            description: contactError?.message || String(contactError),
+            variant: 'destructive',
+          });
+        }
       }
 
-      await createDeal.mutateAsync({
+      const createdDeal = await createDeal.mutateAsync({
         company_id: companyId,
         agent_id: user!.id,
         property_id: null,
@@ -132,7 +173,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         client_phone: clientPhone,
         client_email: clientEmail,
         client_source: form.client_source,
-        stage: 'new',
+        stage: prefilledStage as any,
         deal_type: form.deal_type,
         deal_status: 'active',
         budget_min: form.budget_min ? Number(form.budget_min) : null,
@@ -142,17 +183,29 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         preferred_types: form.preferred_types.length ? form.preferred_types : null,
         bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
         notes: form.notes || null,
+        is_vip: form.is_vip,
         next_action: null, next_action_date: null, deal_value: null,
         commission_percent: null, commission_amount: null,
         closed_at: null, lost_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
       } as any);
-      toast({ title: isRu ? 'Сделка создана' : 'Deal created' });
+      toast({
+        title: isRu ? 'Сделка создана' : 'Deal created',
+        description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.',
+      });
       onOpenChange(false);
       setSelectedContact(null);
-      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [] });
-    } catch {
-      toast({ title: isRu ? 'Ошибка при создании' : 'Failed to create deal', variant: 'destructive' });
+      setErrors({});
+      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false });
+      if (createdDeal?.id) {
+        navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
+      }
+    } catch (dealError: any) {
+      toast({
+        title: isRu ? 'Ошибка при создании сделки' : 'Failed to create deal',
+        description: dealError?.message || String(dealError),
+        variant: 'destructive',
+      });
     }
   };
 
@@ -162,49 +215,74 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       onOpenChange={onOpenChange}
       title={isRu ? 'Новая сделка' : 'New Deal'}
       icon={<Handshake className="w-5 h-5 text-primary" />}
-      size="lg"
+      size="2xl"
+      mobileHeight="max-h-[92vh]"
       footer={
         <Button onClick={handleSubmit} disabled={createDeal.isPending} className="w-full sm:w-auto min-w-[200px]">
           {createDeal.isPending ? '...' : (isRu ? 'Создать сделку' : 'Create Deal')}
         </Button>
       }
     >
-      {/* Duplicate warning */}
-      {duplicates.length > 0 && (
-        <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
-          <div className="flex items-center gap-2 text-warning font-medium mb-1">
-            <AlertCircle className="h-4 w-4" />
-            {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
+      <div className="overflow-y-auto max-h-[calc(100vh-120px)] overscroll-contain space-y-4 pr-1">
+        {/* Duplicate warning */}
+        {duplicates.length > 0 && (
+          <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
+            <div className="flex items-center gap-2 text-warning font-medium mb-1">
+              <AlertCircle className="h-4 w-4" />
+              {isRu ? 'Возможный дубликат!' : 'Possible duplicate!'}
+            </div>
+            {duplicates.map(d => (
+              <button
+                key={d.id}
+                onClick={() => { onOpenChange(false); navigate(`${APP_ROUTES.MC_SALES}/${d.id}`); }}
+                className="block text-xs text-primary hover:underline"
+              >
+                {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})
+              </button>
+            ))}
           </div>
-          {duplicates.map(d => (
-            <button
-              key={d.id}
-              onClick={() => { onOpenChange(false); navigate(`/mc/sales/${d.id}`); }}
-              className="block text-xs text-primary hover:underline"
-            >
-              {d.client_name} — {d.client_phone || d.client_email} ({isRu ? DEAL_STAGE_LABELS_LOOKUP[d.stage]?.ru : DEAL_STAGE_LABELS_LOOKUP[d.stage]?.en})
-            </button>
-          ))}
-        </div>
-      )}
+        )}
 
-      {/* Contact search */}
-      <div>
-        <Label>{isRu ? 'Привязать контакт' : 'Link Contact'}</Label>
-        <ContactSearchInput
-          companyId={companyId}
-          selectedContact={selectedContact}
-          onSelect={(c) => {
-            setSelectedContact(c);
-            setForm(f => ({
-              ...f,
-              client_name: `${c.first_name} ${c.last_name}`.trim(),
-              client_phone: c.phone || '',
-              client_email: c.email || '',
-            }));
-          }}
-          onClear={() => setSelectedContact(null)}
-          isRu={isRu}
+        {/* Contact search */}
+        <div>
+          <Label>{isRu ? 'Привязать контакт' : 'Link Contact'}</Label>
+          <ContactSearchInput
+            companyId={companyId}
+            selectedContact={selectedContact}
+            onSelect={(c) => {
+              const contactIsVip = c.tags?.some(tag => tag.toLowerCase() === 'vip') || false;
+              setSelectedContact(c);
+              setErrors((prev) => ({ ...prev, client_name: undefined }));
+              setForm(f => ({
+                ...f,
+                client_name: `${c.first_name} ${c.last_name}`.trim(),
+                client_phone: c.phone || '',
+                client_email: c.email || '',
+                is_vip: f.is_vip || contactIsVip,
+              }));
+            }}
+            onClear={() => setSelectedContact(null)}
+            isRu={isRu}
+          />
+          {selectedContactIsVip && (
+            <p className="mt-1 text-xs text-warning flex items-center gap-1">
+              <Crown className="h-3.5 w-3.5" />
+              {isRu ? 'Контакт отмечен как VIP' : 'Contact is marked as VIP'}
+            </p>
+          )}
+        </div>
+
+      <div className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <Crown className="h-4 w-4 text-warning" />
+          <Label htmlFor="deal-vip-toggle" className="cursor-pointer">
+            {isRu ? 'VIP клиент (сделка)' : 'VIP client (deal)'}
+          </Label>
+        </div>
+        <Checkbox
+          id="deal-vip-toggle"
+          checked={form.is_vip}
+          onCheckedChange={(checked) => setForm(f => ({ ...f, is_vip: Boolean(checked) }))}
         />
       </div>
 
@@ -232,19 +310,21 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
 
       <div>
         <Label>{isRu ? 'Имя клиента *' : 'Client Name *'}</Label>
-        <Input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} />
+        <Input value={form.client_name} onChange={e => { setForm(f => ({ ...f, client_name: e.target.value })); setErrors(prev => ({ ...prev, client_name: undefined })); }} />
+        {errors.client_name && <p className="text-xs text-destructive mt-1">{errors.client_name}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
           <Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} />
         </div>
         <div>
           <Label>Email</Label>
-          <Input type="email" value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} />
+          <Input type="email" value={form.client_email} onChange={e => { setForm(f => ({ ...f, client_email: e.target.value })); setErrors(prev => ({ ...prev, client_email: undefined })); }} />
+          {errors.client_email && <p className="text-xs text-destructive mt-1">{errors.client_email}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Источник' : 'Source'}</Label>
           <Select value={form.client_source} onValueChange={v => setForm(f => ({ ...f, client_source: v }))}>
@@ -266,7 +346,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           </Select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label>
           <Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} />
@@ -280,6 +360,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           <Input type="number" value={form.bedrooms_min} onChange={e => setForm(f => ({ ...f, bedrooms_min: e.target.value }))} placeholder="1" />
         </div>
       </div>
+      {errors.budget && <p className="text-xs text-destructive -mt-1">{errors.budget}</p>}
 
       {/* Property Types */}
       <div>
@@ -326,6 +407,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       <div>
         <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
         <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
+      </div>
       </div>
     </ResponsiveModal>
   );

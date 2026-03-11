@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { CrmContact } from '@/hooks/useCrmContacts';
@@ -13,6 +13,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ContactExportButtonProps {
   contacts: CrmContact[];
@@ -37,49 +43,72 @@ const EXPORT_FIELDS = [
   { key: 'tags', label: 'Tags', labelRu: 'Теги' },
 ] as const;
 
+function contactToOdooRow(c: CrmContact): Record<string, string> {
+  const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
+  const row: Record<string, string> = {
+    firstname: c.first_name ?? '',
+    lastname: c.last_name ?? '',
+    name,
+    email: c.email ?? '',
+    phone: c.phone ?? '',
+    mobile: c.mobile ?? c.whatsapp ?? '',
+    street: c.address_street ?? '',
+    street2: c.address_street2 ?? '',
+    city: c.address_city ?? '',
+    zip: c.address_zip ?? '',
+    country_id: c.address_country ?? '',
+    website: c.website ?? '',
+    function: c.job_title ?? '',
+    parent_id: c.company_name ?? '',
+    comment: [c.notes, c.special_notes].filter(Boolean).join('\n'),
+    lang: c.language ?? '',
+    vat: c.tax_id ?? '',
+    birthdate: c.birthday ?? '',
+  };
+  return row;
+}
+
 export function ContactExportButton({ contacts }: ContactExportButtonProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
   const canManage = useCanManagePermissions();
+  const [exportOpen, setExportOpen] = useState(false);
 
-  const handleExport = async () => {
+  const logExport = async () => {
+    if (!user) return;
+    try {
+      await supabase.from('crm_access_log').insert({
+        user_id: user.id,
+        action: 'export_csv',
+        entity_type: 'contacts',
+        entity_count: contacts.length,
+        metadata: { format: 'csv', timestamp: new Date().toISOString() },
+      } as Record<string, unknown>);
+    } catch {
+      // ignore
+    }
+  };
+
+  const exportDate = new Date().toISOString().split('T')[0];
+
+  const handleExportMyUno = async () => {
     if (contacts.length === 0) {
       toast.error(isRu ? 'Нет контактов для экспорта' : 'No contacts to export');
       return;
     }
-
-    // Log export to crm_access_log
-    if (user) {
-      try {
-        await supabase.from('crm_access_log').insert({
-          user_id: user.id,
-          action: 'export_csv',
-          entity_type: 'contacts',
-          entity_count: contacts.length,
-          metadata: { format: 'csv', timestamp: new Date().toISOString() },
-        } as any);
-      } catch {
-        // Don't block export if logging fails
-      }
-    }
-
+    await logExport();
     const rows = contacts.map(c => {
       const row: Record<string, string> = {};
       EXPORT_FIELDS.forEach(f => {
-        const val = (c as any)[f.key];
-        row[isRu ? f.labelRu : f.label] = Array.isArray(val) ? val.join(', ') : (val ?? '');
+        const val = (c as Record<string, unknown>)[f.key];
+        row[isRu ? f.labelRu : f.label] = Array.isArray(val) ? val.join(', ') : String(val ?? '');
       });
       return row;
     });
-
     const csv = Papa.unparse(rows);
-
-    // Add watermark
     const exporterName = user?.email || 'Unknown';
-    const exportDate = new Date().toISOString().split('T')[0];
     const watermark = `\n# Exported by: ${exporterName} on ${exportDate}\n# Confidential — Do not distribute`;
-
     const blob = new Blob(['\ufeff' + csv + watermark], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -87,8 +116,27 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
     link.download = `contacts-${exportDate}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-
     toast.success(isRu ? `Экспортировано ${contacts.length} контактов` : `Exported ${contacts.length} contacts`);
+    setExportOpen(false);
+  };
+
+  const handleExportOdoo = async () => {
+    if (contacts.length === 0) {
+      toast.error(isRu ? 'Нет контактов для экспорта' : 'No contacts to export');
+      return;
+    }
+    await logExport();
+    const rows = contacts.map(c => contactToOdooRow(c));
+    const csv = Papa.unparse(rows);
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contacts-odoo-${exportDate}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(isRu ? `Экспорт для Odoo: ${contacts.length} контактов` : `Odoo export: ${contacts.length} contacts`);
+    setExportOpen(false);
   };
 
   if (!canManage) {
@@ -110,9 +158,22 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleExport} disabled={contacts.length === 0}>
-      <Download className="h-4 w-4 mr-1" />
-      CSV
-    </Button>
+    <DropdownMenu open={exportOpen} onOpenChange={setExportOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" disabled={contacts.length === 0}>
+          <Download className="h-4 w-4 mr-1" />
+          CSV
+          <ChevronDown className="h-3.5 w-3.5 ml-1 opacity-70" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleExportMyUno}>
+          {isRu ? 'CSV (myUNO)' : 'CSV (myUNO)'}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportOdoo}>
+          {isRu ? 'CSV для Odoo' : 'CSV for Odoo'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

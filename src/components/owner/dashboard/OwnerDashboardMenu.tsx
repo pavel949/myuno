@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface MenuItem {
   path: string;
@@ -39,46 +40,52 @@ interface MenuSection {
 
 const MENU_SECTIONS: MenuSection[] = [
   {
-    titleEn: 'CRM & Sales',
-    titleRu: 'CRM и продажи',
+    titleEn: 'Properties',
+    titleRu: 'Объекты',
     items: [
-      { path: '/mc/owners', icon: Crown, labelEn: 'Owners', labelRu: 'Собственники', tint: 'bg-accent-amber/15 text-accent-amber' },
-      { path: '/mc/sales', icon: TrendingUp, labelEn: 'Sales', labelRu: 'Продажи', tint: 'bg-success/15 text-success' },
-      { path: '/mc/contacts', icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты', tint: 'bg-info/15 text-info' },
-      { path: '/mc/reviews-management', icon: Star, labelEn: 'Reviews', labelRu: 'Отзывы', tint: 'bg-warning/15 text-warning' },
-      { path: '/mc/marketing', icon: Megaphone, labelEn: 'Marketing', labelRu: 'Маркетинг', tint: 'bg-accent-coral/15 text-accent-coral' },
+      { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', tint: 'bg-info/15 text-info' },
+      { path: APP_ROUTES.MC_INVENTORY, icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь', tint: 'bg-accent-amber/15 text-accent-amber' },
+      { path: APP_ROUTES.MC_VENDORS, icon: Wrench, labelEn: 'Vendors', labelRu: 'Поставщики', tint: 'bg-warning/15 text-warning' },
     ],
   },
   {
-    titleEn: 'Operations',
-    titleRu: 'Операции',
+    titleEn: 'Distribution',
+    titleRu: 'Дистрибуция',
     items: [
-      { path: '/mc/operations', icon: Wrench, labelEn: 'Tasks', labelRu: 'Задачи', tint: 'bg-warning/15 text-warning' },
+      { path: APP_ROUTES.MC_CHANNELS, icon: Radio, labelEn: 'Channels', labelRu: 'Каналы', tint: 'bg-accent-cyan/15 text-accent-cyan' },
       { path: '/mc/rates', icon: Tag, labelEn: 'Rates', labelRu: 'Тарифы', tint: 'bg-accent-purple/15 text-accent-purple' },
-      { path: '/mc/channels', icon: Radio, labelEn: 'Channels', labelRu: 'Каналы', tint: 'bg-accent-cyan/15 text-accent-cyan' },
-      { path: '/mc/inventory', icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь', tint: 'bg-accent-amber/15 text-accent-amber' },
-      { path: '/mc/vendors', icon: Building2, labelEn: 'Vendors', labelRu: 'Поставщики', tint: 'bg-info/15 text-info' },
-      { path: '/mc/insurance', icon: ShieldCheck, labelEn: 'Insurance', labelRu: 'Страховки', tint: 'bg-success/15 text-success' },
-      { path: '/mc/documents', icon: FileText, labelEn: 'Documents', labelRu: 'Документы', tint: 'bg-muted text-muted-foreground' },
+      { path: APP_ROUTES.MC_CALENDAR, icon: Star, labelEn: 'Calendar', labelRu: 'Календарь', tint: 'bg-warning/15 text-warning' },
+      { path: APP_ROUTES.MC_TASKS, icon: FileText, labelEn: 'Tasks', labelRu: 'Задачи', tint: 'bg-muted text-muted-foreground' },
     ],
   },
   {
     titleEn: 'Finance',
     titleRu: 'Финансы',
     items: [
-      { path: '/mc/finance', icon: DollarSign, labelEn: 'Overview', labelRu: 'Обзор', tint: 'bg-success/15 text-success' },
-      { path: '/mc/financials', icon: Receipt, labelEn: 'Transactions', labelRu: 'Транзакции', tint: 'bg-accent-amber/15 text-accent-amber' },
-      { path: '/mc/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты', tint: 'bg-primary/15 text-primary' },
-      { path: '/mc/budget', icon: Tag, labelEn: 'Budget', labelRu: 'Бюджет', tint: 'bg-accent-purple/15 text-accent-purple' },
-      { path: '/mc/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы', tint: 'bg-accent-cyan/15 text-accent-cyan' },
+      { path: APP_ROUTES.MC_FINANCE, icon: DollarSign, labelEn: 'Overview', labelRu: 'Обзор', tint: 'bg-success/15 text-success' },
+      { path: APP_ROUTES.MC_FINANCIALS, icon: Receipt, labelEn: 'Transactions', labelRu: 'Транзакции', tint: 'bg-accent-amber/15 text-accent-amber' },
+      { path: APP_ROUTES.MC_REPORTS, icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты', tint: 'bg-primary/15 text-primary' },
+      { path: APP_ROUTES.MC_BUDGET, icon: Tag, labelEn: 'Budget', labelRu: 'Бюджет', tint: 'bg-accent-purple/15 text-accent-purple' },
+      { path: APP_ROUTES.MC_INVOICES, icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы', tint: 'bg-accent-cyan/15 text-accent-cyan' },
+    ],
+  },
+  {
+    titleEn: 'CRM & Sales',
+    titleRu: 'CRM и продажи',
+    items: [
+      { path: APP_ROUTES.MC_CRM_DASHBOARD, icon: TrendingUp, labelEn: 'CRM', labelRu: 'CRM', tint: 'bg-success/15 text-success' },
+      { path: APP_ROUTES.MC_SALES, icon: Megaphone, labelEn: 'Sales', labelRu: 'Продажи', tint: 'bg-accent-coral/15 text-accent-coral' },
+      { path: APP_ROUTES.MC_CONTACTS, icon: ContactRound, labelEn: 'Contacts', labelRu: 'Контакты', tint: 'bg-info/15 text-info' },
+      { path: APP_ROUTES.MC_OWNERS, icon: Crown, labelEn: 'Owners', labelRu: 'Собственники', tint: 'bg-accent-amber/15 text-accent-amber' },
     ],
   },
   {
     titleEn: 'Team',
     titleRu: 'Команда',
     items: [
-      { path: '/mc/staff', icon: Users, labelEn: 'Staff', labelRu: 'Сотрудники', tint: 'bg-info/15 text-info' },
-      { path: '/owner/guide', icon: BookOpen, labelEn: 'Guide', labelRu: 'Руководство', tint: 'bg-muted text-muted-foreground' },
+      { path: APP_ROUTES.MC_STAFF, icon: Users, labelEn: 'Staff', labelRu: 'Сотрудники', tint: 'bg-info/15 text-info' },
+      { path: APP_ROUTES.MC_SUBSCRIPTION, icon: ShieldCheck, labelEn: 'Subscription', labelRu: 'Подписка', tint: 'bg-success/15 text-success' },
+      { path: '/mc/guide', icon: BookOpen, labelEn: 'Guide', labelRu: 'Руководство', tint: 'bg-muted text-muted-foreground' },
     ],
   },
 ];

@@ -11,13 +11,9 @@ import { Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
-import { OwnershipInviteBanner } from '@/components/owner/OwnershipInviteBanner';
-import { SetupPromptBanner } from '@/components/owner/dashboard/SetupPromptBanner';
-import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { ActiveStaysWidget } from '@/components/owner/dashboard/ActiveStaysWidget';
 import { OwnerPropertiesList } from '@/components/owner/dashboard/OwnerPropertiesList';
 import { OwnerOperationsFlat } from '@/components/owner/dashboard/OwnerOperationsFlat';
-import { OwnerDashboardMenu } from '@/components/owner/dashboard/OwnerDashboardMenu';
 import { ActiveDealsWidget } from '@/components/owner/dashboard/ActiveDealsWidget';
 import { UpcomingPaymentsWidget } from '@/components/owner/dashboard/UpcomingPaymentsWidget';
 import { CrmTasksWidget } from '@/components/owner/dashboard/CrmTasksWidget';
@@ -33,14 +29,15 @@ import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWid
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
-import { OwnerServiceRecommendations } from '@/components/owner/dashboard/OwnerServiceRecommendations';
 import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
 import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
 import { CollapsibleWidget } from '@/components/owner/dashboard/CollapsibleWidget';
 import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
+import { OverviewSection } from '@/components/owner/dashboard/OverviewSection';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
+import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
 
 function SectionSkeleton() {
   return (
@@ -150,7 +147,7 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
         </Suspense>
       );
     case 'invites':
-      return <OwnershipInviteBanner />;
+      return null;
     case 'today_actions':
       return (
         <Suspense fallback={skeleton}>
@@ -232,17 +229,9 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
         </div>
       );
     case 'myuno_services':
-      return (
-        <Suspense fallback={skeleton}>
-          <OwnerServiceRecommendations />
-        </Suspense>
-      );
+      return null;
     case 'menu':
-      return (
-        <div data-tour="menu">
-          <OwnerDashboardMenu />
-        </div>
-      );
+      return null;
     default:
       return null;
   }
@@ -268,6 +257,15 @@ const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'active_deals', 'crm_tasks',
 ]);
 
+const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
+  'today_actions',
+  'your_day',
+  'today_briefing',
+  'active_stays',
+  'crm_tasks',
+  'upcoming_payments',
+]);
+
 export default function OwnerDashboard() {
   const { language } = useLanguage();
   const { user } = useAuth();
@@ -275,12 +273,51 @@ export default function OwnerDashboard() {
   const isRu = language === 'ru';
   const isDesktop = useIsDesktop();
   const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
-  const { data: ownerProperties } = useOwnerProperties();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
 
   const visibleWidgets = isDesktop
-    ? config.widgets.filter((w) => w !== 'menu')
-    : config.widgets;
+    ? config.widgets.filter((w) => w !== 'menu' && !OVERVIEW_SUPPRESSED_WIDGETS.has(w))
+    : config.widgets.filter((w) => !OVERVIEW_SUPPRESSED_WIDGETS.has(w));
+
+  const sectionMeta = {
+    today: {
+      titleEn: 'Today',
+      titleRu: 'Сегодня',
+      icon: Sun,
+      widgets: ['today_actions', 'property_priority', 'your_day'] as DashboardWidgetKey[],
+    },
+    health: {
+      titleEn: 'Portfolio Health',
+      titleRu: 'Здоровье портфеля',
+      icon: HeartPulse,
+      widgets: ['property_status', 'active_stays', 'channel_sync', 'maintenance_health'] as DashboardWidgetKey[],
+    },
+    revenue: {
+      titleEn: 'Revenue & Cash',
+      titleRu: 'Выручка и деньги',
+      icon: CircleDollarSign,
+      widgets: ['kpi', 'upcoming_payments', 'revenue_insights'] as DashboardWidgetKey[],
+    },
+    crm: {
+      titleEn: 'Sales & CRM',
+      titleRu: 'Продажи и CRM',
+      icon: Briefcase,
+      widgets: ['active_deals', 'crm_tasks', 'operations'] as DashboardWidgetKey[],
+    },
+    exceptions: {
+      titleEn: 'Exceptions',
+      titleRu: 'Исключения',
+      icon: AlertTriangle,
+      widgets: ['today_briefing', 'morning_briefing'] as DashboardWidgetKey[],
+    },
+  } as const;
+
+  const sections = Object.values(sectionMeta)
+    .map((section) => ({
+      ...section,
+      widgets: section.widgets.filter((widget) => visibleWidgets.includes(widget)),
+    }))
+    .filter((section) => section.widgets.length > 0);
 
   if (!user) {
     return (
@@ -342,42 +379,59 @@ export default function OwnerDashboard() {
           <DashboardPropertyFilter />
         </motion.div>
 
-        {/* Setup Wizard CTA for new users */}
-        <SetupPromptBanner propertyCount={ownerProperties?.length || 0} />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.18 }}
+        >
+          <OverviewSection />
+        </motion.div>
 
-        {/* Composed Widgets — 2-column grid on desktop */}
-        <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
-          {visibleWidgets.map((widgetKey, idx) => {
-            const isFullWidth = !HALF_WIDTH_WIDGETS.has(widgetKey);
-            return (
-              <motion.div
-                key={widgetKey}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: Math.min(0.15 + idx * 0.05, 0.45) }}
-                className={isFullWidth ? 'md:col-span-2' : ''}
-              >
-                <WidgetErrorBoundary widgetName={widgetKey}>
-                  {(() => {
-                    const collapsible = COLLAPSIBLE_WIDGETS[widgetKey];
-                    const widget = <DashboardWidget widgetKey={widgetKey} role={role} />;
-                    if (collapsible) {
-                      return (
-                        <CollapsibleWidget
-                          title={isRu ? collapsible.ru : collapsible.en}
-                          defaultOpen={collapsible.defaultOpen}
-                        >
-                          {widget}
-                        </CollapsibleWidget>
-                      );
-                    }
-                    return widget;
-                  })()}
-                </WidgetErrorBoundary>
-              </motion.div>
-            );
-          })}
-        </div>
+        {sections.map((section, sectionIdx) => (
+          <section key={section.titleEn} className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <section.icon className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {isRu ? section.titleRu : section.titleEn}
+              </h2>
+            </div>
+            <div className="md:grid md:grid-cols-2 md:gap-6 space-y-5 md:space-y-0">
+              {section.widgets.map((widgetKey, widgetIdx) => {
+                const isFullWidth = !HALF_WIDTH_WIDGETS.has(widgetKey);
+                return (
+                  <motion.div
+                    key={widgetKey}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: Math.min(0.15 + (sectionIdx * 0.06) + (widgetIdx * 0.04), 0.45),
+                    }}
+                    className={isFullWidth ? 'md:col-span-2' : ''}
+                  >
+                    <WidgetErrorBoundary widgetName={widgetKey}>
+                      {(() => {
+                        const collapsible = COLLAPSIBLE_WIDGETS[widgetKey];
+                        const widget = <DashboardWidget widgetKey={widgetKey} role={role} />;
+                        if (collapsible) {
+                          return (
+                            <CollapsibleWidget
+                              title={isRu ? collapsible.ru : collapsible.en}
+                              defaultOpen={collapsible.defaultOpen}
+                            >
+                              {widget}
+                            </CollapsibleWidget>
+                          );
+                        }
+                        return widget;
+                      })()}
+                    </WidgetErrorBoundary>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
       </div>
     </DashboardFilterProvider>
   );

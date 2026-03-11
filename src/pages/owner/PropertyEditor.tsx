@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Bed, Calendar, UsersRound, Eye, Loader2, Check, Rocket, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
+import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
 
 const errorLog = createErrorHandler('PropertyEditor');
 
@@ -60,8 +61,8 @@ function mapPropertyToInitialData(property: any) {
     project_id: property.project_id,
     floor: property.floor,
     unit_number: property.unit_number || '',
-    view_type: property.view_type || '',
-    furnishing_level: property.furnishing_level || '',
+    view_type: normalizeViewTypes(property.view_type),
+    furnishing_level: normalizeFurnishingLevel(property.furnishing_level),
     equipment: property.equipment || [],
     // Rules
     pets_allowed: property.pets_allowed || false,
@@ -109,12 +110,9 @@ export default function PropertyEditor() {
 
   const { data: property, isLoading } = useOwnerProperty(id);
   const updateProperty = useUpdateOwnerProperty();
+  const autosaveProperty = useUpdateOwnerProperty();
   const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(id);
 
-  // Draft persistence
-  const draftKey = `property_editor_${id}`;
-  const [hasDraftToRestore] = useState(() => !!localStorage.getItem(`vendor_draft_${draftKey}`));
-  const [draftRestored, setDraftRestored] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   // Rooms & Calendar local state (not in CanonicalPropertyForm)
@@ -125,15 +123,16 @@ export default function PropertyEditor() {
   const [formData, setFormData] = useState<PropertyFormData | null>(null);
   const [utilitiesData, setUtilitiesData] = useState<Record<string, any>>({});
   const [servicesData, setServicesData] = useState<Record<string, any>>({});
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'unsaved' | 'error'>('idle');
+  const lastSavedSnapshotRef = useRef('');
 
   // Populate from property data
   useEffect(() => {
     if (!property) return;
-    if (hasDraftToRestore && !draftRestored) return;
 
     const mapped = mapPropertyToInitialData(property);
-    // Set form data from mapped initial
-    setFormData({
+    const nextFormData = {
       title: mapped.title_en,
       title_ru: mapped.title_ru,
       internal_name: mapped.internal_name,
@@ -185,9 +184,8 @@ export default function PropertyEditor() {
       monthly_discount: mapped.monthly_discount,
       seasonal_pricing: (property.seasonal_pricing as unknown as SeasonalPrice[]) || [],
       highlights: mapped.highlights,
-    } as PropertyFormData);
-
-    setUtilitiesData({
+    } as PropertyFormData;
+    const nextUtilitiesData = {
       electricity_included: mapped.electricity_included,
       electricity_unit_price: mapped.electricity_unit_price,
       electricity_provider: mapped.electricity_provider,
@@ -196,9 +194,8 @@ export default function PropertyEditor() {
       water_unit_price: mapped.water_unit_price,
       internet_speed: mapped.internet_speed,
       internet_provider: mapped.internet_provider,
-    });
-
-    setServicesData({
+    };
+    const nextServicesData = {
       cleaning_included: mapped.cleaning_included,
       cleaning_frequency: mapped.cleaning_frequency,
       extra_cleaning_price: mapped.extra_cleaning_price,
@@ -210,31 +207,33 @@ export default function PropertyEditor() {
       transfer_airport_price: mapped.transfer_airport_price,
       extra_guest_price: mapped.extra_guest_price,
       extra_guest_threshold: mapped.extra_guest_threshold,
-    });
+    };
+    const nextRooms = (property.rooms as unknown as Room[]) || [];
 
-    setRooms((property.rooms as unknown as Room[]) || []);
-  }, [property, hasDraftToRestore, draftRestored]);
+    setFormData(nextFormData);
+    lastSavedSnapshotRef.current = JSON.stringify({
+      formData: nextFormData,
+      rooms: nextRooms,
+      utilitiesData: nextUtilitiesData,
+      servicesData: nextServicesData,
+    });
+    setLastSaved(new Date(property.updated_at));
+    setSaveState('saved');
+
+    setUtilitiesData(nextUtilitiesData);
+    setServicesData(nextServicesData);
+    setRooms(nextRooms);
+  }, [property]);
 
   // Sync availability
   useEffect(() => {
     if (availability) setLocalAvailability(availability);
   }, [availability]);
 
-  // Draft auto-save
-  const draftTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    if (!property && !draftRestored) return;
-    if (!formData) return;
-    if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current);
-    draftTimeoutRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(`vendor_draft_${draftKey}`, JSON.stringify({ formData, rooms }));
-      } catch { /* quota exceeded */ }
-    }, 800);
-    return () => { if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current); };
-  }, [formData, rooms, draftKey, property, draftRestored]);
-
-  const clearEditorDraft = () => localStorage.removeItem(`vendor_draft_${draftKey}`);
+  const hasUnsavedChanges = useMemo(() => {
+    if (!formData) return false;
+    return JSON.stringify({ formData, rooms, utilitiesData, servicesData }) !== lastSavedSnapshotRef.current;
+  }, [formData, rooms, utilitiesData, servicesData]);
 
   // AI Intake merge: only fills empty/missing fields, never overwrites existing data
   const handleAIMerge = useCallback((extracted: Record<string, any>) => {
@@ -293,76 +292,135 @@ export default function PropertyEditor() {
     return filled;
   }, [formData]);
 
+  const buildEditorPayload = useCallback(() => {
+    if (!formData) return null;
+
+    return {
+      title: formData.title,
+      title_en: formData.title,
+      title_ru: formData.title_ru,
+      property_type: formData.property_type,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms,
+      area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
+      management_type: formData.management_type,
+      is_rented: formData.is_rented,
+      description_en: formData.description,
+      description_ru: formData.description_ru,
+      highlights: formData.highlights,
+      rooms,
+      address: formData.address,
+      district: formData.district,
+      lat: formData.lat,
+      lng: formData.lng,
+      cover_image: formData.cover_image,
+      images: formData.images,
+      price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
+      deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
+      weekly_discount: Number(formData.weekly_discount) || 0,
+      monthly_discount: Number(formData.monthly_discount) || 0,
+      seasonal_pricing: formData.seasonal_pricing && formData.seasonal_pricing.length > 0 ? formData.seasonal_pricing : null,
+      min_stay_nights: formData.min_stay_nights,
+      max_guests: formData.max_guests,
+      instant_booking: formData.instant_booking,
+      cancellation_policy: formData.cancellation_policy,
+      check_in_time: formData.check_in_time,
+      check_out_time: formData.check_out_time,
+      electricity_included: utilitiesData.electricity_included,
+      electricity_unit_price: utilitiesData.electricity_unit_price ? Number(utilitiesData.electricity_unit_price) : null,
+      water_included: utilitiesData.water_included,
+      water_unit_price: utilitiesData.water_unit_price ? Number(utilitiesData.water_unit_price) : null,
+      internet_speed: utilitiesData.internet_speed || null,
+      cleaning_included: servicesData.cleaning_included,
+      cleaning_frequency: servicesData.cleaning_frequency,
+      extra_cleaning_price: servicesData.extra_cleaning_price ? Number(servicesData.extra_cleaning_price) : null,
+      early_checkin_price: servicesData.early_checkin_price ? Number(servicesData.early_checkin_price) : null,
+      late_checkout_price: servicesData.late_checkout_price ? Number(servicesData.late_checkout_price) : null,
+      transfer_available: servicesData.transfer_available,
+      transfer_airport_price: servicesData.transfer_airport_price ? Number(servicesData.transfer_airport_price) : null,
+      pets_allowed: formData.pets_allowed,
+      pet_deposit: formData.pet_deposit ? Number(formData.pet_deposit) : null,
+      children_friendly: formData.children_friendly,
+      has_crib: formData.has_crib,
+      has_high_chair: formData.has_high_chair,
+      quiet_hours_start: formData.quiet_hours_start,
+      quiet_hours_end: formData.quiet_hours_end,
+      parties_allowed: formData.parties_allowed,
+      house_rules: formData.house_rules || null,
+      house_rules_ru: formData.house_rules_ru || null,
+      smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
+      listing_modes: [
+        ...(formData.platform_listed ? ['platform'] : []),
+        ...(formData.is_for_sale ? ['sale'] : []),
+        ...(formData.price_per_night ? ['rent'] : []),
+      ],
+    };
+  }, [formData, rooms, servicesData, utilitiesData]);
+
+  const persistEditorDraft = useCallback(async () => {
+    if (!id || !formData || !hasUnsavedChanges) return;
+
+    const payload = buildEditorPayload();
+    if (!payload) return;
+
+    setSaveState('saving');
+    try {
+      await autosaveProperty.mutateAsync({
+        id,
+        ...payload,
+        approval_status: property?.approval_status || 'draft',
+        _silent: true,
+      } as any);
+
+      lastSavedSnapshotRef.current = JSON.stringify({ formData, rooms, utilitiesData, servicesData });
+      setLastSaved(new Date());
+      setSaveState('saved');
+    } catch (error) {
+      setSaveState('error');
+      errorLog.silent(error, 'persist_editor_draft');
+    }
+  }, [autosaveProperty, buildEditorPayload, formData, hasUnsavedChanges, id, property?.approval_status, rooms, servicesData, utilitiesData]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    setSaveState('unsaved');
+  }, [hasUnsavedChanges]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || !formData) return;
+
+    const timer = window.setTimeout(() => {
+      void persistEditorDraft();
+    }, 30000);
+
+    return () => window.clearTimeout(timer);
+  }, [formData, hasUnsavedChanges, persistEditorDraft]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const handleBlurAutosave = useCallback(() => {
+    if (!hasUnsavedChanges) return;
+    void persistEditorDraft();
+  }, [hasUnsavedChanges, persistEditorDraft]);
+
   const handleSubmit = async () => {
     if (!id || !formData) return;
     try {
-      await updateProperty.mutateAsync({
-        id,
-        title: formData.title,
-        title_ru: formData.title_ru,
-        property_type: formData.property_type,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
-        management_type: formData.management_type,
-        is_rented: formData.is_rented,
-        description_en: formData.description,
-        description_ru: formData.description_ru,
-        highlights: formData.highlights,
-        rooms,
-        address: formData.address,
-        district: formData.district,
-        lat: formData.lat,
-        lng: formData.lng,
-        cover_image: formData.cover_image,
-        images: formData.images,
-        price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
-        deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
-        weekly_discount: Number(formData.weekly_discount) || 0,
-        monthly_discount: Number(formData.monthly_discount) || 0,
-        seasonal_pricing: formData.seasonal_pricing && formData.seasonal_pricing.length > 0 ? formData.seasonal_pricing : null,
-        min_stay_nights: formData.min_stay_nights,
-        max_guests: formData.max_guests,
-        instant_booking: formData.instant_booking,
-        cancellation_policy: formData.cancellation_policy,
-        check_in_time: formData.check_in_time,
-        check_out_time: formData.check_out_time,
-        // Utilities
-        electricity_included: utilitiesData.electricity_included,
-        electricity_unit_price: utilitiesData.electricity_unit_price ? Number(utilitiesData.electricity_unit_price) : null,
-        water_included: utilitiesData.water_included,
-        water_unit_price: utilitiesData.water_unit_price ? Number(utilitiesData.water_unit_price) : null,
-        internet_speed: utilitiesData.internet_speed || null,
-        // Services
-        cleaning_included: servicesData.cleaning_included,
-        cleaning_frequency: servicesData.cleaning_frequency,
-        extra_cleaning_price: servicesData.extra_cleaning_price ? Number(servicesData.extra_cleaning_price) : null,
-        early_checkin_price: servicesData.early_checkin_price ? Number(servicesData.early_checkin_price) : null,
-        late_checkout_price: servicesData.late_checkout_price ? Number(servicesData.late_checkout_price) : null,
-        transfer_available: servicesData.transfer_available,
-        transfer_airport_price: servicesData.transfer_airport_price ? Number(servicesData.transfer_airport_price) : null,
-        // Rules
-        pets_allowed: formData.pets_allowed,
-        pet_deposit: formData.pet_deposit ? Number(formData.pet_deposit) : null,
-        children_friendly: formData.children_friendly,
-        has_crib: formData.has_crib,
-        has_high_chair: formData.has_high_chair,
-        quiet_hours_start: formData.quiet_hours_start,
-        quiet_hours_end: formData.quiet_hours_end,
-        parties_allowed: formData.parties_allowed,
-        house_rules: formData.house_rules || null,
-        house_rules_ru: formData.house_rules_ru || null,
-        smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
-        // Platform listing modes
-        listing_modes: [
-          ...(formData.platform_listed ? ['platform'] : []),
-          ...(formData.is_for_sale ? ['sale'] : []),
-          ...(formData.price_per_night ? ['rent'] : []),
-        ],
-      } as any);
+      await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}) } as any);
 
       await syncAvailability(localAvailability);
-      clearEditorDraft();
+      lastSavedSnapshotRef.current = JSON.stringify({ formData, rooms, utilitiesData, servicesData });
+      setLastSaved(new Date());
+      setSaveState('saved');
 
       if ((window as any).__swPendingReload) {
         window.location.reload();
@@ -441,7 +499,15 @@ export default function PropertyEditor() {
         title={isRu ? 'Редактировать объект' : 'Edit Property'}
         showBack
         fallbackPath={`/mc/properties/${id}`}
-        subtitle={property.title}
+        subtitle={
+          saveState === 'saving'
+            ? (isRu ? 'Сохранение...' : 'Saving...')
+            : saveState === 'unsaved'
+              ? (isRu ? 'Не сохранено' : 'Unsaved changes')
+              : saveState === 'saved'
+                ? `${isRu ? 'Сохранено' : 'Saved'}${lastSaved ? ` · ${lastSaved.toLocaleTimeString()}` : ''}`
+                : property.title
+        }
         actions={
           <div className="flex items-center gap-2">
             {property.approval_status === 'approved' && (
@@ -471,45 +537,13 @@ export default function PropertyEditor() {
         }
       />
 
-      {/* Draft Restoration Banner */}
-      {hasDraftToRestore && !draftRestored && (
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center justify-between gap-3">
-          <p className="text-sm text-foreground">
-            {isRu ? 'Найден несохранённый черновик. Восстановить?' : 'Unsaved draft found. Restore?'}
-          </p>
-          <div className="flex gap-2 flex-shrink-0">
-            <Button size="sm" variant="default" onClick={() => {
-              try {
-                const saved = localStorage.getItem(`vendor_draft_${draftKey}`);
-                if (saved) {
-                  const parsed = JSON.parse(saved);
-                  if (parsed.formData) setFormData(parsed.formData);
-                  if (parsed.rooms) setRooms(parsed.rooms);
-                }
-              } catch { /* ignore */ }
-              setDraftRestored(true);
-              toast({ title: isRu ? 'Черновик восстановлен' : 'Draft restored' });
-            }}>
-              {isRu ? 'Восстановить' : 'Restore'}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => {
-              clearEditorDraft();
-              setDraftRestored(true);
-              toast({ title: isRu ? 'Черновик удалён' : 'Draft discarded' });
-            }}>
-              {isRu ? 'Нет' : 'Discard'}
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* AI Intake - merge mode for existing property */}
       <AIIntakePanel onDataExtracted={handleAIMerge} />
 
       <div className={showPreview 
         ? "grid gap-8 lg:grid-cols-[minmax(0,1fr),300px] xl:grid-cols-[minmax(0,1fr),340px]" 
         : ""
-      }>
+      } onBlurCapture={handleBlurAutosave}>
         <div className="min-w-0">
           {formData && (
             <CanonicalPropertyForm
@@ -552,6 +586,8 @@ export default function PropertyEditor() {
                 price_period: 'night',
                 instant_booking: formData.instant_booking || false,
                 is_featured: false,
+                view_type: primaryViewType(formData.view_type),
+                furnishing_level: normalizeFurnishingLevel(formData.furnishing_level),
               } as any}
             />
           </div>

@@ -43,6 +43,16 @@ export const ru: Record<string, string> = {
   'action.back': 'Назад',
   'action.next': 'Далее',
   'action.submit': 'Отправить',
+  'propertyForm.furnishingLevelDesign': 'Уровень меблировки и дизайн',
+  'propertyForm.furnishingOption.unfurnished': 'Без мебели',
+  'propertyForm.furnishingOption.basic_furnishing': 'Базовая меблировка',
+  'propertyForm.furnishingOption.full_furnishing': 'Полная меблировка',
+  'propertyForm.furnishingOption.designer_interior': 'Авторский дизайн',
+  'propertyForm.furnishingOption.premium_designer_interior': 'Премиум дизайн',
+  'propertyForm.viewType': 'Вид из окна',
+  'propertyForm.saved': 'Сохранено',
+  'propertyForm.unsavedChanges': 'Не сохранено',
+  'propertyForm.saving': 'Сохранение...',
   
   // Booking statuses
   'status.draft': 'Черновик',

@@ -10,6 +10,7 @@ import {
   AlertTriangle, ChevronRight, ClipboardCheck, CreditCard,
   PackageOpen, MessageCircle, Wrench, Star,
 } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface ActionItem {
   id: string;
@@ -40,7 +41,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.overdueTasks} задач требуют внимания` : `${ops.overdueTasks} tasks need attention`,
         count: ops.overdueTasks,
         priority: 'urgent',
-        href: '/mc/operations',
+        href: APP_ROUTES.MC_TASKS,
       });
     }
 
@@ -52,7 +53,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.openServiceRequests} в работе` : `${ops.openServiceRequests} in progress`,
         count: ops.openServiceRequests,
         priority: ops.openServiceRequests > 3 ? 'high' : 'normal',
-        href: '/mc/operations',
+        href: APP_ROUTES.MC_TASKS,
       });
     }
 
@@ -64,7 +65,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.lowStockItems} позиций нужно пополнить` : `${ops.lowStockItems} items need restocking`,
         count: ops.lowStockItems,
         priority: 'high',
-        href: '/mc/inventory',
+        href: APP_ROUTES.MC_INVENTORY,
       });
     }
 
@@ -76,7 +77,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.unreadMessages} новых сообщений` : `${ops.unreadMessages} new messages`,
         count: ops.unreadMessages,
         priority: 'normal',
-        href: '/mc/messages',
+        href: APP_ROUTES.MC_MESSAGES,
       });
     }
 
@@ -88,7 +89,7 @@ export function TodayActionsWidget() {
         subtitle: isRu ? `${ops.pendingInvoices} неоплаченных` : `${ops.pendingInvoices} unpaid`,
         count: ops.pendingInvoices,
         priority: ops.pendingInvoices > 2 ? 'high' : 'normal',
-        href: '/mc/invoices',
+        href: APP_ROUTES.MC_INVOICES,
       });
     }
 

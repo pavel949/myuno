@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,12 +41,24 @@ function useOperationsOverview() {
   });
 }
 
+const VALID_TABS = ['bookings', 'moderation', 'leads', 'inquiries', 'disputes'] as const;
+
 export default function AdminOperations() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [activeTab, setActiveTab] = useState('bookings');
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<typeof VALID_TABS[number]>(
+    tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number]) ? tabFromUrl as typeof VALID_TABS[number] : 'bookings'
+  );
   const { data: overview, refetch: refetchOverview } = useOperationsOverview();
+
+  useEffect(() => {
+    if (tabFromUrl && VALID_TABS.includes(tabFromUrl as typeof VALID_TABS[number])) {
+      setActiveTab(tabFromUrl as typeof VALID_TABS[number]);
+    }
+  }, [tabFromUrl]);
 
   const tabs = [
     { 

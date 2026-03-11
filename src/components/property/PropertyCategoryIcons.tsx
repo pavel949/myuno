@@ -111,14 +111,16 @@ export function PropertyCategoryIcons({ selected, onSelect, className }: Propert
 export function matchesCategory(property: {
   amenities?: string[];
   highlights?: string[];
-  view_type?: string;
+  view_type?: string | string[];
   is_featured?: boolean;
   property_type?: string;
 }, categoryId: string): boolean {
   const amenities = (property.amenities || []).map(a => a.toLowerCase());
   const highlights = (property.highlights || []).map(h => h.toLowerCase());
   const all = [...amenities, ...highlights];
-  const viewType = (property.view_type || '').toLowerCase();
+  const viewType = Array.isArray(property.view_type)
+    ? property.view_type.join(' ').toLowerCase()
+    : (property.view_type || '').toLowerCase();
 
   // Direct match — owner chose this exact feature ID
   if (all.includes(categoryId)) return true;

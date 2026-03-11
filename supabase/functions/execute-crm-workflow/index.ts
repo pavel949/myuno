@@ -130,6 +130,44 @@ Deno.serve(async (req) => {
   }
 });
 
+/** Resolve contact_id and to_email for send_email action */
+async function resolveEmailRecipient(
+  supabase: any,
+  context: { entity_id: string; entity_type: string; company_id: string }
+): Promise<{ to_email?: string; contact_id?: string; deal_id?: string | null; company_id?: string }> {
+  if (context.entity_type === "contact") {
+    const { data: contact } = await supabase
+      .from("crm_contacts")
+      .select("id, email")
+      .eq("id", context.entity_id)
+      .single();
+    return contact?.email
+      ? { to_email: contact.email, contact_id: contact.id, deal_id: null, company_id: context.company_id }
+      : {};
+  }
+  if (context.entity_type === "deal") {
+    const { data: deal } = await supabase
+      .from("agent_deals")
+      .select("id, contact_id, client_email")
+      .eq("id", context.entity_id)
+      .single();
+    if (!deal) return {};
+    const email = deal.client_email;
+    if (email) return { to_email: email, contact_id: deal.contact_id, deal_id: deal.id, company_id: context.company_id };
+    if (deal.contact_id) {
+      const { data: contact } = await supabase
+        .from("crm_contacts")
+        .select("id, email")
+        .eq("id", deal.contact_id)
+        .single();
+      return contact?.email
+        ? { to_email: contact.email, contact_id: contact.id, deal_id: deal.id, company_id: context.company_id }
+        : {};
+    }
+  }
+  return {};
+}
+
 /** Check if trigger metadata matches workflow trigger_config conditions */
 function matchesTriggerConfig(config: Record<string, any>, metadata?: Record<string, any>): boolean {
   if (!metadata) return false;
@@ -176,7 +214,7 @@ async function executeAction(
           ? new Date(Date.now() + config.due_days * 86400000).toISOString()
           : null,
         priority: config.priority || "medium",
-        status: "todo",
+        status: "pending",
         created_by: context.created_by,
       });
       console.log(`[EXECUTE-CRM-WORKFLOW] Created task for ${context.entity_type} ${context.entity_id}`);
@@ -211,18 +249,29 @@ async function executeAction(
     }
 
     case "send_email": {
-      if (config.template_id || config.subject) {
-        await supabase.functions.invoke("send-crm-email", {
-          body: {
-            entity_id: context.entity_id,
-            entity_type: context.entity_type,
-            subject: config.subject || "Automated CRM email",
-            body: config.body || "",
-            template_id: config.template_id || null,
-          },
-        });
-        console.log(`[EXECUTE-CRM-WORKFLOW] Sent email`);
+      if (!config.subject && !config.body && !config.template_id) break;
+      const { to_email, contact_id, deal_id, company_id } = await resolveEmailRecipient(supabase, context);
+      if (!to_email || !contact_id) {
+        console.warn(`[EXECUTE-CRM-WORKFLOW] No email recipient for ${context.entity_type} ${context.entity_id}, skipping send_email`);
+        break;
       }
+      const bodyHtml = config.body ? `<p>${String(config.body).replace(/\n/g, "</p><p>")}</p>` : "<p>Automated CRM email</p>";
+      await supabase.functions.invoke("send-crm-email", {
+        body: {
+          workflow_send: true,
+          company_id: company_id || context.company_id,
+          contact_id,
+          deal_id: context.entity_type === "deal" ? context.entity_id : null,
+          to_email,
+          subject: config.subject || "Automated CRM email",
+          body_html: bodyHtml,
+          sent_by: context.created_by,
+        },
+        headers: {
+          "X-Internal-Secret": Deno.env.get("INTERNAL_SECRET") || "",
+        },
+      });
+      console.log(`[EXECUTE-CRM-WORKFLOW] Sent email to ${to_email}`);
       break;
     }
 

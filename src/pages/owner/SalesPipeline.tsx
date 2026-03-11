@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isPast, isToday } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_TYPES, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDynamicPipelineStages } from '@/hooks/useDynamicPipelineStages';
@@ -16,6 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, LayoutList, Columns3, BarChart3, CheckSquare, Settings, Table2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+
+type QuickPreset = 'none' | 'hot_vip' | 'no_contact' | 'high_budget' | 'follow_up_today';
 
 export default function SalesPipeline() {
   const navigate = useNavigate();
@@ -29,14 +33,34 @@ export default function SalesPipeline() {
   const pipelineData = useDynamicPipelineStages(membership?.company_id, selectedPipelineId);
   const { stages, activeStages, pipelines, getLabel } = pipelineData;
   const [showCreate, setShowCreate] = useState(false);
+  const [createStage, setCreateStage] = useState('new');
   const [filterStage, setFilterStage] = useState<string>('all');
   const [filterType, setFilterType] = useState<DealType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<DealStatus | 'all'>('active');
   const [view, setView] = useState<'list' | 'kanban' | 'pivot'>('list');
   const [search, setSearch] = useState('');
   const [agentFilter, setAgentFilter] = useState('all');
+  const [dealVipFilter, setDealVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [contactVipFilter, setContactVipFilter] = useState<'all' | 'yes' | 'no'>('all');
+  const [highBudgetOnly, setHighBudgetOnly] = useState(false);
+  const [noContactOnly, setNoContactOnly] = useState(false);
+  const [activePreset, setActivePreset] = useState<QuickPreset>('none');
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const { data: vipContactIds = new Set<string>() } = useQuery({
+    queryKey: ['crm-vip-contact-ids', membership?.company_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('crm_contacts')
+        .select('id')
+        .eq('company_id', membership!.company_id)
+        .contains('tags', ['VIP']);
+      if (error) throw error;
+      return new Set((data || []).map(item => item.id));
+    },
+    enabled: !!membership?.company_id,
+  });
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -48,16 +72,7 @@ export default function SalesPipeline() {
     return { won, lost, closed: [...won, ...lost] };
   }, [stages]);
 
-  const overdueCount = useMemo(() => {
-    return deals.filter(d => {
-      if (wonLostKeys.closed.includes(d.stage)) return false;
-      if (!d.next_action_date) return false;
-      const nd = new Date(d.next_action_date);
-      return isPast(nd) || isToday(nd);
-    }).length;
-  }, [deals, wonLostKeys]);
-
-  const filtered = useMemo(() => {
+  const filteredBeforeStage = useMemo(() => {
     let result = deals;
 
     // Status filter (default: active)
@@ -75,16 +90,26 @@ export default function SalesPipeline() {
       result = result.filter(d => d.agent_id === agentFilter);
     }
 
-    // Stage filter
-    if (filterStage === 'follow_up') {
-      result = result.filter(d => {
-        if (wonLostKeys.closed.includes(d.stage)) return false;
-        if (!d.next_action_date) return false;
-        const nd = new Date(d.next_action_date);
-        return isPast(nd) || isToday(nd);
-      });
-    } else if (filterStage !== 'all') {
-      result = result.filter(d => d.stage === filterStage);
+    // Deal VIP filter
+    if (dealVipFilter === 'yes') {
+      result = result.filter(d => d.is_vip);
+    } else if (dealVipFilter === 'no') {
+      result = result.filter(d => !d.is_vip);
+    }
+
+    // Contact VIP filter
+    if (contactVipFilter === 'yes') {
+      result = result.filter(d => !!d.contact_id && vipContactIds.has(d.contact_id));
+    } else if (contactVipFilter === 'no') {
+      result = result.filter(d => !d.contact_id || !vipContactIds.has(d.contact_id));
+    }
+
+    if (highBudgetOnly) {
+      result = result.filter(d => Number(d.budget_max || 0) >= 10_000_000);
+    }
+
+    if (noContactOnly) {
+      result = result.filter(d => !d.contact_id);
     }
 
     // Text search
@@ -94,18 +119,85 @@ export default function SalesPipeline() {
         d.client_name.toLowerCase().includes(q) ||
         d.client_phone?.toLowerCase().includes(q) ||
         d.client_email?.toLowerCase().includes(q) ||
+        d.client_source?.toLowerCase().includes(q) ||
+        d.tags?.some(tag => tag.toLowerCase().includes(q)) ||
         d.notes?.toLowerCase().includes(q)
       );
     }
 
     return result;
-  }, [deals, filterStage, filterType, filterStatus, search, agentFilter, wonLostKeys]);
+  }, [deals, filterType, filterStatus, search, agentFilter, dealVipFilter, contactVipFilter, highBudgetOnly, noContactOnly, vipContactIds]);
+
+  const overdueCount = useMemo(() => {
+    return filteredBeforeStage.filter(d => {
+      if (wonLostKeys.closed.includes(d.stage)) return false;
+      if (!d.next_action_date) return false;
+      const nd = new Date(d.next_action_date);
+      return isPast(nd) || isToday(nd);
+    }).length;
+  }, [filteredBeforeStage, wonLostKeys]);
+
+  const filtered = useMemo(() => {
+    if (filterStage === 'follow_up') {
+      return filteredBeforeStage.filter(d => {
+        if (wonLostKeys.closed.includes(d.stage)) return false;
+        if (!d.next_action_date) return false;
+        const nd = new Date(d.next_action_date);
+        return isPast(nd) || isToday(nd);
+      });
+    }
+    if (filterStage !== 'all') {
+      return filteredBeforeStage.filter(d => d.stage === filterStage);
+    }
+    return filteredBeforeStage;
+  }, [filteredBeforeStage, filterStage, wonLostKeys]);
 
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const d of deals) counts[d.stage] = (counts[d.stage] || 0) + 1;
+    for (const d of filteredBeforeStage) counts[d.stage] = (counts[d.stage] || 0) + 1;
     return counts;
-  }, [deals]);
+  }, [filteredBeforeStage]);
+
+  const applyPreset = useCallback((preset: QuickPreset) => {
+    setActivePreset(preset);
+    if (preset === 'none') {
+      setDealVipFilter('all');
+      setContactVipFilter('all');
+      setHighBudgetOnly(false);
+      setNoContactOnly(false);
+      setFilterStage('all');
+      return;
+    }
+    if (preset === 'hot_vip') {
+      setDealVipFilter('yes');
+      setContactVipFilter('all');
+      setHighBudgetOnly(false);
+      setNoContactOnly(false);
+      setFilterStage('all');
+      return;
+    }
+    if (preset === 'no_contact') {
+      setDealVipFilter('all');
+      setContactVipFilter('all');
+      setHighBudgetOnly(false);
+      setNoContactOnly(true);
+      setFilterStage('all');
+      return;
+    }
+    if (preset === 'high_budget') {
+      setDealVipFilter('all');
+      setContactVipFilter('all');
+      setHighBudgetOnly(true);
+      setNoContactOnly(false);
+      setFilterStage('all');
+      return;
+    }
+    setDealVipFilter('all');
+    setContactVipFilter('all');
+    setHighBudgetOnly(false);
+    setNoContactOnly(false);
+    setFilterStage('follow_up');
+  }, []);
 
   if (membershipLoading || isLoading) {
     return (
@@ -187,7 +279,7 @@ export default function SalesPipeline() {
               <Table2 className="h-4 w-4" />
             </button>
           </div>
-          <Button size="sm" onClick={() => setShowCreate(true)}>
+          <Button size="sm" onClick={() => { setCreateStage('new'); setShowCreate(true); }}>
             <Plus className="h-4 w-4 mr-1" />
             {isRu ? 'Сделка' : 'Deal'}
           </Button>
@@ -238,7 +330,13 @@ export default function SalesPipeline() {
         onSearchChange={setSearch}
         agentFilter={agentFilter}
         onAgentFilterChange={setAgentFilter}
+        dealVipFilter={dealVipFilter}
+        onDealVipFilterChange={setDealVipFilter}
+        contactVipFilter={contactVipFilter}
+        onContactVipFilterChange={setContactVipFilter}
         agents={members}
+        activePreset={activePreset}
+        onApplyPreset={applyPreset}
       />
 
       {/* Bulk Actions */}
@@ -246,53 +344,53 @@ export default function SalesPipeline() {
         <BulkActions selectedIds={selectedIds} onClear={() => { setSelectedIds([]); setSelectMode(false); }} />
       )}
 
+      {/* Stage filter (shared for list/kanban/pivot) */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        <button
+          onClick={() => setFilterStage('all')}
+          className={cn(
+            'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+            filterStage === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+          )}
+        >
+          {isRu ? 'Все' : 'All'} ({filteredBeforeStage.length})
+        </button>
+        {overdueCount > 0 && (
+          <button
+            onClick={() => setFilterStage('follow_up')}
+            className={cn(
+              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              filterStage === 'follow_up' ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-destructive/10 border-destructive/30 text-destructive',
+            )}
+          >
+            🔔 Follow-up ({overdueCount})
+          </button>
+        )}
+        {stages.map(stage => (
+          <button
+            key={stage.key}
+            onClick={() => setFilterStage(stage.key)}
+            className={cn(
+              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+              filterStage === stage.key ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
+            )}
+          >
+            {isRu ? stage.nameRu : stage.nameEn} ({stageCounts[stage.key] || 0})
+          </button>
+        ))}
+      </div>
+
       {view === 'pivot' ? (
         <PipelinePivotTable deals={filtered} pipelineData={pipelineData} />
       ) : view === 'kanban' ? (
-        <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} onQuickCreate={() => setShowCreate(true)} />
+        <KanbanBoard deals={filtered} members={members} pipelineData={pipelineData} onQuickCreate={(stageKey) => { setCreateStage(stageKey); setShowCreate(true); }} />
       ) : (
         <>
-          {/* Stage filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            <button
-              onClick={() => setFilterStage('all')}
-              className={cn(
-                'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                filterStage === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
-              )}
-            >
-              {isRu ? 'Все' : 'All'} ({deals.length})
-            </button>
-            {overdueCount > 0 && (
-              <button
-                onClick={() => setFilterStage('follow_up')}
-                className={cn(
-                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                  filterStage === 'follow_up' ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-destructive/10 border-destructive/30 text-destructive',
-                )}
-              >
-                🔔 Follow-up ({overdueCount})
-              </button>
-            )}
-            {stages.map(stage => (
-              <button
-                key={stage.key}
-                onClick={() => setFilterStage(stage.key)}
-                className={cn(
-                  'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                  filterStage === stage.key ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
-                )}
-              >
-                {isRu ? stage.nameRu : stage.nameEn} ({stageCounts[stage.key] || 0})
-              </button>
-            ))}
-          </div>
-
           {/* Deals list */}
           {filtered.length === 0 ? (
             <div className="text-center text-muted-foreground py-12">
               <p className="text-sm">{isRu ? 'Сделок пока нет' : 'No deals yet'}</p>
-              <Button variant="outline" size="sm" className="mt-3" onClick={() => setShowCreate(true)}>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => { setCreateStage('new'); setShowCreate(true); }}>
                 <Plus className="h-4 w-4 mr-1" />
                 {isRu ? 'Создать первую сделку' : 'Create your first deal'}
               </Button>
@@ -313,7 +411,12 @@ export default function SalesPipeline() {
         </>
       )}
 
-      <CreateDealSheet open={showCreate} onOpenChange={setShowCreate} companyId={membership.company_id} />
+      <CreateDealSheet
+        open={showCreate}
+        onOpenChange={setShowCreate}
+        companyId={membership.company_id}
+        prefilledStage={createStage}
+      />
     </div>
   );
 }

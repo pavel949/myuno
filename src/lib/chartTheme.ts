@@ -1,6 +1,7 @@
 /**
- * Unified Chart Theme — Premium, editorial chart styling
- * Used across all recharts components for consistency.
+ * Unified Chart Theme — DS 2.0 Navy Premium
+ * Uses CSS variables from tokens.css; stays in sync with design-system.
+ * All colors reference var(--primary), var(--chart-*), etc.
  */
 
 export const CHART_THEME = {

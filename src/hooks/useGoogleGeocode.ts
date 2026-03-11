@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { getGoogleMapsKey } from '@/lib/googleMaps';
+import { useCallback, useRef } from 'react';
+import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 
 export interface GeocodeResult {
   address: string;
@@ -8,51 +8,84 @@ export interface GeocodeResult {
   lng: number;
 }
 
-const langParam = (language: string) => (language === 'ru' ? 'ru' : 'en');
-
 /**
- * Hook for Google Geocoding.
- * Uses dynamic API key from system_config when available.
- * Falls back to edge function (geocode-address) when no key is set.
+ * Uses the Geocoder from the Maps JavaScript API (loaded by GoogleMapsProvider).
+ * This avoids CORS issues that occur when calling the Geocoding REST API from the browser.
  */
 export function useGoogleGeocode(language: string = 'en') {
-  const lang = langParam(language);
+  const { isLoaded } = useGoogleMaps();
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
+
+  const getGeocoder = useCallback((): google.maps.Geocoder | null => {
+    if (!isLoaded || typeof window === 'undefined' || !window.google?.maps?.Geocoder) return null;
+    if (!geocoderRef.current) geocoderRef.current = new window.google.maps.Geocoder();
+    return geocoderRef.current;
+  }, [isLoaded]);
 
   const reverseGeocode = useCallback(
     async (lat: number, lng: number): Promise<GeocodeResult | null> => {
-      try {
-        const key = getGoogleMapsKey();
-        if (key) {
-          const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}&language=${lang}`
-          );
-          const data = await res.json();
-          if (data.status !== 'OK' || !data.results?.length) return null;
-          const r = data.results[0];
-          return { address: r.formatted_address, placeId: r.place_id || null, lat, lng };
-        }
-
-        // Fallback: use edge function
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${lat}&lng=${lng}&language=${lang}`;
-        const res = await fetch(url, {
-          headers: {
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      const geocoder = getGeocoder();
+      if (!geocoder) return null;
+      return new Promise((resolve) => {
+        geocoder.geocode(
+          {
+            location: { lat, lng },
+            language: language === 'ru' ? 'ru' : 'en',
           },
-        });
-        const data = await res.json();
-        if (!data.results?.length) return null;
-        return {
-          address: data.results[0].address || data.results[0].name,
-          placeId: data.results[0].mapbox_id || null,
-          lat,
-          lng,
-        };
-      } catch {
-        return null;
-      }
+          (results, status) => {
+            if (status !== 'OK' || !results?.[0]) {
+              resolve(null);
+              return;
+            }
+            const r = results[0];
+            const loc = r.geometry?.location;
+            resolve({
+              address: r.formatted_address ?? '',
+              placeId: r.place_id ?? null,
+              lat: loc?.lat() ?? lat,
+              lng: loc?.lng() ?? lng,
+            });
+          }
+        );
+      });
     },
-    [lang]
+    [getGeocoder, language]
+  );
+
+  /** Returns result + raw status for diagnostics (e.g. OVER_QUERY_LIMIT, REQUEST_DENIED). */
+  const reverseGeocodeWithStatus = useCallback(
+    async (lat: number, lng: number): Promise<{ result: GeocodeResult | null; status: string }> => {
+      const geocoder = getGeocoder();
+      if (!geocoder) {
+        return { result: null, status: 'GEOCODER_NOT_READY' };
+      }
+      return new Promise((resolve) => {
+        geocoder.geocode(
+          {
+            location: { lat, lng },
+            language: language === 'ru' ? 'ru' : 'en',
+          },
+          (results, status) => {
+            if (status !== 'OK' || !results?.[0]) {
+              resolve({ result: null, status: status ?? 'UNKNOWN' });
+              return;
+            }
+            const r = results[0];
+            const loc = r.geometry?.location;
+            resolve({
+              result: {
+                address: r.formatted_address ?? '',
+                placeId: r.place_id ?? null,
+                lat: loc?.lat() ?? lat,
+                lng: loc?.lng() ?? lng,
+              },
+              status,
+            });
+          }
+        );
+      });
+    },
+    [getGeocoder, language]
   );
 
   const searchAddress = useCallback(
@@ -60,44 +93,39 @@ export function useGoogleGeocode(language: string = 'en') {
       query: string,
       options?: { proximity?: { lat: number; lng: number }; country?: string }
     ): Promise<GeocodeResult[]> => {
-      if (!query.trim()) return [];
-      try {
-        const key = getGoogleMapsKey();
-        if (key) {
-          let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${key}&language=${lang}`;
-          if (options?.country) url += `&region=${options.country}`;
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') return [];
-          return (data.results || []).slice(0, 8).map((r: { formatted_address: string; place_id?: string; geometry: { location: { lat: number; lng: number } } }) => ({
-            address: r.formatted_address,
-            placeId: r.place_id || null,
-            lat: r.geometry.location.lat,
-            lng: r.geometry.location.lng,
-          }));
-        }
-
-        // Fallback: use edge function
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=${encodeURIComponent(query)}&language=${lang}`;
-        const res = await fetch(url, {
-          headers: {
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
+      const geocoder = getGeocoder();
+      if (!geocoder || !query.trim()) return [];
+      return new Promise((resolve) => {
+        const request: google.maps.GeocoderRequest = {
+          address: query,
+          language: language === 'ru' ? 'ru' : 'en',
+        };
+        if (options?.country) request.componentRestrictions = { country: options.country };
+        geocoder.geocode(request, (results, status) => {
+          if (status !== 'OK' && status !== 'ZERO_RESULTS') {
+            resolve([]);
+            return;
+          }
+          if (!results?.length) {
+            resolve([]);
+            return;
+          }
+          resolve(
+            results.slice(0, 8).map((r) => {
+              const loc = r.geometry?.location;
+              return {
+                address: r.formatted_address ?? '',
+                placeId: r.place_id ?? null,
+                lat: loc?.lat() ?? 0,
+                lng: loc?.lng() ?? 0,
+              };
+            })
+          );
         });
-        const data = await res.json();
-        return (data.results || []).map((r: any) => ({
-          address: r.address || r.name,
-          placeId: r.mapbox_id || null,
-          lat: 0,
-          lng: 0,
-        }));
-      } catch {
-        return [];
-      }
+      });
     },
-    [lang]
+    [getGeocoder, language]
   );
 
-  return { reverseGeocode, searchAddress };
+  return { reverseGeocode, searchAddress, reverseGeocodeWithStatus, isReady: isLoaded };
 }

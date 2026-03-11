@@ -208,9 +208,10 @@ export const VIEW_TYPES = [
 // ============= FURNISHING LEVELS =============
 export const FURNISHING_LEVELS = [
   { id: 'unfurnished', labelEn: 'Unfurnished', labelRu: 'Без мебели', icon: '🏠' },
-  { id: 'partially', labelEn: 'Partially Furnished', labelRu: 'Частично меблировано', icon: '🪑' },
-  { id: 'fully', labelEn: 'Fully Furnished', labelRu: 'Полностью меблировано', icon: '🛋️' },
-  { id: 'luxury', labelEn: 'Luxury Furnished', labelRu: 'Люкс меблировка', icon: '✨' },
+  { id: 'basic_furnishing', labelEn: 'Basic Furnishing', labelRu: 'Базовая меблировка', icon: '🪑' },
+  { id: 'full_furnishing', labelEn: 'Full Furnishing', labelRu: 'Полная меблировка', icon: '🛋️' },
+  { id: 'designer_interior', labelEn: 'Designer Interior', labelRu: 'Авторский дизайн', icon: '🎨' },
+  { id: 'premium_designer_interior', labelEn: 'Premium Designer Interior', labelRu: 'Премиум дизайн', icon: '✨' },
 ] as const;
 
 // ============= KEY HANDOVER METHODS =============

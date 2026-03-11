@@ -198,7 +198,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       }
     >
       {/* Basic info */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
           <Input value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} />
@@ -208,20 +208,20 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
           <Input value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
         <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} /></div>
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div><Label>Instagram</Label><Input value={form.instagram} onChange={e => setForm(f => ({ ...f, instagram: e.target.value }))} placeholder="@username" /></div>
         <div><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm(f => ({ ...f, facebook: e.target.value }))} placeholder="URL or username" /></div>
         <div><Label>LinkedIn</Label><Input value={form.linkedin} onChange={e => setForm(f => ({ ...f, linkedin: e.target.value }))} placeholder="URL or username" /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
@@ -243,21 +243,21 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
 
       {/* Address & Business (Odoo-style) */}
       <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Адрес и бизнес' : 'Address & Business'}</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Улица' : 'Street'}</Label><Input value={form.address_street} onChange={e => setForm(f => ({ ...f, address_street: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Улица 2' : 'Street 2'}</Label><Input value={form.address_street2} onChange={e => setForm(f => ({ ...f, address_street2: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div><Label>{isRu ? 'Город' : 'City'}</Label><Input value={form.address_city} onChange={e => setForm(f => ({ ...f, address_city: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Регион' : 'State'}</Label><Input value={form.address_state} onChange={e => setForm(f => ({ ...f, address_state: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Индекс' : 'ZIP'}</Label><Input value={form.address_zip} onChange={e => setForm(f => ({ ...f, address_zip: e.target.value }))} /></div>
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div><Label>{isRu ? 'Страна' : 'Country'}</Label><Input value={form.address_country} onChange={e => setForm(f => ({ ...f, address_country: e.target.value }))} /></div>
         <div><Label>Tax ID</Label><Input value={form.tax_id} onChange={e => setForm(f => ({ ...f, tax_id: e.target.value }))} /></div>
         <div><Label>Website</Label><Input value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} placeholder="https://" /></div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div><Label>{isRu ? 'Мобильный' : 'Mobile'}</Label><Input value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} /></div>
       </div>
 
@@ -266,7 +266,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       {/* Personal section */}
       <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Персональное' : 'Personal'}</p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'День рождения' : 'Birthday'}</Label>
           <Input type="date" value={form.birthday} onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))} />
@@ -345,7 +345,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       {/* Preferences */}
       <p className="text-sm font-semibold text-muted-foreground">{isRu ? 'Предпочтения' : 'Preferences'}</p>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div><Label>{isRu ? 'Бюджет от' : 'Budget Min'}</Label><Input type="number" value={form.budget_min} onChange={e => setForm(f => ({ ...f, budget_min: e.target.value }))} /></div>
         <div><Label>{isRu ? 'Бюджет до' : 'Budget Max'}</Label><Input type="number" value={form.budget_max} onChange={e => setForm(f => ({ ...f, budget_max: e.target.value }))} /></div>
         <div>

@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
-import { useUserRoles } from '@/hooks/useUserRoles';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { BackButton } from '@/components/uno/BackButton';
@@ -15,8 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import {
-  Home, Plus, Download, Building2, Users, Search, X, Filter, Map, List,
+  Home, Plus, Download, Building2, Search, X, Filter, Map, List,
   CheckSquare, Trash2, ToggleLeft, ToggleRight, FileSpreadsheet, FolderSync, XCircle,
+  ChevronDown, ChevronRight, Archive,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -107,7 +107,6 @@ export default function OwnerProperties() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { roles } = useUserRoles();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -130,14 +129,10 @@ export default function OwnerProperties() {
   const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
   const [reassignType, setReassignType] = useState<'complex' | 'project'>('complex');
   const [reassignTargetId, setReassignTargetId] = useState<string>('');
-
-  const isPropertyManager = roles?.some(r => r.role === 'property_manager');
-  const RoleIcon = isPropertyManager ? Users : Building2;
-  const roleBadge = isPropertyManager
-    ? (isRu ? 'Управляющая компания' : 'Property Manager')
-    : (isRu ? 'Собственник' : 'Owner');
+  const [showInactiveSection, setShowInactiveSection] = useState(true);
 
   const { allProperties, isLoading } = useMyProperties();
+  const activeOnly = useMemo(() => (allProperties || []).filter((p) => p.is_active), [allProperties]);
 
   // Extract unique filter values
   const { districts, complexIds, projectIds, propertyTypes } = useMemo(() => {
@@ -145,7 +140,7 @@ export default function OwnerProperties() {
     const compIds = new Set<string>();
     const projIds = new Set<string>();
     const types = new Set<string>();
-    (allProperties || []).forEach(p => {
+    activeOnly.forEach(p => {
       if (p.district) dists.add(p.district);
       if (p.complex_id) compIds.add(p.complex_id);
       if (p.project_id) projIds.add(p.project_id);
@@ -157,11 +152,11 @@ export default function OwnerProperties() {
       projectIds: Array.from(projIds),
       propertyTypes: Array.from(types).sort(),
     };
-  }, [allProperties]);
+  }, [activeOnly]);
 
   const { complexNames, projectNames } = usePropertyLookups(complexIds, projectIds);
 
-  // Apply filters
+  // Apply filters (search, district, type, etc.)
   const filteredProperties = useMemo(() => {
     if (!allProperties) return [];
     return allProperties.filter(p => {
@@ -173,6 +168,10 @@ export default function OwnerProperties() {
       return true;
     });
   }, [allProperties, searchId, selectedDistrict, selectedComplex, selectedProject, selectedType]);
+
+  // Split: active (main list) and inactive (separate "archived" section)
+  const activeProperties = useMemo(() => filteredProperties.filter(p => p.is_active), [filteredProperties]);
+  const inactiveProperties = useMemo(() => filteredProperties.filter(p => !p.is_active), [filteredProperties]);
 
   const hasActiveFilters = !!(searchId || selectedDistrict || selectedComplex || selectedProject || selectedType);
 
@@ -194,12 +193,12 @@ export default function OwnerProperties() {
   }, []);
 
   const toggleSelectAll = useCallback(() => {
-    if (selectedIds.size === filteredProperties.length) {
+    if (selectedIds.size === activeProperties.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredProperties.map(p => p.property_id)));
+      setSelectedIds(new Set(activeProperties.map(p => p.property_id)));
     }
-  }, [filteredProperties, selectedIds.size]);
+  }, [activeProperties, selectedIds.size]);
 
   const exitSelectionMode = () => {
     setSelectionMode(false);
@@ -341,11 +340,11 @@ export default function OwnerProperties() {
         subtitle={isRu ? 'Управление недвижимостью' : 'Property management'}
       />
 
-      {/* Role badge */}
+      {/* Workspace badge */}
       <div className="flex items-center gap-2 mb-4">
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/8 text-primary">
-          <RoleIcon className="h-4 w-4" />
-          <span className="text-sm font-medium">{roleBadge}</span>
+          <Building2 className="h-4 w-4" />
+          <span className="text-sm font-medium">{isRu ? 'Рабочее место УК' : 'MC Workspace'}</span>
         </div>
       </div>
 
@@ -454,23 +453,23 @@ export default function OwnerProperties() {
 
           {hasActiveFilters && (
             <p className="text-xs text-muted-foreground">
-              {isRu ? `Найдено: ${filteredProperties.length} из ${allProperties.length}` : `Found: ${filteredProperties.length} of ${allProperties.length}`}
+              {isRu ? `Найдено: ${activeProperties.length} активных, ${inactiveProperties.length} неактивных` : `Found: ${activeProperties.length} active, ${inactiveProperties.length} inactive`}
             </p>
           )}
         </div>
       )}
 
-      {/* Select all row */}
-      {selectionMode && filteredProperties.length > 0 && (
+      {/* Select all row (active list only) */}
+      {selectionMode && activeProperties.length > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
           <Checkbox
-            checked={selectedIds.size === filteredProperties.length && filteredProperties.length > 0}
+            checked={selectedIds.size === activeProperties.length && activeProperties.length > 0}
             onCheckedChange={toggleSelectAll}
           />
           <span className="text-sm text-muted-foreground">
             {selectedIds.size > 0
               ? (isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`)
-              : (isRu ? 'Выбрать все' : 'Select all')}
+              : (isRu ? 'Выбрать все активные' : 'Select all active')}
           </span>
         </div>
       )}
@@ -512,7 +511,7 @@ export default function OwnerProperties() {
       ) : viewMode === 'map' ? (
         <div className="space-y-4 pb-20">
           <PropertyMapView
-            properties={filteredProperties.map(p => ({
+            properties={activeProperties.map(p => ({
               id: p.property_id,
               lat: p.lat,
               lng: p.lng,
@@ -524,17 +523,23 @@ export default function OwnerProperties() {
             mode="rent"
             className="h-[500px] lg:h-[600px]"
           />
-          {filteredProperties.filter(p => !p.lat || !p.lng).length > 0 && (
+          {activeProperties.filter(p => !p.lat || !p.lng).length > 0 && (
             <p className="text-xs text-muted-foreground text-center">
               {isRu
-                ? `${filteredProperties.filter(p => !p.lat || !p.lng).length} объектов без координат — не отображаются на карте`
-                : `${filteredProperties.filter(p => !p.lat || !p.lng).length} properties without coordinates — not shown on map`}
+                ? `${activeProperties.filter(p => !p.lat || !p.lng).length} объектов без координат — не отображаются на карте`
+                : `${activeProperties.filter(p => !p.lat || !p.lng).length} properties without coordinates — not shown on map`}
             </p>
           )}
         </div>
       ) : (
         <div className="space-y-4 pb-20">
-          {filteredProperties.map((property) => (
+          {activeProperties.length === 0 && inactiveProperties.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {isRu ? 'Нет активных объектов. Неактивные показаны ниже.' : 'No active properties. Inactive ones are listed below.'}
+            </p>
+          )}
+          {/* Active properties — main list */}
+          {activeProperties.map((property) => (
             <div key={property.id} className="relative flex items-start gap-2">
               {selectionMode && (
                 <div className="pt-4 pl-1 shrink-0">
@@ -546,15 +551,15 @@ export default function OwnerProperties() {
               )}
               <div className={cn('flex-1 min-w-0 relative', selectionMode && 'pointer-events-none')}>
                 {(property.source === 'managed' || (!property.lat && !property.lng)) && (
-                  <div className="absolute top-2 left-[140px] z-10 flex flex-col gap-1 max-w-[calc(100%-220px)] sm:max-w-[calc(100%-260px)] pointer-events-none">
+                  <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 pointer-events-none">
                     {property.source === 'managed' && (
-                      <Badge variant="secondary" className="w-fit max-w-full text-[10px] truncate">
+                      <Badge variant="secondary" className="w-fit text-[10px] truncate">
                         {isRu ? 'В управлении' : 'Managed'}
                       </Badge>
                     )}
                     {!property.lat && !property.lng && (
-                      <Badge variant="outline" className="w-fit max-w-full text-[10px] bg-warning/10 text-warning border-warning/30 truncate">
-                        <Map className="h-3 w-3 mr-0.5" />
+                      <Badge variant="secondary" className="w-fit text-[10px] text-muted-foreground bg-muted/90 truncate">
+                        <Map className="h-3 w-3 mr-0.5 opacity-70" />
                         {isRu ? 'Нет координат' : 'No coords'}
                       </Badge>
                     )}
@@ -578,6 +583,63 @@ export default function OwnerProperties() {
               </div>
             </div>
           ))}
+
+          {/* Inactive / archived — separate section */}
+          {inactiveProperties.length > 0 && viewMode === 'list' && (
+            <Card className="mt-8 border-dashed border-muted-foreground/30">
+              <button
+                type="button"
+                onClick={() => setShowInactiveSection(!showInactiveSection)}
+                className="w-full flex items-center gap-2 p-4 text-left hover:bg-muted/30 transition-colors rounded-t-lg"
+              >
+                {showInactiveSection ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                <Archive className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="font-medium text-muted-foreground">
+                  {isRu ? `Неактивные объекты (${inactiveProperties.length})` : `Inactive properties (${inactiveProperties.length})`}
+                </span>
+              </button>
+              {showInactiveSection && (
+                <CardContent className="pt-0 pb-4 space-y-4">
+                  {inactiveProperties.map((property) => (
+                    <div key={property.id} className="relative flex items-start gap-2">
+                      <div className="flex-1 min-w-0 relative opacity-90">
+                        {(property.source === 'managed' || (!property.lat && !property.lng)) && (
+                          <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 pointer-events-none">
+                            {property.source === 'managed' && (
+                              <Badge variant="secondary" className="w-fit text-[10px] truncate">
+                                {isRu ? 'В управлении' : 'Managed'}
+                              </Badge>
+                            )}
+                            {!property.lat && !property.lng && (
+                              <Badge variant="secondary" className="w-fit text-[10px] text-muted-foreground bg-muted/90 truncate">
+                                <Map className="h-3 w-3 mr-0.5 opacity-70" />
+                                {isRu ? 'Нет координат' : 'No coords'}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        <PropertyCard
+                          property={property as any}
+                          variant="list"
+                          mode="owner"
+                          complexName={property.complex_id ? (isRu ? complexNames[property.complex_id]?.name_ru : null) || complexNames[property.complex_id]?.name : undefined}
+                          onView={() => handleView(property.property_id)}
+                          onEdit={() => handleEdit(property.property_id)}
+                          onDuplicate={() => handleDuplicate(property.property_id)}
+                          onToggleActive={(_, activate) => handleToggleActive(property.property_id, activate)}
+                          onDelete={() => setDeleteTarget(property.property_id)}
+                          showApprovalStatus
+                          showInstantBadge
+                          showProtectionBadge
+                          showMarketplaceBadge
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              )}
+            </Card>
+          )}
         </div>
       )}
 

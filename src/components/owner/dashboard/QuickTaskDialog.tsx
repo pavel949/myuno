@@ -25,7 +25,8 @@ export function QuickTaskDialog({ open, onOpenChange }: Props) {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  const { allProperties } = useMyProperties();
+  const { activeProperties } = useMyProperties();
+  const allProperties = activeProperties || [];
   const { data: staff } = useStaffMembers();
   const { data: company } = useMyCompanyId();
   const createTask = useCreateCrmTask();

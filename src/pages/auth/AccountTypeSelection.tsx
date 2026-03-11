@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Home, Building2, Users, ArrowRight, Loader2 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 type AccountType = 'owner' | 'management_company' | 'representative';
 
@@ -89,7 +90,7 @@ export default function AccountTypeSelection() {
       // Navigate to owner dashboard or add property
       navigate(redirectTo);
     } catch (error) {
-      console.error('Error setting up account:', error);
+      logger.error('Error setting up account:', error);
       toast.error(isRu ? 'Ошибка настройки аккаунта' : 'Error setting up account');
     } finally {
       setIsSubmitting(false);

@@ -36,6 +36,9 @@ const ALLOWED_TABLES = [
   
   // Legacy (deprecated but may have data)
   'services',
+
+  // CRM
+  'crm_contacts',
 ];
 
 // Provider ID field mapping - different tables use different FK fields
@@ -122,16 +125,22 @@ Deno.serve(async (req) => {
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
       
-      // Add default values + "Listed by UNO" tagging
-      const processedBatch = batch.map((record: Record<string, any>) => ({
-        ...record,
-        is_active: record.is_active ?? true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        // Tag as created by UNO team (admin import)
-        created_by_uno_team: true,
-        uno_team_creator_id: user.id,
-      }));
+      // Add default values (table-specific)
+      const processedBatch = batch.map((record: Record<string, any>) => {
+        const base: Record<string, any> = {
+          ...record,
+          created_at: record.created_at ?? new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        if (table === 'crm_contacts') {
+          base.created_by = record.created_by ?? user.id;
+        } else {
+          base.is_active = record.is_active ?? true;
+          base.created_by_uno_team = true;
+          base.uno_team_creator_id = user.id;
+        }
+        return base;
+      });
 
       const { data, error } = await supabase
         .from(table)

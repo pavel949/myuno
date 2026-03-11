@@ -7,11 +7,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
-import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle, Crown } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getDealTypeEyebrow, getDealTypeFacts, getDealTypePresentation } from '@/components/owner/sales/dealTypePresentation';
 import {
   DndContext,
   DragEndEvent,
@@ -42,6 +43,8 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
   const dragRef = useRef(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id });
   const age = daysSince(deal.updated_at);
+  const typePresentation = getDealTypePresentation(deal.deal_type);
+  const typeFacts = getDealTypeFacts(deal, isRu);
 
   const nextDate = deal.next_action_date ? new Date(deal.next_action_date) : null;
   const isOverdue = nextDate ? isPast(nextDate) && !isToday(nextDate) : false;
@@ -58,11 +61,12 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group',
+        'p-3 rounded-lg border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group border-l-4',
         isDragging && 'opacity-50 shadow-lg z-50',
         isOverdue && 'border-l-2 border-l-destructive',
         !isOverdue && age > 30 && 'border-l-2 border-l-destructive',
         !isOverdue && age > 14 && age <= 30 && 'border-l-2 border-l-warning',
+        !isOverdue && !(age > 14) && typePresentation.accentClassName,
       )}
       onPointerDown={() => { dragRef.current = false; }}
       onPointerMove={() => { dragRef.current = true; }}
@@ -73,6 +77,10 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
         }
       }}
     >
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+        {getDealTypeEyebrow(deal.deal_type, isRu)}
+      </p>
+
       {/* Title */}
       <p className="font-medium text-sm leading-snug line-clamp-2">{deal.client_name}</p>
 
@@ -102,12 +110,27 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
 
       {/* Deal type badges + tags */}
       <div className="flex flex-wrap gap-1 mt-2">
+        {deal.is_vip && (
+          <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-warning/40 text-warning">
+            <Crown className="h-2.5 w-2.5 mr-0.5" />
+            VIP
+          </Badge>
+        )}
         {deal.deal_type && (
-          <Badge variant="outline" className={cn('text-[9px] h-4 px-1.5 border uppercase font-bold', dealTypeBadgeColors[deal.deal_type] || '')}>
+          <Badge variant="outline" className={cn('text-[9px] h-4 px-1.5 border uppercase font-bold', dealTypeBadgeColors[deal.deal_type] || '', typePresentation.badgeClassName)}>
             {isRu ? DEAL_TYPE_LABELS[deal.deal_type]?.ru : DEAL_TYPE_LABELS[deal.deal_type]?.en}
           </Badge>
         )}
         {deal.tags?.length > 0 && <DealTagsDisplay tags={deal.tags} />}
+      </div>
+
+      <div className="grid grid-cols-1 gap-1 mt-2">
+        {typeFacts.slice(0, 2).map((fact) => (
+          <div key={fact.key} className="rounded-md border bg-background/70 px-2 py-1">
+            <p className="text-[9px] uppercase tracking-wide text-muted-foreground">{fact.label}</p>
+            <p className="text-[11px] font-medium truncate">{fact.value}</p>
+          </div>
+        ))}
       </div>
 
       {/* Bottom row: priority stars + activity icons + avatar */}

@@ -78,7 +78,7 @@ export const getDefaultCenter = (citySlug?: string): CityCoordinates => {
   return city.center;
 };
 
-// Get map center as [lng, lat] tuple for Mapbox
+// Get map center as [lng, lat] tuple for Google Maps
 export const getMapCenter = (citySlug?: string): [number, number] => {
   const center = getDefaultCenter(citySlug);
   return [center.lng, center.lat];
@@ -92,7 +92,7 @@ export const getDefaultZoom = (citySlug?: string): number => {
   return city.zoom;
 };
 
-// Get city bounds for Mapbox fitBounds
+// Get city bounds for Google Maps fitBounds
 export const getCityBounds = (citySlug?: string): [[number, number], [number, number]] | null => {
   const city = citySlug && CITY_GEOGRAPHY[citySlug]
     ? CITY_GEOGRAPHY[citySlug]

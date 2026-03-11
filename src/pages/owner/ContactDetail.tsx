@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useContactNotes, useAddContactNote, useDeleteContactNote } from '@/hooks/useCrmContactNotes';
 import { useContactDeals } from '@/hooks/useCrmContacts';
 import { useCrmActivities, ACTIVITY_TYPE_CONFIG } from '@/hooks/useCrmActivities';
@@ -82,7 +83,7 @@ export default function ContactDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: contact, isLoading } = useCrmContact(id);
+  const { data: contact, isLoading, isError } = useCrmContact(id);
   const { data: notes = [] } = useContactNotes(id);
   const { data: deals = [] } = useContactDeals(id);
   const { data: activities = [] } = useCrmActivities(id);
@@ -119,11 +120,22 @@ export default function ContactDetail() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки контакта' : 'Failed to load contact'}</p>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(APP_ROUTES.MC_CONTACTS)}>
+          {isRu ? 'К списку контактов' : 'Back to contacts'}
+        </Button>
+      </div>
+    );
+  }
+
   if (!contact) {
     return (
       <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
         <p className="text-muted-foreground">{isRu ? 'Контакт не найден' : 'Contact not found'}</p>
-        <Button variant="link" onClick={() => navigate('/mc/contacts')}>{isRu ? 'Назад' : 'Back'}</Button>
+        <Button variant="link" onClick={() => navigate(APP_ROUTES.MC_CONTACTS)}>{isRu ? 'Назад' : 'Back'}</Button>
       </div>
     );
   }
@@ -155,7 +167,7 @@ export default function ContactDetail() {
     try {
       await deleteContact.mutateAsync(contact.id);
       toast({ title: isRu ? 'Контакт удалён' : 'Contact deleted' });
-      navigate('/mc/contacts');
+      navigate(APP_ROUTES.MC_CONTACTS);
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
@@ -193,7 +205,7 @@ export default function ContactDetail() {
       {/* ─── Top bar: Back + breadcrumb + actions ─── */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/mc/contacts')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={() => navigate(APP_ROUTES.MC_CONTACTS)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
             {isRu ? 'Контакты' : 'Contacts'}
           </button>

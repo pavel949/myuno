@@ -21,6 +21,18 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // New code: avoid explicit any; legacy any to be replaced incrementally (P1-T1).
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Prefer @/lib/logger in new code (no-op in production). no-console off to avoid mass warnings until migration.
+      "no-console": "off",
+    },
+  },
+  // E2E: Playwright fixtures use callback named "use" (not React); allow lexical declarations in case blocks
+  {
+    files: ["e2e/**/*.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "no-case-declarations": "off",
     },
   },
 );

@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,7 +59,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
         <div className="flex items-center justify-between h-12 lg:h-16 xl:h-[72px] px-3 sm:px-4 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-1">
           {/* Logo with hover animation */}
           <Link
-            to="/"
+            to={APP_ROUTES.HOME}
             className="flex items-center gap-0.5 flex-shrink-0 whitespace-nowrap group"
           >
             <span className="text-sm lg:text-[15px] text-muted-foreground/80 font-light transition-all duration-300 group-hover:tracking-wider group-hover:text-muted-foreground">
@@ -127,7 +128,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
             {user ? (
               <UserAvatarMenu />
             ) : (
-              <Link to="/auth">
+              <Link to={APP_ROUTES.AUTH}>
                 <Button size="sm" className="h-8 text-xs px-4 ml-1 rounded-lg font-medium">
                   {t('auth.login')}
                 </Button>

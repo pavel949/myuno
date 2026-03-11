@@ -14,6 +14,7 @@ import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { CompanySwitcher } from '@/components/owner/CompanySwitcher';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const companyRoleLabels: Record<string, { en: string; ru: string }> = {
   director: { en: 'Director', ru: 'Директор' },
@@ -115,7 +116,7 @@ export function MCHeader() {
       <Breadcrumb className="hidden md:flex">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/mc')} className="flex items-center gap-1 cursor-pointer hover:text-foreground">
+            <BreadcrumbLink onClick={() => navigate(APP_ROUTES.MC)} className="flex items-center gap-1 cursor-pointer hover:text-foreground">
               <span>{isRussian ? 'Панель УК' : 'MC Dashboard'}</span>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -155,7 +156,7 @@ export function MCHeader() {
           <ThemeSwitcher />
         </div>
         <LanguageSwitcher />
-        <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/notifications')}>
+        <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}>
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">

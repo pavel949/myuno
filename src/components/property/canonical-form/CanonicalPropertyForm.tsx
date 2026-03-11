@@ -13,6 +13,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound, Check } from 'lucide-react';
+import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // Import canonical step components from Owner Wizard
 import { 
@@ -152,8 +153,8 @@ function mapToOwnerFormat(data: CanonicalPropertyFormData): PropertyFormData {
     parking_type: data.parking_type || '',
     pool_type: data.pool_type || '',
     garden_type: data.garden_type || '',
-    view_type: data.view_type || '',
-    furnishing_level: data.furnishing_level || '',
+    view_type: normalizeViewTypes(data.view_type),
+    furnishing_level: normalizeFurnishingLevel(data.furnishing_level),
     equipment: data.equipment || [],
     price_per_night: (data.price_per_night && data.price_per_night !== '0') ? data.price_per_night : (data.price ? String(data.price) : ''),
     min_stay_nights: data.min_stay_nights || 1,
@@ -227,7 +228,7 @@ function mapFromOwnerFormat(
     is_for_sale: ownerData.is_for_sale,
     sale_price: ownerData.sale_price,
     view_type: ownerData.view_type,
-    furnishing_level: ownerData.furnishing_level,
+    furnishing_level: normalizeFurnishingLevel(ownerData.furnishing_level),
     equipment: ownerData.equipment,
     pets_allowed: ownerData.pets_allowed,
     smoking_allowed: ownerData.smoking_allowed,

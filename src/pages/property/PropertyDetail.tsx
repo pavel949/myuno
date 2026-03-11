@@ -45,6 +45,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
+import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // Demo fallback removed — only real DB data is used
 
@@ -137,7 +138,10 @@ export default function PropertyDetail() {
   // Duplicate loading check removed (already handled above)
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
-  const viewLabel = property.view_type ? viewTypeLabels[property.view_type] : null;
+  const viewTypes = normalizeViewTypes(property.view_type);
+  const viewLabels = viewTypes
+    .map((viewType) => viewTypeLabels[viewType])
+    .filter(Boolean);
 
   const propertyTitle = isRu ? (property.title_ru || property.title_en) : (property.title_en || property.title_ru);
   const propertyDesc = isRu ? (property.description_ru || property.description_en || '') : (property.description_en || property.description_ru || '');
@@ -354,13 +358,15 @@ export default function PropertyDetail() {
             </div>
 
             {/* View Type Highlight */}
-            {viewLabel && (
+            {viewLabels.length > 0 && (
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Eye className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{isRu ? viewLabel.ru : viewLabel.en}</p>
+                  <p className="font-medium">
+                    {viewLabels.map((viewLabel) => (isRu ? viewLabel.ru : viewLabel.en)).join(' · ')}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {isRu ? 'Потрясающий вид из окон' : 'Amazing views from the windows'}
                   </p>
@@ -429,7 +435,7 @@ export default function PropertyDetail() {
             <UnitSpecs
               floor={property.floor}
               unitNumber={property.unit_number}
-              viewType={property.view_type}
+              viewTypes={viewTypes}
               furnishingLevel={property.furnishing_level}
               equipment={
                 (property.equipment && property.equipment.length > 0)

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { User, Settings, HelpCircle, LogOut, ChevronRight, Shield, Bell, CreditCard, Heart, Clock, Wallet, Gift, Info, FileText, Handshake, MessageCircle, ShieldCheck, Building2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -45,36 +46,36 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate(APP_ROUTES.HOME);
   };
 
   const menuItems = [
-    { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => navigate('/profile/edit') },
-    { icon: Settings, label: language === 'ru' ? 'Настройки и данные' : 'Settings & Data', onClick: () => navigate('/profile/settings') },
-    { icon: FileText, label: language === 'ru' ? 'Мои документы' : 'My Documents', onClick: () => navigate('/profile/settings') },
-    { icon: MessageCircle, label: language === 'ru' ? 'Чат поддержки' : 'Support Chat', onClick: () => navigate('/support') },
-    { icon: Wallet, label: language === 'ru' ? 'Кошелёк' : 'Wallet', onClick: () => navigate('/wallet') },
-    { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate('/favorites') },
-    { icon: Clock, label: language === 'ru' ? 'История просмотров' : 'View History', onClick: () => navigate('/history') },
-    { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => navigate('/notifications') },
-    { icon: CreditCard, label: language === 'ru' ? 'Способы оплаты' : 'Payment Methods', onClick: () => navigate('/wallet/cards') },
+    { icon: User, label: language === 'ru' ? 'Редактировать профиль' : 'Edit Profile', onClick: () => navigate(APP_ROUTES.PROFILE_EDIT) },
+    { icon: Settings, label: language === 'ru' ? 'Настройки и данные' : 'Settings & Data', onClick: () => navigate(APP_ROUTES.PROFILE_SETTINGS) },
+    { icon: FileText, label: language === 'ru' ? 'Мои документы' : 'My Documents', onClick: () => navigate(APP_ROUTES.PROFILE_SETTINGS) },
+    { icon: MessageCircle, label: language === 'ru' ? 'Чат поддержки' : 'Support Chat', onClick: () => navigate(APP_ROUTES.SUPPORT) },
+    { icon: Wallet, label: language === 'ru' ? 'Кошелёк' : 'Wallet', onClick: () => navigate(APP_ROUTES.WALLET) },
+    { icon: Heart, label: language === 'ru' ? 'Избранное' : 'Favorites', onClick: () => navigate(APP_ROUTES.FAVORITES) },
+    { icon: Clock, label: language === 'ru' ? 'История просмотров' : 'View History', onClick: () => navigate(APP_ROUTES.VIEW_HISTORY) },
+    { icon: Bell, label: language === 'ru' ? 'Уведомления' : 'Notifications', onClick: () => navigate(APP_ROUTES.NOTIFICATIONS) },
+    { icon: CreditCard, label: language === 'ru' ? 'Способы оплаты' : 'Payment Methods', onClick: () => navigate(APP_ROUTES.WALLET_CARDS) },
   ];
 
   const adminItems = [
-    { icon: Shield, label: language === 'ru' ? 'Панель управления' : 'Admin Dashboard', onClick: () => navigate('/admin') },
-    { icon: ShieldCheck, label: language === 'ru' ? 'Заявки партнёров' : 'Partner Applications', onClick: () => navigate('/admin/partner-applications') },
-    { icon: Settings, label: language === 'ru' ? 'Пользователи' : 'User Analytics', onClick: () => navigate('/admin/user-analytics') },
-    { icon: CreditCard, label: language === 'ru' ? 'Финансы' : 'Finance', onClick: () => navigate('/admin/finance') },
-    { icon: FileText, label: language === 'ru' ? 'Модерация контента' : 'Content Moderation', onClick: () => navigate('/admin/moderation') },
+    { icon: Shield, label: language === 'ru' ? 'Панель управления' : 'Admin Dashboard', onClick: () => navigate(APP_ROUTES.ADMIN) },
+    { icon: ShieldCheck, label: language === 'ru' ? 'Заявки партнёров' : 'Partner Applications', onClick: () => navigate(`${APP_ROUTES.ADMIN}/partner-applications`) },
+    { icon: Settings, label: language === 'ru' ? 'Пользователи' : 'User Analytics', onClick: () => navigate(`${APP_ROUTES.ADMIN}/user-analytics`) },
+    { icon: CreditCard, label: language === 'ru' ? 'Финансы' : 'Finance', onClick: () => navigate(`${APP_ROUTES.ADMIN}/finance`) },
+    { icon: FileText, label: language === 'ru' ? 'Модерация контента' : 'Content Moderation', onClick: () => navigate(`${APP_ROUTES.ADMIN}/moderation`) },
   ];
 
   const infoItems = [
-    { icon: Info, label: language === 'ru' ? 'О нас' : 'About Us', onClick: () => navigate('/about') },
-    { icon: HelpCircle, label: language === 'ru' ? 'Как это работает' : 'How It Works', onClick: () => navigate('/how-it-works') },
-    { icon: HelpCircle, label: language === 'ru' ? 'Частые вопросы' : 'FAQ', onClick: () => navigate('/faq') },
-    { icon: Handshake, label: language === 'ru' ? 'Для партнёров' : 'For Partners', onClick: () => navigate('/partners') },
-    { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy Policy', onClick: () => navigate('/privacy') },
-    { icon: FileText, label: language === 'ru' ? 'Условия использования' : 'Terms of Use', onClick: () => navigate('/terms') },
+    { icon: Info, label: language === 'ru' ? 'О нас' : 'About Us', onClick: () => navigate(APP_ROUTES.ABOUT) },
+    { icon: HelpCircle, label: language === 'ru' ? 'Как это работает' : 'How It Works', onClick: () => navigate(APP_ROUTES.HOW_IT_WORKS) },
+    { icon: HelpCircle, label: language === 'ru' ? 'Частые вопросы' : 'FAQ', onClick: () => navigate(APP_ROUTES.FAQ) },
+    { icon: Handshake, label: language === 'ru' ? 'Для партнёров' : 'For Partners', onClick: () => navigate(APP_ROUTES.PARTNERS) },
+    { icon: Shield, label: language === 'ru' ? 'Конфиденциальность' : 'Privacy Policy', onClick: () => navigate(APP_ROUTES.PRIVACY) },
+    { icon: FileText, label: language === 'ru' ? 'Условия использования' : 'Terms of Use', onClick: () => navigate(APP_ROUTES.TERMS) },
   ];
 
   return (
@@ -114,7 +115,7 @@ export default function Profile() {
                 </p>
               )}
             </div>
-            <PremiumButton variant="outline" size="sm" onClick={() => navigate('/profile/edit')} className="shrink-0">
+            <PremiumButton variant="outline" size="sm" onClick={() => navigate(APP_ROUTES.PROFILE_EDIT)} className="shrink-0">
               {t('action.edit')}
             </PremiumButton>
           </div>

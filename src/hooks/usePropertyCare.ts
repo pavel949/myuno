@@ -68,6 +68,7 @@ export function useOwnerProperties() {
         .from('properties')
         .select('*')
         .eq('owner_id', user.id)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -136,7 +137,7 @@ export function useCreateOwnerProperty() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string }) => {
+    mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string; _silent?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
       
       // Parallel: fetch profile + auto-detect company
@@ -151,7 +152,7 @@ export function useCreateOwnerProperty() {
       const profile = profileRes.data;
       const managementCompanyId = companyIdFromData || membershipRes.data?.company_id || null;
 
-      const { _companyId, title, title_ru, description, description_ru, ...restData } = data as any;
+      const { _companyId, _silent, title, title_ru, description, description_ru, ...restData } = data as any;
       
       // Clean undefined values to prevent potential DB column mismatch
       const cleanRest: Record<string, any> = {};
@@ -185,25 +186,31 @@ export function useCreateOwnerProperty() {
       }
       
       // Trigger email notification to admins (fire and forget)
-      supabase.functions.invoke('notify-admin-property-submission', {
-        body: {
-          property_id: result.id,
-          property_title: result.title || result.title_en || result.title_ru || 'Без названия',
-          owner_id: user.id,
-          owner_name: profile?.full_name || undefined,
-          owner_email: profile?.email || user.email || undefined,
-        },
-      }).catch(err => errorLog.silent(err, 'notify_admin'));
+      if (!_silent && data.approval_status !== 'draft') {
+        supabase.functions.invoke('notify-admin-property-submission', {
+          body: {
+            property_id: result.id,
+            property_title: result.title || result.title_en || result.title_ru || 'Без названия',
+            owner_id: user.id,
+            owner_name: profile?.full_name || undefined,
+            owner_email: profile?.email || user.email || undefined,
+          },
+        }).catch(err => errorLog.silent(err, 'notify_admin'));
+      }
       
       return result as OwnerProperty;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });
-      toast.success('Объект добавлен!');
+      if (!(variables as any)?._silent) {
+        toast.success('Объект добавлен!');
+      }
     },
-    onError: (error) => {
-      toast.error('Ошибка: ' + error.message);
+    onError: (error, variables) => {
+      if (!(variables as any)?._silent) {
+        toast.error('Ошибка: ' + error.message);
+      }
     },
   });
 }
@@ -217,7 +224,7 @@ export function useUpdateOwnerProperty() {
   const { activeCompany } = useActiveCompany();
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<OwnerProperty> & { id: string }) => {
+    mutationFn: async ({ id, _silent, ...data }: Partial<OwnerProperty> & { id: string; _silent?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
       
       // Try update as owner first
@@ -253,12 +260,14 @@ export function useUpdateOwnerProperty() {
       if (managedError) throw managedError;
       return managedResult;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-property'] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
-      toast.success('Объект обновлён!');
+      if (!(variables as any)?._silent) {
+        toast.success('Объект обновлён!');
+      }
     },
   });
 }

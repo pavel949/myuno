@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
@@ -13,8 +13,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Upload, FileSpreadsheet, Contact, UserPlus, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
-import Papa from 'papaparse';
+import { Upload, FileSpreadsheet, UserPlus, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
+import { parseSpreadsheetFile } from '@/lib/parseSpreadsheet';
+import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
+import { t } from '@/lib/contactsImportI18n';
 
 interface ParsedContact {
   first_name: string;
@@ -23,93 +25,46 @@ interface ParsedContact {
   email?: string;
   whatsapp?: string;
   telegram?: string;
+  tags?: string[];
   source?: string;
   notes?: string;
   valid: boolean;
   error?: string;
 }
 
+const SKIP_COLUMN = '_skip';
+
 export default function ContactImportPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  const { data: company } = useMyCompanyId();
-  const companyId = company?.company_id;
+  const lang = isRu ? 'ru' : 'en';
+  const { data: company, isLoading: companyLoading, error: companyError } = useMyCompanyId();
+  const companyId = company?.company_id ?? undefined;
 
   const [parsed, setParsed] = useState<ParsedContact[]>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [rawRows, setRawRows] = useState<Record<string, string>[]>([]);
   const [rawText, setRawText] = useState('');
+  const [fileLoading, setFileLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Manual entry state
   const [manual, setManual] = useState({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', source: 'manual', notes: '' });
 
-  const FIELDS = [
-    { key: 'first_name', label: isRu ? 'Имя' : 'First Name', required: true },
-    { key: 'last_name', label: isRu ? 'Фамилия' : 'Last Name', required: true },
-    { key: 'phone', label: isRu ? 'Телефон' : 'Phone' },
-    { key: 'email', label: 'Email' },
-    { key: 'whatsapp', label: 'WhatsApp' },
-    { key: 'telegram', label: 'Telegram' },
-    { key: 'notes', label: isRu ? 'Заметки' : 'Notes' },
-  ];
+  const fieldLabels = CONTACT_IMPORT_FIELDS.reduce((acc, f) => {
+    acc[f.key] = isRu ? f.labelRu : f.labelEn;
+    return acc;
+  }, {} as Record<string, string>);
 
-  // CSV / Excel parsing
-  const handleCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (res) => {
-        const headers = res.meta.fields || [];
-        setCsvHeaders(headers);
-        // Auto-map columns
-        const autoMap: Record<string, string> = {};
-        for (const f of FIELDS) {
-          const match = headers.find((h) =>
-            h.toLowerCase().replace(/[_\s]/g, '').includes(f.key.replace('_', ''))
-          );
-          if (match) autoMap[f.key] = match;
-        }
-        setColumnMapping(autoMap);
-        // Parse with auto-mapping
-        applyMapping(res.data as Record<string, string>[], autoMap);
-      },
-    });
-  };
-
-  const applyMapping = (rows: Record<string, string>[], mapping: Record<string, string>) => {
-    const contacts: ParsedContact[] = rows.map((row) => {
-      const c: ParsedContact = {
-        first_name: (row[mapping.first_name || ''] || '').trim(),
-        last_name: (row[mapping.last_name || ''] || '').trim(),
-        phone: (row[mapping.phone || ''] || '').trim(),
-        email: (row[mapping.email || ''] || '').trim(),
-        whatsapp: (row[mapping.whatsapp || ''] || '').trim(),
-        telegram: (row[mapping.telegram || ''] || '').trim(),
-        notes: (row[mapping.notes || ''] || '').trim(),
-        source: 'csv_import',
-        valid: true,
-      };
-      if (!c.first_name) { c.valid = false; c.error = isRu ? 'Нет имени' : 'Missing name'; }
-      return c;
-    });
-    setParsed(contacts);
-  };
-
-  // vCard parsing
-  const handleVCard = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      const cards = text.split('BEGIN:VCARD').filter(Boolean);
-      const contacts: ParsedContact[] = cards.map((card) => {
+  const parseVCardFile = useCallback((text: string): ParsedContact[] => {
+    const cards = text.split('BEGIN:VCARD').filter(Boolean);
+    return cards
+      .map((card) => {
         const getField = (name: string) => {
           const match = card.match(new RegExp(`${name}[^:]*:(.+)`, 'i'));
           return match ? match[1].trim() : '';
@@ -127,11 +82,118 @@ export default function ContactImportPage() {
           valid: !!(nameParts[1] || fn),
           error: !(nameParts[1] || fn) ? (isRu ? 'Нет имени' : 'Missing name') : undefined,
         };
-      });
-      setParsed(contacts.filter((c) => c.first_name || c.last_name));
-    };
-    reader.readAsText(file);
-  };
+      })
+      .filter((c) => c.first_name || c.last_name);
+  }, [isRu]);
+
+  const normalizeHeader = (s: string) => s.toLowerCase().replace(/[^a-zа-яё0-9]/gi, '').trim();
+  const parseTags = (raw: string) =>
+    raw
+      .split(/[;,|]/)
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+  const applyMapping = useCallback((rows: Record<string, string>[], mapping: Record<string, string>) => {
+    const contacts: ParsedContact[] = rows.map((row) => {
+      const first = (row[mapping.first_name || ''] || '').trim();
+      const last = (row[mapping.last_name || ''] || '').trim();
+      const valid = !!(first || last);
+      return {
+        first_name: first,
+        last_name: last,
+        phone: (row[mapping.phone || ''] || '').trim(),
+        email: (row[mapping.email || ''] || '').trim(),
+        whatsapp: (row[mapping.whatsapp || ''] || '').trim(),
+        telegram: (row[mapping.telegram || ''] || '').trim(),
+        tags: parseTags((row[mapping.tags || ''] || '').trim()),
+        source: 'csv_import',
+        notes: (row[mapping.notes || ''] || '').trim(),
+        valid,
+        error: valid ? undefined : (isRu ? 'Нет имени' : 'Missing name'),
+      };
+    });
+    setParsed(contacts);
+  }, [isRu]);
+
+  const handleSpreadsheetResult = useCallback((headers: string[], rows: Record<string, string>[]) => {
+    setCsvHeaders(headers);
+    setRawRows(rows);
+    const autoMap: Record<string, string> = {};
+    const normalizedHeaders = headers.map((h) => ({ raw: h, norm: normalizeHeader(h) }));
+    for (const field of CONTACT_IMPORT_FIELDS) {
+      const aliases = CONTACT_IMPORT_ALIASES[field.key] ?? [field.key.replace(/_/g, '')];
+      const match = normalizedHeaders.find(({ norm }) =>
+        aliases.some((a) => norm === a || norm.includes(a))
+      );
+      if (match && !Object.values(autoMap).includes(match.raw)) {
+        autoMap[field.key] = match.raw;
+      }
+    }
+    setColumnMapping(autoMap);
+    applyMapping(rows, autoMap);
+  }, [applyMapping]);
+
+  const handleFile = useCallback(async (file: File) => {
+    const ext = file.name.toLowerCase().split('.').pop() ?? '';
+    if (ext === 'vcf') {
+      setFileLoading(true);
+      setCsvHeaders([]);
+      setRawRows([]);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const text = (ev.target?.result as string) ?? '';
+        setParsed(parseVCardFile(text));
+        setFileLoading(false);
+      };
+      reader.readAsText(file);
+      return;
+    }
+    setFileLoading(true);
+    try {
+      const { headers, rows } = await parseSpreadsheetFile(file);
+      if (rows.length === 0) {
+        toast.error(t('fileEmpty', lang));
+      } else {
+        handleSpreadsheetResult(headers, rows);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t('readError', lang);
+      toast.error(msg);
+    } finally {
+      setFileLoading(false);
+    }
+  }, [isRu, parseVCardFile, handleSpreadsheetResult, lang]);
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && /\.(csv|tsv|xlsx|xls|vcf)$/i.test(file.name)) {
+      handleFile(file);
+    } else {
+      toast.error(t('supportedFormats', lang));
+    }
+  }, [handleFile, lang]);
+
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const triggerFileInput = useCallback(() => {
+    fileRef.current?.click();
+  }, []);
+
+  const onFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    e.target.value = '';
+  }, [handleFile]);
 
   // WhatsApp/Telegram text parsing
   const parseMessengerText = () => {
@@ -170,37 +232,79 @@ export default function ContactImportPage() {
     setParsed(contacts);
   };
 
-  // Import to DB
+  const buildRowFromMapping = (row: Record<string, string>): Record<string, unknown> => {
+    const out: Record<string, unknown> = {
+      company_id: companyId,
+      created_by: user?.id ?? null,
+      first_name: '',
+      last_name: '-',
+      lifecycle_stage: 'lead',
+      tags: [],
+    };
+    const numKeys = new Set(['budget_min', 'budget_max', 'bedrooms_min', 'lead_score', 'scoring']);
+    for (const [targetKey, sourceCol] of Object.entries(columnMapping)) {
+      if (!sourceCol || !CONTACT_IMPORT_FIELDS.some((f) => f.key === targetKey)) continue;
+      const raw = (row[sourceCol] ?? '').trim();
+      if (numKeys.has(targetKey)) {
+        const n = Number(raw);
+        out[targetKey] = Number.isNaN(n) ? null : n;
+      } else {
+        const val = raw || null;
+        if (targetKey === 'first_name') out.first_name = (val as string)?.slice(0, 100) || '';
+        else if (targetKey === 'last_name') out.last_name = (val as string)?.slice(0, 100) || '-';
+        else if (['phone', 'phone2', 'mobile', 'whatsapp'].includes(targetKey)) out[targetKey] = (val as string)?.slice(0, 20) ?? null;
+        else if (targetKey === 'email') out[targetKey] = (val as string)?.slice(0, 255) ?? null;
+        else if (['telegram', 'line_id'].includes(targetKey)) out[targetKey] = (val as string)?.slice(0, 50) ?? null;
+        else if (['notes', 'special_notes'].includes(targetKey)) out[targetKey] = (val as string)?.slice(0, 500) ?? null;
+        else if (targetKey === 'tags') out.tags = parseTags(String(val ?? ''));
+        else out[targetKey] = val;
+      }
+    }
+    return out;
+  };
+
   const handleImport = async () => {
     if (!companyId || !user) {
-      toast.error(isRu ? 'Компания не найдена' : 'Company not found');
+      toast.error(t('companyNotFound', lang));
       return;
     }
-    const valid = parsed.filter((c) => c.valid);
-    if (!valid.length) return;
+    const validIndices = parsed.map((c, i) => (c.valid ? i : -1)).filter((i) => i >= 0);
+    if (!validIndices.length) return;
 
     setImporting(true);
     let success = 0;
     let failed = 0;
 
-    // Batch insert in chunks of 50
+    const rowsToInsert: Record<string, unknown>[] =
+      rawRows.length > 0
+        ? validIndices.map((i) => buildRowFromMapping(rawRows[i] ?? {}))
+        : validIndices.map((i) => {
+            const c = parsed[i];
+            const firstName = String(c?.first_name ?? '').trim();
+            const lastName = String(c?.last_name ?? '').trim();
+            return {
+              company_id: companyId,
+              first_name: firstName.slice(0, 100) || '',
+              last_name: lastName.slice(0, 100) || '-',
+              phone: c?.phone?.slice(0, 20) || null,
+              email: c?.email?.slice(0, 255) || null,
+              whatsapp: c?.whatsapp?.slice(0, 20) || null,
+              telegram: c?.telegram?.slice(0, 50) || null,
+              source: c?.source || 'import',
+              notes: c?.notes?.slice(0, 500) || null,
+              tags: c?.tags || [],
+              lifecycle_stage: 'lead',
+              created_by: user.id,
+            };
+          });
+
     const BATCH_SIZE = 50;
-    for (let i = 0; i < valid.length; i += BATCH_SIZE) {
-      const batch = valid.slice(i, i + BATCH_SIZE).map(c => ({
-        company_id: companyId,
-        first_name: c.first_name.slice(0, 100),
-        last_name: c.last_name.slice(0, 100) || '-',
-        phone: c.phone?.slice(0, 20) || null,
-        email: c.email?.slice(0, 255) || null,
-        whatsapp: c.whatsapp?.slice(0, 20) || null,
-        telegram: c.telegram?.slice(0, 50) || null,
-        source: c.source || 'import',
-        notes: c.notes?.slice(0, 500) || null,
-        created_by: user.id,
-      }));
+    for (let i = 0; i < rowsToInsert.length; i += BATCH_SIZE) {
+      const batch = rowsToInsert.slice(i, i + BATCH_SIZE);
       const { data, error } = await supabase.from('crm_contacts').insert(batch as any).select('id');
       if (error) {
         failed += batch.length;
+        toast.error(`${t('readError', lang)}: ${error.message}`);
       } else {
         success += data?.length || 0;
         failed += batch.length - (data?.length || 0);
@@ -209,14 +313,23 @@ export default function ContactImportPage() {
 
     setImportResult({ success, failed });
     setImporting(false);
-    toast.success(isRu ? `Импортировано: ${success}` : `Imported: ${success}`);
+    if (success > 0) {
+      toast.success(t('importedCount', lang).replace('{n}', String(success)));
+    }
+    if (failed > 0) {
+      toast.error(
+        success === 0
+          ? t('readError', lang)
+          : `${isRu ? 'Не удалось импортировать часть контактов' : 'Some contacts failed to import'}: ${failed}`
+      );
+    }
   };
 
   // Manual add
   const handleManualAdd = async () => {
     if (!companyId || !user) return;
     if (!manual.first_name.trim()) {
-      toast.error(isRu ? 'Введите имя' : 'Enter name');
+      toast.error(t('enterName', lang));
       return;
     }
     const { error } = await supabase.from('crm_contacts').insert({
@@ -229,11 +342,13 @@ export default function ContactImportPage() {
       telegram: manual.telegram?.slice(0, 50) || null,
       source: manual.source,
       notes: manual.notes?.slice(0, 500) || null,
+      tags: [],
+      lifecycle_stage: 'lead',
       created_by: user.id,
     } as any);
     if (error) toast.error(error.message);
     else {
-      toast.success(isRu ? 'Контакт добавлен' : 'Contact added');
+      toast.success(t('contactAdded', lang));
       setManual({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', source: 'manual', notes: '' });
     }
   };
@@ -241,49 +356,83 @@ export default function ContactImportPage() {
   const validCount = parsed.filter((c) => c.valid).length;
   const invalidCount = parsed.length - validCount;
 
+  if (companyLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[200px] gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">{isRu ? 'Загрузка…' : 'Loading…'}</p>
+      </div>
+    );
+  }
+
+  if (companyError || (!companyLoading && !companyId && user)) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold">{t('title', lang)}</h2>
+        <p className="text-sm text-destructive">{t('companyNotFound', lang)}</p>
+        <p className="text-xs text-muted-foreground">
+          {isRu ? 'Привяжите аккаунт к управляющей компании в настройках.' : 'Link your account to a management company in settings.'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-bold">{isRu ? 'Импорт контактов' : 'Import Contacts'}</h2>
-        <p className="text-sm text-muted-foreground">
-          {isRu ? 'CSV, vCard, WhatsApp или ручной ввод' : 'CSV, vCard, WhatsApp or manual entry'}
-        </p>
+        <h2 className="text-xl font-bold">{t('title', lang)}</h2>
+        <p className="text-sm text-muted-foreground">{t('subtitle', lang)}</p>
       </div>
 
-      <Tabs defaultValue="csv">
-        <TabsList className="grid grid-cols-4 w-full">
-          <TabsTrigger value="csv" className="gap-1 text-xs"><FileSpreadsheet className="h-3.5 w-3.5" /> CSV</TabsTrigger>
-          <TabsTrigger value="vcard" className="gap-1 text-xs"><Contact className="h-3.5 w-3.5" /> vCard</TabsTrigger>
-          <TabsTrigger value="messenger" className="gap-1 text-xs"><MessageCircle className="h-3.5 w-3.5" /> Chat</TabsTrigger>
-          <TabsTrigger value="manual" className="gap-1 text-xs"><UserPlus className="h-3.5 w-3.5" /> {isRu ? 'Вручную' : 'Manual'}</TabsTrigger>
+      <Tabs defaultValue="file">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="file" className="gap-1 text-xs"><FileSpreadsheet className="h-3.5 w-3.5" /> {t('tabFile', lang)}</TabsTrigger>
+          <TabsTrigger value="messenger" className="gap-1 text-xs"><MessageCircle className="h-3.5 w-3.5" /> {t('tabChat', lang)}</TabsTrigger>
+          <TabsTrigger value="manual" className="gap-1 text-xs"><UserPlus className="h-3.5 w-3.5" /> {t('tabManual', lang)}</TabsTrigger>
         </TabsList>
 
-        {/* CSV Tab */}
-        <TabsContent value="csv" className="space-y-4">
-          <Card>
-            <CardContent className="pt-4">
-              <Label>{isRu ? 'CSV / Excel файл' : 'CSV / Excel file'}</Label>
-              <Input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.tsv" onChange={handleCSV} className="mt-2" />
+        {/* File tab: CSV, TSV, XLSX, vCard — drag-and-drop or pick from disk */}
+        <TabsContent value="file" className="space-y-4">
+          <input ref={fileRef} type="file" accept=".csv,.tsv,.xlsx,.xls,.vcf" onChange={onFileInputChange} className="hidden" />
+          <Card
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            className={`border-2 border-dashed transition-colors cursor-pointer ${isDragging ? 'border-primary bg-primary/5' : 'hover:border-primary/50'}`}
+            onClick={triggerFileInput}
+          >
+            <CardContent className="pt-6 pb-6 flex flex-col items-center justify-center gap-2 text-center">
+              <Upload className="h-10 w-10 text-muted-foreground" />
+              <p className="text-sm font-medium">{t('dropPrompt', lang)}</p>
+              <p className="text-xs text-muted-foreground">{t('dropFormats', lang)}</p>
+              {fileLoading && <p className="text-xs text-primary">{t('loading', lang)}</p>}
             </CardContent>
           </Card>
 
           {csvHeaders.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">{isRu ? 'Маппинг колонок' : 'Column Mapping'}</CardTitle>
+                <CardTitle className="text-sm">{t('columnMappingTitle', lang)}</CardTitle>
+                <p className="text-xs text-muted-foreground">{t('columnMappingHint', lang)}</p>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {FIELDS.map((f) => (
+              <CardContent className="space-y-2 max-h-[40vh] overflow-y-auto">
+                {CONTACT_IMPORT_FIELDS.map((f) => (
                   <div key={f.key} className="flex items-center gap-2">
-                    <span className="text-sm w-24">{f.label}{f.required && ' *'}</span>
+                    <span className="text-sm w-40 shrink-0">{fieldLabels[f.key] ?? f.key}{f.required ? ' *' : ''}</span>
                     <Select
-                      value={columnMapping[f.key] || ''}
-                      onValueChange={(v) => setColumnMapping((prev) => ({ ...prev, [f.key]: v }))}
+                      value={columnMapping[f.key] ? columnMapping[f.key] : SKIP_COLUMN}
+                      onValueChange={(v) => {
+                        const next = { ...columnMapping, [f.key]: v === SKIP_COLUMN ? '' : v };
+                        setColumnMapping(next);
+                        if (rawRows.length) applyMapping(rawRows, next);
+                      }}
                     >
-                      <SelectTrigger className="flex-1"><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">—</SelectItem>
-                        {csvHeaders.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                      <SelectTrigger className="flex-1"><SelectValue placeholder={t('skip', lang)} /></SelectTrigger>
+                      <SelectContent className="max-h-[min(70vh,420px)]">
+                        <SelectItem value={SKIP_COLUMN}>{t('skip', lang)}</SelectItem>
+                        {csvHeaders.map((h) => (
+                          <SelectItem key={h} value={h}>{h}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -291,16 +440,6 @@ export default function ContactImportPage() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        {/* vCard Tab */}
-        <TabsContent value="vcard">
-          <Card>
-            <CardContent className="pt-4">
-              <Label>{isRu ? '.vcf файл' : '.vcf file'}</Label>
-              <Input type="file" accept=".vcf" onChange={handleVCard} className="mt-2" />
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Messenger Tab */}
@@ -325,7 +464,7 @@ export default function ContactImportPage() {
         <TabsContent value="manual">
           <Card>
             <CardContent className="pt-4 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>{isRu ? 'Имя *' : 'First Name *'}</Label>
                   <Input value={manual.first_name} onChange={(e) => setManual((m) => ({ ...m, first_name: e.target.value }))} className="mt-1" />
@@ -335,7 +474,7 @@ export default function ContactImportPage() {
                   <Input value={manual.last_name} onChange={(e) => setManual((m) => ({ ...m, last_name: e.target.value }))} className="mt-1" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
                   <Input value={manual.phone} onChange={(e) => setManual((m) => ({ ...m, phone: e.target.value }))} className="mt-1" />
@@ -345,7 +484,7 @@ export default function ContactImportPage() {
                   <Input value={manual.email} onChange={(e) => setManual((m) => ({ ...m, email: e.target.value }))} className="mt-1" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>WhatsApp</Label>
                   <Input value={manual.whatsapp} onChange={(e) => setManual((m) => ({ ...m, whatsapp: e.target.value }))} className="mt-1" />
@@ -361,7 +500,7 @@ export default function ContactImportPage() {
               </div>
               <Button onClick={handleManualAdd} className="w-full gap-2">
                 <UserPlus className="h-4 w-4" />
-                {isRu ? 'Добавить контакт' : 'Add Contact'}
+                {t('addContact', lang)}
               </Button>
             </CardContent>
           </Card>
@@ -374,7 +513,7 @@ export default function ContactImportPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">
-                {isRu ? 'Предпросмотр' : 'Preview'} ({parsed.length})
+                {t('preview', lang)} ({parsed.length})
               </CardTitle>
               <div className="flex gap-2">
                 {validCount > 0 && <Badge className="gap-1"><CheckCircle2 className="h-3 w-3" /> {validCount}</Badge>}
@@ -396,7 +535,7 @@ export default function ContactImportPage() {
                 ))}
                 {parsed.length > 50 && (
                   <p className="text-xs text-muted-foreground text-center py-2">
-                    +{parsed.length - 50} {isRu ? 'ещё' : 'more'}...
+                    +{parsed.length - 50} {t('more', lang)}...
                   </p>
                 )}
               </div>
@@ -407,14 +546,11 @@ export default function ContactImportPage() {
               className="w-full mt-4 gap-2"
             >
               <Upload className="h-4 w-4" />
-              {importing
-                ? (isRu ? 'Импорт...' : 'Importing...')
-                : (isRu ? `Импортировать ${validCount} контактов` : `Import ${validCount} contacts`)
-              }
+              {importing ? t('importing', lang) : `${t('importBtn', lang)} ${validCount}`}
             </Button>
             {importResult && (
               <p className="text-sm text-center mt-2 text-muted-foreground">
-                ✅ {importResult.success} {isRu ? 'успешно' : 'success'}{importResult.failed > 0 && ` · ❌ ${importResult.failed} ${isRu ? 'ошибок' : 'failed'}`}
+                ✅ {importResult.success} {t('success', lang)}{importResult.failed > 0 && ` · ❌ ${importResult.failed} ${t('failed', lang)}`}
               </p>
             )}
           </CardContent>

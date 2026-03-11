@@ -92,7 +92,7 @@ function useInvestorMetrics() {
   });
 }
 
-const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#10b981', '#f59e0b', '#ef4444'];
+const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--success))', 'hsl(var(--warning))', 'hsl(var(--destructive))'];
 
 function MetricCard({ title, value, subtitle, icon: Icon }: {
   title: string; value: string; subtitle?: string; icon: React.ElementType;

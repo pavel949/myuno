@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyCompanyId } from './useAgentDeals';
+import { CRM_TASK_ACTIVE_STATUSES } from '@/lib/tasks/taskStatus';
 
 export interface CrmTask {
   id: string;
@@ -35,7 +36,13 @@ export function useCrmTasks(filters?: { status?: string; assigned_to?: string; d
         .eq('company_id', companyId!)
         .order('due_date', { ascending: true, nullsFirst: false });
 
-      if (filters?.status) q = q.eq('status', filters.status);
+      if (filters?.status) {
+        if (filters.status === 'active') {
+          q = q.in('status', [...CRM_TASK_ACTIVE_STATUSES]);
+        } else {
+          q = q.eq('status', filters.status);
+        }
+      }
       if (filters?.assigned_to) q = q.eq('assigned_to', filters.assigned_to);
     if (filters?.due_today) {
         const now = new Date();
@@ -71,7 +78,7 @@ export function useTodayTasksCount() {
         .from('crm_tasks')
         .select('id', { count: 'exact', head: true })
         .eq('company_id', companyId!)
-        .eq('status', 'pending')
+        .in('status', [...CRM_TASK_ACTIVE_STATUSES])
         .lte('due_date', today + 'T23:59:59');
       if (error) throw error;
       return count || 0;
@@ -118,7 +125,7 @@ export function useUpdateCrmTask() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; status?: string; completed_at?: string; title?: string; due_date?: string; priority?: string }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; status?: string; completed_at?: string | null; title?: string; due_date?: string; priority?: string }) => {
       const { error } = await supabase
         .from('crm_tasks')
         .update(updates as any)

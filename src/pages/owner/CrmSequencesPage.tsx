@@ -20,7 +20,7 @@ export default function CrmSequencesPage() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: sequences = [], isLoading } = useCrmSequences(companyId);
+  const { data: sequences = [], isLoading, isError, error, refetch } = useCrmSequences(companyId);
   const createSequence = useCreateSequence();
   const deleteSequence = useDeleteSequence();
   const { toast } = useToast();
@@ -30,10 +30,14 @@ export default function CrmSequencesPage() {
 
   const handleCreate = async () => {
     if (!companyId || !user) return;
+    if (!form.name.trim()) {
+      toast({ title: isRu ? 'Введите название' : 'Please enter a name', variant: 'destructive' });
+      return;
+    }
     try {
       const seq = await createSequence.mutateAsync({
         company_id: companyId,
-        name: form.name,
+        name: form.name.trim(),
         description: form.description || null,
         is_active: true,
         created_by: user.id,
@@ -42,8 +46,12 @@ export default function CrmSequencesPage() {
       setForm({ name: '', description: '' });
       setSelectedId(seq.id);
       toast({ title: isRu ? 'Последовательность создана' : 'Sequence created' });
-    } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    } catch (createError: any) {
+      toast({
+        title: isRu ? 'Ошибка создания последовательности' : 'Failed to create sequence',
+        description: createError?.message || String(createError),
+        variant: 'destructive',
+      });
     }
   };
 
@@ -88,6 +96,18 @@ export default function CrmSequencesPage() {
         <div className="space-y-2">
           {isLoading ? (
             <p className="text-sm text-muted-foreground">{isRu ? 'Загрузка...' : 'Loading...'}</p>
+          ) : isError ? (
+            <Card className="p-6 text-center space-y-2">
+              <p className="text-sm text-destructive">
+                {isRu ? 'Не удалось загрузить последовательности' : 'Failed to load sequences'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {error instanceof Error ? error.message : String(error)}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
+            </Card>
           ) : sequences.length === 0 ? (
             <Card className="p-8 text-center">
               <Zap className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
@@ -126,7 +146,18 @@ export default function CrmSequencesPage() {
                     onClick={e => {
                       e.stopPropagation();
                       if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
-                        deleteSequence.mutate(seq.id);
+                        deleteSequence.mutate(seq.id, {
+                          onSuccess: () => {
+                            toast({ title: isRu ? 'Последовательность удалена' : 'Sequence deleted' });
+                          },
+                          onError: (deleteError: any) => {
+                            toast({
+                              title: isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence',
+                              description: deleteError?.message || String(deleteError),
+                              variant: 'destructive',
+                            });
+                          },
+                        });
                         if (selectedId === seq.id) setSelectedId(null);
                       }
                     }}

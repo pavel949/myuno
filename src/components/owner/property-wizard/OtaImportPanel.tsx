@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { 
   CHANNEL_REGISTRY, 
   CATEGORY_LABELS, 
@@ -214,13 +215,14 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
 
   const applyListingData = (listing: any) => {
     if (!listing) return;
+    console.log('[OtaImportPanel] Parser returned fields:', Object.keys(listing));
     
     const extracted: Record<string, any> = {};
     
     // Basic info
-    if (listing.title) extracted.title = listing.title;
-    if (listing.title_ru) extracted.title_ru = listing.title_ru;
-    if (listing.description) extracted.description = listing.description;
+    if (listing.name_en || listing.title) extracted.title = listing.name_en || listing.title;
+    if (listing.name_ru || listing.title_ru) extracted.title_ru = listing.name_ru || listing.title_ru;
+    if (listing.description_en || listing.description) extracted.description = listing.description_en || listing.description;
     if (listing.description_ru) extracted.description_ru = listing.description_ru;
     
     // For Russian OTA platforms, if we only got description (not description_ru),
@@ -305,8 +307,8 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
     
     // Physical attributes
     if (listing.floor) extracted.floor = listing.floor;
-    if (listing.view_type) extracted.view_type = listing.view_type;
-    if (listing.furnishing_level) extracted.furnishing_level = listing.furnishing_level;
+    if (listing.view_type) extracted.view_type = normalizeViewTypes(listing.view_type);
+    if (listing.furnishing_level) extracted.furnishing_level = normalizeFurnishingLevel(listing.furnishing_level);
     if (listing.pool_type) extracted.pool_type = listing.pool_type;
     if (listing.parking_type) extracted.parking_type = listing.parking_type;
     

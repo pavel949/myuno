@@ -5,12 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, FileText, Loader2, Check } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
+import { t } from '@/lib/contactsImportI18n';
 
 interface ContactImportSheetProps {
   open: boolean;
@@ -18,44 +19,28 @@ interface ContactImportSheetProps {
   companyId: string;
 }
 
-const TARGET_FIELDS = [
-  { name: 'first_name', label: 'First Name', labelRu: 'Имя', required: true },
-  { name: 'last_name', label: 'Last Name', labelRu: 'Фамилия', required: true },
-  { name: 'phone', label: 'Phone', labelRu: 'Телефон', required: false },
-  { name: 'email', label: 'Email', labelRu: 'Email', required: false },
-  { name: 'whatsapp', label: 'WhatsApp', labelRu: 'WhatsApp', required: false },
-  { name: 'telegram', label: 'Telegram', labelRu: 'Telegram', required: false },
-  { name: 'contact_type', label: 'Type', labelRu: 'Тип', required: false },
-  { name: 'source', label: 'Source', labelRu: 'Источник', required: false },
-  { name: 'nationality', label: 'Nationality', labelRu: 'Гражданство', required: false },
-  { name: 'company_name', label: 'Company', labelRu: 'Компания', required: false },
-  { name: 'notes', label: 'Notes', labelRu: 'Заметки', required: false },
-];
-
 function normalize(s: string): string {
   return s.toLowerCase().replace(/[^a-zа-яё0-9]/gi, '').trim();
 }
 
+function parseTags(raw: string): string[] {
+  return raw
+    .split(/[;,|]/)
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
 function autoMap(columns: string[]): Record<string, string> {
   const mapping: Record<string, string> = {};
-  const aliases: Record<string, string[]> = {
-    first_name: ['firstname', 'first', 'имя', 'name', 'givenname', 'prénom'],
-    last_name: ['lastname', 'last', 'surname', 'фамилия', 'family', 'familyname'],
-    phone: ['phone', 'tel', 'telephone', 'mobile', 'телефон', 'моб', 'мобильный', 'номер'],
-    email: ['email', 'mail', 'почта', 'емейл', 'емаил', 'correo'],
-    whatsapp: ['whatsapp', 'wa', 'ватсап', 'вотсап'],
-    telegram: ['telegram', 'tg', 'телеграм'],
-    contact_type: ['type', 'contacttype', 'тип', 'типконтакта'],
-    source: ['source', 'источник', 'откуда', 'leadsource'],
-    nationality: ['nationality', 'гражданство', 'nation', 'country', 'страна'],
-    company_name: ['company', 'companyname', 'компания', 'организация', 'org', 'firma'],
-    notes: ['notes', 'note', 'заметки', 'comment', 'comments', 'комментарий', 'описание'],
-  };
-  columns.forEach(col => {
+  const usedFields = new Set<string>();
+  columns.forEach((col) => {
     const norm = normalize(col);
-    for (const [field, keys] of Object.entries(aliases)) {
-      if (keys.some(k => norm === k || norm.includes(k)) && !Object.values(mapping).includes(field)) {
-        mapping[col] = field;
+    for (const field of CONTACT_IMPORT_FIELDS) {
+      if (usedFields.has(field.key)) continue;
+      const aliases = CONTACT_IMPORT_ALIASES[field.key] ?? [field.key.replace(/_/g, '')];
+      if (aliases.some((k) => norm === k || norm.includes(k))) {
+        mapping[col] = field.key;
+        usedFields.add(field.key);
         break;
       }
     }
@@ -66,6 +51,7 @@ function autoMap(columns: string[]): Record<string, string> {
 export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImportSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const lang = isRu ? 'ru' : 'en';
   const { user } = useAuth();
   const qc = useQueryClient();
 
@@ -81,13 +67,13 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
       header: true, skipEmptyLines: true,
       complete: (results) => {
         const data = results.data as Record<string, string>[];
-        if (data.length === 0) { toast.error(isRu ? 'Файл пуст' : 'File is empty'); return; }
+        if (data.length === 0) { toast.error(t('fileEmpty', lang)); return; }
         const cols = Object.keys(data[0]);
         setRawData(data); setColumns(cols); setMapping(autoMap(cols)); setStep('map');
       },
-      error: () => { toast.error(isRu ? 'Ошибка чтения файла' : 'Failed to read file'); },
+      error: () => { toast.error(t('readError', lang)); },
     });
-  }, [isRu]);
+  }, [lang]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -96,24 +82,72 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
   }, [handleFile]);
 
   const handleImport = async () => {
+    if (!user?.id) return;
     setImporting(true);
-    let success = 0; let skipped = 0;
-    const rows = rawData.map(row => {
-      const mapped: Record<string, any> = { company_id: companyId, first_name: '', last_name: '', tags: [], is_archived: false, created_by: user?.id || null };
-      for (const [csvCol, targetField] of Object.entries(mapping)) {
-        if (targetField && row[csvCol]) mapped[targetField] = row[csvCol].trim();
-      }
-      return mapped;
-    }).filter(r => r.first_name || r.last_name);
+    let success = 0;
+    let skipped = 0;
+    const rows = rawData
+      .map((row) => {
+        const mapped: Record<string, unknown> = {
+          company_id: companyId,
+          first_name: '',
+          last_name: '-',
+          lifecycle_stage: 'lead',
+          tags: [],
+          is_archived: false,
+          created_by: user.id,
+        };
+        for (const [csvCol, targetField] of Object.entries(mapping)) {
+          if (!targetField || !row[csvCol]) continue;
+          const raw = String(row[csvCol] ?? '').trim();
+          if (raw === '') continue;
+          if (['first_name', 'last_name'].includes(targetField)) {
+            mapped[targetField] = raw.slice(0, 100);
+          } else if (['phone', 'phone2', 'mobile', 'whatsapp'].includes(targetField)) {
+            mapped[targetField] = raw.slice(0, 20);
+          } else if (targetField === 'email') {
+            mapped[targetField] = raw.slice(0, 255);
+          } else if (['telegram', 'line_id'].includes(targetField)) {
+            mapped[targetField] = raw.slice(0, 50);
+          } else if (['notes', 'special_notes'].includes(targetField)) {
+            mapped[targetField] = raw.slice(0, 500);
+          } else if (targetField === 'tags') {
+            mapped.tags = parseTags(raw);
+          } else {
+            mapped[targetField] = raw;
+          }
+        }
+        return mapped;
+      })
+      .filter((r) => {
+        const first = String(r.first_name ?? '').trim();
+        const last = String(r.last_name ?? '').trim();
+        return first !== '' || (last !== '' && last !== '-');
+      });
+
+    if (rows.length === 0) {
+      setImporting(false);
+      toast.error(isRu ? 'Нет строк с именем для импорта' : 'No rows with a name to import');
+      return;
+    }
 
     for (let i = 0; i < rows.length; i += 50) {
       const batch = rows.slice(i, i + 50);
-      const { error } = await supabase.from('crm_contacts').insert(batch as any);
-      if (error) skipped += batch.length; else success += batch.length;
+      const { error } = await supabase.from('crm_contacts').insert(batch as Record<string, unknown>[]);
+      if (error) {
+        skipped += batch.length;
+        toast.error(error.message);
+      } else {
+        success += batch.length;
+      }
     }
-    setImportResult({ success, skipped }); setStep('done'); setImporting(false);
+    setImportResult({ success, skipped });
+    setStep('done');
+    setImporting(false);
     qc.invalidateQueries({ queryKey: ['crm-contacts'] });
-    toast.success(isRu ? `Импортировано: ${success}` : `Imported: ${success}`);
+    if (success > 0) {
+      toast.success(t('importedCount', lang).replace('{n}', String(success)));
+    }
   };
 
   const previewRows = rawData.slice(0, 5);
@@ -124,7 +158,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
     <ResponsiveModal
       open={open}
       onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}
-      title={isRu ? 'Импорт контактов' : 'Import Contacts'}
+      title={t('title', lang)}
       icon={<Upload className="w-5 h-5 text-primary" />}
       size="lg"
     >
@@ -137,8 +171,8 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
             input.click();
           }}>
           <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-          <p className="text-sm font-medium">{isRu ? 'Перетащите CSV файл или нажмите' : 'Drop CSV file or click to browse'}</p>
-          <p className="text-xs text-muted-foreground mt-1">{isRu ? 'Формат: CSV с заголовками' : 'Format: CSV with headers'}</p>
+          <p className="text-sm font-medium">{t('dropCsv', lang)}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('formatCsv', lang)}</p>
         </div>
       )}
 
@@ -154,9 +188,11 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
                 <span className="text-muted-foreground">→</span>
                 <Select value={mapping[col] || '_skip'} onValueChange={v => setMapping(m => ({ ...m, [col]: v === '_skip' ? '' : v }))}>
                   <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_skip">{isRu ? 'Пропустить' : 'Skip'}</SelectItem>
-                    {TARGET_FIELDS.map(f => <SelectItem key={f.name} value={f.name}>{isRu ? f.labelRu : f.label}</SelectItem>)}
+                  <SelectContent className="max-h-[min(70vh,420px)]">
+                    <SelectItem value="_skip">{t('skip', lang)}</SelectItem>
+                    {CONTACT_IMPORT_FIELDS.map((f) => (
+                      <SelectItem key={f.key} value={f.key}>{isRu ? f.labelRu : f.labelEn}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {mapping[col] && <Badge variant="secondary" className="text-[10px]">✓</Badge>}
@@ -167,14 +203,17 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
             <div className="overflow-x-auto max-h-[20vh] overflow-y-auto border rounded-lg">
               <p className="text-xs font-medium mb-1 px-2 pt-2">{isRu ? 'Предпросмотр (5 строк):' : 'Preview (5 rows):'}</p>
               <table className="text-xs w-full">
-                <thead><tr>{columns.filter(c => mapping[c]).map(c => <th key={c} className="text-left p-1.5 border-b font-medium bg-muted/50 sticky top-0">{mapping[c]}</th>)}</tr></thead>
+                <thead><tr>{columns.filter(c => mapping[c]).map(c => {
+                  const f = CONTACT_IMPORT_FIELDS.find(x => x.key === mapping[c]);
+                  return <th key={c} className="text-left p-1.5 border-b font-medium bg-muted/50 sticky top-0">{f ? (isRu ? f.labelRu : f.labelEn) : mapping[c]}</th>;
+                })}</tr></thead>
                 <tbody>{previewRows.map((row, i) => <tr key={i}>{columns.filter(c => mapping[c]).map(c => <td key={c} className="p-1.5 border-b text-muted-foreground truncate max-w-[150px]">{row[c]}</td>)}</tr>)}</tbody>
               </table>
             </div>
           )}
           {!hasMapped && (
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-              {isRu ? '⚠ Сопоставьте хотя бы одну колонку с полем CRM, чтобы активировать импорт' : '⚠ Map at least one column to a CRM field to enable import'}
+              ⚠ {t('mapAtLeastOne', lang)}
             </div>
           )}
           <div className="flex gap-2 pt-2">
@@ -190,11 +229,11 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
       {step === 'done' && (
         <div className="text-center py-6">
           <Check className="h-10 w-10 mx-auto text-primary mb-3" />
-          <p className="font-medium">{isRu ? 'Импорт завершён' : 'Import complete'}</p>
+          <p className="font-medium">{t('importComplete', lang)}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? `Добавлено: ${importResult.success}, пропущено: ${importResult.skipped}` : `Added: ${importResult.success}, skipped: ${importResult.skipped}`}
+            {t('addedSkipped', lang).replace('{success}', String(importResult.success)).replace('{skipped}', String(importResult.skipped))}
           </p>
-          <Button className="mt-4" onClick={() => onOpenChange(false)}>{isRu ? 'Готово' : 'Done'}</Button>
+          <Button className="mt-4" onClick={() => onOpenChange(false)}>{t('done', lang)}</Button>
         </div>
       )}
     </ResponsiveModal>
