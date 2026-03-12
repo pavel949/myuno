@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Upload, FileSpreadsheet, UserPlus, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
 import { parseSpreadsheetFile } from '@/lib/parseSpreadsheet';
-import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
+import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES, HEADER_BLACKLIST_PATTERNS } from '@/lib/contactsImportFields';
 import { t } from '@/lib/contactsImportI18n';
 import { APP_ROUTES } from '@/lib/config/routes';
 
