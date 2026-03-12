@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote, ArrowLeft } from 'lucide-react';
 import { resolveIcon } from '@/lib/iconMap';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -174,7 +175,7 @@ export default function AirportTransferBooking() {
         title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
         variant: 'destructive',
       });
-      navigate('/auth');
+      navigate(APP_ROUTES.AUTH);
       return;
     }
 
@@ -376,10 +377,10 @@ export default function AirportTransferBooking() {
               : 'Driver will meet you with a sign at the terminal exit.'}
           </p>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate('/transport')}>
+            <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
               {language === 'ru' ? 'К транспорту' : 'Browse More'}
             </Button>
-            <Button onClick={() => navigate('/bookings')}>
+            <Button onClick={() => navigate(APP_ROUTES.BOOKINGS)}>
               {language === 'ru' ? 'Мои брони' : 'My Bookings'}
             </Button>
           </div>
@@ -403,7 +404,7 @@ export default function AirportTransferBooking() {
       <div className="px-4 pt-4 pb-2 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 mb-3">
           <button 
-            onClick={() => step > 0 ? handleBack() : navigate('/transport')} 
+            onClick={() => step > 0 ? handleBack() : navigate(APP_ROUTES.TRANSPORT)} 
             className="w-10 h-10 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />

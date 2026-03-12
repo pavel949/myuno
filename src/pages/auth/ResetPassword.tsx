@@ -122,7 +122,7 @@ export default function ResetPassword() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to="/" className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
           <span className="text-xl font-bold text-primary-foreground">U</span>
         </Link>
         <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export default function ResetPassword() {
                 </p>
               )}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to="/auth/forgot-password">
+                <Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD}>
                   <PremiumButton variant="default" className="w-full sm:w-auto">
                     {language === 'ru' ? 'Запросить новую ссылку' : 'Request new link'}
                   </PremiumButton>
@@ -185,7 +185,7 @@ export default function ResetPassword() {
                   ? 'Войдите в аккаунт с новым паролем. Перенаправление на страницу входа...'
                   : 'Sign in with your new password. Redirecting to login...'}
               </p>
-              <Link to="/auth">
+              <Link to={APP_ROUTES.AUTH}>
                 <PremiumButton variant="outline" className="mt-2 gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   {language === 'ru' ? 'Перейти к входу' : 'Go to login'}

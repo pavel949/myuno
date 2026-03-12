@@ -66,7 +66,7 @@ export default function ForgotPassword() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
       
       <header className="relative z-10 p-4 flex justify-between items-center">
-        <Link to="/" className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
+        <Link to={APP_ROUTES.HOME} className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold hover:scale-105 transition-transform">
           <span className="text-xl font-bold text-primary-foreground">U</span>
         </Link>
         <div className="flex items-center gap-2">

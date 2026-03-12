@@ -215,7 +215,7 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
 
   const applyListingData = (listing: any) => {
     if (!listing) return;
-    console.log('[OtaImportPanel] Parser returned fields:', Object.keys(listing));
+    // Fields extracted from OTA listing
     
     const extracted: Record<string, any> = {};
     
