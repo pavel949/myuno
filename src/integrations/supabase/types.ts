@@ -160,6 +160,7 @@ export type Database = {
           deal_type: string
           deal_value: number | null
           id: string
+          is_vip: boolean
           lost_reason: string | null
           next_action: string | null
           next_action_date: string | null
@@ -193,6 +194,7 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
+          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
+          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
