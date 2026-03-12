@@ -230,7 +230,7 @@ export function useUpdateOwnerProperty() {
       // Try update as owner first
       const { data: result } = await supabase
         .from('properties')
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .eq('owner_id', user.id)
         .select()
