@@ -472,7 +472,7 @@ Deno.serve(async (req) => {
     // If we found better photos from links, merge them in
     if (propertyImageLinks.length > 0) {
       const seenBase = new Set<string>((listingData.photos || []).map(p => (typeof p === 'string' ? p : p.url).split('?')[0]));
-      const uniquePhotos: Array<{ url: string; order: number }> = [...(listingData.photos || [])];
+      const uniquePhotos: Array<{ url: string; order: number }> = (listingData.photos || []).map((p, i) => ({ url: p.url, order: p.order ?? i }));
       
       for (const link of propertyImageLinks) {
         const baseUrl = link.split('?')[0];
