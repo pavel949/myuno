@@ -153,3 +153,5 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.rentals-united-sync]
     verify_jwt = false
+  [functions.scheduled-mc-backup]
+    verify_jwt = false
