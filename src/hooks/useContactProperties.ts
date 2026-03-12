@@ -139,8 +139,8 @@ export function useLinkContactProperty() {
       relationshipType: RelationshipType;
       companyId: string;
     }) => {
-      const { data, error } = await supabase
-        .from('contact_properties')
+       const { data, error } = await (supabase as any)
+         .from('contact_properties')
         .insert({
           contact_id: contactId,
           property_id: propertyId,
