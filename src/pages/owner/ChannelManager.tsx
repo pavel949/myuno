@@ -11,7 +11,7 @@ import { useExternalCalendars } from '@/hooks/useExternalCalendars';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { useOtaConnections, OtaConnection } from '@/hooks/useOtaSync';
-import { ChannelManagementCTA } from '@/components/owner/ChannelManagementCTA';
+// Channel management CTA removed — users contact support directly
 import { AirbnbSyncDialog } from '@/components/owner/airbnb-sync/AirbnbSyncDialog';
 import { OtaConnectionsList } from '@/components/owner/airbnb-sync/OtaConnectionsList';
 import { SyncedListingPreview } from '@/components/owner/airbnb-sync/SyncedListingPreview';
