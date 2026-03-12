@@ -159,7 +159,7 @@ export default function ResetPassword() {
                 </p>
               )}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link to="/auth/forgot-password">
+                <Link to={APP_ROUTES.AUTH_FORGOT_PASSWORD}>
                   <PremiumButton variant="default" className="w-full sm:w-auto">
                     {language === 'ru' ? 'Запросить новую ссылку' : 'Request new link'}
                   </PremiumButton>
