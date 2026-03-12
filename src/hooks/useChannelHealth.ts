@@ -248,7 +248,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return { conflicts: [], unresolvedCount: 0 };
 
-      let q = supabase
+      let q = (supabase as any)
         .from('booking_conflicts')
         .select(`
           id,
