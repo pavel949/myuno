@@ -234,6 +234,12 @@ export default function CrmDashboardPage() {
         agentFilter={agentFilter}
         onAgentFilterChange={setAgentFilter}
         agents={members}
+        dealVipFilter="all"
+        onDealVipFilterChange={() => {}}
+        contactVipFilter="all"
+        onContactVipFilterChange={() => {}}
+        highBudgetOnly={false}
+        onHighBudgetOnlyChange={() => {}}
       />
 
       {/* Kanban Board */}

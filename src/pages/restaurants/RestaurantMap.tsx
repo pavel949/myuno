@@ -45,7 +45,7 @@ export default function RestaurantMap() {
     if (!mapRef.current || filteredRestaurants.length === 0) return;
     const bounds = new google.maps.LatLngBounds();
     filteredRestaurants.forEach((r) => bounds.extend({ lat: r.lat!, lng: r.lng! }));
-    mapRef.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+    mapRef.current.fitBounds(bounds, 50);
   }, [filteredRestaurants]);
 
   const selected = selectedRestaurant

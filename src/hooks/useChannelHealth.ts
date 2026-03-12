@@ -289,7 +289,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
 
   const markResolved = useMutation({
     mutationFn: async ({ id, note }: { id: string; note?: string }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('booking_conflicts')
         .update({
           resolved: true,

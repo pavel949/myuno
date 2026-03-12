@@ -173,7 +173,7 @@ export default function AdminOperations() {
       </Card>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 w-full">
           {tabs.map((tab) => (
             <TabsTrigger

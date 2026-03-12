@@ -251,7 +251,7 @@ export function useUpdateOwnerProperty() {
       if (!hasAccess) throw new Error('Property not found or access denied');
 
       // Scoped update: filter by company if available, otherwise by assignment-verified id
-      let query = supabase.from('properties').update(data).eq('id', id);
+      let query = supabase.from('properties').update(data as any).eq('id', id);
       if (propertyCheck.data?.management_company_id) {
         query = query.eq('management_company_id', propertyCheck.data.management_company_id);
       }

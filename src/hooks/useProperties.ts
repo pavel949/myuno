@@ -446,7 +446,7 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
     enabled: !!projectId,
   });
