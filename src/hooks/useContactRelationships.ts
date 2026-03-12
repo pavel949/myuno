@@ -14,8 +14,8 @@ export function useContactRelationships(contactId: string | undefined) {
     queryKey: ['contact-relationships', contactId],
     queryFn: async (): Promise<ContactRelationship[]> => {
       if (!contactId) return [];
-      const { data: links, error } = await supabase
-        .from('contact_relationships')
+       const { data: links, error } = await (supabase as any)
+         .from('contact_relationships')
         .select('id, contact_id, related_contact_id, relationship_type, company_id, notes, created_at, updated_at')
         .eq('contact_id', contactId)
         .order('created_at', { ascending: false });
