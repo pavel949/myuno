@@ -72,7 +72,7 @@ export function useOwnerProperties() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return (data || []) as OwnerProperty[];
+      return (data || []) as unknown as OwnerProperty[];
     },
     enabled: !!user,
     staleTime: 30000,
