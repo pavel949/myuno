@@ -62,8 +62,8 @@ export function usePropertyContacts(propertyId: string | undefined) {
     queryKey: ['property-contacts', propertyId],
     queryFn: async (): Promise<ContactProperty[]> => {
       if (!propertyId) return [];
-      const { data: links, error } = await supabase
-        .from('contact_properties')
+       const { data: links, error } = await (supabase as any)
+         .from('contact_properties')
         .select('id, contact_id, property_id, relationship_type, company_id, created_at')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
