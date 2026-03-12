@@ -29,7 +29,7 @@ import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWid
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
-import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
+import { PortfolioHealthWidget } from '@/components/owner/dashboard/PortfolioHealthWidget';
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
 import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
@@ -171,9 +171,10 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
         </div>
       );
     case 'property_status':
+    case 'portfolio_health':
       return (
         <Suspense fallback={skeleton}>
-          <PropertyStatusSnapshot />
+          <PortfolioHealthWidget />
         </Suspense>
       );
     case 'property_priority':
@@ -290,7 +291,7 @@ export default function OwnerDashboard() {
       titleEn: 'Portfolio Health',
       titleRu: 'Здоровье портфеля',
       icon: HeartPulse,
-      widgets: ['property_status', 'active_stays', 'channel_sync', 'maintenance_health'] as DashboardWidgetKey[],
+      widgets: ['portfolio_health', 'active_stays', 'channel_sync', 'maintenance_health'] as DashboardWidgetKey[],
     },
     revenue: {
       titleEn: 'Revenue & Cash',
