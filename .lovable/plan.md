@@ -1,84 +1,95 @@
 
 
-# Vendor Onboarding UX — Fast First Listing with Progressive Completion
+# Здоровье портфеля — Portfolio Health Dashboard
 
-## Research: How Top Platforms Do It
+## Концепция
 
-| Platform | Pattern | Time-to-First-Listing |
-|----------|---------|----------------------|
-| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
-| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
-| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
-| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
+Единый виджет-чеклист для каждого объекта в портфеле УК, который показывает **процент готовности** и список конкретных действий для достижения 100%. Формат — карточка на объект с прогресс-баром и раскрываемым списком категорий.
 
-**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
+## Категории проверок (Health Checks)
 
-## Current State Analysis
-
-**What exists:**
-- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
-- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
-- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
-- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
-
-**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
-
-## Proposed UX: "3-Screen Fast Start"
+Каждый объект оценивается по ~8 категориям. Каждая категория — бинарная (✅/❌) или процентная:
 
 ```text
-Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
-┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
-│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
-│ [____________]   │           │ Name *            │              │                  │
-│                  │           │ [____________]    │              │  Your listing is │
-│ Category *       │           │                   │              │  pending review  │
-│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
-│                  │           │ [____] THB        │              │  Complete your   │
-│ Phone / WhatsApp │           │                   │              │  profile to get  │
-│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
-│                  │           │ [📷 Upload]       │              │                  │
-│         [Next →] │           │                   │              │  [→ Dashboard]   │
-└──────────────────┘           │ Brief description │              └──────────────────┘
-                               │ [____________]    │
-                               │         [List →]  │
-                               └──────────────────┘
+┌─────────────────────────────────────────────────┐
+│  Villa Orchid                        87% ██████░│
+│  3 items need attention                         │
+├─────────────────────────────────────────────────┤
+│  ✅ Договор управления    — загружен            │
+│  ✅ Электричество         — оплачено            │
+│  ⚠️ CAM/Juristic          — просрочен 5 дн      │
+│  ✅ Ключи                 — у менеджера Анна    │
+│  ✅ Фото                  — 12 проф. фото       │
+│  ❌ Правила дома          — не заполнены        │
+│  ✅ Отчёты собственнику   — настроены           │
+│  ✅ Портал собственника   — активирован         │
+└─────────────────────────────────────────────────┘
 ```
 
-**Required fields total: 4** (business name, category, service name, price)
-Everything else: progressive completion via existing `VendorOnboardingChecklist`.
+### Детализация каждой проверки
 
-## Implementation Plan
+| # | Категория | Источник данных | Условие ✅ |
+|---|-----------|----------------|------------|
+| 1 | **Договор управления** | `properties.management_document_url` | Не null/пустой |
+| 2 | **Электричество** | `useUtilityOverview` (type=electricity) | Нет просроченных за текущий месяц |
+| 3 | **CAM/Juristic** | `useUtilityOverview` (type=cam) | Нет просроченных |
+| 4 | **Ключи** | `usePropertyKeysOverview` | Есть хотя бы одна запись с assigned_to |
+| 5 | **Профессиональные фото** | `properties.images` | Массив ≥ 5 фото |
+| 6 | **Правила дома** | `properties.house_rules` | Не null/пустой |
+| 7 | **Отчёты собственнику** | `properties.auto_report_enabled` + `report_recipients` | Включены + есть получатели |
+| 8 | **Портал собственника** | `owner_portal_settings` (по property_id) | Запись существует |
 
-### 1. Refactor VendorOnboarding into 3-step wizard
-Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
-- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
-- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
-- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
+## Архитектура
 
-### 2. Update VendorOnboardingChecklist
-Expand from 3 to 6 progressive items:
-- ✅ Create account (auto-complete)
-- ✅ Add first listing (auto-complete from step 2)
-- ○ Add business description
-- ○ Upload logo / cover photo
-- ○ Add working hours
-- ○ Add payment details
+### Новые файлы
 
-Each item links to the relevant settings section.
+1. **`src/hooks/usePortfolioHealth.ts`** — хук, который для массива property IDs загружает все нужные данные (properties fields, utilities, keys, portal settings) и возвращает `PropertyHealthReport[]`:
+   ```ts
+   interface HealthCheck {
+     id: string;
+     category: string;      // 'contract' | 'electricity' | 'cam' | ...
+     labelEn: string;
+     labelRu: string;
+     status: 'ok' | 'warning' | 'missing';
+     detail?: string;        // "у менеджера Анна" / "просрочен 5 дн"
+     actionPath?: string;    // ссылка для исправления
+   }
+   
+   interface PropertyHealthReport {
+     propertyId: string;
+     title: string;
+     score: number;          // 0-100
+     checks: HealthCheck[];
+   }
+   ```
 
-### 3. Wire the data flow
-- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
-- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
-- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
+2. **`src/components/owner/dashboard/PortfolioHealthWidget.tsx`** — виджет для дашборда:
+   - Сводная полоска сверху: общий score портфеля и кол-во проблемных объектов
+   - Список карточек по объектам (collapsed по умолчанию, expand при клике)
+   - Каждая карточка: название, progress bar, badge с кол-вом проблем
+   - При раскрытии: список чеков с иконками и кнопкой "Fix" → навигация
 
-### 4. Update entry points
-- `/vendor/onboarding` → renders new 3-step wizard
-- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
+3. **Интеграция в дашборд**: Заменить текущий `property_status` виджет в секции "Portfolio Health" на новый `PortfolioHealthWidget`, либо добавить как `portfolio_health` в `DashboardWidgetKey`.
 
-### Technical Details
-- Reuse existing `OnboardingLayout` component for step progress UI
-- Reuse `UnifiedMediaUploader` for photo upload in step 2
-- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
-- No new DB tables or migrations required
-- No new Edge Functions required
+### Данные — без новых таблиц
+
+Все данные уже есть в существующих таблицах и хуках:
+- `useMyProperties` — список объектов + поля `management_document_url`, `images`, `house_rules`, `auto_report_enabled`, `report_recipients`
+- `useUtilityOverview` — статус оплат utilities
+- `usePropertyKeysOverview` — назначение ключей
+- `owner_portal_settings` — наличие портала
+
+### UX-решения
+
+- **Сортировка**: объекты с наименьшим score — сверху (worst first)
+- **Фильтр**: кнопка "Только проблемные" скрывает объекты с 100%
+- **Action links**: каждый ❌ чек имеет кнопку → переход на соответствующий раздел в property manage (загрузить договор, заполнить правила, настроить отчёты)
+- **Цвета**: ≥80% зелёный, 50-79% жёлтый, <50% красный
+
+## Объём работ
+
+1. Создать хук `usePortfolioHealth` — собирает все проверки
+2. Создать виджет `PortfolioHealthWidget` — UI с прогресс-барами и чеклистом
+3. Добавить `portfolio_health` в `DashboardWidgetKey` и подключить в секцию health дашборда
+4. Заменить/дополнить `PropertyStatusSnapshot` новым виджетом
 
