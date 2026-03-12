@@ -84,7 +84,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
         entity_type: 'contacts',
         entity_count: contacts.length,
         metadata: { format: 'csv', timestamp: new Date().toISOString() },
-      } as Record<string, unknown>);
+      } as any);
     } catch {
       // ignore
     }
