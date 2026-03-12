@@ -106,11 +106,11 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         </div>
         <div>
           <Label>{isRu ? 'Роль' : 'Role'}</Label>
-          <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CRM_ROLES.map(r => (
-                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS.ru[r] : CRM_ROLE_LABELS.en[r]}</SelectItem>
+           <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v as typeof f.crm_role }))}>
+             <SelectTrigger><SelectValue /></SelectTrigger>
+             <SelectContent>
+               {CRM_ROLES.map(r => (
+                 <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
               ))}
             </SelectContent>
           </Select>

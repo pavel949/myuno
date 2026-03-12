@@ -213,8 +213,8 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
             </div>
 
             {MERGE_FIELDS.map(({ key, labelEn, labelRu }) => {
-              const leftVal = (left as Record<string, unknown>)[key];
-              const rightVal = (right as Record<string, unknown>)[key];
+               const leftVal = (left as unknown as Record<string, unknown>)[key];
+               const rightVal = (right as unknown as Record<string, unknown>)[key];
               const leftStr = formatValue(leftVal, key);
               const rightStr = formatValue(rightVal, key);
               const hasDiff = leftStr !== rightStr;

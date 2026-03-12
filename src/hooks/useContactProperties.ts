@@ -164,7 +164,7 @@ export function useUnlinkContactProperty() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (linkId: string) => {
-      const { error } = await supabase.from('contact_properties').delete().eq('id', linkId);
+      const { error } = await (supabase as any).from('contact_properties').delete().eq('id', linkId);
       if (error) throw error;
     },
     onSuccess: () => {

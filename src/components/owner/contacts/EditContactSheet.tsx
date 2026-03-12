@@ -239,7 +239,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {CRM_ROLES.map(r => (
-                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS.ru[r] : CRM_ROLE_LABELS.en[r]}</SelectItem>
+                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
               ))}
             </SelectContent>
           </Select>

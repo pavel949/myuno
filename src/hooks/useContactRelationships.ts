@@ -53,8 +53,8 @@ export function useLinkContactRelationship() {
       companyId: string;
       notes?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('contact_relationships')
+       const { data, error } = await (supabase as any)
+         .from('contact_relationships')
         .insert({
           contact_id: contactId,
           related_contact_id: relatedContactId,
