@@ -11,8 +11,8 @@ export function useContactReminders(contactId: string | undefined) {
     queryKey: ['contact-reminders', contactId],
     queryFn: async (): Promise<CrmReminder[]> => {
       if (!contactId) return [];
-      const { data, error } = await supabase
-        .from('crm_reminders')
+       const { data, error } = await (supabase as any)
+         .from('crm_reminders')
         .select('*')
         .eq('contact_id', contactId)
         .eq('is_dismissed', false)
