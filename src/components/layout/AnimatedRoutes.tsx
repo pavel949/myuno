@@ -605,6 +605,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="contacts" element={<LazyPage><Pages.ContactsList /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.ContactDetail /></LazyPage>} />
           <Route path="contacts/import" element={<LazyPage><Pages.ContactImportPage /></LazyPage>} />
+          <Route path="contacts/import-odoo" element={<LazyPage><Pages.ImportOdooContactsPage /></LazyPage>} />
           <Route path="invoices" element={<LazyPage><Pages.InvoicesPage /></LazyPage>} />
           <Route path="tasks" element={<LazyPage><Pages.CrmTasksPage /></LazyPage>} />
           <Route path="crm-dashboard" element={<LazyPage><Pages.CrmDashboardPage /></LazyPage>} />

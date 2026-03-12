@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
@@ -17,6 +18,7 @@ import { Upload, FileSpreadsheet, UserPlus, CheckCircle2, AlertCircle, MessageCi
 import { parseSpreadsheetFile } from '@/lib/parseSpreadsheet';
 import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
 import { t } from '@/lib/contactsImportI18n';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface ParsedContact {
   first_name: string;
@@ -398,9 +400,16 @@ export default function ContactImportPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-bold">{t('title', lang)}</h2>
-        <p className="text-sm text-muted-foreground">{t('subtitle', lang)}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 className="text-xl font-bold">{t('title', lang)}</h2>
+          <p className="text-sm text-muted-foreground">{t('subtitle', lang)}</p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link to={APP_ROUTES.MC_CONTACTS_IMPORT_ODOO}>
+            {isRu ? 'Импорт из ODOO' : 'Import from ODOO'}
+          </Link>
+        </Button>
       </div>
 
       <Tabs defaultValue="file">

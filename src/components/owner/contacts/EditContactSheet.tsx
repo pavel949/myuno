@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
+import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +47,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     facebook: contact.facebook || '',
     linkedin: contact.linkedin || '',
     contact_type: contact.contact_type || 'buyer',
+    crm_role: (contact as { crm_role?: string }).crm_role || 'other',
     source: contact.source || 'website',
     nationality: contact.nationality || '',
     language: contact.language || '',
@@ -88,6 +90,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       facebook: contact.facebook || '',
       linkedin: contact.linkedin || '',
       contact_type: contact.contact_type || 'buyer',
+      crm_role: (contact as { crm_role?: string }).crm_role || 'other',
       source: contact.source || 'website',
       nationality: contact.nationality || '',
       language: contact.language || '',
@@ -135,6 +138,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         facebook: form.facebook || null,
         linkedin: form.linkedin || null,
         contact_type: form.contact_type,
+        crm_role: form.crm_role,
         source: form.source,
         nationality: form.nationality || null,
         language: form.language || null,
@@ -221,12 +225,23 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         <div><Label>Facebook</Label><Input value={form.facebook} onChange={e => setForm(f => ({ ...f, facebook: e.target.value }))} placeholder="URL or username" /></div>
         <div><Label>LinkedIn</Label><Input value={form.linkedin} onChange={e => setForm(f => ({ ...f, linkedin: e.target.value }))} placeholder="URL or username" /></div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>{isRu ? 'Роль' : 'Role'}</Label>
+          <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CRM_ROLES.map(r => (
+                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS.ru[r] : CRM_ROLE_LABELS.en[r]}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div>

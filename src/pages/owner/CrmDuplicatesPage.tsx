@@ -7,9 +7,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, Users, AlertTriangle, CheckCircle, Merge, Trash2 } from 'lucide-react';
+import { Search, Loader2, Users, AlertTriangle, CheckCircle, Merge } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { DuplicatesMergeModal } from '@/components/owner/contacts/DuplicatesMergeModal';
 
 export default function CrmDuplicatesPage() {
   const { language } = useLanguage();
@@ -20,6 +21,7 @@ export default function CrmDuplicatesPage() {
   const deleteContact = useDeleteContact();
   const companyId = activeCompany?.company_id;
   const [mergedGroups, setMergedGroups] = useState<Set<number>>(new Set());
+  const [mergeModal, setMergeModal] = useState<{ leftId: string; rightId: string } | null>(null);
 
   const handleScan = () => {
     if (companyId) {
@@ -28,51 +30,31 @@ export default function CrmDuplicatesPage() {
     }
   };
 
-  const handleMerge = async (group: DuplicateGroup, keepIdx: number, groupIdx: number) => {
+  const handleMergeSimple = async (group: DuplicateGroup, keepIdx: number, groupIdx: number) => {
     const keepContact = group.contacts[keepIdx];
     const toDelete = group.contacts.filter((_, i) => i !== keepIdx);
 
     try {
-      // Merge data from duplicates into the kept contact (non-null fields)
-      const mergeFields: Record<string, any> = {};
+      const mergeFields: Record<string, unknown> = {};
       for (const dup of toDelete) {
         if (dup.email && !keepContact.email) mergeFields.email = dup.email;
         if (dup.phone && !keepContact.phone) mergeFields.phone = dup.phone;
         if (dup.company_name && !keepContact.company_name) mergeFields.company_name = dup.company_name;
       }
 
-      // Reassign deals from duplicate contacts to the kept contact
       const dupIds = toDelete.map(d => d.id);
       if (dupIds.length > 0) {
-        await supabase
-          .from('agent_deals')
-          .update({ contact_id: keepContact.id } as any)
-          .in('contact_id', dupIds);
-        
-        // Reassign CRM tasks
-        await supabase
-          .from('crm_tasks')
-          .update({ contact_id: keepContact.id } as any)
-          .in('contact_id', dupIds);
-        
-        // Reassign CRM notes
-        await (supabase as any)
-          .from('crm_contact_notes')
-          .update({ contact_id: keepContact.id })
-          .in('contact_id', dupIds);
-        
-        // Reassign CRM activities
-        await (supabase as any)
-          .from('crm_activities')
-          .update({ contact_id: keepContact.id })
-          .in('contact_id', dupIds);
+        await supabase.from('agent_deals').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await supabase.from('crm_tasks').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await (supabase as any).from('crm_contact_notes').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await supabase.from('crm_activities').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await supabase.from('contact_properties').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
       }
 
       if (Object.keys(mergeFields).length > 0) {
-        await updateContact.mutateAsync({ id: keepContact.id, ...mergeFields } as any);
+        await updateContact.mutateAsync({ id: keepContact.id, ...mergeFields } as Parameters<typeof updateContact.mutateAsync>[0]);
       }
 
-      // Delete duplicates
       for (const dup of toDelete) {
         await deleteContact.mutateAsync(dup.id);
       }
@@ -122,11 +104,27 @@ export default function CrmDuplicatesPage() {
               group={group}
               groupIdx={idx}
               isRu={isRu}
-              onMerge={handleMerge}
+              onMergeSimple={handleMergeSimple}
+              onOpenMergeModal={setMergeModal}
               isMerged={mergedGroups.has(idx)}
             />
           ))}
         </div>
+      )}
+
+      {mergeModal && companyId && (
+        <DuplicatesMergeModal
+          open={!!mergeModal}
+          onOpenChange={open => !open && setMergeModal(null)}
+          leftId={mergeModal.leftId}
+          rightId={mergeModal.rightId}
+          companyId={companyId}
+          onMerged={() => {
+            setMergeModal(null);
+            setMergedGroups(prev => new Set(prev));
+            detect.mutate(companyId);
+          }}
+        />
       )}
 
       {!detect.isSuccess && !detect.isPending && (
@@ -141,8 +139,23 @@ export default function CrmDuplicatesPage() {
   );
 }
 
-function DuplicateGroupCard({ group, groupIdx, isRu, onMerge, isMerged }: { group: DuplicateGroup; groupIdx: number; isRu: boolean; onMerge: (group: DuplicateGroup, keepIdx: number, groupIdx: number) => void; isMerged: boolean }) {
+function DuplicateGroupCard({
+  group,
+  groupIdx,
+  isRu,
+  onMergeSimple,
+  onOpenMergeModal,
+  isMerged,
+}: {
+  group: DuplicateGroup;
+  groupIdx: number;
+  isRu: boolean;
+  onMergeSimple: (group: DuplicateGroup, keepIdx: number, groupIdx: number) => void;
+  onOpenMergeModal: (p: { leftId: string; rightId: string }) => void;
+  isMerged: boolean;
+}) {
   const [selectedKeep, setSelectedKeep] = useState(0);
+  const isPair = group.contacts.length === 2;
 
   const reasonLabels: Record<string, string> = {
     email: 'Email',
@@ -160,6 +173,14 @@ function DuplicateGroupCard({ group, groupIdx, isRu, onMerge, isMerged }: { grou
       </Card>
     );
   }
+
+  const handleMerge = () => {
+    if (isPair) {
+      onOpenMergeModal({ leftId: group.contacts[0].id, rightId: group.contacts[1].id });
+    } else {
+      onMergeSimple(group, selectedKeep, groupIdx);
+    }
+  };
 
   return (
     <Card>
@@ -202,9 +223,11 @@ function DuplicateGroupCard({ group, groupIdx, isRu, onMerge, isMerged }: { grou
         </div>
         <div className="flex items-center justify-between pt-2 border-t">
           <p className="text-xs text-muted-foreground">
-            {isRu ? 'Выберите контакт для сохранения, остальные будут удалены' : 'Select contact to keep, others will be deleted'}
+            {isPair
+              ? (isRu ? 'Нажмите «Объединить» для выбора значений по полям' : 'Click Merge to choose values per field')
+              : (isRu ? 'Выберите контакт для сохранения, остальные будут удалены' : 'Select contact to keep, others will be deleted')}
           </p>
-          <Button size="sm" onClick={() => onMerge(group, selectedKeep, groupIdx)}>
+          <Button size="sm" onClick={handleMerge}>
             <Merge className="h-3.5 w-3.5 mr-1" />
             {isRu ? 'Объединить' : 'Merge'}
           </Button>

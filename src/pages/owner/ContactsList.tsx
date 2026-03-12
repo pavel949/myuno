@@ -14,8 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List } from 'lucide-react';
+import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { cn } from '@/lib/utils';
@@ -259,6 +260,9 @@ export default function ContactsList() {
   const handleTagChange = (v: string | null) => { setTagFilter(v); setPage(0); };
   const handleLifecycleChange = (v: string | null) => { setLifecycleFilter(v); setPage(0); };
 
+  const { data: duplicatesData } = useDuplicatesQuery(companyId, !!companyId);
+  const duplicatePairsCount = duplicatesData?.total ?? 0;
+
   const { data: result, isLoading, isError, error, refetch } = useCrmContacts(companyId, page, PAGE_SIZE, {
     search: search.trim(),
     contactType: typeFilter || undefined,
@@ -311,6 +315,15 @@ export default function ContactsList() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap md:justify-end">
+          <Button variant="outline" size="sm" onClick={() => navigate(APP_ROUTES.MC_CONTACTS_DUPLICATES)}>
+            <Users className="h-4 w-4 mr-1" />
+            {isRu ? 'Дубликаты' : 'Review Duplicates'}
+            {duplicatePairsCount > 0 && (
+              <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5">
+                {duplicatePairsCount}
+              </Badge>
+            )}
+          </Button>
           <ContactExportButton contacts={contacts} />
           <Button variant="default" size="sm" onClick={() => navigate(APP_ROUTES.MC_CONTACTS_IMPORT)} className="font-semibold">
             <Upload className="h-4 w-4 mr-1" />

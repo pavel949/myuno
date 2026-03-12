@@ -39,6 +39,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
+import { ContactPropertiesSection } from '@/components/owner/contacts/ContactPropertiesSection';
+import { ContactRelationshipsCard } from '@/components/owner/contacts/ContactRelationshipsCard';
+import { KeyDatesCard } from '@/components/owner/contacts/KeyDatesCard';
+import { RemindersList } from '@/components/owner/contacts/RemindersList';
+import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
 
 const noteTypeIcons: Record<string, string> = {
   note: '📝', call: '📞', meeting: '🤝', email: '📧', whatsapp: '💬',
@@ -324,11 +329,20 @@ export default function ContactDetail() {
                 )}
               </div>
 
-              {/* Lifecycle Stage */}
-              <LifecycleStageBar
-                currentStage={contact.lifecycle_stage || 'lead'}
-                onChange={handleLifecycleChange}
-              />
+              {/* Role badge + Lifecycle Stage */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {(contact as { crm_role?: string }).crm_role && (
+                  <Badge variant="secondary" className="text-xs">
+                    {isRu
+                      ? CRM_ROLE_LABELS[(contact as { crm_role: string }).crm_role as keyof typeof CRM_ROLE_LABELS]?.ru
+                      : CRM_ROLE_LABELS[(contact as { crm_role: string }).crm_role as keyof typeof CRM_ROLE_LABELS]?.en}
+                  </Badge>
+                )}
+                <LifecycleStageBar
+                  currentStage={contact.lifecycle_stage || 'lead'}
+                  onChange={handleLifecycleChange}
+                />
+              </div>
 
               <Separator className="my-4" />
 
@@ -428,12 +442,16 @@ export default function ContactDetail() {
             </div>
           </div>
 
-          {/* ─── Bottom Tabs (Odoo-style: Contacts & Addresses / Sales / Notes / Tasks) ─── */}
+          {/* ─── Bottom Tabs (redesigned: Overview / Properties / Relationships / Timeline / Dates / Financials) ─── */}
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-0 overflow-x-auto">
               {[
                 { value: 'overview', label: isRu ? 'Обзор' : 'Overview' },
-                { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}` },
+                { value: 'properties', label: isRu ? 'Объекты' : 'Properties', icon: Building2 },
+                { value: 'relationships', label: isRu ? 'Связи' : 'Relationships', icon: Users },
+                { value: 'timeline', label: isRu ? 'Хронология' : 'Timeline', icon: Clock },
+                { value: 'dates', label: isRu ? 'Даты' : 'Dates & Reminders', icon: CalendarDays },
+                { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
                 { value: 'ai', label: 'AI', icon: Sparkles },
@@ -510,6 +528,94 @@ export default function ContactDetail() {
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            {/* Properties */}
+            <TabsContent value="properties" className="mt-4">
+              <ContactPropertiesSection contactId={contact.id} companyId={contact.company_id} />
+            </TabsContent>
+
+            {/* Relationships */}
+            <TabsContent value="relationships" className="mt-4">
+              <ContactRelationshipsCard contactId={contact.id} companyId={contact.company_id} />
+            </TabsContent>
+
+            {/* Timeline */}
+            <TabsContent value="timeline" className="mt-4">
+              <div className="space-y-4">
+                <p className="text-sm font-medium">{isRu ? 'Активность' : 'Activity'}</p>
+                {timelineItems.length === 0 ? (
+                  <div className="text-center py-12 rounded-xl border bg-card">
+                    <Clock className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
+                    <p className="text-sm text-muted-foreground">{isRu ? 'Нет активности' : 'No activity yet'}</p>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute left-[13px] top-4 bottom-4 w-0.5 bg-border" />
+                    {timelineItems.slice(0, 50).map((item, idx) => {
+                      if (item.type === 'note') {
+                        const note = item.data as { id: string; note_type: string; content: string; created_at: string };
+                        return (
+                          <div key={`note-${note.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative">
+                            <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 border-border text-xs shrink-0 z-10">
+                              {noteTypeIcons[note.note_type] || '📝'}
+                            </span>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <p className="text-sm">{note.content}</p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                {formatDistanceToNow(new Date(note.created_at), { addSuffix: true, locale })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
+                              className="opacity-0 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      } else {
+                        const activity = item.data as { id: string; activity_type: string; subject?: string; description?: string; activity_date: string };
+                        const config = ACTIVITY_TYPE_CONFIG[activity.activity_type];
+                        const activityIcon = activity.activity_type === 'stage_change' ? '🔄' :
+                          activity.activity_type === 'workflow_executed' ? '⚡' :
+                          activity.activity_type === 'notification' ? '🔔' : '📋';
+                        return (
+                          <div key={`act-${activity.id}`} className="flex gap-2.5 p-2 rounded-lg hover:bg-muted/30 relative">
+                            <span className={cn(
+                              'flex h-[26px] w-[26px] items-center justify-center rounded-full bg-card border-2 text-xs shrink-0 z-10',
+                              config?.color ? 'border-primary' : 'border-border'
+                            )}>
+                              {activityIcon}
+                            </span>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <span className={cn('text-xs font-medium', config?.color || 'text-muted-foreground')}>
+                                {config ? (isRu ? config.labelRu : config.labelEn) : activity.activity_type}
+                              </span>
+                              {activity.subject && <p className="text-sm font-medium mt-0.5">{activity.subject}</p>}
+                              {activity.description && <p className="text-xs text-muted-foreground mt-0.5">{activity.description}</p>}
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true, locale })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Dates & Reminders */}
+            <TabsContent value="dates" className="mt-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <KeyDatesCard
+                  contactId={contact.id}
+                  keyDates={(contact as { key_dates?: Array<{ label: string; date: string }> }).key_dates || []}
+                />
+                <RemindersList contactId={contact.id} companyId={contact.company_id} />
               </div>
             </TabsContent>
 

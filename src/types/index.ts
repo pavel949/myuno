@@ -22,3 +22,6 @@ export * from './orders';
 
 // Availability system types  
 export * from './availability';
+
+// Contact / CRM types
+export * from './contact';

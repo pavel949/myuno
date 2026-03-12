@@ -51,6 +51,9 @@ export interface CrmContact {
   created_at: string;
   updated_at: string;
   deal_count?: number;
+  // Contact card redesign
+  crm_role?: string | null;
+  key_dates?: Array<{ label: string; date: string }> | null;
   // Odoo-style fields
   address_street: string | null;
   address_street2: string | null;
@@ -93,6 +96,8 @@ export type CrmContactInsert = Omit<CrmContact, 'id' | 'created_at' | 'updated_a
 export type CrmContactUpdate = Partial<CrmContactInsert>;
 
 export const CONTACT_TYPES = ['buyer', 'seller', 'investor', 'tenant', 'landlord', 'agent'] as const;
+
+// Use select('*') for robustness — avoids failures when schema has extra/missing columns
 export const CONTACT_SOURCES = ['website', 'referral', 'walk-in', 'social_media', 'agent_network', 'other'] as const;
 export const CONTACT_TAGS = ['VIP', 'hot', 'warm', 'cold', 'follow-up', 'priority'] as const;
 
