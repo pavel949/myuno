@@ -223,7 +223,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         </Button>
       }
     >
-      <div className="overflow-y-auto max-h-[calc(100vh-120px)] overscroll-contain space-y-4 pr-1">
+      <div className="space-y-4 pr-1">
         {/* Duplicate warning */}
         {duplicates.length > 0 && (
           <div className="p-3 rounded-lg border border-warning/50 bg-warning/10 text-sm">
