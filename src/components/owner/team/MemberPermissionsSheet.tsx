@@ -148,7 +148,7 @@ export function MemberPermissionsSheet({ open, onOpenChange, userId, userName, c
           <div className="mb-4 p-3 rounded-lg bg-warning/10 border border-warning/30 text-sm text-warning-foreground">
             <p className="font-medium">{t('View Only', 'Только просмотр')}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {t('Only directors and admins can change permissions', 'Только директор и администратор могут изменять права доступа')}
+              {t('Only directors can change permissions', 'Только директор может изменять права доступа')}
             </p>
           </div>
         )}
