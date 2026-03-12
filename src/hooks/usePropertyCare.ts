@@ -122,7 +122,7 @@ export function useOwnerProperty(id: string | undefined) {
         const otherCompanyIds = activeCompanyId ? companyIds.filter(c => c !== activeCompanyId) : companyIds;
         if (otherCompanyIds.length) {
           const { data: companyProp } = await supabase.from('properties').select('*').eq('id', id).in('management_company_id', otherCompanyIds).maybeSingle();
-          if (companyProp) return companyProp as OwnerProperty;
+          if (companyProp) return companyProp as unknown as OwnerProperty;
         }
       }
 
