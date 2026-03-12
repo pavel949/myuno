@@ -213,7 +213,7 @@ export default function ImportOdooContactsPage() {
              source: 'odoo_import',
            };
           if (existingId) {
-            const { error } = await supabase.from('crm_contacts').update(row).eq('id', existingId);
+            const { error } = await supabase.from('crm_contacts').update(row as any).eq('id', existingId);
             if (error) errors.push({ row: rowNum, reason: error.message });
             else updated++;
           } else {
