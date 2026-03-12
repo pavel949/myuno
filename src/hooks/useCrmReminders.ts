@@ -72,8 +72,8 @@ export function useDismissContactReminder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
-      const { error } = await supabase
-        .from('crm_reminders')
+       const { error } = await (supabase as any)
+         .from('crm_reminders')
         .update({ is_dismissed: true, dismissed_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
