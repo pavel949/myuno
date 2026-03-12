@@ -6,13 +6,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+/** Convert array of objects to CSV string */
+function toCsv(rows: Record<string, unknown>[]): string {
+  if (!rows.length) return '';
+  const headers = Object.keys(rows[0]);
+  const escape = (v: unknown): string => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? `"${s.replace(/"/g, '""')}"`
+      : s;
+  };
+  const lines = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => escape(r[h])).join(',')),
+  ];
+  return lines.join('\n');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Auth check
     const authResult = await requireAuth(req, corsHeaders);
     if (authResult instanceof Response) return authResult;
     const userId = authResult.user.id;
@@ -50,7 +66,6 @@ Deno.serve(async (req) => {
       export_type,
     };
 
-    // Fetch data based on type
     const types = export_type === 'all' ? ['properties', 'crm', 'finance', 'reports'] : [export_type];
 
     for (const t of types) {
@@ -78,6 +93,30 @@ Deno.serve(async (req) => {
           break;
         }
       }
+    }
+
+    // Return CSV if requested
+    if (format === 'csv') {
+      // For CSV, merge all arrays into separate sections
+      const csvParts: string[] = [];
+      for (const [key, value] of Object.entries(result)) {
+        if (Array.isArray(value) && value.length > 0) {
+          csvParts.push(`## ${key}`);
+          csvParts.push(toCsv(value as Record<string, unknown>[]));
+          csvParts.push('');
+        }
+      }
+      const csvContent = csvParts.length > 0
+        ? csvParts.join('\n')
+        : 'No data to export';
+
+      return new Response(csvContent, {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/csv; charset=utf-8',
+          'Content-Disposition': `attachment; filename="${export_type}-backup-${new Date().toISOString().slice(0, 10)}.csv"`,
+        },
+      });
     }
 
     return new Response(JSON.stringify(result, null, 2), {

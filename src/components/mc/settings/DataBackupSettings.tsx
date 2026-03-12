@@ -69,11 +69,15 @@ export function DataBackupSettings() {
     },
     onSuccess: (data, exportType) => {
       // Download the data as file
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const isCsv = format === 'csv';
+      const content = isCsv && typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      const mimeType = isCsv ? 'text/csv;charset=utf-8' : 'application/json';
+      const ext = isCsv ? 'csv' : 'json';
+      const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${exportType}-backup-${new Date().toISOString().slice(0, 10)}.${format}`;
+      a.download = `${exportType}-backup-${new Date().toISOString().slice(0, 10)}.${ext}`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(isRu ? 'Экспорт завершён' : 'Export complete');
