@@ -86,11 +86,11 @@ export function useMemberPermissions(userId: string | null) {
 
 /**
  * Check if the current user can manage permissions in the active company.
- * Only directors and admins can assign/modify permissions.
+ * Only directors can assign/modify permissions.
  */
 export function useCanManagePermissions(): boolean {
   const { activeCompany } = useActiveCompany();
-  return activeCompany?.role === 'director' || activeCompany?.role === 'admin';
+  return activeCompany?.role === 'director';
 }
 
 export function useUpdateMemberPermission() {
