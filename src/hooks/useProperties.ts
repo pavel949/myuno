@@ -284,7 +284,7 @@ export function useProperty(id?: string) {
         .maybeSingle();
 
       if (error) throw error;
-      return data as Property | null;
+      return data as unknown as Property | null;
     },
     enabled: !!id,
   });
