@@ -171,14 +171,14 @@ function detectChannelType(url: string, name: string): string {
   return 'other';
 }
 
-// Look up property pricing from owner_properties
+// Look up property pricing from properties
 async function getPropertyPricing(supabase: any, propertyId: string): Promise<number> {
   const { data } = await supabase
-    .from('owner_properties')
-    .select('price_per_night')
+    .from('properties')
+    .select('price, price_per_night')
     .eq('id', propertyId)
     .single();
-  return data?.price_per_night || 0;
+  return data?.price_per_night ?? data?.price ?? 0;
 }
 
 // Calculate nights between two date strings
@@ -188,6 +188,51 @@ function calculateNights(dtstart: string, dtend: string): number {
   const diffMs = end.getTime() - start.getTime();
   const nights = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
   return nights;
+}
+
+// Check for overlapping orders for this property and date range; return conflict order id if found
+async function findOverlappingOrder(
+  supabase: any,
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  excludeOrderId?: string
+): Promise<{ orderId: string; channel: string } | null> {
+  const startAt = `${startDate}T00:00:00Z`;
+  const endAt = `${endDate}T23:59:59Z`;
+
+  const { data: items } = await supabase
+    .from('order_items')
+    .select('order_id, metadata, resource_id')
+    .eq('item_type', 'property');
+
+  const orderIdsForProperty = (items || [])
+    .filter((i: any) => i.resource_id === propertyId || i.metadata?.property_id === propertyId)
+    .map((i: any) => i.order_id);
+
+  if (orderIdsForProperty.length === 0) return null;
+
+  const { data: orders } = await supabase
+    .from('orders')
+    .select('id, start_at, end_at, metadata, status, deleted_at')
+    .in('id', orderIdsForProperty)
+    .eq('vertical', 'property')
+    .is('deleted_at', null);
+
+  const overlapping = (orders || []).find((o: any) => {
+    if (o.status === 'cancelled') return false;
+    if (excludeOrderId && o.id === excludeOrderId) return false;
+    const oStart = new Date(o.start_at).getTime();
+    const oEnd = new Date(o.end_at).getTime();
+    const eStart = new Date(startAt).getTime();
+    const eEnd = new Date(endAt).getTime();
+    return oStart < eEnd && eStart < oEnd;
+  });
+
+  if (!overlapping) return null;
+
+  const channel = overlapping.metadata?.channel_type || overlapping.metadata?.source || 'myuno';
+  return { orderId: overlapping.id, channel };
 }
 
 // Create or update an order for an external calendar event (unified orders table)
@@ -396,11 +441,36 @@ async function syncCalendar(
       if (!event.dtstart || !event.dtend) continue;
 
       const existingOrderId = existingIdMap.get(event.uid);
+
+      // For NEW events only: check overlap with existing orders before creating
+      if (!existingOrderId) {
+        const overlap = await findOverlappingOrder(
+          supabase,
+          calendar.property_id,
+          event.dtstart,
+          event.dtend
+        );
+        if (overlap) {
+          const channelIcal = detectChannelType(calendar.ical_url, calendar.name);
+          await supabase.from('booking_conflicts').insert({
+            property_id: calendar.property_id,
+            conflict_date: event.dtstart,
+            channel_a: channelIcal,
+            channel_b: overlap.channel,
+            order_id_a: null,
+            order_id_b: overlap.orderId,
+            resolved: false,
+          });
+          console.log(`Conflict detected: iCal ${channelIcal} overlaps order ${overlap.orderId} (${overlap.channel}). Skipping order creation.`);
+          continue;
+        }
+      }
+
       const orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
 
       if (existingOrderId) {
         eventsUpdated++;
-      } else {
+      } else if (orderId) {
         newOrderIds.push(orderId);
         eventsAdded++;
       }
@@ -474,7 +544,7 @@ Deno.serve(async (req) => {
 
     let query = supabase
       .from('property_external_calendars')
-      .select('*, owner_properties!inner(id, owner_id)')
+      .select('*, properties!inner(id, owner_id)')
       .eq('is_active', true)
       .eq('auto_sync', true);
 

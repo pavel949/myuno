@@ -1027,6 +1027,83 @@ export type Database = {
           },
         ]
       }
+      booking_conflicts: {
+        Row: {
+          id: string
+          property_id: string
+          conflict_date: string
+          channel_a: string
+          channel_b: string
+          order_id_a: string | null
+          order_id_b: string | null
+          detected_at: string
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          note: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          conflict_date: string
+          channel_a: string
+          channel_b: string
+          order_id_a?: string | null
+          order_id_b?: string | null
+          detected_at?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          note?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          conflict_date?: string
+          channel_a?: string
+          channel_b?: string
+          order_id_a?: string | null
+          order_id_b?: string | null
+          detected_at?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          note?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_conflicts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_conflicts_order_id_a_fkey"
+            columns: ["order_id_a"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_conflicts_order_id_b_fkey"
+            columns: ["order_id_b"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_conflicts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_cross_sell_offers: {
         Row: {
           booking_id: string

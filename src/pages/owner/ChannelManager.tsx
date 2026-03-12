@@ -18,6 +18,7 @@ import { SyncedListingPreview } from '@/components/owner/airbnb-sync/SyncedListi
 import { ChannelHealthDashboard } from '@/components/owner/channel-manager/ChannelHealthDashboard';
 import { SyncTimeline, SyncStatsChart } from '@/components/owner/channel-manager/SyncTimeline';
 import { ConflictResolver } from '@/components/owner/channel-manager/ConflictResolver';
+import { BookingConflictsBanner } from '@/components/owner/channel-manager/BookingConflictsBanner';
 import { QuickConnectCards } from '@/components/owner/channel-manager/QuickConnectCards';
 import { ChannelStatsCard } from '@/components/owner/channel-manager/ChannelStatsCard';
 import { ChannelCard } from '@/components/owner/channel-manager/ChannelCard';
@@ -95,6 +96,9 @@ export default function ChannelManager() {
       <PageHeader title="Channel Manager" showBack fallbackPath={APP_ROUTES.MC} />
 
       <div className="mt-4 space-y-6">
+        {/* Conflict alert banner */}
+        <BookingConflictsBanner />
+
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <ChannelStatsCard icon={<Link2 className="h-5 w-5" />} label={isRu ? 'Подключено' : 'Connected'} value={totalChannels} color="bg-primary/10 text-primary" />
@@ -183,6 +187,7 @@ export default function ChannelManager() {
           </TabsContent>
 
           <TabsContent value="conflicts" className="space-y-4 mt-4">
+            <BookingConflictsBanner />
             {properties && properties.length > 0 ? (
               <>
                 <Card className="border-warning/30 bg-warning/5">

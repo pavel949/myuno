@@ -222,6 +222,97 @@ export function useBookingConflicts(propertyId?: string) {
   });
 }
 
+// Hook to read booking_conflicts table (from ical-scheduled-sync conflict detection)
+export interface BookingConflictRow {
+  id: string;
+  property_id: string;
+  conflict_date: string;
+  channel_a: string;
+  channel_b: string;
+  order_id_a: string | null;
+  order_id_b: string | null;
+  detected_at: string;
+  resolved: boolean;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  note: string | null;
+  property?: { title_en?: string; title_ru?: string };
+}
+
+export function useBookingConflictsFromTable(propertyId?: string) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['booking-conflicts-table', user?.id, propertyId],
+    queryFn: async () => {
+      if (!user?.id) return { conflicts: [], unresolvedCount: 0 };
+
+      let q = supabase
+        .from('booking_conflicts')
+        .select(`
+          id,
+          property_id,
+          conflict_date,
+          channel_a,
+          channel_b,
+          order_id_a,
+          order_id_b,
+          detected_at,
+          resolved,
+          resolved_at,
+          resolved_by,
+          note,
+          properties(id, title_en, title_ru)
+        `)
+        .eq('resolved', false)
+        .order('detected_at', { ascending: false });
+
+      if (propertyId) {
+        q = q.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await q;
+      if (error) throw error;
+
+      const conflicts = (data || []).map((r: any) => ({
+        ...r,
+        property: r.properties,
+      }));
+      return {
+        conflicts: conflicts as BookingConflictRow[],
+        unresolvedCount: conflicts.length,
+      };
+    },
+    enabled: !!user?.id,
+  });
+
+  const markResolved = useMutation({
+    mutationFn: async ({ id, note }: { id: string; note?: string }) => {
+      const { error } = await supabase
+        .from('booking_conflicts')
+        .update({
+          resolved: true,
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id,
+          note: note || null,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['booking-conflicts-table'] });
+    },
+  });
+
+  return {
+    ...query,
+    markResolved: markResolved.mutateAsync,
+    isMarkingResolved: markResolved.isPending,
+  };
+}
+
 // Hook to get conflicts for all properties
 export function useAllBookingConflicts() {
   const { user } = useAuth();
