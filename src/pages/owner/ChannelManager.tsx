@@ -212,31 +212,60 @@ export default function ChannelManager() {
           </TabsContent>
 
           <TabsContent value="distribution" className="space-y-4 mt-4">
-            <ChannelManagementCTA />
+            {/* Contact us CTA instead of pricing */}
+            <Card className="border border-primary/20 bg-primary/5">
+              <CardContent className="pt-5 pb-5">
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+                    <Crown className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">
+                      {isRu ? 'Нужна помощь с дистрибуцией?' : 'Need help with distribution?'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isRu
+                        ? 'Мы поможем настроить синхронизацию, управление ценами и размещение на OTA-площадках. Напишите нам — подберём оптимальное решение.'
+                        : 'We can help set up synchronization, pricing management, and OTA listings. Contact us — we\'ll find the best solution.'}
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-3" onClick={() => window.open('mailto:support@myuno.app', '_blank')}>
+                      {isRu ? 'Написать нам' : 'Contact us'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            {properties && properties.length > 0 ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  {isRu
-                    ? 'Настройте source of truth по каждому объекту. Режим влияет на приоритет цен/доступности при синке.'
-                    : 'Configure source of truth per property. This mode defines price/availability priority during sync.'}
-                </p>
-                {properties.map((property) => (
-                  <SourceOfTruthToggle
-                    key={property.id}
-                    propertyId={property.id}
-                    currentMode={(property as any).sync_mode || 'import_only'}
-                    propertyTitle={isRu ? property.title_ru || property.title : property.title}
-                  />
-                ))}
-              </>
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  {isRu ? 'Нет объектов для настройки' : 'No properties to configure'}
-                </CardContent>
-              </Card>
-            )}
+            {/* Source of Truth per property */}
+            <div>
+              <h2 className="text-lg font-semibold mb-1">
+                {isRu ? 'Источник данных по объектам' : 'Source of Truth per Property'}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                {isRu
+                  ? 'Выберите для каждого объекта, откуда берутся цены и доступность при синхронизации с площадками.'
+                  : 'Choose for each property where prices and availability come from during OTA synchronization.'}
+              </p>
+
+              {properties && properties.length > 0 ? (
+                <div className="space-y-3">
+                  {properties.map((property) => (
+                    <SourceOfTruthToggle
+                      key={property.id}
+                      propertyId={property.id}
+                      currentMode={(property as any).sync_mode || 'import_only'}
+                      propertyTitle={isRu ? property.title_ru || property.title : property.title}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    {isRu ? 'Нет объектов для настройки' : 'No properties to configure'}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
             <div>
               <h2 className="text-lg font-semibold mb-3">{isRu ? 'Подключённые каналы (iCal)' : 'Connected Channels (iCal)'}</h2>
