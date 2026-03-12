@@ -376,10 +376,10 @@ export default function AirportTransferBooking() {
               : 'Driver will meet you with a sign at the terminal exit.'}
           </p>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => navigate('/transport')}>
+            <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
               {language === 'ru' ? 'К транспорту' : 'Browse More'}
             </Button>
-            <Button onClick={() => navigate('/bookings')}>
+            <Button onClick={() => navigate(APP_ROUTES.BOOKINGS)}>
               {language === 'ru' ? 'Мои брони' : 'My Bookings'}
             </Button>
           </div>
