@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
-import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
+import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES, HEADER_BLACKLIST_PATTERNS } from '@/lib/contactsImportFields';
 import { t } from '@/lib/contactsImportI18n';
 
 interface ContactImportSheetProps {
