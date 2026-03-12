@@ -291,7 +291,7 @@ export default function OwnerDashboard() {
       titleEn: 'Portfolio Health',
       titleRu: 'Здоровье портфеля',
       icon: HeartPulse,
-      widgets: ['property_status', 'active_stays', 'channel_sync', 'maintenance_health'] as DashboardWidgetKey[],
+      widgets: ['portfolio_health', 'active_stays', 'channel_sync', 'maintenance_health'] as DashboardWidgetKey[],
     },
     revenue: {
       titleEn: 'Revenue & Cash',
