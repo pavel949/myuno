@@ -238,8 +238,8 @@ export default function CrmDashboardPage() {
         onDealVipFilterChange={() => {}}
         contactVipFilter="all"
         onContactVipFilterChange={() => {}}
-        highBudgetOnly={false}
-        onHighBudgetOnlyChange={() => {}}
+        activePreset="none"
+        onApplyPreset={() => {}}
       />
 
       {/* Kanban Board */}
