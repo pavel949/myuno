@@ -31,13 +31,15 @@ interface ProfileWithRoles {
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-destructive/15 text-destructive border-destructive/30',
   uno_team: 'bg-primary/15 text-primary border-primary/30',
-  moderator: 'bg-warning/15 text-warning border-warning/30',
   vendor: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30',
   owner: 'bg-success/15 text-success border-success/30',
+  finance: 'bg-warning/15 text-warning border-warning/30',
+  support: 'bg-sky-500/15 text-sky-600 border-sky-500/30',
+  sales: 'bg-purple-500/15 text-purple-600 border-purple-500/30',
   user: 'bg-muted text-muted-foreground border-border',
 };
 
-const ALL_ROLES = ['admin', 'moderator', 'vendor', 'owner', 'uno_team'] as const;
+const ALL_ROLES = ['admin', 'uno_team', 'vendor', 'owner', 'finance', 'support', 'sales'] as const;
 
 const STATUS_MAP: Record<string, { status: 'active' | 'warning' | 'danger' | 'inactive'; labelEn: string; labelRu: string }> = {
   active: { status: 'active', labelEn: 'Active', labelRu: 'Активен' },
