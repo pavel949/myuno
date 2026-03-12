@@ -31,8 +31,10 @@ export async function getAccessiblePropertyIds(
 
   // Fire ALL queries in parallel (including company)
   const [ownedRes, delegatedRes, companyRes] = await Promise.all([
-    // 1. Owned properties
-    supabase.from('properties').select('id').eq('owner_id', userId),
+    // 1. Owned properties — scoped to active MC if in MC mode
+    activeCompanyId
+      ? supabase.from('properties').select('id').eq('owner_id', userId).eq('management_company_id', activeCompanyId)
+      : supabase.from('properties').select('id').eq('owner_id', userId),
     // 2. Delegated properties
     supabase.from('property_delegates').select('property_id').eq('user_id', userId).eq('status', 'active'),
     // 3. Company properties (noop if no activeCompanyId)
