@@ -185,7 +185,7 @@ export default function ResetPassword() {
                   ? 'Войдите в аккаунт с новым паролем. Перенаправление на страницу входа...'
                   : 'Sign in with your new password. Redirecting to login...'}
               </p>
-              <Link to="/auth">
+              <Link to={APP_ROUTES.AUTH}>
                 <PremiumButton variant="outline" className="mt-2 gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   {language === 'ru' ? 'Перейти к входу' : 'Go to login'}

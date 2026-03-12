@@ -403,7 +403,7 @@ export default function AirportTransferBooking() {
       <div className="px-4 pt-4 pb-2 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 mb-3">
           <button 
-            onClick={() => step > 0 ? handleBack() : navigate('/transport')} 
+            onClick={() => step > 0 ? handleBack() : navigate(APP_ROUTES.TRANSPORT)} 
             className="w-10 h-10 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
