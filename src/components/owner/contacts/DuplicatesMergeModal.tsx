@@ -84,7 +84,7 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
     const choice = getFieldChoice(key);
     const c = choice === 'left' ? leftVal : rightVal;
     if (!c) return null;
-    const v = (c as Record<string, unknown>)[key];
+    const v = (c as unknown as Record<string, unknown>)[key];
     return v ?? null;
   };
 
