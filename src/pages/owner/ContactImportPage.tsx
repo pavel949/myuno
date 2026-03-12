@@ -298,13 +298,32 @@ export default function ContactImportPage() {
             };
           });
 
+    // Deduplicate by phone within the import set (keep first occurrence)
+    const seen = new Set<string>();
+    const deduped = rowsToInsert.filter((row) => {
+      const phone = String(row.phone ?? '').trim();
+      if (!phone) return true; // null/empty phones are allowed (no unique constraint)
+      const key = `${row.company_id}::${phone}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     const BATCH_SIZE = 50;
-    for (let i = 0; i < rowsToInsert.length; i += BATCH_SIZE) {
-      const batch = rowsToInsert.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < deduped.length; i += BATCH_SIZE) {
+      const batch = deduped.slice(i, i + BATCH_SIZE);
       const { data, error } = await supabase.from('crm_contacts').insert(batch as any).select('id');
       if (error) {
-        failed += batch.length;
-        toast.error(`${t('readError', lang)}: ${error.message}`);
+        if (error.code === '23505') {
+          // Unique constraint violation — insert one by one, skipping duplicates
+          for (const row of batch) {
+            const { data: d, error: e } = await supabase.from('crm_contacts').insert(row as any).select('id');
+            if (e) { failed++; } else { success += d?.length || 0; }
+          }
+        } else {
+          failed += batch.length;
+          toast.error(`${t('readError', lang)}: ${error.message}`);
+        }
       } else {
         success += data?.length || 0;
         failed += batch.length - (data?.length || 0);
