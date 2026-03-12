@@ -26,8 +26,8 @@ export function useContactRelationships(contactId: string | undefined) {
         .from('crm_contacts')
         .select('id, first_name, last_name, company_name, avatar_url')
         .in('id', relatedIds);
-      const contactMap = new Map((contacts || []).map((c: { id: string }) => [c.id, c]));
-      return links.map((row: Record<string, unknown>) => ({
+       const contactMap = new Map((contacts || []).map((c: any) => [c.id, c]));
+       return (links as any[]).map((row: any) => ({
         ...row,
         related_contact: contactMap.get(row.related_contact_id as string),
       })) as ContactRelationship[];
