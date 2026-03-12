@@ -86,11 +86,11 @@ export function useMemberPermissions(userId: string | null) {
 
 /**
  * Check if the current user can manage permissions in the active company.
- * Only directors and admins can assign/modify permissions.
+ * Only directors can assign/modify permissions.
  */
 export function useCanManagePermissions(): boolean {
   const { activeCompany } = useActiveCompany();
-  return activeCompany?.role === 'director' || activeCompany?.role === 'admin';
+  return activeCompany?.role === 'director';
 }
 
 export function useUpdateMemberPermission() {
@@ -103,7 +103,7 @@ export function useUpdateMemberPermission() {
     mutationFn: async (args: { userId: string; module: string; can_view: boolean; can_edit: boolean; can_export?: boolean; sub_permissions?: Record<string, boolean> }) => {
       const companyId = activeCompany?.company_id;
       if (!companyId || !user) throw new Error('No company');
-      if (!canManage) throw new Error('Only directors and admins can manage permissions');
+      if (!canManage) throw new Error('Only directors can manage permissions');
       
       const { error } = await supabase
         .from('team_member_permissions' as any)
