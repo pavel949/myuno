@@ -61,7 +61,7 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
       'kpi',
       'your_day',
       'active_stays',
-      'property_status',
+      'portfolio_health',
       'channel_sync',
       'maintenance_health',
       'crm_tasks',

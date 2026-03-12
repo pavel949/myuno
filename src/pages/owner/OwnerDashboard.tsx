@@ -171,9 +171,10 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
         </div>
       );
     case 'property_status':
+    case 'portfolio_health':
       return (
         <Suspense fallback={skeleton}>
-          <PropertyStatusSnapshot />
+          <PortfolioHealthWidget />
         </Suspense>
       );
     case 'property_priority':
