@@ -90,7 +90,7 @@ export function useDeleteContactReminder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
-      const { error } = await supabase.from('crm_reminders').delete().eq('id', id);
+      const { error } = await (supabase as any).from('crm_reminders').delete().eq('id', id);
       if (error) throw error;
       return { id, contactId };
     },

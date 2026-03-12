@@ -69,7 +69,7 @@ export function usePropertyContacts(propertyId: string | undefined) {
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!links?.length) return [];
-      const contactIds = [...new Set(links.map((l: any) => l.contact_id))];
+      const contactIds = [...new Set((links as any[]).map((l: any) => l.contact_id as string))];
       const { data: contacts } = await supabase
         .from('crm_contacts')
         .select('id, first_name, last_name, company_name')
