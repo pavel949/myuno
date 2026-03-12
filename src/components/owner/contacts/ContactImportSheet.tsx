@@ -35,6 +35,8 @@ function autoMap(columns: string[]): Record<string, string> {
   const usedFields = new Set<string>();
   columns.forEach((col) => {
     const norm = normalize(col);
+    // Skip "Type" columns (e.g. "Phone 1 - Type" from Google Contacts)
+    if (HEADER_BLACKLIST_PATTERNS.some((bp) => norm.endsWith(bp))) return;
     for (const field of CONTACT_IMPORT_FIELDS) {
       if (usedFields.has(field.key)) continue;
       const aliases = CONTACT_IMPORT_ALIASES[field.key] ?? [field.key.replace(/_/g, '')];
