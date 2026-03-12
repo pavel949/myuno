@@ -216,7 +216,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
       if (error) throw error;
       
       return {
-        properties: (data || []) as Property[],
+        properties: (data || []) as unknown as Property[],
         nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
       };
     },
@@ -265,7 +265,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
   });
 }
@@ -284,7 +284,7 @@ export function useProperty(id?: string) {
         .maybeSingle();
 
       if (error) throw error;
-      return data as Property | null;
+      return data as unknown as Property | null;
     },
     enabled: !!id,
   });
@@ -360,7 +360,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         ...property,
         rentalTerms,
         project: projectData,
-      } as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
+      } as unknown as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
     },
     enabled: !!marketplacePropertyId,
   });
@@ -380,7 +380,7 @@ export function useFeaturedProperties(limit = 6) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
   });
 }
@@ -400,7 +400,7 @@ export function useInstantBookingProperties(limit = 10) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
   });
 }
@@ -446,7 +446,7 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
     enabled: !!projectId,
   });

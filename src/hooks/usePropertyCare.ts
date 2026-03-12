@@ -72,7 +72,7 @@ export function useOwnerProperties() {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return (data || []) as OwnerProperty[];
+      return (data || []) as unknown as OwnerProperty[];
     },
     enabled: !!user,
     staleTime: 30000,
@@ -107,12 +107,12 @@ export function useOwnerProperty(id: string | undefined) {
       ]);
 
       // Priority: owner > company > manager > fallback
-      if (ownerRes.data) return ownerRes.data as OwnerProperty;
-      if (companyRes.data) return companyRes.data as OwnerProperty;
+      if (ownerRes.data) return ownerRes.data as unknown as OwnerProperty;
+      if (companyRes.data) return companyRes.data as unknown as OwnerProperty;
 
       if (assignmentRes.data) {
         const { data: managed } = await supabase.from('properties').select('*').eq('id', id).single();
-        if (managed) return managed as OwnerProperty;
+        if (managed) return managed as unknown as OwnerProperty;
       }
 
       // Fallback: check other companies
@@ -122,7 +122,7 @@ export function useOwnerProperty(id: string | undefined) {
         const otherCompanyIds = activeCompanyId ? companyIds.filter(c => c !== activeCompanyId) : companyIds;
         if (otherCompanyIds.length) {
           const { data: companyProp } = await supabase.from('properties').select('*').eq('id', id).in('management_company_id', otherCompanyIds).maybeSingle();
-          if (companyProp) return companyProp as OwnerProperty;
+          if (companyProp) return companyProp as unknown as OwnerProperty;
         }
       }
 
@@ -198,7 +198,7 @@ export function useCreateOwnerProperty() {
         }).catch(err => errorLog.silent(err, 'notify_admin'));
       }
       
-      return result as OwnerProperty;
+      return result as unknown as OwnerProperty;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
@@ -230,7 +230,7 @@ export function useUpdateOwnerProperty() {
       // Try update as owner first
       const { data: result } = await supabase
         .from('properties')
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .eq('owner_id', user.id)
         .select()
@@ -251,7 +251,7 @@ export function useUpdateOwnerProperty() {
       if (!hasAccess) throw new Error('Property not found or access denied');
 
       // Scoped update: filter by company if available, otherwise by assignment-verified id
-      let query = supabase.from('properties').update(data).eq('id', id);
+      let query = supabase.from('properties').update(data as any).eq('id', id);
       if (propertyCheck.data?.management_company_id) {
         query = query.eq('management_company_id', propertyCheck.data.management_company_id);
       }

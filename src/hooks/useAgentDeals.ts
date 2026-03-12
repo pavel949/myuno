@@ -250,7 +250,7 @@ export function useCreateDeal() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
       if (data?.id) {
-        qc.setQueryData(['agent-deal', data.id], data as AgentDeal);
+        qc.setQueryData(['agent-deal', data.id], data as unknown as AgentDeal);
       }
     },
   });

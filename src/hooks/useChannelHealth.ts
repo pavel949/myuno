@@ -248,7 +248,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
     queryFn: async () => {
       if (!user?.id) return { conflicts: [], unresolvedCount: 0 };
 
-      let q = supabase
+      let q = (supabase as any)
         .from('booking_conflicts')
         .select(`
           id,
@@ -289,7 +289,7 @@ export function useBookingConflictsFromTable(propertyId?: string) {
 
   const markResolved = useMutation({
     mutationFn: async ({ id, note }: { id: string; note?: string }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('booking_conflicts')
         .update({
           resolved: true,

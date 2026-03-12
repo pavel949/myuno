@@ -3,7 +3,7 @@
  * Use this module to ensure consistent Stripe SDK versioning across all functions.
  */
 
-import Stripe from "npm:stripe@18.5.0";
+import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 export const STRIPE_API_VERSION = "2025-08-27.basil" as const;
 

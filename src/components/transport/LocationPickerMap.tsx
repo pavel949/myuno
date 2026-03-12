@@ -281,7 +281,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
 
       <button
         onClick={getCurrentLocation}
-        disabled={isGettingLocation || noKey || isLoading}
+        disabled={isGettingLocation || !!noKey || isLoading}
         className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
       >
         {isGettingLocation ? (

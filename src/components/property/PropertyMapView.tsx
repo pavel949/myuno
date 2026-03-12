@@ -62,7 +62,7 @@ export function PropertyMapView({
     if (!mapRef.current || validProps.length === 0) return;
     const bounds = new google.maps.LatLngBounds();
     validProps.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
-    mapRef.current.fitBounds(bounds, { padding: 60, maxZoom: 14 });
+    mapRef.current.fitBounds(bounds, 60);
   }, [validProps]);
 
   const noKey = !hasKey || loadError;

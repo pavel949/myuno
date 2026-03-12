@@ -160,7 +160,6 @@ export type Database = {
           deal_type: string
           deal_value: number | null
           id: string
-          is_vip: boolean
           lost_reason: string | null
           next_action: string | null
           next_action_date: string | null
@@ -194,7 +193,6 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
-          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
@@ -228,7 +226,6 @@ export type Database = {
           deal_type?: string
           deal_value?: number | null
           id?: string
-          is_vip?: boolean
           lost_reason?: string | null
           next_action?: string | null
           next_action_date?: string | null
@@ -1023,83 +1020,6 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      booking_conflicts: {
-        Row: {
-          id: string
-          property_id: string
-          conflict_date: string
-          channel_a: string
-          channel_b: string
-          order_id_a: string | null
-          order_id_b: string | null
-          detected_at: string
-          resolved: boolean
-          resolved_at: string | null
-          resolved_by: string | null
-          note: string | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          property_id: string
-          conflict_date: string
-          channel_a: string
-          channel_b: string
-          order_id_a?: string | null
-          order_id_b?: string | null
-          detected_at?: string
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          note?: string | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          property_id?: string
-          conflict_date?: string
-          channel_a?: string
-          channel_b?: string
-          order_id_a?: string | null
-          order_id_b?: string | null
-          detected_at?: string
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          note?: string | null
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "booking_conflicts_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "booking_conflicts_order_id_a_fkey"
-            columns: ["order_id_a"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "booking_conflicts_order_id_b_fkey"
-            columns: ["order_id_b"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "booking_conflicts_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -14787,7 +14707,7 @@ export type Database = {
           verified_at: string | null
           verified_by: string | null
           video_url: string | null
-          view_type: string[] | null
+          view_type: string | null
           water_included: boolean | null
           water_meter_id: string | null
           water_notes: string | null
@@ -15005,7 +14925,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -15223,7 +15143,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           video_url?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -25990,7 +25910,7 @@ export type Database = {
           updated_at: string | null
           verified_at: string | null
           verified_by: string | null
-          view_type: string[] | null
+          view_type: string | null
           water_included: boolean | null
           water_notes: string | null
           water_notes_ru: string | null
@@ -26095,7 +26015,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -26200,7 +26120,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_notes?: string | null
           water_notes_ru?: string | null
@@ -26694,7 +26614,7 @@ export type Database = {
           title_en: string | null
           title_ru: string | null
           unit_number: string | null
-          view_type: string[] | null
+          view_type: string | null
         }
         Insert: {
           amenities?: string[] | null
@@ -26739,7 +26659,7 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
         }
         Update: {
           amenities?: string[] | null
@@ -26784,7 +26704,7 @@ export type Database = {
           title_en?: string | null
           title_ru?: string | null
           unit_number?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
         }
         Relationships: [
           {
@@ -26996,7 +26916,7 @@ export type Database = {
           updated_at: string | null
           verified_at: string | null
           verified_by: string | null
-          view_type: string[] | null
+          view_type: string | null
           water_included: boolean | null
           water_meter_id: string | null
           water_notes: string | null
@@ -27199,7 +27119,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
@@ -27402,7 +27322,7 @@ export type Database = {
           updated_at?: string | null
           verified_at?: string | null
           verified_by?: string | null
-          view_type?: string[] | null
+          view_type?: string | null
           water_included?: boolean | null
           water_meter_id?: string | null
           water_notes?: string | null
