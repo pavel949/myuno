@@ -45,8 +45,8 @@ export function useCreateContactReminder() {
       repeatRule?: string;
       createdBy?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('crm_reminders')
+       const { data, error } = await (supabase as any)
+         .from('crm_reminders')
         .insert({
           contact_id: contactId,
           company_id: companyId,
