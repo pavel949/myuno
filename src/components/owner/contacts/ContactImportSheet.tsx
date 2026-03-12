@@ -131,12 +131,30 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
       return;
     }
 
-    for (let i = 0; i < rows.length; i += 50) {
-      const batch = rows.slice(i, i + 50);
+    // Deduplicate by phone within import set
+    const seen = new Set<string>();
+    const deduped = rows.filter((r) => {
+      const phone = String(r.phone ?? '').trim();
+      if (!phone) return true;
+      const key = `${r.company_id}::${phone}`;
+      if (seen.has(key)) { skipped++; return false; }
+      seen.add(key);
+      return true;
+    });
+
+    for (let i = 0; i < deduped.length; i += 50) {
+      const batch = deduped.slice(i, i + 50);
       const { error } = await supabase.from('crm_contacts').insert(batch as any);
       if (error) {
-        skipped += batch.length;
-        toast.error(error.message);
+        if (error.code === '23505') {
+          for (const row of batch) {
+            const { error: e } = await supabase.from('crm_contacts').insert(row as any);
+            if (e) { skipped++; } else { success++; }
+          }
+        } else {
+          skipped += batch.length;
+          toast.error(error.message);
+        }
       } else {
         success += batch.length;
       }
