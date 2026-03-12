@@ -84,7 +84,7 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
     const choice = getFieldChoice(key);
     const c = choice === 'left' ? leftVal : rightVal;
     if (!c) return null;
-    const v = (c as Record<string, unknown>)[key];
+    const v = (c as unknown as Record<string, unknown>)[key];
     return v ?? null;
   };
 
@@ -111,7 +111,7 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
       await supabase.from('crm_tasks').update({ contact_id: winnerId }).in('contact_id', dupIds);
       await (supabase as any).from('crm_contact_notes').update({ contact_id: winnerId }).in('contact_id', dupIds);
       await supabase.from('crm_activities').update({ contact_id: winnerId }).in('contact_id', dupIds);
-      const { error: cpErr } = await supabase.from('contact_properties').update({ contact_id: winnerId }).in('contact_id', dupIds);
+      const { error: cpErr } = await (supabase as any).from('contact_properties').update({ contact_id: winnerId }).in('contact_id', dupIds);
       if (cpErr) {
         // contact_properties might not exist in all deployments
       }
@@ -213,8 +213,8 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
             </div>
 
             {MERGE_FIELDS.map(({ key, labelEn, labelRu }) => {
-              const leftVal = (left as Record<string, unknown>)[key];
-              const rightVal = (right as Record<string, unknown>)[key];
+               const leftVal = (left as unknown as Record<string, unknown>)[key];
+               const rightVal = (right as unknown as Record<string, unknown>)[key];
               const leftStr = formatValue(leftVal, key);
               const rightStr = formatValue(rightVal, key);
               const hasDiff = leftStr !== rightStr;

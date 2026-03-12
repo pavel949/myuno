@@ -34,14 +34,14 @@ export function useContactProperties(contactId: string | undefined) {
     queryKey: ['contact-properties', contactId],
     queryFn: async (): Promise<ContactProperty[]> => {
       if (!contactId) return [];
-      const { data: links, error } = await supabase
-        .from('contact_properties')
+       const { data: links, error } = await (supabase as any)
+         .from('contact_properties')
         .select('id, contact_id, property_id, relationship_type, company_id, created_at')
         .eq('contact_id', contactId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!links?.length) return [];
-      const propertyIds = [...new Set(links.map((l: any) => l.property_id))];
+      const propertyIds = [...new Set((links as any[]).map((l: any) => l.property_id as string))];
       const { data: props } = await supabase
         .from('properties')
         .select('id, title_en, title_ru, district, property_type')
@@ -62,14 +62,14 @@ export function usePropertyContacts(propertyId: string | undefined) {
     queryKey: ['property-contacts', propertyId],
     queryFn: async (): Promise<ContactProperty[]> => {
       if (!propertyId) return [];
-      const { data: links, error } = await supabase
-        .from('contact_properties')
+       const { data: links, error } = await (supabase as any)
+         .from('contact_properties')
         .select('id, contact_id, property_id, relationship_type, company_id, created_at')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!links?.length) return [];
-      const contactIds = [...new Set(links.map((l: any) => l.contact_id))];
+      const contactIds = [...new Set((links as any[]).map((l: any) => l.contact_id as string))];
       const { data: contacts } = await supabase
         .from('crm_contacts')
         .select('id, first_name, last_name, company_name')
@@ -139,8 +139,8 @@ export function useLinkContactProperty() {
       relationshipType: RelationshipType;
       companyId: string;
     }) => {
-      const { data, error } = await supabase
-        .from('contact_properties')
+       const { data, error } = await (supabase as any)
+         .from('contact_properties')
         .insert({
           contact_id: contactId,
           property_id: propertyId,
@@ -164,7 +164,7 @@ export function useUnlinkContactProperty() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (linkId: string) => {
-      const { error } = await supabase.from('contact_properties').delete().eq('id', linkId);
+      const { error } = await (supabase as any).from('contact_properties').delete().eq('id', linkId);
       if (error) throw error;
     },
     onSuccess: () => {

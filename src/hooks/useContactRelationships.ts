@@ -14,20 +14,20 @@ export function useContactRelationships(contactId: string | undefined) {
     queryKey: ['contact-relationships', contactId],
     queryFn: async (): Promise<ContactRelationship[]> => {
       if (!contactId) return [];
-      const { data: links, error } = await supabase
-        .from('contact_relationships')
+       const { data: links, error } = await (supabase as any)
+         .from('contact_relationships')
         .select('id, contact_id, related_contact_id, relationship_type, company_id, notes, created_at, updated_at')
         .eq('contact_id', contactId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!links?.length) return [];
-      const relatedIds = [...new Set(links.map((l: { related_contact_id: string }) => l.related_contact_id))];
+      const relatedIds = [...new Set((links as any[]).map((l: any) => l.related_contact_id))];
       const { data: contacts } = await supabase
         .from('crm_contacts')
         .select('id, first_name, last_name, company_name, avatar_url')
         .in('id', relatedIds);
-      const contactMap = new Map((contacts || []).map((c: { id: string }) => [c.id, c]));
-      return links.map((row: Record<string, unknown>) => ({
+       const contactMap = new Map((contacts || []).map((c: any) => [c.id, c]));
+       return (links as any[]).map((row: any) => ({
         ...row,
         related_contact: contactMap.get(row.related_contact_id as string),
       })) as ContactRelationship[];
@@ -53,8 +53,8 @@ export function useLinkContactRelationship() {
       companyId: string;
       notes?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('contact_relationships')
+       const { data, error } = await (supabase as any)
+         .from('contact_relationships')
         .insert({
           contact_id: contactId,
           related_contact_id: relatedContactId,
@@ -79,7 +79,7 @@ export function useUnlinkContactRelationship() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (linkId: string) => {
-      const { error } = await supabase.from('contact_relationships').delete().eq('id', linkId);
+      const { error } = await (supabase as any).from('contact_relationships').delete().eq('id', linkId);
       if (error) throw error;
     },
     onSuccess: () => {

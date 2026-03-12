@@ -61,7 +61,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
-      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
+      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', crm_role: 'other' as const, source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
@@ -106,11 +106,11 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         </div>
         <div>
           <Label>{isRu ? 'Роль' : 'Role'}</Label>
-          <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CRM_ROLES.map(r => (
-                <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS.ru[r] : CRM_ROLE_LABELS.en[r]}</SelectItem>
+           <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v as typeof f.crm_role }))}>
+             <SelectTrigger><SelectValue /></SelectTrigger>
+             <SelectContent>
+               {CRM_ROLES.map(r => (
+                 <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
               ))}
             </SelectContent>
           </Select>

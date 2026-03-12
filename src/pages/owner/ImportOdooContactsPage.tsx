@@ -197,31 +197,31 @@ export default function ImportOdooContactsPage() {
               .maybeSingle();
             existingId = data?.id ?? null;
           }
-          const row = {
-            first_name: p.first_name,
-            last_name: p.last_name,
-            phone: p.phone,
-            email: p.email,
-            address_city: p.address_city,
-            address_country: p.address_country,
-            tags: (p.tags as string[] | null) ?? [],
-            contact_type: p.contact_type,
-            lifecycle_stage: p.lifecycle_stage,
-            is_company: p.is_company ?? false,
-            company_name: p.company_name,
-            linked_user_id: (p.linked_user_id as string | null) ?? null,
-            source: 'odoo_import',
-          };
+           const row: Record<string, unknown> = {
+             first_name: p.first_name,
+             last_name: p.last_name,
+             phone: p.phone,
+             email: p.email,
+             address_city: p.address_city,
+             address_country: p.address_country,
+             tags: (p.tags as string[] | null) ?? [],
+             contact_type: p.contact_type,
+             lifecycle_stage: p.lifecycle_stage,
+             is_company: p.is_company ?? false,
+             company_name: p.company_name,
+             linked_user_id: (p.linked_user_id as string | null) ?? null,
+             source: 'odoo_import',
+           };
           if (existingId) {
-            const { error } = await supabase.from('crm_contacts').update(row).eq('id', existingId);
+            const { error } = await supabase.from('crm_contacts').update(row as any).eq('id', existingId);
             if (error) errors.push({ row: rowNum, reason: error.message });
             else updated++;
           } else {
-            const { error } = await supabase.from('crm_contacts').insert({
-              ...row,
-              company_id: companyId!,
-              created_by: user!.id,
-            });
+             const { error } = await supabase.from('crm_contacts').insert({
+               ...row,
+               company_id: companyId!,
+               created_by: user!.id,
+             } as any);
             if (error) errors.push({ row: rowNum, reason: error.message });
             else imported++;
           }
