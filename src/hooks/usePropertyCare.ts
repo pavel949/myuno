@@ -107,12 +107,12 @@ export function useOwnerProperty(id: string | undefined) {
       ]);
 
       // Priority: owner > company > manager > fallback
-      if (ownerRes.data) return ownerRes.data as OwnerProperty;
-      if (companyRes.data) return companyRes.data as OwnerProperty;
+      if (ownerRes.data) return ownerRes.data as unknown as OwnerProperty;
+      if (companyRes.data) return companyRes.data as unknown as OwnerProperty;
 
       if (assignmentRes.data) {
         const { data: managed } = await supabase.from('properties').select('*').eq('id', id).single();
-        if (managed) return managed as OwnerProperty;
+        if (managed) return managed as unknown as OwnerProperty;
       }
 
       // Fallback: check other companies
