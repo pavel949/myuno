@@ -37,6 +37,7 @@ export type DashboardWidgetKey =
   | 'active_stays'
   | 'properties'
   | 'property_status'
+  | 'portfolio_health'
   | 'property_priority'
   | 'operations'
   | 'crm_tasks'

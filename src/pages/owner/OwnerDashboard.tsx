@@ -29,7 +29,7 @@ import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWid
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
-import { PropertyStatusSnapshot } from '@/components/owner/dashboard/PropertyStatusSnapshot';
+import { PortfolioHealthWidget } from '@/components/owner/dashboard/PortfolioHealthWidget';
 import { CleaningDashboard } from '@/components/owner/dashboard/CleaningDashboard';
 import { MorningBriefing } from '@/components/owner/dashboard/MorningBriefing';
 import { PropertyPriorityWidget } from '@/components/owner/dashboard/PropertyPriorityWidget';
