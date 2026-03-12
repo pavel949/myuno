@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Upload, FileSpreadsheet, UserPlus, CheckCircle2, AlertCircle, MessageCircle } from 'lucide-react';
 import { parseSpreadsheetFile } from '@/lib/parseSpreadsheet';
-import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES } from '@/lib/contactsImportFields';
+import { CONTACT_IMPORT_FIELDS, CONTACT_IMPORT_ALIASES, HEADER_BLACKLIST_PATTERNS } from '@/lib/contactsImportFields';
 import { t } from '@/lib/contactsImportI18n';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -124,9 +124,11 @@ export default function ContactImportPage() {
     const normalizedHeaders = headers.map((h) => ({ raw: h, norm: normalizeHeader(h) }));
     for (const field of CONTACT_IMPORT_FIELDS) {
       const aliases = CONTACT_IMPORT_ALIASES[field.key] ?? [field.key.replace(/_/g, '')];
-      const match = normalizedHeaders.find(({ norm }) =>
-        aliases.some((a) => norm === a || norm.includes(a))
-      );
+      const match = normalizedHeaders.find(({ norm }) => {
+        // Skip headers that match blacklist patterns (e.g. "Phone 1 - Type")
+        if (HEADER_BLACKLIST_PATTERNS.some((bp) => norm.endsWith(bp))) return false;
+        return aliases.some((a) => norm === a || norm.includes(a));
+      });
       if (match && !Object.values(autoMap).includes(match.raw)) {
         autoMap[field.key] = match.raw;
       }
