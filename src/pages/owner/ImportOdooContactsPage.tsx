@@ -217,11 +217,11 @@ export default function ImportOdooContactsPage() {
             if (error) errors.push({ row: rowNum, reason: error.message });
             else updated++;
           } else {
-            const { error } = await supabase.from('crm_contacts').insert({
-              ...row,
-              company_id: companyId!,
-              created_by: user!.id,
-            });
+             const { error } = await supabase.from('crm_contacts').insert({
+               ...row,
+               company_id: companyId!,
+               created_by: user!.id,
+             } as any);
             if (error) errors.push({ row: rowNum, reason: error.message });
             else imported++;
           }
