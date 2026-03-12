@@ -198,7 +198,7 @@ export function useCreateOwnerProperty() {
         }).catch(err => errorLog.silent(err, 'notify_admin'));
       }
       
-      return result as OwnerProperty;
+      return result as unknown as OwnerProperty;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
