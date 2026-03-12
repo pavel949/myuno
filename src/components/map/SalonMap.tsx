@@ -87,7 +87,7 @@ const SalonMap: React.FC<SalonMapProps> = ({
     const bounds = new google.maps.LatLngBounds();
     filteredSalons.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
     if (userLocation) bounds.extend({ lat: userLocation.lat, lng: userLocation.lng });
-    mapRef.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+    mapRef.current.fitBounds(bounds, 50);
   }, [filteredSalons, userLocation]);
 
   if (!hasKey || loadError) {

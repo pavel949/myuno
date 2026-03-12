@@ -75,7 +75,11 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
 
     setMembers((data || []).map(m => ({
       ...m,
-      profile: profiles[m.user_id] || null,
+      profile: profiles[m.user_id] ? {
+        full_name: profiles[m.user_id].full_name ?? null,
+        email: profiles[m.user_id].email ?? null,
+        phone: profiles[m.user_id].phone ?? null,
+      } : undefined,
     })));
     setIsLoading(false);
   };

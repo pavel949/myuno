@@ -52,7 +52,7 @@ export function ProjectUnitsSection({
         .order('price', { ascending: true });
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
     enabled: !!projectId,
   });

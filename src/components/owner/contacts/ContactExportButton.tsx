@@ -101,7 +101,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
     const rows = contacts.map(c => {
       const row: Record<string, string> = {};
       EXPORT_FIELDS.forEach(f => {
-        const val = (c as Record<string, unknown>)[f.key];
+        const val = (c as any)[f.key];
         row[isRu ? f.labelRu : f.label] = Array.isArray(val) ? val.join(', ') : String(val ?? '');
       });
       return row;
