@@ -301,7 +301,7 @@ export default function ContactImportPage() {
     const BATCH_SIZE = 50;
     for (let i = 0; i < rowsToInsert.length; i += BATCH_SIZE) {
       const batch = rowsToInsert.slice(i, i + BATCH_SIZE);
-      const { data, error } = await supabase.from('crm_contacts').insert(batch as any).select('id');
+      const { data, error } = await supabase.from('crm_contacts').upsert(batch as any, { onConflict: 'company_id,phone', ignoreDuplicates: true }).select('id');
       if (error) {
         failed += batch.length;
         toast.error(`${t('readError', lang)}: ${error.message}`);

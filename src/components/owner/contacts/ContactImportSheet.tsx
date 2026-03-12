@@ -133,7 +133,7 @@ export function ContactImportSheet({ open, onOpenChange, companyId }: ContactImp
 
     for (let i = 0; i < rows.length; i += 50) {
       const batch = rows.slice(i, i + 50);
-      const { error } = await supabase.from('crm_contacts').insert(batch as any);
+      const { error } = await supabase.from('crm_contacts').upsert(batch as any, { onConflict: 'company_id,phone', ignoreDuplicates: true });
       if (error) {
         skipped += batch.length;
         toast.error(error.message);
