@@ -41,7 +41,7 @@ export function useContactProperties(contactId: string | undefined) {
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (!links?.length) return [];
-      const propertyIds = [...new Set(links.map((l: any) => l.property_id))];
+      const propertyIds = [...new Set((links as any[]).map((l: any) => l.property_id as string))];
       const { data: props } = await supabase
         .from('properties')
         .select('id, title_en, title_ru, district, property_type')
