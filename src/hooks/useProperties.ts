@@ -216,7 +216,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
       if (error) throw error;
       
       return {
-        properties: (data || []) as Property[],
+        properties: (data || []) as unknown as Property[],
         nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
       };
     },
