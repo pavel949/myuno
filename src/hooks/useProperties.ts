@@ -400,7 +400,7 @@ export function useInstantBookingProperties(limit = 10) {
         .limit(limit);
 
       if (error) throw error;
-      return (data || []) as Property[];
+      return (data || []) as unknown as Property[];
     },
   });
 }
