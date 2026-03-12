@@ -174,7 +174,7 @@ export default function AirportTransferBooking() {
         title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
         variant: 'destructive',
       });
-      navigate('/auth');
+      navigate(APP_ROUTES.AUTH);
       return;
     }
 
