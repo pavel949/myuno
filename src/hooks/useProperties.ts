@@ -360,7 +360,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         ...property,
         rentalTerms,
         project: projectData,
-      } as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
+      } as unknown as Property & { rentalTerms: PropertyRentalTerms | null; project: PropertyProject | null };
     },
     enabled: !!marketplacePropertyId,
   });
