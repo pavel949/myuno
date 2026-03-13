@@ -1,6 +1,7 @@
 /**
- * Home Services Taxonomy - Thumbtack-based structure
- * Single source of truth for all home service categories
+ * @module HomeServicesTaxonomy
+ * @deprecated Import from '@/lib/taxonomies' instead of this file directly.
+ * This file is a FALLBACK data source. The database (lookup_values) is the source of truth.
  */
 
 export type ServiceDomain = 'maintenance' | 'cleaning' | 'outdoor' | 'logistics';

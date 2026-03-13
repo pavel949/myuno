@@ -1,6 +1,7 @@
 /**
- * Transport Taxonomy - Single source of truth for vehicle categories
- * Based on Turo/Rentalcars industry standards
+ * @module TransportTaxonomy
+ * @deprecated Import from '@/lib/taxonomies' instead of this file directly.
+ * This file is a FALLBACK data source. The database (lookup_values) is the source of truth.
  */
 
 export type VehicleCategory = 'sedan' | 'suv' | 'van' | 'luxury' | 'motorcycle' | 'scooter' | 'electric' | 'compact';
