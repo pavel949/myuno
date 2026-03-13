@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   Eye, Check, X, ChevronRight, Clock, Phone, Mail, 
   MapPin, User, Loader2, ArrowUpRight, Filter
