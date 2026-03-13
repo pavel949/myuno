@@ -68,7 +68,7 @@ const COMMON_FIELDS = {
   },
 };
 
-import { PHUKET_DISTRICTS as TAXONOMY_DISTRICTS } from './propertyTaxonomy';
+import { PHUKET_DISTRICTS as TAXONOMY_DISTRICTS } from './taxonomies';
 
 // Map taxonomy to lead form options
 const PHUKET_DISTRICTS = TAXONOMY_DISTRICTS.map(d => ({
