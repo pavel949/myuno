@@ -140,7 +140,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
       toast.success(isRu ? 'Портал активирован!' : 'Portal activated!');
       queryClient.invalidateQueries({ queryKey: ['owner-portal-settings-all'] });
       queryClient.invalidateQueries({ queryKey: ['owner-accounts'] });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Portal activation error:', err);
       toast.error(isRu ? 'Ошибка активации портала' : 'Portal activation error');
     } finally {

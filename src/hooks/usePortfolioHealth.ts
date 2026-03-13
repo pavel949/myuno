@@ -67,7 +67,7 @@ function usePortalSettingsOverview(propertyIds: string[]) {
     queryFn: async () => {
       if (!propertyIds.length) return [];
       const { data, error } = await typedFrom('owner_portal_settings')
-        .from('owner_portal_settings')
+        .select('property_id')
         .select('property_id')
         .in('property_id', propertyIds);
       if (error) throw error;
