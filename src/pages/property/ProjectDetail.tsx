@@ -7,9 +7,11 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
-  ArrowLeft, Building2, MapPin, Calendar, Users, 
+  Building2, MapPin, Calendar, Users, 
   Phone, Mail, Globe, Info
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { usePropertyProject } from '@/hooks/usePropertyProjects';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
