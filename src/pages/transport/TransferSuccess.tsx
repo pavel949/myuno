@@ -175,11 +175,11 @@
          </p>
          
          <div className="flex gap-3">
-           <Button variant="outline" onClick={() => navigate('/transport')}>
-             {language === 'ru' ? 'К транспорту' : 'Browse More'}
-           </Button>
-           <Button onClick={() => navigate('/bookings')}>
-             {language === 'ru' ? 'Мои брони' : 'My Bookings'}
+            <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
+              {language === 'ru' ? 'К транспорту' : 'Browse More'}
+            </Button>
+            <Button onClick={() => navigate(APP_ROUTES.BOOKINGS)}>
+              {language === 'ru' ? 'Мои брони' : 'My Bookings'}
            </Button>
          </div>
        </div>
