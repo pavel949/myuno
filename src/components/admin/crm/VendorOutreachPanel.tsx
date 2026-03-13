@@ -37,7 +37,7 @@ interface OutreachLogEntry {
   } | null;
 }
 
-const from = (table: string) => (supabase as any).from(table);
+
 
 function useOutreachStats() {
   return useQuery({
