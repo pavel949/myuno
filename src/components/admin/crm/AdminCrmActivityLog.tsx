@@ -55,9 +55,9 @@ function useUnifiedActivity(typeFilter?: string) {
           entries.push({
             id: `u-${l.id}`,
             type: 'user',
-            action: `lead_${l.status || 'created'}`,
-            entity_name: l.full_name || 'Unknown',
-            created_at: l.created_at,
+            action: `lead_${(l.status as string) || 'created'}`,
+            entity_name: (l.full_name as string) || 'Unknown',
+            created_at: l.created_at as string,
           });
         });
       }
