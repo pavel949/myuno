@@ -699,7 +699,7 @@ export function usePropertyWizard() {
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        const { data: newContact } = await untypedFrom('crm_contacts').insert({
+        const { data: newContact } = await typedFrom('crm_contacts').insert({
           company_id: activeOrgId,
           contact_type: 'owner',
           first_name: firstName,
