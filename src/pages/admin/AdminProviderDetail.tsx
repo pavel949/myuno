@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, AlertTriangle, Building2, Handshake, Package, ShoppingCart, FileText, CalendarCheck } from 'lucide-react';
+import { AlertTriangle, Building2, Handshake, Package, ShoppingCart, FileText, CalendarCheck } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { ProviderContractEditor } from '@/components/admin/ProviderContractEditor';
 import {
   ProviderDetailHeader,
