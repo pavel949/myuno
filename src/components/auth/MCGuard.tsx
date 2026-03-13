@@ -8,15 +8,14 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 /**
  * MC workspace guard — allows access only to users who are members
  * of at least one management_company (via management_company_members).
- * Uses server-resolved context for authorization.
+ * Verifies user has a valid activeCompany, not just any membership.
  * Admins always pass through.
- * If no companies — redirects to MC onboarding.
  */
 export function MCGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { context, isLoading: contextLoading, isAdminMode } = useResolvedContext();
-  const { companies, isLoading: companiesLoading } = useActiveCompany();
+  const { companies, activeCompany, isLoading: companiesLoading } = useActiveCompany();
 
   if (authLoading || contextLoading || companiesLoading) {
     return (
@@ -37,6 +36,11 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
 
   // No companies — redirect to onboarding
   if (companies.length === 0) {
+    return <Navigate to="/mc/onboarding" replace />;
+  }
+
+  // Has companies but activeCompany couldn't be resolved (e.g. stored ID from another company)
+  if (!activeCompany) {
     return <Navigate to="/mc/onboarding" replace />;
   }
 

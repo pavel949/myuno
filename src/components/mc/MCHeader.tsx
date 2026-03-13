@@ -15,6 +15,7 @@ import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { CompanySwitcher } from '@/components/owner/CompanySwitcher';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { navigationGroups } from './MCSidebar';
 
 const companyRoleLabels: Record<string, { en: string; ru: string }> = {
   director: { en: 'Director', ru: 'Директор' },
@@ -24,42 +25,31 @@ const companyRoleLabels: Record<string, { en: string; ru: string }> = {
   staff: { en: 'Staff', ru: 'Сотрудник' },
 };
 
-const routeLabels: Record<string, { en: string; ru: string }> = {
-  '/mc': { en: 'Dashboard', ru: 'Обзор' },
-  '/mc/properties': { en: 'Properties', ru: 'Объекты' },
-  '/mc/properties/new': { en: 'Add Property', ru: 'Добавить объект' },
-  '/mc/calendar': { en: 'Calendar', ru: 'Календарь' },
-  '/mc/messages': { en: 'Messages', ru: 'Сообщения' },
-  '/mc/financials': { en: 'Transactions', ru: 'Транзакции' },
-  '/mc/finance': { en: 'Finance', ru: 'Финансы' },
-  '/mc/contacts': { en: 'Contacts', ru: 'Контакты' },
-  '/mc/sales': { en: 'Sales Pipeline', ru: 'Воронка продаж' },
-  '/mc/tasks': { en: 'Tasks', ru: 'Задачи' },
-  '/mc/crm-dashboard': { en: 'CRM Dashboard', ru: 'CRM Обзор' },
-  '/mc/staff': { en: 'Staff', ru: 'Сотрудники' },
-  '/mc/operations': { en: 'Operations', ru: 'Операции' },
-  '/mc/channels': { en: 'Channels', ru: 'Каналы' },
-  '/mc/inventory': { en: 'Inventory', ru: 'Инвентарь' },
-  '/mc/vendors': { en: 'Vendors', ru: 'Поставщики' },
-  '/mc/reports': { en: 'Reports', ru: 'Отчёты' },
-  '/mc/invoices': { en: 'Invoices', ru: 'Инвойсы' },
-  '/mc/budget': { en: 'Budget', ru: 'Бюджет' },
-  '/mc/owners': { en: 'Owners', ru: 'Собственники' },
-  '/mc/marketing': { en: 'Marketing', ru: 'Маркетинг' },
-  '/mc/documents': { en: 'Documents', ru: 'Документы' },
-  '/mc/rates': { en: 'Rates', ru: 'Тарифы' },
-  '/mc/subscription': { en: 'Subscription', ru: 'Подписка' },
-  '/mc/settings': { en: 'Settings', ru: 'Настройки' },
-  '/mc/help': { en: 'Help Center', ru: 'Справочник' },
-  '/mc/modules': { en: 'All Modules', ru: 'Все модули' },
-  '/mc/guide': { en: 'Owner Guide', ru: 'Руководство' },
-  '/mc/sequences': { en: 'Sequences', ru: 'Цепочки' },
-  '/mc/quotes': { en: 'Quotes', ru: 'КП' },
-  '/mc/reviews-management': { en: 'Reviews', ru: 'Отзывы' },
-  '/mc/insurance': { en: 'Insurance & Docs', ru: 'Страховки' },
-  '/mc/support-chat': { en: 'Support', ru: 'Поддержка' },
-  '/mc/bookings': { en: 'Bookings', ru: 'Бронирования' },
-};
+/** Build route labels dynamically from navigationGroups + extras */
+function buildRouteLabels(): Record<string, { en: string; ru: string }> {
+  const labels: Record<string, { en: string; ru: string }> = {};
+  for (const group of navigationGroups) {
+    for (const item of group.items) {
+      if (!labels[item.path]) {
+        labels[item.path] = { en: item.title, ru: item.titleRu };
+      }
+    }
+  }
+  // Extras not in sidebar
+  const extras: Record<string, { en: string; ru: string }> = {
+    [APP_ROUTES.MC]: { en: 'Dashboard', ru: 'Обзор' },
+    [APP_ROUTES.MC_SETTINGS]: { en: 'Settings', ru: 'Настройки' },
+    [APP_ROUTES.MC_SUPPORT_CHAT]: { en: 'Support', ru: 'Поддержка' },
+    [APP_ROUTES.MC_BOOKINGS]: { en: 'Bookings', ru: 'Бронирования' },
+    '/mc/properties/new': { en: 'Add Property', ru: 'Добавить объект' },
+    '/mc/modules': { en: 'All Modules', ru: 'Все модули' },
+    '/mc/guide': { en: 'Owner Guide', ru: 'Руководство' },
+    '/mc/operations': { en: 'Operations', ru: 'Операции' },
+  };
+  return { ...labels, ...extras };
+}
+
+const routeLabels = buildRouteLabels();
 
 export function MCHeader() {
   const location = useLocation();
@@ -79,7 +69,6 @@ export function MCHeader() {
     if (routeLabel) {
       breadcrumbs.push({ path: currentPath, label: isRussian ? routeLabel.ru : routeLabel.en, isLast });
     } else if (isLast && index >= 2) {
-      // Dynamic route segment (e.g. property ID) — show parent label + detail
       const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
       const parentLabel = routeLabels[parentPath];
       if (parentLabel) {
@@ -148,7 +137,7 @@ export function MCHeader() {
       <div className="hidden md:block flex-1" />
 
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/mc/support-chat')} title={isRussian ? 'Поддержка' : 'Support'}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} title={isRussian ? 'Поддержка' : 'Support'}>
           <HelpCircle className="h-4 w-4" />
         </Button>
         <div className="hidden sm:flex items-center gap-1">
