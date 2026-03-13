@@ -37,14 +37,6 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   className,
 }: UnifiedHeaderProps) {
   const navigate = useNavigate();
-  
-  const handleBack = () => {
-    if (window.history.length > 2) {
-      navigate(-1);
-    } else {
-      navigate(fallbackPath);
-    }
-  };
 
   const isSearchInteractive = !!onSearchChange;
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
