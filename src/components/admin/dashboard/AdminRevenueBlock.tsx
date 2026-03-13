@@ -49,7 +49,7 @@ export function AdminRevenueBlock() {
       padding="sm" 
       radius="xl"
       className="cursor-pointer hover:bg-muted/50 transition-colors"
-      onClick={() => navigate('/admin/finance')}
+      onClick={() => navigate(APP_ROUTES.ADMIN_FINANCE)}
     >
       {/* Header */}
       <SectionHeader
