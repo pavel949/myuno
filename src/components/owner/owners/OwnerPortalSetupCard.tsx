@@ -91,7 +91,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
         );
         // Create pending delegates for all properties
         for (const prop of properties) {
-          await (supabase as any).from('property_delegates').upsert({
+          await typedFrom('property_delegates').upsert({
             property_id: prop.id,
             invited_email: email,
             status: 'pending',
