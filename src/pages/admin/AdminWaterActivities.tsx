@@ -151,7 +151,7 @@ const AdminWaterActivities = () => {
   }
 
   if (!isAdmin) {
-    navigate('/');
+    navigate(APP_ROUTES.HOME);
     return null;
   }
 

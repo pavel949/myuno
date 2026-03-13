@@ -73,8 +73,8 @@ export default function AdminGyms() {
 
   const isRussian = language === 'ru';
 
-  React.useEffect(() => { if (!authLoading && !user) navigate('/auth'); }, [user, authLoading, navigate]);
-  React.useEffect(() => { if (!adminLoading && !isAdmin && user) navigate('/'); }, [isAdmin, adminLoading, user, navigate]);
+  React.useEffect(() => { if (!authLoading && !user) navigate(APP_ROUTES.AUTH); }, [user, authLoading, navigate]);
+  React.useEffect(() => { if (!adminLoading && !isAdmin && user) navigate(APP_ROUTES.HOME); }, [isAdmin, adminLoading, user, navigate]);
 
   const resetForm = () => {
     setFormData({

@@ -65,7 +65,7 @@ export default function AdminYachts() {
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
-    if (!adminLoading && !isAdmin && user) navigate('/');
+    if (!adminLoading && !isAdmin && user) navigate(APP_ROUTES.HOME);
   }, [isAdmin, adminLoading, user, navigate]);
 
   const handleFormSubmit = async (payload: any, isEdit: boolean, yachtId?: string) => {

@@ -94,7 +94,7 @@ export default function AdminQuickListings() {
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
-      navigate('/');
+      navigate(APP_ROUTES.HOME);
     }
   }, [isAdmin, adminLoading, navigate]);
 

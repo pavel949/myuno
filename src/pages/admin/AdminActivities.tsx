@@ -115,7 +115,7 @@ export default function AdminActivities() {
 
   React.useEffect(() => {
     if (!adminLoading && !isAdmin && user) {
-      navigate('/');
+      navigate(APP_ROUTES.HOME);
     }
   }, [isAdmin, adminLoading, user, navigate]);
 

@@ -135,7 +135,7 @@ export default function AdminProviders() {
 
   useEffect(() => {
     if (!adminLoading && !isAdmin && user) {
-      navigate('/');
+      navigate(APP_ROUTES.HOME);
     }
   }, [isAdmin, adminLoading, user, navigate]);
 

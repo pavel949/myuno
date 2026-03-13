@@ -111,7 +111,7 @@ export default function AdminRestaurants() {
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
-    if (!adminLoading && !isAdmin && user) navigate('/');
+    if (!adminLoading && !isAdmin && user) navigate(APP_ROUTES.HOME);
   }, [isAdmin, adminLoading, user, navigate]);
 
   const resetForm = () => {
