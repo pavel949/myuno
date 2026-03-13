@@ -263,9 +263,9 @@ export default function AdminLocationKnowledge() {
       setIsDeleteDialogOpen(false);
       setItemToDelete(null);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting:', error);
-      toast.error(error.message || (isRu ? 'Ошибка удаления' : 'Error deleting'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка удаления' : 'Error deleting'));
     } finally {
       setIsDeleting(false);
     }
