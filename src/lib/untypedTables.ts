@@ -16,22 +16,21 @@
  *   const { data } = await untypedTables.analyticsEvents().select('*');
  */
 import { supabase } from '@/integrations/supabase/client';
-import type { PostgrestQueryBuilder } from '@supabase/postgrest-js';
-
 // ============= Generic typed accessor =============
 
 /**
  * Type-safe query builder for tables missing from auto-generated types.
  * Casts once here so consumers get proper intellisense for Row type.
  * 
+ * The return type is intentionally broad to avoid coupling to
+ * internal PostgREST generics that change between SDK versions.
+ * Consumers cast the result via `as T[]` after `.select()`.
+ * 
  * @example
- *   interface MyRow { id: string; name: string; }
- *   const { data } = await typedFrom<MyRow>('my_table').select('*');
- *   // data is MyRow[] | null
+ *   const { data } = await typedFrom('my_table').select('*');
  */
-export function typedFrom<Row extends Record<string, unknown> = Record<string, unknown>>(
-  table: string
-): PostgrestQueryBuilder<never, { Row: Row; Insert: Partial<Row>; Update: Partial<Row>; Relationships: [] }> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function typedFrom(table: string): any {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (supabase as any).from(table);
 }
