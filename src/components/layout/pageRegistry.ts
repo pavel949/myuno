@@ -248,6 +248,7 @@ export const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'))
 export const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
 export const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
+export const AdminTransfers = lazy(() => import('@/pages/admin/AdminTransfers'));
 
 export const AdminActivities = lazy(() => import('@/pages/admin/AdminActivities'));
 export const AdminProperties = lazy(() => import('@/pages/admin/AdminProperties'));
