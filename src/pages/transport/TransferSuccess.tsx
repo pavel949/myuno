@@ -1,6 +1,7 @@
  import React, { useEffect, useState } from 'react';
  import { useNavigate, useSearchParams } from 'react-router-dom';
  import { Check, Shield, Plane, MapPin, Clock, User, Loader2 } from 'lucide-react';
+ import { APP_ROUTES } from '@/lib/config/routes';
  import { AppLayout } from '@/components/layout/AppLayout';
  import { useLanguage } from '@/contexts/LanguageContext';
  import { Button } from '@/components/ui/button';
