@@ -103,8 +103,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
       }
 
       // 2. Link user to CRM contact
-      await (supabase as any)
-        .from('crm_contacts')
+      await typedFrom('crm_contacts')
         .update({ linked_user_id: profile.id })
         .eq('id', contactId);
 
