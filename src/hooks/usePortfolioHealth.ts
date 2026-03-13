@@ -66,7 +66,7 @@ function usePortalSettingsOverview(propertyIds: string[]) {
     queryKey: ['portal-settings-overview', propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await typedFrom('owner_portal_settings')
         .from('owner_portal_settings')
         .select('property_id')
         .in('property_id', propertyIds);
