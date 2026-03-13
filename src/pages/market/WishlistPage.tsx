@@ -1,7 +1,9 @@
 import React from 'react';
-import { Heart, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useUserCollections } from '@/hooks/useUserCollections';
 import { useMarketplaceProducts } from '@/hooks/useMarketplace';
 import { useCart } from '@/contexts/CartContext';
