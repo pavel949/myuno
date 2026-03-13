@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Search, ChevronRight, Home, ArrowLeft, ArrowRight } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
