@@ -234,9 +234,9 @@ export default function AdminLocationKnowledge() {
 
       setIsDialogOpen(false);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving:', error);
-      toast.error(error.message || (isRu ? 'Ошибка сохранения' : 'Error saving'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка сохранения' : 'Error saving'));
     } finally {
       setIsSaving(false);
     }
