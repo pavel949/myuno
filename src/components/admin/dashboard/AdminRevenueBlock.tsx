@@ -56,7 +56,7 @@ export function AdminRevenueBlock() {
         title={isRu ? 'Финансы' : 'Finances'}
         icon={DollarSign}
         size="sm"
-        action={{ label: isRu ? 'Подробнее' : 'Details', onClick: () => navigate('/admin/finance') }}
+        action={{ label: isRu ? 'Подробнее' : 'Details', onClick: () => navigate(APP_ROUTES.ADMIN_FINANCE) }}
         className="mb-1"
       />
 

@@ -142,7 +142,7 @@ export function AdminKPIGrid() {
       value: pendingApprovals,
       icon: AlertCircle,
       color: pendingApprovals > 0 ? 'bg-destructive' : 'bg-muted-foreground',
-      onClick: () => navigate('/admin/operations?tab=moderation'),
+      onClick: () => navigate(`${APP_ROUTES.ADMIN_OPERATIONS}?tab=moderation`),
     },
     {
       title: isRu ? 'Здоровье' : 'System Health',
