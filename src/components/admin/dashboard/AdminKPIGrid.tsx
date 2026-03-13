@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
