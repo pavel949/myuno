@@ -15,8 +15,10 @@ import { DragDropReceiptUpload } from '@/components/upload/DragDropReceiptUpload
 import { VoiceInput } from '@/components/ui/voice-input';
 import {
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
-  Receipt, ChevronLeft, ChevronDown, ChevronUp
+  Receipt, ChevronDown, ChevronUp
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/lib/errorHandler';

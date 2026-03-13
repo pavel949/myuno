@@ -1,4 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useVenue, VENUE_TYPES, AMENITIES_MAP } from '@/hooks/useVenues';
 import { useEvents } from '@/hooks/useEvents';
 import { useLanguage } from '@/contexts/LanguageContext';

@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { Home, ArrowLeft, Search, HelpCircle } from "lucide-react";
+import { Home, Search, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { getLegacyRedirect, APP_ROUTES } from "@/lib/config/routes";

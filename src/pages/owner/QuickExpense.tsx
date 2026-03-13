@@ -19,8 +19,10 @@ import { VendorCombobox } from '@/components/owner/expense/VendorCombobox';
 import { VoiceInput } from '@/components/ui/voice-input';
 import {
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
-  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp, RefreshCw, CalendarIcon
+  Receipt, Camera, ChevronDown, ChevronUp, RefreshCw, CalendarIcon
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
