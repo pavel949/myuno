@@ -118,7 +118,7 @@ export default function AdminServices() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate(APP_ROUTES.AUTH);
     }
   }, [user, authLoading, navigate]);
 
