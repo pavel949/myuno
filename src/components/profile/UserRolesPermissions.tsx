@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useUserRoles, ROLE_CONFIG } from '@/hooks/useUserRoles';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useAuth } from '@/contexts/AuthContext';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { Badge } from '@/components/ui/badge';
