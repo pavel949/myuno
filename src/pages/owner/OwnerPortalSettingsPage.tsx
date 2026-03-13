@@ -15,7 +15,9 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Settings, Eye, Save, Users } from 'lucide-react';
+import { Settings, Eye, Save, Users } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
