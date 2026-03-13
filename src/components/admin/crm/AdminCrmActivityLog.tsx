@@ -38,9 +38,9 @@ function useUnifiedActivity(typeFilter?: string) {
           entries.push({
             id: `v-${a.id}`,
             type: 'vendor',
-            action: a.activity_type,
-            entity_name: a.new_value || a.prospect_id?.slice(0, 8),
-            created_at: a.created_at,
+            action: a.activity_type as string,
+            entity_name: (a.new_value as string) || (a.prospect_id as string)?.slice(0, 8) || '',
+            created_at: a.created_at as string,
           });
         });
       }
