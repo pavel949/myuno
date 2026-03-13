@@ -115,15 +115,18 @@ export function useDashboardMetrics() {
         supabase.from('property_bookings').select('id', { count: 'exact', head: true })
           .in('property_id', filteredPropertyIds)
           .in('status', ['confirmed', 'checked_in']).gte('check_out', today),
-        // Staff
-        supabase.from('staff_members').select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id).eq('is_active', true),
-        // Service requests
+        // Staff — scoped to company if available, otherwise by owner
+        companyId
+          ? supabase.from('staff_members').select('id', { count: 'exact', head: true })
+              .eq('company_id', companyId).eq('is_active', true)
+          : supabase.from('staff_members').select('id', { count: 'exact', head: true })
+              .eq('owner_id', user.id).eq('is_active', true),
+        // Service requests — scoped to filtered properties
         supabase.from('property_service_requests').select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id).in('status', ['pending', 'in_progress']),
-        // Inventory (low stock)
+          .in('property_id', filteredPropertyIds).in('status', ['pending', 'in_progress']),
+        // Inventory (low stock) — scoped to filtered properties
         supabase.from('property_inventory_items').select('id, quantity, min_quantity')
-          .eq('owner_id', user.id).eq('is_active', true),
+          .in('property_id', filteredPropertyIds).eq('is_active', true),
         // Unread messages — scoped to filtered properties
         bookingIdList.length > 0
           ? supabase.from('booking_notifications_log').select('id', { count: 'exact', head: true })
@@ -131,9 +134,9 @@ export function useDashboardMetrics() {
               .in('booking_id', bookingIdList)
               .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
           : Promise.resolve({ count: 0 }),
-        // Pending invoices
+        // Pending invoices — scoped to filtered properties
         supabase.from('property_financials').select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id).eq('transaction_type', 'expense').eq('status', 'pending'),
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'expense').eq('status', 'pending'),
       ]);
 
       // KPI calculations

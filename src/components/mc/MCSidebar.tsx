@@ -40,7 +40,7 @@ interface NavGroup {
   defaultOpen?: boolean;
 }
 
-const navigationGroups: NavGroup[] = [
+export const navigationGroups: NavGroup[] = [
   {
     label: 'Control Tower',
     labelRu: 'Центр управления',
@@ -67,10 +67,9 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Операции',
     defaultOpen: false,
     items: [
-      { title: 'Task Inbox', titleRu: 'Пул задач', path: APP_ROUTES.MC_TASKS, icon: ClipboardList, badgeKey: 'tasks' },
-      { title: 'Rate Seasons', titleRu: 'Тарифы', path: '/mc/rates', icon: Tag },
-      { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: '/mc/insurance', icon: ShieldCheck },
-      { title: 'Templates', titleRu: 'Шаблоны', path: '/mc/documents', icon: FileText },
+      { title: 'Rate Seasons', titleRu: 'Тарифы', path: APP_ROUTES.MC_RATES, icon: Tag },
+      { title: 'Insurance & Docs', titleRu: 'Страховки и документы', path: APP_ROUTES.MC_INSURANCE, icon: ShieldCheck },
+      { title: 'Templates', titleRu: 'Шаблоны', path: APP_ROUTES.MC_DOCUMENTS, icon: FileText },
     ],
   },
   {
@@ -88,7 +87,7 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Overview', titleRu: 'Обзор', path: APP_ROUTES.MC_FINANCE, icon: DollarSign },
-      { title: 'Payouts', titleRu: 'Выплаты', path: '/mc/management-terms', icon: Shuffle },
+      { title: 'Payouts', titleRu: 'Выплаты', path: APP_ROUTES.MC_MANAGEMENT_TERMS, icon: Shuffle },
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
@@ -104,9 +103,9 @@ const navigationGroups: NavGroup[] = [
       { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
       { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
-      { title: 'Sequences', titleRu: 'Цепочки', path: '/mc/sequences', icon: Zap },
-      { title: 'Quotes', titleRu: 'КП', path: '/mc/quotes', icon: FileTextIcon },
-      { title: 'Reviews', titleRu: 'Отзывы', path: '/mc/reviews-management', icon: Star },
+      { title: 'Sequences', titleRu: 'Цепочки', path: APP_ROUTES.MC_SEQUENCES, icon: Zap },
+      { title: 'Quotes', titleRu: 'КП', path: APP_ROUTES.MC_QUOTES, icon: FileTextIcon },
+      { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
       { title: 'Marketing', titleRu: 'Маркетинг', path: APP_ROUTES.MC_MARKETING, icon: Megaphone },
     ],
   },
@@ -117,30 +116,29 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Staff & Access', titleRu: 'Сотрудники', path: APP_ROUTES.MC_STAFF, icon: Users },
       { title: 'Subscription', titleRu: 'Подписка', path: APP_ROUTES.MC_SUBSCRIPTION, icon: CreditCard },
-      { title: 'Help Center', titleRu: 'Справочник', path: '/mc/help', icon: BookOpen },
+      { title: 'Help Center', titleRu: 'Справочник', path: APP_ROUTES.MC_HELP, icon: BookOpen },
     ],
   },
 ];
 
 const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_PROPERTIES]: 'properties',
-  '/mc/complexes': 'properties',
   [APP_ROUTES.MC_OWNERS]: 'crm',
   [APP_ROUTES.MC_CALENDAR]: 'bookings',
   [APP_ROUTES.MC_SALES]: 'crm',
   [APP_ROUTES.MC_CONTACTS]: 'crm',
   [APP_ROUTES.MC_CRM_DASHBOARD]: 'crm',
-  '/mc/sequences': 'crm',
-  '/mc/quotes': 'crm',
-  '/mc/reviews-management': 'crm',
-  '/mc/settings': 'staff',
+  [APP_ROUTES.MC_SEQUENCES]: 'crm',
+  [APP_ROUTES.MC_QUOTES]: 'crm',
+  [APP_ROUTES.MC_REVIEWS]: 'crm',
+  [APP_ROUTES.MC_SETTINGS]: 'staff',
   [APP_ROUTES.MC_MARKETING]: 'crm',
   [APP_ROUTES.MC_TASKS]: 'tasks',
   [APP_ROUTES.MC_INVENTORY]: 'properties',
   [APP_ROUTES.MC_VENDORS]: 'properties',
-  '/mc/rates': 'finance',
+  [APP_ROUTES.MC_RATES]: 'finance',
   [APP_ROUTES.MC_FINANCE]: 'finance',
-  '/mc/management-terms': 'finance',
+  [APP_ROUTES.MC_MANAGEMENT_TERMS]: 'finance',
   [APP_ROUTES.MC_FINANCIALS]: 'finance',
   [APP_ROUTES.MC_INVOICES]: 'finance',
   [APP_ROUTES.MC_REPORTS]: 'reports',
@@ -198,7 +196,7 @@ export function MCSidebar() {
     const badgeCount = getBadgeCount(item.badgeKey);
     const active = isActive(item.path);
     return (
-      <SidebarMenuItem key={item.path}>
+      <SidebarMenuItem key={`${item.path}-${item.title}`}>
         <SidebarMenuButton
           onClick={() => handleNavigate(item.path)}
           isActive={active}
@@ -274,7 +272,7 @@ export function MCSidebar() {
                 {renderNavItem({
                   title: 'Settings',
                   titleRu: 'Настройки',
-                  path: '/mc/settings',
+                  path: APP_ROUTES.MC_SETTINGS,
                   icon: Settings,
                 })}
               </SidebarMenu>

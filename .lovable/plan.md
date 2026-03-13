@@ -1,66 +1,84 @@
 
 
-# План исправления MC блока — приоритизированные задачи
+# Vendor Onboarding UX — Fast First Listing with Progressive Completion
 
-## Фаза 1: Критический баг — скопинг данных по `owner_id` вместо `company_id`
+## Research: How Top Platforms Do It
 
-**Проблема**: 4 запроса в `useDashboardMetrics.ts` (строки 119-136) фильтруют по `owner_id = user.id` вместо property-based или company-based скопинга. Для сотрудников MC, которые не являются владельцами, KPI показывают «0».
+| Platform | Pattern | Time-to-First-Listing |
+|----------|---------|----------------------|
+| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
+| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
+| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
+| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
 
-**Что делать**: Заменить `.eq('owner_id', user.id)` на `.in('property_id', filteredPropertyIds)` для:
-- `staff_members` → добавить фильтр по `company_id` вместо `owner_id`
-- `property_service_requests` → `.in('property_id', filteredPropertyIds)`
-- `property_inventory_items` → `.in('property_id', filteredPropertyIds)`
-- `property_financials` (pending invoices) → `.in('property_id', filteredPropertyIds)`
+**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
 
-Аналогичная проблема в **18 других хуках** (`useExternalCalendars`, `useChannelHealth`, `useSyncLogs`, `useBookingMessageRules`, `useDayBriefing`, `useDepositStats`, `useMessageTemplates`, `useOwnerVault`, `useSuperhostStatus` и др.) — все используют `owner_id = user.id`. Каждый нужно проверить: если хук используется в MC контексте — добавить company/property-based фильтрацию.
+## Current State Analysis
 
----
+**What exists:**
+- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
+- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
+- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
+- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
 
-## Фаза 2: `useMyProperties` — удаление `as any`
+**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
 
-**Проблема**: Строка 83 — `(p as any).management_company_id` — `useOwnerProperties` не возвращает `management_company_id` в select, поэтому фильтр всегда false, и owned properties в MC mode пустые.
+## Proposed UX: "3-Screen Fast Start"
 
-**Что делать**: Добавить `management_company_id` в select запроса `useOwnerProperties` (или `usePropertyCare`), чтобы фильтрация работала без `as any`.
+```text
+Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
+┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
+│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
+│ [____________]   │           │ Name *            │              │                  │
+│                  │           │ [____________]    │              │  Your listing is │
+│ Category *       │           │                   │              │  pending review  │
+│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
+│                  │           │ [____] THB        │              │  Complete your   │
+│ Phone / WhatsApp │           │                   │              │  profile to get  │
+│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
+│                  │           │ [📷 Upload]       │              │                  │
+│         [Next →] │           │                   │              │  [→ Dashboard]   │
+└──────────────────┘           │ Brief description │              └──────────────────┘
+                               │ [____________]    │
+                               │         [List →]  │
+                               └──────────────────┘
+```
 
----
+**Required fields total: 4** (business name, category, service name, price)
+Everything else: progressive completion via existing `VendorOnboardingChecklist`.
 
-## Фаза 3: Сайдбар — дубликаты и хардкод
+## Implementation Plan
 
-**Проблема**: 
-- «Tasks» дублируется в «Control Tower» (строка 51) и «Operations» (строка 70) — ведут на один путь
-- 7 путей захардкожены: `/mc/rates`, `/mc/insurance`, `/mc/documents`, `/mc/sequences`, `/mc/quotes`, `/mc/reviews-management`, `/mc/help`, `/mc/management-terms`
+### 1. Refactor VendorOnboarding into 3-step wizard
+Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
+- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
+- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
+- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
 
-**Что делать**:
-1. Удалить «Task Inbox» из группы Operations (дубликат)
-2. Добавить недостающие маршруты в `APP_ROUTES` и заменить хардкод
+### 2. Update VendorOnboardingChecklist
+Expand from 3 to 6 progressive items:
+- ✅ Create account (auto-complete)
+- ✅ Add first listing (auto-complete from step 2)
+- ○ Add business description
+- ○ Upload logo / cover photo
+- ○ Add working hours
+- ○ Add payment details
 
----
+Each item links to the relevant settings section.
 
-## Фаза 4: MCHeader — хардкод breadcrumbs
+### 3. Wire the data flow
+- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
+- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
+- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
 
-**Проблема**: 34-строчный `routeLabels` словарь с хардкод-путями (строки 27-60).
+### 4. Update entry points
+- `/vendor/onboarding` → renders new 3-step wizard
+- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
 
-**Что делать**: Перенести labels в `navigationGroups` (уже содержат title/titleRu) и генерировать breadcrumbs из единого источника, добавив fallback для параметризованных путей (`/mc/properties/:id` → «Details»).
-
----
-
-## Фаза 5: MCGuard — проверка конкретной компании
-
-**Проблема**: Guard проверяет `companies.length === 0`, но не проверяет, что пользователь является членом именно активной компании.
-
-**Что делать**: Добавить проверку `activeCompany !== null` из `useActiveCompany()` — если `companies.length > 0`, но `activeCompany` не найден среди членств, редиректить на выбор компании.
-
----
-
-## Порядок реализации
-
-| # | Задача | Файлы | Риск |
-|---|--------|-------|------|
-| 1 | Fix `useDashboardMetrics` scoping | 1 файл | Критический — данные показывают 0 |
-| 2 | Fix `useMyProperties` as any + select | 2 файла | Высокий — пустые списки |
-| 3 | Clean sidebar duplicates + hardcoded paths | 2 файла | Средний — UX |
-| 4 | MCHeader breadcrumbs from config | 1 файл | Низкий — косметика |
-| 5 | MCGuard active company check | 1 файл | Средний — безопасность |
-
-Фазы 1-2 — критические баги, видимые пользователям. Фазы 3-5 — техдолг и UX.
+### Technical Details
+- Reuse existing `OnboardingLayout` component for step progress UI
+- Reuse `UnifiedMediaUploader` for photo upload in step 2
+- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
+- No new DB tables or migrations required
+- No new Edge Functions required
 
