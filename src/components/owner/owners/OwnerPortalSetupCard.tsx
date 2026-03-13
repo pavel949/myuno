@@ -109,7 +109,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
 
       // 3. Create portal settings for each property
       for (const prop of properties) {
-        await (supabase as any).from('owner_portal_settings').upsert({
+        await typedFrom('owner_portal_settings').upsert({
           property_id: prop.id,
           owner_user_id: profile.id,
           company_id: companyId,
