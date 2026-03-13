@@ -453,7 +453,7 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
 
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('project_id', projectId)
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
