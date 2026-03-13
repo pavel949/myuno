@@ -101,14 +101,15 @@ const Index = () => {
           {isLoggedIn ? (
             isDesktop ? (
               <>
-                <div className="grid grid-cols-3 gap-8">
-                  <div className="col-span-2 space-y-6">
-                    <Suspense fallback={null}>
-                      <YourDayFeed compact />
-                    </Suspense>
-                  </div>
-                  <div className="col-span-1 space-y-5 lg:sticky lg:top-24 self-start">
-                    <ProactiveConcierge />
+                {/* Row 1: YourDay full width */}
+                <Suspense fallback={null}>
+                  <YourDayFeed compact />
+                </Suspense>
+
+                {/* Row 2: Recommendations + Smart Tips — 2 equal columns */}
+                <div className="grid grid-cols-2 gap-6">
+                  <ProactiveConcierge />
+                  <div className="space-y-5">
                     <LifecycleSmartTip />
                     {hasContext ? (
                       <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
@@ -117,6 +118,7 @@ const Index = () => {
                     )}
                   </div>
                 </div>
+
                 <PropertyTourBanner />
               </>
             ) : (
@@ -136,11 +138,8 @@ const Index = () => {
             )
           ) : (
             <>
-              {/* Public: Today's Events feed — full width */}
               <TodayEventsFeed compact />
-              {/* Popular on UNO for non-logged-in users */}
               <PopularServicesStrip />
-              {/* Property Tour — full width */}
               <PropertyTourBanner />
             </>
           )}
