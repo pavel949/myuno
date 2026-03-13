@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PageContainer } from '@/components/uno/PageContainer';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plane, MapPin, Phone, Mail, Calendar, Car } from 'lucide-react';
+import { Loader2, Plane, MapPin, Phone, Calendar, Car } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
 
-const STATUS_OPTIONS = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] as const;
+type OrderStatus = Database['public']['Enums']['order_status'];
+
+const STATUS_OPTIONS: OrderStatus[] = ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled'];
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/10 text-warning',
@@ -42,7 +43,7 @@ export default function AdminTransfers() {
         .limit(100);
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as OrderStatus);
       }
 
       const { data, error } = await query;
@@ -52,7 +53,7 @@ export default function AdminTransfers() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
+    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatus }) => {
       const { error } = await supabase
         .from('orders')
         .update({ status: newStatus })
@@ -61,7 +62,6 @@ export default function AdminTransfers() {
 
       await supabase.from('order_status_history').insert({
         order_id: orderId,
-        from_status: null,
         to_status: newStatus,
         reason: `Admin status update to ${newStatus}`,
       });
@@ -82,11 +82,13 @@ export default function AdminTransfers() {
   }) || [];
 
   return (
-    <PageContainer
-      title={isRu ? 'Трансферы' : 'Airport Transfers'}
-      subtitle={isRu ? `${transferOrders.length} заказов` : `${transferOrders.length} orders`}
-    >
-      <div className="mb-4 flex items-center gap-3">
+    <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-[1536px] mx-auto w-full">
+      <div>
+        <h1 className="text-2xl font-display font-bold">{isRu ? 'Трансферы' : 'Airport Transfers'}</h1>
+        <p className="text-sm text-muted-foreground">{transferOrders.length} {isRu ? 'заказов' : 'orders'}</p>
+      </div>
+
+      <div className="flex items-center gap-3">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={isRu ? 'Все статусы' : 'All statuses'} />
@@ -112,9 +114,11 @@ export default function AdminTransfers() {
         <div className="space-y-3">
           {transferOrders.map(order => {
             const meta = (order.metadata || {}) as Record<string, unknown>;
-            const primary = (order.order_participants as any[])?.find((p: any) => p.role === 'primary') || (order.order_participants as any[])?.[0];
-            const pickup = (order.order_addresses as any[])?.find((a: any) => a.address_type === 'pickup');
-            const dropoff = (order.order_addresses as any[])?.find((a: any) => a.address_type === 'dropoff');
+            const participants = order.order_participants as Array<{ name: string; phone: string | null; email: string | null; role: string }> | null;
+            const addresses = order.order_addresses as Array<{ address_type: string; address_text: string }> | null;
+            const primary = participants?.find(p => p.role === 'primary') || participants?.[0];
+            const pickup = addresses?.find(a => a.address_type === 'pickup');
+            const dropoff = addresses?.find(a => a.address_type === 'dropoff');
             const scheduledDate = order.start_at ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm') : '—';
 
             return (
@@ -143,7 +147,7 @@ export default function AdminTransfers() {
                   {meta.vehicle_name && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Car className="w-4 h-4 shrink-0" />
-                      <span>{meta.vehicle_name as string} · 👥{meta.passengers as number || 1}</span>
+                      <span>{meta.vehicle_name as string} · 👥{(meta.passengers as number) || 1}</span>
                     </div>
                   )}
                   {primary && (
@@ -172,7 +176,7 @@ export default function AdminTransfers() {
                   </span>
                   <Select
                     value={order.status}
-                    onValueChange={(val) => updateStatus.mutate({ orderId: order.id, newStatus: val })}
+                    onValueChange={(val) => updateStatus.mutate({ orderId: order.id, newStatus: val as OrderStatus })}
                   >
                     <SelectTrigger className="w-[160px] h-8 text-xs">
                       <SelectValue />
@@ -189,6 +193,6 @@ export default function AdminTransfers() {
           })}
         </div>
       )}
-    </PageContainer>
+    </div>
   );
 }
