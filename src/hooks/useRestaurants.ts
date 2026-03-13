@@ -72,6 +72,22 @@ interface UseRestaurantsOptions {
   limit?: number;
 }
 
+const RESTAURANT_LIST_COLUMNS = `
+  id, provider_id, name_en, name_ru, description_en, description_ru,
+  cuisine, address, district, lat, lng, phone, email, website,
+  cover_image, images, price_range, delivery_available, delivery_fee,
+  delivery_time, min_order_amount, working_hours, features,
+  rating, review_count, is_active, is_featured, is_verified,
+  created_at, updated_at
+`;
+
+const MENU_CATEGORY_COLUMNS = 'id, restaurant_id, name_en, name_ru, sort_order, is_active';
+const MENU_ITEM_COLUMNS = `
+  id, restaurant_id, category_id, name_en, name_ru,
+  description_en, description_ru, price, currency, image,
+  is_vegetarian, is_spicy, is_popular, is_active, calories, prep_time_minutes
+`;
+
 export function useRestaurants(options: UseRestaurantsOptions = {}) {
   const filters = useMemo((): QueryFilter[] => {
     const result: QueryFilter[] = [{ column: 'is_active', value: true }];
@@ -101,6 +117,7 @@ export function useRestaurants(options: UseRestaurantsOptions = {}) {
 
   const { data, isLoading, error, refetch } = useSupabaseQuery<Restaurant>({
     table: 'restaurants',
+    select: RESTAURANT_LIST_COLUMNS,
     filters,
     orderBy: { column: 'rating', ascending: false },
     limit: options.limit,
