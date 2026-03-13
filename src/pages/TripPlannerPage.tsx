@@ -9,7 +9,9 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { TripPositioningHero } from '@/components/trip-planner/TripPositioningHero';
 import { TripChecklist } from '@/components/trip-planner/TripChecklist';
-import { ArrowLeft, Palmtree } from 'lucide-react';
+import { Palmtree } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { motion } from 'framer-motion';
 import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
 
