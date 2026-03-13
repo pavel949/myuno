@@ -1,27 +1,23 @@
 /**
  * @module Taxonomies
- * @description Central export hub for all platform taxonomies
- * Provides unified access to both static fallbacks and dynamic database values
+ * @description ★ SINGLE SOURCE OF TRUTH for all platform taxonomies ★
+ * 
+ * ALL taxonomy imports MUST come from this hub.
+ * DO NOT import directly from propertyTaxonomy.ts, transportTaxonomy.ts, etc.
  * 
  * USAGE:
- * 1. Import from this hub instead of direct file imports
+ * 1. Import from this hub: import { PROPERTY_TYPES, getDistrictLabel } from '@/lib/taxonomies'
  * 2. Use hooks for dynamic data: useTaxonomyWithFallback('property_type')
  * 3. Use helpers for labels: getTaxonomyLabel('district', 'patong', 'ru')
+ * 
+ * ARCHITECTURE:
+ * - Database (lookup_values) is the runtime source of truth
+ * - Static files are compile-time fallbacks (used while DB loads or on error)
+ * - useTaxonomyWithFallback() merges both: DB first, static fallback
  */
 
-// ============= STATIC TAXONOMY NAMESPACES =============
-// Use for backward compatibility and type definitions
-export * as PropertyTaxonomy from '../propertyTaxonomy';
-export * as TransportTaxonomy from '../config/transportTaxonomy';
-export * as HomeServicesTaxonomy from '../config/homeServicesTaxonomy';
-export * as ExperiencesTaxonomy from './experiencesTaxonomy';
-export * as BeautyTaxonomy from './beautyTaxonomy';
-export * as RestaurantTaxonomy from './restaurantTaxonomy';
-export * as MedicalTaxonomy from './medicalTaxonomy';
-export * as EducationTaxonomy from './educationTaxonomy';
-
-// ============= DYNAMIC TAXONOMY HOOKS =============
-// Primary interface for fetching taxonomy data
+// ============= DYNAMIC TAXONOMY HOOKS (preferred) =============
+// Primary interface for fetching taxonomy data from DB
 export { 
   useTaxonomy, 
   useTaxonomyHierarchy, 
@@ -36,7 +32,7 @@ export {
 } from '@/hooks/useTaxonomy';
 
 // ============= HYBRID FALLBACK SYSTEM =============
-// Uses DB with static fallback for gradual migration
+// Uses DB with static fallback — best for gradual migration
 export {
   useTaxonomyWithFallback,
   getTaxonomyLabel,
@@ -46,8 +42,21 @@ export {
   getChipOptions,
 } from './useTaxonomyWithFallback';
 
-// ============= DIRECT STATIC EXPORTS =============
-// For components that need direct access to static arrays
+// ============= TAXONOMY TYPE CONSTANTS =============
+export { TAXONOMY_TYPES, type TaxonomyType } from './taxonomyTypes';
+
+// ============= STATIC NAMESPACE EXPORTS =============
+// Use for backward compatibility and type definitions only
+export * as PropertyTaxonomy from '../propertyTaxonomy';
+export * as TransportTaxonomy from '../config/transportTaxonomy';
+export * as HomeServicesTaxonomy from '../config/homeServicesTaxonomy';
+export * as ExperiencesTaxonomy from './experiencesTaxonomy';
+export * as BeautyTaxonomy from './beautyTaxonomy';
+export * as RestaurantTaxonomy from './restaurantTaxonomy';
+export * as MedicalTaxonomy from './medicalTaxonomy';
+export * as EducationTaxonomy from './educationTaxonomy';
+
+// ============= PROPERTY TAXONOMY =============
 export {
   PROPERTY_TYPES,
   PHUKET_DISTRICTS,
@@ -65,19 +74,40 @@ export {
   INCLUDED_SERVICES,
   EXTRA_SERVICES,
   PROPERTY_HIGHLIGHTS,
+  POPULAR_DISTRICTS,
+  DISTRICT_ZONES,
   // Helper functions
   getAmenityLabel,
   getAmenityIcon,
   getDistrictLabel,
   getPropertyTypeLabel,
+  getHighlightLabel,
+  getViewTypeLabel,
+  getIncludedServiceLabel,
+  getExtraServiceLabel,
   normalizeAmenityId,
   normalizeAmenities,
   normalizeDistrictId,
   normalizePropertyType,
-  getIncludedServiceLabel,
-  getExtraServiceLabel,
+  getAmenityById,
+  getDistrictById,
+  getDistrictsByZone,
+  // Types
+  type PropertyType,
+  type DistrictId,
+  type AmenityId,
+  type IncludedServiceId,
+  type ExtraServiceId,
+  type HighlightId,
+  type ViewTypeId,
+  type FurnishingLevel,
+  type KeyHandoverMethod,
+  type DepositType,
+  type CleaningFrequency,
+  type PaymentModel,
 } from '../propertyTaxonomy';
 
+// ============= TRANSPORT TAXONOMY =============
 export {
   VEHICLE_CATEGORIES,
   TRANSMISSION_TYPES,
@@ -95,27 +125,34 @@ export {
   getLocalizedFeatures,
   getRibbonCategories,
   matchesCategory,
+  // Types
+  type VehicleCategory,
+  type TransmissionType as TransmissionTypeId,
+  type FuelType as FuelTypeId,
 } from '../config/transportTaxonomy';
 
+// ============= HOME SERVICES TAXONOMY =============
 export {
   SERVICE_DOMAINS,
   ALL_SERVICE_CATEGORIES,
   DOMAIN_MAP,
   CATEGORY_MAP as SERVICE_CATEGORY_MAP,
   PROVIDER_TYPE_OPTIONS,
+  HOME_SERVICE_CATEGORY_IDS,
+  LEGACY_CATEGORY_MAP,
   // Helper functions
   getCategoryById,
   getDomainByCategory,
   getCategoriesByDomain,
   normalizeCategory,
+  // Types
+  type ServiceDomain,
+  type ProviderType,
+  type ServiceCategory,
+  type ServiceDomainConfig,
 } from '../config/homeServicesTaxonomy';
 
-// ============= TAXONOMY TYPE CONSTANTS =============
-// Re-export from dedicated file to prevent circular dependencies
-export { TAXONOMY_TYPES, type TaxonomyType } from './taxonomyTypes';
-
 // ============= CANONICAL SOURCES OF TRUTH =============
-// Re-export for unified access across the application
 export { VERTICALS, type VerticalId, getVerticalById, getVerticalByTable, getAllVerticalIds, normalizeVerticalId } from '../verticals';
 export { PRICING_MODELS, type PricingModelId, getPricingModelById, getAllPricingModelIds, formatPriceWithModel, getPricingModelsForVertical } from '../pricing';
 export { CURRENCIES, type CurrencyCode, getCurrencySymbol, getCurrencyByCode, formatCurrencyAmount } from '../config/currencies';
