@@ -247,7 +247,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
     queryFn: async () => {
       let query = supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
