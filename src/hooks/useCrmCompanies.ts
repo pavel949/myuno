@@ -3,7 +3,7 @@
  * CRUD hooks for crm_companies entity
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmCompanyEntity {
   id: string;
@@ -28,13 +28,11 @@ export interface CrmCompanyEntity {
   contact_count?: number;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmCompanies(companyId: string | undefined, search?: string) {
   return useQuery({
     queryKey: ['crm-companies', companyId, search],
     queryFn: async (): Promise<CrmCompanyEntity[]> => {
-      let q = from('crm_companies')
+      let q = typedFrom('crm_companies')
         .select('*, crm_contacts(id)')
         .eq('company_id', companyId!)
         .eq('is_active', true)
@@ -60,7 +58,7 @@ export function useCrmCompany(id: string | undefined) {
   return useQuery({
     queryKey: ['crm-company', id],
     queryFn: async (): Promise<CrmCompanyEntity | null> => {
-      const { data, error } = await from('crm_companies')
+      const { data, error } = await typedFrom('crm_companies')
         .select('*')
         .eq('id', id!)
         .maybeSingle();
@@ -75,7 +73,7 @@ export function useCreateCrmCompany() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (company: Omit<CrmCompanyEntity, 'id' | 'created_at' | 'updated_at' | 'contact_count'>) => {
-      const { data, error } = await from('crm_companies').insert(company).select().single();
+      const { data, error } = await typedFrom('crm_companies').insert(company).select().single();
       if (error) throw error;
       return data as CrmCompanyEntity;
     },
@@ -87,7 +85,7 @@ export function useUpdateCrmCompany() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmCompanyEntity> & { id: string }) => {
-      const { error } = await from('crm_companies').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_companies').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
@@ -101,7 +99,7 @@ export function useDeleteCrmCompany() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_companies').delete().eq('id', id);
+      const { error } = await typedFrom('crm_companies').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-companies'] }),
@@ -113,7 +111,7 @@ export function useCrmCompanySearch(companyId: string | undefined, query: string
   return useQuery({
     queryKey: ['crm-company-search', companyId, query],
     queryFn: async (): Promise<CrmCompanyEntity[]> => {
-      const { data, error } = await from('crm_companies')
+      const { data, error } = await typedFrom('crm_companies')
         .select('*')
         .eq('company_id', companyId!)
         .ilike('name', `%${query.trim()}%`)

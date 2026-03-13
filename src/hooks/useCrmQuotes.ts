@@ -3,7 +3,7 @@
  * CRUD hooks for crm_quotes
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmQuoteItem {
   description: string;
@@ -32,13 +32,11 @@ export interface CrmQuote {
   created_at: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmQuotes(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-quotes', companyId],
     queryFn: async (): Promise<CrmQuote[]> => {
-      const { data, error } = await from('crm_quotes')
+      const { data, error } = await typedFrom('crm_quotes')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
@@ -53,7 +51,7 @@ export function useCreateQuote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (quote: Omit<CrmQuote, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_quotes').insert(quote).select().single();
+      const { data, error } = await typedFrom('crm_quotes').insert(quote).select().single();
       if (error) throw error;
       return data as CrmQuote;
     },
@@ -65,7 +63,7 @@ export function useUpdateQuote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmQuote> & { id: string }) => {
-      const { error } = await from('crm_quotes').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_quotes').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-quotes'] }),
@@ -76,7 +74,7 @@ export function useDeleteQuote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_quotes').delete().eq('id', id);
+      const { error } = await typedFrom('crm_quotes').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-quotes'] }),

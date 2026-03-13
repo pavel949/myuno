@@ -3,7 +3,7 @@
  * Hooks for lead scoring rules and score display
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmScoringRule {
   id: string;
@@ -25,13 +25,11 @@ export interface CrmScoreLogEntry {
   scored_at: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmScoringRules(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-scoring-rules', companyId],
     queryFn: async (): Promise<CrmScoringRule[]> => {
-      const { data, error } = await from('crm_scoring_rules')
+      const { data, error } = await typedFrom('crm_scoring_rules')
         .select('*')
         .eq('company_id', companyId!)
         .order('sort_order');
@@ -46,7 +44,7 @@ export function useCrmScoreLog(contactId: string | undefined) {
   return useQuery({
     queryKey: ['crm-score-log', contactId],
     queryFn: async (): Promise<CrmScoreLogEntry[]> => {
-      const { data, error } = await from('crm_score_log')
+      const { data, error } = await typedFrom('crm_score_log')
         .select('*')
         .eq('contact_id', contactId!)
         .order('scored_at', { ascending: false })
@@ -62,7 +60,7 @@ export function useCreateScoringRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (rule: Omit<CrmScoringRule, 'id'>) => {
-      const { data, error } = await from('crm_scoring_rules').insert(rule).select().single();
+      const { data, error } = await typedFrom('crm_scoring_rules').insert(rule).select().single();
       if (error) throw error;
       return data;
     },
@@ -76,7 +74,7 @@ export function useUpdateScoringRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmScoringRule> & { id: string }) => {
-      const { error } = await from('crm_scoring_rules').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_scoring_rules').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -89,7 +87,7 @@ export function useDeleteScoringRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_scoring_rules').delete().eq('id', id);
+      const { error } = await typedFrom('crm_scoring_rules').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

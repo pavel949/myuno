@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmEmail {
   id: string;
@@ -21,13 +22,11 @@ export interface CrmEmail {
   created_at: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmEmails(companyId: string | undefined, contactId?: string) {
   return useQuery({
     queryKey: ['crm-emails', companyId, contactId],
     queryFn: async (): Promise<CrmEmail[]> => {
-      let q = from('crm_emails')
+      let q = typedFrom('crm_emails')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false })
@@ -45,7 +44,7 @@ export function useCreateCrmEmail() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (email: Omit<CrmEmail, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_emails').insert(email).select().single();
+      const { data, error } = await typedFrom('crm_emails').insert(email).select().single();
       if (error) throw error;
       return data as CrmEmail;
     },
@@ -57,7 +56,7 @@ export function useUpdateCrmEmail() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmEmail> & { id: string }) => {
-      const { error } = await from('crm_emails').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_emails').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-emails'] }),

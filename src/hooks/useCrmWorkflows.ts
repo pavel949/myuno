@@ -3,7 +3,7 @@
  * CRUD hooks for crm_workflows and crm_workflow_actions
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmWorkflow {
   id: string;
@@ -49,13 +49,11 @@ export const ACTION_TYPES = [
   { value: 'webhook', labelEn: 'Webhook', labelRu: 'Вебхук' },
 ] as const;
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmWorkflows(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-workflows', companyId],
     queryFn: async (): Promise<WorkflowWithActions[]> => {
-      const { data: workflows, error } = await from('crm_workflows')
+      const { data: workflows, error } = await typedFrom('crm_workflows')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
@@ -64,7 +62,7 @@ export function useCrmWorkflows(companyId: string | undefined) {
       const ids = (workflows || []).map((w: { id: string }) => w.id);
       if (ids.length === 0) return [];
 
-      const { data: actions, error: aErr } = await from('crm_workflow_actions')
+      const { data: actions, error: aErr } = await typedFrom('crm_workflow_actions')
         .select('*')
         .in('workflow_id', ids)
         .order('action_order');
@@ -90,7 +88,7 @@ export function useCreateWorkflow() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (wf: Omit<CrmWorkflow, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_workflows').insert(wf).select().single();
+      const { data, error } = await typedFrom('crm_workflows').insert(wf).select().single();
       if (error) throw error;
       return data as CrmWorkflow;
     },
@@ -102,7 +100,7 @@ export function useUpdateWorkflow() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmWorkflow> & { id: string }) => {
-      const { error } = await from('crm_workflows').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_workflows').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
@@ -113,7 +111,7 @@ export function useDeleteWorkflow() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_workflows').delete().eq('id', id);
+      const { error } = await typedFrom('crm_workflows').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-workflows'] }),
@@ -124,9 +122,9 @@ export function useUpsertWorkflowActions() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ workflowId, actions }: { workflowId: string; actions: Omit<CrmWorkflowAction, 'id'>[] }) => {
-      await from('crm_workflow_actions').delete().eq('workflow_id', workflowId);
+      await typedFrom('crm_workflow_actions').delete().eq('workflow_id', workflowId);
       if (actions.length > 0) {
-        const { error } = await from('crm_workflow_actions').insert(actions);
+        const { error } = await typedFrom('crm_workflow_actions').insert(actions);
         if (error) throw error;
       }
     },

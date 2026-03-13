@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-const from = (table: string) => (supabase as any).from(table);
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface AdminCrmStats {
   vendors: { total: number; active: number; won: number; conversionRate: number };
@@ -18,8 +17,8 @@ export function useAdminCrmStats() {
     queryFn: async (): Promise<AdminCrmStats> => {
       const [vendorRes, leadsRes, ownerRes] = await Promise.all([
         supabase.from('vendor_prospects').select('status'),
-        from('mcc_leads').select('priority, status'),
-        from('owner_prospects').select('status'),
+        typedFrom('mcc_leads').select('priority, status'),
+        typedFrom('owner_prospects').select('status'),
       ]);
 
       const vendors = (vendorRes.data || []) as { status: string }[];

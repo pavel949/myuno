@@ -3,7 +3,7 @@
  * CRUD hooks for crm_activities
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmActivity {
   id: string;
@@ -47,13 +47,11 @@ export const ACTIVITY_TYPE_CONFIG: Record<string, { labelEn: string; labelRu: st
   form_submitted: { labelEn: 'Form Submitted', labelRu: 'Форма', icon: 'ClipboardList', color: 'text-primary' },
 };
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmActivities(contactId?: string, dealId?: string, limit = 30) {
   return useQuery({
     queryKey: ['crm-activities', contactId, dealId, limit],
     queryFn: async (): Promise<CrmActivity[]> => {
-      let q = from('crm_activities')
+      let q = typedFrom('crm_activities')
         .select('*')
         .order('activity_date', { ascending: false })
         .limit(limit);
@@ -71,11 +69,11 @@ export function useLogActivity() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (activity: Omit<CrmActivity, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_activities').insert(activity).select().single();
+      const { data, error } = await typedFrom('crm_activities').insert(activity).select().single();
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, vars) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['crm-activities'] });
     },
   });

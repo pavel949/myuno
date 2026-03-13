@@ -9,9 +9,7 @@ import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const untypedFrom = (table: string) => (supabase as any).from(table);
+import { typedFrom } from '@/lib/untypedTables';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 
 const errorLog = createErrorHandler('usePropertyWizard');
