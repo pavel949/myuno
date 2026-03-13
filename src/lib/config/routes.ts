@@ -279,6 +279,21 @@ export const APP_ROUTES = {
 
   // ── Admin ──
   ADMIN: '/admin',
+  ADMIN_CATALOG: '/admin/catalog',
+  ADMIN_FINANCE: '/admin/finance',
+  ADMIN_OPERATIONS: '/admin/operations',
+  ADMIN_PROVIDERS: '/admin/providers',
+  ADMIN_PROVIDER_DETAIL: (id: string) => `/admin/providers/${id}`,
+  ADMIN_USERS: '/admin/users',
+  ADMIN_SERVICES: '/admin/services',
+  ADMIN_PROPERTIES: '/admin/properties',
+  ADMIN_LEADS: '/admin/leads',
+  ADMIN_ANALYTICS: '/admin/analytics',
+  ADMIN_AI_AGENTS: '/admin/ai-agents',
+  ADMIN_INTAKE_CONFIGS: '/admin/intake-configs',
+  ADMIN_LEAD_CONFIGS: '/admin/lead-configs',
+  ADMIN_CONSULTATIONS: '/admin/consultations',
+  ADMIN_CITIES: '/admin/cities',
 } as const;
 
 /**
