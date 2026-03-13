@@ -119,8 +119,8 @@ export default function OwnerVaultPage() {
       setCopiedToken(file.id);
       toast.success(isRu ? 'Ссылка скопирована (7 дней)' : 'Share link copied (7 days)');
       setTimeout(() => setCopiedToken(null), 3000);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 
