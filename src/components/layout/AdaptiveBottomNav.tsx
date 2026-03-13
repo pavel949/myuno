@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   Home, 
   Compass, 
