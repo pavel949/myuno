@@ -151,7 +151,9 @@ const FlowersSuccess = () => {
   }
 
   const meta = order?.metadata || {};
-  const statusColor = order?.status === 'confirmed' ? 'bg-green-500/10 text-green-600' : 'bg-amber-500/10 text-amber-600';
+  const statusColor = order?.status === 'confirmed' 
+    ? 'bg-primary/10 text-primary' 
+    : 'bg-muted text-muted-foreground';
   const statusLabel = order?.status === 'confirmed'
     ? (isRu ? 'Подтверждён' : 'Confirmed')
     : (isRu ? 'Ожидает' : 'Pending');
