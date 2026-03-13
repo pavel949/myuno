@@ -112,7 +112,7 @@ export function AdminKPIGrid() {
       change: summary?.userGrowth,
       icon: Users,
       color: 'bg-info',
-      onClick: () => navigate('/admin/users'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_USERS),
     },
     {
       title: isRu ? 'Провайдеры' : 'Providers',
