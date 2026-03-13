@@ -146,7 +146,7 @@ const AdminWaterActivities = () => {
   }
 
   if (!user) {
-    navigate('/auth');
+    navigate(APP_ROUTES.AUTH);
     return null;
   }
 
