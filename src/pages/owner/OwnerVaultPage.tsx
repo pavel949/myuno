@@ -101,9 +101,9 @@ export default function OwnerVaultPage() {
           docType: uploadDocType,
           description: uploadDescription,
         });
-      } catch (e: any) {
-        toast.error(`${file.name}: ${e.message}`);
-      }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Upload failed';
+        toast.error(`${file.name}: ${msg}`);
     }
     toast.success(isRu ? 'Файлы загружены' : 'Files uploaded');
     setUploadOpen(false);
