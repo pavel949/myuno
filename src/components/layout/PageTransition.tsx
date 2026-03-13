@@ -6,43 +6,41 @@ interface PageTransitionProps {
   children: React.ReactNode;
 }
 
-const getSlideVariants = (direction: NavigationDirection): Variants => {
-  const xOffset = direction === 'right' ? 50 : direction === 'left' ? -50 : 0;
-  const exitXOffset = direction === 'right' ? -50 : direction === 'left' ? 50 : 0;
-  
-  return {
-    initial: {
-      opacity: 0,
-      x: xOffset,
-      scale: 0.98,
-    },
-    animate: {
-      opacity: 1,
-      x: 0,
-      scale: 1,
-    },
-    exit: {
-      opacity: 0,
-      x: exitXOffset,
-      scale: 0.98,
-    },
-  };
-};
-
-// Fallback for non-tab navigation
-const defaultVariants: Variants = {
-  initial: {
-    opacity: 0,
-    y: 8,
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-  },
+const getVariants = (direction: NavigationDirection): Variants => {
+  switch (direction) {
+    case 'right':
+      return {
+        initial: { opacity: 0, x: 50, scale: 0.98 },
+        animate: { opacity: 1, x: 0, scale: 1 },
+        exit: { opacity: 0, x: -50, scale: 0.98 },
+      };
+    case 'left':
+      return {
+        initial: { opacity: 0, x: -50, scale: 0.98 },
+        animate: { opacity: 1, x: 0, scale: 1 },
+        exit: { opacity: 0, x: 50, scale: 0.98 },
+      };
+    case 'forward':
+      // Push: new page slides in from right, old slides out left (iOS-style)
+      return {
+        initial: { opacity: 0, x: 80 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -30 },
+      };
+    case 'backward':
+      // Pop: page slides in from left, old slides out right (iOS-style)
+      return {
+        initial: { opacity: 0, x: -80 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: 30 },
+      };
+    default:
+      return {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -8 },
+      };
+  }
 };
 
 const pageTransition = {
@@ -54,7 +52,7 @@ const pageTransition = {
 export const PageTransition = forwardRef<HTMLDivElement, PageTransitionProps>(
   function PageTransition({ children }, ref) {
     const direction = getNavigationDirection();
-    const variants = direction === 'none' ? defaultVariants : getSlideVariants(direction);
+    const variants = getVariants(direction);
     
     return (
       <motion.div
