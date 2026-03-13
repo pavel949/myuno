@@ -47,7 +47,7 @@ function useUnifiedActivity(typeFilter?: string) {
 
       // MCC leads activity
       if (!typeFilter || typeFilter === 'user') {
-        const { data } = await from('mcc_leads')
+        const { data } = await typedFrom('mcc_leads')
           .select('id, full_name, status, created_at')
           .order('created_at', { ascending: false })
           .limit(20);
