@@ -80,7 +80,7 @@ export function useMyProperties() {
     if (!ownedRaw) return [];
     // In MC mode, only show owned properties that belong to the active company
     const filtered = isInMCMode
-      ? ownedRaw.filter(p => (p as any).management_company_id === activeCompanyId)
+      ? ownedRaw.filter(p => p.management_company_id === activeCompanyId)
       : ownedRaw;
     return filtered.map(p => ({
         id: p.id,

@@ -256,6 +256,17 @@ export const APP_ROUTES = {
   MC_MARKETING: '/mc/marketing',
   MC_MESSAGES: '/mc/messages',
   MC_SUBSCRIPTION: '/mc/subscription',
+  MC_RATES: '/mc/rates',
+  MC_INSURANCE: '/mc/insurance',
+  MC_DOCUMENTS: '/mc/documents',
+  MC_SEQUENCES: '/mc/sequences',
+  MC_QUOTES: '/mc/quotes',
+  MC_REVIEWS: '/mc/reviews-management',
+  MC_HELP: '/mc/help',
+  MC_SETTINGS: '/mc/settings',
+  MC_MANAGEMENT_TERMS: '/mc/management-terms',
+  MC_SUPPORT_CHAT: '/mc/support-chat',
+  MC_BOOKINGS: '/mc/bookings',
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',

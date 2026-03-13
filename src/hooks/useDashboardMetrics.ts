@@ -134,9 +134,9 @@ export function useDashboardMetrics() {
               .in('booking_id', bookingIdList)
               .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString())
           : Promise.resolve({ count: 0 }),
-        // Pending invoices
+        // Pending invoices — scoped to filtered properties
         supabase.from('property_financials').select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id).eq('transaction_type', 'expense').eq('status', 'pending'),
+          .in('property_id', filteredPropertyIds).eq('transaction_type', 'expense').eq('status', 'pending'),
       ]);
 
       // KPI calculations
