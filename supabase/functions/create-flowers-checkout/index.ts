@@ -148,10 +148,13 @@ Deno.serve(async (req) => {
     const orderItems = items.map(item => ({
       order_id: order.id,
       product_id: item.id,
-      product_name: item.name,
+      item_name: item.name,
+      item_type: 'flower',
       qty: item.quantity,
       unit_price: item.price,
       amount: item.quantity * item.price,
+      status: 'pending',
+    }));
       status: 'pending',
     }));
 

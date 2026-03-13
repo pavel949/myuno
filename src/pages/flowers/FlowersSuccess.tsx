@@ -67,14 +67,14 @@ const FlowersSuccess = () => {
 
           const { data: itemsData } = await supabase
             .from('order_items')
-            .select('product_name, qty, unit_price')
+            .select('item_name, qty, unit_price')
             .eq('order_id', pi.order_id);
 
           if (orderData) {
             setOrder({
               ...orderData,
               metadata: (orderData.metadata as Record<string, unknown>) || {},
-              items: itemsData || [],
+              items: (itemsData || []).map(i => ({ product_name: i.item_name, qty: i.qty ?? 1, unit_price: i.unit_price })),
             });
             clearByType('flowers');
             setIsProcessing(false);
