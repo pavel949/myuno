@@ -79,7 +79,7 @@ function useOutreachLog() {
 
       if (error) throw error;
       
-      return (data || []).map((entry: any) => ({
+      return (data || []).map((entry: Record<string, unknown>) => ({
         ...entry,
         contact: entry.crm_contacts,
       }));

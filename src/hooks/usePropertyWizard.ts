@@ -713,7 +713,7 @@ export function usePropertyWizard() {
 
         // Link owner contact to property
         if (newContact?.id) {
-          await untypedFrom('properties').update({
+          await typedFrom('properties').update({
             owner_contact_id: newContact.id,
           }).eq('id', property.id);
         }

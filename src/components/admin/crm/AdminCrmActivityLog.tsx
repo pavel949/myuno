@@ -72,9 +72,9 @@ function useUnifiedActivity(typeFilter?: string) {
           entries.push({
             id: `o-${o.id}`,
             type: 'owner',
-            action: `prospect_${o.status || 'new'}`,
-            entity_name: o.owner_name || 'Unknown',
-            created_at: o.created_at,
+            action: `prospect_${(o.status as string) || 'new'}`,
+            entity_name: (o.owner_name as string) || 'Unknown',
+            created_at: o.created_at as string,
           });
         });
       }

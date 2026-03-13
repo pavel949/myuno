@@ -47,9 +47,9 @@ export default function CrmDuplicatesPage() {
       if (dupIds.length > 0) {
         await supabase.from('agent_deals').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
         await supabase.from('crm_tasks').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
-        await (supabase as any).from('crm_contact_notes').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await typedFrom('crm_contact_notes').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
         await supabase.from('crm_activities').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
-        await (supabase as any).from('contact_properties').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
+        await typedFrom('contact_properties').update({ contact_id: keepContact.id }).in('contact_id', dupIds);
       }
 
       if (Object.keys(mergeFields).length > 0) {
