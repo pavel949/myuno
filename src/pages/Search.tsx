@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search as SearchIcon, X, ArrowLeft, Star, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, X, Star, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { AnimatedList, AnimatedItem, AnimatedGrid, AnimatedCard } from '@/components/layout/AnimatedList';
