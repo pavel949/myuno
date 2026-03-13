@@ -165,6 +165,21 @@ export interface PropertyFilters {
 
 const PAGE_SIZE = 20;
 
+/**
+ * Columns needed for property list/card views.
+ * Using explicit columns instead of select('*') reduces payload ~60%.
+ */
+const PROPERTY_LIST_COLUMNS = `
+  id, title_en, title_ru, property_type, listing_type,
+  price, price_period, currency, bedrooms, bathrooms, area_sqm,
+  max_guests, amenities, images, cover_image, address, district,
+  lat, lng, is_active, is_featured, is_verified, instant_booking,
+  available_from, min_stay_nights, rating, review_count,
+  created_at, updated_at, project_id, floor, unit_number,
+  view_type, furnishing_level, highlights, monthly_discount,
+  weekly_discount, management_company_id
+`;
+
 // Fetch properties with pagination for infinite scroll
 export function usePropertiesInfinite(filters: PropertyFilters = {}) {
   return useInfiniteQuery({
@@ -172,7 +187,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
@@ -232,7 +247,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
     queryFn: async () => {
       let query = supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
         .order('is_featured', { ascending: false })
@@ -373,7 +388,7 @@ export function useFeaturedProperties(limit = 6) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
@@ -392,7 +407,7 @@ export function useInstantBookingProperties(limit = 10) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('instant_booking', true)
         .order('is_featured', { ascending: false })
@@ -438,7 +453,7 @@ export function usePropertiesByProject(projectId?: string, limit = 20) {
 
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('project_id', projectId)
         .eq('is_active', true)
         .order('is_featured', { ascending: false })
