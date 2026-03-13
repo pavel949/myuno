@@ -12,7 +12,7 @@ import {
 import { 
   VIEW_TYPES, 
   FURNISHING_LEVELS, 
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 import { normalizeFurnishingLevel } from '@/lib/propertyFormNormalizers';
 
 interface UnitSpecsProps {

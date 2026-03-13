@@ -45,7 +45,7 @@ import {
   Users,
   AlertTriangle,
 } from 'lucide-react';
-import { getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
+import { getPropertyTypeLabel } from '@/lib/taxonomies';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
 // ============= TYPES =============

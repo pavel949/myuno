@@ -10,7 +10,7 @@ import {
   KEY_HANDOVER_METHODS,
   DEPOSIT_TYPES,
   CLEANING_FREQUENCIES
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 import { CANCELLATION_POLICY_DETAILS } from '@/lib/constants';
 
 interface BookingConditionsChipsProps {

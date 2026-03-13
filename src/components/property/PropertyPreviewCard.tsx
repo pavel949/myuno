@@ -9,7 +9,7 @@ import {
   getDistrictLabel,
   getHighlightLabel,
   PROPERTY_HIGHLIGHTS 
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 
 interface PropertyPreviewCardProps {
   data: {

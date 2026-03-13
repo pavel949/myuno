@@ -6,7 +6,7 @@ import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
-import { getPropertyTypeLabel, getDistrictLabel } from '@/lib/propertyTaxonomy';
+import { getPropertyTypeLabel, getDistrictLabel } from '@/lib/taxonomies';
 
 interface PropertyForPdf {
   title_en: string;
