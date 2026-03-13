@@ -119,7 +119,7 @@ const AdminInsurance = () => {
   }
 
   if (!user) {
-    navigate('/auth');
+    navigate(APP_ROUTES.AUTH);
     return null;
   }
 
