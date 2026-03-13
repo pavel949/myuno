@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { typedFrom, type TeamMemberPermissionRow } from '@/lib/untypedTables';
 
 export const MODULES = [
   { key: 'properties', labelEn: 'Properties', labelRu: 'Объекты' },
@@ -15,18 +16,9 @@ export const MODULES = [
 
 export type ModuleKey = typeof MODULES[number]['key'];
 
-export interface TeamPermission {
-  id: string;
-  company_id: string;
-  user_id: string;
-  module: string;
-  can_view: boolean;
-  can_edit: boolean;
-  can_export: boolean;
-  sub_permissions: Record<string, boolean>;
-  granted_by: string | null;
-  updated_at: string;
-}
+export interface TeamPermission extends TeamMemberPermissionRow {}
+
+const permissionsTable = () => typedFrom('team_member_permissions');
 
 export function useTeamPermissions() {
   const { user } = useAuth();
@@ -37,24 +29,19 @@ export function useTeamPermissions() {
     queryKey: ['team-permissions', user?.id, companyId],
     queryFn: async () => {
       if (!user || !companyId) return [];
-      const { data, error } = await supabase
-        .from('team_member_permissions' as any)
+      const { data, error } = await permissionsTable()
         .select('*')
         .eq('user_id', user.id)
         .eq('company_id', companyId);
       if (error) throw error;
-      return (data || []) as unknown as TeamPermission[];
+      return (data || []) as TeamMemberPermissionRow[];
     },
     enabled: !!user && !!companyId,
   });
 
   const canAccess = (module: ModuleKey, action: 'view' | 'edit' = 'view'): boolean => {
-    // Directors/admins have full access
     if (activeCompany?.role === 'director' || activeCompany?.role === 'admin') return true;
-    // Platform admins always pass
-    // While permissions are loading, deny access (secure default)
     if (isLoading) return false;
-    // If no permissions configured at all, deny access for non-admin roles
     if (permissions.length === 0) return false;
     const perm = permissions.find(p => p.module === module);
     if (!perm) return false;
@@ -72,13 +59,12 @@ export function useMemberPermissions(userId: string | null) {
     queryKey: ['member-permissions', userId, companyId],
     queryFn: async () => {
       if (!userId || !companyId) return [];
-      const { data, error } = await supabase
-        .from('team_member_permissions' as any)
+      const { data, error } = await permissionsTable()
         .select('*')
         .eq('user_id', userId)
         .eq('company_id', companyId);
       if (error) throw error;
-      return (data || []) as unknown as TeamPermission[];
+      return (data || []) as TeamMemberPermissionRow[];
     },
     enabled: !!userId && !!companyId,
   });
@@ -105,8 +91,7 @@ export function useUpdateMemberPermission() {
       if (!companyId || !user) throw new Error('No company');
       if (!canManage) throw new Error('Only directors can manage permissions');
       
-      const { error } = await supabase
-        .from('team_member_permissions' as any)
+      const { error } = await permissionsTable()
         .upsert({
           company_id: companyId,
           user_id: args.userId,

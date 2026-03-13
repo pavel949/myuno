@@ -1,36 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { typedFrom, type PropertyPayoutRuleRow } from '@/lib/untypedTables';
 
 export type RecipientType = 'coagent' | 'staff' | 'partner' | 'broker' | 'ota';
 export type CommissionType = 'percent_net' | 'percent_gross' | 'fixed' | 'per_booking';
 export type PayoutFrequency = 'per_booking' | 'monthly' | 'quarterly';
 
-export interface PayoutRule {
-  id: string;
-  property_id: string;
-  management_terms_id: string | null;
-  recipient_type: RecipientType;
-  recipient_staff_id: string | null;
-  recipient_name: string | null;
-  commission_type: CommissionType;
-  commission_value: number;
-  deduct_before_owner: boolean;
-  min_payout: number | null;
-  payout_frequency: PayoutFrequency;
-  notes: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
+export type PayoutRule = PropertyPayoutRuleRow;
 export type PayoutRuleInsert = Omit<PayoutRule, 'id' | 'created_at' | 'updated_at'>;
 export type PayoutRuleUpdate = Partial<PayoutRuleInsert>;
 
-// Use untyped access since table is new
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const from = () => (supabase as any).from('property_payout_rules');
+const from = () => typedFrom('property_payout_rules');
 
 export function usePayoutRules(propertyId?: string) {
   const { user } = useAuth();

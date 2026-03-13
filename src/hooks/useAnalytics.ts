@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { useLocation } from 'react-router-dom';
 
 const SESSION_KEY = 'myuno_analytics_session';
@@ -17,12 +17,12 @@ function getSessionId(): string {
 /** Fire-and-forget analytics event insert */
 async function trackEvent(
   eventName: string,
-  eventData: Record<string, any> = {},
+  eventData: Record<string, unknown> = {},
   userId?: string,
   pagePath?: string
 ) {
   try {
-    await (supabase as any).from('analytics_events').insert({
+    await typedFrom('analytics_events').insert({
       user_id: userId || null,
       session_id: getSessionId(),
       event_name: eventName,
@@ -50,7 +50,7 @@ export function useAnalytics() {
   }, [location.pathname, user?.id]);
 
   const track = useCallback(
-    (eventName: string, data: Record<string, any> = {}) => {
+    (eventName: string, data: Record<string, unknown> = {}) => {
       trackEvent(eventName, data, user?.id);
     },
     [user?.id]

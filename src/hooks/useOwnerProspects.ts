@@ -1,24 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom, type OwnerProspectRow } from '@/lib/untypedTables';
 import { toast } from 'sonner';
 
-export interface OwnerProspect {
-  id: string;
-  owner_name: string;
-  email: string | null;
-  phone: string | null;
-  whatsapp: string | null;
-  property_type: string | null;
-  property_location: string | null;
-  source: string | null;
-  status: 'new' | 'contacted' | 'interested' | 'converted' | 'lost';
-  notes: string | null;
-  assigned_to: string | null;
-  created_at: string;
-  updated_at: string;
-}
+export type OwnerProspect = OwnerProspectRow;
 
-const from = () => (supabase as any).from('owner_prospects');
+const from = () => typedFrom('owner_prospects');
 
 export function useOwnerProspects(statusFilter?: string) {
   return useQuery({
@@ -39,7 +25,7 @@ export function useCreateOwnerProspect() {
     mutationFn: async (prospect: Partial<OwnerProspect>) => {
       const { data, error } = await from().insert(prospect).select().single();
       if (error) throw error;
-      return data;
+      return data as OwnerProspect;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-prospects'] });
@@ -55,7 +41,7 @@ export function useUpdateOwnerProspect() {
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<OwnerProspect>) => {
       const { data, error } = await from().update(updates).eq('id', id).select().single();
       if (error) throw error;
-      return data;
+      return data as OwnerProspect;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['owner-prospects'] });
