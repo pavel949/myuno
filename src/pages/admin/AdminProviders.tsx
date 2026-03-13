@@ -129,7 +129,7 @@ export default function AdminProviders() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate(APP_ROUTES.AUTH);
     }
   }, [user, authLoading, navigate]);
 
