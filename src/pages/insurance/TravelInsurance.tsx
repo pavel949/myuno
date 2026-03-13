@@ -68,9 +68,7 @@ export default function TravelInsurance() {
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3 max-w-lg mx-auto">
-          <button onClick={() => navigate(-1)} className="p-1">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton fallbackPath={APP_ROUTES.INSURANCE} variant="ghost" size="sm" />
           <div className="flex-1">
             <h1 className="font-semibold text-base">
               {isRu ? 'Туристическая страховка' : 'Travel Insurance'}

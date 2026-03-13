@@ -129,9 +129,7 @@ export default function QuickIncome() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate(-1)}>
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.MC_FINANCE} variant="ghost" />
           <div>
             <h1 className="font-semibold">{isRu ? 'Записать доход' : 'Record Income'}</h1>
           </div>

@@ -46,14 +46,7 @@ export default function KnowledgeHub() {
       <PageContainer className="pb-32">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.DISCOVER} variant="ghost" />
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />

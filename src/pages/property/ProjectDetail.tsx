@@ -76,13 +76,7 @@ export default function ProjectDetail() {
         {/* Header */}
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.COMPLEXES} variant="ghost" />
             <div className="flex-1 min-w-0">
               <h1 className="font-semibold truncate">{name}</h1>
               {project.district && (

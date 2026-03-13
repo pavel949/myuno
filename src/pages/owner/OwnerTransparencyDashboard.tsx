@@ -77,9 +77,7 @@ export default function OwnerTransparencyDashboard() {
     <div className="p-4 space-y-5 max-w-3xl mx-auto pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate(-1)}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.OWNER} variant="ghost" />
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold text-foreground truncate">{propertyTitle || (isRu ? 'Объект' : 'Property')}</h1>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

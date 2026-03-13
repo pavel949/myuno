@@ -29,9 +29,7 @@ export default function JuristicRequestsPage() {
     <div className="container max-w-4xl py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.OWNER} variant="ghost" />
           <h1 className="text-xl font-bold">
             {isRu ? 'Запросы к УК' : 'Building Requests'}
           </h1>

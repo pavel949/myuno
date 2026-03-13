@@ -47,9 +47,7 @@ export default function VenueDetail() {
             <p className="text-muted-foreground mb-4">
               {language === 'ru' ? 'Площадка не найдена' : 'Venue not found'}
             </p>
-            <Button onClick={() => navigate(-1)}>
-              {language === 'ru' ? 'Назад' : 'Go Back'}
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.EVENTS} />
           </div>
         </PageContainer>
       </AppLayout>

@@ -44,9 +44,7 @@ export default function WishlistPage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-3 p-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.MARKET} variant="ghost" />
           <div className="flex-1">
             <h1 className="font-semibold">
               {language === 'ru' ? 'Избранное' : 'Wishlist'}

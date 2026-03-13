@@ -141,7 +141,7 @@ export default function ExperienceBooking() {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigate(-1);
+      navigate(APP_ROUTES.EXPERIENCES);
     }
   };
 

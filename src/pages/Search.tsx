@@ -37,9 +37,7 @@ export default function Search() {
         {/* Search Header */}
         <div className="sticky top-0 z-20 bg-background border-b border-border p-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" />
             <div className="flex-1 relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input

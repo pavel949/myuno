@@ -27,14 +27,7 @@ export default function TripPlannerPage() {
         <div className="border-b border-border/50">
           <div>
             <div className="flex items-center gap-3 p-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+              <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" />
             </div>
 
             <motion.div

@@ -49,14 +49,7 @@ const NotFound = () => {
             <Home className="w-4 h-4" />
             {isRu ? 'На главную' : 'Go Home'}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate(-1)}
-            className="flex-1 gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {isRu ? 'Назад' : 'Go Back'}
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.HOME} variant="default" />
         </div>
 
         <div className="mt-8 flex gap-4">

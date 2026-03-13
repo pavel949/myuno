@@ -200,7 +200,7 @@ export default function AirportFastTrackPage() {
   const handleBack = () => {
     if (step === 'passenger') setStep('service');
     else if (step === 'review') setStep('passenger');
-    else navigate(-1);
+    else navigate(APP_ROUTES.FAST_TRACK);
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
