@@ -104,6 +104,7 @@ export default function OwnerVaultPage() {
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Upload failed';
         toast.error(`${file.name}: ${msg}`);
+      }
     }
     toast.success(isRu ? 'Файлы загружены' : 'Files uploaded');
     setUploadOpen(false);
