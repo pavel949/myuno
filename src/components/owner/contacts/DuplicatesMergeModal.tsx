@@ -109,9 +109,9 @@ export function DuplicatesMergeModal({ open, onOpenChange, leftId, rightId, comp
       const dupIds = [loserId];
       await supabase.from('agent_deals').update({ contact_id: winnerId }).in('contact_id', dupIds);
       await supabase.from('crm_tasks').update({ contact_id: winnerId }).in('contact_id', dupIds);
-      await (supabase as any).from('crm_contact_notes').update({ contact_id: winnerId }).in('contact_id', dupIds);
+      await typedFrom('crm_contact_notes').update({ contact_id: winnerId }).in('contact_id', dupIds);
       await supabase.from('crm_activities').update({ contact_id: winnerId }).in('contact_id', dupIds);
-      const { error: cpErr } = await (supabase as any).from('contact_properties').update({ contact_id: winnerId }).in('contact_id', dupIds);
+      const { error: cpErr } = await typedFrom('contact_properties').update({ contact_id: winnerId }).in('contact_id', dupIds);
       if (cpErr) {
         // contact_properties might not exist in all deployments
       }

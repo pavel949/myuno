@@ -24,7 +24,7 @@ function useInvestorMetrics() {
           .gte('created_at', subDays(now, 90).toISOString()),
         supabase.from('profiles').select('created_at')
           .order('created_at', { ascending: false }).limit(1000),
-        (supabase as any).from('analytics_events')
+        typedFrom('analytics_events')
           .select('event_name, created_at')
           .gte('created_at', thirtyDaysAgo).limit(1000),
         supabase.from('bookings').select('status, total_amount, created_at')

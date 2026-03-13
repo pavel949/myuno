@@ -32,8 +32,7 @@ function useGuestHistory() {
     queryFn: async () => {
       if (!user?.id) return { orders: [], stats: { totalOrders: 0, totalSpent: 0, categories: [] } };
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const ordersTable = (supabase as any).from('orders');
+      const ordersTable = typedFrom('orders');
       const result = await ordersTable
         .select('id, status, total_amount, currency, created_at, vertical')
         .eq('user_id', user.id)

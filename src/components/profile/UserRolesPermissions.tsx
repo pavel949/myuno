@@ -51,8 +51,7 @@ export function UserRolesPermissions() {
     queryKey: ['user-module-permissions', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from('team_member_permissions' as any)
+      const { data, error } = await typedFrom('team_member_permissions')
         .select('company_id, module, can_view, can_edit, can_export')
         .eq('user_id', user.id);
       if (error) return [];
