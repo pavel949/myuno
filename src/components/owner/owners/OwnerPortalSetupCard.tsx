@@ -129,7 +129,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
         }, { onConflict: 'property_id,owner_user_id' });
 
         // 4. Create property delegate
-        await (supabase as any).from('property_delegates').upsert({
+        await typedFrom('property_delegates').upsert({
           property_id: prop.id,
           user_id: profile.id,
           status: 'active',
