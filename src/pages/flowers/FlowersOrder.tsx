@@ -547,13 +547,34 @@ const FlowersOrder = () => {
                 <Label htmlFor="deliveryDate">
                   {language === 'ru' ? 'Дата доставки *' : 'Delivery Date *'}
                 </Label>
-                <Input
-                  id="deliveryDate"
-                  type="date"
-                  value={formData.deliveryDate}
-                  onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
-                />
+                {(() => {
+                  // Same-day cutoff: if current time in Bangkok (UTC+7) is past 14:00, min date is tomorrow
+                  const now = new Date();
+                  const bangkokHour = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })).getHours();
+                  const today = new Date().toISOString().split('T')[0];
+                  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                  const isTodayCutoff = bangkokHour >= 14;
+                  const minDate = isTodayCutoff ? tomorrow : today;
+                  
+                  return (
+                    <>
+                      <Input
+                        id="deliveryDate"
+                        type="date"
+                        value={formData.deliveryDate}
+                        onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
+                        min={minDate}
+                      />
+                      {isTodayCutoff && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {language === 'ru' 
+                            ? 'Доставка в тот же день доступна до 14:00. Выберите завтра.' 
+                            : 'Same-day delivery available until 14:00. Please select tomorrow.'}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               
               <div>
