@@ -86,7 +86,7 @@ export default function AdminProperties() {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate(APP_ROUTES.AUTH);
     }
   }, [user, authLoading, navigate]);
 
