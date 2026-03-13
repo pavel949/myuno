@@ -96,7 +96,7 @@ export function SellItemWizard() {
   };
   
   const handleClose = () => {
-    navigate(-1);
+    navigate(APP_ROUTES.SELL);
   };
   
   if (isSubmitted) {

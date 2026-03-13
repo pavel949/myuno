@@ -61,7 +61,7 @@ export function ListingWizard() {
     if (currentStep > 0 && !isSubmitted) {
       saveDraft();
     }
-    navigate(-1);
+    navigate(APP_ROUTES.LIST_WITH_US);
   };
   
   if (isSubmitted) {

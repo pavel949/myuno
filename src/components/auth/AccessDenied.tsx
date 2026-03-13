@@ -196,7 +196,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(APP_ROUTES.HOME)}
               className="flex-1"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />

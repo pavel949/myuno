@@ -45,7 +45,7 @@ export function LoginRequiredPage({
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate(APP_ROUTES.HOME);
   };
 
   const handleBrowse = () => {

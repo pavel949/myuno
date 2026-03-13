@@ -68,7 +68,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     if (onBack) {
       onBack();
     } else {
-      navigate(-1);
+      navigate(APP_ROUTES.HOME);
     }
   };
   
