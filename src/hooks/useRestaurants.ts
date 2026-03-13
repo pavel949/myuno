@@ -151,13 +151,13 @@ export function useRestaurant(id: string | undefined) {
         const [categoriesResult, itemsResult] = await Promise.all([
           supabase
             .from('restaurant_menu_categories')
-            .select('*')
+            .select(MENU_CATEGORY_COLUMNS)
             .eq('restaurant_id', id)
             .eq('is_active', true)
             .order('sort_order', { ascending: true }),
           supabase
             .from('restaurant_menu_items')
-            .select('*')
+            .select(MENU_ITEM_COLUMNS)
             .eq('restaurant_id', id)
             .eq('is_active', true)
             .order('is_popular', { ascending: false }),
