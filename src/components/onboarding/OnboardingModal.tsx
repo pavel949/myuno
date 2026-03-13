@@ -60,7 +60,7 @@ interface PersonaOption {
 const PERSONA_OPTIONS: PersonaOption[] = [
   { persona: 'tourist', icon: Plane, labelEn: 'Tourist', labelRu: 'Турист', labelTh: 'นักท่องเที่ยว', descEn: 'Trips, tours, transfers', descRu: 'Поездки, туры, трансферы' },
   { persona: 'resident', icon: Home, labelEn: 'Resident', labelRu: 'Резидент', labelTh: 'ผู้อาศัย', descEn: 'Daily life, services, docs', descRu: 'Быт, сервисы, документы' },
-  { persona: 'property_owner', icon: Building2, labelEn: 'Property Owner', labelRu: 'Собственник', labelTh: 'เจ้าของ', descEn: 'Manage your property', descRu: 'Управление недвижимостью' },
+  { persona: 'property_owner', icon: Building2, labelEn: 'Owner / MC', labelRu: 'Собственник / УК', labelTh: 'เจ้าของ / บจก.', descEn: 'Manage your property', descRu: 'Управление недвижимостью' },
   { persona: 'investor', icon: TrendingUp, labelEn: 'Investor', labelRu: 'Инвестор', labelTh: 'นักลงทุน', descEn: 'Projects & opportunities', descRu: 'Проекты и возможности' },
 ];
 
