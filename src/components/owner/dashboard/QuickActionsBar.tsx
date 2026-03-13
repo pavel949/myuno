@@ -5,6 +5,7 @@ import {
   Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download, Zap, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const actions = [
   { 
