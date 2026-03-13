@@ -2,12 +2,8 @@
  * @module App
  * @description Root application component for myUNO SuperApp.
  *
- * Provider tree (order matters — each provider can use contexts above it):
- * ErrorBoundary → HelmetProvider → QueryClientProvider → ThemeProvider →
- * MaintenanceProvider → LanguageProvider → LocationProvider → CurrencyProvider →
- * AuthProvider → CartProvider → PWAInstallProvider → LifeSituationProvider →
- * StorefrontProvider → GoogleMapsProvider → TooltipProvider → HintProvider →
- * PrefetchProvider → AppContent
+ * Uses composeProviders to flatten the provider tree for better readability
+ * and marginally improved re-render performance.
  *
  * @see docs/ARCHITECTURE.md for full architecture overview
  */
@@ -42,10 +38,31 @@ import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
+import { composeProviders } from "@/lib/composeProviders";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
 });
+
+// ── Composed provider tree ──
+// Order matters: each provider can use contexts from providers above it.
+// QueryClientProvider wraps everything that needs react-query.
+const QueryProviders = composeProviders([
+  ThemeProvider,
+  MaintenanceProvider,
+  LanguageProvider,
+  LocationProvider,
+  CurrencyProvider,
+  AuthProvider,
+  CartProvider,
+  PWAInstallProvider,
+  LifeSituationProvider,
+  StorefrontProvider,
+  GoogleMapsProvider,
+  TooltipProvider,
+  HintProvider,
+  PrefetchProvider,
+]);
 
 /** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
@@ -98,35 +115,9 @@ const App = () => (
   <ErrorBoundary>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <MaintenanceProvider>
-            <LanguageProvider>
-              <LocationProvider>
-                <CurrencyProvider>
-                  <AuthProvider>
-                    <CartProvider>
-                      <PWAInstallProvider>
-                        <LifeSituationProvider>
-                          <StorefrontProvider>
-                            <GoogleMapsProvider>
-                            <TooltipProvider>
-                              <HintProvider>
-                                <PrefetchProvider>
-                                  <AppContent />
-                                </PrefetchProvider>
-                              </HintProvider>
-                            </TooltipProvider>
-                            </GoogleMapsProvider>
-                          </StorefrontProvider>
-                        </LifeSituationProvider>
-                      </PWAInstallProvider>
-                    </CartProvider>
-                  </AuthProvider>
-                </CurrencyProvider>
-              </LocationProvider>
-            </LanguageProvider>
-          </MaintenanceProvider>
-        </ThemeProvider>
+        <QueryProviders>
+          <AppContent />
+        </QueryProviders>
       </QueryClientProvider>
     </HelmetProvider>
   </ErrorBoundary>
