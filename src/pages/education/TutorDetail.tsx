@@ -1,6 +1,8 @@
 import { useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, MessageCircle, Award, BookOpen, Users, Loader2 } from "lucide-react";
+import { Star, MapPin, MessageCircle, Award, BookOpen, Users, Loader2 } from "lucide-react";
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
