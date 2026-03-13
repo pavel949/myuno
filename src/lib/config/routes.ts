@@ -305,6 +305,7 @@ export const APP_ROUTES = {
   ADMIN_LEAD_CONFIGS: '/admin/lead-configs',
   ADMIN_CONSULTATIONS: '/admin/consultations',
   ADMIN_CITIES: '/admin/cities',
+  ADMIN_TRANSFERS: '/admin/transfers',
 } as const;
 
 /**

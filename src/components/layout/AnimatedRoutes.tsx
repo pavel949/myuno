@@ -425,6 +425,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/admin/clinics" element={<Pages.AdminClinics />} />
           <Route path="/admin/gyms" element={<Pages.AdminGyms />} />
           <Route path="/admin/vehicles" element={<Pages.AdminVehicles />} />
+          <Route path="/admin/transfers" element={<Pages.AdminTransfers />} />
           <Route path="/admin/events" element={<Pages.AdminEvents />} />
           <Route path="/admin/education" element={<Pages.AdminEducation />} />
           <Route path="/admin/legal" element={<Pages.AdminLegal />} />
