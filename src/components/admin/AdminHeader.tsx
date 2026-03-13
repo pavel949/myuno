@@ -157,7 +157,7 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink 
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate(APP_ROUTES.ADMIN)}
               className="flex items-center gap-1 cursor-pointer hover:text-foreground"
             >
               <Home className="h-3.5 w-3.5" />
