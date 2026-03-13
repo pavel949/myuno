@@ -165,8 +165,8 @@ const MCOnboarding: React.FC = () => {
       if (updateError) throw updateError;
 
       toast.success(isRu ? 'Логотип загружен' : 'Logo uploaded');
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed');
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : '') || 'Upload failed');
     } finally {
       setLoading(false);
       setStep(3);
