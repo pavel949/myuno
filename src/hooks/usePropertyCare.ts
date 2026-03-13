@@ -135,13 +135,15 @@ export function useOwnerProperty(id: string | undefined) {
 export function useCreateOwnerProperty() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
 
   return useMutation({
     mutationFn: async (data: Partial<OwnerProperty> & { _companyId?: string; _silent?: boolean }) => {
       if (!user) throw new Error('Not authenticated');
       
-      // Parallel: fetch profile + auto-detect company
-      const companyIdFromData = (data as any).management_company_id || data._companyId || null;
+      // Priority: explicit data > active company context > DB fallback
+      const companyIdFromData = (data as any).management_company_id || data._companyId || activeCompanyId || null;
       const [profileRes, membershipRes] = await Promise.all([
         supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
         !companyIdFromData
