@@ -64,7 +64,7 @@ function useUnifiedActivity(typeFilter?: string) {
 
       // Owner prospects
       if (!typeFilter || typeFilter === 'owner') {
-        const { data } = await from('owner_prospects')
+        const { data } = await typedFrom('owner_prospects')
           .select('id, owner_name, status, created_at')
           .order('created_at', { ascending: false })
           .limit(20);
