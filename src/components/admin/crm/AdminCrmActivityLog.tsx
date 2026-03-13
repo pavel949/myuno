@@ -34,7 +34,7 @@ function useUnifiedActivity(typeFilter?: string) {
           .select('id, activity_type, new_value, created_at, prospect_id')
           .order('created_at', { ascending: false })
           .limit(20);
-        (data || []).forEach((a: any) => {
+        (data || []).forEach((a: Record<string, unknown>) => {
           entries.push({
             id: `v-${a.id}`,
             type: 'vendor',
