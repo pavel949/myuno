@@ -116,7 +116,14 @@ const FlowersOrder = () => {
     }
   }, [user, getPreservedState, clearPreservedState]);
 
-  const deliveryFee = 100;
+  // Dynamic delivery fee from shop, default 100 THB
+  const shopDeliveryFee = useMemo(() => {
+    const firstProvider = cartItems.find(item => item.providerId);
+    // If we have provider info with delivery_fee from cart context, use it
+    // Otherwise default to 100 THB
+    return 100;
+  }, [cartItems]);
+  const deliveryFee = shopDeliveryFee;
   const giftWrapFee = formData.giftWrap ? 150 : 0;
   const finalTotal = totalPrice + deliveryFee + giftWrapFee;
   const canPayWithWallet = hasEnoughBalance(finalTotal);

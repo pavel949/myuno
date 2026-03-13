@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface FlowersCheckoutRequest {
@@ -110,7 +110,118 @@ Deno.serve(async (req) => {
       throw new Error("Total must be at least 1");
     }
 
-    // Initialize Stripe
+    // ===== CREATE ORDER IN DATABASE (mirrors create-order-checkout pattern) =====
+    const orderMetadata = {
+      recipient_name,
+      recipient_phone,
+      delivery_address,
+      delivery_date,
+      delivery_slot,
+      message_card: message || "",
+      gift_wrap,
+      provider_name: provider_name || "",
+    };
+
+    const { data: order, error: orderError } = await supabaseClient
+      .from('orders')
+      .insert({
+        order_type: 'flower',
+        customer_user_id: user.id,
+        provider_org_id: provider_id || null,
+        status: 'pending',
+        start_at: delivery_date ? `${delivery_date}T00:00:00Z` : null,
+        total_amount,
+        currency,
+        metadata: orderMetadata,
+      })
+      .select()
+      .single();
+
+    if (orderError || !order) {
+      console.error("create-flowers-checkout: Failed to create order:", orderError);
+      throw new Error("Failed to create order");
+    }
+
+    console.log("create-flowers-checkout: Order created:", order.id, order.order_number);
+
+    // Create order items for each bouquet
+    const orderItems = items.map(item => ({
+      order_id: order.id,
+      product_id: item.id,
+      product_name: item.name,
+      qty: item.quantity,
+      unit_price: item.price,
+      amount: item.quantity * item.price,
+      status: 'pending',
+    }));
+
+    // Add delivery fee as line item
+    if (delivery_fee > 0) {
+      orderItems.push({
+        order_id: order.id,
+        product_id: null as any,
+        product_name: 'Delivery / Доставка',
+        qty: 1,
+        unit_price: delivery_fee,
+        amount: delivery_fee,
+        status: 'pending',
+      });
+    }
+
+    // Add gift wrap as line item
+    if (gift_wrap && gift_wrap_fee > 0) {
+      orderItems.push({
+        order_id: order.id,
+        product_id: null as any,
+        product_name: 'Gift Wrap / Праздничная упаковка',
+        qty: 1,
+        unit_price: gift_wrap_fee,
+        amount: gift_wrap_fee,
+        status: 'pending',
+      });
+    }
+
+    const { error: itemsError } = await supabaseClient
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) {
+      console.error("create-flowers-checkout: Failed to create order items:", itemsError);
+      // Rollback: delete orphaned order
+      await supabaseClient.from('orders').delete().eq('id', order.id);
+      throw new Error("Failed to create order items");
+    }
+
+    // Create delivery address
+    await supabaseClient.from('order_addresses').insert({
+      order_id: order.id,
+      address_type: 'delivery',
+      address_text: delivery_address,
+    });
+
+    // Create initial status history
+    await supabaseClient.from('order_status_history').insert({
+      order_id: order.id,
+      from_status: null,
+      to_status: 'pending',
+      actor_user_id: user.id,
+      reason: 'Flower order created',
+    });
+
+    // Create payment intent record
+    const { data: paymentIntent } = await supabaseClient
+      .from('payment_intents')
+      .insert({
+        order_id: order.id,
+        amount: total_amount,
+        currency,
+        method: 'stripe',
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    // ===== STRIPE CHECKOUT =====
     const stripe = createStripeClient();
 
     // Get or create Stripe customer
@@ -132,8 +243,8 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
 
-    // Build line items
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(item => ({
+    // Build line items for Stripe display
+    const lineItems = items.map(item => ({
       price_data: {
         currency: currency.toLowerCase(),
         product_data: {
@@ -144,7 +255,6 @@ Deno.serve(async (req) => {
       quantity: item.quantity,
     }));
 
-    // Add delivery fee
     if (delivery_fee > 0) {
       lineItems.push({
         price_data: {
@@ -156,7 +266,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Add gift wrap fee
     if (gift_wrap && gift_wrap_fee > 0) {
       lineItems.push({
         price_data: {
@@ -168,7 +277,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create Stripe Checkout Session with card and PromptPay (Thai QR)
     // PromptPay only works with THB currency
     const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 
       ? ["card", "promptpay"] 
@@ -182,28 +290,30 @@ Deno.serve(async (req) => {
       success_url: `${origin}/flowers/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/flowers/order?canceled=true`,
       metadata: {
+        order_id: order.id,
+        order_number: order.order_number,
         user_id: user.id,
-        type: "flowers_payment",
-        provider_id: provider_id || "",
-        provider_name: provider_name || "",
-        recipient_name,
-        recipient_phone,
-        delivery_address,
-        delivery_date,
-        delivery_slot,
-        message: message || "",
-        gift_wrap: gift_wrap ? "true" : "false",
-        total_amount: total_amount.toString(),
-        currency,
+        payment_intent_id: paymentIntent?.id || '',
+        type: "order_payment",
       },
     });
 
-    console.log("Flowers checkout session created:", session.id);
+    console.log("Flowers checkout session created:", session.id, "for order:", order.id);
+
+    // Update payment intent with Stripe session ID
+    if (paymentIntent) {
+      await supabaseClient
+        .from('payment_intents')
+        .update({ provider_ref: session.id })
+        .eq('id', paymentIntent.id);
+    }
 
     return new Response(
       JSON.stringify({ 
         url: session.url, 
-        sessionId: session.id 
+        sessionId: session.id,
+        orderId: order.id,
+        orderNumber: order.order_number,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
