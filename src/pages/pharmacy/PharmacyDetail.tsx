@@ -10,9 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FilterChip } from "@/components/uno/FilterChip";
 import { 
-  ArrowLeft, Star, MapPin, Shield, Phone, Truck, 
+  Star, MapPin, Shield, Phone, Truck, 
   Plus, FileText 
 } from "lucide-react";
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from "@/components/cart/StickyCartBar";
 import { useCartToast } from "@/hooks/useCartToast";
