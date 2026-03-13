@@ -10,6 +10,7 @@ import { usePropertyUserRole } from '@/hooks/usePropertyDelegates';
 import { useSupabaseSingle } from '@/hooks/useSupabaseQuery';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { OwnerOverviewTab } from '@/components/owner/transparency/OwnerOverviewTab';
