@@ -111,7 +111,7 @@ export default function QuickExpense() {
       });
 
       setIsSuccess(true);
-      setTimeout(() => navigate(-1), 1500);
+      setTimeout(() => navigate(APP_ROUTES.MC_FINANCE), 1500);
     } catch (error) {
       errorHandler.error(error, {
         toastTitleRu: 'Ошибка при сохранении расхода',
