@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     console.log("create-flowers-checkout: Order created:", order.id, order.order_number);
 
     // Create order items for each bouquet
-    const orderItems = items.map(item => ({
+    const orderItems: Array<Record<string, unknown>> = items.map(item => ({
       order_id: order.id,
       product_id: item.id,
       item_name: item.name,
@@ -155,15 +155,14 @@ Deno.serve(async (req) => {
       amount: item.quantity * item.price,
       status: 'pending',
     }));
-      status: 'pending',
-    }));
 
     // Add delivery fee as line item
     if (delivery_fee > 0) {
       orderItems.push({
         order_id: order.id,
-        product_id: null as any,
-        product_name: 'Delivery / Доставка',
+        product_id: null,
+        item_name: 'Delivery / Доставка',
+        item_type: 'delivery',
         qty: 1,
         unit_price: delivery_fee,
         amount: delivery_fee,
@@ -175,8 +174,9 @@ Deno.serve(async (req) => {
     if (gift_wrap && gift_wrap_fee > 0) {
       orderItems.push({
         order_id: order.id,
-        product_id: null as any,
-        product_name: 'Gift Wrap / Праздничная упаковка',
+        product_id: null,
+        item_name: 'Gift Wrap / Праздничная упаковка',
+        item_type: 'gift_wrap',
         qty: 1,
         unit_price: gift_wrap_fee,
         amount: gift_wrap_fee,
