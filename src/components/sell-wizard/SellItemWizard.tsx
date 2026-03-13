@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useUserListings } from '@/hooks/useUserListings';
 import { UserListingDraft, ItemCondition } from '@/types/userListing';
 import { useMarketplaceCategories } from '@/hooks/useMarketplace';

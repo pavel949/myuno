@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { LogIn, UserPlus, ArrowLeft, Lock, Sparkles, Shield, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';

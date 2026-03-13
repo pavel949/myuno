@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useListingApplication } from '@/hooks/useListingApplication';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 import { ListingTypeStep } from './steps/ListingTypeStep';
 import { BasicInfoStep } from './steps/BasicInfoStep';
