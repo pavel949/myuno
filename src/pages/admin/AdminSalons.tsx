@@ -70,7 +70,7 @@ export default function AdminSalons() {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) navigate(APP_ROUTES.AUTH);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
