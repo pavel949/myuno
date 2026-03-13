@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ArrowLeft, Shield, AlertTriangle, Heart, Plane, Clock, ExternalLink } from 'lucide-react';
+import { Shield, AlertTriangle, Heart, Plane, Clock, ExternalLink } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
