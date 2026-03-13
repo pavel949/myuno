@@ -1,8 +1,8 @@
 import React, { memo, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/uno/BackButton';
 import { cn } from '@/lib/utils';
 
 interface UnifiedHeaderProps {
@@ -37,14 +37,6 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   className,
 }: UnifiedHeaderProps) {
   const navigate = useNavigate();
-  
-  const handleBack = () => {
-    if (window.history.length > 2) {
-      navigate(-1);
-    } else {
-      navigate(fallbackPath);
-    }
-  };
 
   const isSearchInteractive = !!onSearchChange;
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
@@ -55,14 +47,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-2">
           {showBack && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0 h-8 w-8 rounded-xl"
-              onClick={handleBack}
-            >
-              <ArrowLeft className="h-4.5 w-4.5" />
-            </Button>
+            <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />
           )}
           
           <div className="flex-1 min-w-0">

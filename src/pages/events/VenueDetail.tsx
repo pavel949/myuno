@@ -1,4 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useVenue, VENUE_TYPES, AMENITIES_MAP } from '@/hooks/useVenues';
 import { useEvents } from '@/hooks/useEvents';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -47,9 +49,7 @@ export default function VenueDetail() {
             <p className="text-muted-foreground mb-4">
               {language === 'ru' ? 'Площадка не найдена' : 'Venue not found'}
             </p>
-            <Button onClick={() => navigate(-1)}>
-              {language === 'ru' ? 'Назад' : 'Go Back'}
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.EVENTS} />
           </div>
         </PageContainer>
       </AppLayout>

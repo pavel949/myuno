@@ -1,5 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   ChevronLeft, 
   Star, 
@@ -110,12 +112,7 @@ const VendorPage = () => {
           )}
           
           {/* Back button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center shadow-lg"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
+          <BackButton fallbackPath={APP_ROUTES.MARKET} variant="overlay" className="absolute top-4 left-4" />
 
           {/* Share button */}
           <button

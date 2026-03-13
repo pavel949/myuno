@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search as SearchIcon, X, ArrowLeft, Star, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, X, Star, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -36,9 +38,7 @@ export default function Search() {
         {/* Search Header */}
         <div className="sticky top-0 z-20 bg-background border-b border-border p-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" />
             <div className="flex-1 relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input

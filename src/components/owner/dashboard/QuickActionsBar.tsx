@@ -5,6 +5,7 @@ import {
   Plus, Receipt, Sparkles, Calendar, FileText, MessageCircle, Download, Zap, TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 const actions = [
   { 
@@ -12,49 +13,49 @@ const actions = [
     icon: Download, 
     labelEn: 'Import OTA', 
     labelRu: 'Импорт OTA',
-    path: '/mc/channels',
+    path: APP_ROUTES.MC_CHANNELS,
   },
   { 
     id: 'expense', 
     icon: Receipt, 
     labelEn: 'Add Expense', 
     labelRu: 'Расход',
-    path: '/mc/quick-expense',
+    path: APP_ROUTES.MC + '/quick-expense',
   },
   { 
     id: 'cleaning', 
     icon: Sparkles, 
     labelEn: 'Cleaning', 
     labelRu: 'Уборка',
-    path: '/mc/service-request?type=cleaning',
+    path: APP_ROUTES.MC + '/service-request?type=cleaning',
   },
   { 
     id: 'calendar', 
     icon: Calendar, 
     labelEn: 'Calendar', 
     labelRu: 'Календарь',
-    path: '/mc/calendar',
+    path: APP_ROUTES.MC_CALENDAR,
   },
   { 
     id: 'auto-msg', 
     icon: Zap, 
     labelEn: 'Auto Msgs', 
     labelRu: 'Авто-сообщ.',
-    path: '/mc/auto-messaging',
+    path: APP_ROUTES.MC + '/auto-messaging',
   },
   { 
     id: 'revenue', 
     icon: TrendingUp, 
     labelEn: 'Revenue', 
     labelRu: 'Доходы',
-    path: '/mc/finance',
+    path: APP_ROUTES.MC_FINANCE,
   },
   { 
     id: 'property', 
     icon: Plus, 
     labelEn: 'Add Property', 
     labelRu: 'Объект',
-    path: '/mc/properties/new',
+    path: APP_ROUTES.MC_PROPERTIES + '/new',
   },
 ];
 

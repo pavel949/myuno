@@ -9,7 +9,9 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { TripPositioningHero } from '@/components/trip-planner/TripPositioningHero';
 import { TripChecklist } from '@/components/trip-planner/TripChecklist';
-import { ArrowLeft, Palmtree } from 'lucide-react';
+import { Palmtree } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { motion } from 'framer-motion';
 import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
 
@@ -25,14 +27,7 @@ export default function TripPlannerPage() {
         <div className="border-b border-border/50">
           <div>
             <div className="flex items-center gap-3 p-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(-1)}
-                className="shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+              <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" />
             </div>
 
             <motion.div

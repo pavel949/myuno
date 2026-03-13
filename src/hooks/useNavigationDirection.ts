@@ -31,7 +31,7 @@ const tabOrder: Record<string, number> = {
   '/team/content': 1,
 };
 
-export type NavigationDirection = 'left' | 'right' | 'none';
+export type NavigationDirection = 'left' | 'right' | 'forward' | 'backward' | 'none';
 
 // Simple module-level store
 let storedDirection: NavigationDirection = 'none';
@@ -50,6 +50,18 @@ function getTabIndex(path: string): number {
   }
   
   return -1;
+}
+
+/** Count path segments: /mc/properties = 2, /mc/properties/abc/manage = 4 */
+function getPathDepth(path: string): number {
+  return path.split('/').filter(Boolean).length;
+}
+
+/** Check if two paths share the same root module (e.g. /mc, /vendor) */
+function isSameModule(a: string, b: string): boolean {
+  const rootA = '/' + (a.split('/').filter(Boolean)[0] || '');
+  const rootB = '/' + (b.split('/').filter(Boolean)[0] || '');
+  return rootA === rootB;
 }
 
 export const getNavigationDirection = (): NavigationDirection => storedDirection;
@@ -71,8 +83,22 @@ export const useNavigationDirection = (): NavigationDirection => {
       const prevIndex = getTabIndex(storedPrevPath);
       const currentIndex = getTabIndex(currentPath);
       
+      // Tab-level horizontal navigation (left/right slide)
       if (prevIndex !== -1 && currentIndex !== -1 && prevIndex !== currentIndex) {
         storedDirection = currentIndex > prevIndex ? 'right' : 'left';
+      } 
+      // Depth navigation within the same module (forward/backward push/pop)
+      else if (isSameModule(storedPrevPath, currentPath)) {
+        const prevDepth = getPathDepth(storedPrevPath);
+        const currentDepth = getPathDepth(currentPath);
+        
+        if (currentDepth > prevDepth) {
+          storedDirection = 'forward'; // list → detail (push)
+        } else if (currentDepth < prevDepth) {
+          storedDirection = 'backward'; // detail → list (pop)
+        } else {
+          storedDirection = 'none';
+        }
       } else {
         storedDirection = 'none';
       }

@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { Home, ArrowLeft, Search, HelpCircle } from "lucide-react";
+import { Home, Search, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { getLegacyRedirect, APP_ROUTES } from "@/lib/config/routes";
@@ -49,14 +50,7 @@ const NotFound = () => {
             <Home className="w-4 h-4" />
             {isRu ? 'На главную' : 'Go Home'}
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => navigate(-1)}
-            className="flex-1 gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {isRu ? 'Назад' : 'Go Back'}
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.HOME} variant="default" />
         </div>
 
         <div className="mt-8 flex gap-4">

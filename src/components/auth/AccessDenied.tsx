@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -196,7 +197,7 @@ export function AccessDenied({ requiredRoles, currentPath, className }: AccessDe
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(APP_ROUTES.HOME)}
               className="flex-1"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />

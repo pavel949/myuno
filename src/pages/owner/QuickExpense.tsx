@@ -19,8 +19,10 @@ import { VendorCombobox } from '@/components/owner/expense/VendorCombobox';
 import { VoiceInput } from '@/components/ui/voice-input';
 import {
   Loader2, Check, Banknote, CreditCard, ArrowLeftRight,
-  Receipt, Camera, ChevronLeft, ChevronDown, ChevronUp, RefreshCw, CalendarIcon
+  Receipt, Camera, ChevronDown, ChevronUp, RefreshCw, CalendarIcon
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -109,7 +111,7 @@ export default function QuickExpense() {
       });
 
       setIsSuccess(true);
-      setTimeout(() => navigate(-1), 1500);
+      setTimeout(() => navigate(APP_ROUTES.MC_FINANCE), 1500);
     } catch (error) {
       errorHandler.error(error, {
         toastTitleRu: 'Ошибка при сохранении расхода',
@@ -142,9 +144,7 @@ export default function QuickExpense() {
     <div className="min-h-screen bg-background pb-24">
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={() => navigate(-1)}>
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.MC_FINANCE} variant="ghost" />
           <h1 className="font-semibold">{isRu ? 'Быстрый расход' : 'Quick Expense'}</h1>
         </div>
       </div>

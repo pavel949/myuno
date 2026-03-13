@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Calendar, Users, Clock, CreditCard, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -141,7 +142,7 @@ export default function ExperienceBooking() {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigate(-1);
+      navigate(APP_ROUTES.EXPERIENCES);
     }
   };
 

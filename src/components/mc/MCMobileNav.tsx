@@ -21,7 +21,7 @@ const MC_NAV: NavItem[] = [
   { id: 'properties', icon: Home, labelEn: 'Objects', labelRu: 'Объекты', path: APP_ROUTES.MC_PROPERTIES },
   { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: APP_ROUTES.MC_CALENDAR },
   { id: 'tasks', icon: ClipboardList, labelEn: 'Tasks', labelRu: 'Задачи', path: APP_ROUTES.MC_TASKS },
-  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: '/mc/modules' },
+  { id: 'more', icon: Grid3X3, labelEn: 'More', labelRu: 'Ещё', path: APP_ROUTES.MC + '/modules' },
 ];
 
 const QUICK_ACTIONS = [

@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import { Plus, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { format } from 'date-fns';
 
 export default function JuristicRequestsPage() {
@@ -27,9 +29,7 @@ export default function JuristicRequestsPage() {
     <div className="container max-w-4xl py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.OWNER} variant="ghost" />
           <h1 className="text-xl font-bold">
             {isRu ? 'Запросы к УК' : 'Building Requests'}
           </h1>

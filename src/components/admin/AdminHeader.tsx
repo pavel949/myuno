@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Search, ChevronRight, Home, ArrowLeft, ArrowRight } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -96,12 +97,10 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
     : 'Admin';
 
   const handleGoBack = () => {
-    // If we have browser history, use it
     if (window.history.length > 2) {
       navigate(-1);
     } else {
-      // Fallback to dashboard
-      navigate('/admin');
+      navigate(APP_ROUTES.ADMIN);
     }
   };
 

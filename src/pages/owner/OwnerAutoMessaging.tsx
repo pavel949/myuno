@@ -13,6 +13,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, MessageCircle, Clock, Trash2, Zap, ArrowDown } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
 function RuleCard({ rule, isRu, onToggle, onDelete }: {
@@ -111,9 +113,7 @@ export default function OwnerAutoMessaging() {
   return (
     <div className="p-4 max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
-          <ArrowDown className="w-4 h-4 rotate-90" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.MC} variant="ghost" size="sm" />
         <div>
           <h1 className="text-lg font-semibold">{isRu ? 'Авто-сообщения' : 'Auto Messages'}</h1>
           <p className="text-xs text-muted-foreground">

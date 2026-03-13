@@ -11,11 +11,12 @@ import {
   Phone, 
   Mail, 
   Globe,
-  ChevronLeft,
   Calendar,
   Users,
   TrendingUp
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -70,14 +71,7 @@ export default function DeveloperDetail() {
     <AppLayout>
       {/* Cover */}
       <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute top-4 left-4 rounded-full"
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.DEVELOPERS} className="absolute top-4 left-4" />
       </div>
 
       {/* Profile card */}
