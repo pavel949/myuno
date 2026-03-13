@@ -5,6 +5,7 @@ import { useUtilityOverview } from '@/hooks/useUtilitySchedules';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { typedFrom } from '@/lib/untypedTables';
 
 export type HealthStatus = 'ok' | 'warning' | 'missing';
 
