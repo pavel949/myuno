@@ -69,7 +69,7 @@ function useOutreachLog() {
   return useQuery({
     queryKey: ['vendor-outreach-log'],
     queryFn: async (): Promise<OutreachLogEntry[]> => {
-      const { data, error } = await from('vendor_outreach_log')
+      const { data, error } = await typedFrom('vendor_outreach_log')
         .select(`
           id, contact_id, channel, status, followup_sequence, subject, sent_at, next_followup_at,
           crm_contacts!contact_id(first_name, last_name, company_name)
