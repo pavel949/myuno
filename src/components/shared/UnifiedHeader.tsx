@@ -1,8 +1,8 @@
 import React, { memo, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/uno/BackButton';
 import { cn } from '@/lib/utils';
 
 interface UnifiedHeaderProps {
