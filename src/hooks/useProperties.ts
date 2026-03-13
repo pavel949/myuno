@@ -407,7 +407,7 @@ export function useInstantBookingProperties(limit = 10) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('instant_booking', true)
         .order('is_featured', { ascending: false })
