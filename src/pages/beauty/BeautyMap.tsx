@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Sliders } from 'lucide-react';
+import { MapPin, Sliders } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SalonMap, { SalonMarker } from '@/components/map/SalonMap';
