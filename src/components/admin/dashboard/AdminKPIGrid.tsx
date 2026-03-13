@@ -127,7 +127,7 @@ export function AdminKPIGrid() {
       value: activeListings,
       icon: Package,
       color: 'bg-primary',
-      onClick: () => navigate('/admin/catalog'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_CATALOG),
     },
     {
       title: isRu ? 'Доход' : 'Revenue',
