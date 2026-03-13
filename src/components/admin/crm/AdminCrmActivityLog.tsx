@@ -19,7 +19,7 @@ interface ActivityEntry {
   details?: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
+
 
 function useUnifiedActivity(typeFilter?: string) {
   return useQuery({
