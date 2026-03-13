@@ -120,7 +120,7 @@ export function AdminKPIGrid() {
       change: summary?.providerGrowth,
       icon: UserPlus,
       color: 'bg-success',
-      onClick: () => navigate('/admin/providers'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_PROVIDERS),
     },
     {
       title: isRu ? 'Листинги' : 'Active Listings',
