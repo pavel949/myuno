@@ -96,12 +96,10 @@ export function AdminHeader({ onOpenCommandPalette }: AdminHeaderProps) {
     : 'Admin';
 
   const handleGoBack = () => {
-    // If we have browser history, use it
     if (window.history.length > 2) {
       navigate(-1);
     } else {
-      // Fallback to dashboard
-      navigate('/admin');
+      navigate(APP_ROUTES.ADMIN);
     }
   };
 

@@ -47,14 +47,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         {/* Top row: back, title, badge, right action */}
         <div className="flex items-center gap-3 mb-2">
           {showBack && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="shrink-0 h-8 w-8 rounded-xl"
-              onClick={handleBack}
-            >
-              <ArrowLeft className="h-4.5 w-4.5" />
-            </Button>
+            <BackButton fallbackPath={fallbackPath} variant="ghost" size="sm" />
           )}
           
           <div className="flex-1 min-w-0">
