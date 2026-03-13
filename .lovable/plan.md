@@ -1,84 +1,69 @@
 
 
-# Vendor Onboarding UX — Fast First Listing with Progressive Completion
+## Аудит последовательности навигации
 
-## Research: How Top Platforms Do It
+### Найденные проблемы
 
-| Platform | Pattern | Time-to-First-Listing |
-|----------|---------|----------------------|
-| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
-| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
-| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
-| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
+**1. Массовое использование хардкод-путей вместо APP_ROUTES**
+- **35 компонентов** используют `navigate(APP_ROUTES.*)` — правильно
+- **~260+ файлов** используют `navigate('/...')` с хардкод-строками — нарушение стандарта
+- Примеры: `navigate('/owner')`, `navigate('/mc/operations')`, `navigate('/auth')`, `navigate('/discover')`, `navigate('/beauty')` и сотни других
+- Это создаёт риск 404 при рефакторинге маршрутов
 
-**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
+**2. Непоследовательный паттерн кнопки "Назад"**
+- 35 страниц используют стандартный `<BackButton>` компонент (правильно)
+- ~28 страниц используют инлайн `navigate(-1)` с разными иконками (ArrowLeft, ChevronLeft, ArrowDown rotated) — непоследовательно
+- Некоторые страницы вообще не имеют навигации назад
 
-## Current State Analysis
+**3. Разные иконки для одного действия**
+- Кнопка "назад": используются `ChevronLeft`, `ArrowLeft`, `ArrowDown` (повёрнутый) — должна быть одна
+- `BackButton` компонент использует `ChevronLeft` — это стандарт, остальные нужно привести к нему
 
-**What exists:**
-- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
-- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
-- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
-- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
+**4. AdaptiveBottomNav использует хардкод-пути**
+- `guestNavItems`, `ownerNavItems`, `vendorNavItems` — все пути захардкожены (`'/discover'`, `'/market'`, `'/account'`)
+- `MCMobileNav` — частично использует `APP_ROUTES`, но `'/mc/modules'` захардкожен
 
-**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
+**5. PageTransition работает только для tab-навигации**
+- Slide-анимация работает для переключения между табами BottomNav
+- Для перехода вглубь (list → detail) анимация одинаковая (fade up/down) — нет ощущения "вперёд/назад"
 
-## Proposed UX: "3-Screen Fast Start"
+---
+
+### План исправлений
+
+#### Фаза 1: Стандартизация кнопки "Назад" (приоритет)
+Заменить все инлайн `navigate(-1)` + custom back buttons на `<BackButton>` из `@/components/uno/BackButton` в ~28 файлах. Это обеспечит:
+- Единый внешний вид (ChevronLeft, округлая кнопка)
+- Надёжный fallback вместо `navigate(-1)` (который может вывести за пределы приложения)
+- Правильный `fallbackPath` для каждой страницы
+
+**Файлы для обновления**: Search.tsx, DeveloperDetail.tsx, ProjectDetail.tsx, QuickExpense.tsx, OwnerAutoMessaging.tsx, KnowledgeHub.tsx, WishlistPage.tsx, TravelInsurance.tsx, ServiceFunctionOrder.tsx, JuristicRequestsPage.tsx, OwnerTransparencyDashboard.tsx и другие.
+
+#### Фаза 2: Миграция на APP_ROUTES
+Поэтапно заменить хардкод-пути на `APP_ROUTES.*` в компонентах навигации:
+1. **AdaptiveBottomNav** — все navItems
+2. **QuickActionsBar**, **OwnerQuickActions**, **AdminQuickActionsGrid** — все action paths
+3. Остальные компоненты — постепенно по модулям
+
+#### Фаза 3: Push/Pop анимации для глубокой навигации
+Добавить в `useNavigationDirection` определение глубины навигации (list→detail = "forward", detail→list = "backward") для соответствующих slide-анимаций, создающих ощущение стека.
+
+---
+
+### Техническая секция
 
 ```text
-Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
-┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
-│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
-│ [____________]   │           │ Name *            │              │                  │
-│                  │           │ [____________]    │              │  Your listing is │
-│ Category *       │           │                   │              │  pending review  │
-│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
-│                  │           │ [____] THB        │              │  Complete your   │
-│ Phone / WhatsApp │           │                   │              │  profile to get  │
-│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
-│                  │           │ [📷 Upload]       │              │                  │
-│         [Next →] │           │                   │              │  [→ Dashboard]   │
-└──────────────────┘           │ Brief description │              └──────────────────┘
-                               │ [____________]    │
-                               │         [List →]  │
-                               └──────────────────┘
+Текущее состояние:
+┌─────────────────────────┬───────┬──────────┐
+│ Паттерн                 │ Файлы │ Статус   │
+├─────────────────────────┼───────┼──────────┤
+│ navigate(APP_ROUTES.*)  │  ~35  │ ✅ OK    │
+│ navigate('/hardcoded')  │ ~260  │ ❌ Fix   │
+│ <BackButton>            │  ~35  │ ✅ OK    │
+│ navigate(-1) inline     │  ~28  │ ❌ Fix   │
+│ BottomNav hardcoded     │   4   │ ❌ Fix   │
+└─────────────────────────┴───────┴──────────┘
 ```
 
-**Required fields total: 4** (business name, category, service name, price)
-Everything else: progressive completion via existing `VendorOnboardingChecklist`.
-
-## Implementation Plan
-
-### 1. Refactor VendorOnboarding into 3-step wizard
-Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
-- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
-- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
-- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
-
-### 2. Update VendorOnboardingChecklist
-Expand from 3 to 6 progressive items:
-- ✅ Create account (auto-complete)
-- ✅ Add first listing (auto-complete from step 2)
-- ○ Add business description
-- ○ Upload logo / cover photo
-- ○ Add working hours
-- ○ Add payment details
-
-Each item links to the relevant settings section.
-
-### 3. Wire the data flow
-- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
-- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
-- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
-
-### 4. Update entry points
-- `/vendor/onboarding` → renders new 3-step wizard
-- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
-
-### Technical Details
-- Reuse existing `OnboardingLayout` component for step progress UI
-- Reuse `UnifiedMediaUploader` for photo upload in step 2
-- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
-- No new DB tables or migrations required
-- No new Edge Functions required
+Фазы 1 и 2 — основная работа. Фаза 3 — улучшение UX.
 
