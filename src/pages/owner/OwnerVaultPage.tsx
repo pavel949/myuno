@@ -138,8 +138,8 @@ export default function OwnerVaultPage() {
     try {
       await deleteMut.mutateAsync(file);
       toast.success(isRu ? 'Удалено' : 'Deleted');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 
