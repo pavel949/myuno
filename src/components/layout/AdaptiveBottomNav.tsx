@@ -38,46 +38,46 @@ type NavItem = {
 
 // Guest/User navigation — 4 tabs + center apps button
 const guestNavItems: NavItem[] = [
-  { path: '/', icon: Home, labelEn: 'Home', labelRu: 'Главная' },
-  { path: '/discover', icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
+  { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная' },
+  { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
   // Center slot is for "Apps" button (handled separately)
-  { path: '/market', icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
-  { path: '/account', icon: User, labelEn: 'Me', labelRu: 'Профиль' },
+  { path: APP_ROUTES.MARKET, icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
+  { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
 
 // Owner/Host navigation
 const ownerNavItems: NavItem[] = [
-  { path: '/mc', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/mc/properties', icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
-  { path: '/mc/calendar', icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
-  { path: '/mc/messages', icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
+  { path: APP_ROUTES.MC, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
+  { path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays, labelEn: 'Calendar', labelRu: 'Календарь' },
+  { path: APP_ROUTES.MC_MESSAGES, icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
 ];
 
 // Vendor navigation
 const vendorNavItems: NavItem[] = [
-  { path: '/vendor', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/vendor/services', icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
-  { path: '/vendor/bookings', icon: Calendar, labelEn: 'Bookings', labelRu: 'Заказы' },
+  { path: APP_ROUTES.VENDOR, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: APP_ROUTES.VENDOR_SERVICES, icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
+  { path: APP_ROUTES.VENDOR_BOOKINGS, icon: Calendar, labelEn: 'Bookings', labelRu: 'Заказы' },
   { path: '/vendor/payouts', icon: Wallet, labelEn: 'Payouts', labelRu: 'Выплаты' },
-  { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
+  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
 // Admin navigation
 const adminNavItems: NavItem[] = [
-  { path: '/admin', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/admin/leads', icon: UserCheck, labelEn: 'Leads', labelRu: 'Лиды' },
   { path: '/admin/tickets', icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
+  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
 // Team navigation
 const teamNavItems: NavItem[] = [
-  { path: '/team', icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
+  { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
   { path: '/admin/leads', icon: Users, labelEn: 'Leads', labelRu: 'Лиды' },
-  { path: '/profile', icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
+  { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
 // Routes that have their own fixed bottom bar and should hide the global nav
