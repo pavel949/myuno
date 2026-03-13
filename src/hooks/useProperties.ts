@@ -388,7 +388,7 @@ export function useFeaturedProperties(limit = 6) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
