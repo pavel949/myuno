@@ -332,8 +332,8 @@ export function OdooCrmSettingsImportModal({
 
       onOpenChange(false);
       reset();
-    } catch (error: any) {
-      toast.error(error?.message || (isRu ? 'Ошибка импорта' : 'Import error'));
+    } catch (error: unknown) {
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка импорта' : 'Import error'));
     } finally {
       setImporting(false);
     }

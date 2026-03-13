@@ -214,9 +214,9 @@ export default function AdminCities() {
           : (isRu ? 'Город активирован' : 'City activated')
       );
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error toggling city:', error);
-      toast.error(error.message || (isRu ? 'Ошибка' : 'Error'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
     }
   };
 

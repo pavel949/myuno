@@ -71,9 +71,9 @@ export default function MCRegistrationPage() {
       
       // Redirect to MC workspace after short delay
       setTimeout(() => navigate('/mc'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('MC registration error:', err);
-      toast.error(err?.message || (isRu ? 'Ошибка регистрации' : 'Registration failed'));
+      toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка регистрации' : 'Registration failed'));
     } finally {
       setIsSubmitting(false);
     }

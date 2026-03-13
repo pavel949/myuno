@@ -97,8 +97,8 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       setRole('staff');
       onOpenChange(false);
       onSuccess?.();
-    } catch (err: any) {
-      const errorMessage = typeof err?.message === 'string' ? err.message : '';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '';
       const invalidEmailFromBackend = errorMessage.toLowerCase().includes('invalid email');
 
       toast({

@@ -58,7 +58,7 @@ export function VendorReviewSheet({ vendorId, vendorName, propertyId, taskId, tr
       });
       toast.success(isRu ? 'Оценка сохранена' : 'Review saved');
       setOpen(false); setQuality(0); setSpeed(0); setCommunication(0); setNotes('');
-    } catch (e: any) { toast.error(e.message); }
+    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Error'); }
   };
 
   return (

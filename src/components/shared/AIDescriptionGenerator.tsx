@@ -68,9 +68,9 @@ export function AIDescriptionGenerator({
         onChange(data.description);
         toast.success(language === 'ru' ? 'Описание сгенерировано' : 'Description generated');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Generation error:', err);
-      if (err.message?.includes('429')) {
+      if (err instanceof Error && err.message?.includes('429')) {
         toast.error(language === 'ru' ? 'Слишком много запросов. Попробуйте позже.' : 'Too many requests. Try again later.');
       } else {
         toast.error(language === 'ru' ? 'Не удалось сгенерировать описание' : 'Failed to generate description');

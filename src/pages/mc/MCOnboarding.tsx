@@ -208,8 +208,8 @@ const MCOnboarding: React.FC = () => {
       }
       setInvites([...invites]);
       toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitations');
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
     } finally {
       setLoading(false);
       setStep(4);

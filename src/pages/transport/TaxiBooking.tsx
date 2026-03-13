@@ -135,10 +135,10 @@ export default function TaxiBooking() {
         title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
         description: address,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       let message = language === 'ru' ? 'Не удалось определить местоположение' : 'Could not get location';
       
-      if (error.code === 1) {
+      if (error && typeof error === 'object' && 'code' in error && (error as { code: number }).code === 1) {
         message = language === 'ru' 
           ? 'Доступ к геолокации запрещён. Разрешите в настройках браузера.' 
           : 'Location access denied. Enable in browser settings.';

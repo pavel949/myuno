@@ -286,9 +286,9 @@ export default function AdminLocationKnowledge() {
           : (isRu ? 'Статья опубликована' : 'Article published')
       );
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error toggling:', error);
-      toast.error(error.message || (isRu ? 'Ошибка' : 'Error'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
     }
   };
 

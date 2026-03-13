@@ -70,9 +70,9 @@ export function AIIntakeDialog({
       } else {
         throw new Error('No data extracted');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AI Intake error:', err);
-      setError(err.message || 'Processing failed');
+      setError(err instanceof Error ? err.message : 'Processing failed');
       toast.error(isRu ? 'Ошибка обработки' : 'Processing failed');
     } finally {
       setIsProcessing(false);

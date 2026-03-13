@@ -101,8 +101,8 @@ export function CurrencyRatesEditor() {
       toast.success('Курсы валют обновлены');
       setHasChanges(false);
       loadRates();
-    } catch (error: any) {
-      toast.error(error.message || 'Ошибка сохранения');
+    } catch (error: unknown) {
+      toast.error((error instanceof Error ? error.message : '') || 'Ошибка сохранения');
     } finally {
       setIsSaving(false);
     }

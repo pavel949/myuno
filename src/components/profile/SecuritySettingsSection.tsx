@@ -141,7 +141,7 @@ export function SecuritySettingsSection() {
       toast.success(t.passwordChanged);
       setPasswordDialogOpen(false);
       setPasswordForm({ newPassword: '', confirmPassword: '' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(t.passwordError);
       console.error('Password change error:', error);
     } finally {
