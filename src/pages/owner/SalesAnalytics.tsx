@@ -4,7 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAgentDeals, useMyCompanyId, useCompanyMembers, DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, STAGE_PROBABILITIES, formatValue } from '@/hooks/useAgentDeals';
 import { AgentLeaderboard } from '@/components/owner/sales/AgentLeaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format, subMonths, startOfMonth, addMonths } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -121,9 +123,7 @@ export default function SalesAnalytics() {
   return (
     <div className="px-4 pt-4 pb-24 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/mc/sales')} className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        <BackButton fallbackPath={APP_ROUTES.MC_SALES} variant="ghost" size="sm" />
         <h1 className="text-xl font-bold">{isRu ? 'Аналитика продаж' : 'Sales Analytics'}</h1>
       </div>
 

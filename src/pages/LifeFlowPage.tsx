@@ -5,13 +5,13 @@
  */
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations, useResolveLifeOSContext } from '@/hooks/useLifeOS';
 import { useLifeOSRoute } from '@/hooks/useLifeOSRoutes';
 import { useEnrichCatalogItems } from '@/hooks/useEnrichCatalogItems';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/button';
 import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GuidedFallback } from '@/components/life-flow/GuidedFallback';
@@ -19,7 +19,8 @@ import { RouteRecognitionBlock } from '@/components/life-flow/RouteRecognitionBl
 import { RouteNextSteps } from '@/components/life-flow/RouteNextSteps';
 import { LifeFlowCatalogGrid } from '@/components/life-flow/LifeFlowCatalogGrid';
 import { InsurancePromptBlock, shouldShowInsurancePrompt } from '@/components/life-flow/InsurancePromptBlock';
-import { ArrowLeft, Compass } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { motion } from 'framer-motion';
@@ -54,14 +55,7 @@ export default function LifeFlowPage() {
         {/* HEADER */}
         <div className="border-b border-border/50">
           <div className="flex items-center gap-3 p-4 max-w-5xl mx-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" size="sm" />
           </div>
 
           {currentSituation && (

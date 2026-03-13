@@ -11,7 +11,8 @@ import { useSupabaseSingle } from '@/hooks/useSupabaseQuery';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Eye, Building2, Calendar, DollarSign, Wrench, FileText, Zap, MessageSquare, Home } from 'lucide-react';
+import { Eye, Building2, Calendar, DollarSign, Wrench, FileText, Zap, MessageSquare, Home } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { OwnerOverviewTab } from '@/components/owner/transparency/OwnerOverviewTab';
 import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab';
@@ -94,9 +95,7 @@ export default function OwnerPortalPropertyView() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate('/my-property')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <BackButton fallbackPath="/my-property" variant="ghost" size="sm" />
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold truncate">{propertyTitle || (isRu ? 'Объект' : 'Property')}</h1>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

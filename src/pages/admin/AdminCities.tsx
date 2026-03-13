@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Globe, Plus, MapPin, Check, X, Calendar, 
-  Edit2, Trash2, ChevronRight, Loader2, ArrowLeft 
+  Edit2, Trash2, ChevronRight, Loader2 
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCities, City } from '@/hooks/useCities';
@@ -233,10 +235,7 @@ export default function AdminCities() {
   return (
     <>
       <div className="container max-w-4xl mx-auto px-4 py-6 pb-24">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin')} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {isRu ? 'Назад' : 'Back'}
-        </Button>
+        <div className="mb-4"><BackButton fallbackPath={APP_ROUTES.ADMIN} variant="ghost" size="sm" /></div>
         
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-primary/10">

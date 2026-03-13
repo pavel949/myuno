@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
@@ -111,7 +112,7 @@ export function AdminKPIGrid() {
       change: summary?.userGrowth,
       icon: Users,
       color: 'bg-info',
-      onClick: () => navigate('/admin/users'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_USERS),
     },
     {
       title: isRu ? 'Провайдеры' : 'Providers',
@@ -119,14 +120,14 @@ export function AdminKPIGrid() {
       change: summary?.providerGrowth,
       icon: UserPlus,
       color: 'bg-success',
-      onClick: () => navigate('/admin/providers'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_PROVIDERS),
     },
     {
       title: isRu ? 'Листинги' : 'Active Listings',
       value: activeListings,
       icon: Package,
       color: 'bg-primary',
-      onClick: () => navigate('/admin/catalog'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_CATALOG),
     },
     {
       title: isRu ? 'Доход' : 'Revenue',
@@ -134,14 +135,14 @@ export function AdminKPIGrid() {
       change: summary?.revenueGrowth,
       icon: DollarSign,
       color: 'bg-warning',
-      onClick: () => navigate('/admin/finance'),
+      onClick: () => navigate(APP_ROUTES.ADMIN_FINANCE),
     },
     {
       title: isRu ? 'На модерации' : 'Pending',
       value: pendingApprovals,
       icon: AlertCircle,
       color: pendingApprovals > 0 ? 'bg-destructive' : 'bg-muted-foreground',
-      onClick: () => navigate('/admin/operations?tab=moderation'),
+      onClick: () => navigate(`${APP_ROUTES.ADMIN_OPERATIONS}?tab=moderation`),
     },
     {
       title: isRu ? 'Здоровье' : 'System Health',

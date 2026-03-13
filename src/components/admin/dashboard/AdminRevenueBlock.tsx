@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
 import { Surface } from '@/components/ui/surface';
@@ -48,14 +49,14 @@ export function AdminRevenueBlock() {
       padding="sm" 
       radius="xl"
       className="cursor-pointer hover:bg-muted/50 transition-colors"
-      onClick={() => navigate('/admin/finance')}
+      onClick={() => navigate(APP_ROUTES.ADMIN_FINANCE)}
     >
       {/* Header */}
       <SectionHeader
         title={isRu ? 'Финансы' : 'Finances'}
         icon={DollarSign}
         size="sm"
-        action={{ label: isRu ? 'Подробнее' : 'Details', onClick: () => navigate('/admin/finance') }}
+        action={{ label: isRu ? 'Подробнее' : 'Details', onClick: () => navigate(APP_ROUTES.ADMIN_FINANCE) }}
         className="mb-1"
       />
 

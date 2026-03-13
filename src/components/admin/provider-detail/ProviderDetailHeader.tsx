@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, CheckCircle, XCircle, Edit, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Edit, Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { ContentCreatorMenu } from '@/components/admin/ContentCreatorMenu';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -42,9 +44,7 @@ export function ProviderDetailHeader({ provider, onUpdate }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/providers')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.ADMIN_PROVIDERS} variant="ghost" size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold truncate">{provider.name}</h1>

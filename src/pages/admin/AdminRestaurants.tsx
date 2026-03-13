@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
@@ -106,11 +107,11 @@ export default function AdminRestaurants() {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) navigate(APP_ROUTES.AUTH);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
-    if (!adminLoading && !isAdmin && user) navigate('/');
+    if (!adminLoading && !isAdmin && user) navigate(APP_ROUTES.HOME);
   }, [isAdmin, adminLoading, user, navigate]);
 
   const resetForm = () => {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
@@ -102,12 +103,12 @@ const AdminStores = () => {
   }
 
   if (!user) {
-    navigate('/auth');
+    navigate(APP_ROUTES.AUTH);
     return null;
   }
 
   if (!isAdmin) {
-    navigate('/');
+    navigate(APP_ROUTES.HOME);
     return null;
   }
 

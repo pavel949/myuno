@@ -5,7 +5,8 @@ import { SEOHead } from '@/components/seo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLocation } from '@/contexts/LocationContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useKnowledgeArticle, getSectionMeta } from '@/hooks/useLocationKnowledge';
@@ -77,14 +78,7 @@ export default function KnowledgeArticlePage() {
       <PageContainer className="pb-32">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(`/knowledge/${section}`)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath={section ? APP_ROUTES.KNOWLEDGE_SECTION(section) : APP_ROUTES.KNOWLEDGE} variant="ghost" size="sm" />
           <div className="flex-1">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">
               {sectionMeta?.label}

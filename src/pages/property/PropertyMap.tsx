@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sliders, MapPin, Loader2 } from 'lucide-react';
+import { Sliders, MapPin, Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SalonMap from '@/components/map/SalonMap';
@@ -76,15 +78,7 @@ export default function PropertyMap() {
       <div className="h-[calc(100vh-60px)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <button
-            onClick={() => navigate('/property')}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">
-              {language === 'ru' ? 'Назад' : 'Back'}
-            </span>
-          </button>
+          <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" />
           
           <h1 className="font-display font-semibold">
             {language === 'ru' ? 'Карта объектов' : 'Property Map'}

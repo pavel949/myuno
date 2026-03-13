@@ -25,6 +25,8 @@ import {
   AlertTriangle,
   FileSearch
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -141,14 +143,7 @@ export default function OffplanDetail() {
 
         {/* Top actions */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <Button
-            variant="secondary"
-            size="icon"
-            className="rounded-full bg-white/90 hover:bg-white"
-            onClick={() => navigate(-1)}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
           <div className="flex gap-2">
             <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white">
               <Share2 className="w-5 h-5" />

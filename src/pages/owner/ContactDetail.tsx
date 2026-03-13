@@ -23,12 +23,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import {
-  ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon,
+  Phone, Mail, MessageCircle, Send as TelegramIcon,
   Clock, Pencil, Trash2, ChevronRight, ChevronLeft, Plus, Cake, Users, Heart,
   Briefcase, Globe, Star, SendHorizonal, FileText, DollarSign, MapPin,
   ListTodo, CheckCircle, Sparkles, CalendarDays, ShoppingCart, Receipt,
   Building2, User, ExternalLink, Hash, Smartphone,
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow, format, differenceInYears } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
@@ -210,10 +211,7 @@ export default function ContactDetail() {
       {/* ─── Top bar: Back + breadcrumb + actions ─── */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate(APP_ROUTES.MC_CONTACTS)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            {isRu ? 'Контакты' : 'Contacts'}
-          </button>
+          <BackButton fallbackPath={APP_ROUTES.MC_CONTACTS} variant="ghost" size="sm" />
           <span className="text-muted-foreground/40">/</span>
           <span className="text-sm font-medium truncate max-w-[200px]">
             {contact.is_company ? contact.company_name || `${contact.first_name} ${contact.last_name}` : `${contact.first_name} ${contact.last_name}`}
