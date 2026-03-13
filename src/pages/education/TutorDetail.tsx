@@ -85,9 +85,7 @@ export default function TutorDetail() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="relative bg-gradient-to-r from-indigo-500 to-purple-600 pt-4 pb-24">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/education')} className="absolute top-4 left-4 text-white hover:bg-white/20">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.EDUCATION} variant="overlay" size="md" className="absolute top-4 left-4" />
         <FavoriteButton itemType="tutor" itemId={tutor.id} itemData={{ name: tutor.name_en, specialty_en: tutor.name_en, specialty_ru: tutor.name_ru, image, price: tutor.price_per_hour, currency: tutor.currency || '฿', rating: tutor.rating }} className="absolute top-4 right-4" />
       </div>
 

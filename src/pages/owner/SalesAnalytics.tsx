@@ -123,9 +123,7 @@ export default function SalesAnalytics() {
   return (
     <div className="px-4 pt-4 pb-24 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/mc/sales')} className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
+        <BackButton fallbackPath={APP_ROUTES.MC_SALES} variant="ghost" size="sm" />
         <h1 className="text-xl font-bold">{isRu ? 'Аналитика продаж' : 'Sales Analytics'}</h1>
       </div>
 

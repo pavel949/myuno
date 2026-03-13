@@ -54,14 +54,7 @@ export default function LifeFlowPage() {
         {/* HEADER */}
         <div className="border-b border-border/50">
           <div className="flex items-center gap-3 p-4 max-w-5xl mx-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" size="sm" />
           </div>
 
           {currentSituation && (

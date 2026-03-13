@@ -51,10 +51,7 @@ export default function AdminProviderDetail() {
             <h3 className="font-medium mb-2">
               {isRussian ? 'Провайдер не найден' : 'Provider not found'}
             </h3>
-            <Button variant="outline" onClick={() => navigate('/admin/providers')}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {isRussian ? 'Назад к списку' : 'Back to list'}
-            </Button>
+            <BackButton fallbackPath={`${APP_ROUTES.ADMIN}/providers`} variant="default" size="md" />
           </CardContent>
         </Card>
       </div>

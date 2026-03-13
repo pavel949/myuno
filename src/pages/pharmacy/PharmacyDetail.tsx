@@ -92,14 +92,7 @@ export default function PharmacyDetail() {
             className="w-full h-48 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 left-4 bg-background/80 backdrop-blur-sm"
-            onClick={() => navigate('/pharmacy')}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <BackButton fallbackPath={APP_ROUTES.PHARMACY} variant="overlay" size="md" className="absolute top-4 left-4" />
           {pharmacy.is_24h && (
             <Badge className="absolute top-4 right-4 bg-success text-success-foreground">{t('pharmacy.24h')}</Badge>
           )}

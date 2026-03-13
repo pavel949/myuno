@@ -85,10 +85,7 @@ export default function ServicesMap() {
     <AppLayout>
       <div className="h-[calc(100vh-60px)] flex flex-col">
         <div className="flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm border-b border-border/50">
-          <button onClick={() => navigate('/services')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">{language === 'ru' ? 'Назад' : 'Back'}</span>
-          </button>
+          <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" size="sm" />
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта мастеров' : 'Professionals Map'}</h1>
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>

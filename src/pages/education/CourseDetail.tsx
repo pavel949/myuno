@@ -94,9 +94,7 @@ export default function CourseDetail() {
       <div className="relative h-72">
         <img src={heroImage} alt={title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <Button variant="ghost" size="icon" onClick={() => navigate('/education')} className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <BackButton fallbackPath={APP_ROUTES.EDUCATION} variant="overlay" size="md" className="absolute top-4 left-4" />
         <div className="absolute top-4 right-4 flex gap-2">
           <FavoriteButton itemType="course" itemId={course.id} itemData={{ title_en: course.name_en, title_ru: course.name_ru, images, price, currency: course.currency || '฿', category: course.provider_type, rating: course.rating }} />
           {course.age_groups && (
