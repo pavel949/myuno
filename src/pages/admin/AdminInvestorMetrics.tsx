@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { SectionHeader } from '@/components/ds';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, DollarSign, BarChart3, Activity, ShoppingCart } from 'lucide-react';

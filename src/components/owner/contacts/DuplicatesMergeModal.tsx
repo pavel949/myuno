@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact, CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmCustomFields, useCrmCustomFieldValues, useUpsertCustomFieldValue } from '@/hooks/useCrmCustomFields';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { Button } from '@/components/ui/button';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Merge, Loader2, User, Mail, Phone, Briefcase, Tag } from 'lucide-react';

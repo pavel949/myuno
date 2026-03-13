@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { motion } from 'framer-motion';
 import { 
   User, MapPin, Calendar, Star, ShoppingBag, Heart,
