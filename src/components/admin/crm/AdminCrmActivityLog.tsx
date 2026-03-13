@@ -68,7 +68,7 @@ function useUnifiedActivity(typeFilter?: string) {
           .select('id, owner_name, status, created_at')
           .order('created_at', { ascending: false })
           .limit(20);
-        (data || []).forEach((o: any) => {
+        (data || []).forEach((o: Record<string, unknown>) => {
           entries.push({
             id: `o-${o.id}`,
             type: 'owner',
