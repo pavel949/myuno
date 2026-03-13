@@ -5,6 +5,7 @@ import { useUtilityOverview } from '@/hooks/useUtilitySchedules';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { typedFrom } from '@/lib/untypedTables';
 
 export type HealthStatus = 'ok' | 'warning' | 'missing';
 
@@ -65,8 +66,8 @@ function usePortalSettingsOverview(propertyIds: string[]) {
     queryKey: ['portal-settings-overview', propertyIds],
     queryFn: async () => {
       if (!propertyIds.length) return [];
-      const { data, error } = await (supabase as any)
-        .from('owner_portal_settings')
+      const { data, error } = await typedFrom('owner_portal_settings')
+        .select('property_id')
         .select('property_id')
         .in('property_id', propertyIds);
       if (error) throw error;

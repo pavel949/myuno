@@ -3,53 +3,33 @@
  * CRUD hooks for crm_pipelines and crm_pipeline_stages
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom, type CrmPipelineRow, type CrmPipelineStageRow } from '@/lib/untypedTables';
 
-export interface CrmPipeline {
-  id: string;
-  company_id: string;
-  name_en: string;
-  name_ru: string;
-  pipeline_type: string;
-  is_default: boolean;
-  sort_order: number;
-  is_active: boolean;
-  created_at: string;
-}
-
-export interface CrmPipelineStage {
-  id: string;
-  pipeline_id: string;
-  name_en: string;
-  name_ru: string;
-  probability: number;
-  color: string | null;
-  sort_order: number;
-  is_won: boolean;
-  is_lost: boolean;
-}
+export type CrmPipeline = CrmPipelineRow;
+export type CrmPipelineStage = CrmPipelineStageRow;
 
 export interface PipelineWithStages extends CrmPipeline {
   stages: CrmPipelineStage[];
 }
 
-const from = (table: string) => (supabase as any).from(table);
+const pipelinesTable = () => typedFrom('crm_pipelines');
+const stagesTable = () => typedFrom('crm_pipeline_stages');
 
 export function useCrmPipelines(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-pipelines', companyId],
     queryFn: async (): Promise<PipelineWithStages[]> => {
-      const { data: pipelines, error: pErr } = await from('crm_pipelines')
+      const { data: pipelines, error: pErr } = await pipelinesTable()
         .select('*')
         .eq('company_id', companyId!)
         .eq('is_active', true)
         .order('sort_order');
       if (pErr) throw pErr;
 
-      const pipelineIds = (pipelines || []).map((p: { id: string }) => p.id);
+      const pipelineIds = (pipelines || []).map((p: CrmPipelineRow) => p.id);
       if (pipelineIds.length === 0) return [];
 
-      const { data: stages, error: sErr } = await from('crm_pipeline_stages')
+      const { data: stages, error: sErr } = await stagesTable()
         .select('*')
         .in('pipeline_id', pipelineIds)
         .order('sort_order');
@@ -75,7 +55,7 @@ export function useCreatePipeline() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (pipeline: { company_id: string; name_en: string; name_ru: string; pipeline_type?: string; is_default?: boolean }) => {
-      const { data, error } = await from('crm_pipelines').insert(pipeline).select().single();
+      const { data, error } = await pipelinesTable().insert(pipeline).select().single();
       if (error) throw error;
       return data as CrmPipeline;
     },
@@ -89,7 +69,7 @@ export function useUpdatePipeline() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmPipeline> & { id: string }) => {
-      const { error } = await from('crm_pipelines').update(updates).eq('id', id);
+      const { error } = await pipelinesTable().update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -102,7 +82,7 @@ export function useCreatePipelineStage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (stage: Omit<CrmPipelineStage, 'id'>) => {
-      const { data, error } = await from('crm_pipeline_stages').insert(stage).select().single();
+      const { data, error } = await stagesTable().insert(stage).select().single();
       if (error) throw error;
       return data as CrmPipelineStage;
     },
@@ -116,7 +96,7 @@ export function useUpdatePipelineStage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmPipelineStage> & { id: string }) => {
-      const { error } = await from('crm_pipeline_stages').update(updates).eq('id', id);
+      const { error } = await stagesTable().update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -129,7 +109,7 @@ export function useDeletePipelineStage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_pipeline_stages').delete().eq('id', id);
+      const { error } = await stagesTable().delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -145,13 +125,13 @@ export function useEnsureDefaultPipeline(companyId: string | undefined) {
 
   const ensureDefault = async () => {
     if (!companyId) return null;
-    const { data } = await from('crm_pipelines')
+    const { data } = await pipelinesTable()
       .select('id')
       .eq('company_id', companyId)
       .eq('is_default', true)
       .limit(1)
       .maybeSingle();
-    if (data) return data.id as string;
+    if (data) return (data as { id: string }).id;
 
     // Create default Sales pipeline
     const pipeline = await createPipeline.mutateAsync({

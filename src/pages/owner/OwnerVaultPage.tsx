@@ -101,8 +101,9 @@ export default function OwnerVaultPage() {
           docType: uploadDocType,
           description: uploadDescription,
         });
-      } catch (e: any) {
-        toast.error(`${file.name}: ${e.message}`);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Upload failed';
+        toast.error(`${file.name}: ${msg}`);
       }
     }
     toast.success(isRu ? 'Файлы загружены' : 'Files uploaded');
@@ -119,8 +120,8 @@ export default function OwnerVaultPage() {
       setCopiedToken(file.id);
       toast.success(isRu ? 'Ссылка скопирована (7 дней)' : 'Share link copied (7 days)');
       setTimeout(() => setCopiedToken(null), 3000);
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 
@@ -128,8 +129,8 @@ export default function OwnerVaultPage() {
     try {
       const url = await signedUrlMut.mutateAsync(file.file_path);
       window.open(url, '_blank');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 
@@ -138,8 +139,8 @@ export default function OwnerVaultPage() {
     try {
       await deleteMut.mutateAsync(file);
       toast.success(isRu ? 'Удалено' : 'Deleted');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 

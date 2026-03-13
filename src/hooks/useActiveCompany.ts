@@ -41,6 +41,16 @@ const STORAGE_KEY = 'uno-active-company-id';
 /** Query keys that are NOT company-scoped and should survive a switch */
 const PRESERVED_KEY_PREFIXES = ['user-companies', 'user-roles', 'user-context', 'profile'];
 
+interface MCMemberRow {
+  company_id: string;
+  role: string;
+  management_companies: {
+    name_en: string;
+    name_ru: string;
+    logo: string | null;
+  };
+}
+
 export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -58,8 +68,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
         .eq('is_active', true);
       if (error) throw error;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data || []).map((m: any) => ({
+      return (data || []).map((m: MCMemberRow) => ({
         company_id: m.company_id,
         role: m.role,
         name_en: m.management_companies.name_en,

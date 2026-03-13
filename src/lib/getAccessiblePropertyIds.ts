@@ -18,6 +18,9 @@ export interface AccessiblePropertyIdsResult {
   allIds: string[];
 }
 
+interface IdRow { id: string }
+interface PropertyIdRow { property_id: string }
+
 /**
  * Returns all property IDs the user can access:
  * 1. Directly owned (properties.owner_id)
@@ -40,12 +43,12 @@ export async function getAccessiblePropertyIds(
     // 3. Company properties (noop if no activeCompanyId)
     activeCompanyId
       ? supabase.from('properties').select('id').eq('management_company_id', activeCompanyId)
-      : Promise.resolve({ data: [] as { id: string }[], error: null }),
+      : Promise.resolve({ data: [] as IdRow[], error: null }),
   ]);
 
-  const ownedIds = (ownedRes.data || []).map(p => p.id);
-  const delegatedIds = (delegatedRes.data || []).map((d: any) => d.property_id as string);
-  const companyIds = (companyRes.data || []).map((p: any) => p.id as string);
+  const ownedIds = (ownedRes.data || []).map((p: IdRow) => p.id);
+  const delegatedIds = (delegatedRes.data || []).map((d: PropertyIdRow) => d.property_id);
+  const companyIds = (companyRes.data || []).map((p: IdRow) => p.id);
 
   const allIds = [...new Set([...ownedIds, ...delegatedIds, ...companyIds])];
 

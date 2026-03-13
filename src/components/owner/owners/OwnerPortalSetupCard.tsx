@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -91,7 +92,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
         );
         // Create pending delegates for all properties
         for (const prop of properties) {
-          await (supabase as any).from('property_delegates').upsert({
+          await typedFrom('property_delegates').upsert({
             property_id: prop.id,
             invited_email: email,
             status: 'pending',
@@ -103,14 +104,13 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
       }
 
       // 2. Link user to CRM contact
-      await (supabase as any)
-        .from('crm_contacts')
+      await typedFrom('crm_contacts')
         .update({ linked_user_id: profile.id })
         .eq('id', contactId);
 
       // 3. Create portal settings for each property
       for (const prop of properties) {
-        await (supabase as any).from('owner_portal_settings').upsert({
+        await typedFrom('owner_portal_settings').upsert({
           property_id: prop.id,
           owner_user_id: profile.id,
           company_id: companyId,
@@ -130,7 +130,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
         }, { onConflict: 'property_id,owner_user_id' });
 
         // 4. Create property delegate
-        await (supabase as any).from('property_delegates').upsert({
+        await typedFrom('property_delegates').upsert({
           property_id: prop.id,
           user_id: profile.id,
           status: 'active',
@@ -141,7 +141,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
       toast.success(isRu ? 'Портал активирован!' : 'Portal activated!');
       queryClient.invalidateQueries({ queryKey: ['owner-portal-settings-all'] });
       queryClient.invalidateQueries({ queryKey: ['owner-accounts'] });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Portal activation error:', err);
       toast.error(isRu ? 'Ошибка активации портала' : 'Portal activation error');
     } finally {

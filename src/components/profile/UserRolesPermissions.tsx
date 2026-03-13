@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import { useUserRoles, ROLE_CONFIG } from '@/hooks/useUserRoles';
 import { useQuery } from '@tanstack/react-query';
+import { typedFrom } from '@/lib/untypedTables';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { SectionCard } from '@/components/uno/SectionCard';
@@ -51,8 +52,7 @@ export function UserRolesPermissions() {
     queryKey: ['user-module-permissions', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data, error } = await supabase
-        .from('team_member_permissions' as any)
+      const { data, error } = await typedFrom('team_member_permissions')
         .select('company_id, module, can_view, can_edit, can_export')
         .eq('user_id', user.id);
       if (error) return [];

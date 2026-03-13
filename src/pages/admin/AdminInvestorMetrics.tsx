@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { SectionHeader } from '@/components/ds';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, DollarSign, BarChart3, Activity, ShoppingCart } from 'lucide-react';
@@ -24,7 +25,7 @@ function useInvestorMetrics() {
           .gte('created_at', subDays(now, 90).toISOString()),
         supabase.from('profiles').select('created_at')
           .order('created_at', { ascending: false }).limit(1000),
-        (supabase as any).from('analytics_events')
+        typedFrom('analytics_events')
           .select('event_name, created_at')
           .gte('created_at', thirtyDaysAgo).limit(1000),
         supabase.from('bookings').select('status, total_amount, created_at')
