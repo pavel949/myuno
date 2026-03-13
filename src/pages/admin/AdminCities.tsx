@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Globe, Plus, MapPin, Check, X, Calendar, 
-  Edit2, Trash2, ChevronRight, Loader2, ArrowLeft 
+  Edit2, Trash2, ChevronRight, Loader2 
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCities, City } from '@/hooks/useCities';

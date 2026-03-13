@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { useLifeSituations, useResolveLifeOSContext } from '@/hooks/useLifeOS';

@@ -23,12 +23,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import {
-  ArrowLeft, Phone, Mail, MessageCircle, Send as TelegramIcon,
+  Phone, Mail, MessageCircle, Send as TelegramIcon,
   Clock, Pencil, Trash2, ChevronRight, ChevronLeft, Plus, Cake, Users, Heart,
   Briefcase, Globe, Star, SendHorizonal, FileText, DollarSign, MapPin,
   ListTodo, CheckCircle, Sparkles, CalendarDays, ShoppingCart, Receipt,
   Building2, User, ExternalLink, Hash, Smartphone,
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow, format, differenceInYears } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';

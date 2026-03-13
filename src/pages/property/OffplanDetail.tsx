@@ -25,6 +25,8 @@ import {
   AlertTriangle,
   FileSearch
 } from 'lucide-react';
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
