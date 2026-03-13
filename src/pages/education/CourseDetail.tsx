@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, Clock, MapPin, Calendar, Users, CheckCircle, Loader2 } from "lucide-react";
+import { Star, Clock, MapPin, Calendar, Users, CheckCircle, Loader2 } from "lucide-react";
+import { BackButton } from '@/components/uno/BackButton';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
