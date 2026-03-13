@@ -8,7 +8,7 @@ import {
   Home, CheckCircle2, Clock, AlertTriangle, Star, Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
+import { getPropertyTypeLabel } from '@/lib/taxonomies';
 
 interface Property {
   id: string;

@@ -1,8 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { resolveIcon } from '@/lib/iconMap';
-import { SERVICE_DOMAINS } from '@/lib/taxonomies';
-import type { ServiceDomain } from '@/lib/config/homeServicesTaxonomy';
+import { SERVICE_DOMAINS, type ServiceDomain } from '@/lib/taxonomies';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DomainTabsProps {

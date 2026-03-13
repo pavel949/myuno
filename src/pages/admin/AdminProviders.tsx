@@ -54,7 +54,7 @@ import {
   PROVIDER_TYPE_OPTIONS,
   SERVICE_DOMAINS,
   getCategoryById
-} from '@/lib/config/homeServicesTaxonomy';
+} from '@/lib/taxonomies';
 
 // Combined business categories for display
 const ALL_BUSINESS_CATEGORIES = [

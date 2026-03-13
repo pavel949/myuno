@@ -35,7 +35,7 @@ import {
   normalizeDistrictId,
   normalizePropertyType,
   normalizeAmenities,
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 
 export interface FormOption {
   id: string;

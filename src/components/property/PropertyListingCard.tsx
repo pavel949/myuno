@@ -12,7 +12,7 @@ import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/propertyTaxonomy';
+import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 

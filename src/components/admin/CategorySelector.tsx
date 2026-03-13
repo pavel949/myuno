@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ALL_SERVICE_CATEGORIES, SERVICE_DOMAINS } from '@/lib/config/homeServicesTaxonomy';
+import { ALL_SERVICE_CATEGORIES, SERVICE_DOMAINS } from '@/lib/taxonomies';
 
 // ====== Canonical Sector definitions ======
 export interface Sector {

@@ -1,7 +1,8 @@
 /**
  * @module PropertyTaxonomy
- * @description Unified taxonomy for property listings - Phuket-specific
- * Single source of truth for all property types, districts, amenities, and booking terms
+ * @deprecated Import from '@/lib/taxonomies' instead of this file directly.
+ * This file is a FALLBACK data source. The database (lookup_values) is the source of truth.
+ * @description Static property taxonomy data for Phuket real estate
  */
 
 // ============= PROPERTY TYPES =============

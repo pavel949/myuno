@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { resolveIcon } from '@/lib/iconMap';
-import { PROVIDER_TYPE_OPTIONS, ProviderType } from '@/lib/config/homeServicesTaxonomy';
+import { PROVIDER_TYPE_OPTIONS, type ProviderType } from '@/lib/taxonomies';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProviderTypeToggleProps {

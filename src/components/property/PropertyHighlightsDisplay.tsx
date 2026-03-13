@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { 
   PROPERTY_HIGHLIGHTS
-} from '@/lib/propertyTaxonomy';
+} from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 
 interface PropertyHighlightsDisplayProps {

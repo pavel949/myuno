@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   normalizeCategory,
+  HOME_SERVICE_CATEGORY_IDS,
+  type ServiceDomain,
+  type ProviderType,
 } from '@/lib/taxonomies';
-import type { ServiceDomain, ProviderType } from '@/lib/config/homeServicesTaxonomy';
-import { HOME_SERVICE_CATEGORY_IDS } from '@/lib/config/homeServicesTaxonomy';
 
 // Editorial-style service images
 import handymanImg from '@/assets/services/handyman.jpg';
