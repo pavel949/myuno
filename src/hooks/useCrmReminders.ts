@@ -2,7 +2,7 @@
  * CRM reminders for contacts
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import type { CrmReminder } from '@/types/contact';
 
 /** Fetch reminders for a contact */
@@ -11,8 +11,7 @@ export function useContactReminders(contactId: string | undefined) {
     queryKey: ['contact-reminders', contactId],
     queryFn: async (): Promise<CrmReminder[]> => {
       if (!contactId) return [];
-       const { data, error } = await (supabase as any)
-         .from('crm_reminders')
+      const { data, error } = await typedFrom('crm_reminders')
         .select('*')
         .eq('contact_id', contactId)
         .eq('is_dismissed', false)
@@ -45,8 +44,7 @@ export function useCreateContactReminder() {
       repeatRule?: string;
       createdBy?: string;
     }) => {
-       const { data, error } = await (supabase as any)
-         .from('crm_reminders')
+      const { data, error } = await typedFrom('crm_reminders')
         .insert({
           contact_id: contactId,
           company_id: companyId,
@@ -72,8 +70,7 @@ export function useDismissContactReminder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
-       const { error } = await (supabase as any)
-         .from('crm_reminders')
+      const { error } = await typedFrom('crm_reminders')
         .update({ is_dismissed: true, dismissed_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
@@ -90,7 +87,7 @@ export function useDeleteContactReminder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
-      const { error } = await (supabase as any).from('crm_reminders').delete().eq('id', id);
+      const { error } = await typedFrom('crm_reminders').delete().eq('id', id);
       if (error) throw error;
       return { id, contactId };
     },

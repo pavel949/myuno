@@ -66,9 +66,9 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
       if (onSuccess) {
         onSuccess(connection.id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Sync error:', err);
-      const errorMessage = err?.message || 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       
       // Check if blocked by OTA
       if (errorMessage.includes('OTA_BLOCKED') || errorMessage.includes('blocklisted')) {

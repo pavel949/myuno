@@ -213,11 +213,11 @@ export default function OwnerPropertyImport() {
       });
 
       setStep('preview');
-    } catch (error: any) {
+    } catch (error: unknown) {
       errorLog.silent(error, 'analyze_url');
       
       // Check for OTA blocked error
-      const errorMessage = error?.message || '';
+      const errorMessage = error instanceof Error ? error.message : '';
       if (errorMessage.includes('OTA_BLOCKED') || errorMessage.includes('blocklisted') || errorMessage.includes('blocked')) {
         setStep('blocked');
       }

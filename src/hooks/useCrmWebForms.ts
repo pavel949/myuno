@@ -3,7 +3,7 @@
  * CRUD hooks for crm_web_forms
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmWebForm {
   id: string;
@@ -20,13 +20,11 @@ export interface CrmWebForm {
   created_at: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmWebForms(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-web-forms', companyId],
     queryFn: async (): Promise<CrmWebForm[]> => {
-      const { data, error } = await from('crm_web_forms')
+      const { data, error } = await typedFrom('crm_web_forms')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
@@ -41,7 +39,7 @@ export function useCreateWebForm() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (form: Omit<CrmWebForm, 'id' | 'created_at' | 'submit_count'>) => {
-      const { data, error } = await from('crm_web_forms').insert(form).select().single();
+      const { data, error } = await typedFrom('crm_web_forms').insert(form).select().single();
       if (error) throw error;
       return data as CrmWebForm;
     },
@@ -53,7 +51,7 @@ export function useUpdateWebForm() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmWebForm> & { id: string }) => {
-      const { error } = await from('crm_web_forms').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_web_forms').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-web-forms'] }),
@@ -64,7 +62,7 @@ export function useDeleteWebForm() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_web_forms').delete().eq('id', id);
+      const { error } = await typedFrom('crm_web_forms').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-web-forms'] }),

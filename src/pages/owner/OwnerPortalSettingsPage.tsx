@@ -91,8 +91,8 @@ export default function OwnerPortalSettingsPage() {
         statement_start_date: startDate || null,
       });
       toast.success(isRu ? 'Настройки портала сохранены' : 'Portal settings saved');
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Error');
     }
   };
 

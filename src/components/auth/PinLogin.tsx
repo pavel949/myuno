@@ -58,10 +58,10 @@ export const PinLogin: React.FC<PinLoginProps> = ({ onSuccess, onSwitchToEmail }
       await verifyPin(pin);
       toast.success(language === 'en' ? 'Welcome back!' : 'С возвращением!');
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(true);
       
-      const errorMessage = err?.message || '';
+      const errorMessage = err instanceof Error ? err.message : '';
       
       // Check for session-related errors (expired, invalid, not found)
       const isSessionError = 

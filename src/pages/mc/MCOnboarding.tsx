@@ -130,8 +130,8 @@ const MCOnboarding: React.FC = () => {
       setActiveCompanyId(data.company_id);
       toast.success(isRu ? 'Компания создана!' : 'Company created!');
       setStep(2);
-    } catch (err: any) {
-      toast.error(err.message || (isRu ? 'Ошибка при создании' : 'Failed to create company'));
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка при создании' : 'Failed to create company'));
     } finally {
       setLoading(false);
     }
@@ -165,8 +165,8 @@ const MCOnboarding: React.FC = () => {
       if (updateError) throw updateError;
 
       toast.success(isRu ? 'Логотип загружен' : 'Logo uploaded');
-    } catch (err: any) {
-      toast.error(err.message || 'Upload failed');
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : '') || 'Upload failed');
     } finally {
       setLoading(false);
       setStep(3);
@@ -208,8 +208,8 @@ const MCOnboarding: React.FC = () => {
       }
       setInvites([...invites]);
       toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitations');
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
     } finally {
       setLoading(false);
       setStep(4);

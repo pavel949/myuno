@@ -159,9 +159,9 @@ export default function AdminCities() {
 
       setIsDialogOpen(false);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving city:', error);
-      toast.error(error.message || (isRu ? 'Ошибка сохранения' : 'Error saving'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка сохранения' : 'Error saving'));
     } finally {
       setIsSaving(false);
     }
@@ -188,9 +188,9 @@ export default function AdminCities() {
       setIsDeleteDialogOpen(false);
       setCityToDelete(null);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting city:', error);
-      toast.error(error.message || (isRu ? 'Ошибка удаления' : 'Error deleting'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка удаления' : 'Error deleting'));
     } finally {
       setIsDeleting(false);
     }
@@ -214,9 +214,9 @@ export default function AdminCities() {
           : (isRu ? 'Город активирован' : 'City activated')
       );
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error toggling city:', error);
-      toast.error(error.message || (isRu ? 'Ошибка' : 'Error'));
+      toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
     }
   };
 

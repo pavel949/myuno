@@ -9,9 +9,7 @@ import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const untypedFrom = (table: string) => (supabase as any).from(table);
+import { typedFrom } from '@/lib/untypedTables';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 
 const errorLog = createErrorHandler('usePropertyWizard');
@@ -701,7 +699,7 @@ export function usePropertyWizard() {
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        const { data: newContact } = await untypedFrom('crm_contacts').insert({
+        const { data: newContact } = await typedFrom('crm_contacts').insert({
           company_id: activeOrgId,
           contact_type: 'owner',
           first_name: firstName,
@@ -715,7 +713,7 @@ export function usePropertyWizard() {
 
         // Link owner contact to property
         if (newContact?.id) {
-          await untypedFrom('properties').update({
+          await typedFrom('properties').update({
             owner_contact_id: newContact.id,
           }).eq('id', property.id);
         }

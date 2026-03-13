@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,7 +19,7 @@ interface ActivityEntry {
   details?: string;
 }
 
-const from = (table: string) => (supabase as any).from(table);
+
 
 function useUnifiedActivity(typeFilter?: string) {
   return useQuery({
@@ -33,47 +34,47 @@ function useUnifiedActivity(typeFilter?: string) {
           .select('id, activity_type, new_value, created_at, prospect_id')
           .order('created_at', { ascending: false })
           .limit(20);
-        (data || []).forEach((a: any) => {
+        (data || []).forEach((a: Record<string, unknown>) => {
           entries.push({
             id: `v-${a.id}`,
             type: 'vendor',
-            action: a.activity_type,
-            entity_name: a.new_value || a.prospect_id?.slice(0, 8),
-            created_at: a.created_at,
+            action: a.activity_type as string,
+            entity_name: (a.new_value as string) || (a.prospect_id as string)?.slice(0, 8) || '',
+            created_at: a.created_at as string,
           });
         });
       }
 
       // MCC leads activity
       if (!typeFilter || typeFilter === 'user') {
-        const { data } = await from('mcc_leads')
+        const { data } = await typedFrom('mcc_leads')
           .select('id, full_name, status, created_at')
           .order('created_at', { ascending: false })
           .limit(20);
-        (data || []).forEach((l: any) => {
+        (data || []).forEach((l: Record<string, unknown>) => {
           entries.push({
             id: `u-${l.id}`,
             type: 'user',
-            action: `lead_${l.status || 'created'}`,
-            entity_name: l.full_name || 'Unknown',
-            created_at: l.created_at,
+            action: `lead_${(l.status as string) || 'created'}`,
+            entity_name: (l.full_name as string) || 'Unknown',
+            created_at: l.created_at as string,
           });
         });
       }
 
       // Owner prospects
       if (!typeFilter || typeFilter === 'owner') {
-        const { data } = await from('owner_prospects')
+        const { data } = await typedFrom('owner_prospects')
           .select('id, owner_name, status, created_at')
           .order('created_at', { ascending: false })
           .limit(20);
-        (data || []).forEach((o: any) => {
+        (data || []).forEach((o: Record<string, unknown>) => {
           entries.push({
             id: `o-${o.id}`,
             type: 'owner',
-            action: `prospect_${o.status || 'new'}`,
-            entity_name: o.owner_name || 'Unknown',
-            created_at: o.created_at,
+            action: `prospect_${(o.status as string) || 'new'}`,
+            entity_name: (o.owner_name as string) || 'Unknown',
+            created_at: o.created_at as string,
           });
         });
       }

@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { toast } from 'sonner';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface AccountingPolicy {
   id: string;
@@ -28,8 +28,6 @@ export interface AccountingPolicy {
   updated_at: string;
 }
 
-const untypedFrom = (table: string) => (supabase as any).from(table);
-
 export function useAccountingPolicies() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
@@ -39,7 +37,7 @@ export function useAccountingPolicies() {
     queryKey: ['accounting-policies', user?.id, companyId],
     queryFn: async () => {
       if (!user) return [];
-      let query = untypedFrom('property_accounting_policies')
+      let query = typedFrom('property_accounting_policies')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -80,8 +78,7 @@ export function useSaveAccountingPolicy() {
         updated_at: new Date().toISOString(),
       };
 
-      // Upsert on property_id + company_id
-      const { data, error } = await untypedFrom('property_accounting_policies')
+      const { data, error } = await typedFrom('property_accounting_policies')
         .upsert(payload, { onConflict: 'property_id,company_id' })
         .select()
         .single();

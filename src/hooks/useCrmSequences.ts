@@ -3,7 +3,7 @@
  * CRUD hooks for crm_sequences, crm_sequence_steps, crm_sequence_enrollments
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmSequence {
   id: string;
@@ -19,7 +19,7 @@ export interface CrmSequenceStep {
   id: string;
   sequence_id: string;
   step_order: number;
-  action_type: string; // 'task' | 'wait' | 'email' | 'whatsapp'
+  action_type: string;
   delay_days: number;
   task_type: string | null;
   task_title: string | null;
@@ -45,13 +45,11 @@ export interface SequenceWithSteps extends CrmSequence {
   enrollment_count?: number;
 }
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmSequences(companyId: string | undefined) {
   return useQuery({
     queryKey: ['crm-sequences', companyId],
     queryFn: async (): Promise<SequenceWithSteps[]> => {
-      const { data: seqs, error } = await from('crm_sequences')
+      const { data: seqs, error } = await typedFrom('crm_sequences')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
@@ -60,13 +58,13 @@ export function useCrmSequences(companyId: string | undefined) {
       const ids = (seqs || []).map((s: { id: string }) => s.id);
       if (ids.length === 0) return [];
 
-      const { data: steps, error: sErr } = await from('crm_sequence_steps')
+      const { data: steps, error: sErr } = await typedFrom('crm_sequence_steps')
         .select('*')
         .in('sequence_id', ids)
         .order('step_order');
       if (sErr) throw sErr;
 
-      const { data: enrollments, error: eErr } = await from('crm_sequence_enrollments')
+      const { data: enrollments, error: eErr } = await typedFrom('crm_sequence_enrollments')
         .select('sequence_id, status')
         .in('sequence_id', ids)
         .eq('status', 'active');
@@ -98,7 +96,7 @@ export function useCreateSequence() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (seq: Omit<CrmSequence, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_sequences').insert(seq).select().single();
+      const { data, error } = await typedFrom('crm_sequences').insert(seq).select().single();
       if (error) throw error;
       return data as CrmSequence;
     },
@@ -110,7 +108,7 @@ export function useUpdateSequence() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmSequence> & { id: string }) => {
-      const { error } = await from('crm_sequences').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_sequences').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
@@ -121,7 +119,7 @@ export function useDeleteSequence() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_sequences').delete().eq('id', id);
+      const { error } = await typedFrom('crm_sequences').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
@@ -132,10 +130,9 @@ export function useUpsertSequenceSteps() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ sequenceId, steps }: { sequenceId: string; steps: Omit<CrmSequenceStep, 'id'>[] }) => {
-      // Delete existing steps, then insert new ones
-      await from('crm_sequence_steps').delete().eq('sequence_id', sequenceId);
+      await typedFrom('crm_sequence_steps').delete().eq('sequence_id', sequenceId);
       if (steps.length > 0) {
-        const { error } = await from('crm_sequence_steps').insert(steps);
+        const { error } = await typedFrom('crm_sequence_steps').insert(steps);
         if (error) throw error;
       }
     },
@@ -147,7 +144,7 @@ export function useEnrollInSequence() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (enrollment: Omit<CrmSequenceEnrollment, 'id' | 'enrolled_at' | 'completed_at'>) => {
-      const { data, error } = await from('crm_sequence_enrollments').insert(enrollment).select().single();
+      const { data, error } = await typedFrom('crm_sequence_enrollments').insert(enrollment).select().single();
       if (error) throw error;
       return data;
     },
@@ -159,7 +156,7 @@ export function useSequenceEnrollments(sequenceId: string | undefined) {
   return useQuery({
     queryKey: ['crm-sequence-enrollments', sequenceId],
     queryFn: async (): Promise<CrmSequenceEnrollment[]> => {
-      const { data, error } = await from('crm_sequence_enrollments')
+      const { data, error } = await typedFrom('crm_sequence_enrollments')
         .select('*')
         .eq('sequence_id', sequenceId!)
         .order('enrolled_at', { ascending: false });

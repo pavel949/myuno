@@ -3,7 +3,7 @@
  * CRUD hooks for crm_comm_templates
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface CrmCommTemplate {
   id: string;
@@ -31,13 +31,11 @@ export const MERGE_TAGS = [
   '{{company_name}}', '{{date}}',
 ] as const;
 
-const from = (table: string) => (supabase as any).from(table);
-
 export function useCrmTemplates(companyId: string | undefined, channel?: string) {
   return useQuery({
     queryKey: ['crm-templates', companyId, channel],
     queryFn: async (): Promise<CrmCommTemplate[]> => {
-      let q = from('crm_comm_templates')
+      let q = typedFrom('crm_comm_templates')
         .select('*')
         .eq('company_id', companyId!)
         .order('created_at', { ascending: false });
@@ -54,7 +52,7 @@ export function useCreateTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (tpl: Omit<CrmCommTemplate, 'id' | 'created_at'>) => {
-      const { data, error } = await from('crm_comm_templates').insert(tpl).select().single();
+      const { data, error } = await typedFrom('crm_comm_templates').insert(tpl).select().single();
       if (error) throw error;
       return data as CrmCommTemplate;
     },
@@ -66,7 +64,7 @@ export function useUpdateTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<CrmCommTemplate> & { id: string }) => {
-      const { error } = await from('crm_comm_templates').update(updates).eq('id', id);
+      const { error } = await typedFrom('crm_comm_templates').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-templates'] }),
@@ -77,7 +75,7 @@ export function useDeleteTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await from('crm_comm_templates').delete().eq('id', id);
+      const { error } = await typedFrom('crm_comm_templates').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-templates'] }),

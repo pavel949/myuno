@@ -135,16 +135,17 @@ export default function TaxiBooking() {
         title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
         description: address,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       let message = language === 'ru' ? 'Не удалось определить местоположение' : 'Could not get location';
+      const geoError = error as { code?: number };
       
-      if (error.code === 1) {
+      if (geoError.code === 1) {
         message = language === 'ru' 
           ? 'Доступ к геолокации запрещён. Разрешите в настройках браузера.' 
           : 'Location access denied. Enable in browser settings.';
-      } else if (error.code === 2) {
+      } else if (geoError.code === 2) {
         message = language === 'ru' ? 'Местоположение недоступно' : 'Location unavailable';
-      } else if (error.code === 3) {
+      } else if (geoError.code === 3) {
         message = language === 'ru' ? 'Превышено время ожидания' : 'Request timed out';
       }
       

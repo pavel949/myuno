@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { typedFrom } from '@/lib/untypedTables';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +37,7 @@ interface OutreachLogEntry {
   } | null;
 }
 
-const from = (table: string) => (supabase as any).from(table);
+
 
 function useOutreachStats() {
   return useQuery({
@@ -68,7 +69,7 @@ function useOutreachLog() {
   return useQuery({
     queryKey: ['vendor-outreach-log'],
     queryFn: async (): Promise<OutreachLogEntry[]> => {
-      const { data, error } = await from('vendor_outreach_log')
+      const { data, error } = await typedFrom('vendor_outreach_log')
         .select(`
           id, contact_id, channel, status, followup_sequence, subject, sent_at, next_followup_at,
           crm_contacts!contact_id(first_name, last_name, company_name)
@@ -78,7 +79,7 @@ function useOutreachLog() {
 
       if (error) throw error;
       
-      return (data || []).map((entry: any) => ({
+      return (data || []).map((entry: Record<string, unknown>) => ({
         ...entry,
         contact: entry.crm_contacts,
       }));
