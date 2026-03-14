@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export interface ExtractedField {
   value: unknown;
