@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface CreateEventCheckoutRequest {
@@ -28,12 +28,13 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Anon client for auth verification only
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
 
-  // Service role client for DB writes (anon client lacks RLS INSERT permissions)
+  // Service role client for all DB writes (anon client fails RLS INSERT policies)
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
@@ -68,12 +69,7 @@ Deno.serve(async (req) => {
     const total_amount = ticket_count * unit_price;
 
     // --- Atomic spots decrement (prevents overselling) ---
-    const serviceClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    const { data: reserveResult, error: reserveError } = await serviceClient
+    const { data: reserveResult, error: reserveError } = await supabaseAdmin
       .rpc('reserve_event_spots', { p_event_id: event_id, p_count: ticket_count });
 
     if (reserveError || !reserveResult) {
@@ -82,7 +78,7 @@ Deno.serve(async (req) => {
     }
 
     // --- Create order row BEFORE Stripe session ---
-    const { data: order, error: orderError } = await supabaseClient
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         order_type: 'event',
@@ -108,15 +104,14 @@ Deno.serve(async (req) => {
 
     if (orderError || !order) {
       console.error("Failed to create order:", orderError);
-      // Rollback spots
-      await serviceClient.rpc('release_event_spots', { p_event_id: event_id, p_count: ticket_count });
+      await supabaseAdmin.rpc('release_event_spots', { p_event_id: event_id, p_count: ticket_count });
       throw new Error("Failed to create order");
     }
 
     console.log("Order created:", order.id, order.order_number);
 
     // Create order items
-    const { error: itemsError } = await supabaseClient
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert({
         order_id: order.id,
@@ -130,13 +125,13 @@ Deno.serve(async (req) => {
 
     if (itemsError) {
       console.error("Failed to create order items:", itemsError);
-      await supabaseClient.from('orders').delete().eq('id', order.id);
-      await serviceClient.rpc('release_event_spots', { p_event_id: event_id, p_count: ticket_count });
+      await supabaseAdmin.from('orders').delete().eq('id', order.id);
+      await supabaseAdmin.rpc('release_event_spots', { p_event_id: event_id, p_count: ticket_count });
       throw new Error("Failed to create order items");
     }
 
     // Create participants
-    await supabaseClient.from('order_participants').insert({
+    await supabaseAdmin.from('order_participants').insert({
       order_id: order.id,
       role: 'attendee',
       name: contact_name,
@@ -145,7 +140,7 @@ Deno.serve(async (req) => {
     });
 
     // Create status history
-    await supabaseClient.from('order_status_history').insert({
+    await supabaseAdmin.from('order_status_history').insert({
       order_id: order.id,
       from_status: null,
       to_status: 'pending',
@@ -154,7 +149,7 @@ Deno.serve(async (req) => {
     });
 
     // Create payment intent record
-    const { data: paymentIntent } = await supabaseClient
+    const { data: paymentIntent } = await supabaseAdmin
       .from('payment_intents')
       .insert({
         order_id: order.id,
@@ -218,7 +213,7 @@ Deno.serve(async (req) => {
 
     // Update payment intent with Stripe session ID
     if (paymentIntent) {
-      await supabaseClient
+      await supabaseAdmin
         .from('payment_intents')
         .update({ provider_ref: session.id })
         .eq('id', paymentIntent.id);
