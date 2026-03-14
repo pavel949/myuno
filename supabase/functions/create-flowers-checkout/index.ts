@@ -43,6 +43,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    // Service role client for DB writes (anon client lacks RLS INSERT permissions)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
     console.log("create-flowers-checkout: Auth header present:", !!authHeader);
