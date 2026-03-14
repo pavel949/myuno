@@ -209,6 +209,15 @@ export function useIntakeAgent() {
       if (!fields.description_en && item.suggestedDescription?.en) {
         fields.description_en = item.suggestedDescription.en;
       }
+      // Attach resolved cloud images to listing
+      if (!fields.images && item.sourceImages && item.sourceImages.length > 0) {
+        fields.images = item.sourceImages;
+      }
+      // Set first image as main image if not already set
+      if (!fields.image && item.sourceImages && item.sourceImages.length > 0) {
+        fields.image = item.sourceImages[0];
+      }
+
       if (!fields.description_ru && item.suggestedDescription?.ru) {
         fields.description_ru = item.suggestedDescription.ru;
       }
