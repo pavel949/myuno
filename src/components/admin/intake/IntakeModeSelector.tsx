@@ -1,9 +1,9 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FileText, Files, Link2, Upload } from 'lucide-react';
+import { FileText, Files, Link2, Upload, MessageSquareText } from 'lucide-react';
 
-export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls' | 'files';
+export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message';
 
 interface IntakeModeSelectorProps {
   mode: IntakeMode;
@@ -44,6 +44,14 @@ const modes = [
     descEn: 'Images, PDF, Excel',
     descRu: 'Фото, PDF, Excel'
   },
+  { 
+    id: 'agent_message' as const, 
+    icon: MessageSquareText, 
+    labelEn: 'Agent Post', 
+    labelRu: 'Пост агента',
+    descEn: 'From WA/TG groups',
+    descRu: 'Из групп WA/TG'
+  },
 ];
 
 export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelectorProps) {
@@ -51,7 +59,7 @@ export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelec
   const isRu = language === 'ru';
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
       {modes.map((m) => {
         const Icon = m.icon;
         const isActive = mode === m.id;
