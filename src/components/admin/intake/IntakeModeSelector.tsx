@@ -44,6 +44,14 @@ const modes = [
     descEn: 'Images, PDF, Excel',
     descRu: 'Фото, PDF, Excel'
   },
+  { 
+    id: 'agent_message' as const, 
+    icon: MessageSquareText, 
+    labelEn: 'Agent Post', 
+    labelRu: 'Пост агента',
+    descEn: 'From WA/TG groups',
+    descRu: 'Из групп WA/TG'
+  },
 ];
 
 export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelectorProps) {
