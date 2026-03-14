@@ -16,6 +16,7 @@ interface PropertyDepositRequest {
   nights: number;
   total_amount: number;
   deposit_amount: number;
+  cleaning_fee?: number;
   guest_name: string;
   guest_phone: string;
   guest_email: string;
@@ -73,6 +74,7 @@ Deno.serve(async (req) => {
       nights,
       total_amount,
       deposit_amount,
+      cleaning_fee,
       guest_name,
       guest_phone,
       guest_email,
@@ -83,7 +85,8 @@ Deno.serve(async (req) => {
       property_id, 
       check_in, 
       check_out, 
-      deposit_amount 
+      deposit_amount,
+      cleaning_fee,
     });
 
     // Validate deposit amount (should be ~10% of total)
@@ -96,25 +99,51 @@ Deno.serve(async (req) => {
       );
     }
 
-    // P0 FIX: Create order in database BEFORE Stripe checkout
-    // Use service role client for RPC call
+    // Use service role client for DB operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // P0 FIX: Check availability BEFORE creating the order
+    const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
+      'check_property_dates_available',
+      {
+        p_property_id: property_id,
+        p_check_in: check_in,
+        p_check_out: check_out,
+      }
+    );
+
+    if (availError) {
+      logStep("ERROR: Availability check failed", { error: availError.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify availability" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    if (!isAvailable) {
+      logStep("Dates not available", { property_id, check_in, check_out });
+      return new Response(
+        JSON.stringify({ error: "Selected dates are no longer available" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
+      );
+    }
+
+    // Create order in database BEFORE Stripe checkout
     const orderItems = [{
       product_id: property_id,
       resource_id: property_id,
       provider_org_id: provider_org_id || null,
       item_name: property_title,
-      item_type: 'property_rental',
+      item_type: 'property',
       qty: nights,
       unit_price: Math.round(total_amount / nights),
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { guests, deposit_amount },
+      metadata: { guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
     }];
 
     const orderParticipants = [{
@@ -137,6 +166,7 @@ Deno.serve(async (req) => {
         deposit_amount, 
         deposit_percent: 10,
         remaining_amount: total_amount - deposit_amount,
+        cleaning_fee: cleaning_fee || 0,
         payment_status: 'pending_deposit',
       },
       p_items: orderItems,
@@ -201,24 +231,53 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
 
-    // Create Stripe Checkout Session for 10% deposit
-    // Include PromptPay (Thai QR) for THB payments
+    // Build Stripe line items — separate deposit and cleaning fee
+    const lineItems: Array<{
+      price_data: {
+        currency: string;
+        product_data: { name: string; description?: string };
+        unit_amount: number;
+      };
+      quantity: number;
+    }> = [];
+
+    // Calculate how much of the deposit covers each component
+    const cleaningFeeAmount = cleaning_fee && cleaning_fee > 0 ? cleaning_fee : 0;
+    const rentalDeposit = deposit_amount - Math.round(cleaningFeeAmount * 0.1);
+
+    // Main rental deposit line
+    lineItems.push({
+      price_data: {
+        currency: "thb",
+        product_data: {
+          name: `Deposit: ${property_title}`,
+          description: `10% deposit for ${nights} nights (${check_in} – ${check_out})`,
+        },
+        unit_amount: Math.round((cleaningFeeAmount > 0 ? rentalDeposit : deposit_amount) * 100),
+      },
+      quantity: 1,
+    });
+
+    // Cleaning fee line (10% of cleaning fee as part of deposit)
+    if (cleaningFeeAmount > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "thb",
+          product_data: {
+            name: "Cleaning Fee (10% deposit)",
+            description: `Cleaning fee deposit portion`,
+          },
+          unit_amount: Math.round(cleaningFeeAmount * 0.1 * 100),
+        },
+        quantity: 1,
+      });
+    }
+
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card", "promptpay"],
-      line_items: [
-        {
-          price_data: {
-            currency: "thb",
-            product_data: {
-              name: `Deposit: ${property_title}`,
-              description: `10% deposit for ${nights} nights (${check_in} - ${check_out})`,
-            },
-            unit_amount: Math.round(deposit_amount * 100), // Convert to satang
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
       cancel_url: `${origin}/property/${property_id}/inquiry?canceled=true`,
@@ -233,6 +292,7 @@ Deno.serve(async (req) => {
         nights: nights.toString(),
         total_amount: total_amount.toString(),
         deposit_amount: deposit_amount.toString(),
+        cleaning_fee: cleaningFeeAmount.toString(),
         guest_name,
         guest_phone,
         guest_email: guest_email || user.email || "",

@@ -488,9 +488,11 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
+                providerOrgId={(property as any)?.provider_id || undefined}
               />
             </section>
           )}
@@ -507,8 +509,8 @@ export default function PropertyInquiry() {
           )}
         </div>
 
-        {/* ===== STICKY CONFIRM / REQUEST BUTTON ===== */}
-        {user && isFormValid && (
+        {/* ===== STICKY CONFIRM / REQUEST BUTTON (only for non-instant / request mode) ===== */}
+        {user && isFormValid && !isInstantBooking && (
           <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t p-4 safe-area-bottom">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
@@ -517,10 +519,7 @@ export default function PropertyInquiry() {
               </span>
             </div>
             <Button
-              className={cn(
-                "w-full h-12 text-base font-semibold",
-                !isInstantBooking && "bg-foreground text-background hover:bg-foreground/90"
-              )}
+              className="w-full h-12 text-base font-semibold bg-foreground text-background hover:bg-foreground/90"
               size="lg"
               disabled={isSubmitting}
               onClick={async () => {
@@ -543,9 +542,7 @@ export default function PropertyInquiry() {
                       price_per_night: pricePerNight,
                       deposit_amount: rentalTerms?.deposit_amount || 0,
                       discount_percent: pricing.discountPercent,
-                      booking_mode: isInstantBooking ? 'instant' : 'request',
-                      ...(isInstantBooking ? { prepayment: Math.round(pricing.total * 0.1) } : {}),
-                      // Manager contact for notifications
+                      booking_mode: 'request',
                       ...((rentalTerms as any)?.manager_email ? { manager_email: (rentalTerms as any).manager_email } : {}),
                       ...((rentalTerms as any)?.manager_phone ? { manager_phone: (rentalTerms as any).manager_phone } : {}),
                     },
@@ -565,20 +562,12 @@ export default function PropertyInquiry() {
                       phone: formData.phone,
                       email: formData.email || undefined,
                     }],
-                    ...(isInstantBooking ? {
-                      payment: {
-                        method: 'cash',
-                        amount: Math.round(pricing.total * 0.1),
-                      },
-                    } : {}),
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
-                    if (!isInstantBooking) {
-                      toast.success(isRu 
-                        ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
-                        : 'Request sent! The host will respond within 24 hours.');
-                    }
+                    toast.success(isRu 
+                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
+                      : 'Request sent! The host will respond within 24 hours.');
                     navigate(`/bookings/${result.order_id}`, { replace: true });
                   }
                 } catch (err) {
@@ -588,22 +577,14 @@ export default function PropertyInquiry() {
                 }
               }}
             >
-              {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              ) : isInstantBooking ? (
-                <Zap className="w-5 h-5 mr-2" />
-              ) : null}
-              {isInstantBooking
-                ? (isRu ? 'Забронировать и оплатить' : 'Book and pay')
-                : (isRu ? 'Запросить бронирование' : 'Request to book')}
+              {isSubmitting && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
+              {isRu ? 'Запросить бронирование' : 'Request to book'}
             </Button>
-            {!isInstantBooking && (
-              <p className="text-[10px] text-center text-muted-foreground mt-2">
-                {isRu 
-                  ? 'Оплата не списывается. Хозяин подтвердит бронирование.' 
-                  : "You won't be charged. The host will confirm your booking."}
-              </p>
-            )}
+            <p className="text-[10px] text-center text-muted-foreground mt-2">
+              {isRu 
+                ? 'Оплата не списывается. Хозяин подтвердит бронирование.' 
+                : "You won't be charged. The host will confirm your booking."}
+            </p>
           </div>
         )}
       </div>
