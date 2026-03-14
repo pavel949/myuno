@@ -64,9 +64,11 @@ export function DepositPaymentOptions({
           nights,
           total_amount: totalAmount,
           deposit_amount: depositAmount,
+          cleaning_fee: cleaningFee || 0,
           guest_name: guestName,
           guest_phone: guestPhone,
           guest_email: guestEmail,
+          provider_org_id: providerOrgId,
         },
       });
 
