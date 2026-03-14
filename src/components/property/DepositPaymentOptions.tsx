@@ -35,9 +35,11 @@ export function DepositPaymentOptions({
   guests,
   nights,
   totalAmount,
+  cleaningFee,
   guestName,
   guestPhone,
   guestEmail,
+  providerOrgId,
   onSuccess,
 }: DepositPaymentOptionsProps) {
   const { language } = useLanguage();
