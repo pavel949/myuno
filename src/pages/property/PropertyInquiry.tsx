@@ -488,9 +488,11 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
+                cleaningFee={rentalTerms?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
+                providerOrgId={(property as any)?.provider_id || undefined}
               />
             </section>
           )}
