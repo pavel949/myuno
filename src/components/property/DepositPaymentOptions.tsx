@@ -19,9 +19,11 @@ interface DepositPaymentOptionsProps {
   guests: number;
   nights: number;
   totalAmount: number;
+  cleaningFee?: number;
   guestName: string;
   guestPhone: string;
   guestEmail: string;
+  providerOrgId?: string;
   onSuccess?: () => void;
 }
 
