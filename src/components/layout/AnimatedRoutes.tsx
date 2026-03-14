@@ -263,6 +263,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.EVENTS} element={<LazyPage><Pages.EventsIndex /></LazyPage>} />
         <Route path="/events/:id" element={<LazyPage><Pages.EventDetail /></LazyPage>} />
         <Route path="/events/booking/:id" element={<LazyPage><Pages.EventBooking /></LazyPage>} />
+        <Route path="/events/success" element={<LazyPage><Pages.EventSuccess /></LazyPage>} />
         <Route path="/venues/:id" element={<LazyPage><Pages.VenueDetail /></LazyPage>} />
         
         {/* ── Education ── */}
