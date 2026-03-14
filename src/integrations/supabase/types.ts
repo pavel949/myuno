@@ -27861,6 +27861,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_property_dates_available: {
+        Args: {
+          p_check_in: string
+          p_check_out: string
+          p_exclude_order_id?: string
+          p_property_id: string
+        }
+        Returns: boolean
+      }
       check_property_permission: {
         Args: { p_permission: string; p_property_id: string; p_user_id: string }
         Returns: boolean
