@@ -28276,6 +28276,14 @@ export type Database = {
         Args: { p_booking_id: string; p_user_id: string }
         Returns: boolean
       }
+      release_event_spots: {
+        Args: { p_count: number; p_event_id: string }
+        Returns: undefined
+      }
+      reserve_event_spots: {
+        Args: { p_count: number; p_event_id: string }
+        Returns: boolean
+      }
       resolve_catalog_by_life_situation: {
         Args: { p_life_code: string; p_limit?: number }
         Returns: {
