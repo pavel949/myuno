@@ -38,9 +38,16 @@ Deno.serve(async (req) => {
   try {
     console.log("create-flowers-checkout: Starting request processing");
     
+    // Anon client for auth verification only
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+
+    // Service role client for all DB writes (anon client fails RLS INSERT policies)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     // Authenticate user
@@ -110,7 +117,7 @@ Deno.serve(async (req) => {
       throw new Error("Total must be at least 1");
     }
 
-    // ===== CREATE ORDER IN DATABASE (mirrors create-order-checkout pattern) =====
+    // ===== CREATE ORDER IN DATABASE =====
     const orderMetadata = {
       recipient_name,
       recipient_phone,
@@ -122,7 +129,7 @@ Deno.serve(async (req) => {
       provider_name: provider_name || "",
     };
 
-    const { data: order, error: orderError } = await supabaseClient
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         order_type: 'flower',
@@ -184,26 +191,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { error: itemsError } = await supabaseClient
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(orderItems);
 
     if (itemsError) {
       console.error("create-flowers-checkout: Failed to create order items:", itemsError);
-      // Rollback: delete orphaned order
-      await supabaseClient.from('orders').delete().eq('id', order.id);
+      await supabaseAdmin.from('orders').delete().eq('id', order.id);
       throw new Error("Failed to create order items");
     }
 
     // Create delivery address
-    await supabaseClient.from('order_addresses').insert({
+    await supabaseAdmin.from('order_addresses').insert({
       order_id: order.id,
       address_type: 'delivery',
       address_text: delivery_address,
     });
 
     // Create initial status history
-    await supabaseClient.from('order_status_history').insert({
+    await supabaseAdmin.from('order_status_history').insert({
       order_id: order.id,
       from_status: null,
       to_status: 'pending',
@@ -212,7 +218,7 @@ Deno.serve(async (req) => {
     });
 
     // Create payment intent record
-    const { data: paymentIntent } = await supabaseClient
+    const { data: paymentIntent } = await supabaseAdmin
       .from('payment_intents')
       .insert({
         order_id: order.id,
@@ -227,7 +233,6 @@ Deno.serve(async (req) => {
     // ===== STRIPE CHECKOUT =====
     const stripe = createStripeClient();
 
-    // Get or create Stripe customer
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1,
@@ -280,7 +285,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // PromptPay only works with THB currency
     const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 
       ? ["card", "promptpay"] 
       : ["card"];
@@ -305,7 +309,7 @@ Deno.serve(async (req) => {
 
     // Update payment intent with Stripe session ID
     if (paymentIntent) {
-      await supabaseClient
+      await supabaseAdmin
         .from('payment_intents')
         .update({ provider_ref: session.id })
         .eq('id', paymentIntent.id);

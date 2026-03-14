@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface OrderItem {
@@ -43,9 +43,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Anon client for auth verification only
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  );
+
+  // Service role client for all DB writes (anon client fails RLS INSERT policies)
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
   try {
@@ -90,7 +97,7 @@ Deno.serve(async (req) => {
     }
 
     // Create the order
-    const { data: order, error: orderError } = await supabaseClient
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         order_type,
@@ -126,14 +133,13 @@ Deno.serve(async (req) => {
       status: 'pending',
     }));
 
-    const { error: itemsError } = await supabaseClient
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(orderItems);
 
     if (itemsError) {
       console.error("Failed to create order items:", itemsError);
-      // Rollback: delete the orphaned order
-      await supabaseClient.from('orders').delete().eq('id', order.id);
+      await supabaseAdmin.from('orders').delete().eq('id', order.id);
       throw new Error("Failed to create order items");
     }
 
@@ -144,7 +150,7 @@ Deno.serve(async (req) => {
         ...p,
       }));
 
-      await supabaseClient.from('order_participants').insert(orderParticipants);
+      await supabaseAdmin.from('order_participants').insert(orderParticipants);
     }
 
     // Create addresses if provided
@@ -154,11 +160,11 @@ Deno.serve(async (req) => {
         ...a,
       }));
 
-      await supabaseClient.from('order_addresses').insert(orderAddresses);
+      await supabaseAdmin.from('order_addresses').insert(orderAddresses);
     }
 
     // Create initial status history
-    await supabaseClient.from('order_status_history').insert({
+    await supabaseAdmin.from('order_status_history').insert({
       order_id: order.id,
       from_status: null,
       to_status: 'pending',
@@ -167,7 +173,7 @@ Deno.serve(async (req) => {
     });
 
     // Create payment intent record
-    const { data: paymentIntent, error: piError } = await supabaseClient
+    const { data: paymentIntent, error: piError } = await supabaseAdmin
       .from('payment_intents')
       .insert({
         order_id: order.id,
@@ -212,13 +218,11 @@ Deno.serve(async (req) => {
         product_data: {
           name: item.product_name,
         },
-        unit_amount: Math.round(item.unit_price * 100), // Convert to cents
+        unit_amount: Math.round(item.unit_price * 100),
       },
       quantity: item.qty,
     }));
 
-    // Create Stripe Checkout Session with card and PromptPay (Thai QR)
-    // PromptPay only works with THB currency
     const paymentMethods: ("card" | "promptpay")[] = currency.toUpperCase() === "THB" 
       ? ["card", "promptpay"] 
       : ["card"];
@@ -243,7 +247,7 @@ Deno.serve(async (req) => {
 
     // Update payment intent with Stripe session ID
     if (paymentIntent) {
-      await supabaseClient
+      await supabaseAdmin
         .from('payment_intents')
         .update({ provider_ref: session.id })
         .eq('id', paymentIntent.id);
