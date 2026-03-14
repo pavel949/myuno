@@ -224,16 +224,15 @@ export function useIntakeAgent() {
       const { data, error: fnError } = await supabase.functions.invoke('bulk-import', {
         body: {
           table: item.detectedVertical,
-          rows: [fields]
+          records: [fields]
         }
       });
 
       if (fnError) throw fnError;
 
-      if (data.success > 0) {
+      if (data.inserted > 0) {
         updateItem(itemId, { 
           status: 'created',
-          createdListingId: data.insertedIds?.[0],
           createdListingTable: item.detectedVertical
         });
         
@@ -241,6 +240,9 @@ export function useIntakeAgent() {
           ...prev,
           approvedCount: prev.approvedCount + 1
         } : prev);
+
+        // Auto-create CRM contact from extracted contact info
+        await createCrmContactFromItem(item);
 
         toast.success(
           language === 'ru' 
@@ -258,7 +260,80 @@ export function useIntakeAgent() {
     } finally {
       setIsApproving(false);
     }
-  }, [session, updateItem, language]);
+  }, [session, updateItem, language, activeCompany]);
+
+  // Auto-create CRM contact from intake item's extracted fields
+  const createCrmContactFromItem = useCallback(async (item: IntakeItem) => {
+    try {
+      const f = item.extractedFields;
+      const phone = f.phone?.value as string || f.contact_phone?.value as string;
+      const email = f.email?.value as string || f.contact_email?.value as string;
+      const whatsapp = f.whatsapp?.value as string || f.contact_whatsapp?.value as string;
+      const telegram = f.telegram?.value as string || f.contact_telegram?.value as string;
+      const contactName = f.agent_name?.value as string || f.contact_name?.value as string;
+
+      // Skip if no contact info at all
+      if (!phone && !email && !whatsapp && !telegram) return;
+
+      const companyId = activeCompany?.company_id;
+      if (!companyId) return;
+
+      // Parse name into first/last
+      let firstName = 'Agent';
+      let lastName = '';
+      if (contactName) {
+        const parts = contactName.trim().split(/\s+/);
+        firstName = parts[0] || 'Agent';
+        lastName = parts.slice(1).join(' ');
+      }
+
+      // Check for existing contact by phone to avoid duplicates
+      if (phone) {
+        const { data: existing } = await supabase
+          .from('crm_contacts')
+          .select('id')
+          .eq('company_id', companyId)
+          .eq('phone', phone)
+          .maybeSingle();
+        
+        if (existing) {
+          console.log('[INTAKE] CRM contact already exists:', existing.id);
+          return;
+        }
+      }
+
+      const { data: contact, error: contactError } = await supabase
+        .from('crm_contacts')
+        .insert({
+          company_id: companyId,
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone || null,
+          email: email || null,
+          whatsapp: whatsapp || phone || null,
+          telegram: telegram || null,
+          source: 'intake_agent',
+          contact_type: 'agent',
+          tags: ['intake-auto'],
+          notes: `Auto-created from AI Intake. Listing: ${item.suggestedTitle?.en || item.suggestedTitle?.ru || 'Unknown'}`,
+        } as any)
+        .select('id')
+        .single();
+
+      if (contactError) {
+        console.error('[INTAKE] Failed to create CRM contact:', contactError);
+      } else {
+        console.log('[INTAKE] CRM contact created:', contact?.id);
+        toast.success(
+          language === 'ru'
+            ? 'Контакт добавлен в CRM'
+            : 'Contact added to CRM'
+        );
+      }
+    } catch (err) {
+      console.error('[INTAKE] CRM contact creation error:', err);
+    }
+  }, [activeCompany, language]);
 
   // Discard item
   const discardItem = useCallback((itemId: string) => {
