@@ -1,84 +1,87 @@
 
 
-# Vendor Onboarding UX — Fast First Listing with Progressive Completion
+# Plan: Agent Message Parser for Intake System
 
-## Research: How Top Platforms Do It
+## Problem
 
-| Platform | Pattern | Time-to-First-Listing |
-|----------|---------|----------------------|
-| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
-| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
-| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
-| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
+Real estate agents post listings in WhatsApp/Telegram groups using a specific format: a header block (complex name, location) followed by numbered items (emoji digits like 1️⃣ 2️⃣) each with specs, links, and pricing info at the bottom. The current `splitBulkText` function in `intake-listing-agent` only recognizes `---`, `===`, `## headers`, and `^\d+\.` as item separators — it completely misses emoji-numbered patterns and groups-style messages.
 
-**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
+## What Already Works
 
-## Current State Analysis
+- **`intake-listing-agent` edge function** — full AI extraction pipeline with Gemini, Firecrawl scraping, vertical detection, confidence scoring
+- **`IntakeInputForm` + `IntakeQueue` UI** — paste text → AI analyze → review → approve → create listings
+- **`whatsapp-incoming-webhook`** — receives incoming WhatsApp messages (currently only creates leads, not listings)
+- **`bulk_text` mode** — exists but the splitter can't parse agent-style messages
 
-**What exists:**
-- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
-- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
-- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
-- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
+## What Needs to Change
 
-**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
+### 1. New Intake Mode: `agent_message` 
+Add a 5th mode to the intake system specifically designed for agent group messages.
 
-## Proposed UX: "3-Screen Fast Start"
+**Files:**
+- `src/components/admin/intake/IntakeModeSelector.tsx` — add `agent_message` mode with a MessageSquare icon
+- `src/components/admin/intake/IntakeInputForm.tsx` — add placeholder example matching the agent format
+- `src/hooks/useIntakeAgent.ts` — pass new mode type
+
+### 2. Smart Message Splitter in Edge Function
+Enhance `supabase/functions/intake-listing-agent/index.ts`:
+
+- Add `splitAgentMessage()` function that:
+  - Detects header block (complex name, location, common info like agent commission, contact)
+  - Splits on emoji numbers (1️⃣ 2️⃣ 3️⃣...) or standard numbered patterns
+  - Merges header context (complex name, district, contact, commission) into each sub-item
+  - Extracts Yandex Disk / Google Drive / Dropbox links per item as `sourceImages`
+  - Preserves shared footer info (pricing policy, agent commission, contact) across all items
+
+- Update `splitBulkText()` to detect agent message patterns first and delegate to `splitAgentMessage()`
+
+- The AI prompt already extracts all property fields — no change needed there, since each sub-item will be sent with its full context (header + item + footer)
+
+### 3. Handle `agent_message` Mode in Edge Function
+In the main `Deno.serve` handler:
+- When `mode === 'agent_message'`, use `splitAgentMessage()` instead of `splitBulkText()`
+- Force vertical to `properties` by default (can be overridden)
+- Set `sourceText` to include the original header for traceability
+
+### 4. Improve `splitBulkText` Detection
+Update the `ITEM_SEPARATORS` array to also catch:
+- Emoji number patterns: `/^[1-9]️⃣/m` and `/^[①②③④⑤⑥⑦⑧⑨⑩]/m`
+- Emoji bullet patterns: `/^[🏠🏢🏡🛥️⛵🚗]/m`
+
+This ensures even if someone uses `bulk_text` mode, agent messages still split correctly.
+
+## Technical Details
 
 ```text
-Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
-┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
-│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
-│ [____________]   │           │ Name *            │              │                  │
-│                  │           │ [____________]    │              │  Your listing is │
-│ Category *       │           │                   │              │  pending review  │
-│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
-│                  │           │ [____] THB        │              │  Complete your   │
-│ Phone / WhatsApp │           │                   │              │  profile to get  │
-│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
-│                  │           │ [📷 Upload]       │              │                  │
-│         [Next →] │           │                   │              │  [→ Dashboard]   │
-└──────────────────┘           │ Brief description │              └──────────────────┘
-                               │ [____________]    │
-                               │         [List →]  │
-                               └──────────────────┘
+Input message structure:
+┌─────────────────────────────┐
+│ HEADER (shared context)     │  ← complex name, district, type
+│ "Lagendary, Bangtao"        │
+├─────────────────────────────┤
+│ 1️⃣ Item 1 + link           │  ← split point
+│ 2️⃣ Item 2 + link           │  ← split point  
+│ 3️⃣ Item 3 + link           │  ← split point
+├─────────────────────────────┤
+│ FOOTER (shared context)     │  ← price policy, commission, contact
+│ "Agent commission: 10%"     │
+└─────────────────────────────┘
+
+Each item sent to AI = HEADER + ITEM + FOOTER
 ```
 
-**Required fields total: 4** (business name, category, service name, price)
-Everything else: progressive completion via existing `VendorOnboardingChecklist`.
+## Files to Modify
 
-## Implementation Plan
+| File | Change |
+|------|--------|
+| `supabase/functions/intake-listing-agent/index.ts` | Add `splitAgentMessage()`, handle `agent_message` mode |
+| `src/components/admin/intake/IntakeModeSelector.tsx` | Add 5th mode button |
+| `src/components/admin/intake/IntakeInputForm.tsx` | Add placeholder + hint for agent mode |
+| `src/hooks/useIntakeAgent.ts` | Extend mode type |
 
-### 1. Refactor VendorOnboarding into 3-step wizard
-Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
-- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
-- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
-- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
+## Time Estimate
 
-### 2. Update VendorOnboardingChecklist
-Expand from 3 to 6 progressive items:
-- ✅ Create account (auto-complete)
-- ✅ Add first listing (auto-complete from step 2)
-- ○ Add business description
-- ○ Upload logo / cover photo
-- ○ Add working hours
-- ○ Add payment details
-
-Each item links to the relevant settings section.
-
-### 3. Wire the data flow
-- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
-- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
-- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
-
-### 4. Update entry points
-- `/vendor/onboarding` → renders new 3-step wizard
-- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
-
-### Technical Details
-- Reuse existing `OnboardingLayout` component for step progress UI
-- Reuse `UnifiedMediaUploader` for photo upload in step 2
-- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
-- No new DB tables or migrations required
-- No new Edge Functions required
+~3 hours total:
+- Edge function splitter logic: 1.5h
+- UI mode + form updates: 0.5h  
+- Testing & edge cases: 1h
 
