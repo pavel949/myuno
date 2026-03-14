@@ -75,6 +75,11 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
         ? 'Вставьте несколько объектов, разделённых ---\n\n---\nОбъект 1: Яхта Princess 52...\n---\nОбъект 2: Вилла в Равай...\n---'
         : 'Paste multiple items separated by ---\n\n---\nItem 1: Princess 52 yacht...\n---\nItem 2: Villa in Rawai...\n---';
     }
+    if (mode === 'agent_message') {
+      return isRu
+        ? 'Вставьте пост агента из WhatsApp/Telegram группы:\n\nПример:\nApartments for Rent:\nLagendary, Bangtao 🌴\n\n1️⃣ 1-bedroom, 40 кв.м — с 20 марта\nhttps://disk.yandex.ru/...\n\n2️⃣ 1-bedroom, 44 кв.м — с 10 апреля\nhttps://disk.yandex.ru/...\n\n💰 Расчёт по вашим датам\nКомиссия агента: 10%\n📲 WhatsApp: +66 92 478 1973'
+        : 'Paste agent post from WhatsApp/Telegram group:\n\nExample:\nApartments for Rent:\nLagendary, Bangtao 🌴\n\n1️⃣ 1-bedroom, 40 sq.m — from March 20\nhttps://disk.yandex.ru/...\n\n2️⃣ 1-bedroom, 44 sq.m — from April 10\nhttps://disk.yandex.ru/...\n\n💰 Price on request\nAgent commission: 10%\n📲 WhatsApp: +66 92 478 1973';
+    }
     return isRu
       ? 'Вставьте ссылки (каждая с новой строки):\n\nhttps://yacht-charter.com/azimut-55\nhttps://phuket-villas.com/oceanview\nhttps://tour-phuket.com/island-trip'
       : 'Paste URLs (one per line):\n\nhttps://yacht-charter.com/azimut-55\nhttps://phuket-villas.com/oceanview\nhttps://tour-phuket.com/island-trip';
