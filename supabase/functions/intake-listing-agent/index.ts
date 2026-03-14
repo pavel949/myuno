@@ -82,7 +82,11 @@ async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
 // URL detection regex
 const URL_REGEX = /https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
 
-// Item separators for bulk text
+// Emoji number patterns for agent messages
+const EMOJI_NUMBER_PATTERN = /(?:^|\n)\s*(?:1️⃣|2️⃣|3️⃣|4️⃣|5️⃣|6️⃣|7️⃣|8️⃣|9️⃣|🔟|[①②③④⑤⑥⑦⑧⑨⑩])/;
+const EMOJI_SPLIT_PATTERN = /(?=(?:^|\n)\s*(?:[1-9]️⃣|🔟|[①②③④⑤⑥⑦⑧⑨⑩]))/;
+
+// Item separators for bulk text (updated with emoji patterns)
 const ITEM_SEPARATORS = [
   /^---+$/m,
   /^===+$/m,
@@ -90,8 +94,122 @@ const ITEM_SEPARATORS = [
   /^\d+\.\s+[A-ZА-Я]/m,
 ];
 
+/**
+ * Detect if text is an agent-style group message with emoji-numbered items
+ */
+function isAgentMessage(text: string): boolean {
+  const emojiMatches = text.match(/[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩]/g);
+  return (emojiMatches?.length || 0) >= 2;
+}
+
+/**
+ * Split agent group message into individual items with shared header/footer context
+ * 
+ * Structure:
+ *   HEADER (complex name, location, type)
+ *   1️⃣ Item 1 + link
+ *   2️⃣ Item 2 + link
+ *   FOOTER (price policy, commission, contact)
+ * 
+ * Each returned item = HEADER + ITEM_BODY + FOOTER
+ */
+function splitAgentMessage(text: string): string[] {
+  const lines = text.split('\n');
+  
+  // Find first emoji number position
+  let firstEmojiLineIdx = -1;
+  let lastEmojiLineIdx = -1;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (/^(?:[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩])/.test(line)) {
+      if (firstEmojiLineIdx === -1) firstEmojiLineIdx = i;
+      lastEmojiLineIdx = i;
+    }
+  }
+  
+  if (firstEmojiLineIdx === -1) {
+    return [text]; // No emoji numbers found, return as single item
+  }
+  
+  // Extract header = everything before the first emoji number
+  const headerLines = lines.slice(0, firstEmojiLineIdx).filter(l => l.trim());
+  const header = headerLines.join('\n').trim();
+  
+  // Find footer = everything after the last item block
+  // Walk from lastEmojiLineIdx to find where its content ends (next emoji or end)
+  // Then footer is everything after all items
+  
+  // Split the items section by emoji numbers
+  const itemsSection = lines.slice(firstEmojiLineIdx).join('\n');
+  const itemChunks = itemsSection.split(EMOJI_SPLIT_PATTERN).filter(s => s.trim());
+  
+  // Detect footer: lines after last item that look like shared info
+  // (commission, contact, price policy, etc.)
+  const footerKeywords = [
+    /commission|комиссия/i,
+    /contact|контакт|whatsapp|telegram|📲|📱|☎/i,
+    /price\s*calculation|расчёт/i,
+    /short.?term|долгосроч|краткосроч/i,
+    /available|доступн/i,
+    /💰|📧|📞/,
+  ];
+  
+  // Check if the last chunk has trailing footer lines
+  let footer = '';
+  if (itemChunks.length > 0) {
+    const lastChunk = itemChunks[itemChunks.length - 1];
+    const lastChunkLines = lastChunk.split('\n');
+    
+    // Walk backwards from the last chunk to find footer start
+    let footerStartInLastChunk = lastChunkLines.length;
+    for (let i = lastChunkLines.length - 1; i >= 1; i--) {
+      const line = lastChunkLines[i].trim();
+      if (!line) continue;
+      const isFooter = footerKeywords.some(kw => kw.test(line));
+      if (isFooter) {
+        footerStartInLastChunk = i;
+      } else {
+        break;
+      }
+    }
+    
+    // Also check lines after all emoji items in the original text
+    // Find where item content truly ends
+    const allItemsEnd = firstEmojiLineIdx + itemsSection.split('\n').length;
+    const trailingLines = lines.slice(allItemsEnd).filter(l => l.trim());
+    
+    if (footerStartInLastChunk < lastChunkLines.length) {
+      footer = lastChunkLines.slice(footerStartInLastChunk).join('\n').trim();
+      // Trim footer from last item chunk
+      itemChunks[itemChunks.length - 1] = lastChunkLines.slice(0, footerStartInLastChunk).join('\n').trim();
+    }
+    
+    if (trailingLines.length > 0) {
+      footer = (footer ? footer + '\n' : '') + trailingLines.join('\n').trim();
+    }
+  }
+  
+  // Build final items: HEADER + ITEM + FOOTER
+  const results: string[] = [];
+  for (const chunk of itemChunks) {
+    const trimmed = chunk.trim();
+    if (!trimmed) continue;
+    
+    // Extract URLs from this chunk for sourceImages tracking
+    const parts: string[] = [];
+    if (header) parts.push(header);
+    parts.push(trimmed);
+    if (footer) parts.push(footer);
+    
+    results.push(parts.join('\n\n'));
+  }
+  
+  return results.length > 0 ? results : [text];
+}
+
 interface IntakeRequest {
-  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls' | 'files';
+  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls' | 'files' | 'agent_message';
   rawText?: string;
   fileData?: { rows: Record<string, unknown>[] };
   urls?: string[];
