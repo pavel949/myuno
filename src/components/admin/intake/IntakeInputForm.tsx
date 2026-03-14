@@ -98,6 +98,13 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
         ? `Найдено ${itemCount} объектов` 
         : `Found ${itemCount} items`;
     }
+    if (mode === 'agent_message') {
+      const emojiPattern = /(?:^|\n)\s*(?:[1-9]️⃣|[①②③④⑤⑥⑦⑧⑨⑩]|(?:[1-9]\d?)\s*[).\-])/g;
+      const itemCount = (rawText.match(emojiPattern) || []).length;
+      return isRu 
+        ? `Найдено ${itemCount} объектов в посте` 
+        : `Found ${itemCount} items in post`;
+    }
     if (mode === 'files') {
       const imageCount = files.filter(f => f.type === 'image').length;
       const docCount = files.filter(f => f.type !== 'image').length;
