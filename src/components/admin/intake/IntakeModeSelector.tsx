@@ -1,9 +1,9 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { FileText, Files, Link2, Upload } from 'lucide-react';
+import { FileText, Files, Link2, Upload, MessageSquareText } from 'lucide-react';
 
-export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls' | 'files';
+export type IntakeMode = 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message';
 
 interface IntakeModeSelectorProps {
   mode: IntakeMode;
