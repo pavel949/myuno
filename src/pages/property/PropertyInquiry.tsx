@@ -488,7 +488,7 @@ export default function PropertyInquiry() {
                 guests={guests}
                 nights={nights}
                 totalAmount={pricing.total}
-                cleaningFee={rentalTerms?.cleaning_fee || 0}
+                cleaningFee={rentalTerms?.extra_cleaning_price || (property as any)?.cleaning_fee || 0}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
