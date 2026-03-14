@@ -940,7 +940,9 @@ Deno.serve(async (req) => {
         for (const text of textItems) {
           // Extract per-item image URLs (Yandex Disk, Google Drive, etc.)
           const itemUrls = extractUrls(text);
-          const item = await processItem(text, itemUrls[0], itemUrls, agentVertical, LOVABLE_API_KEY, verticals);
+          // Try to resolve cloud storage links to actual image URLs
+          const resolvedImages = await extractImagesFromCloudLinks(itemUrls, FIRECRAWL_API_KEY);
+          const item = await processItem(text, itemUrls[0], resolvedImages, agentVertical, LOVABLE_API_KEY, verticals);
           items.push(item);
         }
       } else if (mode === 'bulk_text') {
