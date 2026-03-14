@@ -102,6 +102,7 @@ export const MedicalAppointment = lazy(() => import('@/pages/medical/MedicalAppo
 export const EventsIndex = lazy(() => import('@/pages/events/EventsIndex'));
 export const EventDetail = lazy(() => import('@/pages/events/EventDetail'));
 export const EventBooking = lazy(() => import('@/pages/events/EventBooking'));
+export const EventSuccess = lazy(() => import('@/pages/events/EventSuccess'));
 export const VenueDetail = lazy(() => import('@/pages/events/VenueDetail'));
 
 // ── Education ──

@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEvent } from "@/hooks/useEvents";
 import { useBooking } from "@/hooks/useBooking";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -33,22 +34,24 @@ export default function EventBooking() {
   const { user, isLoading: authLoading } = useAuth();
   const { event, isLoading } = useEvent(id);
   const { createBooking, isSubmitting } = useBooking();
+  const { createCheckout, isProcessing } = useStripeUnifiedCheckout();
 
   const ticketCount = parseInt(searchParams.get('tickets') || '1');
+  const isRu = language === 'ru';
 
   // Form state
   const [participants, setParticipants] = useState(ticketCount);
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [pickupInfo, setPickupInfo] = useState({ hotelName: "", roomNumber: "" });
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
 
   // Calculate current step based on filled fields
   const getCurrentStep = () => {
-    if (paymentMethod) return 2; // Payment step
-    if (contactData.name && contactData.phone) return 2; // Moving to payment
-    if (participants > 0) return 1; // Contact step
-    return 0; // Details step
+    if (paymentMethod) return 2;
+    if (contactData.name && contactData.phone) return 2;
+    if (participants > 0) return 1;
+    return 0;
   };
   const currentStep = getCurrentStep();
 
@@ -58,7 +61,6 @@ export default function EventBooking() {
     return null;
   }
 
-  // Loading state
   if (isLoading || authLoading) {
     return (
       <AppLayout>
@@ -69,13 +71,12 @@ export default function EventBooking() {
     );
   }
 
-  // Not found
   if (!event) {
     return (
       <AppLayout>
         <PageContainer>
           <div className="text-center py-12">
-            <p>{language === 'ru' ? 'Событие не найдено' : 'Event not found'}</p>
+            <p>{isRu ? 'Событие не найдено' : 'Event not found'}</p>
           </div>
         </PageContainer>
       </AppLayout>
@@ -83,12 +84,12 @@ export default function EventBooking() {
   }
 
   const totalAmount = (event.price || 0) * participants;
-  const eventTitle = language === 'ru' ? event.title_ru : event.title_en;
+  const eventTitle = isRu ? event.title_ru : event.title_en;
   const eventDate = event.event_date 
-    ? format(new Date(event.event_date), 'PPP', { locale: language === 'ru' ? ru : undefined })
+    ? format(new Date(event.event_date), 'PPP', { locale: isRu ? ru : undefined })
     : undefined;
 
-  // Success state
+  // Success state (for cash/wallet bookings)
   if (bookingResult?.success && bookingResult.bookingId) {
     return (
       <AppLayout>
@@ -100,7 +101,7 @@ export default function EventBooking() {
           total={totalAmount}
           currency={event.currency || 'THB'}
           continuePath="/events"
-          continueLabel={language === 'ru' ? 'К событиям' : 'Browse Events'}
+          continueLabel={isRu ? 'К событиям' : 'Browse Events'}
         />
       </AppLayout>
     );
@@ -109,6 +110,26 @@ export default function EventBooking() {
   const handleSubmit = async () => {
     if (!contactData.name || !contactData.phone) return;
 
+    // Stripe card payment → Edge Function
+    if (paymentMethod === 'card' || paymentMethod === 'online') {
+      await createCheckout('create-event-checkout', {
+        event_id: event.id,
+        event_title: eventTitle,
+        ticket_count: participants,
+        unit_price: event.price || 0,
+        currency: event.currency || 'THB',
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email || undefined,
+        pickup_hotel: pickupInfo.hotelName || undefined,
+        pickup_room: pickupInfo.roomNumber || undefined,
+        event_date: event.event_date || undefined,
+        event_time: event.event_time || undefined,
+      });
+      return;
+    }
+
+    // Cash / Wallet → existing booking flow
     const scheduledAt = event.event_date ? new Date(event.event_date) : new Date();
     if (event.event_time) {
       const [hours, minutes] = event.event_time.split(':').map(Number);
@@ -146,16 +167,17 @@ export default function EventBooking() {
     }
   };
 
+  const isBusy = isSubmitting || isProcessing;
+
   return (
     <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
-          title={language === 'ru' ? 'Оформление билетов' : 'Book Tickets'} 
+          title={isRu ? 'Оформление билетов' : 'Book Tickets'} 
           showBack 
           fallbackPath="/events"
         />
 
-        {/* Step Progress */}
         <BookingStepProgress steps={eventBookingSteps} currentStep={currentStep} className="mt-4" />
 
         {/* Summary Card */}
@@ -165,7 +187,7 @@ export default function EventBooking() {
             title={eventTitle}
             subtitle={eventDate}
             duration={event.duration_hours ? `${event.duration_hours}h` : undefined}
-            location={language === 'ru' ? event.location_ru : event.location_name || undefined}
+            location={isRu ? event.location_ru : event.location_name || undefined}
             date={event.event_date ? new Date(event.event_date) : undefined}
             time={event.event_time || undefined}
             participants={participants}
@@ -180,16 +202,23 @@ export default function EventBooking() {
             count={participants}
             onChange={setParticipants}
             min={1}
-            max={event.max_spots || 10}
+            max={event.spots_left || event.max_spots || 10}
             pricePerPerson={event.price || 0}
-            label={language === 'ru' ? 'Билетов' : 'Tickets'}
+            label={isRu ? 'Билетов' : 'Tickets'}
           />
         </div>
+
+        {/* Spots left indicator */}
+        {event.spots_left !== null && event.spots_left <= 10 && (
+          <div className="text-center text-sm text-destructive font-medium mb-4">
+            🔥 {isRu ? `Осталось ${event.spots_left} мест` : `Only ${event.spots_left} spots left`}
+          </div>
+        )}
 
         {/* Contact Info */}
         <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+            {isRu ? 'Контактные данные' : 'Contact Information'}
           </h3>
           <BookingContactForm
             data={contactData}
@@ -201,20 +230,20 @@ export default function EventBooking() {
         {/* Pickup Info */}
         <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Место забора' : 'Pickup Location'}
+            {isRu ? 'Место забора' : 'Pickup Location'}
           </h3>
           <div className="space-y-4">
             <div>
-              <Label>{language === 'ru' ? 'Название отеля' : 'Hotel Name'}</Label>
+              <Label>{isRu ? 'Название отеля' : 'Hotel Name'}</Label>
               <Input
                 value={pickupInfo.hotelName}
                 onChange={(e) => setPickupInfo({ ...pickupInfo, hotelName: e.target.value })}
-                placeholder={language === 'ru' ? 'Где вас забрать?' : 'Where should we pick you up?'}
+                placeholder={isRu ? 'Где вас забрать?' : 'Where should we pick you up?'}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label>{language === 'ru' ? 'Номер комнаты' : 'Room Number'}</Label>
+              <Label>{isRu ? 'Номер комнаты' : 'Room Number'}</Label>
               <Input
                 value={pickupInfo.roomNumber}
                 onChange={(e) => setPickupInfo({ ...pickupInfo, roomNumber: e.target.value })}
@@ -227,7 +256,7 @@ export default function EventBooking() {
         {/* Payment Method */}
         <div className="bg-card rounded-xl border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            {isRu ? 'Способ оплаты' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
             selected={paymentMethod}
@@ -236,6 +265,8 @@ export default function EventBooking() {
             currency={event.currency || 'THB'}
             showWallet
             showCash
+            showCard
+            showOnline
           />
         </div>
 
@@ -243,9 +274,9 @@ export default function EventBooking() {
         <BookingBottomBar
           total={totalAmount}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isBusy}
           disabled={!contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Купить билеты' : 'Buy Tickets'}
+          submitLabel={isRu ? 'Купить билеты' : 'Buy Tickets'}
         />
       </PageContainer>
     </AppLayout>
