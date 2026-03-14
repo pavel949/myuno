@@ -59,7 +59,7 @@ export function IntakeModeSelector({ mode, onChange, disabled }: IntakeModeSelec
   const isRu = language === 'ru';
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
       {modes.map((m) => {
         const Icon = m.icon;
         const isActive = mode === m.id;
