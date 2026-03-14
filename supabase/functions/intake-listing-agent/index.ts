@@ -838,13 +838,25 @@ Deno.serve(async (req) => {
     } else if (rawText) {
       // Check for URLs in text
       const extractedUrls = extractUrls(rawText);
-      if (extractedUrls.length > 0 && mode !== 'bulk_text') {
+      if (extractedUrls.length > 0 && mode !== 'bulk_text' && mode !== 'agent_message') {
         // Scrape URLs first
         const scraped = await scrapeUrls(extractedUrls, FIRECRAWL_API_KEY);
         Object.assign(scrapedContent, scraped);
       }
 
-      if (mode === 'bulk_text') {
+      if (mode === 'agent_message') {
+        // Agent group message — split with smart header/footer merging
+        // Default to properties vertical for rental agent posts
+        const agentVertical = forceVertical || 'properties';
+        const textItems = splitAgentMessage(rawText);
+        console.log(`[INTAKE] Agent message split into ${textItems.length} items`);
+        for (const text of textItems) {
+          // Extract per-item image URLs (Yandex Disk, Google Drive, etc.)
+          const itemUrls = extractUrls(text);
+          const item = await processItem(text, itemUrls[0], itemUrls, agentVertical, LOVABLE_API_KEY, verticals);
+          items.push(item);
+        }
+      } else if (mode === 'bulk_text') {
         // Split into multiple items
         const textItems = splitBulkText(rawText);
         for (const text of textItems) {
