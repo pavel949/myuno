@@ -61,6 +61,7 @@ export interface IntakeSummary {
 
 export function useIntakeAgent() {
   const { language } = useLanguage();
+  const { activeCompany } = useActiveCompany();
   const [session, setSession] = useState<IntakeSession | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
