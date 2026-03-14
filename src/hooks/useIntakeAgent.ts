@@ -67,7 +67,7 @@ export function useIntakeAgent() {
 
   // Analyze input (single or bulk)
   const analyze = useCallback(async (options: {
-    mode: 'single' | 'bulk_text' | 'bulk_urls' | 'files';
+    mode: 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message';
     rawText?: string;
     urls?: string[];
     files?: Array<{ id: string; file: File; type: string }>;

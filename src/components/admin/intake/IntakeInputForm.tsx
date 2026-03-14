@@ -54,10 +54,13 @@ export function IntakeInputForm({ mode, onAnalyze, isProcessing }: IntakeInputFo
         return;
       }
     }
+
+    // For agent_message mode, always pass rawText
+    const shouldSendRawText = mode !== 'bulk_urls' && mode !== 'files';
     
     await onAnalyze({
       mode,
-      rawText: mode !== 'bulk_urls' && mode !== 'files' ? rawText : undefined,
+      rawText: shouldSendRawText ? rawText : undefined,
       urls,
       files: mode === 'files' ? files : undefined,
       forceVertical: forceVertical && forceVertical !== 'auto' ? forceVertical : undefined,
