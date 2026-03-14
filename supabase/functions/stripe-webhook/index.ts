@@ -823,6 +823,29 @@ Deno.serve(async (req) => {
             .eq('order_id', orderId)
             .eq('method', 'stripe');
 
+          // Release reserved event spots if this was an event order
+          const eventId = session.metadata?.event_id;
+          if (eventId) {
+            try {
+              // Count tickets from order metadata or order_items
+              const { data: orderItems } = await supabaseAdmin
+                .from('order_items')
+                .select('qty')
+                .eq('order_id', orderId)
+                .limit(1)
+                .single();
+
+              const ticketCount = orderItems?.qty || 1;
+              await supabaseAdmin.rpc('release_event_spots', {
+                p_event_id: eventId,
+                p_count: ticketCount,
+              });
+              logStep("Released event spots on expired session", { eventId, ticketCount });
+            } catch (releaseError) {
+              logStep("WARN", `Failed to release event spots: ${releaseError}`);
+            }
+          }
+
           if (order.customer_user_id) {
             await supabaseAdmin.from('notifications').insert({
               user_id: order.customer_user_id,
