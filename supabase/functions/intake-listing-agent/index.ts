@@ -286,8 +286,15 @@ function detectVerticalFromKeywords(content: string, verticals: VerticalConfig[]
 
 /**
  * Split bulk text into individual items
+ * Now also detects agent-style emoji-numbered messages
  */
 function splitBulkText(text: string): string[] {
+  // Check for agent-style message first
+  if (isAgentMessage(text)) {
+    const agentItems = splitAgentMessage(text);
+    if (agentItems.length > 1) return agentItems;
+  }
+  
   for (const sep of ITEM_SEPARATORS) {
     const parts = text.split(sep).filter(p => p.trim().length > 50);
     if (parts.length > 1) {
