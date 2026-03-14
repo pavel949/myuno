@@ -318,6 +318,93 @@ function extractUrls(text: string): string[] {
 }
 
 /**
+ * Cloud storage link patterns
+ */
+const CLOUD_STORAGE_PATTERNS = [
+  /disk\.yandex\.(ru|com)/i,
+  /drive\.google\.com/i,
+  /dropbox\.com/i,
+  /cloud\.mail\.ru/i,
+  /photos\.google\.com/i,
+];
+
+function isCloudStorageLink(url: string): boolean {
+  return CLOUD_STORAGE_PATTERNS.some(p => p.test(url));
+}
+
+/**
+ * Extract direct image URLs from cloud storage pages using Firecrawl
+ */
+async function extractImagesFromCloudLinks(
+  urls: string[],
+  firecrawlApiKey?: string
+): Promise<string[]> {
+  const cloudUrls = urls.filter(isCloudStorageLink);
+  if (cloudUrls.length === 0 || !firecrawlApiKey) return urls;
+
+  const imageUrls: string[] = [];
+  // Keep non-cloud URLs as-is
+  const nonCloudUrls = urls.filter(u => !isCloudStorageLink(u));
+  imageUrls.push(...nonCloudUrls);
+
+  for (const url of cloudUrls) {
+    try {
+      console.log(`[INTAKE] Extracting images from cloud link: ${url}`);
+      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${firecrawlApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          formats: ['links', 'html'],
+          waitFor: 5000,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.success === false) {
+        console.warn(`[INTAKE] Cloud scrape failed for ${url}:`, data?.error);
+        imageUrls.push(url); // Keep original link as fallback
+        continue;
+      }
+
+      const scraped = data.data || {};
+      
+      // Extract image URLs from links and HTML
+      const allLinks: string[] = scraped.links || [];
+      const html: string = scraped.html || '';
+      
+      // Find direct image links
+      const imgExtensions = /\.(jpg|jpeg|png|webp|heic|avif)(\?|$)/i;
+      const directImages = allLinks.filter((l: string) => imgExtensions.test(l));
+      
+      // Also extract from HTML img tags and og:image meta
+      const htmlImgMatches = html.match(/(?:src|content)=["']([^"']+\.(?:jpg|jpeg|png|webp)(?:\?[^"']*)?)["']/gi) || [];
+      const htmlImages = htmlImgMatches
+        .map((m: string) => m.replace(/^(?:src|content)=["']/, '').replace(/["']$/, ''))
+        .filter((u: string) => u.startsWith('http'));
+
+      const foundImages = [...new Set([...directImages, ...htmlImages])];
+      
+      if (foundImages.length > 0) {
+        console.log(`[INTAKE] Found ${foundImages.length} images from ${url}`);
+        imageUrls.push(...foundImages.slice(0, 20)); // Limit to 20 images per link
+      } else {
+        console.log(`[INTAKE] No images found in cloud link, keeping original: ${url}`);
+        imageUrls.push(url); // Keep original as reference
+      }
+    } catch (err) {
+      console.error(`[INTAKE] Cloud image extraction error for ${url}:`, err);
+      imageUrls.push(url);
+    }
+  }
+
+  return [...new Set(imageUrls)];
+}
+
+/**
  * Call Firecrawl to scrape URLs
  */
 async function scrapeUrls(urls: string[], firecrawlApiKey?: string): Promise<Record<string, { title: string; content: string; metadata: Record<string, unknown> }>> {
