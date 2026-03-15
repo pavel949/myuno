@@ -44,6 +44,12 @@ export const PROVIDER_ID_MAPPING: Record<string, ProviderIdConfig> = {
   
   // User-generated content uses user_id
   'user_listings': { field: 'user_id', type: 'user' },
+  
+  // Unified listings table
+  'listings': { field: 'provider_id', type: 'provider' },
+  
+  // Owner properties (alias for properties with owner_id)
+  'owner_properties': { field: 'owner_id', type: 'owner' },
 };
 
 /**

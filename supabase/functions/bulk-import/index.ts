@@ -33,6 +33,7 @@ const ALLOWED_TABLES = [
   'flower_shops',
   'bouquets',
   'user_listings',
+  'listings',
   
   // Legacy (deprecated but may have data)
   'services',
