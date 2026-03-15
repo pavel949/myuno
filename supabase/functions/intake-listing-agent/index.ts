@@ -27,18 +27,14 @@ const STATIC_VERTICALS: VerticalConfig[] = [
   { id: 'vehicles', table: 'vehicles', keywords: ['car', 'машина', 'авто', 'motorbike', 'мотобайк', 'scooter', 'скутер', 'bike', 'rental', 'прокат'] },
   { id: 'events', table: 'events', keywords: ['event', 'событие', 'party', 'вечеринка', 'concert', 'концерт', 'festival', 'фестиваль', 'show'] },
   { id: 'babysitters', table: 'babysitters', keywords: ['babysitter', 'няня', 'nanny', 'childcare', 'baby', 'ребёнок', 'children', 'дети'] },
-  { id: 'cleaning_services', table: 'cleaning_services', keywords: ['cleaning', 'уборка', 'maid', 'housekeeping', 'клининг', 'deep clean'] },
-  { id: 'legal_services', table: 'legal_services', keywords: ['lawyer', 'юрист', 'адвокат', 'legal', 'visa', 'виза', 'immigration', 'notary', 'contract'] },
+  { id: 'cleaning_providers', table: 'cleaning_providers', keywords: ['cleaning', 'уборка', 'maid', 'housekeeping', 'клининг', 'deep clean'] },
+  { id: 'lawyers', table: 'lawyers', keywords: ['lawyer', 'юрист', 'адвокат', 'legal', 'visa', 'виза', 'immigration', 'notary', 'contract'] },
   { id: 'pet_services', table: 'pet_services', keywords: ['pet', 'питомец', 'dog', 'собака', 'cat', 'кошка', 'vet', 'ветеринар', 'grooming'] },
-  { id: 'education_providers', table: 'education_providers', keywords: ['school', 'школа', 'education', 'course', 'курс', 'tutor', 'репетитор', 'language', 'training'] },
-  { id: 'pharmacies', table: 'pharmacies', keywords: ['pharmacy', 'аптека', 'medicine', 'лекарство', 'drug', 'препарат', 'drugstore'] },
-  { id: 'insurance_providers', table: 'insurance_providers', keywords: ['insurance', 'страховка', 'страхование', 'policy', 'полис', 'health insurance'] },
+  { id: 'education_centers', table: 'education_centers', keywords: ['school', 'школа', 'education', 'course', 'курс', 'tutor', 'репетитор', 'language', 'training'] },
   { id: 'flower_shops', table: 'flower_shops', keywords: ['flowers', 'цветы', 'bouquet', 'букет', 'florist', 'флорист', 'roses'] },
-  { id: 'stores', table: 'stores', keywords: ['store', 'магазин', 'shop', 'shopping', 'retail', 'supermarket', 'grocery'] },
-  { id: 'providers', table: 'providers', keywords: ['provider', 'провайдер', 'company', 'компания', 'service', 'услуга', 'business'] },
+  { id: 'providers', table: 'providers', keywords: ['provider', 'провайдер', 'company', 'компания', 'service', 'услуга', 'business', 'pharmacy', 'аптека', 'insurance', 'страховка', 'store', 'магазин'] },
   { id: 'marketplace_products', table: 'marketplace_products', keywords: ['product', 'товар', 'item', 'goods', 'buy', 'sell', 'продать'] },
-  { id: 'marketplace_vendors', table: 'marketplace_vendors', keywords: ['vendor', 'продавец', 'seller', 'merchant', 'shop'] },
-  { id: 'vendor_locations', table: 'vendor_locations', keywords: ['location', 'локация', 'branch', 'филиал', 'office', 'outlet'] },
+  { id: 'marketplace_vendors', table: 'marketplace_vendors', keywords: ['vendor', 'продавец', 'seller', 'merchant'] },
 ];
 
 // Cache for loaded verticals (per-request scope)
