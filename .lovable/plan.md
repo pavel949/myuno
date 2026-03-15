@@ -1,84 +1,43 @@
 
 
-# Vendor Onboarding UX — Fast First Listing with Progressive Completion
+# Code Review: Agent Message Intake Flow
 
-## Research: How Top Platforms Do It
+## Current Status
 
-| Platform | Pattern | Time-to-First-Listing |
-|----------|---------|----------------------|
-| **Airbnb** | 3-screen wizard: Type → Location → Photo. Profile filled later. Go live in ~5 min | ~5 min |
-| **Grab Merchant** | Phone + OTP → Business Name + Category → Menu item. 2 min to first entry | ~2 min |
-| **Glovo Partners** | Name + Category → 1 product with photo + price → Done. Details later via dashboard checklist | ~3 min |
-| **Uber Eats** | Express signup: Name → Menu category → 1 dish → live (with "incomplete" badge until verified) | ~4 min |
+The two critical bugs (rows→records, data.success→data.inserted) are **fixed**. CRM contact creation and cloud image extraction are **implemented**. The overall flow structure is correct.
 
-**Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
+## Remaining Issue Found: Table Name Mismatch
 
-## Current State Analysis
+There is a **table name mismatch** between the edge function's vertical detection and the frontend's validation that will cause approval failures for certain verticals.
 
-**What exists:**
-- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
-- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
-- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
-- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
+**Edge function** (`intake-listing-agent/index.ts` lines 30-38) defines these verticals:
+- `cleaning_services` — but `VALID_INTAKE_TABLES` and `bulk-import` expect `cleaning_providers`
+- `legal_services` — but mapping expects `lawyers`
+- `education_providers` — but mapping expects `education_centers`
+- `pharmacies` — not in `VALID_INTAKE_TABLES` at all
+- `insurance_providers` — not in `VALID_INTAKE_TABLES` at all
+- `stores` — not in `VALID_INTAKE_TABLES` at all
+- `events` — not in `VALID_INTAKE_TABLES` at all
+- `vendor_locations` — not in `VALID_INTAKE_TABLES` at all
 
-**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
+When the AI detects a cleaning service listing, it assigns `detectedVertical: 'cleaning_services'`. On approval, `isValidIntakeTable('cleaning_services')` returns **false**, and the listing is rejected with an error toast.
 
-## Proposed UX: "3-Screen Fast Start"
+### Fix
 
-```text
-Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
-┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
-│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
-│ [____________]   │           │ Name *            │              │                  │
-│                  │           │ [____________]    │              │  Your listing is │
-│ Category *       │           │                   │              │  pending review  │
-│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
-│                  │           │ [____] THB        │              │  Complete your   │
-│ Phone / WhatsApp │           │                   │              │  profile to get  │
-│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
-│                  │           │ [📷 Upload]       │              │                  │
-│         [Next →] │           │                   │              │  [→ Dashboard]   │
-└──────────────────┘           │ Brief description │              └──────────────────┘
-                               │ [____________]    │
-                               │         [List →]  │
-                               └──────────────────┘
-```
+Two changes needed:
 
-**Required fields total: 4** (business name, category, service name, price)
-Everything else: progressive completion via existing `VendorOnboardingChecklist`.
+1. **`supabase/functions/intake-listing-agent/index.ts`** — Fix `STATIC_VERTICALS` entries to use actual DB table names:
+   - `cleaning_services` → `cleaning_providers`
+   - `legal_services` → `lawyers`
+   - `education_providers` → `education_centers`
+   - Remove or remap `pharmacies`, `insurance_providers`, `stores`, `events`, `vendor_locations` (these tables don't exist in `PROVIDER_ID_MAPPING`)
 
-## Implementation Plan
+2. **`src/lib/providerIdMapping.ts`** — Add any actually-existing tables that are missing (e.g., if `events` table exists in DB, add it to the mapping). Otherwise the edge function shouldn't suggest verticals that can't be imported.
 
-### 1. Refactor VendorOnboarding into 3-step wizard
-Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
-- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
-- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
-- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
+### Impact
+- **Properties** (the main agent use case): Works fine — `properties` is correctly mapped
+- **Other verticals**: 8 out of 22 static verticals have wrong or missing table names and will fail on approval
 
-### 2. Update VendorOnboardingChecklist
-Expand from 3 to 6 progressive items:
-- ✅ Create account (auto-complete)
-- ✅ Add first listing (auto-complete from step 2)
-- ○ Add business description
-- ○ Upload logo / cover photo
-- ○ Add working hours
-- ○ Add payment details
-
-Each item links to the relevant settings section.
-
-### 3. Wire the data flow
-- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
-- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
-- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
-
-### 4. Update entry points
-- `/vendor/onboarding` → renders new 3-step wizard
-- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
-
-### Technical Details
-- Reuse existing `OnboardingLayout` component for step progress UI
-- Reuse `UnifiedMediaUploader` for photo upload in step 2
-- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
-- No new DB tables or migrations required
-- No new Edge Functions required
+### Effort
+~10 minutes — rename table IDs in the static fallback array and optionally extend `PROVIDER_ID_MAPPING`.
 
