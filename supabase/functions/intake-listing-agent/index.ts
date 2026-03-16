@@ -30,7 +30,7 @@ const STATIC_VERTICALS: VerticalConfig[] = [
   { id: 'cleaning_services', table: 'cleaning_providers', keywords: ['cleaning', 'уборка', 'maid', 'housekeeping', 'клининг', 'deep clean'] },
   { id: 'legal_services', table: 'lawyers', keywords: ['lawyer', 'юрист', 'адвокат', 'legal', 'visa', 'виза', 'immigration', 'notary', 'contract'] },
   { id: 'pet_services', table: 'pet_services', keywords: ['pet', 'питомец', 'dog', 'собака', 'cat', 'кошка', 'vet', 'ветеринар', 'grooming'] },
-  { id: 'education_centers', table: 'education_centers', keywords: ['school', 'школа', 'education', 'course', 'курс', 'tutor', 'репетитор', 'language', 'training'] },
+  { id: 'education_providers', table: 'education_centers', keywords: ['school', 'школа', 'education', 'course', 'курс', 'tutor', 'репетитор', 'language', 'training'] },
   { id: 'flower_shops', table: 'flower_shops', keywords: ['flowers', 'цветы', 'bouquet', 'букет', 'florist', 'флорист', 'roses'] },
   { id: 'providers', table: 'providers', keywords: ['provider', 'провайдер', 'company', 'компания', 'service', 'услуга', 'business', 'pharmacy', 'аптека', 'insurance', 'страховка', 'store', 'магазин'] },
   { id: 'marketplace_products', table: 'marketplace_products', keywords: ['product', 'товар', 'item', 'goods', 'buy', 'sell', 'продать'] },
