@@ -39,6 +39,7 @@ import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 import { composeProviders } from "@/lib/composeProviders";
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -99,6 +100,7 @@ function AppContent() {
         <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />
+        <SpeedInsights />
         <BrowserRouter>
           <ComingSoonGate>
             <AnimatedRoutes />
