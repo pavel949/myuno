@@ -29,7 +29,7 @@ const EDGE_FUNCTION_STATIC_VERTICALS = [
   { id: 'cleaning_services', table: 'cleaning_providers' },
   { id: 'legal_services', table: 'lawyers' },
   { id: 'pet_services', table: 'pet_services' },
-  { id: 'education_centers', table: 'education_centers' },
+  { id: 'education_providers', table: 'education_centers' },
   { id: 'flower_shops', table: 'flower_shops' },
   { id: 'providers', table: 'providers' },
   { id: 'marketplace_products', table: 'marketplace_products' },
