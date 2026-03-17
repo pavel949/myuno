@@ -249,12 +249,12 @@ const MCOnboarding: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label>{isRu ? 'Название (EN) *' : 'Name (EN) *'}</Label>
-                  <Input value={form.name_en} onChange={e => updateField('name_en', e.target.value)} placeholder="Sunrise Property Management" />
+                  <Label htmlFor="onboard-name-en">{isRu ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                  <Input id="onboard-name-en" value={form.name_en} onChange={e => updateField('name_en', e.target.value)} placeholder="Sunrise Property Management" />
                 </div>
                 <div>
-                  <Label>{isRu ? 'Название (RU) *' : 'Name (RU) *'}</Label>
-                  <Input value={form.name_ru} onChange={e => updateField('name_ru', e.target.value)} placeholder="Санрайз Управление Недвижимостью" />
+                  <Label htmlFor="onboard-name-ru">{isRu ? 'Название (RU) *' : 'Name (RU) *'}</Label>
+                  <Input id="onboard-name-ru" value={form.name_ru} onChange={e => updateField('name_ru', e.target.value)} placeholder="Санрайз Управление Недвижимостью" />
                 </div>
                 {form.name_en && (
                   <p className="text-xs text-muted-foreground">
@@ -263,25 +263,25 @@ const MCOnboarding: React.FC = () => {
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Email</Label>
-                    <Input type="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="info@company.com" />
+                    <Label htmlFor="onboard-email">Email</Label>
+                    <Input id="onboard-email" type="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="info@company.com" />
                   </div>
                   <div>
-                    <Label>{isRu ? 'Телефон' : 'Phone'}</Label>
-                    <Input value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+66..." />
+                    <Label htmlFor="onboard-phone">{isRu ? 'Телефон' : 'Phone'}</Label>
+                    <Input id="onboard-phone" value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+66..." />
                   </div>
                 </div>
                 <div>
-                  <Label>{isRu ? 'Адрес офиса' : 'Office Address'}</Label>
-                  <Input value={form.address} onChange={e => updateField('address', e.target.value)} />
+                  <Label htmlFor="onboard-address">{isRu ? 'Адрес офиса' : 'Office Address'}</Label>
+                  <Input id="onboard-address" value={form.address} onChange={e => updateField('address', e.target.value)} />
                 </div>
                 <div>
-                  <Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                  <Textarea value={form.description_en} onChange={e => updateField('description_en', e.target.value)} rows={2} />
+                  <Label htmlFor="onboard-description-en">{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                  <Textarea id="onboard-description-en" value={form.description_en} onChange={e => updateField('description_en', e.target.value)} rows={2} />
                 </div>
                 <div>
-                  <Label>{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
-                  <Textarea value={form.description_ru} onChange={e => updateField('description_ru', e.target.value)} rows={2} />
+                  <Label htmlFor="onboard-description-ru">{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                  <Textarea id="onboard-description-ru" value={form.description_ru} onChange={e => updateField('description_ru', e.target.value)} rows={2} />
                 </div>
 
                 <Button className="w-full" size="lg" onClick={handleRegister} disabled={loading || !form.name_en.trim() || !form.name_ru.trim()}>

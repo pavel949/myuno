@@ -3,8 +3,8 @@
  * @description Self-service Management Company registration.
  * Public-facing page for property managers to register without admin.
  */
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, ArrowRight, CheckCircle, Shield, BarChart3, Users } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 const BENEFITS = [
   { icon: BarChart3, en: 'Full property analytics & P&L reports', ru: 'Полная аналитика и отчёты P&L' },
@@ -30,9 +31,12 @@ export default function MCRegistrationPage() {
   const isRu = language === 'ru';
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [nameEn, setNameEn] = useState('');
-  const [nameRu, setNameRu] = useState('');
+  const initialName = useMemo(() => searchParams.get('name')?.trim() || '', [searchParams]);
+  const redirectTo = searchParams.get('redirect') || '/mc';
+  const [nameEn, setNameEn] = useState(initialName);
+  const [nameRu, setNameRu] = useState(initialName);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [description, setDescription] = useState('');
@@ -70,9 +74,9 @@ export default function MCRegistrationPage() {
       toast.success(isRu ? 'Компания зарегистрирована!' : 'Company registered!');
       
       // Redirect to MC workspace after short delay
-      setTimeout(() => navigate('/mc'), 2000);
+      setTimeout(() => navigate(redirectTo), 2000);
     } catch (err: unknown) {
-      console.error('MC registration error:', err);
+      logger.error('MC registration error:', err);
       toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка регистрации' : 'Registration failed'));
     } finally {
       setIsSubmitting(false);
@@ -138,20 +142,22 @@ export default function MCRegistrationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-1.5 block">
+              <label htmlFor="mc-name-en" className="text-sm font-medium mb-1.5 block">
                 {isRu ? 'Название (EN) *' : 'Company Name (EN) *'}
               </label>
               <Input
+                id="mc-name-en"
                 placeholder="Ignatev Estate"
                 value={nameEn}
                 onChange={(e) => setNameEn(e.target.value)}
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">
+              <label htmlFor="mc-name-ru" className="text-sm font-medium mb-1.5 block">
                 {isRu ? 'Название (RU)' : 'Company Name (RU)'}
               </label>
               <Input
+                id="mc-name-ru"
                 placeholder="Игнатьев Эстейт"
                 value={nameRu}
                 onChange={(e) => setNameRu(e.target.value)}
@@ -159,8 +165,9 @@ export default function MCRegistrationPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Email</label>
+                <label htmlFor="mc-email" className="text-sm font-medium mb-1.5 block">Email</label>
                 <Input
+                  id="mc-email"
                   type="email"
                   placeholder="info@company.com"
                   value={email}
@@ -168,10 +175,11 @@ export default function MCRegistrationPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">
+                <label htmlFor="mc-phone" className="text-sm font-medium mb-1.5 block">
                   {isRu ? 'Телефон' : 'Phone'}
                 </label>
                 <Input
+                  id="mc-phone"
                   type="tel"
                   placeholder="+66..."
                   value={phone}
@@ -180,10 +188,11 @@ export default function MCRegistrationPage() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1.5 block">
+              <label htmlFor="mc-description" className="text-sm font-medium mb-1.5 block">
                 {isRu ? 'Описание (необязательно)' : 'Description (optional)'}
               </label>
               <Textarea
+                id="mc-description"
                 placeholder={isRu ? 'Расскажите о вашей компании...' : 'Tell us about your company...'}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

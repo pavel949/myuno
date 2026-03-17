@@ -90,6 +90,12 @@ body {
     word-break: break-word;
   }
 
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
   @media (min-width: 1024px) {
     body {
       font-size: 16px;
@@ -136,6 +142,19 @@ body {
   html.light .text-white {
     color: hsl(var(--foreground));
   }
+  /* Exception: hero/dark gradient blocks — keep white text on dark blue */
+  html.light .hero-on-dark,
+  html.light .hero-on-dark .text-white,
+  html.light .hero-on-dark [class*="text-white"] {
+    color: #ffffff !important;
+  }
+  html.light .hero-on-dark .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
+  html.light .hero-on-dark .text-white\/80 { color: rgba(255,255,255,0.8) !important; }
+  html.light .hero-on-dark .text-white\/85 { color: rgba(255,255,255,0.85) !important; }
+  html.light .hero-on-dark .text-white\/90 { color: rgba(255,255,255,0.9) !important; }
+  html.light .hero-on-dark .text-white\/60 { color: rgba(255,255,255,0.6) !important; }
+  html.light .hero-on-dark .text-white\/30 { color: rgba(255,255,255,0.3) !important; }
+  html.light .hero-on-dark .text-white\/20 { color: rgba(255,255,255,0.2) !important; }
   html.light .bg-primary .text-white,
   html.light .bg-primary.text-white,
   html.light .bg-destructive .text-white,
@@ -155,7 +174,7 @@ body {
     
     /* Slightly larger tap targets on mobile */
     button, a, [role="button"] {
-      min-height: 36px;
+      min-height: 44px;
     }
     
     /* Ensure inputs are readable on iOS (prevents zoom) */

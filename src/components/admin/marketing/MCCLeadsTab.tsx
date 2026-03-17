@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,10 +26,13 @@ import {
   Thermometer,
   Snowflake,
   Database,
-  Brain
+  Brain,
+  ArrowRightCircle
 } from 'lucide-react';
 import { useLeadHub, LeadSource, LeadPriority, UnifiedLead } from '@/hooks/useLeadHub';
 import { useLeadsFactory } from '@/hooks/useLeadsFactory';
+import { useConvertLeadToDeal } from '@/hooks/useConvertLeadToDeal';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -40,13 +44,15 @@ export function MCCLeadsTab() {
   const [priorityFilter, setPriorityFilter] = useState<LeadPriority | null>(null);
   const [sourceFilter, setSourceFilter] = useState<LeadSource>('all');
 
-  const { leads, stats, isLoading } = useLeadHub({
+  const { leads, stats, isLoading, error } = useLeadHub({
     source: sourceFilter,
     priority: priorityFilter,
     search: searchQuery,
   });
 
   const { batchScoreLeads, generateFollowUp } = useLeadsFactory();
+  const convertToDeal = useConvertLeadToDeal();
+  const navigate = useNavigate();
 
   const handleWhatsApp = async (lead: UnifiedLead) => {
     if (!lead.phone) return;
@@ -89,6 +95,23 @@ export function MCCLeadsTab() {
   const handlePhone = (lead: UnifiedLead) => {
     if (!lead.phone) return;
     window.open(`tel:${lead.phone}`, '_blank');
+  };
+
+  const handleConvertToDeal = (lead: UnifiedLead) => {
+    if (lead.source_table === 'profiles') return;
+    const source = lead.source_table === 'consultation_requests' ? 'consultation_requests' : 'mcc_leads';
+    convertToDeal.mutate(
+      { leadId: lead.id, source },
+      {
+        onSuccess: (result) => {
+          toast.success(isRu ? 'Лид конвертирован в сделку' : 'Lead converted to deal');
+          navigate(`${APP_ROUTES.MC_SALES}/${result.dealId}`);
+        },
+        onError: (err) => {
+          toast.error(err instanceof Error ? err.message : 'Conversion failed');
+        },
+      }
+    );
   };
 
   const handleBatchScore = () => {
@@ -151,11 +174,24 @@ export function MCCLeadsTab() {
     });
   };
 
+  const activateOnEnterOrSpace = (event: React.KeyboardEvent, callback: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      callback();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setPriorityFilter(null); setSourceFilter('all'); }}>
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => { setPriorityFilter(null); setSourceFilter('all'); }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => activateOnEnterOrSpace(event, () => { setPriorityFilter(null); setSourceFilter('all'); })}
+        >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Users className="h-5 w-5 text-primary" />
@@ -170,6 +206,9 @@ export function MCCLeadsTab() {
         <Card 
           className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'hot' ? 'ring-2 ring-destructive' : ''}`} 
           onClick={() => setPriorityFilter(priorityFilter === 'hot' ? null : 'hot')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'hot' ? null : 'hot'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-destructive/10">
@@ -185,6 +224,9 @@ export function MCCLeadsTab() {
         <Card 
           className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'warm' ? 'ring-2 ring-warning' : ''}`} 
           onClick={() => setPriorityFilter(priorityFilter === 'warm' ? null : 'warm')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'warm' ? null : 'warm'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-warning/10">
@@ -200,6 +242,9 @@ export function MCCLeadsTab() {
         <Card 
           className={`cursor-pointer hover:shadow-md transition-shadow ${priorityFilter === 'cold' ? 'ring-2 ring-info' : ''}`} 
           onClick={() => setPriorityFilter(priorityFilter === 'cold' ? null : 'cold')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => activateOnEnterOrSpace(event, () => setPriorityFilter(priorityFilter === 'cold' ? null : 'cold'))}
         >
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-info/10">
@@ -212,7 +257,7 @@ export function MCCLeadsTab() {
           </CardContent>
         </Card>
         
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-success/10">
               <ChevronRight className="h-5 w-5 text-success" />
@@ -224,7 +269,7 @@ export function MCCLeadsTab() {
           </CardContent>
         </Card>
         
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-chart-5/10">
               <Brain className="h-5 w-5 text-chart-5" />
@@ -265,9 +310,9 @@ export function MCCLeadsTab() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as LeadSource)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder={isRu ? 'Источник' : 'Source'} />
             </SelectTrigger>
             <SelectContent>
@@ -294,6 +339,15 @@ export function MCCLeadsTab() {
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">
               {isRu ? 'Загрузка...' : 'Loading...'}
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center space-y-3">
+              <p className="text-sm text-destructive">
+                {isRu ? 'Не удалось загрузить лиды' : 'Failed to load leads'}
+              </p>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
             </div>
           ) : leads.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
@@ -379,18 +433,31 @@ export function MCCLeadsTab() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 items-center">
+                          {lead.source_table !== 'profiles' && lead.status !== 'converted' && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="gap-1 h-8"
+                              onClick={() => handleConvertToDeal(lead)}
+                              disabled={convertToDeal.isPending}
+                              title={isRu ? 'Конвертировать в сделку' : 'Convert to deal'}
+                            >
+                              <ArrowRightCircle className="h-3.5 w-3.5" />
+                              {isRu ? 'В сделку' : 'Deal'}
+                            </Button>
+                          )}
                           {lead.email && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEmail(lead)} title={isRu ? 'Написать email' : 'Send email'}>
+                            <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-8 sm:w-8" onClick={() => handleEmail(lead)} title={isRu ? 'Написать email' : 'Send email'} aria-label={isRu ? 'Написать email' : 'Send email'}>
                               <Mail className="h-4 w-4" />
                             </Button>
                           )}
                           {lead.phone && (
                             <>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handlePhone(lead)} title={isRu ? 'Позвонить' : 'Call'}>
+                              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-8 sm:w-8" onClick={() => handlePhone(lead)} title={isRu ? 'Позвонить' : 'Call'} aria-label={isRu ? 'Позвонить' : 'Call'}>
                                 <Phone className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleWhatsApp(lead)} title="WhatsApp">
+                              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-8 sm:w-8" onClick={() => handleWhatsApp(lead)} title="WhatsApp" aria-label="WhatsApp">
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
                             </>
