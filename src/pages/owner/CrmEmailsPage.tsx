@@ -27,7 +27,7 @@ export default function CrmEmailsPage() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: emails = [], isLoading } = useCrmEmails(companyId);
+  const { data: emails = [], isLoading, isError: emailsError, refetch: refetchEmails } = useCrmEmails(companyId);
   const createEmail = useCreateCrmEmail();
   const sendEmail = useSendCrmEmail();
   const { toast } = useToast();
@@ -66,6 +66,17 @@ export default function CrmEmailsPage() {
       toast({ title: isRu ? 'Ошибка отправки' : 'Send failed', variant: 'destructive' });
     }
   };
+
+  if (emailsError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки писем' : 'Failed to load emails'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchEmails()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
