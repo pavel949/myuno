@@ -294,13 +294,38 @@ export function useDeleteDeal() {
 /** Bulk update stage */
 export function useBulkUpdateStage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ ids, stage }: { ids: string[]; stage: DealStage }) => {
+      // Fetch current stages for audit trail before updating
+      const { data: current } = await supabase
+        .from('agent_deals')
+        .select('id, stage')
+        .in('id', ids);
+
       const { error } = await supabase
         .from('agent_deals')
         .update({ stage } as any)
         .in('id', ids);
       if (error) throw error;
+
+      // Non-blocking: log field changes for each deal that actually changed
+      if (current && user) {
+        const changes = current
+          .filter((d: any) => d.stage !== stage)
+          .map((d: any) => ({
+            deal_id: d.id,
+            field_name: 'stage',
+            old_value: d.stage,
+            new_value: stage,
+            user_id: user.id,
+          }));
+        if (changes.length > 0) {
+          supabase.from('deal_field_changes').insert(changes).then(({ error: logError }) => {
+            if (logError) console.warn('[useBulkUpdateStage] deal_field_changes insert failed:', logError);
+          });
+        }
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
