@@ -19,7 +19,7 @@ export default function CrmMeetingsPage() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: meetings = [], isLoading } = useCrmMeetings(companyId);
+  const { data: meetings = [], isLoading, isError: meetingsError, refetch: refetchMeetings } = useCrmMeetings(companyId);
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
   const { toast } = useToast();
@@ -55,6 +55,17 @@ export default function CrmMeetingsPage() {
     if (s === 'cancelled') return 'destructive';
     return 'secondary';
   };
+
+  if (meetingsError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки встреч' : 'Failed to load meetings'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchMeetings()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">

@@ -29,7 +29,7 @@ export default function CrmTemplatesPage() {
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
   const [channelFilter, setChannelFilter] = useState<string>('all');
-  const { data: templates = [], isLoading } = useCrmTemplates(companyId, channelFilter === 'all' ? undefined : channelFilter);
+  const { data: templates = [], isLoading, isError: templatesError, refetch: refetchTemplates } = useCrmTemplates(companyId, channelFilter === 'all' ? undefined : channelFilter);
   const createTemplate = useCreateTemplate();
   const deleteTemplate = useDeleteTemplate();
   const { toast } = useToast();
@@ -60,6 +60,17 @@ export default function CrmTemplatesPage() {
   const insertTag = (tag: string) => {
     setForm(f => ({ ...f, body: f.body + tag }));
   };
+
+  if (templatesError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки шаблонов' : 'Failed to load templates'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchTemplates()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">

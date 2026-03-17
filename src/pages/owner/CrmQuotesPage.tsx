@@ -26,7 +26,7 @@ export default function CrmQuotesPage() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: quotes = [], isLoading } = useCrmQuotes(companyId);
+  const { data: quotes = [], isLoading, isError: quotesError, refetch: refetchQuotes } = useCrmQuotes(companyId);
   const createQuote = useCreateQuote();
   const updateQuote = useUpdateQuote();
   const deleteQuote = useDeleteQuote();
@@ -41,6 +41,17 @@ export default function CrmQuotesPage() {
     };
     return isRu ? (map[s]?.[1] || s) : (map[s]?.[0] || s);
   };
+
+  if (quotesError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки КП' : 'Failed to load quotes'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchQuotes()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">

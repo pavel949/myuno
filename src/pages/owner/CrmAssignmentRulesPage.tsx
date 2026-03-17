@@ -16,7 +16,7 @@ export default function CrmAssignmentRulesPage() {
   const isRu = language === 'ru';
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: rules = [], isLoading } = useCrmAssignmentRules(companyId);
+  const { data: rules = [], isLoading, isError: rulesError, refetch: refetchRules } = useCrmAssignmentRules(companyId);
   const createRule = useCreateAssignmentRule();
   const deleteRule = useDeleteAssignmentRule();
   const updateRule = useUpdateAssignmentRule();
@@ -37,6 +37,17 @@ export default function CrmAssignmentRulesPage() {
     setOpen(false);
     toast.success(isRu ? 'Правило создано' : 'Rule created');
   };
+
+  if (rulesError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки правил' : 'Failed to load assignment rules'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchRules()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">

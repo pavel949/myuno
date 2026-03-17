@@ -30,7 +30,7 @@ export default function CrmCompaniesPage() {
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
 
-  const { data: companies = [], isLoading } = useCrmCompanies(companyId, search);
+  const { data: companies = [], isLoading, isError: companiesError, refetch: refetchCompanies } = useCrmCompanies(companyId, search);
   const createCompany = useCreateCrmCompany();
   const deleteCompany = useDeleteCrmCompany();
 
@@ -75,6 +75,17 @@ export default function CrmCompaniesPage() {
       toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
+
+  if (companiesError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки компаний' : 'Failed to load companies'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchCompanies()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

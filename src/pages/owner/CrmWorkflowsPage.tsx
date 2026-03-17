@@ -22,7 +22,7 @@ export default function CrmWorkflowsPage() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { data: workflows = [], isLoading } = useCrmWorkflows(companyId);
+  const { data: workflows = [], isLoading, isError: workflowsError, refetch: refetchWorkflows } = useCrmWorkflows(companyId);
   const createWorkflow = useCreateWorkflow();
   const deleteWorkflow = useDeleteWorkflow();
   const updateWorkflow = useUpdateWorkflow();
@@ -61,6 +61,17 @@ export default function CrmWorkflowsPage() {
     const t = TRIGGER_TYPES.find(t => t.value === type);
     return t ? (isRu ? t.labelRu : t.labelEn) : type;
   };
+
+  if (workflowsError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки автоматизаций' : 'Failed to load automations'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchWorkflows()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">

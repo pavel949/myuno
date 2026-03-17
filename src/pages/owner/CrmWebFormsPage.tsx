@@ -17,7 +17,7 @@ export default function CrmWebFormsPage() {
   const { activeCompany } = useActiveCompany();
   const { user } = useAuth();
   const companyId = activeCompany?.company_id;
-  const { data: forms = [], isLoading } = useCrmWebForms(companyId);
+  const { data: forms = [], isLoading, isError: formsError, refetch: refetchForms } = useCrmWebForms(companyId);
   const createForm = useCreateWebForm();
   const deleteForm = useDeleteWebForm();
   const [newName, setNewName] = useState('');
@@ -59,6 +59,17 @@ export default function CrmWebFormsPage() {
     navigator.clipboard.writeText(snippet);
     toast.success(isRu ? 'Код скопирован' : 'Embed code copied');
   };
+
+  if (formsError) {
+    return (
+      <div className="p-4 md:p-6 lg:p-8 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки форм' : 'Failed to load forms'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchForms()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1536px] mx-auto">
