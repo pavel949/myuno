@@ -4,6 +4,7 @@ import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, us
 import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
@@ -315,6 +316,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
       const oldLabel = pipelineData.getLabel(deal.stage, false);
       const newLabel = pipelineData.getLabel(newStage, false);
       const wonStage = pipelineData.stages.find(s => s.isWon);
+      const previousStageId = deal.stage;
       await updateDeal.mutateAsync({
         id: dealId,
         stage: newStage,
@@ -327,6 +329,19 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         description: `${oldLabel} → ${newLabel}`,
         stage_from: deal.stage,
         stage_to: newStage,
+      });
+      // Non-blocking: log stage change to deal_field_changes (audit trail)
+      const changeRow = {
+        deal_id: dealId,
+        field_name: 'stage',
+        old_value: previousStageId,
+        new_value: newStage,
+        user_id: user!.id,
+      };
+      supabase.from('deal_field_changes').insert(changeRow).then(({ error }) => {
+        if (error) toast({ title: isRu ? 'Не удалось записать историю изменений' : 'Audit log failed to save', variant: 'destructive' });
+      }).catch(() => {
+        toast({ title: isRu ? 'Не удалось записать историю изменений' : 'Audit log failed to save', variant: 'destructive' });
       });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
