@@ -26,7 +26,7 @@ export default function SalesPipeline() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: membership, isLoading: membershipLoading } = useMyCompanyId();
-  const { data: dealsResult, isLoading } = useAgentDeals(membership?.company_id);
+  const { data: dealsResult, isLoading, isError: dealsError, refetch: refetchDeals } = useAgentDeals(membership?.company_id);
   const deals = dealsResult?.data || [];
   const { data: members = [] } = useCompanyMembers(membership?.company_id);
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
@@ -214,6 +214,17 @@ export default function SalesPipeline() {
       <div className="p-4 md:p-6 text-center text-muted-foreground pt-20 max-w-[1536px] mx-auto">
         <p className="text-lg font-medium mb-2">{isRu ? 'Нет доступа' : 'No Access'}</p>
         <p className="text-sm">{isRu ? 'Вы не являетесь членом управляющей компании' : "You're not a member of any management company"}</p>
+      </div>
+    );
+  }
+
+  if (dealsError) {
+    return (
+      <div className="p-4 md:p-6 text-center pt-20 max-w-[1536px] mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки сделок' : 'Failed to load deals'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchDeals()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
       </div>
     );
   }
