@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, useUpdateDeal, daysSince, formatValue } from '@/hooks/useAgentDeals';
 import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
+import { useLogDealChanges } from '@/hooks/useDealFieldChanges';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -264,6 +265,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
   const isRu = language === 'ru';
   const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
+  const logChanges = useLogDealChanges();
   const [activeDeal, setActiveDeal] = useState<AgentDeal | null>(null);
 
   const sensors = useSensors(
@@ -322,6 +324,10 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         id: dealId,
         stage: newStage,
         ...(wonStage && newStage === wonStage.key ? { closed_at: new Date().toISOString() } : {}),
+      });
+      await logChanges.mutateAsync({
+        dealId,
+        changes: [{ field_name: 'stage', old_value: previousStageId, new_value: newStage }],
       });
       await addActivity.mutateAsync({
         deal_id: dealId,
