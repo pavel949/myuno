@@ -156,7 +156,7 @@ export default function CrmDashboardPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`${APP_ROUTES.MC_SALES}/settings`)} title={isRu ? 'Настройки' : 'Settings'}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`${APP_ROUTES.MC_SETTINGS}?tab=crm`)} title={isRu ? 'Настройки' : 'Settings'}>
             <Settings className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`${APP_ROUTES.MC_SALES}/analytics`)}>
