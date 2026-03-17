@@ -20,6 +20,45 @@ import { Plus, Lock, Eye, EyeOff, Save } from 'lucide-react';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { cn } from '@/lib/utils';
 
+function hslToHex(hslString: string): string | null {
+  const match = hslString.trim().match(/^(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const s = Number(match[2]) / 100;
+  const l = Number(match[3]) / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (h >= 0 && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h >= 60 && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h >= 120 && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h >= 180 && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h >= 240 && h < 300) {
+    r = x; g = 0; b = c;
+  } else {
+    r = c; g = 0; b = x;
+  }
+
+  const toHex = (channel: number) => Math.round((channel + m) * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function getPrimaryHexColor(): string {
+  const defaultPrimary = hslToHex('224 55% 32%')!;
+  if (typeof window === 'undefined') return defaultPrimary;
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+  return hslToHex(primary) ?? defaultPrimary;
+}
+
 export function LifeOSSituationsTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
@@ -35,7 +74,7 @@ export function LifeOSSituationsTab() {
     description_en: '',
     description_ru: '',
     icon: 'Compass',
-    color: '#6366f1',
+    color: getPrimaryHexColor(),
     priority: 100,
   });
 
@@ -94,7 +133,7 @@ export function LifeOSSituationsTab() {
       description_en: '',
       description_ru: '',
       icon: 'Compass',
-      color: '#6366f1',
+      color: getPrimaryHexColor(),
       priority: 100,
     });
     queryClient.invalidateQueries({ queryKey: ['admin-life-situations'] });

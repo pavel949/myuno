@@ -321,12 +321,12 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
                 <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                   <defs>
                     <linearGradient id="fIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="fExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -337,14 +337,14 @@ export function CashFlowForecast({ propertyId }: { propertyId?: string }) {
                   <Area
                     type="monotone"
                     dataKey={isRu ? 'Доходы' : 'Income'}
-                    stroke="#22c55e"
+                    stroke="hsl(var(--success))"
                     fill="url(#fIncome)"
                     strokeWidth={2}
                   />
                   <Area
                     type="monotone"
                     dataKey={isRu ? 'Расходы' : 'Expenses'}
-                    stroke="#ef4444"
+                    stroke="hsl(var(--destructive))"
                     fill="url(#fExpense)"
                     strokeWidth={2}
                   />

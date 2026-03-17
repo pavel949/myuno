@@ -139,7 +139,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
               <div className="sticky top-0 bg-background z-10 px-6 pt-6 pb-4 border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#00B14F] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-success flex items-center justify-center">
                       <span className="text-white font-bold text-lg">G</span>
                     </div>
                     <div>
@@ -244,7 +244,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-[#00B14F] hover:bg-[#00A047] text-white"
+                  className="w-full h-12 text-base font-semibold bg-success hover:bg-success/90 text-white"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -274,7 +274,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
                 transition={{ type: 'spring', damping: 15 }}
                 className="mb-6"
               >
-                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[#00B14F] to-[#00A047] flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-success to-success/90 flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-3xl">G</span>
                 </div>
               </motion.div>
@@ -304,7 +304,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
                 {[0, 1, 2].map((i) => (
                   <motion.div
                     key={i}
-                    className="w-2.5 h-2.5 rounded-full bg-[#00B14F]"
+                    className="w-2.5 h-2.5 rounded-full bg-success"
                     animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
                   />

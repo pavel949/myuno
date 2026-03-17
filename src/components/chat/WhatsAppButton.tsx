@@ -185,7 +185,7 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
           onClick={handleTelegram}
           className={cn(
             'w-11 h-11 rounded-full shadow-lg',
-            'bg-[#0088cc] hover:bg-[#0077b5] active:scale-95',
+            'bg-info hover:bg-info/90 active:scale-95',
             'flex items-center justify-center',
             'transition-all duration-200'
           )}
@@ -197,7 +197,7 @@ export const WhatsAppButton: React.FC<SocialButtonsProps> = ({ className }) => {
           onClick={handleWhatsApp}
           className={cn(
             'w-11 h-11 rounded-full shadow-lg',
-            'bg-[#25D366] hover:bg-[#20BD5A] active:scale-95',
+            'bg-success hover:bg-success/90 active:scale-95',
             'flex items-center justify-center',
             'transition-all duration-200'
           )}

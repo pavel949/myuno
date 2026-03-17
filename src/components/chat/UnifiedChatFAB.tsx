@@ -225,9 +225,9 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 {/* WhatsApp */}
                 <button
                   onClick={handleWhatsApp}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 hover:border-[#25D366]/40 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-success/10 border border-success/20 hover:border-success/40 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-success flex items-center justify-center">
                     <WhatsAppIcon className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-left flex-1">
@@ -241,9 +241,9 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 {/* Telegram */}
                 <button
                   onClick={handleTelegram}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-[#0088cc]/10 border border-[#0088cc]/20 hover:border-[#0088cc]/40 transition-colors"
+                  className="w-full flex items-center gap-4 p-4 rounded-xl bg-info/10 border border-info/20 hover:border-info/40 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[#0088cc] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-info flex items-center justify-center">
                     <TelegramIcon className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-left flex-1">

@@ -28,19 +28,19 @@ import { toast } from 'sonner';
 // Google Drive SVG Icon
 const GoogleDriveIcon = () => (
   <svg viewBox="0 0 87.3 78" className="h-5 w-5">
-    <path d="M6.6 66.85L.2 78h28.8l6.4-11.15z" fill="#0066da"/>
-    <path d="M58.6 78h28.8l-6.4-11.15H52.2z" fill="#00ac47"/>
-    <path d="M28.8 0L0 50.7l6.6 11.15 28.8-50.7z" fill="#ea4335"/>
-    <path d="M87.3 50.7L58.5 0H29.7l28.8 50.7z" fill="#00832d"/>
-    <path d="M58.6 50.7l-6.4 11.15 6.4 11.15h28.7L81 61.85z" fill="#2684fc"/>
-    <path d="M29.7 0l-6.4 11.15 28.8 50.7 6.4-11.15z" fill="#ffba00"/>
+    <path d="M6.6 66.85L.2 78h28.8l6.4-11.15z" fill="hsl(var(--brand-google-blue))"/>
+    <path d="M58.6 78h28.8l-6.4-11.15H52.2z" fill="hsl(var(--brand-google-green))"/>
+    <path d="M28.8 0L0 50.7l6.6 11.15 28.8-50.7z" fill="hsl(var(--brand-google-red))"/>
+    <path d="M87.3 50.7L58.5 0H29.7l28.8 50.7z" fill="hsl(var(--brand-google-dark-green))"/>
+    <path d="M58.6 50.7l-6.4 11.15 6.4 11.15h28.7L81 61.85z" fill="hsl(var(--brand-google-light-blue))"/>
+    <path d="M29.7 0l-6.4 11.15 28.8 50.7 6.4-11.15z" fill="hsl(var(--brand-google-yellow))"/>
   </svg>
 );
 
 // Dropbox SVG Icon
 const DropboxIcon = () => (
   <svg viewBox="0 0 43 40" className="h-5 w-5">
-    <path fill="#0061FF" d="M12.5 0L0 8.1l8.6 6.9 12.5-7.7zM0 22l12.5 8.1 8.6-6.1-12.5-7.7zm21.1 2l8.6 6.1L42.2 22l-8.6-6.9zM42.2 8.1L29.7 0l-8.6 6.1 12.5 7.7zm-21 8.4l-8.7 6.1L0 15.7l8.6-6.9z"/>
+    <path fill="hsl(var(--brand-dropbox))" d="M12.5 0L0 8.1l8.6 6.9 12.5-7.7zM0 22l12.5 8.1 8.6-6.1-12.5-7.7zm21.1 2l8.6 6.1L42.2 22l-8.6-6.9zM42.2 8.1L29.7 0l-8.6 6.1 12.5 7.7zm-21 8.4l-8.7 6.1L0 15.7l8.6-6.9z"/>
   </svg>
 );
 

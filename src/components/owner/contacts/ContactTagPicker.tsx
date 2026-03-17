@@ -64,7 +64,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
 
   const getTagColor = (name: string): string => {
     const found = tags.find(t => t.name === name);
-    return found?.color || '#78716c';
+    return found?.color || 'hsl(var(--muted-foreground))';
   };
 
   const sizeClasses = size === 'sm'
@@ -266,7 +266,7 @@ export function ContactTagsDisplay({ tags, companyId, max = 3 }: { tags: string[
   const shown = tags.slice(0, max);
   const remaining = tags.length - max;
 
-  const getColor = (name: string) => allTags.find(t => t.name === name)?.color || '#78716c';
+  const getColor = (name: string) => allTags.find(t => t.name === name)?.color || 'hsl(var(--muted-foreground))';
 
   return (
     <div className="flex flex-wrap gap-1">

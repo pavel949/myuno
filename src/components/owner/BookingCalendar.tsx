@@ -287,9 +287,9 @@ export function BookingCalendar({ propertyId, showPropertySelector = true }: Boo
                           variant="outline" 
                           className={cn(
                             "text-xs capitalize",
-                            booking.source.toLowerCase().includes('airbnb') && "border-[#FF5A5F] text-[#FF5A5F]",
-                            booking.source.toLowerCase().includes('booking') && "border-[#003580] text-[#003580]",
-                            booking.source.toLowerCase().includes('vrbo') && "border-[#0077CC] text-[#0077CC]",
+                            booking.source.toLowerCase().includes('airbnb') && "border-destructive text-destructive",
+                            booking.source.toLowerCase().includes('booking') && "border-primary text-primary",
+                            booking.source.toLowerCase().includes('vrbo') && "border-info text-info",
                           )}
                         >
                           {booking.source}

@@ -48,7 +48,12 @@ export function AdminKPICard({
       return `${x},${y}`;
     }).join(' ');
 
-    const trendColor = trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#a1a1aa';
+    const trendColor =
+      trend === 'up'
+        ? 'hsl(var(--success))'
+        : trend === 'down'
+          ? 'hsl(var(--destructive))'
+          : 'hsl(var(--muted-foreground))';
     
     return (
       <svg 

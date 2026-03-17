@@ -84,7 +84,7 @@ export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ classNa
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0, transition: { delay: 0.05 } }}
               onClick={handleWhatsApp}
-              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20bd5a] transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-success text-white shadow-lg hover:bg-success/90 transition-colors"
             >
               <WhatsAppIcon className="w-6 h-6" />
               <span className="font-medium text-sm">WhatsApp</span>
@@ -95,7 +95,7 @@ export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ classNa
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0, transition: { delay: 0.1 } }}
               onClick={handleTelegram}
-              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#0088cc] text-white shadow-lg hover:bg-[#0077b5] transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-info text-white shadow-lg hover:bg-info/90 transition-colors"
             >
               <TelegramIcon className="w-6 h-6" />
               <span className="font-medium text-sm">Telegram</span>

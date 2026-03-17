@@ -26,8 +26,8 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
         onClick={() => setIsModalOpen(true)}
         className={cn(
           "w-full p-4 rounded-2xl text-left transition-all",
-          "bg-gradient-to-br from-[#00B14F] via-[#00A047] to-[#008F3C]",
-          "shadow-lg shadow-[#00B14F]/20",
+          "bg-gradient-to-br from-success via-success/90 to-success/80",
+          "shadow-lg shadow-success/20",
           "border border-white/10",
           className
         )}

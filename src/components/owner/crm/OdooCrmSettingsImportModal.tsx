@@ -177,7 +177,7 @@ export function OdooCrmSettingsImportModal({
         name_en: nameEn || finalKey,
         name_ru: nameRu || nameEn || finalKey,
         short_label: (readCell(row, ['short_label', 'short']) || nameEn || finalKey).slice(0, 8),
-        color: readCell(row, ['color', 'colour']) || '#6366f1',
+        color: readCell(row, ['color', 'colour']) || 'hsl(var(--primary))',
         probability: parseProbability(probabilityRaw),
         sort_order: Number(readCell(row, ['sort_order', 'sequence', 'order'])) || stages.length + 1,
       });
