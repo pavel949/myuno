@@ -203,7 +203,7 @@ export function useCrmContacts(
 
       let q = supabase
         .from('crm_contacts')
-        .select('*', { count: 'exact' })
+        .select('*, agent_deals!contact_id(id)', { count: 'exact' })
         .eq('company_id', companyId!)
         .order(sortField, { ascending })
         .range(from, to);

@@ -15,7 +15,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, FileText, Trash2, Send, Check, X, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { generateInvoicePdf } from '@/lib/invoicePdf';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -139,9 +138,10 @@ export default function InvoicesPage() {
     });
   };
 
-  const handleDownloadPdf = (inv: any) => {
+  const handleDownloadPdf = async (inv: any) => {
     try {
-      const doc = generateInvoicePdf({
+      const { generateInvoicePdf } = await import('@/lib/invoicePdf');
+      const doc = await generateInvoicePdf({
         invoice_number: inv.invoice_number,
         recipient_name: inv.recipient_name,
         recipient_email: inv.recipient_email,
