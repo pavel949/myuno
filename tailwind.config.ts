@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -22,9 +23,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'Inter', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
-        serif: ['Instrument Serif', 'Georgia', 'serif'],
+        sans: ['Golos Text', 'DM Sans', 'sans-serif'],
+        display: ['Playfair Display', 'serif'],
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -117,6 +119,12 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      transitionTimingFunction: {
+        standard: "cubic-bezier(0.4, 0, 0.2, 1)",
+        enter: "cubic-bezier(0, 0, 0.2, 1)",
+        exit: "cubic-bezier(0.4, 0, 1, 1)",
+        spring: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -158,5 +166,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

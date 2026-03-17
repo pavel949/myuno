@@ -52,9 +52,9 @@
   --border-default: var(--color-neutral-300);
   --border-strong: var(--color-neutral-500);
 
-  /* ═══ Typography (DS 2.0 — Space Grotesk display) ═══ */
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
+  /* ═══ Typography (DS 2.0 — Golos + Playfair) ═══ */
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Golos Text', 'DM Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --text-xs: 0.64rem;
@@ -145,6 +145,14 @@
   --accent-cyan: 190 65% 40%;
   --accent-amber: 38 85% 48%;
   --icon-dark: 222 47% 15%;
+  /* Brand accents (external integrations) */
+  --brand-google-blue: 212 100% 43%;
+  --brand-google-green: 145 100% 34%;
+  --brand-google-red: 4 81% 56%;
+  --brand-google-dark-green: 141 100% 26%;
+  --brand-google-light-blue: 214 97% 57%;
+  --brand-google-yellow: 44 100% 50%;
+  --brand-dropbox: 217 100% 50%;
   /* State tokens (disabled, focus, skeleton, validation) */
   --color-disabled: 220 14% 90%;
   --opacity-disabled: 0.6;
@@ -251,4 +259,11 @@
   --glow-from: 224 70% 62%;
   --glow-via: 260 60% 65%;
   --glow-to: 190 70% 58%;
+  --brand-google-blue: 212 100% 43%;
+  --brand-google-green: 145 100% 34%;
+  --brand-google-red: 4 81% 56%;
+  --brand-google-dark-green: 141 100% 26%;
+  --brand-google-light-blue: 214 97% 57%;
+  --brand-google-yellow: 44 100% 50%;
+  --brand-dropbox: 217 100% 50%;
 }
