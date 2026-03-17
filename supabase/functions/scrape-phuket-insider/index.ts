@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -57,7 +58,7 @@ async function scrapeUrl(url: string, apiKey: string): Promise<ScrapeResult | nu
 async function processFaqBatch(
   urls: string[],
   firecrawlKey: string,
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   cityId: string
 ) {
   const results: { url: string; status: string }[] = [];
