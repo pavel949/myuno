@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useDetectDuplicates, DuplicateGroup } from '@/hooks/useCrmDuplicates';
+import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
 import { supabase } from '@/integrations/supabase/client';
 import { typedFrom } from '@/lib/untypedTables';
@@ -16,11 +16,11 @@ import { DuplicatesMergeModal } from '@/components/owner/contacts/DuplicatesMerg
 export default function CrmDuplicatesPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { activeCompany } = useActiveCompany();
+  const { data: membership } = useMyCompanyId();
   const detect = useDetectDuplicates();
   const updateContact = useUpdateContact();
   const deleteContact = useDeleteContact();
-  const companyId = activeCompany?.company_id;
+  const companyId = membership?.company_id;
   const [mergedGroups, setMergedGroups] = useState<Set<number>>(new Set());
   const [mergeModal, setMergeModal] = useState<{ leftId: string; rightId: string } | null>(null);
 
