@@ -102,6 +102,7 @@ export default function ContactDetail() {
   const deleteNote = useDeleteContactNote();
   const updateTask = useUpdateCrmTask();
 
+  const [activeTab, setActiveTab] = useState('overview');
   const [showEdit, setShowEdit] = useState(false);
   const [showCreateDeal, setShowCreateDeal] = useState(false);
   const [noteType, setNoteType] = useState('note');
@@ -251,10 +252,10 @@ export default function ContactDetail() {
           {/* ─── Smart Buttons Strip (Odoo-style) ─── */}
           <div className="flex items-center gap-1 border rounded-xl bg-card p-1 overflow-x-auto">
             {[
-              { icon: CalendarDays, label: isRu ? 'Встречи' : 'Meetings', count: meetings.length, onClick: () => {} },
-              { icon: Star, label: isRu ? 'Сделки' : 'Opportunities', count: opportunityCount, onClick: () => {} },
-              { icon: ShoppingCart, label: isRu ? 'Продажи' : 'Sales', count: deals.filter(d => d.stage === 'closed_won').length, onClick: () => {} },
-              { icon: Receipt, label: isRu ? 'Задачи' : 'Tasks', count: contactTasks.length, onClick: () => {} },
+              { icon: CalendarDays, label: isRu ? 'Встречи' : 'Meetings', count: meetings.length, onClick: () => setActiveTab('timeline') },
+              { icon: Star, label: isRu ? 'Сделки' : 'Opportunities', count: opportunityCount, onClick: () => setActiveTab('deals') },
+              { icon: ShoppingCart, label: isRu ? 'Продажи' : 'Sales', count: deals.filter(d => d.stage === 'closed_won').length, onClick: () => setActiveTab('deals') },
+              { icon: Receipt, label: isRu ? 'Задачи' : 'Tasks', count: contactTasks.length, onClick: () => setActiveTab('tasks') },
             ].map((btn, i) => (
               <button
                 key={i}
@@ -441,7 +442,7 @@ export default function ContactDetail() {
           </div>
 
           {/* ─── Bottom Tabs (redesigned: Overview / Properties / Relationships / Timeline / Dates / Financials) ─── */}
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-0 overflow-x-auto">
               {[
                 { value: 'overview', label: isRu ? 'Обзор' : 'Overview' },
