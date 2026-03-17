@@ -55,7 +55,7 @@ export default function SalesDealDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: deal, isLoading } = useAgentDeal(id);
+  const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useAgentDeal(id);
   const { data: activities = [] } = useDealActivities(id);
   const { data: fieldChanges = [] } = useDealFieldChanges(id);
   const updateDeal = useUpdateDeal();
@@ -73,6 +73,17 @@ export default function SalesDealDetail() {
       <div className="p-4 space-y-4 max-w-lg mx-auto">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-24 w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  if (dealError) {
+    return (
+      <div className="p-4 text-center pt-20 max-w-lg mx-auto">
+        <p className="text-destructive font-medium">{isRu ? 'Ошибка загрузки сделки' : 'Failed to load deal'}</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetchDeal()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
       </div>
     );
   }
