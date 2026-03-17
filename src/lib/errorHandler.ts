@@ -21,6 +21,19 @@ interface ErrorHandlerOptions {
   silent?: boolean;
 }
 
+function isAbortError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === 'AbortError') return true;
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    return msg.includes('aborted') || msg.includes('aborterror') || msg.includes('signal is aborted');
+  }
+  if (typeof error === 'string') {
+    const msg = error.toLowerCase();
+    return msg.includes('aborted') || msg.includes('aborterror') || msg.includes('signal is aborted');
+  }
+  return false;
+}
+
 // Default error messages by type
 const DEFAULT_MESSAGES: Record<string, { en: string; ru: string }> = {
   network: {
@@ -170,6 +183,9 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
   const lang = getCurrentLanguage();
   const isRu = lang === 'ru';
   const isDev = import.meta.env.DEV;
+
+  // Ignore expected request-cancellation noise during navigation.
+  if (isAbortError(error)) return;
 
   // Always log in development
   if (isDev && !silent) {
