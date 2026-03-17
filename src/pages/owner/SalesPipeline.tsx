@@ -51,13 +51,21 @@ export default function SalesPipeline() {
   const { data: vipContactIds = new Set<string>() } = useQuery({
     queryKey: ['crm-vip-contact-ids', membership?.company_id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('crm_contacts')
-        .select('id')
-        .eq('company_id', membership!.company_id)
-        .contains('tags', ['VIP']);
-      if (error) throw error;
-      return new Set((data || []).map(item => item.id));
+      try {
+        const { data, error } = await supabase
+          .from('crm_contacts')
+          .select('id, tags')
+          .eq('company_id', membership!.company_id)
+          .not('tags', 'is', null);
+        if (error) throw error;
+        return new Set(
+          (data || [])
+            .filter(item => Array.isArray(item.tags) && item.tags.includes('VIP'))
+            .map(item => item.id)
+        );
+      } catch {
+        return new Set<string>();
+      }
     },
     enabled: !!membership?.company_id,
   });
