@@ -639,7 +639,7 @@ export default function ContactDetail() {
                     return (
                       <button
                         key={d.id}
-                        onClick={() => navigate(`/mc/sales/${d.id}`)}
+                        onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
                         className="w-full text-left p-4 rounded-xl border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
                       >
                         <div className={cn('h-3 w-3 rounded-full shrink-0', stageDotColors[stage] || 'bg-muted')} />

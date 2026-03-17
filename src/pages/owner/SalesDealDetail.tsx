@@ -230,7 +230,7 @@ export default function SalesDealDetail() {
 
         {deal.contact_id && (
           <button
-            onClick={() => navigate(`/mc/contacts/${deal.contact_id}`)}
+            onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(deal.contact_id!))}
             className="flex items-center gap-1.5 mt-2 text-xs text-primary hover:text-primary/80 transition-colors"
           >
             <ContactRound className="h-3.5 w-3.5" />

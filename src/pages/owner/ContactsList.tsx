@@ -499,7 +499,7 @@ export default function ContactsList() {
               key={contact.id}
               contact={contact}
               isOwnerOrAdmin={isOwnerOrAdmin}
-              onClick={() => navigate(`/mc/contacts/${contact.id}`)}
+              onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(contact.id))}
             />
           ))}
         </div>
@@ -510,7 +510,7 @@ export default function ContactsList() {
               key={contact.id}
               contact={contact}
               isOwnerOrAdmin={isOwnerOrAdmin}
-              onClick={() => navigate(`/mc/contacts/${contact.id}`)}
+              onClick={() => navigate(APP_ROUTES.MC_CONTACT_DETAIL(contact.id))}
             />
           ))}
         </div>

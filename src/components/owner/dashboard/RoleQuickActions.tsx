@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { type BusinessRole } from '@/lib/businessRoles';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import {
   Plus, Receipt, Sparkles, Calendar, Download, Users, FileText,
@@ -25,7 +26,7 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
     { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: '/mc/properties/new' },
   ],
   sales_agent: [
-    { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Новая сделка', path: '/mc/sales/new' },
+    { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Новая сделка', path: APP_ROUTES.MC_SALES_NEW },
     { id: 'contact', icon: Users, labelEn: 'Add Contact', labelRu: 'Контакт', path: '/mc/contacts' },
     { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Мои задачи', path: '/mc/tasks' },
     { id: 'call', icon: Phone, labelEn: 'Call Log', labelRu: 'Звонки', path: '/mc/contacts' },
@@ -38,7 +39,7 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
   ],
   general: [
     { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Импорт OTA', path: '/mc/channels' },
-    { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Сделка', path: '/mc/sales/new' },
+    { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Сделка', path: APP_ROUTES.MC_SALES_NEW },
     { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
     { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', path: '/mc/service-request?type=cleaning' },
     { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: '/mc/properties/new' },

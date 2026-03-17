@@ -6,6 +6,7 @@ import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { Badge } from '@/components/ui/badge';
 import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle, Crown } from 'lucide-react';
@@ -74,7 +75,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       onPointerUp={(e) => {
         if (!dragRef.current) {
           e.stopPropagation();
-          navigate(`/mc/sales/${deal.id}`);
+          navigate(APP_ROUTES.MC_SALES_DEAL(deal.id));
         }
       }}
     >

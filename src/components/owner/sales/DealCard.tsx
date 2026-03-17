@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, daysSince } from '@/hooks/useAgentDeals';
 import { Badge } from '@/components/ui/badge';
@@ -58,7 +59,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
         />
       )}
       <button
-        onClick={() => navigate(`/mc/sales/${deal.id}`)}
+        onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(deal.id))}
         className="flex-1 text-left min-w-0"
       >
         <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
