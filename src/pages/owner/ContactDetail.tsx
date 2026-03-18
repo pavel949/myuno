@@ -454,6 +454,7 @@ export default function ContactDetail() {
                 { value: 'dates', label: isRu ? 'Даты' : 'Dates & Reminders', icon: CalendarDays },
                 { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
+                { value: 'terms', label: isRu ? 'Условия' : 'Terms', icon: Receipt },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
                 { value: 'ai', label: 'AI', icon: Sparkles },
               ].map(tab => (
