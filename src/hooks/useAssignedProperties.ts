@@ -73,7 +73,8 @@ export function useAssignedProperties() {
             owner_id,
             complex_id,
             project_id,
-            deleted_at
+            deleted_at,
+            management_company_id
           )
         `)
         .eq('manager_user_id', user.id)
