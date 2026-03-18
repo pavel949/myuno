@@ -13,6 +13,8 @@ import { InlineTaskCreator } from '@/components/owner/contacts/InlineTaskCreator
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { CrmDocumentsSection } from '@/components/owner/contacts/CrmDocumentsSection';
+import { CooperationTermsSection } from '@/components/owner/contacts/CooperationTermsSection';
+import { LegalDocumentAgent } from '@/components/owner/contacts/LegalDocumentAgent';
 import { LifecycleStageBar } from '@/components/owner/contacts/LifecycleStageBar';
 import { CrmAiAssistantPanel } from '@/components/owner/contacts/CrmAiAssistantPanel';
 import { Button } from '@/components/ui/button';
