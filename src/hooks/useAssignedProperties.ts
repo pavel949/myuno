@@ -6,6 +6,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export interface AssignedProperty {
   id: string;
@@ -42,9 +43,11 @@ export interface PropertyManagerStats {
 
 export function useAssignedProperties() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['assigned-properties', user?.id],
+    queryKey: ['assigned-properties', user?.id, activeCompanyId],
     queryFn: async (): Promise<AssignedProperty[]> => {
       if (!user?.id) return [];
 
@@ -70,7 +73,8 @@ export function useAssignedProperties() {
             owner_id,
             complex_id,
             project_id,
-            deleted_at
+            deleted_at,
+            management_company_id
           )
         `)
         .eq('manager_user_id', user.id)
@@ -118,10 +122,18 @@ export function useAssignedProperties() {
         }
       });
 
-      const visibleAssignments = assignments.filter((assignment) => {
+      let visibleAssignments = assignments.filter((assignment) => {
         const property = assignment.properties as any;
         return !property?.deleted_at;
       });
+
+      // In MC mode, only show assignments for properties belonging to the active company
+      if (activeCompanyId) {
+        visibleAssignments = visibleAssignments.filter((assignment) => {
+          const property = assignment.properties as any;
+          return property?.management_company_id === activeCompanyId;
+        });
+      }
 
       return visibleAssignments.map(assignment => {
         const property = assignment.properties as any;

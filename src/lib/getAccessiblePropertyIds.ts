@@ -38,8 +38,10 @@ export async function getAccessiblePropertyIds(
     activeCompanyId
       ? supabase.from('properties').select('id').eq('owner_id', userId).eq('management_company_id', activeCompanyId)
       : supabase.from('properties').select('id').eq('owner_id', userId),
-    // 2. Delegated properties
-    supabase.from('property_delegates').select('property_id').eq('user_id', userId).eq('status', 'active'),
+    // 2. Delegated properties — in MC mode, join to properties to filter by company
+    activeCompanyId
+      ? supabase.from('property_delegates').select('property_id, properties!inner(management_company_id)').eq('user_id', userId).eq('status', 'active').eq('properties.management_company_id', activeCompanyId)
+      : supabase.from('property_delegates').select('property_id').eq('user_id', userId).eq('status', 'active'),
     // 3. Company properties (noop if no activeCompanyId)
     activeCompanyId
       ? supabase.from('properties').select('id').eq('management_company_id', activeCompanyId)
