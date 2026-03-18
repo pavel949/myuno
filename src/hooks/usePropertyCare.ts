@@ -59,18 +59,26 @@ async function canAccessProperty(userId: string, propertyId: string): Promise<bo
 
 export function useOwnerProperties() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
 
   return useQuery({
-    queryKey: ['owner-properties', user?.id],
+    queryKey: ['owner-properties', user?.id, activeCompanyId],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      let query = supabase
         .from('properties')
         .select('*')
         .eq('owner_id', user.id)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
       
+      // In MC mode, only show owned properties belonging to the active company
+      if (activeCompanyId) {
+        query = query.eq('management_company_id', activeCompanyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return (data || []) as unknown as OwnerProperty[];
     },
