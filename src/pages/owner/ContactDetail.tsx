@@ -699,12 +699,26 @@ export default function ContactDetail() {
               )}
             </TabsContent>
 
-            {/* Documents */}
-            <TabsContent value="documents" className="mt-4">
+            {/* Cooperation Terms */}
+            <TabsContent value="terms" className="mt-4">
               {membership?.company_id ? (
-                <div className="rounded-xl border bg-card p-5">
-                  <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
+                <CooperationTermsSection companyId={membership.company_id} contactId={contact.id} />
+              ) : (
+                <div className="text-center py-12 text-muted-foreground text-sm">
+                  {isRu ? 'Условия доступны только для УК' : 'Terms available for management companies'}
                 </div>
+              )}
+            </TabsContent>
+
+            {/* Documents */}
+            <TabsContent value="documents" className="mt-4 space-y-4">
+              {membership?.company_id ? (
+                <>
+                  <div className="rounded-xl border bg-card p-5">
+                    <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
+                  </div>
+                  <LegalDocumentAgent contactId={contact.id} companyId={membership.company_id} />
+                </>
               ) : (
                 <div className="text-center py-12 text-muted-foreground text-sm">
                   {isRu ? 'Документы доступны только для УК' : 'Documents available for management companies'}
