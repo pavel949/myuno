@@ -79,17 +79,18 @@ export function useCooperationTerms(contactId?: string, dealId?: string) {
   return useQuery({
     queryKey: ['cooperation-terms', contactId, dealId],
     queryFn: async (): Promise<CooperationTerms | null> => {
-      let query = supabase.from('crm_cooperation_terms' as any).select('*');
+      const table = supabase.from('crm_cooperation_terms' as any);
+      let q: any;
       if (dealId) {
-        query = query.eq('deal_id', dealId);
+        q = table.select('*').eq('deal_id', dealId);
       } else if (contactId) {
-        query = query.eq('contact_id', contactId).is('deal_id', null);
+        q = table.select('*').eq('contact_id', contactId).is('deal_id', null);
       } else {
         return null;
       }
-      const { data, error } = await query.maybeSingle();
+      const { data, error } = await q.maybeSingle();
       if (error) throw error;
-      return data as CooperationTerms | null;
+      return (data as CooperationTerms | null);
     },
     enabled: !!(contactId || dealId),
   });
