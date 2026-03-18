@@ -121,10 +121,18 @@ export function useAssignedProperties() {
         }
       });
 
-      const visibleAssignments = assignments.filter((assignment) => {
+      let visibleAssignments = assignments.filter((assignment) => {
         const property = assignment.properties as any;
         return !property?.deleted_at;
       });
+
+      // In MC mode, only show assignments for properties belonging to the active company
+      if (activeCompanyId) {
+        visibleAssignments = visibleAssignments.filter((assignment) => {
+          const property = assignment.properties as any;
+          return property?.management_company_id === activeCompanyId;
+        });
+      }
 
       return visibleAssignments.map(assignment => {
         const property = assignment.properties as any;
