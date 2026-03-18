@@ -43,9 +43,11 @@ export interface PropertyManagerStats {
 
 export function useAssignedProperties() {
   const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const activeCompanyId = activeCompany?.company_id || null;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['assigned-properties', user?.id],
+    queryKey: ['assigned-properties', user?.id, activeCompanyId],
     queryFn: async (): Promise<AssignedProperty[]> => {
       if (!user?.id) return [];
 
