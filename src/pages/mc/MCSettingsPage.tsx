@@ -72,7 +72,7 @@ export default function MCSettingsPage() {
             <AccordionTrigger className="hover:no-underline py-4 gap-3">
               <div className="flex items-center gap-3 text-left">
                 <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
-                  <Icon className="h-4.5 w-4.5 text-primary" />
+                  <Icon className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">{title}</p>

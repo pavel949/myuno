@@ -3,7 +3,7 @@
  * @description Self-service Management Company registration.
  * Public-facing page for property managers to register without admin.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Building2, ArrowRight, CheckCircle, Shield, BarChart3, Users } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -43,6 +43,12 @@ export default function MCRegistrationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    if (!success) return;
+    const t = setTimeout(() => navigate(redirectTo), 2000);
+    return () => clearTimeout(t);
+  }, [success, navigate, redirectTo]);
+
   const handleSubmit = async () => {
     if (!user) {
       toast.error(isRu ? 'Необходимо войти в систему' : 'Please sign in first');
@@ -72,9 +78,6 @@ export default function MCRegistrationPage() {
 
       setSuccess(true);
       toast.success(isRu ? 'Компания зарегистрирована!' : 'Company registered!');
-      
-      // Redirect to MC workspace after short delay
-      setTimeout(() => navigate(redirectTo), 2000);
     } catch (err: unknown) {
       logger.error('MC registration error:', err);
       toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка регистрации' : 'Registration failed'));

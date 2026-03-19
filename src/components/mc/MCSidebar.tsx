@@ -19,26 +19,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 import { useProfile } from '@/hooks/useProfile';
 import { APP_ROUTES } from '@/lib/config/routes';
-
-interface NavItem {
-  title: string;
-  titleRu: string;
-  path: string;
-  icon: React.ElementType;
-  badgeKey?: 'tasks' | 'messages';
-}
-
-interface NavGroup {
-  label: string;
-  labelRu: string;
-  items: NavItem[];
-  defaultOpen?: boolean;
-}
+import type { NavItem, NavGroup } from './types';
 
 export const navigationGroups: NavGroup[] = [
   {
@@ -78,7 +63,6 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Channel Manager', titleRu: 'Channel Manager', path: APP_ROUTES.MC_CHANNELS, icon: Radio },
-      { title: 'Calendar Sync', titleRu: 'Синхронизация', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
     ],
   },
   {
@@ -125,6 +109,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_PROPERTIES]: 'properties',
   [APP_ROUTES.MC_OWNERS]: 'crm',
   [APP_ROUTES.MC_CALENDAR]: 'bookings',
+  [APP_ROUTES.MC_CHANNELS]: 'bookings',
   [APP_ROUTES.MC_SALES]: 'crm',
   [APP_ROUTES.MC_CONTACTS]: 'crm',
   [APP_ROUTES.MC_CRM_DASHBOARD]: 'crm',
@@ -155,7 +140,6 @@ export function MCSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
-  const { role: resolvedRole } = useResolvedContext();
   const { canAccess } = useTeamPermissions();
   const { data: todayTasksCount } = useTodayTasksCount();
   const { profile } = useProfile();

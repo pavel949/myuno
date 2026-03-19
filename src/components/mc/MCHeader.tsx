@@ -137,7 +137,7 @@ export function MCHeader() {
       <div className="hidden md:block flex-1" />
 
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} title={isRussian ? 'Поддержка' : 'Support'}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(APP_ROUTES.MC_SUPPORT_CHAT)} aria-label={isRussian ? 'Поддержка' : 'Support'}>
           <HelpCircle className="h-4 w-4" />
         </Button>
         <div className="hidden sm:flex items-center gap-1">
@@ -145,7 +145,7 @@ export function MCHeader() {
           <ThemeSwitcher />
         </div>
         <LanguageSwitcher />
-        <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}>
+        <Button variant="ghost" size="icon" className="relative" aria-label={isRussian ? 'Уведомления' : 'Notifications'} onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}>
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1">

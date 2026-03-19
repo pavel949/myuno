@@ -97,16 +97,7 @@ const MCOnboarding: React.FC = () => {
     }
     setLoading(true);
     try {
-      // Generate slug with uniqueness suffix
-      let slug = slugify(nameEn);
-      const { data: existing } = await supabase
-        .from('management_companies')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle();
-      if (existing) {
-        slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
-      }
+      const slug = slugify(nameEn);
 
       const { data, error } = await supabase.functions.invoke('register-mc', {
         body: {
@@ -193,6 +184,7 @@ const MCOnboarding: React.FC = () => {
 
     setLoading(true);
     try {
+      const sentEmails = new Set<string>();
       for (const invite of validInvites) {
         const { data, error } = await supabase.functions.invoke('invite-team-member', {
           body: {
@@ -204,9 +196,11 @@ const MCOnboarding: React.FC = () => {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        invite.sent = true;
+        sentEmails.add(invite.email.trim());
       }
-      setInvites([...invites]);
+      setInvites(prev => prev.map(inv =>
+        sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv
+      ));
       toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
     } catch (err: unknown) {
       toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
@@ -424,11 +418,11 @@ const MCOnboarding: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full" size="lg" onClick={() => navigate('/mc/properties/new')}>
+                <Button className="w-full" size="lg" onClick={() => navigate(APP_ROUTES.MC_PROPERTY_NEW)}>
                   <Building2 className="mr-2 h-5 w-5" />
                   {isRu ? 'Добавить первый объект' : 'Add First Property'}
                 </Button>
-                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate('/mc')}>
+                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate(APP_ROUTES.MC)}>
                   {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}
                 </Button>
               </div>

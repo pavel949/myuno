@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -53,6 +53,11 @@ export function DataBackupSettings() {
     },
     enabled: !!companyId,
   });
+
+  // Sync format from saved settings so toggling auto-backup doesn't overwrite it
+  useEffect(() => {
+    if (backupSettings?.format) setFormat(backupSettings.format);
+  }, [backupSettings?.format]);
 
   const autoEnabled = backupSettings?.auto_enabled ?? false;
   const autoFrequency = backupSettings?.frequency ?? 'monthly';

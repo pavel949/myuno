@@ -242,14 +242,26 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  // Cancel any in-flight stream on unmount
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort(); };
+  }, []);
+
   const streamChat = async (msgs: ChatMessage[]) => {
+    // Cancel any previous in-flight request
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const resp = await fetch(CHAT_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
@@ -312,7 +324,8 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
     setIsLoading(true);
     try {
       await streamChat(newMessages);
-    } catch {
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       setMessages(prev => [...prev, { role: 'assistant', content: isRu ? 'Ошибка. Попробуйте позже.' : 'Error. Please try again.' }]);
     } finally {
       setIsLoading(false);
