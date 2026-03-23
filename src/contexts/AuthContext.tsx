@@ -11,6 +11,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
+import { normalizeAuthEmail } from '@/lib/auth/normalizeAuthEmail';
 import { clearAdminCache } from '@/hooks/useIsAdmin';
 
 interface SignUpResult {
@@ -84,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: normalizeAuthEmail(email),
       password,
       options: {
         emailRedirectTo: redirectUrl,
@@ -111,10 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizeAuthEmail(email),
       password,
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -124,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizeAuthEmail(email), {
       redirectTo: getPasswordResetRedirectUrl(),
     });
     return { error: error as Error | null };
