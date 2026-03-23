@@ -244,7 +244,7 @@ export function useCrmContacts(
       }
       const { data, count } = res;
 
-      const rows = (data || []) as Record<string, unknown>[];
+      const rows = (data || []) as unknown as Record<string, unknown>[];
       const enriched = rows.map((c) => {
         const { agent_deals, ...rest } = c;
         const dealCount = Array.isArray(agent_deals) ? agent_deals.length : 0;

@@ -23,6 +23,7 @@ function escapeICalText(text: string): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   console.log('Calendar export request received');
   
   // Handle CORS preflight

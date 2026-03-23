@@ -56,7 +56,7 @@ export function usePartnerReport(
       let contactsMap = new Map<string, { first_name: string; last_name: string }>();
       if (ownerContactIds.length > 0) {
         const [settingsRes, contactsRes] = await Promise.all([
-          supabase
+          (supabase as any)
             .from('owner_management_settings')
             .select('contact_id, management_fee_percent')
             .eq('company_id', companyId)
