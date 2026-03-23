@@ -42,6 +42,7 @@ function getWeatherInfo(code: number): { condition: 'sunny' | 'cloudy' | 'rainy'
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
