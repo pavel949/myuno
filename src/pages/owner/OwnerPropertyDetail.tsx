@@ -86,12 +86,7 @@ export default function OwnerPropertyDetail() {
     );
   }
 
-  const propertyTypeLabels: Record<string, { en: string; ru: string }> = {
-    villa: { en: 'Villa', ru: 'Вилла' },
-    apartment: { en: 'Apartment', ru: 'Квартира' },
-    condo: { en: 'Condo', ru: 'Кондо' },
-    house: { en: 'House', ru: 'Дом' },
-  };
+  // propertyTypeLabels moved to PropertyDetailHeader
 
   return (
     <PageContainer className="!px-0 sm:!px-0">
