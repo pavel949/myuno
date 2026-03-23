@@ -95,50 +95,23 @@ export default function OwnerPropertyDetail() {
   };
 
   return (
-    <PageContainer>
-      <BackButton />
+    <PageContainer className="!px-0 sm:!px-0">
+      <div className="px-4 sm:px-6">
+        <BackButton />
+      </div>
 
-      <PropertyDetailHeader property={property} isRu={isRu} />
+      <PropertyDetailHeader property={{
+        ...property,
+        property_type: property.property_type,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        area_sqm: property.area_sqm,
+        price_per_night: property.price_per_night,
+        images: (property as any).images,
+      }} isRu={isRu} />
 
-      {/* Internal info bar — rich data for MC only */}
-      <Card className="mb-4">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-            <span className="text-muted-foreground">
-              {isRu ? propertyTypeLabels[property.property_type]?.ru : propertyTypeLabels[property.property_type]?.en || property.property_type}
-            </span>
-            {property.bedrooms && <span className="flex items-center gap-1"><Bed className="h-4 w-4" />{property.bedrooms}</span>}
-            {property.bathrooms && <span className="flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms}</span>}
-            {property.area_sqm && <span className="flex items-center gap-1"><SquareStack className="h-4 w-4" />{property.area_sqm}{isRu ? 'м²' : ' sqm'}</span>}
-            {property.floor && <span className="text-muted-foreground">{isRu ? `Этаж ${property.floor}` : `Floor ${property.floor}`}</span>}
-            {property.unit_number && <span className="text-muted-foreground">#{property.unit_number}</span>}
-            {property.price_per_night && (
-              <span className="flex items-center gap-1 font-medium text-success">
-                <DollarSign className="h-3.5 w-3.5" />
-                ฿{Number(property.price_per_night).toLocaleString()}/{isRu ? 'ночь' : 'night'}
-              </span>
-            )}
-            {property.deposit_amount && Number(property.deposit_amount) > 0 && (
-              <span className="text-muted-foreground">
-                {isRu ? 'Депозит:' : 'Deposit:'} {Number(property.deposit_amount).toLocaleString()} {(property as any).deposit_currency || 'USD'}
-              </span>
-            )}
-            {(property as any).seasonal_pricing?.length > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {(property as any).seasonal_pricing.length} {isRu ? 'сезон.' : 'seasons'}
-              </Badge>
-            )}
-          </div>
-          {property.internal_name && (
-            <p className="text-xs text-muted-foreground mt-2 italic">
-              {isRu ? 'Внутреннее имя:' : 'Internal name:'} {property.internal_name}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Publication & Quick Edit */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="px-4 sm:px-6">
+        {/* Publication status */}
         <MarketplaceStatusCard
           propertyId={property.id}
           approvalStatus={property.approval_status}
@@ -146,17 +119,17 @@ export default function OwnerPropertyDetail() {
           isActive={property.is_active}
           isRu={isRu}
         />
-      </div>
 
-      <div className="flex gap-2 mb-6">
-        <Button className="flex-1" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
-          <Settings className="h-4 w-4 mr-2" />
-          {isRu ? 'Редактировать объект' : 'Edit Property'}
-        </Button>
-        <Button variant="outline" onClick={() => navigate(`/mc/properties/${id}/guidebook`)}>
-          {isRu ? 'Гайдбук' : 'Guidebook'}
-        </Button>
-      </div>
+        {/* Action buttons */}
+        <div className="flex gap-2 mb-6">
+          <Button className="flex-1" size="lg" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
+            <Settings className="h-4 w-4 mr-2" />
+            {isRu ? 'Редактировать объект' : 'Edit Property'}
+          </Button>
+          <Button variant="outline" size="lg" onClick={() => navigate(`/mc/properties/${id}/guidebook`)}>
+            {isRu ? 'Гайдбук' : 'Guidebook'}
+          </Button>
+        </div>
 
       {/* === UNIFIED TABS === */}
       <Tabs defaultValue="overview" className="w-full">
