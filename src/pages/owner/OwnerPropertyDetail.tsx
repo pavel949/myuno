@@ -26,10 +26,9 @@ import { PropertyUtilitySchedules } from '@/components/owner/property-detail/Pro
 import { ChecklistCompletion } from '@/components/owner/checklists/ChecklistCompletion';
 import { ChecklistHistory } from '@/components/owner/checklists/ChecklistHistory';
 import {
-  Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText, Building2,
-  Sparkles, Shield, Settings, Bed, Bath, SquareStack, Rocket, EyeOff,
-  StickyNote, Users, Wrench, Eye, MapPin, DollarSign, Wifi, KeyRound,
-  Handshake
+  Home, Calendar, CheckCircle, Clock, AlertTriangle, FileText,
+  Shield, Settings, Wrench, Eye, Wifi,
+  StickyNote, Users, Handshake
 } from 'lucide-react';
 
 export default function OwnerPropertyDetail() {
