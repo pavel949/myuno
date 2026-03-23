@@ -110,7 +110,7 @@ export default function PartnerReportPage() {
     <PageContainer>
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <BackButton to={APP_ROUTES.MC_REPORTS} />
+          <BackButton fallbackPath={APP_ROUTES.MC_REPORTS} />
           <div className="flex-1">
             <h1 className="text-xl font-semibold">
               {isRu ? 'Отчёт партнёра' : 'Partner Report'}
