@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, MapPin, Users, Check, ArrowRight, Briefcase, Shield, Star, ChevronLeft, Loader2, User, Calendar, Clock, CreditCard, Handshake, LocateFixed, Banknote, ArrowLeft } from 'lucide-react';
@@ -267,7 +268,7 @@ export default function AirportTransferBooking() {
           customer_email: formData.email,
           notes: formData.notes || undefined,
         },
-      }).catch(err => console.error('[Notify] Transfer notification error:', err));
+      }).catch(err => logger.error('[Notify] Transfer notification error:', err));
 
       if (formData.paymentMethod === 'stripe') {
         setIsProcessingPayment(true);
@@ -290,7 +291,7 @@ export default function AirportTransferBooking() {
             return;
           }
         } catch (err) {
-          console.error('Stripe checkout error:', err);
+          logger.error('Stripe checkout error:', err);
           toast({
             title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
             description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -185,7 +186,7 @@ const VendorRestaurants = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving:', error);
+      logger.error('Error saving:', error);
       toast.error(isRussian ? 'Ошибка сохранения' : 'Error saving');
     } finally {
       setIsSubmitting(false);

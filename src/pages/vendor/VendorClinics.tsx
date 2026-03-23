@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -220,7 +221,7 @@ const VendorClinics = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving clinic:', error);
+      logger.error('Error saving clinic:', error);
       toast.error(isRussian ? 'Ошибка сохранения' : 'Error saving');
     } finally {
       setIsSubmitting(false);
@@ -235,7 +236,7 @@ const VendorClinics = () => {
       toast.success(isRussian ? 'Клиника удалена' : 'Clinic deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting clinic:', error);
+      logger.error('Error deleting clinic:', error);
       toast.error(isRussian ? 'Ошибка удаления' : 'Error deleting');
     }
   };

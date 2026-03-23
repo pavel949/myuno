@@ -3,6 +3,7 @@
  * Full CRUD for investment_projects table with MuUNO scoring editor
  */
 import React, { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   useAdminInvestmentProjects, 
@@ -201,7 +202,7 @@ export default function AdminInvestments() {
       }
       setIsFormOpen(false);
     } catch (error) {
-      console.error('Save error:', error);
+      logger.error('Save error:', error);
     }
   };
 
@@ -211,7 +212,7 @@ export default function AdminInvestments() {
       await deleteProject.mutateAsync(deleteConfirmId);
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Delete error:', error);
+      logger.error('Delete error:', error);
     }
   };
 

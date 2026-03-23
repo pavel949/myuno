@@ -74,6 +74,7 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Payouts', titleRu: 'Выплаты', path: APP_ROUTES.MC_MANAGEMENT_TERMS, icon: Shuffle },
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
+      { title: 'Partner P&L', titleRu: 'Отчёт партнёра', path: APP_ROUTES.MC_PARTNER_REPORT, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
       { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
     ],
@@ -127,6 +128,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_FINANCIALS]: 'finance',
   [APP_ROUTES.MC_INVOICES]: 'finance',
   [APP_ROUTES.MC_REPORTS]: 'reports',
+  [APP_ROUTES.MC_PARTNER_REPORT]: 'reports',
   [APP_ROUTES.MC_BUDGET]: 'finance',
   [APP_ROUTES.MC_STAFF]: 'staff',
 };

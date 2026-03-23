@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { Camera, Upload, Loader2, Check, AlertCircle, Sparkles, Building2, Phone, Mail, Globe, MapPin, User, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,7 +104,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       };
       reader.readAsDataURL(compressed);
     } catch (err) {
-      console.error('Error processing file:', err);
+      logger.error('Error processing file:', err);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
@@ -125,7 +126,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
         videoRef.current.srcObject = mediaStream;
       }
     } catch (err) {
-      console.error('Camera access error:', err);
+      logger.error('Camera access error:', err);
       toast({
         title: isRu ? 'Ошибка камеры' : 'Camera Error',
         description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
@@ -185,7 +186,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
           : `Confidence: ${data.confidence}%`,
       });
     } catch (err) {
-      console.error('Scan error:', err);
+      logger.error('Scan error:', err);
       toast({
         title: isRu ? 'Ошибка сканирования' : 'Scan Error',
         description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
@@ -249,7 +250,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       setEditedData(null);
 
     } catch (err) {
-      console.error('Create provider error:', err);
+      logger.error('Create provider error:', err);
       toast({
         title: isRu ? 'Ошибка создания' : 'Creation Error',
         description: isRu ? 'Не удалось создать провайдера' : 'Failed to create provider',

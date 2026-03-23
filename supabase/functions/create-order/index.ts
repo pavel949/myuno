@@ -1,11 +1,7 @@
 // Creates order with server-side prices from marketplace_products. Returns order_id for create-order-checkout.
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 interface CreateOrderItem {
   product_id: string;
@@ -29,6 +25,7 @@ interface CreateOrderRequest {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

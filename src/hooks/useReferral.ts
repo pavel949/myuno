@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -44,7 +45,7 @@ export const useReferral = () => {
       if (error) throw error;
       return data === true;
     } catch (error) {
-      console.error('Error applying referral code:', error);
+      logger.error('Error applying referral code:', error);
       return false;
     }
   }, [user]);
@@ -119,7 +120,7 @@ export const useReferral = () => {
 
         if (!settingsRes.error) setSettings(settingsRes.data);
       } catch (error) {
-        console.error('Error loading referral data:', error);
+        logger.error('Error loading referral data:', error);
       } finally {
         if (isMounted) setIsLoading(false);
       }

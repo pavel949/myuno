@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
@@ -70,7 +71,7 @@ export default function AdminApiKeys() {
       setConfigs(data.configs || []);
     } catch (e) {
       toast.error(isRu ? 'Не удалось загрузить статус' : 'Failed to load status');
-      console.error(e);
+      logger.error(e);
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ export default function AdminApiKeys() {
       fetchStatus();
     } catch (e) {
       toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
-      console.error(e);
+      logger.error(e);
     } finally {
       setSaving(null);
     }
@@ -107,7 +108,7 @@ export default function AdminApiKeys() {
       fetchStatus();
     } catch (e) {
       toast.error(isRu ? 'Ошибка удаления' : 'Delete failed');
-      console.error(e);
+      logger.error(e);
     } finally {
       setSaving(null);
     }
@@ -134,7 +135,7 @@ export default function AdminApiKeys() {
       fetchStatus();
     } catch (e) {
       toast.error(isRu ? 'Ошибка добавления' : 'Add failed');
-      console.error(e);
+      logger.error(e);
     } finally {
       setSaving(null);
     }

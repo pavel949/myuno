@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProviderContracts, ProviderContract, ContractInsert } from '@/hooks/useProviderContracts';
 import { useContractEntities } from '@/hooks/useContractEntities';
@@ -165,7 +166,7 @@ export default function AdminContracts() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving contract:', error);
+      logger.error('Error saving contract:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +176,7 @@ export default function AdminContracts() {
     try {
       await activateContract(id);
     } catch (error) {
-      console.error('Error activating contract:', error);
+      logger.error('Error activating contract:', error);
     }
   };
 

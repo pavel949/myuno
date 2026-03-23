@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { getFeedbackSettings } from './useFeedbackSettings';
 
 export type SoundType = 'click' | 'type' | 'success' | 'error' | 'notification' | 'keypad';
@@ -28,7 +29,7 @@ function getAudioContext(): AudioContext | null {
     try {
       audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     } catch (e) {
-      console.warn('Web Audio API not supported');
+      logger.warn('Web Audio API not supported');
       return null;
     }
   }

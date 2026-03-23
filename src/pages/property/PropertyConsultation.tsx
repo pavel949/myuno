@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -208,7 +209,7 @@ export default function PropertyConsultation() {
       
       setIsSuccess(true);
     } catch (error) {
-      console.error('Failed to submit consultation request:', error);
+      logger.error('Failed to submit consultation request:', error);
     } finally {
       setIsSubmitting(false);
     }

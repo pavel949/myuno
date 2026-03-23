@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { logger } from '@/lib/logger';
 
 export interface CrmContact {
   id: string;
@@ -197,50 +197,53 @@ export function useCrmContacts(
       const from = page * pageSize;
       const to = from + pageSize - 1;
 
-      // Determine sort
       const sortField = filters?.sortBy || 'updated_at';
-      const ascending = sortField === 'first_name'; // name ascending, rest descending
+      const ascending = sortField === 'first_name';
 
-      let q = supabase
-        .from('crm_contacts')
-        .select('*, agent_deals!contact_id(id)', { count: 'exact' })
-        .eq('company_id', companyId!)
-        .order(sortField, { ascending })
-        .range(from, to);
+      const runSelect = async (select: string) => {
+        let q = supabase
+          .from('crm_contacts')
+          .select(select, { count: 'exact' })
+          .eq('company_id', companyId!)
+          .order(sortField, { ascending })
+          .range(from, to);
 
-      // Server-side archived filter (default: hide archived)
-      if (!filters?.showArchived) {
-        q = q.eq('is_archived', false);
+        if (!filters?.showArchived) {
+          q = q.eq('is_archived', false);
+        }
+
+        if (filters?.search && filters.search.trim().length >= 2) {
+          const s = sanitizeSearchTerm(filters.search);
+          if (s) q = q.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
+        }
+
+        if (filters?.contactType) {
+          q = q.eq('contact_type', filters.contactType);
+        }
+
+        if (filters?.source) {
+          q = q.eq('source', filters.source);
+        }
+
+        if (filters?.lifecycleStage) {
+          q = q.eq('lifecycle_stage', filters.lifecycleStage);
+        }
+
+        if (filters?.tag) {
+          q = q.contains('tags', [filters.tag]);
+        }
+
+        return q;
+      };
+
+      let res = await runSelect('*, agent_deals!contact_id(id)');
+      if (res.error) {
+        logger.warn('[useCrmContacts] embed query failed, retrying without deal count', res.error);
+        res = await runSelect('*');
+        if (res.error) throw res.error;
       }
+      const { data, count } = res;
 
-      // Server-side search
-      if (filters?.search && filters.search.trim().length >= 2) {
-        const s = sanitizeSearchTerm(filters.search);
-        if (s) q = q.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`);
-      }
-
-      // Server-side type filter
-      if (filters?.contactType) {
-        q = q.eq('contact_type', filters.contactType);
-      }
-
-      // Server-side source filter
-      if (filters?.source) {
-        q = q.eq('source', filters.source);
-      }
-
-      // Server-side lifecycle stage filter
-      if (filters?.lifecycleStage) {
-        q = q.eq('lifecycle_stage', filters.lifecycleStage);
-      }
-
-      // Server-side tag filter
-      if (filters?.tag) {
-        q = q.contains('tags', [filters.tag]);
-      }
-
-      const { data, error, count } = await q;
-      if (error) throw error;
       const rows = (data || []) as Record<string, unknown>[];
       const enriched = rows.map((c) => {
         const { agent_deals, ...rest } = c;

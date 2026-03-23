@@ -4,6 +4,7 @@
  * Used after order completion to rate provider + leave feedback.
  */
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Star, Send, Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -78,7 +79,7 @@ export function ReviewForm({
       toast.success(isRu ? 'Спасибо за ваш отзыв!' : 'Thank you for your review!');
       onSuccess?.();
     } catch (err) {
-      console.error('Review submit error:', err);
+      logger.error('Review submit error:', err);
       toast.error(isRu ? 'Ошибка при отправке отзыва' : 'Failed to submit review');
     } finally {
       setIsSubmitting(false);

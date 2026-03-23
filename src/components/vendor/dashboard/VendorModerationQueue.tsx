@@ -3,6 +3,7 @@
  * Displays approval status across all verticals owned by vendor
  */
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -95,7 +96,7 @@ export function VendorModerationQueue({
               .limit(limit);
 
             if (error) {
-              console.warn(`Error fetching ${tableConfig.table}:`, error.message);
+              logger.warn(`Error fetching ${tableConfig.table}:`, error.message);
               continue;
             }
 
@@ -125,7 +126,7 @@ export function VendorModerationQueue({
         setPendingCount(allItems.filter(i => i.status === APPROVAL_STATUSES.PENDING).length);
         setRejectedCount(allItems.filter(i => i.status === APPROVAL_STATUSES.REJECTED).length);
       } catch (err) {
-        console.error('Error fetching moderation items:', err);
+        logger.error('Error fetching moderation items:', err);
       } finally {
         setIsLoading(false);
       }

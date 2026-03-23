@@ -171,7 +171,7 @@ const PAGE_SIZE = 20;
  */
 const PROPERTY_LIST_COLUMNS = `
   id, title_en, title_ru, property_type, listing_type,
-  price, price_period, currency, bedrooms, bathrooms, area_sqm,
+  price, price_per_night, price_period, currency, bedrooms, bathrooms, area_sqm,
   max_guests, amenities, images, cover_image, address, district,
   lat, lng, is_active, is_featured, is_verified, instant_booking,
   available_from, min_stay_nights, rating, review_count,

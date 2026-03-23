@@ -3,6 +3,7 @@
  * Similar to Etsy's "Request a category" feature
  */
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,7 +77,7 @@ export function CategorySuggestionDialog({
       toast.success(isRu ? 'Заявка отправлена!' : 'Suggestion submitted!');
       
     } catch (error) {
-      console.error('Error submitting suggestion:', error);
+      logger.error('Error submitting suggestion:', error);
       toast.error(isRu ? 'Ошибка отправки' : 'Submission failed');
     } finally {
       setIsSubmitting(false);

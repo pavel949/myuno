@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/lib/logger';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, X, Sparkles } from 'lucide-react';
@@ -19,14 +20,14 @@ export function PWAUpdatePrompt() {
   } = useRegisterSW({
     immediate: true,
     onRegisteredSW(swUrl, r) {
-      console.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
+      logger.log(`[PWA] SW registered: ${swUrl} | App v${APP_VERSION}`);
       if (r) {
         // Immediate check on registration
         r.update();
         // Check for updates when tab regains focus (instead of polling every 2min)
         const handleVisibility = () => {
           if (document.visibilityState === 'visible') {
-            console.log('[PWA] Tab visible — checking for SW updates...');
+            logger.log('[PWA] Tab visible — checking for SW updates...');
             r.update();
           }
         };
@@ -34,7 +35,7 @@ export function PWAUpdatePrompt() {
       }
     },
     onRegisterError(error) {
-      console.error('[PWA] SW registration error:', error);
+      logger.error('[PWA] SW registration error:', error);
     },
   });
 

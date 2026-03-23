@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,7 +73,7 @@ export function SourceOfTruthToggle({ propertyId, currentMode, propertyTitle, on
       setExpanded(false);
       toast.success(isRu ? 'Режим синхронизации обновлён' : 'Sync mode updated');
     } catch (err) {
-      console.error('Failed to update sync mode:', err);
+      logger.error('Failed to update sync mode:', err);
       toast.error(isRu ? 'Ошибка сохранения' : 'Failed to save');
     } finally {
       setSaving(false);

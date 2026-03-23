@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 
@@ -99,7 +100,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
       if (queryError) throw queryError;
       setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
     } catch (err) {
-      console.error('Error loading services:', err);
+      logger.error('Error loading services:', err);
       setError(err as Error);
       setServices([]);
     } finally {
@@ -118,7 +119,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
         if (!isMounted) return;
         setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
       } catch (err) {
-        console.error('Error loading services:', err);
+        logger.error('Error loading services:', err);
         if (isMounted) { setError(err as Error); setServices([]); }
       } finally {
         if (isMounted) setIsLoading(false);
@@ -170,7 +171,7 @@ export const useCategories = () => {
           if (isMounted) setCategories(data || []);
         }
       } catch (err) {
-        console.error('Error loading categories:', err);
+        logger.error('Error loading categories:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }

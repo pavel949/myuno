@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,7 +159,7 @@ export function AILegalAssistant({ propertyContext, bookingContext }: AILegalAss
     try {
       await streamChat(newMessages);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       if (!(e instanceof Error && (e.message === 'Rate limited' || e.message === 'Payment required'))) {
         toast.error(isRu ? 'Ошибка AI' : 'AI Error');
       }

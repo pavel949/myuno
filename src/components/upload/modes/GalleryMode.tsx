@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
@@ -346,7 +347,7 @@ export function GalleryMode({
 
       return publicUrl;
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : img
       ));
@@ -462,7 +463,7 @@ export function GalleryMode({
           u.id === uploadingId ? { ...u, status: 'done' as const, progress: 100 } : u
         ));
       } catch (error) {
-        console.error('External upload error:', error);
+        logger.error('External upload error:', error);
         setUploadingImages(prev => prev.map(u => 
           u.id === uploadingId ? { ...u, status: 'error' as const, error: isRu ? 'Ошибка загрузки' : 'Upload error' } : u
         ));

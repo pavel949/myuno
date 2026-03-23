@@ -345,4 +345,15 @@ export const ru: Record<string, string> = {
   
   // Tours extras
   'tours.noToursFound': 'Туры не найдены',
+
+  // Estate / Owner management fee
+  'estate.management_fee_percent': 'Процент управления (%)',
+  'estate.fee_hint': 'По умолчанию 15%. Указывается индивидуально.',
+  'estate.fee_invalid': 'Некорректный процент',
+
+  // Owner report reconciliation
+  'estate.reconciliation_title': 'Итоговая финансовая сверка (накопительно)',
+  'estate.opening_balance': 'Входящий баланс',
+  'estate.closing_balance': 'Исходящий баланс',
+  'estate.cumulative_net': 'Нарастающий итог',
 };

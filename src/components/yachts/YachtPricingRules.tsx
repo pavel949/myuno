@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useYachtPricingRules, YachtPricingRule, CreatePricingRuleInput } from '@/hooks/useYachtPricingRules';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -120,7 +121,7 @@ export function YachtPricingRules({
       setShowAddDialog(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving rule:', error);
+      logger.error('Error saving rule:', error);
       toast.error(isRu ? 'Ошибка сохранения' : 'Error saving');
     }
   };
@@ -130,7 +131,7 @@ export function YachtPricingRules({
       await deleteRule(ruleId);
       toast.success(isRu ? 'Правило удалено' : 'Rule deleted');
     } catch (error) {
-      console.error('Error deleting rule:', error);
+      logger.error('Error deleting rule:', error);
       toast.error(isRu ? 'Ошибка удаления' : 'Error deleting');
     }
   };
@@ -139,7 +140,7 @@ export function YachtPricingRules({
     try {
       await updateRule({ id: rule.id, is_active: !rule.is_active });
     } catch (error) {
-      console.error('Error toggling rule:', error);
+      logger.error('Error toggling rule:', error);
     }
   };
 

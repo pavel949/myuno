@@ -10,6 +10,7 @@
  * PRINCIPLE: Admin provisions, Vendor owns.
  */
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -201,7 +202,7 @@ export default function AdminVendorContentCreator() {
       setIsCreateVendorOpen(false);
       setNewVendorData({ name: '', email: '', phone: '', business_category: 'services' });
     } catch (err) {
-      console.error('Error creating vendor:', err);
+      logger.error('Error creating vendor:', err);
       toast.error(isRu ? 'Ошибка создания' : 'Creation failed');
     } finally {
       setIsCreatingVendor(false);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { resolveIcon } from '@/lib/iconMap';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -87,7 +88,7 @@ ${description}
       setSubmitted(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Application submitted!');
     } catch (error) {
-      console.error('Failed to submit:', error);
+      logger.error('Failed to submit:', error);
       toast.error(isRu ? 'Ошибка отправки' : 'Failed to submit');
     } finally {
       setIsSubmitting(false);

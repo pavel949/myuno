@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -69,13 +70,13 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
             customer_phone: formData.phone,
             notes: `🏠 Free Property Tour Request\nGuests: ${formData.guests}\nPreferred date: ${formData.preferredDate || 'Flexible'}\n${formData.notes}`,
           },
-        }).catch(err => console.error('Failed to send tour notification:', err));
+        }).catch(err => logger.error('Failed to send tour notification:', err));
       }
 
       setIsSuccess(true);
       toast.success(isRu ? 'Заявка отправлена!' : 'Request submitted!');
     } catch (err) {
-      console.error('Lead form error:', err);
+      logger.error('Lead form error:', err);
       toast.error(isRu ? 'Ошибка, попробуйте позже' : 'Error, please try again');
     } finally {
       setIsSubmitting(false);

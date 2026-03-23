@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { Camera, Upload, Loader2, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,7 +54,7 @@ export function BusinessCardScanButton({
   useEffect(() => {
     if (stream && videoRef.current) {
       videoRef.current.srcObject = stream;
-      videoRef.current.play().catch(console.error);
+      videoRef.current.play().catch(logger.error);
     }
   }, [stream, isCameraActive]);
 
@@ -118,7 +119,7 @@ export function BusinessCardScanButton({
 
       handleClose();
     } catch (err) {
-      console.error('Scan error:', err);
+      logger.error('Scan error:', err);
       toast({
         title: isRu ? 'Ошибка сканирования' : 'Scan Error',
         description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
@@ -148,7 +149,7 @@ export function BusinessCardScanButton({
       };
       reader.readAsDataURL(compressed);
     } catch (err) {
-      console.error('Error processing file:', err);
+      logger.error('Error processing file:', err);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
@@ -174,7 +175,7 @@ export function BusinessCardScanButton({
       
       setStream(mediaStream);
     } catch (err: any) {
-      console.error('Camera access error:', err);
+      logger.error('Camera access error:', err);
       setIsCameraActive(false);
       
       if (err.name === 'NotAllowedError') {

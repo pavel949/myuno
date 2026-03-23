@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = [
   "https://id-preview--dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovable.app",
   "https://dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovableproject.com",
   ...(typeof Deno !== "undefined" && Deno.env.get("NODE_ENV") === "development"
-    ? ["http://localhost:5173", "http://localhost:3000"]
+    ? ["http://localhost:5173", "http://localhost:3000", "http://localhost:8080"]
     : []),
 ];
 

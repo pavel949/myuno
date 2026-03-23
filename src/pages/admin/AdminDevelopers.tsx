@@ -3,6 +3,7 @@
  * CRUD for developers table (property developers/builders)
  */
 import React, { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   useAdminDevelopers, 
@@ -151,7 +152,7 @@ export default function AdminDevelopers() {
       }
       setIsFormOpen(false);
     } catch (error) {
-      console.error('Save error:', error);
+      logger.error('Save error:', error);
     }
   };
 
@@ -161,7 +162,7 @@ export default function AdminDevelopers() {
       await deleteDeveloper.mutateAsync(deleteConfirmId);
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Delete error:', error);
+      logger.error('Delete error:', error);
     }
   };
 

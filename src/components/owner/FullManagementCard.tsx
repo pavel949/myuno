@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 import { OWNER_BRAND, OWNER_REVENUE } from '@/lib/config/ownerConstants';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export function FullManagementCard() {
   const { language } = useLanguage();
@@ -50,7 +51,7 @@ export function FullManagementCard() {
           </div>
 
           <Button 
-            onClick={() => navigate('/owner/full-management')}
+            onClick={() => navigate(APP_ROUTES.OWNER_FULL_MANAGEMENT)}
             className="w-full"
             size="sm"
           >

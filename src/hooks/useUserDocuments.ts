@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -110,7 +111,7 @@ export function useUserDocuments() {
       toast.success('Документ сохранён');
     },
     onError: (error) => {
-      console.error('Document save error:', error);
+      logger.error('Document save error:', error);
       toast.error('Ошибка сохранения документа');
     },
   });
@@ -129,7 +130,7 @@ export function useUserDocuments() {
       toast.success('Документ удалён');
     },
     onError: (error) => {
-      console.error('Document delete error:', error);
+      logger.error('Document delete error:', error);
       toast.error('Ошибка удаления');
     },
   });

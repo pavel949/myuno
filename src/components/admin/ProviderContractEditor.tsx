@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEntityContract, useProviderContracts, ContractInsert } from '@/hooks/useProviderContracts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -102,7 +103,7 @@ export function ProviderContractEditor({ providerId, providerName }: ProviderCon
       
       setIsDirty(false);
     } catch (error) {
-      console.error('Error saving contract:', error);
+      logger.error('Error saving contract:', error);
     }
   };
 

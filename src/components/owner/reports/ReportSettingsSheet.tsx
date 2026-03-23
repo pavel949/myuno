@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -138,7 +139,7 @@ export function ReportSettingsSheet({ open, onOpenChange, propertyId }: Props) {
       toast.success(isRu ? 'Настройки сохранены' : 'Settings saved');
       onOpenChange(false);
     } catch (err) {
-      console.error('Save report prefs error:', err);
+      logger.error('Save report prefs error:', err);
       toast.error(isRu ? 'Ошибка сохранения' : 'Failed to save');
     } finally {
       setSaving(false);

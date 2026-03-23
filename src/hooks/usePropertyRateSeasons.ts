@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { type RateSeasonRecord, rateSeasonsToJsonb } from '@/lib/pricingEngine';
 
@@ -24,7 +25,7 @@ async function logActivity(params: {
       details: params.details as any,
     });
   } catch (err) {
-    console.error('Failed to log activity:', err);
+    logger.error('Failed to log activity:', err);
   }
 }
 

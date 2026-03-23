@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -112,7 +113,7 @@ export default function BecomePartnerPage() {
           : 'We will contact you soon',
       });
     } catch (error) {
-      console.error('Error submitting application:', error);
+      logger.error('Error submitting application:', error);
       toast({
         title: language === 'ru' ? 'Ошибка' : 'Error',
         description: language === 'ru' 

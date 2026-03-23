@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { APP_ROUTES, getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 const emailSchema = z.string().email('Invalid email address');
 
@@ -51,6 +52,7 @@ export default function ForgotPassword() {
         );
       }
     } catch (error) {
+      logger.error('[ForgotPassword] resetPasswordForEmail', error);
       toast.error(
         language === 'ru'
           ? 'Произошла ошибка'
@@ -89,6 +91,11 @@ export default function ForgotPassword() {
                 {language === 'ru'
                   ? `Мы отправили инструкции для сброса пароля на ${email}`
                   : `We've sent password reset instructions to ${email}`}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {language === 'ru'
+                  ? 'Проверьте папку «Спам». Письмо может прийти с задержкой несколько минут. Если вы не регистрировали этот email в myUNO, письмо не придёт (из соображений безопасности мы не сообщаем, существует ли аккаунт).'
+                  : 'Check your spam folder. The email may take a few minutes. If this address was never used to sign up for myUNO, no email will be sent (we do not reveal whether an account exists).'}
               </p>
               <Link to={APP_ROUTES.AUTH}>
                 <PremiumButton variant="outline" className="mt-4">

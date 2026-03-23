@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -107,7 +108,7 @@ const VendorPayouts = () => {
         phone: '',
       });
     } catch (error) {
-      console.error('Error requesting payout:', error);
+      logger.error('Error requesting payout:', error);
       toast.error(isRussian ? 'Ошибка при создании заявки' : 'Error creating payout request');
     } finally {
       setIsSubmitting(false);

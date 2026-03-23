@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Camera, User, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -68,7 +69,7 @@ export function AvatarUpload({ value, onChange, name, className }: AvatarUploadP
         toast.success('Аватар загружен');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки аватара');
       }

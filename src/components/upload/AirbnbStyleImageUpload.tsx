@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -382,7 +383,7 @@ export function AirbnbStyleImageUpload({
 
       return publicUrl;
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       setUploadingImages(prev => prev.map(img => 
         img.id === id ? { ...img, status: 'error' as const, error: 'Ошибка загрузки' } : img
       ));
@@ -508,7 +509,7 @@ export function AirbnbStyleImageUpload({
           u.id === uploadingId ? { ...u, status: 'done' as const, progress: 100 } : u
         ));
       } catch (error) {
-        console.error('External upload error:', error);
+        logger.error('External upload error:', error);
         setUploadingImages(prev => prev.map(u => 
           u.id === uploadingId ? { ...u, status: 'error' as const, error: 'Ошибка загрузки' } : u
         ));

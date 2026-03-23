@@ -11,6 +11,7 @@ import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { Crown, Pencil } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -165,8 +166,8 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
         </Button>
       }
     >
-      <div className="overflow-y-auto max-h-[calc(100vh-120px)] overscroll-contain space-y-4 pr-1">
-      {/* Deal Type */}
+      <div className="space-y-4">
+      {/* Deal Type — scroll handled by ResponsiveModal / ScrollArea */}
       <div>
         <Label>{isRu ? 'Тип сделки' : 'Deal Type'}</Label>
         <div className="flex gap-1.5 mt-1">

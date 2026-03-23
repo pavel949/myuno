@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 // Application-wide constants to eliminate magic strings
 
 export const STORAGE_KEYS = {
@@ -15,7 +17,7 @@ export const CURRENCY = {
   // DEPRECATED: Use getCurrencySymbol() from src/lib/config/currencies.ts
   // Kept for backward compatibility during migration
   get SYMBOLS() {
-    console.warn('CURRENCY.SYMBOLS is deprecated. Use getCurrencySymbol() from src/lib/config/currencies.ts');
+    logger.warn('CURRENCY.SYMBOLS is deprecated. Use getCurrencySymbol() from src/lib/config/currencies.ts');
     return {
       THB: '฿',
       USD: '$',

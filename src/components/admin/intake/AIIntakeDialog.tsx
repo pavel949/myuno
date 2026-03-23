@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
@@ -71,7 +72,7 @@ export function AIIntakeDialog({
         throw new Error('No data extracted');
       }
     } catch (err: unknown) {
-      console.error('AI Intake error:', err);
+      logger.error('AI Intake error:', err);
       setError(err instanceof Error ? err.message : 'Processing failed');
       toast.error(isRu ? 'Ошибка обработки' : 'Processing failed');
     } finally {

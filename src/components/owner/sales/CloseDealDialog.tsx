@@ -83,7 +83,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm max-h-[min(90vh,calc(100vh-2rem))] overflow-y-auto overscroll-contain">
         <DialogHeader>
           <DialogTitle>
             {mode === 'won'

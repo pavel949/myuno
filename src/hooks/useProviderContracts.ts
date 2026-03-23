@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -78,7 +79,7 @@ export function useProviderContracts(entityType?: string, entityId?: string) {
       toast.success('Контракт создан');
     },
     onError: (error) => {
-      console.error('Error creating contract:', error);
+      logger.error('Error creating contract:', error);
       toast.error('Ошибка при создании контракта');
     },
   });
@@ -100,7 +101,7 @@ export function useProviderContracts(entityType?: string, entityId?: string) {
       toast.success('Контракт обновлён');
     },
     onError: (error) => {
-      console.error('Error updating contract:', error);
+      logger.error('Error updating contract:', error);
       toast.error('Ошибка при обновлении контракта');
     },
   });
@@ -119,7 +120,7 @@ export function useProviderContracts(entityType?: string, entityId?: string) {
       toast.success('Контракт удалён');
     },
     onError: (error) => {
-      console.error('Error deleting contract:', error);
+      logger.error('Error deleting contract:', error);
       toast.error('Ошибка при удалении контракта');
     },
   });

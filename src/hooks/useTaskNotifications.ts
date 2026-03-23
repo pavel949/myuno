@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCallback } from 'react';
 
@@ -31,7 +32,7 @@ export function useTaskNotifications() {
         is_read: false,
       } as any);
     } catch (e) {
-      console.error('Failed to send task notification', e);
+      logger.error('Failed to send task notification', e);
     }
   }, [user]);
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Phone, User, ArrowRight, Shield, Clock, Sparkles, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
       }, 3000);
 
     } catch (error) {
-      console.error('Error saving lead:', error);
+      logger.error('Error saving lead:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Попробуйте ещё раз' : 'Please try again',

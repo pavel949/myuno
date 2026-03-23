@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PinInput } from './PinInput';
@@ -73,7 +74,7 @@ export const PinSetup: React.FC<PinSetupProps> = ({ onComplete, onSkip }) => {
       toast.success(texts.success);
       onComplete();
     } catch (err) {
-      console.error('[PinSetup] Error:', err);
+      logger.error('[PinSetup] Error:', err);
       toast.error(texts.error);
       setError(true);
       setTimeout(() => {

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -191,7 +192,7 @@ export function useCreateOwnerProperty() {
         .single();
       
       if (error) {
-        console.error('[useCreateOwnerProperty] Insert error:', error);
+        logger.error('[useCreateOwnerProperty] Insert error:', error);
         throw error;
       }
       

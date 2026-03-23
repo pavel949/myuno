@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { logger } from '@/lib/logger';
 
 export interface ExtractedField {
   value: unknown;
@@ -306,7 +307,7 @@ export function useIntakeAgent() {
           .maybeSingle();
         
         if (existing) {
-          console.log('[INTAKE] CRM contact already exists:', existing.id);
+          logger.log('[INTAKE] CRM contact already exists:', existing.id);
           return;
         }
       }
@@ -330,9 +331,9 @@ export function useIntakeAgent() {
         .single();
 
       if (contactError) {
-        console.error('[INTAKE] Failed to create CRM contact:', contactError);
+        logger.error('[INTAKE] Failed to create CRM contact:', contactError);
       } else {
-        console.log('[INTAKE] CRM contact created:', contact?.id);
+        logger.debug('[INTAKE] CRM contact created:', contact?.id);
         toast.success(
           language === 'ru'
             ? 'Контакт добавлен в CRM'
@@ -340,7 +341,7 @@ export function useIntakeAgent() {
         );
       }
     } catch (err) {
-      console.error('[INTAKE] CRM contact creation error:', err);
+      logger.error('[INTAKE] CRM contact creation error:', err);
     }
   }, [activeCompany, language]);
 

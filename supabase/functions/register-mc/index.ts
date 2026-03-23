@@ -1,11 +1,9 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 function slugify(text: string): string {
   return text
@@ -16,6 +14,7 @@ function slugify(text: string): string {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -96,6 +95,28 @@ Deno.serve(async (req) => {
     if (roleError) {
       console.error("Failed to upsert role:", roleError);
     }
+
+    // Trigger onboarding agent (fire-and-forget)
+    EdgeRuntime.waitUntil((async () => {
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/mc-onboarding-agent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+            "x-internal-secret": Deno.env.get("INTERNAL_SECRET") ?? "",
+          },
+          body: JSON.stringify({
+            company_id: company.id,
+            user_id: userId,
+            company_name: name_en,
+            plan_type: body.plan_type ?? "free",
+          }),
+        });
+      } catch (e) {
+        console.error("[register-mc] onboarding agent trigger failed:", e);
+      }
+    })());
 
     return new Response(
       JSON.stringify({ company_id: company.id, slug: company.slug }),

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -118,7 +119,7 @@ export function usePushSubscription() {
       toast.success('Уведомления отключены');
       return true;
     } catch (error) {
-      console.error('Error unsubscribing:', error);
+      logger.error('Error unsubscribing:', error);
       toast.error('Не удалось отключить уведомления');
       return false;
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { UserListing, UserListingDraft, ItemCondition } from '@/types/userListing';
 import { useToast } from '@/hooks/use-toast';
@@ -274,7 +275,7 @@ export function usePublicListings(options: {
 
         setListings(result);
       } catch (err) {
-        console.error('Error fetching public listings:', err);
+        logger.error('Error fetching public listings:', err);
       } finally {
         setIsLoading(false);
       }

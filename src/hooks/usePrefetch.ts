@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES, PREFETCH_ROUTES, queryKeys } from '@/lib/queryConfig';
+import { logger } from '@/lib/logger';
 
 /**
  * Smart prefetching hook that loads popular data during idle time
@@ -102,7 +103,7 @@ export function usePrefetchPopularData() {
         await prefetchFeaturedContent();
       } catch (error) {
         // Silently fail - prefetching is optional
-        console.debug('Prefetch failed:', error);
+        logger.debug('Prefetch failed:', error);
       }
     });
 

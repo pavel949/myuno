@@ -1,9 +1,5 @@
 import { Resend } from 'npm:resend@2.0.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const ADMIN_EMAIL = 'pavel@ignatevestate.com';
 
@@ -16,6 +12,7 @@ interface SignupNotificationPayload {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

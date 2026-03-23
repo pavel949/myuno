@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -317,7 +318,7 @@ const VendorProducts = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving product:', error);
+      logger.error('Error saving product:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving product');
     } finally {
       setIsSubmitting(false);
@@ -331,7 +332,7 @@ const VendorProducts = () => {
       toast.success(isRussian ? 'Товар удалён' : 'Product deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting product:', error);
+      logger.error('Error deleting product:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting product');
     }
   };

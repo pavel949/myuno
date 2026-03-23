@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -545,7 +546,7 @@ export default function StaffPage() {
                 : `Login credentials sent to ${form.email}`
             );
           } catch (inviteErr: any) {
-            console.error('Failed to send credentials:', inviteErr);
+            logger.error('Failed to send credentials:', inviteErr);
             toastSonner.error(
               isRu 
                 ? `Сотрудник добавлен, но не удалось отправить данные: ${inviteErr.message}` 

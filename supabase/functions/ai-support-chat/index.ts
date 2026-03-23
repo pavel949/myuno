@@ -2,10 +2,7 @@
 import { withRateLimit, RATE_LIMITS, getClientIdentifier } from "../_shared/rate-limit.ts";
 import { createClient } from "../_shared/supabase.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const SYSTEM_PROMPT = `Ты — myUNO Assistant, дружелюбный AI-помощник платформы myUNO для бронирования услуг в Таиланде (Пхукет, Самуи, Паттайя).
 
@@ -27,6 +24,7 @@ const SYSTEM_PROMPT = `Ты — myUNO Assistant, дружелюбный AI-по�
 Рабочие часы живой поддержки: 9:00-21:00 (время Таиланда)`;
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

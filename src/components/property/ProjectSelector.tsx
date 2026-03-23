@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, memo, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyProjects, PropertyProject } from '@/hooks/usePropertyProjects';
 import { Button } from '@/components/ui/button';
@@ -116,7 +117,7 @@ function ProjectSelectorInner({ value, onChange, selectedProject }: ProjectSelec
       setRequestNotes('');
       setShowRequestForm(false);
     } catch (err) {
-      console.error('Failed to submit project request:', err);
+      logger.error('Failed to submit project request:', err);
       toast.error(isRu ? 'Ошибка отправки заявки' : 'Failed to submit request');
     } finally {
       setIsSubmitting(false);

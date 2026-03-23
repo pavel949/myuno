@@ -4,6 +4,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { auditFieldValue } from '@/lib/dealAuditEncoding';
+
+/** Re-export for call sites that already import from this hook */
+export { auditFieldValue };
 
 export interface DealFieldChange {
   id: string;
@@ -69,8 +73,8 @@ export function diffDealFields(
     if (!(field in newFields)) continue;
     const oldVal = oldDeal[field];
     const newVal = newFields[field];
-    const oldStr = oldVal == null ? null : JSON.stringify(oldVal);
-    const newStr = newVal == null ? null : JSON.stringify(newVal);
+    const oldStr = auditFieldValue(oldVal);
+    const newStr = auditFieldValue(newVal);
     if (oldStr !== newStr) {
       changes.push({ field_name: field, old_value: oldStr, new_value: newStr });
     }
@@ -83,5 +87,5 @@ export const TRACKED_DEAL_FIELDS = [
   'client_source', 'budget_min', 'budget_max', 'currency', 'deal_value',
   'commission_percent', 'commission_amount', 'agent_id', 'property_id',
   'preferred_types', 'preferred_districts', 'bedrooms_min', 'next_action',
-  'next_action_date', 'notes', 'lost_reason',
+  'next_action_date', 'notes', 'lost_reason', 'priority', 'tags', 'is_vip',
 ];

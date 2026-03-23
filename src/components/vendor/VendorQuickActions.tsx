@@ -11,6 +11,7 @@ import {
   Settings,
   Zap
 } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
 interface QuickAction {
@@ -44,7 +45,7 @@ const quickActions: QuickAction[] = [
     icon: BarChart3, 
     title: 'Analytics', 
     titleRu: 'Аналитика',
-    href: '/vendor/analytics',
+    href: APP_ROUTES.VENDOR_ANALYTICS,
     color: 'text-purple-500'
   },
   { 

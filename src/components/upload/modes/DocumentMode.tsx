@@ -3,6 +3,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -128,7 +129,7 @@ export function DocumentMode({
         toast.success('Документ загружен');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки');
       }

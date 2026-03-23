@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
  /**
   * Hook to fetch yacht experiences from database
   * Replaces hardcoded YACHT_EXPERIENCES array
@@ -39,7 +41,7 @@
          .order('sort_order');
  
        if (error || !data?.length) {
-         console.warn('Using fallback yacht experiences');
+         logger.warn('Using fallback yacht experiences');
          return FALLBACK_EXPERIENCES;
        }
  

@@ -5,6 +5,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -104,7 +105,7 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Analysis failed';
       setError(message);
-      console.error('[useLifeOSAIInsights] Error:', err);
+      logger.error('[useLifeOSAIInsights] Error:', err);
     } finally {
       setIsLoading(false);
     }

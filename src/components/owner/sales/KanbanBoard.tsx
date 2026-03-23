@@ -3,9 +3,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, DEAL_STAGE_LABELS, DealStage, DEAL_TYPE_LABELS, DealType, useUpdateDeal, daysSince, formatValue } from '@/hooks/useAgentDeals';
 import { DynamicPipelineResult, DynamicStage } from '@/hooks/useDynamicPipelineStages';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
-import { useLogDealChanges } from '@/hooks/useDealFieldChanges';
+import { useLogDealChanges, auditFieldValue } from '@/hooks/useDealFieldChanges';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,7 @@ import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle, Crown } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getDealTypeEyebrow, getDealTypeFacts, getDealTypePresentation } from '@/components/owner/sales/dealTypePresentation';
@@ -325,10 +325,20 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         stage: newStage,
         ...(wonStage && newStage === wonStage.key ? { closed_at: new Date().toISOString() } : {}),
       });
-      await logChanges.mutateAsync({
-        dealId,
-        changes: [{ field_name: 'stage', old_value: previousStageId, new_value: newStage }],
-      });
+      try {
+        await logChanges.mutateAsync({
+          dealId,
+          changes: [
+            {
+              field_name: 'stage',
+              old_value: auditFieldValue(previousStageId),
+              new_value: auditFieldValue(newStage),
+            },
+          ],
+        });
+      } catch (auditErr) {
+        logger.warn('[KanbanBoard] deal_field_changes failed (stage saved)', auditErr);
+      }
       await addActivity.mutateAsync({
         deal_id: dealId,
         user_id: user!.id,
@@ -337,16 +347,9 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         stage_from: deal.stage,
         stage_to: newStage,
       });
-      // Non-blocking: log stage change to deal_field_changes (audit trail)
-      const changeRow = {
-        deal_id: dealId,
-        field_name: 'stage',
-        old_value: previousStageId,
-        new_value: newStage,
-        user_id: user!.id,
-      };
-      supabase.from('deal_field_changes').insert(changeRow).then(({ error }) => {
-        if (error) toast({ title: isRu ? 'Не удалось записать историю изменений' : 'Audit log failed to save', variant: 'destructive' });
+      toast({
+        title: isRu ? 'Этап обновлён' : 'Stage updated',
+        description: `${oldLabel} → ${newLabel}`,
       });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });

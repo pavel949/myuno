@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -107,7 +108,7 @@ export function InvestorLeadForm({ onSuccess, entryPoint = 'hero_promo_card' }: 
       toast.success(isRu ? 'Заявка отправлена! Мы свяжемся с вами в течение 24 часов.' : 'Request sent! We\'ll contact you within 24 hours.');
       onSuccess?.();
     } catch (error) {
-      console.error('Failed to submit investor lead:', error);
+      logger.error('Failed to submit investor lead:', error);
       toast.error(isRu ? 'Ошибка отправки. Попробуйте ещё раз.' : 'Failed to submit. Please try again.');
     } finally {
       setIsSubmitting(false);

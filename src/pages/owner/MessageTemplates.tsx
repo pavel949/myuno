@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Plus, Edit2, Trash2, FileText, Save } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,7 +107,7 @@ export default function MessageTemplates() {
       }
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('Error saving template:', error);
     }
   };
 

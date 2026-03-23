@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { 
   BookOpen, Plus, Globe, Edit2, Trash2, 
   Eye, EyeOff, Loader2, ChevronDown, Search,
@@ -235,7 +236,7 @@ export default function AdminLocationKnowledge() {
       setIsDialogOpen(false);
       refetch();
     } catch (error: unknown) {
-      console.error('Error saving:', error);
+      logger.error('Error saving:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка сохранения' : 'Error saving'));
     } finally {
       setIsSaving(false);
@@ -264,7 +265,7 @@ export default function AdminLocationKnowledge() {
       setItemToDelete(null);
       refetch();
     } catch (error: unknown) {
-      console.error('Error deleting:', error);
+      logger.error('Error deleting:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка удаления' : 'Error deleting'));
     } finally {
       setIsDeleting(false);
@@ -287,7 +288,7 @@ export default function AdminLocationKnowledge() {
       );
       refetch();
     } catch (error: unknown) {
-      console.error('Error toggling:', error);
+      logger.error('Error toggling:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
     }
   };

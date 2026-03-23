@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
  import { useState, useEffect } from 'react';
  import { useParams, useNavigate } from 'react-router-dom';
  import { Clock, MapPin, Calendar, MessageSquare, Check, LocateFixed, Loader2 } from 'lucide-react';
@@ -108,7 +110,7 @@
          } 
        });
      } catch (error) {
-       console.error('Order submission failed:', error);
+       logger.error('Order submission failed:', error);
      }
    };
  

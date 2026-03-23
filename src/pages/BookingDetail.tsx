@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, MapPin, Phone, User, Package, XCircle, CheckCircle, AlertCircle, Loader2, ClipboardCheck, Home } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -132,7 +133,7 @@ export default function BookingDetail() {
         addresses: data.booking_addresses || [],
       });
     } catch (error) {
-      console.error('Error loading booking:', error);
+      logger.error('Error loading booking:', error);
       toast.error(language === 'ru' ? 'Ошибка загрузки' : 'Failed to load booking');
     } finally {
       setIsLoading(false);
@@ -174,7 +175,7 @@ export default function BookingDetail() {
       toast.success(language === 'ru' ? 'Бронирование отменено' : 'Booking cancelled');
       setBooking({ ...booking, status: 'cancelled_by_user' });
     } catch (error) {
-      console.error('Error cancelling booking:', error);
+      logger.error('Error cancelling booking:', error);
       toast.error(language === 'ru' ? 'Ошибка отмены' : 'Failed to cancel');
     } finally {
       setIsCancelling(false);

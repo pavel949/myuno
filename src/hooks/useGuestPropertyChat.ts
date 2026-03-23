@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,7 +65,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
 
       const { data, error } = await query;
       if (error) {
-        console.error('Error fetching guest chat messages:', error);
+        logger.error('Error fetching guest chat messages:', error);
         return [];
       }
       return (data || []) as GuestChatMessage[];
@@ -105,7 +106,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
               messagePreview: params.message,
             },
           })
-          .catch((err) => console.warn('[Chat Notify] Error:', err));
+          .catch((err) => logger.warn('[Chat Notify] Error:', err));
       }
 
       // AI chat moderation (fire-and-forget)
@@ -120,7 +121,7 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
               senderId: user.id,
             },
           })
-          .catch((err) => console.warn('[AI Moderation] Error:', err));
+          .catch((err) => logger.warn('[AI Moderation] Error:', err));
       }
 
       // Trigger AI auto-reply asynchronously (fire-and-forget)
@@ -149,10 +150,10 @@ export function useGuestPropertyChat(options: { propertyId?: string; bookingId?:
           },
         })
         .then(({ error }) => {
-          if (error) console.warn('[AI AutoReply] Skipped or failed:', error.message);
+          if (error) logger.warn('[AI AutoReply] Skipped or failed:', error.message);
         })
         .catch((err) => {
-          console.warn('[AI AutoReply] Network error:', err);
+          logger.warn('[AI AutoReply] Network error:', err);
         });
     },
     [language]
@@ -246,7 +247,7 @@ export function useGuestChatList() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching guest conversations:', error);
+        logger.error('Error fetching guest conversations:', error);
         return [];
       }
 

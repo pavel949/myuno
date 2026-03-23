@@ -5,6 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { LEAD_VERTICALS, LeadVerticalConfig, LeadFormField } from '@/lib/leadVerticalConfig';
 
@@ -53,19 +54,19 @@ export function useLeadConfigs() {
           .order('popularity_score', { ascending: false });
 
         if (error) {
-          console.warn('Failed to fetch lead configs from DB, using fallback:', error.message);
+          logger.warn('Failed to fetch lead configs from DB, using fallback:', error.message);
           return LEAD_VERTICALS;
         }
 
         if (!data || data.length === 0) {
-          console.info('No lead configs in DB, using static fallback');
+          logger.info('No lead configs in DB, using static fallback');
           return LEAD_VERTICALS;
         }
 
         // Map DB rows to LeadVerticalConfig interface
         return data.map(row => mapDbToLeadConfig(row as unknown as DbLeadConfig));
       } catch (err) {
-        console.error('Error fetching lead configs:', err);
+        logger.error('Error fetching lead configs:', err);
         return LEAD_VERTICALS;
       }
     },

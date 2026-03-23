@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, Shield, Clock, Users, Plus, Minus, ChevronLeft, Loader2, AlertCircle, Check, Star, Crown, Sparkles } from 'lucide-react';
@@ -263,7 +264,7 @@ export default function AirportFastTrackPage() {
         navigate('/bookings');
       }
     } catch (err) {
-      console.error('Fast Track booking error:', err);
+      logger.error('Fast Track booking error:', err);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.',

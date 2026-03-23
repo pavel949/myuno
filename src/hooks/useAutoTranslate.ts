@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -57,7 +58,7 @@ export function useAutoTranslate() {
 
       return data?.translations || {};
     } catch (error) {
-      console.error('Translation error:', error);
+      logger.error('Translation error:', error);
       toast.error(targetLang === 'ru' 
         ? 'Ошибка перевода' 
         : 'Translation error'

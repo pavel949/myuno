@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   LayoutDashboard, 
   CalendarDays,
@@ -84,8 +85,8 @@ const navigationGroups: NavGroup[] = [
     labelRu: 'Финансы',
     defaultOpen: false,
     items: [
-      { title: 'Analytics', titleRu: 'Аналитика', path: '/vendor/analytics', icon: BarChart3 },
-      { title: 'Payouts', titleRu: 'Выплаты', path: '/vendor/payouts', icon: DollarSign },
+      { title: 'Analytics', titleRu: 'Аналитика', path: APP_ROUTES.VENDOR_ANALYTICS, icon: BarChart3 },
+      { title: 'Payouts', titleRu: 'Выплаты', path: APP_ROUTES.VENDOR_PAYOUTS, icon: DollarSign },
       { title: 'Subscription', titleRu: 'Подписка', path: '/vendor/subscription', icon: Settings },
     ],
   },

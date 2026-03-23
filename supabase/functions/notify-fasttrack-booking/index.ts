@@ -1,10 +1,7 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const ADMIN_EMAIL = 'pavel@ignatevestate.com';
 const ADMIN_WHATSAPP = '66922407355';
@@ -91,6 +88,7 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

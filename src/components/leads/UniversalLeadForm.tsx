@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useForm, Controller } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -131,7 +132,7 @@ export function UniversalLeadForm({
       setIsSuccess(true);
       onSuccess?.();
     } catch (error) {
-      console.error('Submit error:', error);
+      logger.error('Submit error:', error);
     }
   };
 

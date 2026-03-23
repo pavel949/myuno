@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -205,7 +206,7 @@ const VendorProperties = () => {
       closeSheet();
       clearDraft();
     } catch (error) {
-      console.error('Error saving property:', error);
+      logger.error('Error saving property:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving property');
     } finally {
       setIsSubmitting(false);
@@ -219,7 +220,7 @@ const VendorProperties = () => {
       toast.success(isRussian ? 'Объект удалён' : 'Property deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting property:', error);
+      logger.error('Error deleting property:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting property');
     }
   };

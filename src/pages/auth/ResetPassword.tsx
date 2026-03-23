@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { toast } from 'sonner';
 
@@ -27,7 +28,7 @@ export default function ResetPassword() {
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  // When user clicks link in email: Supabase redirects to /auth/reset-password#access_token=...&refresh_token=...&type=recovery
+  // Recovery link: either ?code= (PKCE) or #access_token=...&refresh_token=...&type=recovery (implicit)
   useEffect(() => {
     const applySessionFromEmailLink = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -35,6 +36,22 @@ export default function ResetPassword() {
         setLinkStatus('valid');
         return;
       }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          logger.error('[ResetPassword] exchangeCodeForSession failed', error);
+          setLinkError(error.message);
+          setLinkStatus('invalid');
+          return;
+        }
+        window.history.replaceState(null, '', window.location.pathname);
+        setLinkStatus('valid');
+        return;
+      }
+
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
@@ -45,11 +62,11 @@ export default function ResetPassword() {
           refresh_token: refreshToken,
         });
         if (error) {
+          logger.error('[ResetPassword] setSession from hash failed', error);
           setLinkError(error.message);
           setLinkStatus('invalid');
           return;
         }
-        // Remove tokens from URL for security
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         setLinkStatus('valid');
       } else {

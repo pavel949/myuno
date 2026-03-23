@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,7 +97,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
           actor_user_id: user?.id || null,
           reason: reason || null,
         });
-      if (historyError) console.error('Status history error:', historyError);
+      if (historyError) logger.error('Status history error:', historyError);
 
       // Notify customer via edge function
       try {
@@ -108,7 +109,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
           },
         });
       } catch (e) {
-        console.error('Notification error:', e);
+        logger.error('Notification error:', e);
       }
     },
     onSuccess: (_, { newStatus }) => {

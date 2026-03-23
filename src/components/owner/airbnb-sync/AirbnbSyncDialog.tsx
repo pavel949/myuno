@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
@@ -67,7 +68,7 @@ export function AirbnbSyncDialog({ open, onOpenChange, onSuccess }: AirbnbSyncDi
         onSuccess(connection.id);
       }
     } catch (err: unknown) {
-      console.error('Sync error:', err);
+      logger.error('Sync error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       
       // Check if blocked by OTA

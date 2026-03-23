@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -142,7 +143,7 @@ export default function PartnerApplicationsAdmin() {
         .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
       if (error) {
-        console.error('Error checking admin role:', error);
+        logger.error('Error checking admin role:', error);
         setIsAdmin(false);
       } else {
         setIsAdmin(data === true);
@@ -169,7 +170,7 @@ export default function PartnerApplicationsAdmin() {
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
     } catch (error) {
-      console.error('Error fetching applications:', error);
+      logger.error('Error fetching applications:', error);
       toast({
         title: language === 'ru' ? 'Ошибка' : 'Error',
         description: language === 'ru' 
@@ -242,7 +243,7 @@ export default function PartnerApplicationsAdmin() {
       setRejectionReason('');
       setActionType(null);
     } catch (error) {
-      console.error('Error updating application:', error);
+      logger.error('Error updating application:', error);
       toast({
         title: language === 'ru' ? 'Ошибка' : 'Error',
         description: language === 'ru'

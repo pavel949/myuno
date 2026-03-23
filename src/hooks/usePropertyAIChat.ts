@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { toast } from 'sonner';
 
 export interface AIMessage {
@@ -157,7 +158,7 @@ export function usePropertyAIChat(context?: SearchContext) {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-      console.error('AI chat error:', error);
+      logger.error('AI chat error:', error);
       toast.error('Не удалось получить ответ. Попробуйте снова.');
     } finally {
       setIsLoading(false);

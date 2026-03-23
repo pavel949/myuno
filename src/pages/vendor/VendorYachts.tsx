@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -341,7 +342,7 @@ const VendorYachts = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving yacht:', error);
+      logger.error('Error saving yacht:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving yacht');
     } finally {
       setIsSubmitting(false);
@@ -355,7 +356,7 @@ const VendorYachts = () => {
       toast.success(isRussian ? 'Яхта удалена' : 'Yacht deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting yacht:', error);
+      logger.error('Error deleting yacht:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting yacht');
     }
   };

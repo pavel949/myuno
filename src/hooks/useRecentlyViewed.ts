@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 
 const MAX_ITEMS = 10;
 
@@ -20,7 +21,7 @@ export function useRecentlyViewed<T extends { id: string }>(storageKey: string) 
         setItems(JSON.parse(stored));
       }
     } catch (error) {
-      console.error(`Failed to load ${storageKey}:`, error);
+      logger.error(`Failed to load ${storageKey}:`, error);
     }
   }, [storageKey]);
 
@@ -33,7 +34,7 @@ export function useRecentlyViewed<T extends { id: string }>(storageKey: string) 
       try {
         localStorage.setItem(storageKey, JSON.stringify(updated));
       } catch (error) {
-        console.error(`Failed to save ${storageKey}:`, error);
+        logger.error(`Failed to save ${storageKey}:`, error);
       }
 
       return updated;
@@ -45,7 +46,7 @@ export function useRecentlyViewed<T extends { id: string }>(storageKey: string) 
     try {
       localStorage.removeItem(storageKey);
     } catch (error) {
-      console.error(`Failed to clear ${storageKey}:`, error);
+      logger.error(`Failed to clear ${storageKey}:`, error);
     }
   }, [storageKey]);
 

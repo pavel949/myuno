@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@/lib/logger';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -55,7 +56,7 @@ export function CancellationPolicySelector({
         .order('sort_order', { ascending: true });
 
       if (error) {
-        console.error('Error fetching cancellation policies:', error);
+        logger.error('Error fetching cancellation policies:', error);
         return [];
       }
 

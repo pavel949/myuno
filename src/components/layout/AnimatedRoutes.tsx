@@ -39,19 +39,19 @@ const TransportIdRedirect = () => {
   if (id === 'vehicle' || id === 'booking' || id === 'airport-transfer' || id === 'transfer-success' || id === 'airport' || id === 'taxi' || id === 'fast-track') {
     return null;
   }
-  return <Navigate to={`/transport/vehicle/${id}`} replace />;
+  return <Navigate to={APP_ROUTES.VEHICLE_DETAIL(id!)} replace />;
 };
 
-const TourRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
-const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
-const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}`} replace />; };
-const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={`/experiences/${id}/book`} replace />; };
+const TourRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.EXPERIENCE_DETAIL(id!)} replace />; };
+const TourBookRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.EXPERIENCE_BOOKING(id!)} replace />; };
+const WaterDetailRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.EXPERIENCE_DETAIL(id!)} replace />; };
+const WaterBookRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.EXPERIENCE_BOOKING(id!)} replace />; };
 
 // Legacy redirect helpers for Property Hub migration
-const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/restaurants/${id}`} replace />; };
-const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/offplan/${id}`} replace />; };
-const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/developers/${id}`} replace />; };
-const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={`/property/invest/${id}`} replace />; };
+const FoodRestaurantIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.RESTAURANT_DETAIL(id!)} replace />; };
+const OffplanIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.OFFPLAN_DETAIL(id!)} replace />; };
+const DeveloperIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.DEVELOPER_DETAIL(id!)} replace />; };
+const InvestIdRedirect = () => { const { id } = useParams(); return <Navigate to={APP_ROUTES.INVEST_DETAIL(id!)} replace />; };
 
 // ── Layout Wrappers ──
 
@@ -524,7 +524,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor" element={<Pages.VendorDashboard />} />
           <Route path="/vendor/bookings" element={<Pages.VendorBookings />} />
           <Route path="/vendor/services" element={<Pages.VendorServices />} />
-          <Route path="/vendor/analytics" element={<Pages.VendorAnalytics />} />
+          <Route path={APP_ROUTES.VENDOR_ANALYTICS} element={<Pages.VendorAnalytics />} />
           <Route path="/vendor/payouts" element={<Pages.VendorPayouts />} />
           <Route path="/vendor/properties" element={<Pages.VendorProperties />} />
           <Route path="/vendor/tours" element={<Navigate to="/vendor/experiences" replace />} />
@@ -591,6 +591,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
           <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
           <Route path="team" element={<Navigate to="/mc/staff" replace />} />
+          <Route path="reports/partner" element={<LazyPage><Pages.PartnerReportPage /></LazyPage>} />
           <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
           <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
           <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
@@ -649,7 +650,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/finance" element={<Navigate to="/mc/finance" replace />} />
         <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
         <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
-        <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />
+        <Route path={APP_ROUTES.OWNER_FULL_MANAGEMENT} element={<Navigate to={APP_ROUTES.MC_FULL_MANAGEMENT} replace />} />
         <Route path="/owner" element={<Navigate to="/mc" replace />} />
         <Route path="/owner/*" element={<Navigate to="/mc" replace />} />
         

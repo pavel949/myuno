@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -56,7 +57,7 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
       .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching members:', error);
+      logger.error('Error fetching members:', error);
       setIsLoading(false);
       return;
     }
@@ -130,14 +131,14 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
 
     if (error) {
       toast.error(isRu ? 'Ошибка добавления' : 'Error adding member');
-      console.error(error);
+      logger.error(error);
     } else {
       // Also ensure user has owner role for MC access
       const { error: roleError } = await supabase
         .from('user_roles')
         .upsert({ user_id: foundUser.id, role: 'owner' as const }, { onConflict: 'user_id,role' });
       
-      if (roleError) console.warn('Could not auto-assign role:', roleError);
+      if (roleError) logger.warn('Could not auto-assign role:', roleError);
       
       toast.success(isRu ? 'Сотрудник добавлен' : 'Member added');
       setFoundUser(null);

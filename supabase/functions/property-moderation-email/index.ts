@@ -2,12 +2,9 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 interface PropertyModerationRequest {
   propertyId: string;
@@ -285,6 +282,7 @@ function generateRejectionEmail(property: any, ownerName: string, reason: string
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

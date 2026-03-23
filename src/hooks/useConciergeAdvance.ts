@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -123,7 +124,7 @@ export function useConciergeAdvance() {
         }]);
 
       if (consultationError) {
-        console.error('Failed to create consultation request:', consultationError);
+        logger.error('Failed to create consultation request:', consultationError);
         // Don't fail the whole request, just log it
       }
 
@@ -154,7 +155,7 @@ export function useConciergeAdvance() {
         conciergeFee,
       };
     } catch (error) {
-      console.error('Error creating advance request:', error);
+      logger.error('Error creating advance request:', error);
       toast.error(
         language === 'ru' 
           ? 'Ошибка при отправке запроса' 

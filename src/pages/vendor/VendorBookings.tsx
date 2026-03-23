@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -77,7 +78,7 @@ const VendorBookings = () => {
       setSelectedBooking(null);
       setActionType(null);
     } catch (error) {
-      console.error('Error updating booking:', error);
+      logger.error('Error updating booking:', error);
       toast.error(isRussian ? 'Ошибка при обновлении' : 'Error updating booking');
     } finally {
       setIsUpdating(false);

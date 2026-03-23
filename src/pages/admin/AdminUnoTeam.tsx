@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnoTeamMembers, VERTICALS, VERTICAL_LABELS, type Vertical, type UnoTeamMember } from '@/hooks/useUnoTeamPermissions';
 import { supabase } from '@/integrations/supabase/client';
@@ -98,7 +99,7 @@ export default function AdminUnoTeam() {
       setShowAddDialog(false);
       setAddEmail('');
     } catch (err) {
-      console.error('Error adding member:', err);
+      logger.error('Error adding member:', err);
       toast({ 
         title: isRu ? 'Ошибка' : 'Error', 
         description: isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member',
@@ -133,7 +134,7 @@ export default function AdminUnoTeam() {
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
     } catch (err) {
-      console.error('Error removing member:', err);
+      logger.error('Error removing member:', err);
       toast({ 
         title: isRu ? 'Ошибка' : 'Error', 
         description: isRu ? 'Не удалось удалить сотрудника' : 'Failed to remove member',

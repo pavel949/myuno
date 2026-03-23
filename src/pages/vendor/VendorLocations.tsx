@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorLocations, LocationFormData } from '@/hooks/useVendorLocations';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
@@ -110,7 +111,7 @@ const VendorLocations = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving location:', error);
+      logger.error('Error saving location:', error);
       toast.error(isRu ? 'Ошибка сохранения' : 'Error saving');
     } finally {
       setIsSubmitting(false);

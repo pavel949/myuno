@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -40,7 +41,7 @@ export function useLeadsFactory() {
       toast.success('Лид проанализирован');
     },
     onError: (error) => {
-      console.error('Score lead error:', error);
+      logger.error('Score lead error:', error);
       toast.error('Ошибка анализа лида');
     },
   });
@@ -64,7 +65,7 @@ export function useLeadsFactory() {
       toast.success(`Проанализировано лидов: ${data.processed}`);
     },
     onError: (error) => {
-      console.error('Batch score error:', error);
+      logger.error('Batch score error:', error);
       toast.error('Ошибка пакетного анализа');
     },
   });
@@ -85,7 +86,7 @@ export function useLeadsFactory() {
       toast.success('Сообщение сгенерировано');
     },
     onError: (error) => {
-      console.error('Generate followup error:', error);
+      logger.error('Generate followup error:', error);
       toast.error('Ошибка генерации сообщения');
     },
   });
@@ -108,7 +109,7 @@ export function useLeadsFactory() {
       toast.success('Полный анализ завершён');
     },
     onError: (error) => {
-      console.error('Analyze lead error:', error);
+      logger.error('Analyze lead error:', error);
       toast.error('Ошибка анализа лида');
     },
   });

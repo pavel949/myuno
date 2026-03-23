@@ -345,4 +345,15 @@ export const en: Record<string, string> = {
   
   // Tours extras
   'tours.noToursFound': 'No tours found',
+
+  // Estate / Owner management fee
+  'estate.management_fee_percent': 'Management Fee (%)',
+  'estate.fee_hint': 'Default 15%. Set per owner.',
+  'estate.fee_invalid': 'Invalid fee percent',
+
+  // Owner report reconciliation
+  'estate.reconciliation_title': 'Cumulative Financial Reconciliation',
+  'estate.opening_balance': 'Opening Balance',
+  'estate.closing_balance': 'Closing Balance',
+  'estate.cumulative_net': 'Cumulative Net',
 };

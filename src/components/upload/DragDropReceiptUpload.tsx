@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Camera, Upload, X, Loader2, FileText, Image as ImageIcon } from 'lucide-react';
@@ -80,7 +81,7 @@ export function DragDropReceiptUpload({
         toast.success(isRu ? 'Файл загружен' : 'File uploaded');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error(isRu ? 'Ошибка загрузки' : 'Upload failed');
       }

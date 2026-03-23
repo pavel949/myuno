@@ -79,7 +79,9 @@ export interface OwnerProperty extends BaseProperty {
   equipment?: string[];
   
   // Rental terms - Basic
-  price_per_night?: number;
+  price?: number;                    // Generic price (monthly for long-term, etc.)
+  price_per_night?: number;          // Nightly rate for short-term
+  price_period?: string;             // 'night' | 'month' | 'week' | 'year'
   min_stay_nights?: number;
   max_guests?: number;
   deposit_amount?: number;

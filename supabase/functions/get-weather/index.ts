@@ -1,10 +1,7 @@
 // Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 // Phuket coordinates
 const PHUKET_LAT = 7.8804;

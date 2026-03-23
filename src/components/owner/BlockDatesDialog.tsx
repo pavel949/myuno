@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
@@ -128,7 +129,7 @@ export function BlockDatesDialog({
       setDateRange(undefined);
       setNote('');
     } catch (error) {
-      console.error('Error managing dates:', error);
+      logger.error('Error managing dates:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось обновить даты' : 'Failed to update dates',

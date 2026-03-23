@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -186,7 +187,7 @@ export default function VendorExperiences() {
       setFormData(getEmptyFormData());
       setEditingItem(null);
     } catch (err) {
-      console.error('Submit error:', err);
+      logger.error('Submit error:', err);
       toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
     } finally {
       setIsSubmitting(false);

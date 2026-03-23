@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -223,7 +224,7 @@ const VendorFitness = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error saving gym:', error);
+      logger.error('Error saving gym:', error);
       toast.error(isRussian ? 'Ошибка сохранения' : 'Error saving');
     } finally {
       setIsSubmitting(false);
@@ -238,7 +239,7 @@ const VendorFitness = () => {
       toast.success(isRussian ? 'Зал удалён' : 'Gym deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      console.error('Error deleting gym:', error);
+      logger.error('Error deleting gym:', error);
       toast.error(isRussian ? 'Ошибка удаления' : 'Error deleting');
     }
   };

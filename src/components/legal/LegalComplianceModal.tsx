@@ -3,6 +3,7 @@
  * @description Blocking modal that requires users to accept updated legal documents.
  */
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -47,7 +48,7 @@ export function LegalComplianceModal() {
       queryClient.invalidateQueries({ queryKey: ['legal-compliance'] });
       toast.success(isRu ? 'Документы приняты' : 'Documents accepted');
     } catch (err) {
-      console.error('Accept error:', err);
+      logger.error('Accept error:', err);
       toast.error(isRu ? 'Ошибка при сохранении' : 'Failed to save acceptance');
     } finally {
       setIsSubmitting(false);

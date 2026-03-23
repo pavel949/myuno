@@ -3,6 +3,7 @@
  * after a property booking is confirmed.
  */
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -108,7 +109,7 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
           setOffers((freshOffers || []) as unknown as CrossSellOffer[]);
         }
       } catch (err) {
-        console.error('Cross-sell error:', err);
+        logger.error('Cross-sell error:', err);
       } finally {
         setLoading(false);
       }

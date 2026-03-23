@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { logger } from '@/lib/logger';
 import { MapPin, Building2, Search, Loader2, Navigation, Keyboard, ExternalLink } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -89,7 +90,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           setGeocodeResults([]);
         }
       } catch (err) {
-        console.error('[AddressAutocomplete] geocode error:', err);
+        logger.error('[AddressAutocomplete] geocode error:', err);
         setGeocodeResults([]);
       } finally {
         setIsSearching(false);
@@ -179,7 +180,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             if (json.results?.[0]) onChange(json.results[0].address || json.results[0].name);
           }
         } catch (err) {
-          console.error('[AddressAutocomplete] reverse geocode error:', err);
+          logger.error('[AddressAutocomplete] reverse geocode error:', err);
         } finally {
           setGeolocating(false);
           setIsFocused(false);

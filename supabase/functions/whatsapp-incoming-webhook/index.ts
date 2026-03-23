@@ -10,16 +10,14 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-// Pavel's admin phone (Thailand)
-const ADMIN_PHONE = "66922407355";
+const ADMIN_PHONE = Deno.env.get("ADMIN_WHATSAPP_NUMBER") ?? "66922407355";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -116,6 +114,23 @@ Deno.serve(async (req) => {
 
     console.log(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
 
+    // Score lead and start nurture (fire-and-forget)
+    EdgeRuntime.waitUntil((async () => {
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/ai-owner-nurture`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
+            "x-internal-secret": Deno.env.get("INTERNAL_SECRET") ?? "",
+          },
+          body: JSON.stringify({ lead_id: lead.id, source: "whatsapp" }),
+        });
+      } catch (e) {
+        console.error("[WhatsApp Incoming] nurture trigger failed:", e);
+      }
+    })());
+
     // Notify Pavel immediately
     const adminMessage = `📩 *НОВЫЙ ЛИД ИЗ WHATSAPP*
 
@@ -157,7 +172,7 @@ Thank you for reaching out to *myUNO* — your concierge in Phuket.
 
 Our team has received your message and will reply shortly.
 
-For urgent matters, feel free to call: +66 92 240 7355
+For urgent matters, feel free to call us on WhatsApp.
 
 ---
 Привет${pushName ? ` ${pushName}` : ""}! 👋
@@ -166,7 +181,7 @@ For urgent matters, feel free to call: +66 92 240 7355
 
 Наша команда получила ваше сообщение и скоро ответит.
 
-По срочным вопросам: +66 92 240 7355`;
+По срочным вопросам — напишите нам напрямую.`;
 
     await sendWhatsApp({ to: phone, body: autoReply });
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { MessageCircle, X, Sparkles, Send, Bot, User, Loader2 } from 'lucide-react';
@@ -141,7 +142,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
     try {
       await streamChat(newMessages);
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
       setMessages(prev => [
         ...prev,
         { 

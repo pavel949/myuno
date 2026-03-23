@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { useAdminProviders } from '@/hooks/useAdmin';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -140,7 +141,7 @@ export function ProviderSelector({
       setQuickPhone('');
       setQuickEmail('');
     } catch (err) {
-      console.error('Quick create error:', err);
+      logger.error('Quick create error:', err);
       toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
     } finally {
       setIsCreating(false);
@@ -174,7 +175,7 @@ export function ProviderSelector({
       await refetch();
       onChange(created.id);
     } catch (err) {
-      console.error('Create from scan error:', err);
+      logger.error('Create from scan error:', err);
       toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
     } finally {
       setIsCreating(false);

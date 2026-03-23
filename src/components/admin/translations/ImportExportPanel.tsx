@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Download, Upload, FileJson } from 'lucide-react';
 import { Translation } from '@/hooks/useTranslationsAdmin';
@@ -62,7 +63,7 @@ export function ImportExportPanel({ translations, onImport }: ImportExportPanelP
 
       await onImport(validated);
     } catch (err) {
-      console.error('Import error:', err);
+      logger.error('Import error:', err);
       toast.error(`Ошибка импорта: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
 

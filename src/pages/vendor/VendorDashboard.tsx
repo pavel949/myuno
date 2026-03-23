@@ -19,6 +19,7 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { ru, enUS } from 'date-fns/locale';
 import {
   DropdownMenu,
@@ -213,7 +214,7 @@ const VendorDashboard = () => {
           icon={DollarSign} 
           iconColor="text-success" 
           loading={ordersLoading} 
-          href="/vendor/analytics"
+          href={APP_ROUTES.VENDOR_ANALYTICS}
           change={previousPeriodRevenue > 0 ? ((stats.totalRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100 : undefined}
           trend={previousPeriodRevenue > 0 ? (stats.totalRevenue > previousPeriodRevenue ? 'up' : stats.totalRevenue < previousPeriodRevenue ? 'down' : 'neutral') : undefined}
         />
@@ -223,7 +224,7 @@ const VendorDashboard = () => {
           icon={Calendar} 
           iconColor="text-info" 
           loading={ordersLoading} 
-          href="/vendor/bookings" 
+          href={APP_ROUTES.VENDOR_BOOKINGS} 
         />
         <VendorKPICard 
           title={isRu ? 'Завершено' : 'Completed'} 

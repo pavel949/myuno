@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Link2, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/uno/SectionCard';
@@ -91,11 +92,11 @@ export function ConnectedAccountsSection() {
       
       if (error) {
         toast.error(t.connectError);
-        console.error('OAuth error:', error);
+        logger.error('OAuth error:', error);
       }
     } catch (error) {
       toast.error(t.connectError);
-      console.error('Connect error:', error);
+      logger.error('Connect error:', error);
     } finally {
       setConnectingProvider(null);
     }

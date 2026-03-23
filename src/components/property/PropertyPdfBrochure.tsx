@@ -2,6 +2,7 @@
  * PropertyPdfBrochure — Generate a beautiful PDF with property details
  */
 import React, { useState } from 'react';
+import { logger } from '@/lib/logger';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -156,7 +157,7 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
       doc.save(filename);
       toast.success(isRu ? 'PDF скачан!' : 'PDF downloaded!');
     } catch (err) {
-      console.error('PDF generation error:', err);
+      logger.error('PDF generation error:', err);
       toast.error(isRu ? 'Ошибка генерации PDF' : 'Failed to generate PDF');
     } finally {
       setGenerating(false);

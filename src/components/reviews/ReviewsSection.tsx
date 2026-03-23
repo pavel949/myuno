@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from '@/lib/logger';
 import { Star, Filter, ChevronDown, MessageSquare, TrendingUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -131,7 +132,7 @@ export const ReviewsSection = ({
       toast.success(language === 'ru' ? 'Спасибо за отзыв!' : 'Thanks for your feedback!');
       refetch();
     } catch (error) {
-      console.error('Error marking helpful:', error);
+      logger.error('Error marking helpful:', error);
     }
   };
 

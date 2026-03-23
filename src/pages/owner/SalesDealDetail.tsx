@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
-import { useDealFieldChanges, useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
+import { useDealFieldChanges, useLogDealChanges, auditFieldValue } from '@/hooks/useDealFieldChanges';
 import { DealStageBar } from '@/components/owner/sales/DealStageBar';
 import { EditDealSheet } from '@/components/owner/sales/EditDealSheet';
 import { CloseDealDialog } from '@/components/owner/sales/CloseDealDialog';
@@ -27,6 +27,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { cn } from '@/lib/utils';
 import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { logger } from '@/lib/logger';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -106,8 +107,21 @@ export default function SalesDealDetail() {
     if (newStage === 'closed_won') { setCloseMode('won'); return; }
     if (newStage === 'closed_lost') { setCloseMode('lost'); return; }
     try {
-      await logChanges.mutateAsync({ dealId: deal.id, changes: [{ field_name: 'stage', old_value: deal.stage, new_value: newStage }] });
       await updateDeal.mutateAsync({ id: deal.id, stage: newStage });
+      try {
+        await logChanges.mutateAsync({
+          dealId: deal.id,
+          changes: [
+            {
+              field_name: 'stage',
+              old_value: auditFieldValue(deal.stage),
+              new_value: auditFieldValue(newStage),
+            },
+          ],
+        });
+      } catch (auditErr) {
+        logger.warn('[SalesDealDetail] deal_field_changes failed (stage saved)', auditErr);
+      }
       await addActivity.mutateAsync({
         deal_id: deal.id, user_id: user!.id, activity_type: 'stage_change',
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
@@ -123,8 +137,21 @@ export default function SalesDealDetail() {
     if (deal.deal_status === newStatus) return;
     try {
       const oldStatus = deal.deal_status || 'active';
-      await logChanges.mutateAsync({ dealId: deal.id, changes: [{ field_name: 'deal_status', old_value: oldStatus, new_value: newStatus }] });
       await updateDeal.mutateAsync({ id: deal.id, deal_status: newStatus });
+      try {
+        await logChanges.mutateAsync({
+          dealId: deal.id,
+          changes: [
+            {
+              field_name: 'deal_status',
+              old_value: auditFieldValue(oldStatus),
+              new_value: auditFieldValue(newStatus),
+            },
+          ],
+        });
+      } catch (auditErr) {
+        logger.warn('[SalesDealDetail] deal_field_changes failed (status saved)', auditErr);
+      }
       await addActivity.mutateAsync({
         deal_id: deal.id, user_id: user!.id, activity_type: 'status_change',
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,

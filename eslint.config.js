@@ -23,8 +23,19 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
       // New code: avoid explicit any; legacy any to be replaced incrementally (P1-T1).
       "@typescript-eslint/no-explicit-any": "warn",
-      // Prefer @/lib/logger in new code (no-op in production). no-console off to avoid mass warnings until migration.
       "no-console": "off",
+    },
+  },
+  // Phase B: discourage raw console in hooks + lib (use @/lib/logger)
+  {
+    files: ["src/hooks/**/*.{ts,tsx}", "src/lib/**/*.{ts,tsx}"],
+    ignores: [
+      "src/lib/logger.ts",
+      "src/lib/errorHandler.ts",
+      "src/lib/finance/__test_run__.ts",
+    ],
+    rules: {
+      "no-console": "warn",
     },
   },
   // E2E: Playwright fixtures use callback named "use" (not React); allow lexical declarations in case blocks

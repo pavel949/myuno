@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Gift, Phone, ChevronLeft } from 'lucide-react';
@@ -141,14 +142,14 @@ export default function Auth() {
         if (referralCode && data?.user) {
           try {
             await supabase.rpc('apply_referral_code', { p_referred_id: data.user.id, p_code: referralCode.toUpperCase() });
-          } catch (refError) { console.error('Error applying referral code:', refError); }
+          } catch (refError) { logger.error('Error applying referral code:', refError); }
         }
 
         if (data?.user) {
           supabase.from('terms_acceptances').insert([
             { user_id: data.user.id, document_type: 'terms', document_version: '1.0' },
             { user_id: data.user.id, document_type: 'privacy', document_version: '1.0' },
-          ]).then(({ error }) => { if (error) console.error('Terms acceptance log error:', error); });
+          ]).then(({ error }) => { if (error) logger.error('Terms acceptance log error:', error); });
         }
 
         supabase.functions.invoke('notify-new-signup', {
@@ -158,7 +159,7 @@ export default function Auth() {
             referral_code: referralCode || undefined,
             signup_source: 'auth_page',
           },
-        }).catch(err => console.error('Signup notification error:', err));
+        }).catch(err => logger.error('Signup notification error:', err));
         
         toast({
           title: isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
