@@ -24,7 +24,7 @@ import { MaintenanceProvider, useMaintenance } from "@/contexts/MaintenanceConte
 import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
-import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
@@ -102,7 +102,7 @@ function AppContent() {
         <BrowserRouter>
           <ComingSoonGate>
             <AnimatedRoutes />
-            <UnifiedChatFAB />
+            <ChatWidget />
             
             <CookieConsentBanner />
           </ComingSoonGate>

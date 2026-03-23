@@ -356,4 +356,13 @@ export const ru: Record<string, string> = {
   'estate.opening_balance': 'Входящий баланс',
   'estate.closing_balance': 'Исходящий баланс',
   'estate.cumulative_net': 'Нарастающий итог',
+
+  // Admin optional password gate (/admin/login)
+  'admin.login.title': 'Админка myUNO',
+  'admin.login.placeholder': 'Пароль',
+  'admin.login.enter': 'Войти',
+  'admin.login.submitting': 'Вход…',
+  'admin.login.errorEmpty': 'Введите пароль.',
+  'admin.login.errorFailed': 'Не удалось войти. Проверьте пароль.',
+  'admin.login.errorNetwork': 'Ошибка сети. Попробуйте снова.',
 };

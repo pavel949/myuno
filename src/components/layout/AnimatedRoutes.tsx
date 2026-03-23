@@ -394,6 +394,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/demo" element={<Navigate to="/" replace />} />
         <Route path="/demo/*" element={<Navigate to="/" replace />} />
         
+        {/* ── Admin login (public — no AdminGuard; backend may set session cookie) ── */}
+        <Route
+          path={APP_ROUTES.ADMIN_LOGIN}
+          element={
+            <LazyPage>
+              <Pages.AdminLoginPage />
+            </LazyPage>
+          }
+        />
+
         {/* ── Admin ── */}
         <Route element={<AdminRouteLayout />}>
           <Route path="/admin" element={<Pages.AdminDashboard />} />

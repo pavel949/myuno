@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeAuthEmail } from '@/lib/auth/normalizeAuthEmail';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePinAuth } from './usePinAuth';
 
@@ -101,7 +102,7 @@ export function usePinManagement() {
     try {
       // Verify password by re-signing in
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: normalizeAuthEmail(email),
         password
       });
 
