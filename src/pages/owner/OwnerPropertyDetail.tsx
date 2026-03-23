@@ -363,6 +363,7 @@ export default function OwnerPropertyDetail() {
           )}
         </TabsContent>
       </Tabs>
+      </div>
     </PageContainer>
   );
 }
