@@ -11,16 +11,8 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-// Guards & layouts — lazy to avoid pulling huge module trees on initial load
-const AuthModule = React.lazy(() => import('@/components/auth').then(m => ({
-  default: ({ children, guard }: { children: React.ReactNode; guard: 'admin' | 'vendor' | 'auth' | 'team' | 'staff' | 'mc' }) => {
-    const Guard = { admin: m.AdminGuard, vendor: m.VendorGuard, auth: m.AuthGuard, team: m.TeamGuard, staff: m.StaffGuard, mc: m.MCGuard }[guard];
-    return <Guard>{children}</Guard>;
-  }
-})));
-
-// Eager-load only the lightweight guards (they're just context checks)
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 const AdminLayout = React.lazy(() => import('@/components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
 const MCLayout = React.lazy(() => import('@/components/mc/MCLayout').then(m => ({ default: m.MCLayout })));
 const VendorLayout = React.lazy(() => import('@/components/vendor/VendorLayout').then(m => ({ default: m.VendorLayout })));
