@@ -186,18 +186,11 @@ export default function Auth() {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
 
-        const errCode = (error as Error & { code?: string }).code;
         let description: string;
-        if (errCode === 'email_not_confirmed' || error.message.includes('Email not confirmed')) {
+        if (error.message === 'Invalid login credentials' || error.message.includes('invalid_credentials')) {
+          description = isRu ? 'Неверный email или пароль' : 'Invalid email or password';
+        } else if (error.message.includes('Email not confirmed')) {
           description = isRu ? 'Email не подтверждён. Проверьте почту и перейдите по ссылке.' : 'Email not confirmed. Check your inbox and click the verification link.';
-        } else if (
-          errCode === 'invalid_credentials' ||
-          error.message === 'Invalid login credentials' ||
-          error.message.toLowerCase().includes('invalid_credentials')
-        ) {
-          description = isRu
-            ? 'Неверный email или пароль. Если вы меняли пароль в Lovable, на этом сайте в Vercel должны быть те же VITE_SUPABASE_URL и VITE_SUPABASE_PUBLISHABLE_KEY — иначе это другой проект Supabase.'
-            : 'Invalid email or password. If you reset the password in Lovable, Vercel must use the same VITE_SUPABASE_URL and publishable key — otherwise this app points at a different Supabase project.';
         } else {
           description = error.message;
         }

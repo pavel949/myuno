@@ -43,9 +43,7 @@ See [`.env.example`](.env.example) for the complete list. Key variables:
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
 | `VITE_SUPABASE_PROJECT_ID` | Supabase project ID |
-| `VITE_PUBLIC_APP_URL` | Optional. Canonical site URL (no trailing slash), e.g. `https://myuno.app` — **recommended on Vercel Production** for password-reset emails. See [`docs/AUTH-PASSWORD-RESET.md`](docs/AUTH-PASSWORD-RESET.md), [`docs/OWNER-SETUP-VERCEL-SUPABASE.md`](docs/OWNER-SETUP-VERCEL-SUPABASE.md), and the full **[`docs/VERCEL-SUPABASE-PRODUCTION-SETUP.md`](docs/VERCEL-SUPABASE-PRODUCTION-SETUP.md)** checklist. |
-
-**Before production launch:** data flow, Coming Soon gate, smoke tests — [`docs/PRODUCTION-READINESS-CHECKLIST.md`](docs/PRODUCTION-READINESS-CHECKLIST.md).
+| `VITE_PUBLIC_APP_URL` | Optional. Canonical site URL (no trailing slash), e.g. `https://myuno.app` — **recommended on Vercel Production** for password-reset emails. See [`docs/AUTH-PASSWORD-RESET.md`](docs/AUTH-PASSWORD-RESET.md) and [`docs/OWNER-SETUP-VERCEL-SUPABASE.md`](docs/OWNER-SETUP-VERCEL-SUPABASE.md). |
 
 Edge functions also require secrets configured in the backend: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `MAPBOX_PUBLIC_TOKEN`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`.
 

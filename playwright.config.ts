@@ -16,9 +16,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
-    actionTimeout: 15000,
-    // SPA + первый прогрев Vite: `load` иногда позже `domcontentloaded`
-    navigationTimeout: 60000,
+    actionTimeout: 10000,
+    navigationTimeout: 15000,
   },
   projects: [
     {
@@ -34,14 +33,6 @@ export default defineConfig({
     command: 'npm run dev',
     port: 8080,
     reuseExistingServer: !process.env.CI,
-    // Первый старт Vite на большом проекте может занимать несколько минут
-    timeout: 300000,
-    env: {
-      ...process.env,
-      // Совпадает с CI: dev-сервер для e2e поднимается даже без локального .env
-      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ?? 'https://placeholder.supabase.co',
-      VITE_SUPABASE_PUBLISHABLE_KEY:
-        process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ci-placeholder',
-    },
+    timeout: 120000,
   },
 });

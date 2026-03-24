@@ -356,13 +356,4 @@ export const en: Record<string, string> = {
   'estate.opening_balance': 'Opening Balance',
   'estate.closing_balance': 'Closing Balance',
   'estate.cumulative_net': 'Cumulative Net',
-
-  // Admin optional password gate (/admin/login)
-  'admin.login.title': 'myUNO Admin',
-  'admin.login.placeholder': 'Password',
-  'admin.login.enter': 'Enter',
-  'admin.login.submitting': 'Signing in…',
-  'admin.login.errorEmpty': 'Enter your password.',
-  'admin.login.errorFailed': 'Sign-in failed. Check your password.',
-  'admin.login.errorNetwork': 'Network error. Try again.',
 };
