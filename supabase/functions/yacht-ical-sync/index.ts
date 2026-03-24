@@ -190,7 +190,7 @@ Deno.serve(async (req) => {
           if (!event.dtstart || !event.dtend) continue;
 
           // Mark each day in the event range as blocked
-          let currentDate = new Date(event.dtstart);
+          const currentDate = new Date(event.dtstart);
           const endDate = new Date(event.dtend);
 
           while (currentDate < endDate) {

@@ -135,7 +135,7 @@ async function handleScore(supabase: any, body: { prospectId?: string; prospectD
   }
 
   const knowledge = agent.ai_agent_knowledge[0];
-  let systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
+  const systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
@@ -285,7 +285,7 @@ async function handleGenerateOutreach(supabase: any, body: {
   }
 
   const knowledge = agent.ai_agent_knowledge[0];
-  let systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
+  const systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
@@ -500,7 +500,7 @@ async function handleAnalyzeUrl(supabase: any, body: { url: string; sourceType: 
   }
 
   const knowledge = agent.ai_agent_knowledge[0];
-  let systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
+  const systemPrompt = knowledge.system_prompt.replace('{{KNOWLEDGE_BASE}}', knowledge.knowledge_base || '');
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {

@@ -431,7 +431,7 @@ function extractPhotos(scrapeData: any, platform: string): Array<{ url: string; 
   
   // Also check markdown for inline images
   const markdown = scrapeData.data?.markdown || '';
-  const imgMatches = markdown.matchAll(/!\[.*?\]\((https:\/\/[^\)]+)\)/g);
+  const imgMatches = markdown.matchAll(/!\[.*?\]\((https:\/\/[^)]+)\)/g);
   for (const m of imgMatches) {
     const baseUrl = m[1].split('?')[0];
     if (!seen.has(baseUrl) && photos.length < 30) {

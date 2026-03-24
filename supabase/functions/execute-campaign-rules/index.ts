@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
         }
 
         // Find matching events
-        let eventsQuery = supabase
+        const eventsQuery = supabase
           .from("mcc_events")
           .select("*")
           .eq("event_type", rule.trigger_event)
