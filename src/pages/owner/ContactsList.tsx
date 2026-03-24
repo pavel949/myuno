@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Phone, Mail, ChevronRight, Filter, UserCircle, ChevronLeft, Upload, Lock, Star, MessageSquare, DollarSign, Briefcase, Clock, ArrowUpDown, LayoutGrid, List, Users } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useDuplicatesQuery } from '@/hooks/useCrmDuplicates';
+import { useTeamPermissions } from '@/hooks/useTeamPermissions';
 import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
 import { ContactExportButton } from '@/components/owner/contacts/ContactExportButton';
 import { cn } from '@/lib/utils';
@@ -242,6 +243,8 @@ export default function ContactsList() {
   const isOwnerOrAdmin = safeRoles.some(r => r.role === 'admin' || r.role === 'owner');
   const { data: membership } = useMyCompanyId();
   const companyId = membership?.company_id;
+  const { canAccess } = useTeamPermissions();
+  const canCreateContacts = canAccess('crm', 'edit');
 
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
@@ -329,10 +332,12 @@ export default function ContactsList() {
             <Upload className="h-4 w-4 mr-1" />
             {isRu ? 'Импорт контактов' : 'Import Contacts'}
           </Button>
-          <Button size="sm" onClick={() => setShowCreate(true)}>
-            <Plus className="h-4 w-4 mr-1" />
-            {isRu ? 'Новый' : 'New'}
-          </Button>
+          {canCreateContacts ? (
+            <Button size="sm" onClick={() => setShowCreate(true)}>
+              <Plus className="h-4 w-4 mr-1" />
+              {isRu ? 'Новый' : 'New'}
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -531,9 +536,9 @@ export default function ContactsList() {
         </div>
       )}
 
-      {companyId && (
+      {companyId && canCreateContacts ? (
         <CreateContactSheet open={showCreate} onOpenChange={setShowCreate} companyId={companyId} />
-      )}
+      ) : null}
     </div>
   );
 }
