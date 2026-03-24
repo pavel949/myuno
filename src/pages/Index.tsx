@@ -1,6 +1,6 @@
 /**
  * Index — LifeOS Dashboard
- * 
+ *
  * Clean, calm, confident layout:
  * 1. Hero (greeting + weather + loyalty)
  * 2. Quick Actions (8 role-adaptive shortcuts)
@@ -15,34 +15,52 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituationContext } from '@/contexts/LifeSituationContext';
 import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
-import { HeroBlock } from '@/components/home/HeroBlock';
-import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
-import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-
-import { InstallBanner } from '@/components/pwa/InstallBanner';
-import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
-import { HomeProductsSection } from '@/components/home/HomeProductsSection';
-import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
-import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
-import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
-import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
-import { YourDayFeed } from '@/components/shared/YourDayFeed';
-import { TodayEventsFeed } from '@/components/home/TodayEventsFeed';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
-import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
-import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
-import { ProactiveConcierge } from '@/components/home/ProactiveConcierge';
+import { cn } from '@/lib/utils';
 
-// Lazy load secondary components
+const HeroBlock = lazy(() => import('@/components/home/HeroBlock').then((m) => ({ default: m.HeroBlock })));
+const QuickActionsGrid = lazy(() => import('@/components/home/QuickActionsGrid').then((m) => ({ default: m.QuickActionsGrid })));
+const ActiveSituationBanner = lazy(() => import('@/components/life-os/ActiveSituationBanner').then((m) => ({ default: m.ActiveSituationBanner })));
+const InstallBanner = lazy(() => import('@/components/pwa/InstallBanner').then((m) => ({ default: m.InstallBanner })));
+const HomeProductsSection = lazy(() => import('@/components/home/HomeProductsSection').then((m) => ({ default: m.HomeProductsSection })));
+const PostOrderReviewPrompt = lazy(() => import('@/components/reviews/PostOrderReviewPrompt').then((m) => ({ default: m.PostOrderReviewPrompt })));
+const LifecycleSmartTip = lazy(() => import('@/components/home/LifecycleSmartTip').then((m) => ({ default: m.LifecycleSmartTip })));
+const DocumentExpiryNotifier = lazy(() => import('@/components/notifications/DocumentExpiryNotifier').then((m) => ({ default: m.DocumentExpiryNotifier })));
+const PropertyTourBanner = lazy(() => import('@/components/home/PropertyTourBanner').then((m) => ({ default: m.PropertyTourBanner })));
+const YourDayFeed = lazy(() => import('@/components/shared/YourDayFeed').then((m) => ({ default: m.YourDayFeed })));
+const TodayEventsFeed = lazy(() => import('@/components/home/TodayEventsFeed').then((m) => ({ default: m.TodayEventsFeed })));
+const PopularServicesStrip = lazy(() => import('@/components/home/PopularServicesStrip').then((m) => ({ default: m.PopularServicesStrip })));
+const OfflineEmergencyCard = lazy(() => import('@/components/home/OfflineEmergencyCard').then((m) => ({ default: m.OfflineEmergencyCard })));
+const ProactiveConcierge = lazy(() => import('@/components/home/ProactiveConcierge').then((m) => ({ default: m.ProactiveConcierge })));
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
-const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
-const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
-const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then((m) => ({ default: m.ConciergeBanner })));
+const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then((m) => ({ default: m.TrustBanner })));
+const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then((m) => ({ default: m.OnboardingModal })));
 
+function SectionSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        'animate-pulse rounded-3xl border border-border/60 bg-card/60 shadow-sm',
+        className,
+      )}
+    />
+  );
+}
+
+function QuickActionsSkeleton() {
+  return (
+    <div className="grid grid-cols-4 gap-3 sm:gap-4">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <SectionSkeleton key={index} className="h-20 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
 
 const Index = () => {
   const { activeCode } = useLifeSituationContext();
@@ -51,14 +69,17 @@ const Index = () => {
   const isDesktop = useIsDesktop();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem('myuno-onboarding-complete') &&
-           !sessionStorage.getItem('myuno-onboarding-complete');
+    try {
+      return !localStorage.getItem('myuno-onboarding-complete') && !sessionStorage.getItem('myuno-onboarding-complete');
+    } catch {
+      return false;
+    }
   });
-  const { pendingReview, isOpen: reviewOpen, setIsOpen: setReviewOpen, dismiss: dismissReview } = usePostOrderReview();
+  const { pendingReview, isOpen: reviewOpen, dismiss: dismissReview } = usePostOrderReview();
 
   const handleRefresh = useCallback(async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setRefreshKey(prev => prev + 1);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setRefreshKey((prev) => prev + 1);
   }, []);
 
   const hasContext = !!activeCode;
@@ -67,115 +88,144 @@ const Index = () => {
   return (
     <AppLayout showFooter>
       <SEOHead jsonLd={createOrganizationSchema()} />
-      
-      <DocumentExpiryNotifier />
-      
+
+      <Suspense fallback={null}>
+        <DocumentExpiryNotifier />
+      </Suspense>
+
       {showOnboarding && (
         <Suspense fallback={null}>
-          <OnboardingModal 
-            open={showOnboarding} 
-            onComplete={() => setShowOnboarding(false)} 
-          />
+          <OnboardingModal open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
         </Suspense>
       )}
 
-      <ActiveSituationBanner />
+      <Suspense fallback={null}>
+        <ActiveSituationBanner />
+      </Suspense>
 
-      {/* ─── PWA Install Banner ─── */}
       <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-3 w-full max-w-[1536px] mx-auto">
-        <InstallBanner />
+        <Suspense fallback={<SectionSkeleton className="h-14 rounded-2xl" />}>
+          <InstallBanner />
+        </Suspense>
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
         <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10 xl:space-y-14">
-          
-          {/* ─── SECTION 1: Hero (full width) ─── */}
-          <HeroBlock />
+          <Suspense fallback={<SectionSkeleton className="h-[320px] sm:h-[380px]" />}>
+            <HeroBlock />
+          </Suspense>
 
-          {/* ─── SECTION 2: Quick Actions (full width) ─── */}
           <RevealOnScroll>
-            <QuickActionsGrid />
+            <Suspense fallback={<QuickActionsSkeleton />}>
+              <QuickActionsGrid />
+            </Suspense>
           </RevealOnScroll>
 
-          {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
           {isLoggedIn ? (
             isDesktop ? (
               <>
-                {/* Row 1: YourDay full width */}
-                <Suspense fallback={null}>
+                <Suspense fallback={<SectionSkeleton className="h-40" />}>
                   <YourDayFeed compact />
                 </Suspense>
 
-                {/* Row 2: Recommendations + Smart Tips — 2 equal columns */}
                 <div className="grid grid-cols-2 gap-6">
-                  <ProactiveConcierge />
+                  <Suspense fallback={<SectionSkeleton className="h-56" />}>
+                    <ProactiveConcierge />
+                  </Suspense>
+
                   <div className="space-y-5">
-                    <LifecycleSmartTip />
+                    <Suspense fallback={<SectionSkeleton className="h-40" />}>
+                      <LifecycleSmartTip />
+                    </Suspense>
+
                     {hasContext ? (
-                      <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
+                      <Suspense fallback={<SectionSkeleton className="h-32" />}>
+                        <LifeOSStatusBlock />
+                      </Suspense>
                     ) : (
-                      <Suspense fallback={null}><ConciergeBanner /></Suspense>
+                      <Suspense fallback={<SectionSkeleton className="h-32" />}>
+                        <ConciergeBanner />
+                      </Suspense>
                     )}
                   </div>
                 </div>
 
-                <PropertyTourBanner />
+                <Suspense fallback={<SectionSkeleton className="h-44" />}>
+                  <PropertyTourBanner />
+                </Suspense>
               </>
             ) : (
               <>
-                <Suspense fallback={null}>
+                <Suspense fallback={<SectionSkeleton className="h-40" />}>
                   <YourDayFeed compact />
                 </Suspense>
-                <ProactiveConcierge />
-                <LifecycleSmartTip />
-                <PropertyTourBanner />
+                <Suspense fallback={<SectionSkeleton className="h-56" />}>
+                  <ProactiveConcierge />
+                </Suspense>
+                <Suspense fallback={<SectionSkeleton className="h-40" />}>
+                  <LifecycleSmartTip />
+                </Suspense>
+                <Suspense fallback={<SectionSkeleton className="h-44" />}>
+                  <PropertyTourBanner />
+                </Suspense>
                 {hasContext ? (
-                  <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
+                  <Suspense fallback={<SectionSkeleton className="h-32" />}>
+                    <LifeOSStatusBlock />
+                  </Suspense>
                 ) : (
-                  <Suspense fallback={null}><ConciergeBanner /></Suspense>
+                  <Suspense fallback={<SectionSkeleton className="h-32" />}>
+                    <ConciergeBanner />
+                  </Suspense>
                 )}
               </>
             )
           ) : (
             <>
-              <TodayEventsFeed compact />
-              <PopularServicesStrip />
-              <PropertyTourBanner />
+              <Suspense fallback={<SectionSkeleton className="h-40" />}>
+                <TodayEventsFeed compact />
+              </Suspense>
+              <Suspense fallback={<SectionSkeleton className="h-36" />}>
+                <PopularServicesStrip />
+              </Suspense>
+              <Suspense fallback={<SectionSkeleton className="h-44" />}>
+                <PropertyTourBanner />
+              </Suspense>
             </>
           )}
 
-          {/* ─── SECTION 4: Products / Solutions (full width) ─── */}
           <RevealOnScroll>
-            <HomeProductsSection />
-          </RevealOnScroll>
-
-          {/* ─── Offline Emergency Card ─── */}
-          {isOffline && (
-            <RevealOnScroll>
-              <OfflineEmergencyCard compact />
-            </RevealOnScroll>
-          )}
-
-          {/* ─── SECTION 5: Trust + Emergency (unified strip) ─── */}
-          <RevealOnScroll>
-            <Suspense fallback={null}>
-              <TrustBanner showEmergency />
+            <Suspense fallback={<SectionSkeleton className="h-[420px]" />}>
+              <HomeProductsSection />
             </Suspense>
           </RevealOnScroll>
 
+          {isOffline && (
+            <RevealOnScroll>
+              <Suspense fallback={<SectionSkeleton className="h-32" />}>
+                <OfflineEmergencyCard compact />
+              </Suspense>
+            </RevealOnScroll>
+          )}
+
+          <RevealOnScroll>
+            <Suspense fallback={<SectionSkeleton className="h-40" />}>
+              <TrustBanner showEmergency />
+            </Suspense>
+          </RevealOnScroll>
         </div>
       </PullToRefresh>
 
-      {/* Post-order review prompt */}
       {pendingReview && (
-        <PostOrderReviewPrompt
-          open={reviewOpen}
-          onClose={dismissReview}
-          orderId={pendingReview.orderId}
-          entityType={pendingReview.entityType}
-          entityId={pendingReview.entityId}
-          entityName={pendingReview.entityName}
-        />
+        <Suspense fallback={null}>
+          <PostOrderReviewPrompt
+            open={reviewOpen}
+            onClose={dismissReview}
+            orderId={pendingReview.orderId}
+            entityType={pendingReview.entityType}
+            entityId={pendingReview.entityId}
+            entityName={pendingReview.entityName}
+          />
+        </Suspense>
       )}
     </AppLayout>
   );
