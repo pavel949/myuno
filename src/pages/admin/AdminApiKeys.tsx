@@ -35,8 +35,7 @@ const FRONTEND_VARS = [
   { key: 'VITE_SUPABASE_PUBLISHABLE_KEY', label: 'Backend Anon Key', managedBy: 'system' },
   { key: 'VITE_SUPABASE_PROJECT_ID', label: 'Project ID', managedBy: 'system' },
   { key: 'VITE_GOOGLE_MAPS_API_KEY', label: 'Google Maps API Key', managedBy: 'manual' },
-  { key: 'VITE_COMING_SOON_GATE', label: 'Coming Soon gate (closed beta)', managedBy: 'manual' },
-  { key: 'VITE_BYPASS_COMING_SOON', label: 'Bypass gate when gate is on', managedBy: 'manual' },
+  { key: 'VITE_BYPASS_COMING_SOON', label: 'Bypass Coming Soon Gate', managedBy: 'manual' },
 ];
 
 const DEFAULT_CONFIG_KEYS = [

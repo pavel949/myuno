@@ -64,15 +64,10 @@ const QueryProviders = composeProviders([
   PrefetchProvider,
 ]);
 
-/**
- * Closed-beta gate: only when VITE_COMING_SOON_GATE=true.
- * Default (unset): full app is visible to guests — set the gate explicitly for pre-launch teasers.
- * VITE_BYPASS_COMING_SOON=true still forces the app open when the gate is on.
- */
+/** Gate that shows Coming Soon for unauthenticated users (except /auth routes). Set VITE_BYPASS_COMING_SOON=true to test app without login. */
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  const comingSoonGateActive = import.meta.env.VITE_COMING_SOON_GATE === 'true';
   const bypassComingSoon = import.meta.env.VITE_BYPASS_COMING_SOON === 'true';
 
   // Allow auth and public marketing routes through
@@ -82,7 +77,7 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || location.pathname.startsWith('/vendor/onboarding')
     || location.pathname.startsWith('/ref/');
 
-  if (!comingSoonGateActive || bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
+  if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
   return <>{children}</>;
 }

@@ -9,7 +9,7 @@ Copy `.env.example` to `.env` for local development.
 | `VITE_SUPABASE_URL` | Supabase project URL (`https://xxx.supabase.co`) |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon / publishable key (Dashboard → API) |
 
-Validation runs in `src/lib/env.ts`: **production** builds show a configuration screen if these are missing or invalid (and log the error). Values are **trimmed** to avoid accidental spaces from copy-paste.
+Validation runs in `src/lib/env.ts`: **production** builds throw if these are missing or invalid.
 
 ## Optional (features)
 
@@ -18,8 +18,7 @@ Validation runs in `src/lib/env.ts`: **production** builds show a configuration 
 | `VITE_PUBLIC_APP_URL` | Canonical site origin without trailing slash (e.g. `https://myuno.app`). Used for **password reset** `redirectTo` so it matches Supabase Redirect URLs. Recommended on Vercel production. |
 | `VITE_SUPABASE_PROJECT_ID` | Project ref (some tooling) |
 | `VITE_GOOGLE_MAPS_API_KEY` | Maps, Places, Geocoding |
-| `VITE_COMING_SOON_GATE` | Set to `true` to show **Coming Soon** for anonymous users (closed beta). **Default: off** — guests see the full app. |
-| `VITE_BYPASS_COMING_SOON` | When `VITE_COMING_SOON_GATE=true`, set to `true` to open the full app without login (QA / demos). |
+| `VITE_BYPASS_COMING_SOON` | Set to `true` to skip Coming Soon gate locally |
 
 ## CI
 
