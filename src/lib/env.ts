@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 
-/** Preferred key name + legacy alias support. */
+/** Same JWT as Dashboard “anon public” — either env name works. */
 export function getSupabasePublishableKey(): string | undefined {
   return (
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() ||
@@ -30,10 +30,14 @@ export function validatePublicEnv(): void {
 
   const hasUrl = Boolean(raw.VITE_SUPABASE_URL);
   const hasKey = Boolean(raw.VITE_SUPABASE_PUBLISHABLE_KEY);
+
   if (!hasUrl || !hasKey) {
-    const hint = 'Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY).';
-    logger.error(`[env] Missing Supabase env. ${hint}`);
-    throw new Error(`[env] Missing Supabase configuration. ${hint}`);
+    const detail =
+      'Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY) — copy .env.example to .env';
+    if (!import.meta.env.PROD) {
+      logger.error(`[env] Missing Supabase env — ${detail}`);
+    }
+    throw new Error(`[env] Missing Supabase configuration. ${detail}`);
   }
 
   const parsed = prodPublicEnvSchema.safeParse(raw);

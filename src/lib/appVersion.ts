@@ -1,11 +1,12 @@
 import { logger } from '@/lib/logger';
 
-declare const __APP_VERSION__: string;
-declare const __BUILD_TIMESTAMP__: string;
+// App version for PWA cache busting
+// Increment this when deploying significant changes
+export const APP_VERSION = '3.40.0';
 
-// Build metadata is injected by Vite define (see vite.config.ts).
-export const APP_VERSION: string =
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev-local';
+// Injected by vite `define` at build-time — always reflects the actual build moment,
+// not the runtime moment (which would be wrong after caching).
+declare const __BUILD_TIMESTAMP__: string;
 export const BUILD_TIMESTAMP: string =
   typeof __BUILD_TIMESTAMP__ !== 'undefined'
     ? __BUILD_TIMESTAMP__
