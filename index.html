@@ -109,17 +109,13 @@
           .then(function(data) {
             var serverVersion = data.version;
             var storedVersion = localStorage.getItem('manifest_version');
-            var metaTag = document.querySelector('meta[name="version"]');
-            var htmlVersion = metaTag ? metaTag.getAttribute('content') : null;
-            
-            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion + ', HTML: ' + htmlVersion);
+            console.log('[myUNO] Server: ' + serverVersion + ', Stored: ' + storedVersion);
             localStorage.setItem('manifest_version', serverVersion);
             localStorage.setItem('app_version', serverVersion);
             
-            // Mismatch if EITHER stored version or baked HTML version differs from server
-            var needsReload = false;
-            if (storedVersion && storedVersion !== serverVersion) needsReload = true;
-            if (htmlVersion && htmlVersion !== serverVersion) needsReload = true;
+            // Mismatch only against persisted client version.
+            // HTML meta can be stale in edge caches and causes false-positive reload loops.
+            var needsReload = Boolean(storedVersion && storedVersion !== serverVersion);
             
             if (needsReload) {
               // Defer reload if user has unsaved drafts

@@ -7,6 +7,17 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { clientsClaim } from 'workbox-core';
 
 declare let self: ServiceWorkerGlobalScope;
+declare const __APP_VERSION__: string;
+
+const SW_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev-local';
+const CACHE_SUFFIX = SW_VERSION.replace(/[^a-zA-Z0-9_-]/g, '_');
+const CACHE_NAMES = {
+  images: `images-${CACHE_SUFFIX}`,
+  fonts: `fonts-${CACHE_SUFFIX}`,
+  supabase: `supabase-${CACHE_SUFFIX}`,
+  googleFonts: `google-fonts-${CACHE_SUFFIX}`,
+  sos: 'uno-sos-cache-v1',
+} as const;
 
 // AGGRESSIVE: Take control immediately — no waiting for old tabs
 self.skipWaiting();
@@ -31,7 +42,7 @@ registerRoute(new NavigationRoute(navigationStrategy, {
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
-    cacheName: 'images-v3',
+    cacheName: CACHE_NAMES.images,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -46,7 +57,7 @@ registerRoute(
 registerRoute(
   ({ request }) => request.destination === 'font',
   new CacheFirst({
-    cacheName: 'fonts-v3',
+    cacheName: CACHE_NAMES.fonts,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -61,7 +72,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.hostname.endsWith('.supabase.co'),
   new NetworkFirst({
-    cacheName: 'supabase-v3',
+    cacheName: CACHE_NAMES.supabase,
     networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -77,7 +88,7 @@ registerRoute(
 registerRoute(
   ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
   new CacheFirst({
-    cacheName: 'google-fonts-v3',
+    cacheName: CACHE_NAMES.googleFonts,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({
@@ -108,13 +119,13 @@ self.addEventListener('message', (event) => {
 
 // ─── ACTIVATE: Delete ALL old caches + notify clients ───
 self.addEventListener('activate', (event) => {
-  console.log('[SW v3.40.0] Activated — cleaning ALL old caches');
-  const CURRENT_CACHES = ['images-v3', 'fonts-v3', 'supabase-v3', 'google-fonts-v3', 'uno-sos-cache-v1'];
+  console.log(`[SW v${SW_VERSION}] Activated — cleaning old caches`);
+  const currentCaches = Object.values(CACHE_NAMES);
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys
-          .filter((key) => !CURRENT_CACHES.includes(key) && !key.startsWith('workbox-precache'))
+          .filter((key) => !currentCaches.includes(key) && !key.startsWith('workbox-precache'))
           .map((key) => {
             console.log('[SW] Deleting old cache:', key);
             return caches.delete(key);
@@ -133,5 +144,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('install', () => {
-  console.log('[SW v3.40.0] Installing new service worker...');
+  console.log(`[SW v${SW_VERSION}] Installing new service worker...`);
 });

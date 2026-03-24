@@ -10,6 +10,7 @@ import { APP_VERSION } from '@/lib/appVersion';
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const DISMISSED_KEY = `pwa_prompt_dismissed_v${APP_VERSION}`;
+  const UPDATE_RELOAD_KEY = `pwa_update_reload_v${APP_VERSION}`;
   const [dismissed, setDismissed] = React.useState(
     () => sessionStorage.getItem(DISMISSED_KEY) === 'true'
   );
@@ -40,9 +41,9 @@ export function PWAUpdatePrompt() {
   });
 
   const handleUpdate = () => {
+    if (sessionStorage.getItem(UPDATE_RELOAD_KEY)) return;
+    sessionStorage.setItem(UPDATE_RELOAD_KEY, 'true');
     updateServiceWorker(true);
-    // Force hard reload to clear old JS from memory
-    setTimeout(() => window.location.reload(), 300);
   };
 
   const handleDismiss = () => {

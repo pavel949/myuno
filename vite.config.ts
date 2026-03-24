@@ -2,12 +2,24 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import os from "node:os";
+import fs from "node:fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const buildTimestamp = new Date().toISOString();
+  let buildTimestamp = new Date().toISOString();
+  const fallbackVersion = `dev-${buildTimestamp.replace(/[-:TZ.]/g, "").slice(0, 14)}`;
+  let buildVersion = fallbackVersion;
+
+  try {
+    const raw = fs.readFileSync(path.resolve(__dirname, ".build-meta.json"), "utf8");
+    const parsed = JSON.parse(raw) as { version?: string; buildTime?: string };
+    if (parsed.version) buildVersion = parsed.version;
+    if (parsed.buildTime) buildTimestamp = parsed.buildTime;
+  } catch {
+    // No generated metadata in local dev; keep deterministic fallback.
+  }
 
   return {
     // Cursor / VS Code Simple Browser & tunnels send non-localhost Host headers — allow them.
@@ -31,6 +43,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
+      __APP_VERSION__: JSON.stringify(buildVersion),
     },
     plugins: [
       react(),

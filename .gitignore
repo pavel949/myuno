@@ -16,19 +16,15 @@ dist-ssr
 .env
 .env.*
 !.env.example
+.build-meta.json
 
 # Cursor IDE (local)
 .cursor/
-
-# Nested clones / local skills (often contain .git — do not commit into this repo)
-VibeSec-Skill/
+.firecrawl/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-!.vscode/tasks.json
-!.vscode/settings.json
-!.vscode/launch.json
 .idea
 .DS_Store
 *.suo
