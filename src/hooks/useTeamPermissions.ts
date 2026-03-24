@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
-import { useUserRoles } from '@/hooks/useUserRoles';
 import { typedFrom, type TeamMemberPermissionRow } from '@/lib/untypedTables';
 
 export const MODULES = [
@@ -25,7 +24,6 @@ export function useTeamPermissions() {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
-  const { roles: appRoles = [], isLoading: rolesLoading } = useUserRoles();
 
   const { data: permissions = [], isLoading } = useQuery({
     queryKey: ['team-permissions', user?.id, companyId],
@@ -42,12 +40,8 @@ export function useTeamPermissions() {
   });
 
   const canAccess = (module: ModuleKey, action: 'view' | 'edit' = 'view'): boolean => {
-    // Align with public.mc_can_access(): platform admins always pass.
-    if (!rolesLoading && appRoles.some((r) => r.role === 'admin' || r.role === 'uno_team')) return true;
-    // MC baseline roles get full module access (same as SECURITY DEFINER mc_can_access first branch).
-    const mcRole = activeCompany?.role;
-    if (mcRole === 'owner' || mcRole === 'director' || mcRole === 'admin' || mcRole === 'manager') return true;
-    if (isLoading || rolesLoading) return false;
+    if (activeCompany?.role === 'director' || activeCompany?.role === 'admin') return true;
+    if (isLoading) return false;
     if (permissions.length === 0) return false;
     const perm = permissions.find(p => p.module === module);
     if (!perm) return false;

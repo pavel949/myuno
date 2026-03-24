@@ -16,16 +16,6 @@ import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 import { UserPlus } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
-function errorMessageFromUnknown(e: unknown): string {
-  if (e && typeof e === 'object' && 'message' in e) {
-    const m = (e as { message?: unknown }).message;
-    if (typeof m === 'string' && m.trim()) return m;
-  }
-  if (e instanceof Error) return e.message;
-  if (typeof e === 'string') return e;
-  return 'Unknown error';
-}
-
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -72,13 +62,8 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
       setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', crm_role: 'other' as const, source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
-    } catch (err: unknown) {
-      const detail = errorMessageFromUnknown(err);
-      toast({
-        title: isRu ? 'Не удалось создать контакт' : 'Could not create contact',
-        description: detail,
-        variant: 'destructive',
-      });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
   };
 
