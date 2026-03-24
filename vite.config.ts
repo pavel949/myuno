@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import os from "node:os";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -10,24 +9,10 @@ export default defineConfig(({ mode }) => {
   const buildTimestamp = new Date().toISOString();
 
   return {
-    // Cursor / VS Code Simple Browser & tunnels send non-localhost Host headers — allow them.
-    // OneDrive / cloud-sync folders on Windows often break native FS watch — polling fixes blank/hung dev.
     server: {
-      host: true,
+      host: "::",
       port: 8080,
-      strictPort: false,
-      open: false,
-      allowedHosts: true,
-      watch: {
-        usePolling: os.platform() === "win32",
-        interval: 1000,
-      },
-    },
-    preview: {
-      host: true,
-      port: 8080,
-      strictPort: false,
-      allowedHosts: true,
+      open: true,
     },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
