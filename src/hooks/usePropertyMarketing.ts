@@ -169,8 +169,8 @@ export function calculateListingHealthScore(property: OwnerProperty | null): Pro
   let descriptionScore = 0;
   let pricingScore = 0;
   let amenitiesScore = 0;
-  let responseScore = 50; // Default mid-score
-  let reviewsScore = 0;
+  const responseScore = 50; // Default mid-score
+  const reviewsScore = 0;
   
   const missingFields: string[] = [];
   const tips: PropertyListingScore['improvement_tips'] = [];

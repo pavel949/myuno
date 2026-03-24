@@ -2,12 +2,11 @@
  * PropertyIndex — Airbnb-style Discovery Page
  * Clean search pill + category icons ribbon + card grid
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, Loader2, SlidersHorizontal, Map } from 'lucide-react';
+import { Star, ArrowRight, Loader2, SlidersHorizontal, Map } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -19,11 +18,18 @@ import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearc
 import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
 import { cn } from '@/lib/utils';
+import { formatQueryError } from '@/lib/formatQueryError';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
-import { matchesFilter, matchesSingleFilter, matchesPriceLevel } from '@/lib/filterUtils';
+import {
+  matchesFilter,
+  matchesSingleFilter,
+  matchesPriceLevel,
+  matchesPropertyListingTab,
+  countActiveFilters,
+} from '@/lib/filterUtils';
 
 // ── Recently Viewed Property Shape ──
 interface RecentProperty {
@@ -60,30 +66,36 @@ export default function PropertyIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [searchParamsUrl] = useSearchParams();
+  const modeFromUrl = searchParamsUrl.get('mode');
   const isRu = language === 'ru';
 
   // UniversalFilter state
   const { filterConfig } = usePropertyFilterOptions();
   const [filterValues, setFilterValues] = useState<FilterValues>({});
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.values(filterValues).forEach(v => {
-      if (Array.isArray(v)) count += v.length;
-      else if (v) count += 1;
-    });
-    return count;
-  }, [filterValues]);
+  const activeFilterCount = useMemo(() => countActiveFilters(filterValues), [filterValues]);
 
   const [propertyMode, setPropertyMode] = useState<PropertyMode>(
     (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
   );
 
+  // Keep rent/buy in sync with PropertyHub tabs (?mode=buy | rent)
+  useEffect(() => {
+    if (modeFromUrl === 'buy') setPropertyMode('buy');
+    else setPropertyMode('rent');
+  }, [modeFromUrl]);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { items: recentItems } = useRecentlyViewed<RecentProperty>('myuno_recently_viewed_properties');
 
-  const { data: infiniteData, isLoading } = usePropertiesInfinite({
+  const {
+    data: infiniteData,
+    isLoading,
+    isError,
+    error: propertiesError,
+    refetch: refetchProperties,
+  } = usePropertiesInfinite({
     listingType: propertyMode === 'buy' ? 'sale' : 'rent',
   });
 
@@ -130,7 +142,11 @@ export default function PropertyIndex() {
       result = result.filter(p => matchesSingleFilter(p.property_type, propertyTypes));
     }
     if (listingType) {
-      result = result.filter(p => matchesSingleFilter(p.listing_type, [listingType]));
+      if (listingType === 'rent' || listingType === 'sale') {
+        result = result.filter((p) => matchesPropertyListingTab(p, listingType));
+      } else {
+        result = result.filter((p) => matchesSingleFilter(p.listing_type, [listingType]));
+      }
     }
     if (priceLevel) {
       result = result.filter(p => matchesPriceLevel(p.price, priceLevel));
@@ -250,8 +266,22 @@ export default function PropertyIndex() {
             </div>
           )}
 
+          {isError && (
+            <div className="text-center py-16 px-4">
+              <p className="text-destructive font-medium mb-1">
+                {isRu ? 'Не удалось загрузить каталог' : 'Could not load listings'}
+              </p>
+              <p className="text-sm text-foreground/80 mb-3 break-words font-mono">
+                {formatQueryError(propertiesError)}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetchProperties()}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
+            </div>
+          )}
+
           {/* Main grid — Airbnb-style 2-col cards */}
-          {!isLoading && filteredProperties.length > 0 && (
+          {!isLoading && !isError && filteredProperties.length > 0 && (
             <section className="px-4">
               <div className="flex items-center justify-between mb-3">
                 {selectedCategories.length === 0 && (
@@ -280,13 +310,26 @@ export default function PropertyIndex() {
             </section>
           )}
 
-          {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
+          {!isLoading && !isError && filteredProperties.length === 0 && allProperties.length > 0 && (
             <div className="text-center py-16 px-4">
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
               </p>
               <Button variant="outline" size="sm" onClick={() => setSelectedCategories([])}>
                 {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !isError && allProperties.length === 0 && (
+            <div className="text-center py-16 px-4">
+              <p className="text-foreground/90 mb-2 text-sm sm:text-base">
+                {isRu
+                  ? 'Объектов в каталоге пока нет. Загляните позже или оставьте заявку — подберём варианты.'
+                  : 'No listings in the catalog yet. Check back soon or request a shortlist.'}
+              </p>
+              <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/property/consultation')}>
+                {isRu ? 'Консультация' : 'Get consultation'}
               </Button>
             </div>
           )}

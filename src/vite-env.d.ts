@@ -1,6 +1,19 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/react" />
 
+interface ImportMetaEnv {
+  readonly VITE_SUPABASE_URL?: string;
+  /** Preferred: Dashboard → API → anon public */
+  readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
+  /** Legacy alias — same value as publishable/anon key */
+  readonly VITE_SUPABASE_ANON_KEY?: string;
+  readonly VITE_SUPABASE_PROJECT_ID?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module 'virtual:pwa-register/react' {
   import type { Dispatch, SetStateAction } from 'react';
 

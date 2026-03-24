@@ -2,6 +2,16 @@
  * Filter utilities for normalizing and comparing filter values with database data
  */
 
+/** Counts the number of active filter selections across all sections. */
+export function countActiveFilters(filterValues: Record<string, unknown>): number {
+  let count = 0;
+  Object.values(filterValues).forEach(v => {
+    if (Array.isArray(v)) count += v.length;
+    else if (v) count += 1;
+  });
+  return count;
+}
+
 /**
  * Normalizes a string for filter comparison:
  * - Converts to lowercase
@@ -20,12 +30,12 @@ export const matchesFilter = (
 ): boolean => {
   if (!filterIds.length) return true;
   if (!dataArray?.length) return false;
-  
+
   const normalizedData = dataArray.map(normalizeForFilter);
-  return filterIds.some(filterId => 
-    normalizedData.some(dataItem => 
-      dataItem.includes(normalizeForFilter(filterId)) ||
-      normalizeForFilter(filterId).includes(dataItem)
+  const normalizedFilters = filterIds.map(normalizeForFilter);
+  return normalizedFilters.some(nFilter =>
+    normalizedData.some(dataItem =>
+      dataItem.includes(nFilter) || nFilter.includes(dataItem)
     )
   );
 };
@@ -39,13 +49,52 @@ export const matchesSingleFilter = (
 ): boolean => {
   if (!filterIds.length) return true;
   if (!value) return false;
-  
+
   const normalizedValue = normalizeForFilter(value);
-  return filterIds.some(filterId => 
-    normalizedValue.includes(normalizeForFilter(filterId)) ||
-    normalizeForFilter(filterId).includes(normalizedValue)
+  const normalizedFilters = filterIds.map(normalizeForFilter);
+  return normalizedFilters.some(nFilter =>
+    normalizedValue.includes(nFilter) || nFilter.includes(normalizedValue)
   );
 };
+
+/** Shape used for marketplace rent/sale tabs (legacy listing_type + listing_modes[]) */
+export type PropertyListingShape = {
+  listing_type?: string | null;
+  listing_modes?: string[] | null;
+  price_per_night?: number | null;
+  sale_price?: number | null;
+};
+
+/**
+ * Whether a property should appear on the Rent or Buy tab.
+ * DB may use listing_type only, listing_modes[] only, or both (e.g. rent_and_sale).
+ * Some rows are mislabeled (e.g. sale + nightly price) — mirror useProperties SQL filter.
+ */
+export function matchesPropertyListingTab(
+  property: PropertyListingShape,
+  tab: 'rent' | 'sale'
+): boolean {
+  const lt = (property.listing_type || '').toLowerCase();
+  const modes = property.listing_modes;
+  const hasMode = (m: string) =>
+    Array.isArray(modes) && modes.some((x) => (x || '').toLowerCase() === m);
+  const hasNightly = property.price_per_night != null && property.price_per_night > 0;
+  const hasSalePrice = property.sale_price != null && property.sale_price > 0;
+
+  if (tab === 'rent') {
+    if (lt === 'rent' || lt === 'rent_and_sale') return true;
+    if (hasMode('rent')) return true;
+    if (hasNightly) return true;
+    return false;
+  }
+  if (tab === 'sale') {
+    if (lt === 'sale' || lt === 'rent_and_sale') return true;
+    if (hasMode('sale')) return true;
+    if (hasSalePrice) return true;
+    return false;
+  }
+  return true;
+}
 
 /**
  * Checks if current time is within working hours

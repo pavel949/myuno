@@ -46,7 +46,7 @@ export function ExpenseTemplates({ propertyId, onApplied }: ExpenseTemplatesProp
       });
       toast.success(isRu ? `Расход "${template.labelRu}" добавлен` : `Expense "${template.labelEn}" added`);
       onApplied?.();
-    } catch {} finally { setApplied(null); }
+    } catch { /* errors surfaced via toast */ } finally { setApplied(null); }
   };
 
   return (

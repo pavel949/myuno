@@ -104,8 +104,7 @@ export function useMinOrderValidation() {
       });
 
       setProviderMinOrders(newMinOrders);
-    } catch {
-    } finally {
+    } catch { /* errors surfaced via empty state */ } finally {
       setIsLoading(false);
     }
   }, [language]);

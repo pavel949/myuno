@@ -3,10 +3,9 @@
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flower2, ShoppingCart, Shield, Clock, Flame, Star, Filter } from 'lucide-react';
+import { Flower2, ShoppingCart, Shield, Clock, Flame, Star } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCart } from '@/contexts/CartContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CatalogHeader } from '@/components/shared/CatalogHeader';
@@ -17,13 +16,14 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { useBouquets } from '@/hooks/useBouquets';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { formatQueryError } from '@/lib/formatQueryError';
+import { countActiveFilters } from '@/lib/filterUtils';
 import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { UniversalFilter, ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const { getItemsByType } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
@@ -35,20 +35,12 @@ export default function FlowersIndex() {
     label: isRu ? opt.labelRu : opt.labelEn,
   })), [categoryRibbon, isRu]);
 
-  const { bouquets, isLoading } = useBouquets({
+  const { bouquets, isLoading, isError, error: bouquetsError, refetch: refetchBouquets } = useBouquets({
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     onlyActive: true,
   });
 
-  // Count active filters
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.values(filterValues).forEach(v => {
-      if (Array.isArray(v)) count += v.length;
-      else if (v) count += 1;
-    });
-    return count;
-  }, [filterValues]);
+  const activeFilterCount = useMemo(() => countActiveFilters(filterValues), [filterValues]);
 
   // Client-side filtering
   const filteredBouquets = useMemo(() => {
@@ -96,9 +88,8 @@ export default function FlowersIndex() {
 
       // Size filter
       const size = filterValues.size as string | null;
-      if (size && b.size_variants) {
-        const variants = b.size_variants as any[];
-        if (!variants.some(v => v.size === size)) return false;
+      if (size && Array.isArray(b.size_variants)) {
+        if (!b.size_variants.some((v: { size?: string }) => v.size === size)) return false;
       }
 
       return true;
@@ -205,6 +196,18 @@ export default function FlowersIndex() {
                 </div>
               ))}
             </div>
+          ) : isError ? (
+            <div className="text-center py-16 px-4">
+              <p className="text-destructive font-medium mb-1">
+                {isRu ? 'Не удалось загрузить каталог' : 'Could not load flower catalog'}
+              </p>
+              <p className="text-sm text-foreground/80 mb-3 break-words font-mono">
+                {formatQueryError(bouquetsError)}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetchBouquets()}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
+            </div>
           ) : filteredBouquets.length === 0 ? (
             <EmptyState
               icon={Flower2}
@@ -227,11 +230,10 @@ export default function FlowersIndex() {
                   ? bouquet.short_description_ru
                   : bouquet.short_description_en;
                 const hasVariants = bouquet.size_variants?.length;
-                const displayPrice = hasVariants
-                  ? (bouquet.size_variants as any[])[0]?.price || bouquet.price
+                const displayPrice = hasVariants && Array.isArray(bouquet.size_variants)
+                  ? (bouquet.size_variants[0] as { price?: number })?.price ?? bouquet.price
                   : bouquet.price;
                 const socialProof = bouquet.social_proof_badge;
-                const urgencyBadge = bouquet.urgency_badge;
                 const scarcityLevel = bouquet.scarcity_level;
                 const boxType = bouquet.box_type;
 

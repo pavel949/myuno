@@ -40,8 +40,7 @@ export function usePushSubscription() {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
-    } catch {
-    }
+    } catch { /* errors surfaced via isSubscribed=false */ }
     setIsLoading(false);
   }, [isSupported, user]);
 

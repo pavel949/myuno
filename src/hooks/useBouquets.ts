@@ -46,7 +46,9 @@ async function fetchBouquets(options: UseBouquetsOptions): Promise<Bouquet[]> {
 
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(error.message || 'Failed to load bouquets');
+  }
 
   return (data as unknown as Bouquet[]) || [];
 }
@@ -54,12 +56,13 @@ async function fetchBouquets(options: UseBouquetsOptions): Promise<Bouquet[]> {
 export function useBouquets(options: UseBouquetsOptions = {}) {
   const { shopId, category, onlyActive = true } = options;
 
-  const { 
-    data: bouquets = [] as Bouquet[], 
-    isLoading, 
+  const {
+    data: bouquets = [] as Bouquet[],
+    isLoading,
     error,
-    refetch 
-  } = useQuery<Bouquet[], Error>({
+    refetch,
+    isError,
+  } = useQuery({
     queryKey: ['bouquets', shopId, category, onlyActive],
     queryFn: () => fetchBouquets({ shopId, category, onlyActive }),
     staleTime: 1000 * 60, // 1 minute
@@ -69,7 +72,9 @@ export function useBouquets(options: UseBouquetsOptions = {}) {
   return {
     bouquets,
     isLoading,
-    error: error instanceof Error ? error : null,
+    /** Present when Supabase / network fails (PostgrestError is normalized to Error in fetchBouquets). */
+    error: error ?? null,
+    isError,
     refetch,
   };
 }
@@ -93,7 +98,9 @@ async function fetchBouquet(id: string): Promise<Bouquet | null> {
     .eq('id', id)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(error.message || 'Failed to load bouquet');
+  }
   return data as unknown as Bouquet;
 }
 

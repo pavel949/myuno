@@ -71,8 +71,7 @@ export const useChat = (bookingId?: string) => {
           setMessages(formattedMessages);
         }
       }
-    } catch {
-    } finally {
+    } catch { /* errors are surfaced via empty state */ } finally {
       if (checkMounted()) setIsLoading(false);
     }
   }, [user, bookingId]);

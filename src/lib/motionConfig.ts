@@ -105,20 +105,23 @@ export const pageTransitionVariants = {
 
 // Hook to get reduced motion preference reactively
 export const useReducedMotion = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  
-  const [reducedMotion, setReducedMotion] = React.useState(prefersReducedMotion());
-  
+  const isServer = typeof window === 'undefined';
+
+  const [reducedMotion, setReducedMotion] = React.useState(
+    isServer ? false : prefersReducedMotion()
+  );
+
   React.useEffect(() => {
+    if (isServer) return;
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
       setReducedMotion(e.matches);
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-  
+  }, [isServer]);
+
   return reducedMotion;
 };

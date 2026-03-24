@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import { memo, useMemo, useCallback, useState } from 'react';
 import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,7 +7,6 @@ import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
 import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 
@@ -124,17 +123,21 @@ export const HeroBlock = memo(function HeroBlock() {
     return (isRu ? 'Добрый вечер' : 'Good evening') + name;
   }, [isRu, firstName]);
 
-  const WeatherIcon = weather?.condition === 'rainy' ? CloudRain 
+  const WeatherIcon = weather?.condition === 'rainy' ? CloudRain
     : weather?.condition === 'cloudy' ? Cloud : Sun;
 
-  const now = new Date();
-  const dayName = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'short' });
-  const dateStr = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
+  const { dayName, dateStr } = useMemo(() => {
+    const now = new Date();
+    return {
+      dayName: now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'short' }),
+      dateStr: now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' }),
+    };
+  }, [isRu]);
 
   // Mobile
   if (!isDesktop) {
     return (
-    <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
+    <div className="hero-on-dark relative rounded-2xl overflow-hidden shadow-[var(--shadow-elevated)]">
         {/* Hero gradient — uses CSS vars for theme consistency */}
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 16%) 40%, hsl(230 45% 24%) 100%)'
@@ -209,7 +212,7 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-2xl overflow-hidden p-8 xl:p-10 shadow-[var(--shadow-elevated)]">
+    <div className="hero-on-dark relative rounded-2xl overflow-hidden p-8 xl:p-10 shadow-[var(--shadow-elevated)]">
       {/* Hero gradient — uses CSS vars for theme consistency */}
       <div className="absolute inset-0" style={{
         background: 'linear-gradient(135deg, hsl(var(--icon-dark)) 0%, hsl(225 40% 16%) 40%, hsl(230 45% 24%) 100%)'

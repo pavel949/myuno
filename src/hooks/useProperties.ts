@@ -2,6 +2,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { logger } from '@/lib/logger';
 
 export interface Property {
   id: string;
@@ -44,6 +45,8 @@ export interface Property {
   equipment?: string[];
   // Quick filter fields
   highlights?: string[];
+  /** Rent/sale (and platform, etc.) — source of truth alongside listing_type */
+  listing_modes?: string[] | null;
   monthly_discount?: number;
   weekly_discount?: number;
   // Advanced pricing fields
@@ -165,6 +168,50 @@ export interface PropertyFilters {
 
 const PAGE_SIZE = 20;
 
+/** Applies shared PropertyFilters to a Supabase query builder. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyPropertyFilters(query: any, filters: PropertyFilters): any {
+  let q = query;
+
+  if (filters.search) {
+    const s = sanitizeSearchTerm(filters.search);
+    if (s) q = q.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
+  }
+  if (filters.propertyType && filters.propertyType !== 'all') {
+    q = q.eq('property_type', filters.propertyType);
+  }
+  if (filters.listingType && filters.listingType !== 'all') {
+    const lt = filters.listingType;
+    if (lt === 'rent') {
+      q = q.in('listing_type', ['rent', 'rent_and_sale']);
+    } else if (lt === 'sale') {
+      q = q.in('listing_type', ['sale', 'rent_and_sale']);
+    } else {
+      q = q.eq('listing_type', lt);
+    }
+  }
+  if (filters.district) {
+    q = q.eq('district', filters.district);
+  }
+  if (filters.minPrice) {
+    q = q.gte('price', filters.minPrice);
+  }
+  if (filters.maxPrice) {
+    q = q.lte('price', filters.maxPrice);
+  }
+  if (filters.bedrooms) {
+    if (filters.bedrooms === '4+') {
+      q = q.gte('bedrooms', 4);
+    } else if (filters.bedrooms === 'studio') {
+      q = q.eq('bedrooms', 0);
+    } else {
+      q = q.eq('bedrooms', parseInt(filters.bedrooms));
+    }
+  }
+
+  return q;
+}
+
 /**
  * Columns needed for property list/card views.
  * Using explicit columns instead of select('*') reduces payload ~60%.
@@ -177,7 +224,7 @@ const PROPERTY_LIST_COLUMNS = `
   available_from, min_stay_nights, rating, review_count,
   created_at, updated_at, project_id, floor, unit_number,
   view_type, furnishing_level, highlights, monthly_discount,
-  weekly_discount, management_company_id
+  weekly_discount, management_company_id, listing_modes
 `;
 
 // Fetch properties with pagination for infinite scroll
@@ -195,41 +242,19 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
         .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1);
 
       // Apply filters
-      if (filters.search) {
-        const s = sanitizeSearchTerm(filters.search);
-        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
-      }
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
-      if (filters.minPrice) {
-        query = query.gte('price', filters.minPrice);
-      }
-      if (filters.maxPrice) {
-        query = query.lte('price', filters.maxPrice);
-      }
-      if (filters.bedrooms) {
-        if (filters.bedrooms === '4+') {
-          query = query.gte('bedrooms', 4);
-        } else if (filters.bedrooms === 'studio') {
-          query = query.eq('bedrooms', 0);
-        } else {
-          query = query.eq('bedrooms', parseInt(filters.bedrooms));
-        }
-      }
+      query = applyPropertyFilters(query, filters);
+      // Use .in() only — complex or(listing_modes.cs,…) breaks some PostgREST / schema combos.
       if (filters.managementCompanyId) {
         query = query.eq('management_company_id', filters.managementCompanyId);
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      
+      if (error) {
+        logger.error('usePropertiesInfinite query failed', error.message, error.code, error.details);
+        const wrapped = new Error(error.message || 'Failed to load properties');
+        throw wrapped;
+      }
+
       return {
         properties: (data || []) as unknown as Property[],
         nextPage: data && data.length === PAGE_SIZE ? pageParam + 1 : undefined,
@@ -237,6 +262,8 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 0,
+    staleTime: 1000 * 60 * 3,   // 3 minutes — catalog is relatively stable
+    gcTime: 1000 * 60 * 15,     // 15 minutes — keep pages in memory across tab switches
   });
 }
 
@@ -255,31 +282,12 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
         .limit(limit);
 
       // Apply filters
-      if (filters.search) {
-        const s = sanitizeSearchTerm(filters.search);
-        if (s) query = query.or(`title_en.ilike.%${s}%,title_ru.ilike.%${s}%`);
-      }
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
-      if (filters.district) {
-        query = query.eq('district', filters.district);
-      }
-      if (filters.bedrooms) {
-        if (filters.bedrooms === '4+') {
-          query = query.gte('bedrooms', 4);
-        } else if (filters.bedrooms === 'studio') {
-          query = query.eq('bedrooms', 0);
-        } else {
-          query = query.eq('bedrooms', parseInt(filters.bedrooms));
-        }
-      }
+      query = applyPropertyFilters(query, filters);
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message || 'Failed to load properties');
+      }
       return (data || []) as unknown as Property[];
     },
   });
