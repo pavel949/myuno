@@ -21,10 +21,10 @@ import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-// Core pages - eagerly loaded for fast initial navigation
-import Index from '@/pages/Index';
-import Auth from '@/pages/Auth';
-import NotFound from '@/pages/NotFound';
+// Core pages - lazy loaded to reduce initial module graph for dev server
+const Index = React.lazy(() => import('@/pages/Index'));
+const Auth = React.lazy(() => import('@/pages/Auth'));
+const NotFound = React.lazy(() => import('@/pages/NotFound'));
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
@@ -116,8 +116,8 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path={APP_ROUTES.HOME} element={<PageTransition><Index /></PageTransition>} />
-        <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
+        <Route path={APP_ROUTES.HOME} element={<LazyPage><Index /></LazyPage>} />
+        <Route path={APP_ROUTES.AUTH} element={<LazyPage><Auth /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
