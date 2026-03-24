@@ -12,19 +12,19 @@ import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
-const AdminLayout = React.lazy(() => import('@/components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
-const MCLayout = React.lazy(() => import('@/components/mc/MCLayout').then(m => ({ default: m.MCLayout })));
-const VendorLayout = React.lazy(() => import('@/components/vendor/VendorLayout').then(m => ({ default: m.VendorLayout })));
-const GuestLayout = React.lazy(() => import('@/components/guest/GuestLayout').then(m => ({ default: m.GuestLayout })));
-const StaffLayout = React.lazy(() => import('@/components/staff/StaffLayout').then(m => ({ default: m.StaffLayout })));
+import { MCLayout } from '@/components/mc/MCLayout';
+import { VendorLayout } from '@/components/vendor/VendorLayout';
+import { GuestLayout } from '@/components/guest/GuestLayout';
+import { StaffLayout } from '@/components/staff/StaffLayout';
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-// Core pages - lazy loaded to reduce initial module graph for dev server
-const Index = React.lazy(() => import('@/pages/Index'));
-const Auth = React.lazy(() => import('@/pages/Auth'));
-const NotFound = React.lazy(() => import('@/pages/NotFound'));
+// Core pages - eagerly loaded for fast initial navigation
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import NotFound from '@/pages/NotFound';
 
 // All lazy page imports from centralized registry
 import * as Pages from './pageRegistry';
@@ -116,8 +116,8 @@ export const AnimatedRoutes: React.FC = () => {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
         {/* ── Core ── */}
-        <Route path={APP_ROUTES.HOME} element={<LazyPage><Index /></LazyPage>} />
-        <Route path={APP_ROUTES.AUTH} element={<LazyPage><Auth /></LazyPage>} />
+        <Route path={APP_ROUTES.HOME} element={<PageTransition><Index /></PageTransition>} />
+        <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
@@ -669,7 +669,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/my-property/:propertyId" element={<AuthGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></AuthGuard>} />
         
         {/* ── Catch-all ── */}
-        <Route path="*" element={<LazyPage><NotFound /></LazyPage>} />
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
     
