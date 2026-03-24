@@ -12,21 +12,12 @@ import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
-<<<<<<< HEAD
-const AdminLayout = React.lazy(() => import('@/components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
-const MCLayout = React.lazy(() => import('@/components/mc/MCLayout').then(m => ({ default: m.MCLayout })));
-const VendorLayout = React.lazy(() => import('@/components/vendor/VendorLayout').then(m => ({ default: m.VendorLayout })));
-const GuestLayout = React.lazy(() => import('@/components/guest/GuestLayout').then(m => ({ default: m.GuestLayout })));
-const StaffLayout = React.lazy(() => import('@/components/staff/StaffLayout').then(m => ({ default: m.StaffLayout })));
-import { AdaptiveBottomNav } from './AdaptiveBottomNav';
-=======
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdaptiveBottomNav } from './AdaptiveBottomNav';
 import { MCLayout } from '@/components/mc/MCLayout';
 import { VendorLayout } from '@/components/vendor/VendorLayout';
 import { GuestLayout } from '@/components/guest/GuestLayout';
 import { StaffLayout } from '@/components/staff/StaffLayout';
->>>>>>> parent of 1f104193 (Lazy-load core pages)
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
 
