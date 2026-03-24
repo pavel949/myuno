@@ -669,7 +669,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/my-property/:propertyId" element={<AuthGuard><LazyPage><Pages.OwnerPortalPropertyView /></LazyPage></AuthGuard>} />
         
         {/* ── Catch-all ── */}
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+        <Route path="*" element={<LazyPage><NotFound /></LazyPage>} />
       </Routes>
     </AnimatePresence>
     
