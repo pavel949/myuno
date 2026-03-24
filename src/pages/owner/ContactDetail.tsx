@@ -13,8 +13,6 @@ import { InlineTaskCreator } from '@/components/owner/contacts/InlineTaskCreator
 import { useMyCompanyId, DEAL_STAGE_LABELS, DealStage } from '@/hooks/useAgentDeals';
 import { CreateDealSheet } from '@/components/owner/sales/CreateDealSheet';
 import { CrmDocumentsSection } from '@/components/owner/contacts/CrmDocumentsSection';
-import { CooperationTermsSection } from '@/components/owner/contacts/CooperationTermsSection';
-import { LegalDocumentAgent } from '@/components/owner/contacts/LegalDocumentAgent';
 import { LifecycleStageBar } from '@/components/owner/contacts/LifecycleStageBar';
 import { CrmAiAssistantPanel } from '@/components/owner/contacts/CrmAiAssistantPanel';
 import { Button } from '@/components/ui/button';
@@ -454,7 +452,6 @@ export default function ContactDetail() {
                 { value: 'dates', label: isRu ? 'Даты' : 'Dates & Reminders', icon: CalendarDays },
                 { value: 'deals', label: `${isRu ? 'Сделки' : 'Deals'}${deals.length > 0 ? ` (${deals.length})` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
-                { value: 'terms', label: isRu ? 'Условия' : 'Terms', icon: Receipt },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
                 { value: 'ai', label: 'AI', icon: Sparkles },
               ].map(tab => (
@@ -699,26 +696,12 @@ export default function ContactDetail() {
               )}
             </TabsContent>
 
-            {/* Cooperation Terms */}
-            <TabsContent value="terms" className="mt-4">
-              {membership?.company_id ? (
-                <CooperationTermsSection companyId={membership.company_id} contactId={contact.id} />
-              ) : (
-                <div className="text-center py-12 text-muted-foreground text-sm">
-                  {isRu ? 'Условия доступны только для УК' : 'Terms available for management companies'}
-                </div>
-              )}
-            </TabsContent>
-
             {/* Documents */}
-            <TabsContent value="documents" className="mt-4 space-y-4">
+            <TabsContent value="documents" className="mt-4">
               {membership?.company_id ? (
-                <>
-                  <div className="rounded-xl border bg-card p-5">
-                    <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
-                  </div>
-                  <LegalDocumentAgent contactId={contact.id} companyId={membership.company_id} />
-                </>
+                <div className="rounded-xl border bg-card p-5">
+                  <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
+                </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground text-sm">
                   {isRu ? 'Документы доступны только для УК' : 'Documents available for management companies'}
