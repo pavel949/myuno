@@ -64,13 +64,6 @@ export const CACHE_PROFILES = {
     refetchOnWindowFocus: false,
     retry: 2,
   },
-
-  // Background/prefetch data - long stale, rarely refetched
-  BACKGROUND: {
-    staleTime: TIME.MINUTES(30),
-    gcTime: TIME.HOURS(2),
-    refetchOnWindowFocus: false,
-  },
 } as const;
 
 /**
@@ -195,10 +188,10 @@ export const PREFETCH_ROUTES = [
  */
 export const defaultQueryClientOptions = {
   queries: {
-    staleTime: TIME.MINUTES(5),
+    staleTime: TIME.MINUTES(1),
     gcTime: TIME.MINUTES(5),
     retry: 1,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   },
   mutations: {
     retry: 0,

@@ -8,9 +8,7 @@ describe('utils', () => {
     });
 
     it('handles conditional classes', () => {
-      // eslint-disable-next-line no-constant-binary-expression
       expect(cn('base', true && 'conditional')).toBe('base conditional');
-      // eslint-disable-next-line no-constant-binary-expression
       expect(cn('base', false && 'conditional')).toBe('base');
     });
 
@@ -35,9 +33,7 @@ describe('utils', () => {
     it('handles complex combinations', () => {
       const result = cn(
         'base-class',
-        // eslint-disable-next-line no-constant-binary-expression
         true && 'conditional-true',
-        // eslint-disable-next-line no-constant-binary-expression
         false && 'conditional-false',
         { 'object-true': true, 'object-false': false },
         ['array-class']

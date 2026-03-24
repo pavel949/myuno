@@ -681,7 +681,20 @@ function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: Cate
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [showSuggestionDialog, setShowSuggestionDialog] = useState(false);
-
+  
+  if (isLocked && selectedId) {
+    return (
+      <div className="text-center py-8">
+        <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">
+          {isRu 
+            ? 'Категория заблокирована после выбора'
+            : 'Category is locked after selection'}
+        </p>
+      </div>
+    );
+  }
+  
   const filteredCategories = useMemo(() => {
     if (!searchQuery.trim()) return categories;
     
@@ -753,20 +766,7 @@ function CategoryStep({ categories, selectedId, onSelect, isLocked, isRu }: Cate
       </div>
     );
   };
-
-  if (isLocked && selectedId) {
-    return (
-      <div className="text-center py-8">
-        <Lock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">
-          {isRu
-            ? 'Категория заблокирована после выбора'
-            : 'Category is locked after selection'}
-        </p>
-      </div>
-    );
-  }
-
+  
   return (
     <div className="space-y-4">
       <div>
@@ -1398,15 +1398,15 @@ function SchemaFieldRenderer({ field, value, onChange, error, isRu }: SchemaFiel
           </div>
         );
       
-      case 'select': {
-        const selectOptions = field.taxonomyType
-          ? taxonomyOptions.map(o => ({
-              value: o.value,
-              labelEn: o.label_en,
-              labelRu: o.label_ru
+      case 'select':
+        const selectOptions = field.taxonomyType 
+          ? taxonomyOptions.map(o => ({ 
+              value: o.value, 
+              labelEn: o.label_en, 
+              labelRu: o.label_ru 
             }))
           : field.options || [];
-
+        
         return (
           <Select value={value || ''} onValueChange={onChange}>
             <SelectTrigger className={cn(error && 'border-destructive')}>
@@ -1421,8 +1421,7 @@ function SchemaFieldRenderer({ field, value, onChange, error, isRu }: SchemaFiel
             </SelectContent>
           </Select>
         );
-      }
-
+      
       default:
         return null;
     }

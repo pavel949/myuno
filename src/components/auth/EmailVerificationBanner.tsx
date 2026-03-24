@@ -32,7 +32,7 @@ export function EmailVerificationBanner() {
   if (!user || user.email_confirmed_at || dismissed) return null;
 
   const handleDismiss = () => {
-    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* best-effort, ignore storage errors */ }
+    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch {}
     setDismissed(true);
   };
 

@@ -263,7 +263,8 @@ export function useAdminVendorLocations() {
       if (error) throw error;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setLocations((data as any[]) || []);
-    } catch { /* errors surfaced via empty state */ } finally {
+    } catch {
+    } finally {
       setIsLoading(false);
     }
   }, []);

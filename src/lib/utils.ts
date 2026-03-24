@@ -30,5 +30,3 @@ export function transliterate(text: string): string {
     .map(char => cyrillicToLatinMap[char] ?? char)
     .join('');
 }
-
-

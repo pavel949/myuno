@@ -152,14 +152,14 @@ export default function ExperiencesIndex() {
   const handleTypeChange = (type: ViewType) => {
     setViewType(type);
     const newParams = new URLSearchParams(searchParams);
-    if (type === 'all') newParams.delete('type'); else newParams.set('type', type);
+    type === 'all' ? newParams.delete('type') : newParams.set('type', type);
     setSearchParams(newParams);
   };
 
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat);
     const newParams = new URLSearchParams(searchParams);
-    if (cat === 'all') newParams.delete('category'); else newParams.set('category', cat);
+    cat === 'all' ? newParams.delete('category') : newParams.set('category', cat);
     setSearchParams(newParams);
   };
 

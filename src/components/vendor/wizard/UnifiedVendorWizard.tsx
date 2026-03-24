@@ -808,15 +808,15 @@ function CustomFieldRenderer({ field, value, onChange, isRu }: CustomFieldRender
         </div>
       );
     
-    case 'select': {
-      const selectOptions = field.taxonomyType
-        ? taxonomyOptions.map(o => ({
-            value: o.value,
-            labelEn: o.label_en,
-            labelRu: o.label_ru
+    case 'select':
+      const selectOptions = field.taxonomyType 
+        ? taxonomyOptions.map(o => ({ 
+            value: o.value, 
+            labelEn: o.label_en, 
+            labelRu: o.label_ru 
           }))
         : field.options || [];
-
+      
       return (
         <CompactField label={label} className="mt-3">
           <Select value={value || ''} onValueChange={onChange}>
@@ -833,8 +833,7 @@ function CustomFieldRenderer({ field, value, onChange, isRu }: CustomFieldRender
           </Select>
         </CompactField>
       );
-    }
-
+    
     default:
       return null;
   }

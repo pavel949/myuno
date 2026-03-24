@@ -228,7 +228,7 @@ export function getStoredLang(): 'en' | 'ru' {
     try {
       const stored = localStorage.getItem('myuno-language');
       if (stored === 'ru') return 'ru';
-    } catch { /* best-effort, fall through to default */ }
+    } catch {}
   }
   return 'en';
 }

@@ -23,7 +23,7 @@ export function useTripChecklist() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
-    } catch { /* best-effort, fall through to defaults */ }
+    } catch {}
     return Object.fromEntries(DEFAULT_ITEMS.map(id => [id, false]));
   });
 

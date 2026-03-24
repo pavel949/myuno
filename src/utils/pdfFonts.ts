@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 
-const fontCache: Record<string, string> = {};
+let fontCache: Record<string, string> = {};
 
 async function loadFontAsBase64(url: string): Promise<string> {
   if (fontCache[url]) return fontCache[url];

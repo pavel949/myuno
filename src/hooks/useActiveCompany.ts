@@ -89,7 +89,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
     if (id === selectedId) return; // no-op if same company
     
     setSelectedId(id);
-    try { localStorage.setItem(STORAGE_KEY, id); } catch { /* best-effort, ignore storage errors */ }
+    try { localStorage.setItem(STORAGE_KEY, id); } catch {}
 
     // Invalidate all company-scoped queries to prevent stale data from another MC
     queryClient.invalidateQueries({

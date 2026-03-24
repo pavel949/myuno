@@ -97,9 +97,9 @@ export function PersonalRecommendations() {
             {isRu ? 'Заказать снова' : 'Order again'}
           </p>
           <div className="space-y-1">
-            {data.reOrderItems.map((item) => (
+            {data.reOrderItems.map((item, i) => (
               <button
-                key={item.id}
+                key={i}
                 onClick={() => navigate('/discover')}
                 className="w-full flex items-center gap-3 py-3 hover:opacity-70 transition-opacity"
               >

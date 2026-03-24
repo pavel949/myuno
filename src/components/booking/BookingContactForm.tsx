@@ -26,7 +26,7 @@ interface BookingContactFormProps {
   onValidationChange?: (isValid: boolean) => void;
 }
 
-const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/;
+const PHONE_REGEX = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
 
 export function BookingContactForm({
   data,

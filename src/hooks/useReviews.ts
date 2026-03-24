@@ -80,7 +80,8 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
         });
         setStats({ average, total, distribution });
       }
-    } catch { /* errors surfaced via empty state */ } finally {
+    } catch {
+    } finally {
       if (checkMounted()) setIsLoading(false);
     }
   }, [itemType, itemId]);
@@ -132,6 +133,8 @@ export const useCreateReview = () => {
       
       if (error) throw error;
       return { success: true };
+    } catch (err) {
+      throw err;
     } finally {
       if (isMountedRef.current) setIsSubmitting(false);
     }
@@ -170,7 +173,8 @@ export const useTrustBadges = (providerId?: string) => {
             .order('sort_order');
           if (isMounted) setBadges(data || []);
         }
-      } catch { /* errors surfaced via empty state */ } finally {
+      } catch {
+      } finally {
         if (isMounted) setIsLoading(false);
       }
     };

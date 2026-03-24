@@ -63,7 +63,7 @@ export function CrmDocumentsSection({ companyId, contactId, propertyId, dealId, 
       setTitle('');
       setSelectedFile(null);
       setDocType('other');
-    } catch { /* errors surfaced via toast */ }
+    } catch {}
   };
 
   const handleDownload = async (fileUrl: string, fileName: string) => {

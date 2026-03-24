@@ -107,33 +107,45 @@ export function useAdminBouquets() {
   }, [fetchItems]);
 
   const createItem = async (data: Partial<BouquetFormData>) => {
-    const { error } = await supabase
-      .from('bouquets')
-      .insert(data as any);
+    try {
+      const { error } = await supabase
+        .from('bouquets')
+        .insert(data as any);
 
-    if (error) throw error;
-    await fetchItems();
+      if (error) throw error;
+      await fetchItems();
+    } catch (err) {
+      throw err;
+    }
   };
 
   const updateItem = async (data: { id: string } & Partial<BouquetFormData>) => {
     const { id, ...updates } = data;
-    const { error } = await supabase
-      .from('bouquets')
-      .update(updates as any)
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('bouquets')
+        .update(updates as any)
+        .eq('id', id);
 
-    if (error) throw error;
-    await fetchItems();
+      if (error) throw error;
+      await fetchItems();
+    } catch (err) {
+      throw err;
+    }
   };
 
   const deleteItem = async (id: string) => {
-    const { error } = await supabase
-      .from('bouquets')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('bouquets')
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
-    await fetchItems();
+      if (error) throw error;
+      await fetchItems();
+    } catch (err) {
+      throw err;
+    }
   };
 
   return {
