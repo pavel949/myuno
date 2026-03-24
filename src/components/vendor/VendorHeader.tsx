@@ -15,7 +15,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { CurrencySwitcher } from '@/components/uno/CurrencySwitcher';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { VendorCommandPalette } from './dashboard/VendorCommandPalette';
 import { VendorNotificationBell } from './dashboard/VendorNotificationBell';
 import { VendorAvatarMenu } from './dashboard/VendorAvatarMenu';
@@ -24,8 +23,8 @@ const routeLabels: Record<string, { en: string; ru: string }> = {
   '/vendor': { en: 'Dashboard', ru: 'Обзор' },
   '/vendor/bookings': { en: 'Bookings', ru: 'Заказы' },
   '/vendor/services': { en: 'Services', ru: 'Услуги' },
-  [APP_ROUTES.VENDOR_ANALYTICS]: { en: 'Analytics', ru: 'Аналитика' },
-  [APP_ROUTES.VENDOR_PAYOUTS]: { en: 'Payouts', ru: 'Выплаты' },
+  '/vendor/analytics': { en: 'Analytics', ru: 'Аналитика' },
+  '/vendor/payouts': { en: 'Payouts', ru: 'Выплаты' },
   '/vendor/subscription': { en: 'Subscription', ru: 'Подписка' },
   '/vendor/properties': { en: 'Properties', ru: 'Недвижимость' },
   '/vendor/yachts': { en: 'Yachts', ru: 'Яхты' },

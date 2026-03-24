@@ -3,14 +3,16 @@ import { createStripeClient } from "../_shared/stripe.ts";
 import { createAnonClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const logStep = (step: string, details?: unknown) => {
   console.log(`[VENDOR-PORTAL] ${step}`, details ? JSON.stringify(details) : '');
 };
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

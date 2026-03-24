@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -206,7 +205,7 @@ export function OtaImportPanel({ onDataExtracted }: OtaImportPanelProps) {
 
       setStep('done');
     } catch (err: any) {
-      logger.error('Import error:', err);
+      console.error('Import error:', err);
       setError(err?.message || 'Unknown error');
       setStep('error');
     } finally {

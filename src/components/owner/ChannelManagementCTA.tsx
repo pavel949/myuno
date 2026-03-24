@@ -24,7 +24,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { OWNER_REVENUE } from '@/lib/config/ownerConstants';
-import { APP_ROUTES } from '@/lib/config/routes';
 
 const locale = {
   ru: {
@@ -308,7 +307,7 @@ export function ChannelManagementCTA() {
             <ArrowRight className="h-4 w-4 ml-2" />
           </PremiumButton>
           <a
-            href={APP_ROUTES.OWNER_FULL_MANAGEMENT}
+            href="/owner/full-management"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             {t.fullManagement} →

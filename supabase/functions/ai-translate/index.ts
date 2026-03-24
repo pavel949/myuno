@@ -2,14 +2,16 @@
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const AGENT_SLUG = 'ai-translate';
 const DEFAULT_MODEL = 'google/gemini-2.5-flash';
 const DEFAULT_TEMPERATURE = 0.3;
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

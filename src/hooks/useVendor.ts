@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { createErrorHandler } from '@/lib/errorHandler';
@@ -361,7 +360,7 @@ export function useVendorProfile() {
         }
       } catch (mvError) {
         // Log but don't fail - marketplace_vendor is optional
-        logger.warn('Could not create marketplace_vendor:', mvError);
+        console.warn('Could not create marketplace_vendor:', mvError);
       }
 
       // 2. Create org in new Clean Core system with verticals in metadata

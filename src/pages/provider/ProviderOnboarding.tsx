@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -81,7 +80,7 @@ const ProviderOnboarding = () => {
 
       setStep('success');
     } catch (error) {
-      logger.error('Error submitting application:', error);
+      console.error('Error submitting application:', error);
       toast.error(isRu ? 'Ошибка при отправке заявки' : 'Error submitting application');
     } finally {
       setIsSubmitting(false);

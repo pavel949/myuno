@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -119,7 +118,7 @@ export function PropertyBookingSuccess({
         throw new Error('No PDF data');
       }
     } catch (error) {
-      logger.error('Error downloading voucher:', error);
+      console.error('Error downloading voucher:', error);
       toast.error(isRu ? 'Не удалось загрузить ваучер' : 'Failed to download voucher');
     } finally {
       setIsDownloadingPdf(false);

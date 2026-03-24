@@ -9,7 +9,6 @@ export * from './defaults';
 export * from './investorData';
 export * from './homeServicesTaxonomy';
 export * from './routes';
-export * from './publicUrls';
 export * from './currencies';
 export * from './entityTypes';
 export * from './ownerConstants';

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -60,7 +59,7 @@ export function useSupabaseCRUD<T extends { id: string }>({
   const handleError = useCallback((err: unknown, operation: string): Error => {
     const errorMessage = err instanceof Error ? err.message : String(err);
     const error = new Error(`${operation} failed: ${errorMessage}`);
-    logger.error(`Error in ${operation} for ${table}:`, err);
+    console.error(`Error in ${operation} for ${table}:`, err);
     
     if (showToasts) {
       toast.error(`${operation} failed`, { description: errorMessage });

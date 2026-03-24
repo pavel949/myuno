@@ -6,7 +6,6 @@
  * DB translations override static ones and are cached for 1 hour.
  */
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { translations, type Language } from '@/i18n';
 
@@ -85,7 +84,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(TRANSLATIONS_CACHE_KEY, JSON.stringify(map));
         localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
       } catch (err) {
-        logger.error('Failed to load translations from DB:', err);
+        console.error('Failed to load translations from DB:', err);
         // Fallback to static translations (already in the component)
       } finally {
         setIsLoadingTranslations(false);

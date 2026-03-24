@@ -214,19 +214,6 @@ export interface CrmReminderRow {
   [key: string]: unknown;
 }
 
-export interface MCAssetFinancialModelRow {
-  id: string;
-  company_id: string;
-  property_id: string | null;
-  asset_name: string;
-  asset_address: string | null;
-  inputs: Record<string, unknown>;
-  scenarios: Record<string, unknown>;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 // ============= Named accessors =============
 
 export const untypedTables = {
@@ -238,7 +225,6 @@ export const untypedTables = {
   disputes: () => typedFrom('disputes'),
   analyticsEvents: () => typedFrom('analytics_events'),
   contactProperties: () => typedFrom('contact_properties'),
-  ownerManagementSettings: () => typedFrom('owner_management_settings'),
   teamMemberPermissions: () => typedFrom('team_member_permissions'),
   ownerPortalSettings: () => typedFrom('owner_portal_settings'),
   propertyDelegates: () => typedFrom('property_delegates'),
@@ -270,5 +256,4 @@ export const untypedTables = {
   crmActivities: () => typedFrom('crm_activities'),
   mccLeads: () => typedFrom('mcc_leads'),
   vendorOutreachLog: () => typedFrom('vendor_outreach_log'),
-  mcAssetFinancialModels: () => typedFrom('mc_asset_financial_models'),
 } as const;

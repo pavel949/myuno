@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,7 +47,7 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
           .single();
         
         if (bookingError || !booking) {
-          logger.warn('Chat access denied: booking not found or not owned');
+          console.warn('Chat access denied: booking not found or not owned');
           return [];
         }
       } else if (propertyId) {
@@ -60,7 +59,7 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
           .single();
         
         if (propError || !property) {
-          logger.warn('Chat access denied: property not found or not owned');
+          console.warn('Chat access denied: property not found or not owned');
           return [];
         }
       }

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -86,7 +85,7 @@ const VendorOnboarding = () => {
       setCreatedProviderId(data?.id || null);
       setCurrentStep(1);
     } catch (error) {
-      logger.error('Error creating profile:', error);
+      console.error('Error creating profile:', error);
       toast.error(isRu ? 'Ошибка при создании профиля' : 'Error creating profile');
     } finally {
       setIsSubmitting(false);
@@ -119,7 +118,7 @@ const VendorOnboarding = () => {
       if (error) throw error;
       setCurrentStep(2);
     } catch (error) {
-      logger.error('Error creating service:', error);
+      console.error('Error creating service:', error);
       toast.error(isRu ? 'Ошибка при создании услуги' : 'Error creating listing');
     } finally {
       setIsSubmitting(false);

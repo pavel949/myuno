@@ -2,8 +2,6 @@
  * CRUD hooks for agent_deals table (Sales CRM for Management Companies)
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
-import { auditFieldValue } from '@/lib/dealAuditEncoding';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
@@ -318,13 +316,13 @@ export function useBulkUpdateStage() {
           .map((d: any) => ({
             deal_id: d.id,
             field_name: 'stage',
-            old_value: auditFieldValue(d.stage),
-            new_value: auditFieldValue(stage),
+            old_value: d.stage,
+            new_value: stage,
             user_id: user.id,
           }));
         if (changes.length > 0) {
           supabase.from('deal_field_changes').insert(changes).then(({ error: logError }) => {
-            if (logError) logger.warn('[useBulkUpdateStage] deal_field_changes insert failed:', logError);
+            if (logError) console.warn('[useBulkUpdateStage] deal_field_changes insert failed:', logError);
           });
         }
       }

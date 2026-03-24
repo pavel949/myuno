@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
@@ -131,7 +130,7 @@ export default function PropertyQuickSetup() {
 
       toast.success(isRu ? 'Настройки сохранены!' : 'Settings saved!');
     } catch (error) {
-      logger.error('Error saving:', error);
+      console.error('Error saving:', error);
       toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
     } finally {
       setIsSaving(false);

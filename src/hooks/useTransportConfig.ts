@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface VehicleType {
@@ -57,7 +56,7 @@ export function useVehicleTypes(type: 'taxi' | 'airport_transfer' | 'rental' = '
       if (fetchError) throw fetchError;
       if (checkMounted()) setVehicleTypes((data || []) as VehicleType[]);
     } catch (err) {
-      logger.error('Error fetching vehicle types:', err);
+      console.error('Error fetching vehicle types:', err);
       if (checkMounted()) setError(err as Error);
     } finally {
       if (checkMounted()) setIsLoading(false);
@@ -96,7 +95,7 @@ export function useTransportDestinations(type: string = 'airport_transfer') {
       if (fetchError) throw fetchError;
       if (checkMounted()) setDestinations((data || []) as TransportDestination[]);
     } catch (err) {
-      logger.error('Error fetching destinations:', err);
+      console.error('Error fetching destinations:', err);
       if (checkMounted()) setError(err as Error);
     } finally {
       if (checkMounted()) setIsLoading(false);

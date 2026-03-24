@@ -3,7 +3,6 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Camera, User, Loader2 } from 'lucide-react';
@@ -107,7 +106,7 @@ export function AvatarMode({
         toast.success('Аватар загружен');
       }
     } catch (error) {
-      logger.error('Upload error:', error);
+      console.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки аватара');
       }

@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +80,7 @@ export function ReceiptUploadWithOCR({
         throw new Error(result.error || 'Failed to parse receipt');
       }
     } catch (err) {
-      logger.error('OCR Error:', err);
+      console.error('OCR Error:', err);
       setError(isRu ? 'Не удалось распознать чек' : 'Failed to parse receipt');
       // Still save the image even if OCR fails
       onReceiptParsed({

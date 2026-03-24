@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { CheckCircle, AlertCircle, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -41,7 +40,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
           : 'Email sent! Check your inbox.'
       );
     } catch (error: any) {
-      logger.error('Resend verification error:', error);
+      console.error('Resend verification error:', error);
       toast.error(
         language === 'ru' 
           ? 'Ошибка отправки письма' 

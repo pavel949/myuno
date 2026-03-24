@@ -1,5 +1,4 @@
 import React from 'react';
-import { logger } from '@/lib/logger';
 import { RefreshCw, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -123,7 +122,7 @@ export function ReorderButton({
         });
       }
     } catch (error) {
-      logger.error('Reorder error:', error);
+      console.error('Reorder error:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось повторить заказ' : 'Failed to reorder',

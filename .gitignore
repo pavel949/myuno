@@ -12,14 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Environment — never commit secrets
-.env
-.env.*
-!.env.example
-
-# Cursor IDE (local)
-.cursor/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

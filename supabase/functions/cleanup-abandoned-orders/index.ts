@@ -3,12 +3,14 @@ import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
+};
 
 const PENDING_MAX_AGE_HOURS = 2;
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -70,7 +69,7 @@ export function AIDescriptionGenerator({
         toast.success(language === 'ru' ? 'Описание сгенерировано' : 'Description generated');
       }
     } catch (err: unknown) {
-      logger.error('Generation error:', err);
+      console.error('Generation error:', err);
       if (err instanceof Error && err.message?.includes('429')) {
         toast.error(language === 'ru' ? 'Слишком много запросов. Попробуйте позже.' : 'Too many requests. Try again later.');
       } else {

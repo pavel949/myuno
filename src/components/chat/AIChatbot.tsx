@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,7 +114,7 @@ export const AIChatbot = React.forwardRef<HTMLDivElement, object>(function AICha
     try {
       await streamChat(newMessages);
     } catch (error) {
-      logger.error('Chat error:', error);
+      console.error('Chat error:', error);
       setMessages(prev => [
         ...prev,
         { 

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -79,7 +78,7 @@ export function useCommissionRules() {
       toast.success('Комиссия обновлена');
     },
     onError: (error) => {
-      logger.error('Error updating commission rule:', error);
+      console.error('Error updating commission rule:', error);
       toast.error('Ошибка при обновлении комиссии');
     },
   });
@@ -100,7 +99,7 @@ export function useCommissionRules() {
       toast.success('Правило комиссии создано');
     },
     onError: (error) => {
-      logger.error('Error creating commission rule:', error);
+      console.error('Error creating commission rule:', error);
       toast.error('Ошибка при создании правила');
     },
   });
@@ -119,7 +118,7 @@ export function useCommissionRules() {
       toast.success('Правило удалено');
     },
     onError: (error) => {
-      logger.error('Error deleting commission rule:', error);
+      console.error('Error deleting commission rule:', error);
       toast.error('Ошибка при удалении правила');
     },
   });

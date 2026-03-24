@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -230,7 +229,7 @@ export default function AdminActivities() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving activity:', error);
+      console.error('Error saving activity:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving activity');
     } finally {
       setIsSubmitting(false);
@@ -244,7 +243,7 @@ export default function AdminActivities() {
       toast.success(isRussian ? 'Активность удалена' : 'Activity deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting activity:', error);
+      console.error('Error deleting activity:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting activity');
     }
   };

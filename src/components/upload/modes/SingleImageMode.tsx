@@ -3,7 +3,6 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import imageCompression from 'browser-image-compression';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -115,7 +114,7 @@ export function SingleImageMode({
         toast.success('Изображение загружено');
       }
     } catch (error) {
-      logger.error('Upload error:', error);
+      console.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки');
       }

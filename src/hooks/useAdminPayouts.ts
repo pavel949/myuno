@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -129,7 +128,7 @@ export function useAdminPayouts() {
       toast.success('Выплата создана');
     },
     onError: (error) => {
-      logger.error('Error creating payout:', error);
+      console.error('Error creating payout:', error);
       toast.error('Ошибка при создании выплаты');
     },
   });
@@ -164,7 +163,7 @@ export function useAdminPayouts() {
       toast.success(variables.status === 'completed' ? 'Выплата обработана' : 'Выплата отклонена');
     },
     onError: (error) => {
-      logger.error('Error processing payout:', error);
+      console.error('Error processing payout:', error);
       toast.error('Ошибка при обработке выплаты');
     },
   });
@@ -206,7 +205,7 @@ export function useAdminPayouts() {
       toast.success(`Создано ${data?.length || 0} выплат`);
     },
     onError: (error) => {
-      logger.error('Error creating bulk payouts:', error);
+      console.error('Error creating bulk payouts:', error);
       toast.error('Ошибка при создании выплат');
     },
   });

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -145,7 +144,7 @@ export function CatalogExportButton({
 
       toast.success(isRussian ? 'Excel экспортирован' : 'Excel exported');
     } catch (error) {
-      logger.error('Excel export error:', error);
+      console.error('Excel export error:', error);
       toast.error(isRussian ? 'Ошибка экспорта Excel' : 'Excel export failed');
     } finally {
       setIsExporting(false);

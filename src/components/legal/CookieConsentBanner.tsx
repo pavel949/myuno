@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, forwardRef } from 'react';
-import { logger } from '@/lib/logger';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Cookie, X, Settings } from 'lucide-react';
@@ -69,7 +68,7 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
     try {
       localStorage.setItem(CONSENT_KEY, JSON.stringify(final));
     } catch (error) {
-      logger.warn('Failed to persist cookie consent, applying for current session only', error);
+      console.warn('Failed to persist cookie consent, applying for current session only', error);
     } finally {
       setVisible(false);
     }

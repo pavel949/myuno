@@ -1,6 +1,10 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+};
 
 /** Convert array of objects to CSV string */
 function toCsv(rows: Record<string, unknown>[]): string {
@@ -20,7 +24,6 @@ function toCsv(rows: Record<string, unknown>[]): string {
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

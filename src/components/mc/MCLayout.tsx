@@ -1,13 +1,16 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { MCSidebar } from './MCSidebar';
 import { MCHeader } from './MCHeader';
 import { MCMobileNav } from './MCMobileNav';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-export function MCLayout() {
+interface MCLayoutProps {
+  children?: React.ReactNode;
+}
+
+export function MCLayout({ children }: MCLayoutProps) {
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -36,9 +39,7 @@ export function MCLayout() {
               paddingBottom: 'max(env(safe-area-inset-bottom, 20px), 5rem)',
             }}
           >
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
+            {children || <Outlet />}
           </main>
         </SidebarInset>
         <MCMobileNav />

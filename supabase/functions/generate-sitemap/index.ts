@@ -2,7 +2,10 @@
 // Public endpoint - sitemap is meant to be publicly accessible
 import { createAnonClient } from "../_shared/supabase.ts";
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const BASE_URL = "https://myuno.app";
 
@@ -12,7 +15,6 @@ const RATE_LIMIT = 10; // requests per minute
 const RATE_WINDOW = 60000;
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

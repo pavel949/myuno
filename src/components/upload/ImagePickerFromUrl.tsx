@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,7 +99,7 @@ export function ImagePickerFromUrl({
         toast.success(`Найдено ${imageItems.length} изображений на ${sourceLabel}`);
       }
     } catch (error) {
-      logger.error('Error extracting images:', error);
+      console.error('Error extracting images:', error);
       toast.error(error instanceof Error ? error.message : 'Ошибка загрузки');
     } finally {
       setIsLoading(false);

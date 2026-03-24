@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,7 +141,7 @@ export default function TaxonomySchemaEditor({ typeKey }: TaxonomySchemaEditorPr
           ...parsed,
         });
       } catch (e) {
-        logger.error('Failed to parse metadata_schema:', e);
+        console.error('Failed to parse metadata_schema:', e);
         setSchema(DEFAULT_SCHEMA);
       }
     } else {

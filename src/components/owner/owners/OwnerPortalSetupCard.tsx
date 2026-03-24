@@ -4,7 +4,6 @@
  * Links CRM contact → auth user → portal settings for all properties.
  */
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
@@ -143,7 +142,7 @@ export default function OwnerPortalSetupCard({ contactId, email, linkedUserId, p
       queryClient.invalidateQueries({ queryKey: ['owner-portal-settings-all'] });
       queryClient.invalidateQueries({ queryKey: ['owner-accounts'] });
     } catch (err: unknown) {
-      logger.error('Portal activation error:', err);
+      console.error('Portal activation error:', err);
       toast.error(isRu ? 'Ошибка активации портала' : 'Portal activation error');
     } finally {
       setActivating(false);

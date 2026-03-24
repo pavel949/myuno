@@ -6,7 +6,11 @@ import {
   generateWalletTopUpEmail,
   generateOrderRequestReceivedEmail,
 } from '../_shared/email-templates.ts';
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 interface SendOrderEmailPayload {
   type: 'order_confirmation' | 'order_cancellation' | 'wallet_topup' | 'order_request_received';
@@ -29,7 +33,6 @@ const logStep = (step: string, details?: unknown) => {
 };
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

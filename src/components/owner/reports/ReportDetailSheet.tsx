@@ -4,7 +4,6 @@ import {
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   TrendingUp, TrendingDown, Building2, Calendar,
   FileText
@@ -13,8 +12,6 @@ import { format } from 'date-fns';
 import { ru as ruLocale, enUS } from 'date-fns/locale';
 import { PropertyReport } from '@/hooks/usePropertyReports';
 import { ManagementReportDetail } from './ManagementReportDetail';
-import { FinancialReconciliation } from './FinancialReconciliation';
-import { useOwnerReconciliation } from '@/hooks/useOwnerReconciliation';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
 
 interface ReportDetailSheetProps {
@@ -27,10 +24,6 @@ interface ReportDetailSheetProps {
 export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: ReportDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: reconciliationRows, isLoading: reconciliationLoading } = useOwnerReconciliation(
-    open ? report?.property_id : undefined,
-    12
-  );
 
   if (!report) return null;
 
@@ -261,18 +254,6 @@ export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: Re
                 </div>
               </div>
             )}
-          </>
-        )}
-
-        {/* Cumulative Financial Reconciliation */}
-        {(report.report_type === 'owner_statement' || report.report_type === 'monthly') && (
-          <>
-            <Separator className="my-4" />
-            {reconciliationLoading ? (
-              <Skeleton className="h-32 w-full" />
-            ) : reconciliationRows && reconciliationRows.length > 0 ? (
-              <FinancialReconciliation rows={reconciliationRows} />
-            ) : null}
           </>
         )}
 

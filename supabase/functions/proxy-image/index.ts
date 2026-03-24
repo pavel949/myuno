@@ -8,13 +8,15 @@
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { validateUrlForSSRF } from "../_shared/ssrf-guard.ts";
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const FETCH_TIMEOUT_MS = 8000;
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

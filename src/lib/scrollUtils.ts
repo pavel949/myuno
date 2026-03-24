@@ -1,5 +1,3 @@
-import { logger } from '@/lib/logger';
-
 /**
  * @module scrollUtils
  * @description Standardized scroll utilities for consistent mobile behavior
@@ -96,7 +94,7 @@ export function validateTouchAction(element: HTMLElement): boolean {
   const badValues = ['pan-x', 'none'];
   
   if (badValues.includes(touchAction)) {
-    logger.warn(
+    console.warn(
       `[ScrollUtils] Element has touch-action: ${touchAction} which may block vertical scrolling`,
       element
     );
@@ -122,6 +120,6 @@ export function auditScrollContainers(): void {
   });
   
   if (issues > 0) {
-    logger.warn(`[ScrollUtils] Found ${issues} potential scroll issues`);
+    console.warn(`[ScrollUtils] Found ${issues} potential scroll issues`);
   }
 }

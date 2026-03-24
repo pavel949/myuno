@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -89,7 +88,7 @@ export default function AdminIntakeConfigs() {
     },
     onError: (err) => {
       toast.error(t('Failed to save', 'Ошибка сохранения'));
-      logger.error(err);
+      console.error(err);
     }
   });
 

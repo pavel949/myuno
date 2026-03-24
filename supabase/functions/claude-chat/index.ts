@@ -3,7 +3,11 @@
  * Accepts POST { messages, systemPrompt?, vertical? }, returns { response }.
  * Never expose ANTHROPIC_API_KEY to the frontend.
  */
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-20250514";
@@ -31,7 +35,6 @@ interface AnthropicResponse {
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

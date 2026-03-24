@@ -9,7 +9,6 @@
  */
 
 import { useState, useMemo, useEffect } from "react";
-import { logger } from '@/lib/logger';
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -252,7 +251,7 @@ export default function TransportBooking() {
           });
 
         if (detailsError) {
-          logger.error('Failed to save transport details:', detailsError);
+          console.error('Failed to save transport details:', detailsError);
         }
       }
 

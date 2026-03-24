@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -79,7 +78,7 @@ export function useVendorSubscription() {
         setError(null);
       }
     } catch (err) {
-      logger.error('Error checking subscription:', err);
+      console.error('Error checking subscription:', err);
       if (checkMounted()) {
         setError(err instanceof Error ? err.message : 'Failed to check subscription');
       }
@@ -126,7 +125,7 @@ export function useVendorSubscription() {
 
       throw new Error('No checkout URL returned');
     } catch (err) {
-      logger.error('Error creating subscription:', err);
+      console.error('Error creating subscription:', err);
       throw err;
     }
   };
@@ -150,7 +149,7 @@ export function useVendorSubscription() {
 
       throw new Error('No portal URL returned');
     } catch (err) {
-      logger.error('Error opening portal:', err);
+      console.error('Error opening portal:', err);
       throw err;
     }
   };
@@ -199,7 +198,7 @@ export function useSubscriptionPlans() {
 
         if (isMounted) setPlans(mappedPlans);
       } catch (err) {
-        logger.error('Error fetching plans:', err);
+        console.error('Error fetching plans:', err);
       } finally {
         if (isMounted) setIsLoading(false);
       }

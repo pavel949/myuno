@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { Send, User, Building2, Check, CheckCheck, ShieldAlert, Bot } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -82,7 +81,7 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
       setNewMessage('');
       setPreSendWarning(null);
     } catch (error) {
-      logger.error('Error sending message:', error);
+      console.error('Error sending message:', error);
     }
   };
 

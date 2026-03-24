@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -38,7 +37,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
         .order('date', { ascending: true });
 
       if (error) {
-        logger.error('Error fetching availability:', error);
+        console.error('Error fetching availability:', error);
         throw error;
       }
 
@@ -85,7 +84,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
       });
     },
     onError: (error) => {
-      logger.error('Error updating availability:', error);
+      console.error('Error updating availability:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось обновить доступность' : 'Failed to update availability',
@@ -113,7 +112,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
     },
     onError: (error) => {
-      logger.error('Error deleting availability:', error);
+      console.error('Error deleting availability:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось удалить записи' : 'Failed to delete availability entries',

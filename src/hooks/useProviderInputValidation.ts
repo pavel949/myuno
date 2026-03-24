@@ -4,7 +4,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -42,7 +41,7 @@ export function useProviderInputValidation(entityType: string) {
         .eq('is_active', true);
       
       if (error) {
-        logger.warn('Failed to fetch provider input rules:', error);
+        console.warn('Failed to fetch provider input rules:', error);
         return [];
       }
       return data as ProviderInputRule[];
@@ -147,7 +146,7 @@ export function useTaxonomyNormalization(entityType: string, fieldName: string) 
         .eq('is_active', true);
       
       if (error) {
-        logger.warn('Failed to fetch taxonomy normalization:', error);
+        console.warn('Failed to fetch taxonomy normalization:', error);
         return new Map<string, string>();
       }
       
@@ -189,7 +188,7 @@ export function useCatalogFacets(entityType: string) {
         .order('sort_order', { ascending: true });
       
       if (error) {
-        logger.warn('Failed to fetch catalog facets:', error);
+        console.warn('Failed to fetch catalog facets:', error);
         return [];
       }
       return data;

@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { logger } from '@/lib/logger';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -87,7 +86,7 @@ export function TranslatableInput({
       setIsAutoTranslated(true);
       toast.success(isRu ? 'Перевод выполнен' : 'Translation complete');
     } catch (error) {
-      logger.error('Translation error:', error);
+      console.error('Translation error:', error);
       toast.error(isRu ? 'Ошибка перевода' : 'Translation failed');
     } finally {
       setIsTranslating(false);

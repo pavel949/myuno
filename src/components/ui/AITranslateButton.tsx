@@ -8,7 +8,6 @@
  * - Error handling with toast notifications
  */
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Languages, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -118,7 +117,7 @@ export function AITranslateButton({
         throw new Error(data.error);
       }
     } catch (error) {
-      logger.error('Translation error:', error);
+      console.error('Translation error:', error);
       const message = error instanceof Error ? error.message : 'Ошибка перевода';
       toast.error(message);
     } finally {

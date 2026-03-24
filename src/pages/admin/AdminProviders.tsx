@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -226,7 +225,7 @@ export default function AdminProviders() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving provider:', error);
+      console.error('Error saving provider:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving provider');
     } finally {
       setIsSubmitting(false);
@@ -240,7 +239,7 @@ export default function AdminProviders() {
       toast.success(isRussian ? 'Провайдер удалён' : 'Provider deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting provider:', error);
+      console.error('Error deleting provider:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting provider');
     }
   };

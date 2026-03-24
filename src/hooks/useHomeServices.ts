@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   normalizeCategory,
@@ -111,7 +110,7 @@ export function useHomeServices(options: UseHomeServicesOptions = {}) {
       } catch (err) {
         if (isMounted) {
           setError(err as Error);
-          logger.error('Error fetching home service providers:', err);
+          console.error('Error fetching home service providers:', err);
         }
       } finally {
         if (isMounted) setIsLoading(false);

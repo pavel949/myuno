@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -127,7 +126,7 @@ export default function Bookings() {
 
       setBookings(formattedBookings);
     } catch (error) {
-      logger.error('Error loading bookings:', error);
+      console.error('Error loading bookings:', error);
     } finally {
       setIsLoading(false);
     }

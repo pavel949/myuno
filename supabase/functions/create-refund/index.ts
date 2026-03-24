@@ -1,7 +1,11 @@
 // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 /**
  * Admin-initiated refund endpoint.
@@ -14,7 +18,6 @@ import { getCorsHeaders } from "../_shared/cors.ts";
  *   note?: string           — Internal admin note
  */
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

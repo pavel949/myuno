@@ -4,7 +4,6 @@
  */
 
 import { useState, useRef, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { Cropper, CropperRef } from 'react-advanced-cropper';
 import 'react-advanced-cropper/dist/style.css';
 import {
@@ -151,7 +150,7 @@ export function ImageEditor({
         toast.success('Фото улучшено!');
       }
     } catch (error) {
-      logger.error('AI enhance error:', error);
+      console.error('AI enhance error:', error);
       toast.error('Не удалось улучшить фото');
     } finally {
       setIsEnhancing(false);
@@ -203,7 +202,7 @@ export function ImageEditor({
       onOpenChange(false);
       toast.success('Изменения сохранены');
     } catch (error) {
-      logger.error('Save error:', error);
+      console.error('Save error:', error);
       toast.error('Ошибка сохранения');
     } finally {
       setIsSaving(false);

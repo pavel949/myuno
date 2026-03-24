@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -99,7 +98,7 @@ export default function AdminLeadConfigs() {
     },
     onError: (err) => {
       toast.error(t('Failed to save', 'Ошибка сохранения'));
-      logger.error(err);
+      console.error(err);
     }
   });
 

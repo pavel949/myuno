@@ -1,5 +1,4 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useSupabaseQuery, useSupabaseSingle, QueryFilter } from './useSupabaseQuery';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -169,7 +168,7 @@ export function useRestaurant(id: string | undefined) {
           setMenuItems((itemsResult.data || []) as MenuItem[]);
         }
       } catch (err) {
-        logger.error('Error fetching menu data:', err);
+        console.error('Error fetching menu data:', err);
       } finally {
         if (isMounted) setMenuLoading(false);
       }

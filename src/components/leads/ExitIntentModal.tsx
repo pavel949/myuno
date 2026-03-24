@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { logger } from '@/lib/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Shield, Clock, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,7 +96,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
       toast.success(isRu ? 'Заявка отправлена! Свяжемся в течение 24 часов' : 'Request sent! We\'ll contact you within 24 hours');
       setIsOpen(false);
     } catch (error) {
-      logger.error('Exit intent submit error:', error);
+      console.error('Exit intent submit error:', error);
       toast.error(isRu ? 'Ошибка отправки' : 'Submission error');
     } finally {
       setIsSubmitting(false);

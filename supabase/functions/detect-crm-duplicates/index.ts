@@ -1,7 +1,10 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from '../_shared/auth-guard.ts';
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 interface DuplicateGroup {
   contacts: any[];
@@ -42,7 +45,6 @@ function similarity(a: string, b: string): number {
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

@@ -1,7 +1,11 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-internal-secret",
+};
 
 /**
  * Lifecycle Processor — cron-triggered Edge Function
@@ -11,7 +15,6 @@ import { getCorsHeaders } from "../_shared/cors.ts";
  * 3. Sends pending executions (email via Resend, in_app via insert to notifications)
  */
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

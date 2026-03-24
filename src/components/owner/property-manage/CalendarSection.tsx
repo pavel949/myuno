@@ -1,5 +1,4 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { logger } from '@/lib/logger';
 import { useAuth } from '@/contexts/AuthContext';
 import { PropertyCalendar, AvailabilityEntry, ActivityLogEntry } from '@/components/property/PropertyCalendar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -46,7 +45,7 @@ export function PropertyManageCalendarSection({
         details: entry.details as any,
       });
     } catch (err) {
-      logger.error('Failed to log activity:', err);
+      console.error('Failed to log activity:', err);
     }
   };
 

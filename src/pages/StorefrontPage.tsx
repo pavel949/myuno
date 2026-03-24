@@ -3,7 +3,6 @@
  * @description Entry point for /b/:slug — loads storefront context and shows MC properties.
  */
 import React, { useEffect, useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useStorefront, StorefrontData } from '@/contexts/StorefrontContext';
@@ -90,7 +89,7 @@ export default function StorefrontPage() {
       const { data: props } = await query;
       setProperties(props || []);
     } catch (err) {
-      logger.error('Storefront load error:', err);
+      console.error('Storefront load error:', err);
       setError(isRu ? 'Ошибка загрузки' : 'Failed to load');
     } finally {
       setLoading(false);

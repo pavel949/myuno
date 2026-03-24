@@ -5,7 +5,6 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface TaxonomyValue {
@@ -77,7 +76,7 @@ export function useTaxonomy(
       const { data, error } = await q;
 
       if (error) {
-        logger.error(`Error fetching taxonomy ${lookupType}:`, error);
+        console.error(`Error fetching taxonomy ${lookupType}:`, error);
         throw error;
       }
 

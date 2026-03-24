@@ -1,7 +1,10 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 // Allowed tables for bulk import - synchronized with src/lib/providerIdMapping.ts
 const ALLOWED_TABLES = [

@@ -4,7 +4,6 @@
  */
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   Command,
   CommandDialog,
@@ -77,10 +76,10 @@ export function VendorCommandPalette({ triggerClassName }: VendorCommandPaletteP
   const commands: CommandItem[] = useMemo(() => [
     // Navigation
     { id: 'dashboard', titleEn: 'Dashboard', titleRu: 'Обзор', icon: LayoutDashboard, action: () => navigate('/vendor'), keywords: ['home', 'main', 'главная'], group: 'navigation' },
-    { id: 'bookings', titleEn: 'Bookings', titleRu: 'Заказы', icon: CalendarDays, action: () => navigate(APP_ROUTES.VENDOR_BOOKINGS), keywords: ['orders', 'заказы'], group: 'navigation' },
-    { id: 'services', titleEn: 'Services', titleRu: 'Услуги', icon: Package, action: () => navigate(APP_ROUTES.VENDOR_SERVICES), keywords: ['products', 'товары'], group: 'navigation' },
-    { id: 'analytics', titleEn: 'Analytics', titleRu: 'Аналитика', icon: BarChart3, action: () => navigate(APP_ROUTES.VENDOR_ANALYTICS), keywords: ['stats', 'статистика'], group: 'navigation' },
-    { id: 'payouts', titleEn: 'Payouts', titleRu: 'Выплаты', icon: DollarSign, action: () => navigate(APP_ROUTES.VENDOR_PAYOUTS), keywords: ['money', 'деньги'], group: 'navigation' },
+    { id: 'bookings', titleEn: 'Bookings', titleRu: 'Заказы', icon: CalendarDays, action: () => navigate('/vendor/bookings'), keywords: ['orders', 'заказы'], group: 'navigation' },
+    { id: 'services', titleEn: 'Services', titleRu: 'Услуги', icon: Package, action: () => navigate('/vendor/services'), keywords: ['products', 'товары'], group: 'navigation' },
+    { id: 'analytics', titleEn: 'Analytics', titleRu: 'Аналитика', icon: BarChart3, action: () => navigate('/vendor/analytics'), keywords: ['stats', 'статистика'], group: 'navigation' },
+    { id: 'payouts', titleEn: 'Payouts', titleRu: 'Выплаты', icon: DollarSign, action: () => navigate('/vendor/payouts'), keywords: ['money', 'деньги'], group: 'navigation' },
     
     // Quick Actions
     { id: 'new-product', titleEn: 'Create New Product', titleRu: 'Создать товар', icon: Plus, action: () => navigate('/vendor/products/new'), keywords: ['add', 'добавить'], group: 'actions' },

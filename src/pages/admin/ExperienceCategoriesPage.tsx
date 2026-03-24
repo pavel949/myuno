@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminExperienceCategories, ExperienceCategory, ExperienceCategoryInsert } from '@/hooks/useExperienceCategories';
 import { Button } from '@/components/ui/button';
@@ -72,7 +71,7 @@ export default function ExperienceCategoriesPage() {
       setDialogOpen(false);
     } catch (error) {
       toast.error(isRu ? 'Ошибка сохранения' : 'Error saving');
-      logger.error(error);
+      console.error(error);
     }
   };
 
@@ -83,7 +82,7 @@ export default function ExperienceCategoriesPage() {
       setDeleteConfirmId(null);
     } catch (error) {
       toast.error(isRu ? 'Ошибка удаления' : 'Error deleting');
-      logger.error(error);
+      console.error(error);
     }
   };
 

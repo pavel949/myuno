@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { 
@@ -120,7 +119,7 @@ export default function AdminProjects() {
       queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
     } catch (err: any) {
-      logger.error('Enrich error:', err);
+      console.error('Enrich error:', err);
       toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
     } finally {
       setIsEnriching(false);
@@ -282,7 +281,7 @@ export default function AdminProjects() {
       }
       setIsFormOpen(false);
     } catch (error) {
-      logger.error('Save error:', error);
+      console.error('Save error:', error);
       toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
     }
   };

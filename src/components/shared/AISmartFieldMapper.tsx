@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -71,7 +70,7 @@ export function AISmartFieldMapper({
           : `Found ${confidentMappings.length} mappings`
       );
     } catch (err) {
-      logger.error('AI mapping error:', err);
+      console.error('AI mapping error:', err);
       toast.error(
         language === 'ru'
           ? 'Ошибка AI анализа'

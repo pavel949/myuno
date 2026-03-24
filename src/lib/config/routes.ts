@@ -229,8 +229,6 @@ export const APP_ROUTES = {
   VENDOR: '/vendor',
   VENDOR_ONBOARDING: '/vendor/onboarding',
   VENDOR_BOOKINGS: '/vendor/bookings',
-  VENDOR_ANALYTICS: '/vendor/analytics',
-  VENDOR_PAYOUTS: '/vendor/payouts',
   VENDOR_SERVICES: '/vendor/services',
   VENDOR_SETTINGS: '/vendor/settings',
 
@@ -259,7 +257,6 @@ export const APP_ROUTES = {
   MC_FINANCIALS: '/mc/financials',
   MC_STAFF: '/mc/staff',
   MC_REPORTS: '/mc/reports',
-  MC_PARTNER_REPORT: '/mc/reports/partner',
   MC_BUDGET: '/mc/budget',
   MC_INVOICES: '/mc/invoices',
   MC_OWNERS: '/mc/owners',
@@ -281,13 +278,11 @@ export const APP_ROUTES = {
   MC_MANAGEMENT_TERMS: '/mc/management-terms',
   MC_SUPPORT_CHAT: '/mc/support-chat',
   MC_BOOKINGS: '/mc/bookings',
-  MC_FULL_MANAGEMENT: '/mc/full-management',
 
   // ── Owner Portal (individual owners) ──
   OWNER: '/owner',
   OWNER_LANDING: '/owner',
   OWNER_GUIDE: '/owner/guide',
-  OWNER_FULL_MANAGEMENT: '/owner/full-management',
 
   // ── Provider Onboarding ──
   PROVIDER_ONBOARDING: '/provider/onboarding',
@@ -431,20 +426,8 @@ export function getLegacyRedirect(path: string): string | null {
   return LEGACY_REDIRECTS[path] || null;
 }
 
-/**
- * Full URL for password reset (`redirectTo` in `resetPasswordForEmail`).
- * Must match an entry in Supabase → Authentication → URL Configuration → **Redirect URLs**
- * (e.g. `https://myuno.app/auth/reset-password`, `http://localhost:8080/auth/reset-password`).
- *
- * Set **VITE_PUBLIC_APP_URL** in Vercel/production (e.g. `https://myuno.app`) so the link always
- * matches the allowlist even if users open the app via `www` or another alias.
- */
+/** Full URL for password reset redirect. Use in resetPasswordForEmail. Allowlist in Supabase: Authentication → URL Configuration → Redirect URLs. */
 export function getPasswordResetRedirectUrl(): string {
   if (typeof window === 'undefined') return '';
-  const path = APP_ROUTES.AUTH_RESET_PASSWORD;
-  const explicit = import.meta.env.VITE_PUBLIC_APP_URL?.trim();
-  if (explicit) {
-    return `${explicit.replace(/\/$/, '')}${path}`;
-  }
-  return `${window.location.origin}${path}`;
+  return `${window.location.origin}${APP_ROUTES.AUTH_RESET_PASSWORD}`;
 }

@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -93,7 +92,7 @@ export function VoiceInput({ onTranscript, className, disabled }: VoiceInputProp
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        logger.error('Speech recognition error:', event.error);
+        console.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
 
@@ -103,7 +102,7 @@ export function VoiceInput({ onTranscript, className, disabled }: VoiceInputProp
 
       recognition.start();
     } catch (error) {
-      logger.error('Failed to start speech recognition:', error);
+      console.error('Failed to start speech recognition:', error);
       setIsListening(false);
     }
   }, [isRu, onTranscript]);

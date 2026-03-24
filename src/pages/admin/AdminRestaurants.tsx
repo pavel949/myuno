@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -207,7 +206,7 @@ export default function AdminRestaurants() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error:', error);
+      console.error('Error:', error);
       toast.error(isRussian ? 'Ошибка сохранения' : 'Error saving');
     } finally {
       setIsSubmitting(false);

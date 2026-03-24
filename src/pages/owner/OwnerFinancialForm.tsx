@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -141,7 +140,7 @@ export default function OwnerFinancialForm() {
       }
       navigate('/mc/financials');
     } catch (error) {
-      logger.error('Error saving financial:', error);
+      console.error('Error saving financial:', error);
     }
   };
 

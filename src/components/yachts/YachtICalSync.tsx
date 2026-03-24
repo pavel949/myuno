@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useYachtExternalCalendars, useYachtICalExportUrl, CreateYachtCalendarInput } from '@/hooks/useYachtExternalCalendars';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -81,7 +80,7 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
       setShowAddDialog(false);
       setFormData({ name: '', ical_url: '' });
     } catch (error) {
-      logger.error('Error adding calendar:', error);
+      console.error('Error adding calendar:', error);
       toast.error(isRu ? 'Ошибка добавления' : 'Error adding calendar');
     }
   };
@@ -91,7 +90,7 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
       await syncCalendar(calendarId);
       toast.success(isRu ? 'Синхронизация завершена' : 'Sync completed');
     } catch (error) {
-      logger.error('Error syncing calendar:', error);
+      console.error('Error syncing calendar:', error);
       toast.error(isRu ? 'Ошибка синхронизации' : 'Sync failed');
     }
   };
@@ -101,7 +100,7 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
       await deleteCalendar(calendarId);
       toast.success(isRu ? 'Календарь удалён' : 'Calendar deleted');
     } catch (error) {
-      logger.error('Error deleting calendar:', error);
+      console.error('Error deleting calendar:', error);
       toast.error(isRu ? 'Ошибка удаления' : 'Error deleting');
     }
   };
@@ -116,7 +115,7 @@ export function YachtICalSync({ yachtId, className }: YachtICalSyncProps) {
           : `Synced ${successful} calendars`
       );
     } catch (error) {
-      logger.error('Error syncing all:', error);
+      console.error('Error syncing all:', error);
       toast.error(isRu ? 'Ошибка синхронизации' : 'Sync failed');
     }
   };

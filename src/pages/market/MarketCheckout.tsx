@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Truck, ShoppingBag, Package, Sparkles, Plane, AlertTriangle, User } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -427,7 +426,7 @@ const MarketCheckout = () => {
           });
         } catch (e) {
           // Non-blocking - continue with order success
-          logger.error('Failed to save address:', e);
+          console.error('Failed to save address:', e);
         }
       }
 

@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useRef, memo } from 'react';
-import { logger } from '@/lib/logger';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ export const TranslatableTextarea = memo(function TranslatableTextarea({
         toast.success(isRu ? 'Переведено!' : 'Translated!');
       }
     } catch (error) {
-      logger.error('Translation error:', error);
+      console.error('Translation error:', error);
       toast.error(isRu ? 'Ошибка перевода' : 'Translation failed');
     } finally {
       setIsTranslating(false);

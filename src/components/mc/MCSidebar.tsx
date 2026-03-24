@@ -19,11 +19,26 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { useTodayTasksCount } from '@/hooks/useCrmTasks';
 import { useProfile } from '@/hooks/useProfile';
 import { APP_ROUTES } from '@/lib/config/routes';
-import type { NavItem, NavGroup } from './types';
+
+interface NavItem {
+  title: string;
+  titleRu: string;
+  path: string;
+  icon: React.ElementType;
+  badgeKey?: 'tasks' | 'messages';
+}
+
+interface NavGroup {
+  label: string;
+  labelRu: string;
+  items: NavItem[];
+  defaultOpen?: boolean;
+}
 
 export const navigationGroups: NavGroup[] = [
   {
@@ -63,6 +78,7 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Channel Manager', titleRu: 'Channel Manager', path: APP_ROUTES.MC_CHANNELS, icon: Radio },
+      { title: 'Calendar Sync', titleRu: 'Синхронизация', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
     ],
   },
   {
@@ -74,7 +90,6 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Payouts', titleRu: 'Выплаты', path: APP_ROUTES.MC_MANAGEMENT_TERMS, icon: Shuffle },
       { title: 'Transactions', titleRu: 'Транзакции', path: APP_ROUTES.MC_FINANCIALS, icon: ArrowLeftRight },
       { title: 'Reports', titleRu: 'Отчёты', path: APP_ROUTES.MC_REPORTS, icon: BarChart3 },
-      { title: 'Partner P&L', titleRu: 'Отчёт партнёра', path: APP_ROUTES.MC_PARTNER_REPORT, icon: BarChart3 },
       { title: 'Budget', titleRu: 'Бюджет', path: APP_ROUTES.MC_BUDGET, icon: Target },
       { title: 'Invoices', titleRu: 'Инвойсы', path: APP_ROUTES.MC_INVOICES, icon: Receipt },
     ],
@@ -110,7 +125,6 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_PROPERTIES]: 'properties',
   [APP_ROUTES.MC_OWNERS]: 'crm',
   [APP_ROUTES.MC_CALENDAR]: 'bookings',
-  [APP_ROUTES.MC_CHANNELS]: 'bookings',
   [APP_ROUTES.MC_SALES]: 'crm',
   [APP_ROUTES.MC_CONTACTS]: 'crm',
   [APP_ROUTES.MC_CRM_DASHBOARD]: 'crm',
@@ -128,7 +142,6 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_FINANCIALS]: 'finance',
   [APP_ROUTES.MC_INVOICES]: 'finance',
   [APP_ROUTES.MC_REPORTS]: 'reports',
-  [APP_ROUTES.MC_PARTNER_REPORT]: 'reports',
   [APP_ROUTES.MC_BUDGET]: 'finance',
   [APP_ROUTES.MC_STAFF]: 'staff',
 };
@@ -142,6 +155,7 @@ export function MCSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { activeCompany } = useActiveCompany();
+  const { role: resolvedRole } = useResolvedContext();
   const { canAccess } = useTeamPermissions();
   const { data: todayTasksCount } = useTodayTasksCount();
   const { profile } = useProfile();

@@ -12,8 +12,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
-import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -79,12 +77,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
     preferred_types: [] as string[],
     preferred_districts: [] as string[],
     is_vip: false,
-    client_whatsapp: '',
-    client_telegram: '',
-    client_nationality: '',
-    client_crm_role: 'other' as (typeof CRM_ROLES)[number],
-    client_tags: [] as string[],
-    client_notes: '',
   });
   const [errors, setErrors] = useState<{
     client_name?: string;
@@ -150,14 +142,9 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             last_name: nameParts.slice(1).join(' ') || '',
             phone: form.client_phone || null,
             phone2: null, email: form.client_email || null,
-            whatsapp: form.client_whatsapp || null,
-            telegram: form.client_telegram || null,
-            line_id: null,
-            nationality: form.client_nationality || null,
-            language: 'en',
-            source: form.client_source,
-            contact_type: CONTACT_TYPE_BY_DEAL_TYPE[form.deal_type as keyof typeof CONTACT_TYPE_BY_DEAL_TYPE],
-            crm_role: form.client_crm_role,
+            whatsapp: null, telegram: null, line_id: null,
+            nationality: null, language: 'en',
+            source: form.client_source, contact_type: CONTACT_TYPE_BY_DEAL_TYPE[form.deal_type as keyof typeof CONTACT_TYPE_BY_DEAL_TYPE],
             company_name: null,
             budget_min: form.budget_min ? Number(form.budget_min) : null,
             budget_max: form.budget_max ? Number(form.budget_max) : null,
@@ -165,10 +152,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
             preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
             preferred_types: form.preferred_types.length ? form.preferred_types : null,
             bedrooms_min: form.bedrooms_min ? Number(form.bedrooms_min) : null,
-            lifecycle_stage: 'lead',
-            notes: form.client_notes || null,
-            tags: form.client_tags,
-            avatar_url: null, is_archived: false,
+            notes: null, tags: [], avatar_url: null, is_archived: false,
             created_by: user?.id || null,
           });
           contactId = (newContact as any)?.id || null;
@@ -212,7 +196,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
       onOpenChange(false);
       setSelectedContact(null);
       setErrors({});
-      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false, client_whatsapp: '', client_telegram: '', client_nationality: '', client_crm_role: 'other', client_tags: [], client_notes: '' });
+      setForm({ client_name: '', client_phone: '', client_email: '', client_source: 'website', deal_type: 'sale', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], is_vip: false });
       if (createdDeal?.id) {
         navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
       }
@@ -340,39 +324,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           {errors.client_email && <p className="text-xs text-destructive mt-1">{errors.client_email}</p>}
         </div>
       </div>
-      {/* Extra contact fields — shown only for new contacts */}
-      {!selectedContact && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label>WhatsApp</Label>
-              <Input value={form.client_whatsapp} onChange={e => setForm(f => ({ ...f, client_whatsapp: e.target.value }))} placeholder={isRu ? 'Если отличается от телефона' : 'If different from phone'} />
-            </div>
-            <div>
-              <Label>Telegram</Label>
-              <Input value={form.client_telegram} onChange={e => setForm(f => ({ ...f, client_telegram: e.target.value }))} placeholder="@username" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label>{isRu ? 'Роль в CRM' : 'CRM Role'}</Label>
-              <Select value={form.client_crm_role} onValueChange={v => setForm(f => ({ ...f, client_crm_role: v as typeof f.client_crm_role }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CRM_ROLES.map(r => (
-                    <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isRu ? 'Национальность' : 'Nationality'}</Label>
-              <Input value={form.client_nationality} onChange={e => setForm(f => ({ ...f, client_nationality: e.target.value }))} placeholder="RU" />
-            </div>
-          </div>
-        </>
-      )}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label>{isRu ? 'Источник' : 'Source'}</Label>
@@ -453,26 +404,8 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         </div>
       </div>
 
-      {/* Tags & contact notes — for new contacts only */}
-      {!selectedContact && (
-        <>
-          <div>
-            <Label className="mb-1.5 block">{isRu ? 'Теги контакта' : 'Contact Tags'}</Label>
-            <ContactTagPicker
-              companyId={companyId}
-              selectedTags={form.client_tags}
-              onToggle={(tag) => setForm(f => ({ ...f, client_tags: f.client_tags.includes(tag) ? f.client_tags.filter(t => t !== tag) : [...f.client_tags, tag] }))}
-            />
-          </div>
-          <div>
-            <Label>{isRu ? 'Заметки по контакту' : 'Contact Notes'}</Label>
-            <Textarea value={form.client_notes} onChange={e => setForm(f => ({ ...f, client_notes: e.target.value }))} rows={2} placeholder={isRu ? 'Инфо о клиенте для CRM' : 'Client info for CRM'} />
-          </div>
-        </>
-      )}
-
       <div>
-        <Label>{isRu ? 'Заметки по сделке' : 'Deal Notes'}</Label>
+        <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
         <Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} />
       </div>
       </div>

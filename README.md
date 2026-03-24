@@ -32,7 +32,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080` (see `vite.config.ts`).
+The app will be available at `http://localhost:5173`.
 
 ## Environment Variables
 
@@ -43,7 +43,6 @@ See [`.env.example`](.env.example) for the complete list. Key variables:
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
 | `VITE_SUPABASE_PROJECT_ID` | Supabase project ID |
-| `VITE_PUBLIC_APP_URL` | Optional. Canonical site URL (no trailing slash), e.g. `https://myuno.app` — **recommended on Vercel Production** for password-reset emails. See [`docs/AUTH-PASSWORD-RESET.md`](docs/AUTH-PASSWORD-RESET.md) and [`docs/OWNER-SETUP-VERCEL-SUPABASE.md`](docs/OWNER-SETUP-VERCEL-SUPABASE.md). |
 
 Edge functions also require secrets configured in the backend: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `MAPBOX_PUBLIC_TOKEN`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`.
 
@@ -76,8 +75,6 @@ docs/            — Developer documentation
 | [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, and RLS policies |
 | [`docs/MCC_ARCHITECTURE.md`](docs/MCC_ARCHITECTURE.md) | Management company business logic |
 | [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns and contracts |
-| [`docs/AUTH-PASSWORD-RESET.md`](docs/AUTH-PASSWORD-RESET.md) | Password reset flow & Supabase troubleshooting |
-| [`docs/OWNER-SETUP-VERCEL-SUPABASE.md`](docs/OWNER-SETUP-VERCEL-SUPABASE.md) | **Owner checklist:** Vercel env + Supabase URLs (cannot be automated from repo) |
 
 ## Key Concepts
 

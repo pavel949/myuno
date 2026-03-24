@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { CreditCard, MessageCircle, Loader2, Shield, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -81,7 +80,7 @@ export function DepositPaymentOptions({
         throw new Error('No checkout URL received');
       }
     } catch (error) {
-      logger.error('Payment error:', error);
+      console.error('Payment error:', error);
       toast.error(isRu ? 'Ошибка при создании платежа' : 'Error creating payment');
     } finally {
       setIsProcessing(false);

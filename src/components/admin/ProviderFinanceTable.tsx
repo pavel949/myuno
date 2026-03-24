@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { motion } from 'framer-motion';
 import { Building2, Search, ArrowUpDown, Pencil, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,7 +88,7 @@ export function ProviderFinanceTable({ providers, isLoading, onRefresh }: Provid
       setEditingRate('');
       onRefresh?.();
     } catch (error) {
-      logger.error('Error updating commission:', error);
+      console.error('Error updating commission:', error);
       toast.error('Ошибка при сохранении комиссии');
     } finally {
       setSaving(false);

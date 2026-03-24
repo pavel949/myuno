@@ -3,7 +3,6 @@
  * Single component that handles Products, Services, and Vertical-specific entries
  */
 import React, { useState, useMemo, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -266,7 +265,7 @@ export function UnifiedVendorWizard({
         toast.info(isRu ? 'Базовое заполнение' : 'Basic fill applied');
       }
     } catch (error) {
-      logger.error('AI fill error:', error);
+      console.error('AI fill error:', error);
       toast.error(isRu ? 'Ошибка AI' : 'AI error');
     } finally {
       setIsAiProcessing(false);

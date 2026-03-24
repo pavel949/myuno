@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -82,7 +81,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
         });
       }
     } catch (err) {
-      logger.warn('Failed to notify owner of check-in:', err);
+      console.warn('Failed to notify owner of check-in:', err);
     }
   };
 

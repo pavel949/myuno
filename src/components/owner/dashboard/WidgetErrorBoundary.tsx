@@ -1,5 +1,4 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { logger } from '@/lib/logger';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredLang } from '@/lib/languageConfig';
@@ -26,7 +25,7 @@ export class WidgetErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    logger.error(`[Widget:${this.props.widgetName || 'unknown'}]`, error, info);
+    console.error(`[Widget:${this.props.widgetName || 'unknown'}]`, error, info);
   }
 
   private handleRetry = () => {

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { RefreshCw, Save, TrendingUp, AlertCircle, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,7 +55,7 @@ export function CurrencyRatesEditor() {
         setEditedRates(initial);
       }
     } catch (error) {
-      logger.error('Failed to load rates:', error);
+      console.error('Failed to load rates:', error);
       toast.error('Не удалось загрузить курсы валют');
     } finally {
       setIsLoading(false);

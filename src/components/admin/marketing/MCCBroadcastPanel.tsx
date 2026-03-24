@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -137,7 +136,7 @@ export function MCCBroadcastPanel() {
       setBodyEn('');
       setPromoCode('');
     } catch (err) {
-      logger.error(err);
+      console.error(err);
       toast.error(isRu ? 'Ошибка при отправке рассылки' : 'Failed to send broadcast');
     } finally {
       setIsSending(false);

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Loader2, Package, ArrowRight, MapPin, Calendar, User, Gift } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -93,7 +92,7 @@ const FlowersSuccess = () => {
           setIsProcessing(false);
         }
       } catch (err) {
-        logger.error('Error polling order:', err);
+        console.error('Error polling order:', err);
         attempts++;
         if (attempts < maxAttempts) {
           timer = setTimeout(pollOrder, 2000);

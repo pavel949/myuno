@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { logger } from '@/lib/logger';
 import { 
   Download, 
   Smartphone, 
@@ -104,15 +103,15 @@ const Install = () => {
   // Cache clearing function for "already installed" state
   const handleClearCache = async () => {
     setIsClearing(true);
-    logger.log('[myUNO] Starting aggressive cache clear...');
+    console.log('[myUNO] Starting aggressive cache clear...');
     
     try {
       // 1. Unregister ALL service workers
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-        logger.log(`[myUNO] Found ${registrations.length} service workers`);
+        console.log(`[myUNO] Found ${registrations.length} service workers`);
         await Promise.all(registrations.map(async (reg) => {
-          logger.log('[myUNO] Unregistering SW:', reg.scope);
+          console.log('[myUNO] Unregistering SW:', reg.scope);
           await reg.unregister();
         }));
       }
@@ -120,9 +119,9 @@ const Install = () => {
       // 2. Clear ALL Cache Storage
       if ('caches' in window) {
         const cacheNames = await caches.keys();
-        logger.log(`[myUNO] Found ${cacheNames.length} caches:`, cacheNames);
+        console.log(`[myUNO] Found ${cacheNames.length} caches:`, cacheNames);
         await Promise.all(cacheNames.map(async (name) => {
-          logger.log('[myUNO] Deleting cache:', name);
+          console.log('[myUNO] Deleting cache:', name);
           await caches.delete(name);
         }));
       }
@@ -131,22 +130,22 @@ const Install = () => {
       const keysToRemove = ['app_version', 'manifest_version', 'last_cache_cleanup', 'pwa_installed'];
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
-        logger.log('[myUNO] Removed localStorage:', key);
+        console.log('[myUNO] Removed localStorage:', key);
       });
       
       // 4. Clear sessionStorage
       sessionStorage.clear();
-      logger.log('[myUNO] Cleared sessionStorage');
+      console.log('[myUNO] Cleared sessionStorage');
       
       // 5. Wait a moment for cleanup
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      logger.log('[myUNO] Cache cleared! Hard reloading...');
+      console.log('[myUNO] Cache cleared! Hard reloading...');
       
       // 6. Force hard reload - bypass ALL caches
       window.location.replace(window.location.origin + '/?cache_bust=' + Date.now());
     } catch (error) {
-      logger.error('[myUNO] Cache clear error:', error);
+      console.error('[myUNO] Cache clear error:', error);
       // Still try to reload
       window.location.reload();
     }

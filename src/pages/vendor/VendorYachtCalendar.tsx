@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -68,7 +67,7 @@ export default function VendorYachtCalendar() {
       setHasChanges(false);
       toast.success(isRu ? 'Календарь сохранён' : 'Calendar saved');
     } catch (error) {
-      logger.error('Error saving availability:', error);
+      console.error('Error saving availability:', error);
       toast.error(isRu ? 'Ошибка сохранения' : 'Error saving');
     }
   };

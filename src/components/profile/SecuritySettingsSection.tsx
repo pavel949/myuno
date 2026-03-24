@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { KeyRound, Smartphone, Monitor, Trash2, ChevronRight, Shield, Plus, Pencil, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/uno/SectionCard';
@@ -144,7 +143,7 @@ export function SecuritySettingsSection() {
       setPasswordForm({ newPassword: '', confirmPassword: '' });
     } catch (error: unknown) {
       toast.error(t.passwordError);
-      logger.error('Password change error:', error);
+      console.error('Password change error:', error);
     } finally {
       setIsChangingPassword(false);
     }
@@ -155,7 +154,7 @@ export function SecuritySettingsSection() {
       await signOut(); // Uses AuthContext signOut which clears caches
       toast.success(t.logoutAllSuccess);
     } catch (error) {
-      logger.error('Logout error:', error);
+      console.error('Logout error:', error);
     }
   };
 

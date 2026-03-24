@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { 
   Globe, Plus, MapPin, Check, X, Calendar, 
@@ -163,7 +162,7 @@ export default function AdminCities() {
       setIsDialogOpen(false);
       refetch();
     } catch (error: unknown) {
-      logger.error('Error saving city:', error);
+      console.error('Error saving city:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка сохранения' : 'Error saving'));
     } finally {
       setIsSaving(false);
@@ -192,7 +191,7 @@ export default function AdminCities() {
       setCityToDelete(null);
       refetch();
     } catch (error: unknown) {
-      logger.error('Error deleting city:', error);
+      console.error('Error deleting city:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка удаления' : 'Error deleting'));
     } finally {
       setIsDeleting(false);
@@ -218,7 +217,7 @@ export default function AdminCities() {
       );
       refetch();
     } catch (error: unknown) {
-      logger.error('Error toggling city:', error);
+      console.error('Error toggling city:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
     }
   };

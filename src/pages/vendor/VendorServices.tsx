@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -217,7 +216,7 @@ const VendorServices = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving service:', error);
+      console.error('Error saving service:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving service');
     } finally {
       setIsSubmitting(false);
@@ -231,7 +230,7 @@ const VendorServices = () => {
       toast.success(isRussian ? 'Услуга удалена' : 'Service deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting service:', error);
+      console.error('Error deleting service:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting service');
     }
   };

@@ -3,7 +3,6 @@
  * Supports file upload and paste from clipboard
  */
 import React, { useState, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,7 +134,7 @@ export function BulkImportSheet({
 
     if (result.errors.length > 0) {
       toast.error(isRu ? 'Ошибка парсинга CSV' : 'CSV parsing error');
-      logger.error('CSV errors:', result.errors);
+      console.error('CSV errors:', result.errors);
       // Don't return - continue with valid rows, but warn user
     }
     
@@ -260,7 +259,7 @@ export function BulkImportSheet({
         setTimeout(() => onOpenChange(false), 1500);
       }
     } catch (error) {
-      logger.error('Import error:', error);
+      console.error('Import error:', error);
       toast.error(isRu ? 'Ошибка импорта' : 'Import error');
     } finally {
       setIsImporting(false);

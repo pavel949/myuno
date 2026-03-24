@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,7 +121,7 @@ const Wallet = () => {
           setTransactions((txData || []) as Transaction[]);
         }
       } catch (error) {
-        logger.error('Error loading wallet:', error);
+        console.error('Error loading wallet:', error);
       } finally {
         setIsLoading(false);
       }
@@ -159,7 +158,7 @@ const Wallet = () => {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
-      logger.error('Error creating checkout session:', error);
+      console.error('Error creating checkout session:', error);
       toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Error creating payment');
     } finally {
       setIsProcessing(false);

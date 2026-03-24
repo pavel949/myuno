@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -237,7 +236,7 @@ export default function AdminServices() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving service:', error);
+      console.error('Error saving service:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving service');
     } finally {
       setIsSubmitting(false);
@@ -251,7 +250,7 @@ export default function AdminServices() {
       toast.success(isRussian ? 'Услуга удалена' : 'Service deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting service:', error);
+      console.error('Error deleting service:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting service');
     }
   };

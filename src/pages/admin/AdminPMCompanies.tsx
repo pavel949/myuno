@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePMCompanies, PMCompany, PMCompanyInsert, PMCompanyUpdate } from '@/hooks/usePMCompanies';
@@ -168,7 +167,7 @@ export default function AdminPMCompanies() {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving PM company:', error);
+      console.error('Error saving PM company:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -179,7 +178,7 @@ export default function AdminPMCompanies() {
       await deleteCompany(id);
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting PM company:', error);
+      console.error('Error deleting PM company:', error);
     }
   };
 

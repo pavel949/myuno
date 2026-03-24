@@ -394,7 +394,6 @@ export const OwnerTransparencyDashboard = lazy(() => import('@/pages/owner/Owner
 export const MaintenancePlan = lazy(() => import('@/pages/owner/MaintenancePlan'));
 export const TeamPage = lazy(() => import('@/pages/owner/TeamPage'));
 export const ReportsPage = lazy(() => import('@/pages/owner/ReportsPage'));
-export const PartnerReportPage = lazy(() => import('@/pages/mc/PartnerReportPage'));
 export const ManagementPortfolio = lazy(() => import('@/pages/owner/ManagementPortfolio'));
 export const StaffPage = lazy(() => import('@/pages/owner/StaffPage'));
 export const MCSubscriptionPage = lazy(() => import('@/pages/owner/MCSubscriptionPage'));

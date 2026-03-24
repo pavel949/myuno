@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -91,7 +90,7 @@ export function useAIConcierge() {
       setSuggestions(result);
       setCache(result);
     } catch (e) {
-      logger.error('Concierge error:', e);
+      console.error('Concierge error:', e);
       setError(e instanceof Error ? e.message : 'Failed to load suggestions');
     } finally {
       setIsLoading(false);

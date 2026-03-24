@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 
 type FilterOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike' | 'or';
@@ -125,7 +124,7 @@ export function useSupabaseQuery<T>({
         setError(null);
       }
     } catch (err) {
-      logger.error(`Error fetching from ${table}:`, err);
+      console.error(`Error fetching from ${table}:`, err);
       if (isMountedRef.current) {
         setError(err instanceof Error ? err : new Error(String(err)));
         setData([]);
@@ -202,7 +201,7 @@ export function useSupabaseSingle<T>({
           setData(finalData);
         }
       } catch (err) {
-        logger.error(`Error fetching ${table} by ID:`, err);
+        console.error(`Error fetching ${table} by ID:`, err);
         if (isMounted) {
           setError(err instanceof Error ? err : new Error(String(err)));
         }

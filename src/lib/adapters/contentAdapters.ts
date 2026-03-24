@@ -329,10 +329,6 @@ export function mapPropertyToCardProps(
 
   if (isOwnerProperty(property)) {
     // OwnerProperty format (title, title_ru)
-    // Price: price_per_night for short-term; fallback to price for long-term (month/year)
-    const displayPrice = property.price_per_night ?? property.price;
-    const pricePeriod = property.price_period ?? 'night';
-
     return {
       variant: 'property',
       id: property.id,
@@ -348,9 +344,9 @@ export function mapPropertyToCardProps(
       areaSqm: property.area_sqm,
       district: property.district,
       address: property.address,
-      price: displayPrice ?? undefined,
-      pricePerNight: property.price_per_night ?? undefined,
-      pricePeriod,
+      price: property.price_per_night,
+      pricePerNight: property.price_per_night,
+      pricePeriod: 'night',
       currency: property.deposit_currency || 'THB',
       instantBooking: property.instant_booking,
       approvalStatus: property.approval_status,

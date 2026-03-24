@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { logger } from '@/lib/logger';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -50,7 +49,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     const handleBeforeInstall = (e: Event) => {
       // Use debug level to reduce console noise
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] beforeinstallprompt event received');
+        console.debug('[PWA] beforeinstallprompt event received');
       }
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
@@ -65,7 +64,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     const handleAppInstalled = () => {
       // Use debug level to reduce console noise
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] App installed successfully');
+        console.debug('[PWA] App installed successfully');
       }
       setIsInstalled(true);
       globalDeferredPrompt = null;
@@ -87,20 +86,20 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     if (!prompt) {
       // Use debug level to reduce console noise
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] No install prompt available');
+        console.debug('[PWA] No install prompt available');
       }
       return false;
     }
 
     try {
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] Triggering install prompt');
+        console.debug('[PWA] Triggering install prompt');
       }
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
       
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] User choice:', outcome);
+        console.debug('[PWA] User choice:', outcome);
       }
       
       if (outcome === 'accepted') {
@@ -114,7 +113,7 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       // Use debug level for expected errors
       if (import.meta.env.DEV) {
-        logger.debug('[PWA] Install prompt error:', error);
+        console.debug('[PWA] Install prompt error:', error);
       }
       return false;
     }

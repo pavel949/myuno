@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
-      open: true,
     },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),

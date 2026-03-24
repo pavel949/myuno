@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -98,7 +97,16 @@ const MCOnboarding: React.FC = () => {
     }
     setLoading(true);
     try {
-      const slug = slugify(nameEn);
+      // Generate slug with uniqueness suffix
+      let slug = slugify(nameEn);
+      const { data: existing } = await supabase
+        .from('management_companies')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (existing) {
+        slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
+      }
 
       const { data, error } = await supabase.functions.invoke('register-mc', {
         body: {
@@ -185,7 +193,6 @@ const MCOnboarding: React.FC = () => {
 
     setLoading(true);
     try {
-      const sentEmails = new Set<string>();
       for (const invite of validInvites) {
         const { data, error } = await supabase.functions.invoke('invite-team-member', {
           body: {
@@ -197,11 +204,9 @@ const MCOnboarding: React.FC = () => {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        sentEmails.add(invite.email.trim());
+        invite.sent = true;
       }
-      setInvites(prev => prev.map(inv =>
-        sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv
-      ));
+      setInvites([...invites]);
       toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
     } catch (err: unknown) {
       toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
@@ -419,11 +424,11 @@ const MCOnboarding: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full" size="lg" onClick={() => navigate(APP_ROUTES.MC_PROPERTY_NEW)}>
+                <Button className="w-full" size="lg" onClick={() => navigate('/mc/properties/new')}>
                   <Building2 className="mr-2 h-5 w-5" />
                   {isRu ? 'Добавить первый объект' : 'Add First Property'}
                 </Button>
-                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate(APP_ROUTES.MC)}>
+                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate('/mc')}>
                   {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}
                 </Button>
               </div>

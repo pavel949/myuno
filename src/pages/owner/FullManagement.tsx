@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +14,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { 
   Home, CheckCircle, Users, Calendar, Sparkles, 
   Brush, Wrench, DollarSign, HeadphonesIcon, Key,
@@ -137,7 +135,7 @@ export default function FullManagement() {
       
       setIsSuccess(true);
     } catch (error) {
-      logger.error('Failed to submit management request:', error);
+      console.error('Failed to submit management request:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -263,7 +261,7 @@ export default function FullManagement() {
       <PageHeader 
         title={isRu ? 'Заявка на управление' : 'Management Request'}
         showBack
-        fallbackPath={APP_ROUTES.OWNER_FULL_MANAGEMENT}
+        fallbackPath="/owner/full-management"
       />
 
       <div className="space-y-6">

@@ -8,7 +8,12 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
-import { getCorsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type, x-lovable-signature, x-lovable-timestamp, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+}
 
 const EMAIL_SUBJECTS: Record<string, string> = {
   signup: 'Confirm your email',
@@ -74,9 +79,14 @@ const SAMPLE_DATA: Record<string, object> = {
 }
 
 // Preview endpoint handler - returns rendered HTML without sending email
-async function handlePreview(req: Request, corsHeaders: Record<string, string>): Promise<Response> {
+async function handlePreview(req: Request): Promise<Response> {
+  const previewCorsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, content-type',
+  }
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: previewCorsHeaders })
   }
 
   const apiKey = Deno.env.get('LOVABLE_API_KEY')
@@ -85,7 +95,7 @@ async function handlePreview(req: Request, corsHeaders: Record<string, string>):
   if (!apiKey || authHeader !== `Bearer ${apiKey}`) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...previewCorsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
@@ -96,7 +106,7 @@ async function handlePreview(req: Request, corsHeaders: Record<string, string>):
   } catch (error) {
     return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
       status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...previewCorsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
@@ -105,7 +115,7 @@ async function handlePreview(req: Request, corsHeaders: Record<string, string>):
   if (!EmailTemplate) {
     return new Response(JSON.stringify({ error: `Unknown email type: ${type}` }), {
       status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...previewCorsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
@@ -114,12 +124,12 @@ async function handlePreview(req: Request, corsHeaders: Record<string, string>):
 
   return new Response(html, {
     status: 200,
-    headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+    headers: { ...previewCorsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
   })
 }
 
 // Webhook handler - verifies signature and sends email
-async function handleWebhook(req: Request, corsHeaders: Record<string, string>): Promise<Response> {
+async function handleWebhook(req: Request): Promise<Response> {
   const apiKey = Deno.env.get('LOVABLE_API_KEY')
 
   if (!apiKey) {
@@ -268,7 +278,6 @@ async function handleWebhook(req: Request, corsHeaders: Record<string, string>):
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   const url = new URL(req.url)
 
   // Handle CORS preflight for main endpoint
@@ -278,12 +287,12 @@ Deno.serve(async (req) => {
 
   // Route to preview handler for /preview path
   if (url.pathname.endsWith('/preview')) {
-    return handlePreview(req, corsHeaders)
+    return handlePreview(req)
   }
 
   // Main webhook handler
   try {
-    return await handleWebhook(req, corsHeaders)
+    return await handleWebhook(req)
   } catch (error) {
     console.error('Webhook handler error:', error)
     const message = error instanceof Error ? error.message : 'Unknown error'

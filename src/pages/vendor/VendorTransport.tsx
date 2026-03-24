@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -244,7 +243,7 @@ const VendorTransport = () => {
       setIsDialogOpen(false);
       resetForm();
     } catch (error) {
-      logger.error('Error saving vehicle:', error);
+      console.error('Error saving vehicle:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving vehicle');
     } finally {
       setIsSubmitting(false);
@@ -258,7 +257,7 @@ const VendorTransport = () => {
       toast.success(isRussian ? 'Транспорт удален' : 'Vehicle deleted');
       setDeleteConfirmId(null);
     } catch (error) {
-      logger.error('Error deleting vehicle:', error);
+      console.error('Error deleting vehicle:', error);
       toast.error(isRussian ? 'Ошибка при удалении' : 'Error deleting vehicle');
     }
   };

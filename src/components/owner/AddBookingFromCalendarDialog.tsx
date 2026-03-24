@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
@@ -199,7 +198,7 @@ export function AddBookingFromCalendarDialog({
           .upload(fileName, file);
         
         if (uploadError) {
-          logger.error('Upload error:', uploadError);
+          console.error('Upload error:', uploadError);
           toast({
             title: isRu ? 'Ошибка загрузки' : 'Upload Error',
             description: uploadError.message,
@@ -224,7 +223,7 @@ export function AddBookingFromCalendarDialog({
         description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully',
       });
     } catch (error) {
-      logger.error('Upload error:', error);
+      console.error('Upload error:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document',
@@ -294,7 +293,7 @@ export function AddBookingFromCalendarDialog({
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      logger.error('Error creating booking:', error);
+      console.error('Error creating booking:', error);
       toast({
         title: isRu ? 'Ошибка' : 'Error',
         description: isRu ? 'Не удалось создать бронирование' : 'Failed to create booking',

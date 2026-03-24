@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { 
@@ -117,7 +116,7 @@ export default function AdminQuickListings() {
       if (error) throw error;
       setListings(data || []);
     } catch (error) {
-      logger.error('Error fetching listings:', error);
+      console.error('Error fetching listings:', error);
       toast.error(language === 'ru' ? 'Ошибка загрузки' : 'Failed to load listings');
     } finally {
       setIsLoading(false);
@@ -142,7 +141,7 @@ export default function AdminQuickListings() {
       fetchListings();
       setSelectedListing(null);
     } catch (error) {
-      logger.error('Error approving listing:', error);
+      console.error('Error approving listing:', error);
       toast.error(language === 'ru' ? 'Ошибка при одобрении' : 'Failed to approve');
     } finally {
       setIsProcessing(false);
@@ -172,7 +171,7 @@ export default function AdminQuickListings() {
       setShowRejectDialog(false);
       setRejectionReason('');
     } catch (error) {
-      logger.error('Error rejecting listing:', error);
+      console.error('Error rejecting listing:', error);
       toast.error(language === 'ru' ? 'Ошибка при отклонении' : 'Failed to reject');
     } finally {
       setIsProcessing(false);

@@ -81,8 +81,6 @@ export function MCMobileNav() {
 
       <button
         onClick={() => setFabOpen(!fabOpen)}
-        aria-label={isRu ? (fabOpen ? 'Закрыть меню' : 'Быстрые действия') : (fabOpen ? 'Close menu' : 'Quick actions')}
-        aria-expanded={fabOpen}
         className={cn(
           "fixed z-[70] md:hidden bottom-[76px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full [box-shadow:var(--shadow-elevation-4)] flex items-center justify-center transition-all duration-200",
           fabOpen ? "bg-foreground text-background rotate-45" : "bg-primary text-primary-foreground"

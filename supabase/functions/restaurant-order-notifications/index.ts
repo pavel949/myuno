@@ -1,6 +1,9 @@
 import { createClient } from '../_shared/supabase.ts'
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 interface OrderStatusPayload {
   booking_id: string;
@@ -37,7 +40,6 @@ const statusMessages: Record<string, { en: string; ru: string; emoji: string }> 
 }
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }

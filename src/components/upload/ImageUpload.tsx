@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +71,7 @@ export function ImageUpload({
         toast.success('Фото загружено');
       }
     } catch (error) {
-      logger.error('Upload error:', error);
+      console.error('Upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки');
       }
@@ -273,7 +272,7 @@ export function MultiImageUpload({
         toast.success(`Загружено ${uploadedUrls.length} фото`);
       }
     } catch (error) {
-      logger.error('Upload error:', error);
+      console.error('Upload error:', error);
       if (isMountedRef.current) {
         // Still add successfully uploaded images
         if (uploadedUrls.length > 0) {
@@ -350,7 +349,7 @@ export function MultiImageUpload({
         try {
           const response = await fetch(fetchUrl);
           if (!response.ok) {
-            logger.error(`Failed to fetch image: ${response.status}`);
+            console.error(`Failed to fetch image: ${response.status}`);
             continue;
           }
           
@@ -377,7 +376,7 @@ export function MultiImageUpload({
             });
 
           if (uploadError) {
-            logger.error('Upload error:', uploadError);
+            console.error('Upload error:', uploadError);
             continue;
           }
 
@@ -387,7 +386,7 @@ export function MultiImageUpload({
 
           uploadedUrls.push(publicUrl);
         } catch (err) {
-          logger.error(`Error uploading image ${i}:`, err);
+          console.error(`Error uploading image ${i}:`, err);
         }
         
         setUploadProgress(Math.round(((i + 1) / imagesToUpload.length) * 100));
@@ -402,7 +401,7 @@ export function MultiImageUpload({
         }
       }
     } catch (error) {
-      logger.error('External upload error:', error);
+      console.error('External upload error:', error);
       if (isMountedRef.current) {
         toast.error('Ошибка загрузки изображений');
       }

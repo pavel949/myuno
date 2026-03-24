@@ -6,7 +6,10 @@
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
-import { getCorsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 // Entity extraction schemas for different types
 const entitySchemas: Record<string, any> = {
@@ -65,7 +68,6 @@ const entitySchemas: Record<string, any> = {
 };
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

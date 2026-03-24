@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { logger } from '@/lib/logger';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, CreditCard, Truck, Gift, Check, Wallet, Loader2, Sparkles } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -432,7 +431,7 @@ const FlowersOrder = () => {
         navigate('/bookings');
       }
     } catch (error) {
-      logger.error('Error creating order:', error);
+      console.error('Error creating order:', error);
       toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
     }
   };

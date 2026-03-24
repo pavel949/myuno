@@ -8,7 +8,6 @@ import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
-import { useOwnerManagementSettings, useUpsertOwnerManagementSettings, DEFAULT_FEE_PERCENT } from '@/hooks/useOwnerManagementSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
 import { useToast } from '@/hooks/use-toast';
@@ -34,10 +33,8 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
   const isRu = language === 'ru';
   const { toast } = useToast();
   const updateContact = useUpdateContact();
-  const upsertOwnerSettings = useUpsertOwnerManagementSettings();
   const { data: contactTypes = [] } = useCrmOptions(contact.company_id, 'contact_type');
   const { data: leadSources = [] } = useCrmOptions(contact.company_id, 'lead_source');
-  const { data: ownerSettings } = useOwnerManagementSettings(contact.id, contact.company_id);
 
   const [form, setForm] = useState({
     first_name: contact.first_name,
@@ -77,7 +74,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
     address_country: contact.address_country || '',
     tax_id: contact.tax_id || '',
     website: contact.website || '',
-    management_fee_percent: String(DEFAULT_FEE_PERCENT),
   });
 
   const [customInterest, setCustomInterest] = useState('');
@@ -119,23 +115,14 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
       address_state: contact.address_state || '',
       address_zip: contact.address_zip || '',
       address_country: contact.address_country || '',
-    tax_id: contact.tax_id || '',
-    website: contact.website || '',
-    management_fee_percent: String(ownerSettings?.management_fee_percent ?? DEFAULT_FEE_PERCENT),
-  });
-  }, [contact, ownerSettings]);
+      tax_id: contact.tax_id || '',
+      website: contact.website || '',
+    });
+  }, [contact]);
 
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
       toast({ title: isRu ? 'Введите имя' : 'Enter first name', variant: 'destructive' });
-      return;
-    }
-    const feeNum = parseFloat(form.management_fee_percent);
-    if (
-      (form.crm_role === 'owner' || form.crm_role === 'investor') &&
-      (isNaN(feeNum) || feeNum < 0 || feeNum > 100)
-    ) {
-      toast({ title: isRu ? 'Некорректный процент' : 'Invalid fee percent', variant: 'destructive' });
       return;
     }
     try {
@@ -179,16 +166,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         tax_id: form.tax_id || null,
         website: form.website || null,
       });
-      if (form.crm_role === 'owner' || form.crm_role === 'investor') {
-        const feeNum = parseFloat(form.management_fee_percent);
-        if (!isNaN(feeNum) && contact.company_id) {
-          await upsertOwnerSettings.mutateAsync({
-            contactId: contact.id,
-            companyId: contact.company_id,
-            management_fee_percent: feeNum,
-          });
-        }
-      }
       toast({ title: isRu ? 'Контакт обновлён' : 'Contact updated' });
       onOpenChange(false);
     } catch {
@@ -276,26 +253,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         </div>
         <div><Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} /></div>
       </div>
-
-      {(form.crm_role === 'owner' || form.crm_role === 'investor') && (
-        <div className="space-y-2">
-          <Label htmlFor="management_fee_percent">
-            {isRu ? 'Процент управления (%)' : 'Management Fee (%)'}
-          </Label>
-          <Input
-            id="management_fee_percent"
-            type="number"
-            min={0}
-            max={100}
-            step={0.5}
-            value={form.management_fee_percent}
-            onChange={e => setForm(f => ({ ...f, management_fee_percent: e.target.value }))}
-          />
-          <p className="text-xs text-muted-foreground">
-            {isRu ? 'По умолчанию 15%. Указывается индивидуально.' : 'Default 15%. Set per owner.'}
-          </p>
-        </div>
-      )}
 
       <Separator />
 

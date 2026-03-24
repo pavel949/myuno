@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { logger } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -70,7 +69,7 @@ export function usePaymentMethods() {
       toast.success('Карта добавлена');
     },
     onError: (error) => {
-      logger.error('Add payment method error:', error);
+      console.error('Add payment method error:', error);
       toast.error('Ошибка добавления карты');
     },
   });
@@ -92,7 +91,7 @@ export function usePaymentMethods() {
       toast.success('Карта по умолчанию изменена');
     },
     onError: (error) => {
-      logger.error('Set default method error:', error);
+      console.error('Set default method error:', error);
       toast.error('Ошибка изменения карты');
     },
   });
@@ -114,7 +113,7 @@ export function usePaymentMethods() {
       toast.success('Карта удалена');
     },
     onError: (error) => {
-      logger.error('Delete payment method error:', error);
+      console.error('Delete payment method error:', error);
       toast.error('Ошибка удаления карты');
     },
   });
