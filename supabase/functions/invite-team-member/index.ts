@@ -26,7 +26,7 @@ function generatePassword(length = 16): string {
   const array = new Uint8Array(length);
   crypto.getRandomValues(array);
   // Ensure at least one of each type
-  const result = [
+  let result = [
     upper[array[0] % upper.length],
     lower[array[1] % lower.length],
     digits[array[2] % digits.length],

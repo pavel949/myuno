@@ -84,9 +84,8 @@ export function GoogleMapsStatusCard() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success(isRu ? 'Ключ синхронизирован! Перезагрузите страницу.' : 'Key synced! Please reload the page.');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Sync failed';
-      toast.error(msg);
+    } catch (err: any) {
+      toast.error(err.message || 'Sync failed');
     } finally {
       setSyncing(false);
     }

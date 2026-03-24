@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
 
     // Fetch read-only data based on mode
     const dataSources: string[] = [];
-    const contextData: Record<string, unknown> = {};
+    let contextData: Record<string, unknown> = {};
 
     // Always fetch governance rules
     const { data: governance } = await supabase

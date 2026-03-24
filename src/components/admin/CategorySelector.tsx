@@ -147,10 +147,7 @@ export function CategorySelector({
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const selectedValues = useMemo(
-    () => (Array.isArray(value) ? value : value ? [value] : []),
-    [value]
-  );
+  const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
 
   // Find which sector the current value belongs to (for auto-expand)
   const autoSector = useMemo(() => {
@@ -383,5 +380,4 @@ function CategoryRow({
 }
 
 // Export for backward compat
-// eslint-disable-next-line react-refresh/only-export-components
 export { GENERAL_CATEGORIES };

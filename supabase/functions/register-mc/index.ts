@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     }
 
     // Trigger onboarding agent (fire-and-forget)
-    // @ts-expect-error EdgeRuntime is injected by Supabase Edge runtime
+    // @ts-ignore EdgeRuntime available in Supabase
     EdgeRuntime.waitUntil((async () => {
       try {
         await fetch(`${SUPABASE_URL}/functions/v1/mc-onboarding-agent`, {

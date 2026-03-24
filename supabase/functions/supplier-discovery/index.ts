@@ -325,11 +325,7 @@ IMPORTANT RULES:
         const content = aiData.choices?.[0]?.message?.content || '';
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
-          try {
-            suppliers = JSON.parse(jsonMatch[0]);
-          } catch (parseErr) {
-            console.warn('[Discovery v2] Fallback JSON parse failed:', parseErr);
-          }
+          try { suppliers = JSON.parse(jsonMatch[0]); } catch {}
         }
       }
     } else {
@@ -337,11 +333,7 @@ IMPORTANT RULES:
       const content = aiData.choices?.[0]?.message?.content || '';
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        try {
-          suppliers = JSON.parse(jsonMatch[0]);
-        } catch (parseErr) {
-          console.warn('[Discovery v2] Content JSON parse failed:', parseErr);
-        }
+        try { suppliers = JSON.parse(jsonMatch[0]); } catch {}
       }
     }
 
