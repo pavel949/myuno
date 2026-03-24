@@ -15,8 +15,8 @@ export function validatePublicEnv(): void {
   if (import.meta.env.MODE === 'test') return;
 
   const raw = {
-    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL?.trim(),
+    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim(),
   };
 
   if (!import.meta.env.PROD) {

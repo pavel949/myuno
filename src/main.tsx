@@ -4,14 +4,28 @@ import App from "./App.tsx";
 import "./index.css";
 import { validatePublicEnv } from "./lib/env";
 import { reportWebVitals } from "./lib/webVitals";
+import { EnvFatalScreen } from "./components/boot/EnvFatalScreen";
 
-validatePublicEnv();
+const rootEl = document.getElementById("root");
+if (!rootEl) {
+  throw new Error("Missing #root element");
+}
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+try {
+  validatePublicEnv();
+  createRoot(rootEl).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+} catch (e) {
+  const message = e instanceof Error ? e.message : String(e);
+  createRoot(rootEl).render(
+    <StrictMode>
+      <EnvFatalScreen message={message} />
+    </StrictMode>
+  );
+}
 
 // Report Web Vitals for performance monitoring
 reportWebVitals(undefined, { debug: import.meta.env.DEV });
