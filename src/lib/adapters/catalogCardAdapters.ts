@@ -383,8 +383,6 @@ export function mapClinicToCatalogCard(
     subtitle,
   };
 }
-  const isRu = language === 'ru';
-  const r = restaurant as any;
   const cuisineTags = r.cuisine_tags as string[] | null;
   const priceBand = r.price_band as string | null;
   const reservationUrl = r.reservation_url as string | null;
