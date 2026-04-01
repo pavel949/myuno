@@ -75,11 +75,10 @@ const CLUSTERS: Cluster[] = [
     services: [
       { labelRu: 'Поиск недвижимости', labelEn: 'Property Search', icon: Search, path: '/property', status: 'available' },
       { labelRu: 'Новостройки', labelEn: 'New Developments', icon: Building2, path: '/newbuilds', status: 'available' },
-      { labelRu: 'Off-Plan', labelEn: 'Off-Plan', icon: Building, path: '/offplan', status: 'available' },
-      { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/invest', status: 'available' },
-      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/invest', status: 'soon' },
       { labelRu: 'Вторичка', labelEn: 'Resale', icon: Building2, path: '/property/resale', status: 'available' },
-      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: '/property/developers', status: 'available' },
+      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: '/newbuilds/developers', status: 'available' },
+      { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/property/invest', status: 'available' },
+      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/property/invest', status: 'soon' },
     ],
   },
   {
