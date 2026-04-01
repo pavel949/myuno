@@ -102,6 +102,11 @@ const ROLE_FEATURES: Record<UserPersona, { titleRu: string; titleEn: string; bul
     bulletsRu: ['Ветеринарные клиники', 'Груминг и отели', 'Перевозка питомцев'],
     bulletsEn: ['Vet clinics', 'Grooming & hotels', 'Pet transport'],
   },
+  relocation: {
+    titleRu: 'Переезд на Пхукет — пошагово', titleEn: 'Relocate to Phuket — step by step',
+    bulletsRu: ['Визы и документы', 'Жильё и школы', 'Юрист и банки'],
+    bulletsEn: ['Visas & documents', 'Housing & schools', 'Legal & banking'],
+  },
 };
 
 const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu: string; descEn: string; icon: React.ElementType; path: string }> = {
