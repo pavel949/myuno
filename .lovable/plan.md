@@ -1,99 +1,118 @@
 
 
-# Визуальный редизайн персон + Relocation + новые посадочные страницы
+# Канонический формат мини-аппа: аудит и унификация
 
-## Что делаем
+## Проблема
 
-### 1. Визуальный редизайн карточек персон (HeroBlock + PersonaSmartFeed)
+Сейчас в проекте **два параллельных стандарта** layout и **6 разных форматов карточек**:
 
-**Проблема**: текущие карточки — мелкие иконки 36px в двух рядах, выглядят как generic UI.
+### Layout (обёртка страницы)
+| Страница | Обёртка | Header | Ширина контента |
+|----------|---------|--------|-----------------|
+| Experiences, Market, Invest | `MiniAppLayout` | `UnifiedHeader` + sticky ribbon | `max-w-[1536px] px-4` |
+| Yachts, Flowers, Restaurants, Pets | `AppLayout` + `CatalogHeader` | Свой sticky header | `max-w-[1536px] mx-auto px-4` |
+| Transport | `AppLayout` + custom hero search | Полностью custom | `container max-w-[1536px]` |
+| Landing pages | `AppLayout` + raw HTML | BackButton + custom hero | Разная ширина |
 
-**Решение — компактный горизонтальный скролл с glassmorphism-чипами**:
-- Один ряд с горизонтальным скроллом вместо двух рядов по 6
-- Каждый чип: gradient-фон с blur-эффектом, Lucide-иконка 20px + label
-- Активный чип: яркий gradient + `ring-2` + subtle glow (`box-shadow`)
-- Неактивные: полупрозрачный `bg-white/5` с `backdrop-blur`
-- Для `PersonaSmartFeed` карточки: заменить emoji на Lucide-иконки в цветных кружках + описательный subtitle
+### Карточки (листинги)
+| Вертикаль | Компонент | Aspect ratio | Рейтинг | Цена | Badges |
+|-----------|-----------|-------------|---------|------|--------|
+| Yachts | Inline `YachtCard` | 4:3 | Star warning fill | `formatPrice()` | Instant/Request, Featured |
+| Experiences | Inline `ExperienceCard` | 4:3 | Star warning fill | `formatPrice()` | Tour/Activity type |
+| Transport | `VehicleCard` | 4:3 | Нет | Raw `toLocaleString()` | Year, Verified, Available |
+| Flowers | Inline card | **3:4** (портрет) | Нет | Raw `฿` hardcode | Popular, Box type, Scarcity |
+| Pets | Inline card | 4:3 | Star foreground fill | `formatPrice()` | Verified |
+| Insurance/Legal | `ItemCard` | 1:1 horizontal | Star primary fill | `formatPrice()` | New, Featured |
 
-### 2. Новая персона: Relocation (переезд на Пхукет)
+**Итого: 6 разных карточек, 3 формата layout, несогласованные цены, рейтинги и badges.**
 
-**DB migration**: добавить `relocation` в enum `user_persona`.
+## Решение
 
-**Данные для всех систем**:
-- `PERSONA_INFO`: icon = `Globe`, label "Relocating" / "Переезд"
-- `QuickActionsGrid` — `RELOCATION_ACTIONS`: Visa, Property, Schools, Legal, Banking, Medical, Insurance, Transport
-- `PersonaSmartFeed` — рекомендации: "Первичная консультация", "Найти жильё", "Школы для детей"
-- `OnboardingModal` — `ROLE_FEATURES` + `QUICK_WINS`: "Бесплатная консультация по переезду"
+### 1. Создать `CatalogCard` — единую карточку для grid-каталогов
 
-### 3. Отдельная посадочная страница `/relocate`
-
-Полноценный лендинг "Relocate to Phuket" — мини-апп с пошаговым роадмапом переезда:
+Один компонент для **всех** вертикальных grid-каталогов (Yachts, Experiences, Transport, Flowers, Pets). Не заменяет `ItemCard` (он для horizontal list view), а стандартизирует vertical grid cards.
 
 ```text
-┌─────────────────────────────────┐
-│  Hero: "Переезд на Пхукет"     │
-│  CTA: Бесплатная консультация   │
-├─────────────────────────────────┤
-│  Roadmap (вертикальный timeline):│
-│  1. Визы и документы            │
-│  2. Жильё                      │
-│  3. Школы и сады                │
-│  4. Медицина и страховка        │
-│  5. Банки и финансы             │
-│  6. Транспорт                  │
-│  7. Юрист и бухгалтер          │
-│  8. Досуг и комьюнити          │
-├─────────────────────────────────┤
-│  Тарифы: DIY / Guided / VIP    │
-│  WhatsApp CTA                  │
-│  FAQ аккордеон                 │
-└─────────────────────────────────┘
+┌──────────────────────┐
+│  [image aspect-[4/3]]│  ← configurable: 4:3 | 3:4 | 1:1
+│  ┌badges─┐  ┌─right─┐│
+│  │NEW    │  │Instant││
+│  └───────┘  └───────┘│
+│  ┌─social proof──────┐│
+│  └───────────────────┘│
+├──────────────────────┤
+│ ★ 4.8 (23) · 12 чел  │  ← meta row
+│ Yacht Name            │  ← title, font-semibold text-sm
+│ 📍 Chalong            │  ← location (optional)
+│ ฿15,000 /day          │  ← formatPrice() always
+└──────────────────────┘
 ```
 
-Каждый шаг роадмапа — ссылка на соответствующий сервис платформы. Монетизация: консультации + пакеты "сопровождение переезда" (DIY бесплатно, Guided ₿15k, VIP ₿50k).
+Props interface:
+- `image`, `title`, `onClick` — обязательные
+- `aspectRatio?: '4:3' | '3:4' | '1:1'` (default `4:3`)
+- `badges?: Badge[]` (top-left stack)
+- `statusBadge?: Badge` (top-right)
+- `socialProof?: string` (bottom overlay)
+- `rating?`, `reviewCount?`, `meta?: {icon, label}[]`
+- `location?`
+- `price?` (uses `formatPrice()` always)
+- `pricePrefix?`, `priceSuffix?`
 
-### 4. Дополнительные посадочные страницы для монетизации
+**Файл**: `src/components/miniapp/CatalogCard.tsx`
 
-Оценка целесообразности — создаём 3 высоко-конверсионные страницы:
+### 2. Мигрировать все inline-карточки на `CatalogCard`
 
-| Страница | Путь | Зачем | Монетизация |
-|----------|------|-------|-------------|
-| **Wedding Phuket** | `/wedding` | Пары тратят $10-50k, высокий чек: venue + декор + фото + яхта | Комиссия 10% со всех вендоров |
-| **Phuket for Kids** | `/kids` | Семьи — самый долгосрочный LTV: школы + клиники + активности + няни | Лиды школам + booking fee |
-| **Digital Nomad Guide** | `/nomad-guide` | Привлечение номадов: коворкинги + визы + аренда + SIM | Подписки + реферальные |
+| Файл | Что убираем | Что добавляем |
+|------|-------------|---------------|
+| `YachtsIndex.tsx` | Inline `YachtCard` (60 строк) | `<CatalogCard>` + adapter |
+| `ExperiencesIndex.tsx` | Inline `ExperienceCard` (70 строк) | `<CatalogCard>` + adapter |
+| `FlowersIndex.tsx` | Inline card (65 строк) | `<CatalogCard aspectRatio="3:4">` |
+| `PetsIndex.tsx` | Inline card (40 строк) | `<CatalogCard>` |
+| `VehicleCard.tsx` | Custom component | Адаптировать или заменить на `CatalogCard` |
 
-### 5. Добавить Relocation в кластерную навигацию
+Для каждой вертикали создать тонкий **adapter** (маппер из domain entity в `CatalogCardProps`), по аналогии с существующими `mapYachtToCardProps`, `mapVehicleToCardProps`.
 
-- Добавить `/relocate` в `APP_ROUTES`
-- Добавить карточку "Relocation" в `ArriveClusterPage` (логически — первый шаг после приезда)
-- Обновить `VERTICAL_GROUPS` (группа "Life Admin") — добавить relocation
-- Обновить `sitemap.xml` со всеми новыми страницами
+### 3. Мигрировать layout: `CatalogHeader` → `MiniAppLayout`
 
-## Файлы для изменения
+Перевести **все каталожные Index-страницы** на единый `MiniAppLayout`:
 
-| Файл | Действие |
-|------|----------|
-| `migration` | Добавить `relocation` в enum |
-| `src/hooks/useUserPersonas.ts` | +1 персона, обновить PERSONA_OPTIONS/INFO |
-| `src/components/home/HeroBlock.tsx` | Редизайн PersonaSwitcher — горизонтальный скролл + glassmorphism |
-| `src/components/home/PersonaSmartFeed.tsx` | Редизайн карточек + добавить relocation |
-| `src/components/home/QuickActionsGrid.tsx` | +RELOCATION_ACTIONS |
-| `src/components/onboarding/OnboardingModal.tsx` | +relocation в ROLE_FEATURES/QUICK_WINS |
-| `src/pages/relocate/RelocateLandingPage.tsx` | **Новый** — посадочная страница |
-| `src/pages/wedding/WeddingLandingPage.tsx` | **Новый** — свадьбы |
-| `src/pages/kids/KidsLandingPage.tsx` | **Новый** — для семей |
-| `src/pages/nomad/NomadGuidePage.tsx` | **Новый** — для номадов |
-| `src/lib/config/routes.ts` | +4 новых маршрута |
-| `AnimatedRoutes.tsx` | +4 lazy-импорта |
-| `public/sitemap.xml` | +4 URL |
+| Страница | Сейчас | После |
+|----------|--------|-------|
+| `YachtsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
+| `FlowersIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
+| `RestaurantsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
+| `PetsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
+| `TransportIndex` | `AppLayout` + custom hero | `MiniAppLayout` + hero slot |
+
+Это даст единый sticky header, search, filter ribbon, max-width, padding на **всех** страницах.
+
+### 4. Стандартизировать Landing Pages
+
+Создать `LandingLayout` — обёртку для Relocate, Wedding, Kids, Nomad:
+- Hero section с gradient + BackButton
+- Max-width `max-w-3xl mx-auto` для контента
+- Стандартный footer с CTA
+- WhatsApp button
+
+**Файл**: `src/components/miniapp/LandingLayout.tsx`
+
+### 5. Адаптеры (mappers)
+
+Обновить/создать в `src/lib/adapters/`:
+- `mapExperienceToCatalogCard.ts`
+- `mapFlowerToCatalogCard.ts`
+- `mapPetServiceToCatalogCard.ts`
+- Существующие `mapYachtToCardProps`, `mapVehicleToCardProps` — адаптировать к CatalogCard interface
 
 ## Порядок реализации
 
-1. Migration + useUserPersonas (relocation)
-2. HeroBlock визуальный редизайн
-3. PersonaSmartFeed редизайн + relocation
-4. QuickActionsGrid + OnboardingModal
-5. RelocateLandingPage (главная посадочная)
-6. WeddingLandingPage, KidsLandingPage, NomadGuidePage
-7. Routes, navigation, sitemap
+1. `CatalogCard` компонент
+2. Adapters для каждой вертикали
+3. Миграция карточек (Yachts → Experiences → Flowers → Pets → Transport)
+4. Миграция layout (все Index → MiniAppLayout)
+5. `LandingLayout` + миграция лендингов
+6. Удаление deprecated inline cards и `CatalogHeader` (если больше не используется)
+
+~12 файлов изменить, ~3 создать. Сокращение кода: ~300 строк inline-карточек заменяются на 1 компонент + 5 адаптеров.
 
