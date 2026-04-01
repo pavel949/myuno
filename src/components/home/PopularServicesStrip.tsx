@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { SectionTitle } from '@/components/uno/SectionCard';
 import { ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,8 +18,6 @@ interface ServiceItem {
 }
 
 import { PLACEHOLDER_IMAGES, getServiceFallbackImage } from '@/lib/config/placeholders';
-
-const FALLBACK_DEFAULT = PLACEHOLDER_IMAGES.service;
 
 function getServiceImage(service: ServiceItem): string {
   if (service.images?.[0]) return service.images[0];
@@ -53,7 +50,7 @@ export function PopularServicesStrip() {
         <Skeleton className="h-6 w-40" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-36 w-44 rounded-2xl shrink-0" />
+            <Skeleton key={i} className="h-[220px] w-[180px] rounded-[var(--radius-lg)] shrink-0" />
           ))}
         </div>
       </div>
@@ -65,9 +62,9 @@ export function PopularServicesStrip() {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <SectionTitle className="mb-0">
-          {isRu ? 'Популярное на UNO' : 'Popular on UNO'}
-        </SectionTitle>
+        <h2 className="text-lg font-display font-bold text-foreground">
+          {isRu ? 'Популярное' : 'Popular'}
+        </h2>
         <button
           onClick={() => navigate('/discover')}
           className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors"
@@ -84,22 +81,27 @@ export function PopularServicesStrip() {
             <button
               key={service.id}
               onClick={() => navigate(`/services/${service.id}`)}
-              className="shrink-0 w-44 rounded-2xl border border-border/50 bg-card overflow-hidden text-left shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-200 group"
+              className="shrink-0 w-[180px] h-[220px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1"
+              style={{
+                background: 'hsl(var(--card))',
+                border: '1px solid hsl(0 0% 100% / 0.07)',
+                boxShadow: 'var(--shadow-card)',
+              }}
             >
               <div className="relative overflow-hidden">
                 <img
                   src={imageUrl}
                   alt={isRu ? service.name_ru : service.name_en}
-                  className="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-[1.05]"
                   loading="lazy"
                 />
               </div>
               <div className="p-3">
-                <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                <p className="text-[13px] font-medium text-foreground truncate group-hover:text-primary transition-colors">
                   {isRu ? service.name_ru : service.name_en}
                 </p>
                 {service.price && (
-                  <span className="text-xs text-muted-foreground mt-1 block font-medium">
+                  <span className="text-xs text-primary mt-1 block font-semibold">
                     {service.price.toLocaleString()} {service.currency || '฿'}
                   </span>
                 )}

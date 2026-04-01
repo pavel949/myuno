@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +13,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="description" content="myUNO - Home is where myUNO is. Your life abroad, simplified." />
     <meta name="author" content="myUNO" />
-    <meta name="theme-color" content="#d4af37" />
+    <meta name="theme-color" content="#00D68F" />
     <meta name="version" content="3.40.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -53,15 +53,14 @@
     <link rel="dns-prefetch" href="https://kakkwibljrjsawxgnupk.supabase.co" />
     <link rel="dns-prefetch" href="https://maps.googleapis.com" />
     
-    <!-- Google Fonts: Golos + Playfair + DM Sans + JetBrains Mono -->
+    <!-- Google Fonts: Syne (display) + DM Sans (body) + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Golos+Text:wght@400..700&family=JetBrains+Mono:wght@400..700&family=Playfair+Display:wght@400..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     
     <!-- Version check with forced reload on mismatch -->
     <script>
       (function() {
-        // Check if user has unsaved form drafts — defer destructive reloads
         function hasUnsavedDrafts() {
           try {
             for (var i = 0; i < localStorage.length; i++) {
@@ -81,7 +80,6 @@
           return true;
         }
 
-        // On SW controller change, reload once (unless editing)
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.addEventListener('controllerchange', function() {
             if (!window.__swReloading && safeReload()) {
@@ -90,7 +88,6 @@
             }
           });
           
-          // Listen for SW_UPDATED message
           navigator.serviceWorker.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'SW_UPDATED') {
               console.log('[myUNO] SW_UPDATED received');
@@ -102,8 +99,6 @@
           });
         }
         
-        // Version check — clear caches AND reload on mismatch
-        // Compare BOTH localStorage AND the baked-in meta tag to catch stale HTML
         fetch('/version.json?_=' + Date.now(), { cache: 'no-store' })
           .then(function(r) { return r.json(); })
           .then(function(data) {
@@ -116,13 +111,11 @@
             localStorage.setItem('manifest_version', serverVersion);
             localStorage.setItem('app_version', serverVersion);
             
-            // Mismatch if EITHER stored version or baked HTML version differs from server
             var needsReload = false;
             if (storedVersion && storedVersion !== serverVersion) needsReload = true;
             if (htmlVersion && htmlVersion !== serverVersion) needsReload = true;
             
             if (needsReload) {
-              // Defer reload if user has unsaved drafts
               if (hasUnsavedDrafts()) {
                 console.log('[myUNO] Version mismatch but unsaved drafts — deferring reload');
                 window.__swPendingReload = true;
@@ -130,7 +123,6 @@
               }
               console.log('[myUNO] Version mismatch! Clearing all caches and reloading...');
               
-              // Guard against reload loops: max 1 reload per version change
               var reloadKey = 'uno_reloaded_for_' + serverVersion;
               if (sessionStorage.getItem(reloadKey)) {
                 console.log('[myUNO] Already reloaded for ' + serverVersion + ', skipping');
@@ -138,7 +130,6 @@
               }
               sessionStorage.setItem(reloadKey, '1');
               
-              // 1. Unregister all service workers
               var swPromise = Promise.resolve();
               if ('serviceWorker' in navigator) {
                 swPromise = navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -146,7 +137,6 @@
                 });
               }
               
-              // 2. Delete all caches
               var cachePromise = Promise.resolve();
               if ('caches' in window) {
                 cachePromise = caches.keys().then(function(keys) {
@@ -154,7 +144,6 @@
                 });
               }
               
-              // 3. After both complete, force reload from network
               Promise.all([swPromise, cachePromise]).then(function() {
                 console.log('[myUNO] Caches cleared, reloading...');
                 window.location.reload();
@@ -172,16 +161,16 @@
     <!-- Inline critical CSS for fast FCP -->
     <style>
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      html{-webkit-text-size-adjust:100%;font-family:'Golos Text','DM Sans',system-ui,-apple-system,sans-serif}
-      body{min-height:100vh;background:#09090b;color:#fafafa;-webkit-font-smoothing:antialiased}
+      html{-webkit-text-size-adjust:100%;font-family:'DM Sans',system-ui,-apple-system,sans-serif}
+      body{min-height:100vh;background:#08101E;color:#EDF2FF;-webkit-font-smoothing:antialiased}
       #root{min-height:100vh;display:flex;flex-direction:column}
-      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#09090b}
+      .uno-splash{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#08101E}
       .uno-splash svg{width:48px;height:48px;animation:uno-spin 1s linear infinite}
       @keyframes uno-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     </style>
     <div id="root">
       <div class="uno-splash" aria-label="Loading myUNO">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00D68F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

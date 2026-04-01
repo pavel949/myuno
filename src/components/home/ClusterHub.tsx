@@ -1,6 +1,5 @@
 /**
- * ClusterHub — Bible v2.0 "6 cluster cards" hub section
- * Shows ARRIVE / LIVE / LEGAL / INVEST / MANAGE / BUILD clusters
+ * ClusterHub — 6 cluster cards with new design system
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,8 +18,7 @@ interface Cluster {
   labelRu: string;
   description: string;
   descriptionRu: string;
-  color: string;
-  bgColor: string;
+  accentColor: string; // raw CSS color
   path: string;
   apps: string[];
   appsRu: string[];
@@ -28,79 +26,55 @@ interface Cluster {
 
 const CLUSTERS: Cluster[] = [
   {
-    id: 'arrive',
-    icon: Plane,
-    label: 'ARRIVE',
-    labelRu: 'ПРИЕХАТЬ',
-    description: 'First day on the island',
-    descriptionRu: 'Первый день на острове',
-    color: 'text-cluster-arrive',
-    bgColor: 'bg-cluster-arrive/10',
+    id: 'arrive', icon: Plane,
+    label: 'ARRIVE', labelRu: 'ПРИЕХАТЬ',
+    description: 'First day on the island', descriptionRu: 'Первый день на острове',
+    accentColor: '#00D68F',
     path: APP_ROUTES.ARRIVE_CLUSTER,
     apps: ['Transfers', 'SIM Cards', 'Exchange', 'Car Rental'],
     appsRu: ['Трансферы', 'SIM-карты', 'Обмен валют', 'Аренда авто'],
   },
   {
-    id: 'live',
-    icon: Home,
-    label: 'LIVE',
-    labelRu: 'ЖИТЬ',
-    description: 'Daily life services',
-    descriptionRu: 'Сервисы на каждый день',
-    color: 'text-cluster-live',
-    bgColor: 'bg-cluster-live/10',
+    id: 'live', icon: Home,
+    label: 'LIVE', labelRu: 'ЖИТЬ',
+    description: 'Daily life services', descriptionRu: 'Сервисы на каждый день',
+    accentColor: '#4E7BFF',
     path: APP_ROUTES.DISCOVER,
     apps: ['Restaurants', 'Cleaning', 'Medical', 'Flowers'],
     appsRu: ['Рестораны', 'Уборка', 'Медицина', 'Цветы'],
   },
   {
-    id: 'legal',
-    icon: Scale,
-    label: 'STAY LEGAL',
-    labelRu: 'ЛЕГАЛЬНО',
-    description: 'Visas, taxes & contracts',
-    descriptionRu: 'Визы, налоги и документы',
-    color: 'text-cluster-legal',
-    bgColor: 'bg-cluster-legal/10',
+    id: 'legal', icon: Scale,
+    label: 'STAY LEGAL', labelRu: 'ЛЕГАЛЬНО',
+    description: 'Visas, taxes & contracts', descriptionRu: 'Визы, налоги и документы',
+    accentColor: '#F59E0B',
     path: APP_ROUTES.LEGAL_CLUSTER,
     apps: ['VisaTrack', 'TaxNav', 'ContractAI', 'Insurance'],
     appsRu: ['Визы', 'Налоги', 'Договоры', 'Страховка'],
   },
   {
-    id: 'invest',
-    icon: TrendingUp,
-    label: 'INVEST',
-    labelRu: 'КУПИТЬ',
-    description: 'Buy & invest in Phuket',
-    descriptionRu: 'Покупка и инвестиции',
-    color: 'text-cluster-invest',
-    bgColor: 'bg-cluster-invest/10',
+    id: 'invest', icon: TrendingUp,
+    label: 'INVEST', labelRu: 'КУПИТЬ',
+    description: 'Buy & invest in Phuket', descriptionRu: 'Покупка и инвестиции',
+    accentColor: '#A855F7',
     path: APP_ROUTES.INVEST_CLUSTER,
     apps: ['Property Search', 'Off-Plan', 'ROI Calculator', 'Due Diligence'],
     appsRu: ['Поиск недвижимости', 'Off-Plan', 'ROI калькулятор', 'Проверка'],
   },
   {
-    id: 'manage',
-    icon: Building2,
-    label: 'MANAGE',
-    labelRu: 'УПРАВЛЯТЬ',
-    description: 'Property management',
-    descriptionRu: 'Управление недвижимостью',
-    color: 'text-cluster-manage',
-    bgColor: 'bg-cluster-manage/10',
+    id: 'manage', icon: Building2,
+    label: 'MANAGE', labelRu: 'УПРАВЛЯТЬ',
+    description: 'Property management', descriptionRu: 'Управление недвижимостью',
+    accentColor: '#06B6D4',
     path: APP_ROUTES.MC,
     apps: ['StaySync', 'Calendar', 'Financials', 'Team'],
     appsRu: ['StaySync', 'Календарь', 'Финансы', 'Команда'],
   },
   {
-    id: 'build',
-    icon: HardHat,
-    label: 'BUILD & SELL',
-    labelRu: 'ДЕВЕЛОПЕРАМ',
-    description: 'For developers & agents',
-    descriptionRu: 'Для застройщиков и агентов',
-    color: 'text-cluster-build',
-    bgColor: 'bg-cluster-build/10',
+    id: 'build', icon: HardHat,
+    label: 'BUILD & SELL', labelRu: 'ДЕВЕЛОПЕРАМ',
+    description: 'For developers & agents', descriptionRu: 'Для застройщиков и агентов',
+    accentColor: '#F43F5E',
     path: APP_ROUTES.OFFPLAN,
     apps: ['Sales Dashboard', 'Construction', 'Pricing', 'Agent CRM'],
     appsRu: ['Продажи', 'Стройка', 'Ценообразование', 'CRM агентов'],
@@ -109,9 +83,7 @@ const CLUSTERS: Cluster[] = [
 
 const containerVariants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07 },
-  },
+  visible: { transition: { staggerChildren: 0.07 } },
 };
 
 const itemVariants = {
@@ -127,7 +99,7 @@ export const ClusterHub: React.FC = () => {
   return (
     <section className="space-y-4">
       <div className="text-center space-y-1">
-        <h2 className="text-lg md:text-xl font-display font-semibold text-foreground">
+        <h2 className="font-display font-bold text-foreground">
           {t ? 'Один аккаунт — весь Пхукет' : 'One account — all of Phuket'}
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -149,35 +121,50 @@ export const ClusterHub: React.FC = () => {
               key={cluster.id}
               variants={itemVariants}
               onClick={() => navigate(cluster.path)}
-              className={cn(
-                'group relative overflow-hidden rounded-xl border border-border p-4 text-left',
-                'transition-all duration-200 hover:border-transparent',
-                'hover:[box-shadow:var(--shadow-elevation-3)]',
-                'active:scale-[0.98]',
-              )}
+              className="group relative overflow-hidden text-left rounded-[var(--radius-lg)] p-5 transition-all duration-200 active:scale-[0.98]"
+              style={{
+                background: 'hsl(var(--card))',
+                border: '1px solid hsl(0 0% 100% / 0.07)',
+                boxShadow: 'var(--shadow-card)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = cluster.accentColor + '40';
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${cluster.accentColor}15`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'hsl(0 0% 100% / 0.07)';
+                (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-card)';
+              }}
             >
-              {/* Colored accent bar */}
-              <div className={cn('absolute inset-x-0 top-0 h-1', cluster.bgColor.replace('/10', ''))} />
-
-              <div className={cn('inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3', cluster.bgColor)}>
-                <Icon className={cn('w-5 h-5', cluster.color)} />
+              {/* Icon container */}
+              <div 
+                className="inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3"
+                style={{ background: cluster.accentColor + '1A' }}
+              >
+                <Icon className="w-5 h-5" style={{ color: cluster.accentColor }} />
               </div>
 
-              <h3 className={cn('text-xs font-bold tracking-wider uppercase mb-0.5', cluster.color)}>
+              <h3 className="text-xs font-bold tracking-wider uppercase mb-0.5 font-display"
+                style={{ color: cluster.accentColor }}
+              >
                 {t ? cluster.labelRu : cluster.label}
               </h3>
-              <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
+              <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
                 {t ? cluster.descriptionRu : cluster.description}
               </p>
 
               <div className="flex flex-wrap gap-1">
                 {(t ? cluster.appsRu : cluster.apps).slice(0, 3).map(app => (
-                  <span key={app} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  <span key={app} className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
+                    style={{ background: 'hsl(var(--bg-elevated))' }}
+                  >
                     {app}
                   </span>
                 ))}
                 {cluster.apps.length > 3 && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  <span className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
+                    style={{ background: 'hsl(var(--bg-elevated))' }}
+                  >
                     +{cluster.apps.length - 3}
                   </span>
                 )}
