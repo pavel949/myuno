@@ -47,7 +47,7 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 }
 
 const PERSONA_ICONS: Record<string, React.ElementType> = {
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint,
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
 };
 
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
