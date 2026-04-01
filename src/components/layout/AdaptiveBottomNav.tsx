@@ -212,21 +212,19 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   {active && (
                     <div
                       className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
-                      style={{ animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}
                     />
                   )}
-                  <Icon
-                    className={cn(
-                      "transition-all duration-250 mb-0.5",
-                      active
-                        ? "text-primary w-[22px] h-[22px]"
-                        : "text-muted-foreground w-[22px] h-[22px]"
-                    )}
-                    style={active ? {
-                      transform: 'scale(1.1)',
-                      animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-                    } : undefined}
-                  />
+                  <div className={cn(
+                    "transition-all duration-200 mb-0.5",
+                    active ? "text-primary scale-110" : "text-muted-foreground"
+                  )}>
+                    <Icon className="w-[22px] h-[22px]" />
+                  </div>
+                  {active ? (
+                    <span className="text-[10px] font-semibold text-primary">
+                      {language === 'ru' ? labelRu : labelEn}
+                    </span>
+                  ) : null}
                   {active ? (
                     <span className="text-[10px] font-semibold text-primary">
                       {language === 'ru' ? labelRu : labelEn}
