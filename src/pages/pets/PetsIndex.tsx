@@ -1,8 +1,8 @@
 /**
  * PetsIndex — Airbnb-style pet services catalog
  */
-import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PawPrint, Star, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -26,11 +26,18 @@ const CATEGORIES = [
 
 export default function PetsIndex() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { services: petServices, isLoading } = usePetServices();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all');
   const isRu = language === 'ru';
+
+  // Sync URL category param → state
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat && cat !== selectedCategory) setSelectedCategory(cat);
+  }, [searchParams]);
 
   const filteredServices = useMemo(() => {
     if (selectedCategory === 'all') return petServices;
