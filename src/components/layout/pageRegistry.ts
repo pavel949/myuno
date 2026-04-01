@@ -56,6 +56,17 @@ export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLa
 export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCatalog'));
 export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
 
+// ── Developer Portal ──
+export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));
+export const DeveloperOverview = lazy(() => import('@/pages/developer-portal/DeveloperOverview'));
+export const DeveloperProjects = lazy(() => import('@/pages/developer-portal/DeveloperProjects'));
+export const DeveloperProjectEditor = lazy(() => import('@/pages/developer-portal/DeveloperProjectEditor'));
+export const DeveloperLeads = lazy(() => import('@/pages/developer-portal/DeveloperLeads'));
+export const DeveloperAnalytics = lazy(() => import('@/pages/developer-portal/DeveloperAnalytics'));
+
+// ── Admin Newbuilds ──
+export const AdminNewbuilds = lazy(() => import('@/pages/admin/AdminNewbuilds'));
+
 // ── Investment ──
 export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));

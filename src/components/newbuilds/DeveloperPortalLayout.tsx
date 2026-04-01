@@ -3,7 +3,7 @@
  */
 import React, { Suspense } from 'react';
 import { Outlet, useLocation, Link, Navigate } from 'react-router-dom';
-import { NewbuildsLayout } from './NewbuildsLayout';
+import NewbuildsLayout from './NewbuildsLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDeveloperProfile } from '@/hooks/useDeveloperPortal';
 import { LayoutDashboard, FolderKanban, Users, BarChart3, Megaphone, Settings, ArrowLeft } from 'lucide-react';
