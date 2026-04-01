@@ -34,6 +34,7 @@
 /* Prevent browser back/forward gestures */
 html {
   overscroll-behavior-x: none;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -45,6 +46,61 @@ body {
 #root {
   max-width: 100vw;
 }
+
+/* ═══ PAGE ENTRY ANIMATIONS ═══ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sosPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+@keyframes waPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.6; }
+}
+
+@keyframes navPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25) translateY(-3px); }
+  100% { transform: scale(1.1); }
+}
+
+/* Staggered entry animations */
+.anim-hero      { animation: fadeUp 0.4s ease both; animation-delay: 0.05s; }
+.anim-switcher  { animation: fadeUp 0.4s ease both; animation-delay: 0.1s; }
+.anim-qa-1      { animation: scaleIn 0.35s ease both; animation-delay: 0.15s; }
+.anim-qa-2      { animation: scaleIn 0.35s ease both; animation-delay: 0.2s; }
+.anim-qa-3      { animation: scaleIn 0.35s ease both; animation-delay: 0.25s; }
+.anim-qa-4      { animation: scaleIn 0.35s ease both; animation-delay: 0.3s; }
+.anim-section   { animation: fadeUp 0.4s ease both; animation-delay: 0.2s; }
+.anim-stats     { animation: fadeUp 0.4s ease both; animation-delay: 0.35s; }
+
+/* Section reveal via IntersectionObserver */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.section-reveal.section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* WA dot pulse */
+.wa-dot { animation: waPulse 1.8s ease infinite; }
+
+/* SOS pulse */
+.sos-pulse { animation: sosPulse 2.5s infinite; }
 
 .table-scroll-container {
   overflow-x: auto;
