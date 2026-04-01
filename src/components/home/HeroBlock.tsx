@@ -1,8 +1,15 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
-import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
+import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight,
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
+import { useIsDesktop } from '@/hooks/use-desktop';
+import { useAuth } from '@/contexts/AuthContext';
+import { useHeroData } from '@/hooks/useHeroData';
+import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
+import { cn } from '@/lib/utils';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
