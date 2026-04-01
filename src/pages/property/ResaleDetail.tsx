@@ -77,7 +77,7 @@ export default function ResaleDetail() {
           className="w-full h-full object-cover"
         />
         <div className="absolute top-3 left-3">
-          <BackButton fallback="/property/resale" />
+          <BackButton fallbackPath="/property/resale" />
         </div>
         {images.length > 1 && (
           <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs">
