@@ -24680,6 +24680,54 @@ export type Database = {
         }
         Relationships: []
       }
+      visa_records: {
+        Row: {
+          created_at: string | null
+          document_url: string | null
+          entry_date: string | null
+          expiry_date: string
+          id: string
+          notes: string | null
+          reminder_sent_14d: boolean | null
+          reminder_sent_30d: boolean | null
+          reminder_sent_7d: boolean | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          visa_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_url?: string | null
+          entry_date?: string | null
+          expiry_date: string
+          id?: string
+          notes?: string | null
+          reminder_sent_14d?: boolean | null
+          reminder_sent_30d?: boolean | null
+          reminder_sent_7d?: boolean | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          visa_type: string
+        }
+        Update: {
+          created_at?: string | null
+          document_url?: string | null
+          entry_date?: string | null
+          expiry_date?: string
+          id?: string
+          notes?: string | null
+          reminder_sent_14d?: boolean | null
+          reminder_sent_30d?: boolean | null
+          reminder_sent_7d?: boolean | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          visa_type?: string
+        }
+        Relationships: []
+      }
       visa_services: {
         Row: {
           created_at: string | null

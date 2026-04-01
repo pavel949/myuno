@@ -156,8 +156,17 @@ export const APP_ROUTES = {
   VETERINARY: '/veterinary',
 
   // ── ARRIVE Cluster ──
+  ARRIVE_CLUSTER: '/arrive',
   SIM_START: '/sim',
   EXCHANGE: '/exchange',
+
+  // ── LEGAL Cluster ──
+  LEGAL_CLUSTER: '/stay-legal',
+  TAX_NAV: '/tax',
+  CONTRACT_ANALYSIS: '/legal/contract-analysis',
+
+  // ── INVEST Cluster ──
+  INVEST_CLUSTER: '/invest-hub',
 
   // ── Experiences (tours + activities) ──
   EXPERIENCES: '/experiences',

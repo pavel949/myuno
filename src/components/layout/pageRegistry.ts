@@ -145,8 +145,17 @@ export const BankingPage = lazy(() => import('@/pages/expat/BankingPage'));
 export const VeterinaryPage = lazy(() => import('@/pages/expat/VeterinaryPage'));
 
 // ── ARRIVE Cluster ──
+export const ArriveClusterPage = lazy(() => import('@/pages/arrive/ArriveClusterPage'));
 export const SIMStartPage = lazy(() => import('@/pages/arrive/SIMStartPage'));
 export const ExchangeBotPage = lazy(() => import('@/pages/arrive/ExchangeBotPage'));
+
+// ── LEGAL Cluster ──
+export const LegalClusterPage = lazy(() => import('@/pages/legal/LegalClusterPage'));
+export const ContractAnalysisPage = lazy(() => import('@/pages/legal/ContractAnalysisPage'));
+export const TaxNavPage = lazy(() => import('@/pages/legal/TaxNavPage'));
+
+// ── INVEST Cluster ──
+export const InvestClusterPage = lazy(() => import('@/pages/invest/InvestClusterPage'));
 
 // ── Experiences ──
 export const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));

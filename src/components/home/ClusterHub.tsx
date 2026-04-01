@@ -75,7 +75,7 @@ const CLUSTERS: Cluster[] = [
     descriptionRu: 'Покупка и инвестиции',
     color: 'text-cluster-invest',
     bgColor: 'bg-cluster-invest/10',
-    path: APP_ROUTES.PROPERTY,
+    path: APP_ROUTES.INVEST_CLUSTER,
     apps: ['Property Search', 'Off-Plan', 'ROI Calculator', 'Due Diligence'],
     appsRu: ['Поиск недвижимости', 'Off-Plan', 'ROI калькулятор', 'Проверка'],
   },
