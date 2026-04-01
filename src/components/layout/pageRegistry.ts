@@ -144,6 +144,10 @@ export const TravelInsurance = lazy(() => import('@/pages/insurance/TravelInsura
 export const BankingPage = lazy(() => import('@/pages/expat/BankingPage'));
 export const VeterinaryPage = lazy(() => import('@/pages/expat/VeterinaryPage'));
 
+// ── ARRIVE Cluster ──
+export const SIMStartPage = lazy(() => import('@/pages/arrive/SIMStartPage'));
+export const ExchangeBotPage = lazy(() => import('@/pages/arrive/ExchangeBotPage'));
+
 // ── Experiences ──
 export const ExperiencesIndex = lazy(() => import('@/pages/experiences/ExperiencesIndex'));
 export const ExperienceDetail = lazy(() => import('@/pages/experiences/ExperienceDetail'));
