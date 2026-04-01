@@ -12,7 +12,7 @@ import {
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
   Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
   Users, BarChart3, ClipboardList, Lock, ChevronRight,
-  Baby, Heart, Music, Dumbbell, Laptop, Wifi
+  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
