@@ -441,6 +441,8 @@ export function isValidRoute(path: string): boolean {
     /^\/insurance\/[^/]+$/,
     /^\/knowledge\/[^/]+$/,
     /^\/transport\/vehicle\/[^/]+$/,
+    /^\/newbuilds\/projects\/[^/]+$/,
+    /^\/newbuilds\/developers\/[^/]+$/,
     /^\/transport\/booking\/[^/]+$/,
   ];
   
