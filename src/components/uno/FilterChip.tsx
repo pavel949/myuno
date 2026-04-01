@@ -93,7 +93,7 @@ export function FilterChipGroup({ children, className, scrollable = false }: Fil
       <div className="overflow-hidden -mx-4">
         <div
           className={cn(
-            "flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-4",
+            "flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-4 touch-pan-y",
             className
           )}
         >

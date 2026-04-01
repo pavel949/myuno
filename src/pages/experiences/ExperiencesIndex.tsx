@@ -106,9 +106,9 @@ export default function ExperiencesIndex() {
         </Button>
       }
       stickySubHeader={
-        <div className="px-4 py-2 flex items-center gap-2">
+        <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           {/* Type toggle */}
-          <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg">
+          <div className="flex gap-1 p-0.5 bg-muted/50 rounded-lg shrink-0">
             {([
               { id: 'all', labelEn: 'All', labelRu: 'Все' },
               { id: 'tour', labelEn: 'Tours', labelRu: 'Туры', icon: Compass },
@@ -118,7 +118,7 @@ export default function ExperiencesIndex() {
                 key={type.id}
                 onClick={() => handleTypeChange(type.id)}
                 className={cn(
-                  "py-1.5 px-3 rounded-md text-xs font-medium transition-all flex items-center gap-1",
+                  "py-1.5 px-3 rounded-md text-xs font-medium transition-all flex items-center gap-1 whitespace-nowrap",
                   viewType === type.id
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
