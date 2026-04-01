@@ -62,7 +62,7 @@ const CLUSTERS: Cluster[] = [
     descriptionRu: 'Визы, налоги и документы',
     color: 'text-cluster-legal',
     bgColor: 'bg-cluster-legal/10',
-    path: APP_ROUTES.VISA_IMMIGRATION,
+    path: APP_ROUTES.LEGAL_CLUSTER,
     apps: ['VisaTrack', 'TaxNav', 'ContractAI', 'Insurance'],
     appsRu: ['Визы', 'Налоги', 'Договоры', 'Страховка'],
   },
