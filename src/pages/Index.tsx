@@ -98,6 +98,11 @@ const Index = () => {
             <QuickActionsGrid />
           </RevealOnScroll>
 
+          {/* ─── SECTION 2.5: Cluster Hub (Bible v2.0 — 6 clusters) ─── */}
+          <RevealOnScroll>
+            <ClusterHub />
+          </RevealOnScroll>
+
           {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
           {isLoggedIn ? (
             isDesktop ? (
