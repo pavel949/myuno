@@ -64,9 +64,7 @@ const CLUSTERS: Cluster[] = [
     services: [
       { labelRu: 'Визы', labelEn: 'Visas', icon: Plane, path: '/visa', status: 'available' },
       { labelRu: 'Налоги', labelEn: 'Taxes', icon: Calculator, path: '/tax', status: 'available' },
-      { labelRu: 'Договоры', labelEn: 'Contracts', icon: FileText, path: '/contract-analysis', status: 'available' },
-      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: '/contract-analysis', status: 'available' },
-      { labelRu: 'TaxNav', labelEn: 'TaxNav', icon: Calculator, path: '/tax', status: 'available' },
+      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: '/legal/contract-analysis', status: 'available' },
       { labelRu: 'Страхование', labelEn: 'Insurance', icon: Shield, path: '/insurance', status: 'available' },
     ],
   },
@@ -75,11 +73,10 @@ const CLUSTERS: Cluster[] = [
     services: [
       { labelRu: 'Поиск недвижимости', labelEn: 'Property Search', icon: Search, path: '/property', status: 'available' },
       { labelRu: 'Новостройки', labelEn: 'New Developments', icon: Building2, path: '/newbuilds', status: 'available' },
-      { labelRu: 'Off-Plan', labelEn: 'Off-Plan', icon: Building, path: '/offplan', status: 'available' },
-      { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/invest', status: 'available' },
-      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/invest', status: 'soon' },
       { labelRu: 'Вторичка', labelEn: 'Resale', icon: Building2, path: '/property/resale', status: 'available' },
-      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: '/property/developers', status: 'available' },
+      { labelRu: 'Застройщики', labelEn: 'Developers', icon: Users, path: '/newbuilds/developers', status: 'available' },
+      { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/property/invest', status: 'available' },
+      { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/property/invest', status: 'soon' },
     ],
   },
   {
@@ -95,11 +92,10 @@ const CLUSTERS: Cluster[] = [
   {
     id: 'build', labelRu: 'ДЕВЕЛОПЕРАМ', labelEn: 'FOR DEVELOPERS', color: '#F43F5E', icon: HardHat,
     services: [
+      { labelRu: 'Портал', labelEn: 'Portal', icon: Building, path: '/developer-portal', status: 'available' },
       { labelRu: 'Продажи', labelEn: 'Sales', icon: LineChart, path: '/for-management-companies', status: 'available' },
       { labelRu: 'Стройка', labelEn: 'Construction', icon: HardHat, path: '/for-management-companies', status: 'soon' },
-      { labelRu: 'Ценообразование', labelEn: 'Pricing', icon: DollarSign, path: '/for-management-companies', status: 'soon' },
       { labelRu: 'MarketBrief', labelEn: 'MarketBrief', icon: PenTool, path: '/for-management-companies', status: 'soon' },
-      { labelRu: 'InvestCalc', labelEn: 'InvestCalc', icon: Calculator, path: '/invest', status: 'available' },
     ],
   },
 ];

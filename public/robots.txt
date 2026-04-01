@@ -15,15 +15,32 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Protected portals
 Disallow: /admin/
 Disallow: /owner/
 Disallow: /vendor/
 Disallow: /staff/
+Disallow: /team/
+Disallow: /manager/
+Disallow: /mc/
+Disallow: /developer-portal/
+Disallow: /my-stay
+Disallow: /my-property/
+Disallow: /guest/
+
+# User private pages
 Disallow: /api/
 Disallow: /account/
 Disallow: /cart
 Disallow: /wallet
 Disallow: /checkout
+Disallow: /profile/
+Disallow: /bookings
+Disallow: /favorites
+Disallow: /notifications
+Disallow: /messages
+Disallow: /history
 
 # Sitemap
 Sitemap: https://myuno.app/sitemap.xml
