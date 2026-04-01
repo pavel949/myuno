@@ -377,7 +377,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/invest': '/property/invest',
   '/invest/dashboard': '/property/invest/dashboard',
   '/invest/raise': '/property/invest/raise',
-  '/new-developments': '/property/offplan',
+  '/new-developments': '/newbuilds',
 } as const;
 
 /**
