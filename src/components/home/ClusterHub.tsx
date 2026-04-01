@@ -1,5 +1,5 @@
 /**
- * ClusterHub — 6 cluster cards with new design system
+ * ClusterHub — 6 cluster cards with mobile optimizations
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import {
   Plane, Home, Scale, TrendingUp, Building2, HardHat,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIsDesktop } from '@/hooks/use-desktop';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -18,7 +19,7 @@ interface Cluster {
   labelRu: string;
   description: string;
   descriptionRu: string;
-  accentColor: string; // raw CSS color
+  accentColor: string;
   path: string;
   apps: string[];
   appsRu: string[];
@@ -83,23 +84,24 @@ const CLUSTERS: Cluster[] = [
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
+  visible: { transition: { staggerChildren: 0.04 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const } },
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] as const } },
 };
 
 export const ClusterHub: React.FC = () => {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
 
   return (
     <section className="space-y-4">
       <div className="text-center space-y-1">
-        <h2 className="font-display font-bold text-foreground">
+        <h2 className="font-display font-bold text-foreground text-lg md:text-xl">
           {t ? 'Один аккаунт — весь Пхукет' : 'One account — all of Phuket'}
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -112,7 +114,7 @@ export const ClusterHub: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-50px' }}
-        className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"
+        className="grid grid-cols-2 md:grid-cols-3 gap-3"
       >
         {CLUSTERS.map(cluster => {
           const Icon = cluster.icon;
@@ -121,7 +123,7 @@ export const ClusterHub: React.FC = () => {
               key={cluster.id}
               variants={itemVariants}
               onClick={() => navigate(cluster.path)}
-              className="group relative overflow-hidden text-left rounded-[var(--radius-lg)] p-5 transition-all duration-200 active:scale-[0.98]"
+              className="group relative overflow-hidden text-left rounded-[var(--radius-lg)] p-4 md:p-5 min-h-[140px] transition-all duration-200 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',
@@ -136,7 +138,7 @@ export const ClusterHub: React.FC = () => {
                 (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-card)';
               }}
             >
-              {/* Icon container */}
+              {/* Icon */}
               <div 
                 className="inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3"
                 style={{ background: cluster.accentColor + '1A' }}
@@ -149,23 +151,28 @@ export const ClusterHub: React.FC = () => {
               >
                 {t ? cluster.labelRu : cluster.label}
               </h3>
-              <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
-                {t ? cluster.descriptionRu : cluster.description}
-              </p>
+              
+              {/* Description — hidden on mobile */}
+              {isDesktop && (
+                <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                  {t ? cluster.descriptionRu : cluster.description}
+                </p>
+              )}
 
-              <div className="flex flex-wrap gap-1">
-                {(t ? cluster.appsRu : cluster.apps).slice(0, 3).map(app => (
+              {/* Tags — max 2 on mobile */}
+              <div className="flex flex-wrap gap-1 mt-2">
+                {(t ? cluster.appsRu : cluster.apps).slice(0, isDesktop ? 3 : 2).map(app => (
                   <span key={app} className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
                     style={{ background: 'hsl(var(--bg-elevated))' }}
                   >
                     {app}
                   </span>
                 ))}
-                {cluster.apps.length > 3 && (
+                {cluster.apps.length > (isDesktop ? 3 : 2) && (
                   <span className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] text-muted-foreground"
                     style={{ background: 'hsl(var(--bg-elevated))' }}
                   >
-                    +{cluster.apps.length - 3}
+                    +{cluster.apps.length - (isDesktop ? 3 : 2)}
                   </span>
                 )}
               </div>

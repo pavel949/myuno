@@ -47,9 +47,9 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
         {showSituationBanner && <ActiveSituationBanner />}
         
         <main
-          className={cn(
+           className={cn(
             "flex-1 w-full",
-            showBottomNav && "pb-20 md:pb-4",
+            showBottomNav && "pb-24 md:pb-4",
             contentClassName
           )}
         >

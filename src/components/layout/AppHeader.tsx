@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { DesktopNavTabs } from '@/components/layout/DesktopNavTabs';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
+import { useScrolled } from '@/hooks/useScrollBehavior';
 
 interface AppHeaderProps {
   title?: string;
@@ -26,6 +27,7 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const [searchOpen, setSearchOpen] = useState(false);
+  const scrolled = useScrolled(60);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -43,13 +45,15 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full",
-          "border-b",
+          "sticky top-0 z-50 w-full border-b transition-all duration-300",
           className
         )}
         style={{
-          background: 'hsl(var(--bg-surface))',
+          background: scrolled ? 'rgba(15,28,46,0.95)' : 'hsl(var(--bg-surface))',
           borderColor: 'hsl(0 0% 100% / 0.07)',
+          backdropFilter: scrolled ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
+          boxShadow: scrolled ? '0 1px 0 rgba(255,255,255,0.07)' : 'none',
         }}
       >
         <div className="flex items-center justify-between h-14 lg:h-16 px-4 lg:px-8 xl:px-10 max-w-[1536px] mx-auto gap-2">
@@ -108,14 +112,9 @@ export const AppHeader = memo(function AppHeader({ title, showBack, onMenuClick,
 
           {/* Right — utilities */}
           <div className="flex items-center gap-1 lg:gap-1.5 ml-auto shrink-0">
-            {/* Language pill */}
             <LanguageSwitcher size="sm" />
-            
-            {/* Currency pill */}
             <CurrencySwitcher size="sm" />
-
             <MiniCart className="rounded-[var(--radius-sm)] hover:bg-muted/40 transition-colors" />
-
             {user ? (
               <UserAvatarMenu />
             ) : (

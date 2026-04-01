@@ -19,7 +19,6 @@ const PERSONA_LABELS: Record<UserPersona, { ru: string; en: string }> = {
   investor: { ru: 'Инвестор', en: 'Investor' },
 };
 
-/** Inline search bar */
 function HeroSearchInput({ isRu }: { isRu: boolean }) {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -55,13 +54,12 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   );
 }
 
-/** Horizontal pill persona switcher */
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
   return (
-    <div className="w-full rounded-[var(--radius-md)] p-1 flex gap-1"
+    <div className="anim-switcher w-full rounded-[var(--radius-md)] p-1 flex gap-1 overflow-x-auto scrollbar-hide"
       style={{
         background: 'hsl(var(--bg-surface))',
         border: '1px solid hsl(0 0% 100% / 0.07)',
@@ -75,7 +73,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
             onClick={() => setPersonas([p])}
             disabled={isSetting}
             className={cn(
-              "flex-1 px-3 py-2 rounded-[var(--radius-sm)] text-[13px] font-semibold transition-all duration-200",
+              "flex-1 min-w-0 px-3 py-2 rounded-[var(--radius-sm)] text-[13px] font-semibold transition-all duration-200 whitespace-nowrap",
               isActive
                 ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -116,46 +114,44 @@ export const HeroBlock = memo(function HeroBlock() {
   const dayName = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { weekday: 'short' });
   const dateStr = now.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' });
 
-  // Mobile
   if (!isDesktop) {
     return (
       <div className="relative rounded-[var(--radius-lg)] overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
         }} />
-        {/* Animated mesh dots */}
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(0 0% 100%) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
         }} />
         
-        <div className="relative px-5 py-5 space-y-4">
+        <div className="relative px-4 py-6 space-y-4">
           {/* Location + SOS */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
               <span className="font-medium text-foreground">{isRu ? 'Пхукет' : 'Phuket'}</span>
               <span className="text-muted-foreground/40">·</span>
-              <WeatherIcon className="w-3.5 h-3.5" />
+              <WeatherIcon className="w-3.5 h-3.5 shrink-0" />
               <span>{weather?.temp || 31}°</span>
               <span className="text-muted-foreground/40">·</span>
               <span className="capitalize">{dayName}, {dateStr}</span>
             </div>
             <Link 
               to="/sos" 
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-full)]"
+              className="sos-pulse flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-full)] shrink-0 min-w-[44px] min-h-[44px] justify-center"
               style={{
-                background: 'hsl(0 0% 100% / 0.07)',
-                border: '1px solid hsl(0 0% 100% / 0.1)',
+                background: 'rgba(239,68,68,0.15)',
+                border: '1px solid rgba(239,68,68,0.4)',
               }}
             >
               <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-              <span className="text-[11px] font-semibold text-foreground">SOS</span>
+              <span className="text-[11px] font-semibold text-warning">SOS</span>
             </Link>
           </div>
           
           {/* Greeting */}
-          <div>
+          <div className="anim-hero">
             <h1 className="text-2xl font-bold text-foreground leading-tight font-display">{greeting}</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {user 
@@ -164,9 +160,9 @@ export const HeroBlock = memo(function HeroBlock() {
             </p>
             
             {user && (loyaltyTier || (activityStreak && activityStreak > 0)) && (
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
                 {loyaltyTier && (
-                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs"
+                  <Link to="/wallet" className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
                     style={{ background: 'hsl(0 0% 100% / 0.07)', border: '1px solid hsl(0 0% 100% / 0.1)' }}
                   >
                     <Trophy className="w-3 h-3 text-primary" />
@@ -175,7 +171,7 @@ export const HeroBlock = memo(function HeroBlock() {
                   </Link>
                 )}
                 {activityStreak && activityStreak > 0 ? (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs"
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-full)] text-xs min-h-[44px]"
                     style={{ background: 'hsl(0 0% 100% / 0.07)', border: '1px solid hsl(0 0% 100% / 0.1)' }}
                   >
                     <Flame className="w-3 h-3 text-warning" />
@@ -188,10 +184,7 @@ export const HeroBlock = memo(function HeroBlock() {
             )}
           </div>
           
-          {/* Persona pill switcher */}
           <PersonaSwitcher isRu={isRu} />
-          
-          {/* Search */}
           <HeroSearchInput isRu={isRu} />
         </div>
       </div>
@@ -261,10 +254,10 @@ export const HeroBlock = memo(function HeroBlock() {
 
         <Link 
           to="/sos" 
-          className="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
+          className="sos-pulse flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] transition-all hover:scale-105"
           style={{
-            background: 'hsl(0 0% 100% / 0.07)',
-            border: '1px solid hsl(0 0% 100% / 0.1)',
+            background: 'rgba(239,68,68,0.15)',
+            border: '1px solid rgba(239,68,68,0.4)',
           }}
         >
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />

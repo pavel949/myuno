@@ -1,11 +1,12 @@
 /**
- * WhatsAppCTA — Premium CTA with new design system
+ * WhatsAppCTA — with wa-dot pulse animation
  */
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MessageCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useSectionReveal } from '@/hooks/useScrollBehavior';
 
 const WHATSAPP_NUMBER = '+66612345678';
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi! I need help with services in Phuket')}`;
@@ -13,23 +14,21 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/[^0-9]/g, '')}?te
 export function WhatsAppCTA({ className }: { className?: string }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const sectionRef = useSectionReveal<HTMLElement>();
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+    <section
+      ref={sectionRef}
       className={cn(
-        "relative rounded-[var(--radius-lg)] overflow-hidden",
+        "section-reveal relative rounded-[var(--radius-lg)] overflow-hidden",
         className
       )}
     >
-      {/* Gradient background */}
       <div className="absolute inset-0" style={{
         background: 'linear-gradient(135deg, #00D68F 0%, #00A67A 100%)'
       }} />
 
-      <div className="relative px-5 py-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="relative px-4 py-6 md:px-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-[var(--radius-sm)] flex items-center justify-center"
@@ -57,21 +56,17 @@ export function WhatsAppCTA({ className }: { className?: string }) {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-5 py-3 rounded-[var(--radius-full)] font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
-          style={{
-            background: '#fff',
-            color: '#00A67A',
-          }}
+          className="flex items-center gap-2 px-5 py-3 rounded-[var(--radius-full)] font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 min-h-[44px]"
+          style={{ background: '#fff', color: '#00A67A' }}
         >
-          {/* Pulsing green dot */}
           <div className="relative">
             <MessageCircle className="w-4 h-4" />
-            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-pulse-green" />
+            <div className="wa-dot absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary" />
           </div>
           WhatsApp
           <ArrowRight className="w-3.5 h-3.5" />
         </a>
       </div>
-    </motion.section>
+    </section>
   );
 }

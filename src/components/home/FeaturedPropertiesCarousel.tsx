@@ -1,5 +1,5 @@
 /**
- * FeaturedPropertiesCarousel — Horizontal scroll with new design system
+ * FeaturedPropertiesCarousel — mobile-optimized with carousel-scroll
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getDistrictLabel } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { useSectionReveal } from '@/hooks/useScrollBehavior';
 
 interface FeaturedProperty {
   id: string;
@@ -36,6 +37,7 @@ export function FeaturedPropertiesCarousel() {
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const sectionRef = useSectionReveal<HTMLElement>();
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ['featured-properties-home'],
@@ -64,7 +66,7 @@ export function FeaturedPropertiesCarousel() {
         <Skeleton className="h-6 w-48" />
         <div className="flex gap-3 overflow-hidden">
           {[1, 2, 3].map(i => (
-            <Skeleton key={i} className="h-72 w-60 rounded-[var(--radius-lg)] shrink-0" />
+            <Skeleton key={i} className="h-[280px] w-[220px] md:h-72 md:w-60 rounded-[var(--radius-lg)] shrink-0" />
           ))}
         </div>
       </div>
@@ -74,22 +76,22 @@ export function FeaturedPropertiesCarousel() {
   if (properties.length === 0) return null;
 
   return (
-    <section>
+    <section ref={sectionRef} className="section-reveal">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-display font-bold text-foreground">
           {isRu ? 'Аренда на Пхукете' : 'Rent in Phuket'}
         </h2>
         <button
           onClick={() => navigate('/property?mode=rent')}
-          className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors"
+          className="flex items-center gap-1 text-xs text-primary font-semibold hover:text-primary/80 transition-colors min-h-[44px]"
         >
           {isRu ? 'Все объекты' : 'View all'}
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
-        {properties.map(property => {
+      <div className="carousel-scroll gap-3 -mx-4 px-4">
+        {properties.map((property, i) => {
           const image = property.cover_image || property.images?.[0] || PLACEHOLDER_IMAGES.property;
           const unitPrice = property.price_per_night || property.price || 0;
           const district = property.district
@@ -100,14 +102,15 @@ export function FeaturedPropertiesCarousel() {
             <button
               key={property.id}
               onClick={() => navigate(`/property/${property.id}`)}
-              className="shrink-0 w-[260px] h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group snap-start transition-all duration-200 hover:-translate-y-1"
+              className="w-[220px] h-[280px] md:w-[260px] md:h-[320px] rounded-[var(--radius-lg)] overflow-hidden text-left group transition-all duration-200 hover:-translate-y-1 active:scale-[0.97]"
               style={{
                 background: 'hsl(var(--card))',
                 border: '1px solid hsl(0 0% 100% / 0.07)',
                 boxShadow: 'var(--shadow-card)',
+                animationDelay: `${0.25 + i * 0.05}s`,
               }}
             >
-              {/* Image — top 60% */}
+              {/* Image */}
               <div className="relative h-[60%] overflow-hidden">
                 <img
                   src={image}
@@ -115,7 +118,6 @@ export function FeaturedPropertiesCarousel() {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
                   loading="lazy"
                 />
-                {/* Badges */}
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
                   {property.is_featured && (
                     <span className="px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] backdrop-blur-sm"
@@ -133,10 +135,9 @@ export function FeaturedPropertiesCarousel() {
                 </div>
               </div>
 
-              {/* Content — bottom 40% */}
-              <div className="h-[40%] p-4 flex flex-col justify-between">
+              {/* Content */}
+              <div className="h-[40%] p-3 md:p-4 flex flex-col justify-between">
                 <div>
-                  {/* Location pill */}
                   <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded-[var(--radius-full)] mb-1.5"
                     style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}
                   >
@@ -147,25 +148,18 @@ export function FeaturedPropertiesCarousel() {
                   </p>
                   <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1">
                     {property.bedrooms != null && property.bedrooms > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Bed className="w-3 h-3" /> {property.bedrooms}
-                      </span>
+                      <span className="flex items-center gap-0.5"><Bed className="w-3 h-3" /> {property.bedrooms}</span>
                     )}
                     {property.max_guests != null && property.max_guests > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Users className="w-3 h-3" /> {property.max_guests}
-                      </span>
+                      <span className="flex items-center gap-0.5"><Users className="w-3 h-3" /> {property.max_guests}</span>
                     )}
                     {property.rating != null && property.rating > 0 && (
-                      <span className="flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-warning text-warning" />
-                        {property.rating.toFixed(1)}
-                      </span>
+                      <span className="flex items-center gap-0.5"><Star className="w-3 h-3 fill-warning text-warning" /> {property.rating.toFixed(1)}</span>
                     )}
                   </div>
                 </div>
 
-                <p className="text-lg font-bold font-display text-primary">
+                <p className="text-base md:text-lg font-bold font-display text-primary">
                   {formatPrice(unitPrice)}
                   <span className="font-normal text-muted-foreground text-xs ml-1">
                     /{isRu ? 'ночь' : 'night'}
