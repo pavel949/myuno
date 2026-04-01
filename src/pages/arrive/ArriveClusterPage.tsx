@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap } from 'lucide-react';
+import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
