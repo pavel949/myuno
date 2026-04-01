@@ -44,6 +44,7 @@ const navigationItems: NavItem[] = [
   { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
   { title: 'Partners', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, badgeKey: 'pendingProviders' },
   { title: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: BadgeIcon },
+  { title: 'New Developments', titleRu: 'Новостройки', path: '/admin/newbuilds', icon: Building2 },
   { title: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings },
 ];
 
