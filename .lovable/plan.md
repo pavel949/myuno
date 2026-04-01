@@ -1,6 +1,6 @@
 
 
-# Vendor Onboarding UX — Fast First Listing with Progressive Completion
+# myUNO Bible v2.0 — Full Gap Closure Plan
 
 ## Research: How Top Platforms Do It
 
@@ -13,72 +13,62 @@
 
 **Common pattern**: Minimal barrier to first listing (name + category + 1 item), then a dashboard checklist drives progressive completion (photos, hours, bank details, verification docs).
 
-## Current State Analysis
+---
 
-**What exists:**
-- `VendorOnboarding.tsx` — single long form: business name, categories (15 checkboxes), description, phone, email, website, address → creates provider + org + marketplace_vendor. **No first listing created.**
-- `VendorOnboardingChecklist.tsx` — dashboard widget with 3 items (profile, first listing, photos). Already follows the progressive pattern but is disconnected from onboarding.
-- `UnifiedVendorWizard.tsx` — full 4-step wizard for creating listings. Already works in vendor dashboard.
-- `ListingWizard` at `/list-with-us` — 7-step wizard for public listing applications. Separate flow.
+## Implementation Progress
 
-**Core problem:** After completing onboarding, vendor lands on empty dashboard. Must discover how to create their first listing separately. **Drop-off point.**
+### ✅ Phase 1.3: Hub Landing Page
+- Added ClusterHub component with 6 Bible cluster cards (ARRIVE/LIVE/LEGAL/INVEST/MANAGE/BUILD)
+- Integrated into Index.tsx between QuickActions and content sections
 
-## Proposed UX: "3-Screen Fast Start"
+### ✅ Phase 2.1: SIMstart (/sim)
+- Built SIMstart page with AIS, DTAC/True, True Move H plan comparison
+- Filters by duration and provider
+- eSIM badges, price converter, referral links
+- Bilingual RU/EN
 
-```text
-Screen 1: WHO ARE YOU?          Screen 2: YOUR FIRST LISTING       Screen 3: DONE!
-┌──────────────────┐           ┌──────────────────┐              ┌──────────────────┐
-│ Business Name *  │           │ Service/Product   │              │  ✅ You're Live!  │
-│ [____________]   │           │ Name *            │              │                  │
-│                  │           │ [____________]    │              │  Your listing is │
-│ Category *       │           │                   │              │  pending review  │
-│ [🍽 Restaurant▾]│           │ Price *            │              │                  │
-│                  │           │ [____] THB        │              │  Complete your   │
-│ Phone / WhatsApp │           │                   │              │  profile to get  │
-│ [+66 ________]   │           │ Photo (optional)  │              │  verified faster │
-│                  │           │ [📷 Upload]       │              │                  │
-│         [Next →] │           │                   │              │  [→ Dashboard]   │
-└──────────────────┘           │ Brief description │              └──────────────────┘
-                               │ [____________]    │
-                               │         [List →]  │
-                               └──────────────────┘
-```
+### ✅ Phase 2.2: ExchangeBot (/exchange)
+- Built ExchangeBot page with RUB/USD/EUR/GBP/CNY → THB rates
+- Currency converter calculator
+- Exchanger directory with ratings, hours, spread %
+- Google Maps links for each exchanger
+- Bilingual RU/EN
 
-**Required fields total: 4** (business name, category, service name, price)
-Everything else: progressive completion via existing `VendorOnboardingChecklist`.
+### ✅ Design System: Cluster Accent Colors
+- Added 6 cluster HSL tokens to tokens.css (--cluster-arrive through --cluster-build)
+- Added `cluster` color group to tailwind.config.ts
 
-## Implementation Plan
+### 🔲 Remaining (Next Sessions)
 
-### 1. Refactor VendorOnboarding into 3-step wizard
-Replace the current single-form `VendorOnboarding.tsx` with a 3-screen flow:
-- **Screen 1 — Business Info**: Business name, primary category (single select, not 15 checkboxes), phone/WhatsApp (one field). Remove: description, email, website, address, Russian name — all deferred to profile settings.
-- **Screen 2 — First Listing**: Service/product name, price + currency, optional photo, optional one-line description. Uses existing `vendor_services` table via `useVendorServices.createService`.
-- **Screen 3 — Success**: Confirmation with profile completeness score and CTA to dashboard. Shows what to do next (from checklist).
+#### P0: Fix Happy Paths
+- Wire Transfers end-to-end with Stripe + WhatsApp confirmation
+- Verify Yachts 50% deposit flow
+- Verify Flowers cart → checkout → delivery
 
-### 2. Update VendorOnboardingChecklist
-Expand from 3 to 6 progressive items:
-- ✅ Create account (auto-complete)
-- ✅ Add first listing (auto-complete from step 2)
-- ○ Add business description
-- ○ Upload logo / cover photo
-- ○ Add working hours
-- ○ Add payment details
+#### P0: WhatsApp Cloud API
+- Create _shared/whatsapp-cloud.ts
+- Create send-booking-whatsapp edge function
+- Hook into stripe-webhook
 
-Each item links to the relevant settings section.
+#### P1: SEO Foundation
+- JSON-LD schemas per vertical
+- Canonical tags
+- Sitemap verification
 
-### 3. Wire the data flow
-- Screen 1 calls existing `createProfile()` from `useVendorProfile` — but with reduced payload (name + category + phone only)
-- Screen 2 calls `createService()` from `useVendorServices` with the newly created provider ID
-- No new tables or migrations needed — uses existing `providers`, `vendor_services`, `orgs`, `org_members`
+#### P2: VisaTrack MVP (/visa)
+- visa_records table + migration
+- Expiry tracker UI
+- Document upload
+- Reminder cron
 
-### 4. Update entry points
-- `/vendor/onboarding` → renders new 3-step wizard
-- `BecomePartnerCTA`, `PartnersPage`, `VendorSection` links remain unchanged (they already point to `/vendor/onboarding`)
+#### P2: ContractAI UI
+- Upload PDF → AI analysis frontend
 
-### Technical Details
-- Reuse existing `OnboardingLayout` component for step progress UI
-- Reuse `UnifiedMediaUploader` for photo upload in step 2
-- Category select: reuse `availableVerticals` array but render as `Select` dropdown instead of checkbox grid
-- No new DB tables or migrations required
-- No new Edge Functions required
-
+#### P3+: Remaining clusters
+- TaxNav, DTVready, LeaseBuilder
+- MarketBrief, DueDiligence AI
+- Service booking flow enhancements
+- Restaurant reservation flow
+- DepositSafe, FinanceGuide
+- ComplianceTrack
+- Construction Tracker, Pricing Intel
