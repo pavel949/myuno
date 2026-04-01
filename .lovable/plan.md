@@ -38,6 +38,36 @@
 - Added 6 cluster HSL tokens to tokens.css (--cluster-arrive through --cluster-build)
 - Added `cluster` color group to tailwind.config.ts
 
+### ✅ Cluster Landing Pages
+- ArriveClusterPage (/arrive) — 6 apps: Transfers, SIM, Exchange, Car Rental, Banking, Fast Track
+- LegalClusterPage (/stay-legal) — 5 apps: VisaTrack, TaxNav, ContractAI, Insurance, Legal Services
+- InvestClusterPage (/invest-hub) — 5 apps: Property Search, Off-Plan, ROI Calculator, Developers, Consultation
+- ClusterHub cards now link to dedicated cluster pages
+
+### ✅ VisaTrack MVP (/visa)
+- Created visa_records table with RLS (users manage own records)
+- Created visa-documents storage bucket with per-user folder RLS
+- Built VisaTracker component with add/edit/delete visa records
+- Color-coded urgency display (green >30d, amber 14-30d, red <14d)
+- Integrated as "Tracker" tab in VisaImmigrationPage
+- visa-expiry-reminders edge function for 30/14/7 day email notifications + auto-expire
+
+### ✅ ContractAI (/legal/contract-analysis)
+- Upload contract text → AI analysis via ai-agent (Gemini 2.5 Pro)
+- Displays: risk score (1-10), summary, red flags, key terms, recommendations
+- Bilingual RU/EN output
+
+### ✅ TaxNav (/tax)
+- 4-step interactive questionnaire (residency, income sources, stay duration, filing status)
+- AI-generated tax obligations summary via ai-agent (Gemini 2.5 Flash)
+- "Connect with tax advisor" CTA
+- Markdown-rendered results with start-over capability
+
+### ✅ Route & Navigation Cleanup
+- Added APP_ROUTES: ARRIVE_CLUSTER, LEGAL_CLUSTER, INVEST_CLUSTER, TAX_NAV, CONTRACT_ANALYSIS
+- Registered all new pages in pageRegistry.ts and AnimatedRoutes.tsx
+- Updated ROUTE_OWNERSHIP PUBLIC array with new routes
+
 ### 🔲 Remaining (Next Sessions)
 
 #### P0: Fix Happy Paths
@@ -54,12 +84,6 @@
 - JSON-LD schemas per vertical
 - Canonical tags
 - Sitemap verification
-
-#### P2: VisaTrack MVP (/visa)
-- visa_records table + migration
-- Expiry tracker UI
-- Document upload
-- Reminder cron
 
 #### P2: ContractAI UI
 - Upload PDF → AI analysis frontend
