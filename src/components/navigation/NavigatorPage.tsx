@@ -92,11 +92,10 @@ const CLUSTERS: Cluster[] = [
   {
     id: 'build', labelRu: 'ДЕВЕЛОПЕРАМ', labelEn: 'FOR DEVELOPERS', color: '#F43F5E', icon: HardHat,
     services: [
+      { labelRu: 'Портал', labelEn: 'Portal', icon: Building, path: '/developer-portal', status: 'available' },
       { labelRu: 'Продажи', labelEn: 'Sales', icon: LineChart, path: '/for-management-companies', status: 'available' },
       { labelRu: 'Стройка', labelEn: 'Construction', icon: HardHat, path: '/for-management-companies', status: 'soon' },
-      { labelRu: 'Ценообразование', labelEn: 'Pricing', icon: DollarSign, path: '/for-management-companies', status: 'soon' },
       { labelRu: 'MarketBrief', labelEn: 'MarketBrief', icon: PenTool, path: '/for-management-companies', status: 'soon' },
-      { labelRu: 'InvestCalc', labelEn: 'InvestCalc', icon: Calculator, path: '/invest', status: 'available' },
     ],
   },
 ];
