@@ -69,6 +69,7 @@ const TABS: TabConfig[] = [
 function getActiveTab(pathname: string, search: string): string {
   if (pathname.startsWith('/property/my')) return 'my';
   if (pathname.startsWith('/property/invest')) return 'my';
+  if (pathname.startsWith('/property/resale')) return 'resale';
   if (pathname.startsWith('/property/offplan') || pathname.startsWith('/property/developers') || pathname.startsWith('/property/projects')) return 'newbuild';
   
   if (pathname === '/property' || pathname.startsWith('/property/search') || pathname.startsWith('/property/map') || pathname.startsWith('/property/consultation')) {
