@@ -94,7 +94,7 @@ export default function YachtsIndex() {
       onCategoryChange={(id) => setTypeFilter(id as YachtTypeFilter)}
       showFilter={false}
       stickySubHeader={
-        <div className="px-4 py-2 flex items-center gap-2">
+        <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           <button
             onClick={() => setInstantOnly(v => !v)}
             className={cn(

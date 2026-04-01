@@ -284,11 +284,8 @@ export function MiniAppLayout({
         {/* Unified Sticky Sub-Header: Categories OR Quick Filters OR Custom */}
         {hasStickySubHeader && (
           <div className="bg-background border-b border-border/30">
-            {/* Custom sticky sub-header (Market uses this) */}
-            {stickySubHeader}
-            
-            {/* Category Filter Ribbon (if no custom sub-header) */}
-            {!stickySubHeader && hasCategories && (
+            {/* Category Filter Ribbon (always shown when categories are provided) */}
+            {hasCategories && (
               <UnifiedFilterRibbon
                 items={categoryItems}
                 activeId={selectedCategory}
@@ -296,6 +293,9 @@ export function MiniAppLayout({
                 className="px-4 py-2 border-0"
               />
             )}
+            
+            {/* Custom sticky sub-header (sort, type toggles, etc.) */}
+            {stickySubHeader}
             
             {/* Quick Filter Chips in sticky sub-header (if no categories and no custom) */}
             {!stickySubHeader && !hasCategories && hasQuickFilters && (

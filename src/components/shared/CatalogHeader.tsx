@@ -68,7 +68,7 @@ export const CatalogHeader = memo(function CatalogHeader({
 
       {/* Category ribbon */}
       {categories && categories.length > 0 && onCategoryChange && (
-        <div className="max-w-[1536px] mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide">
+        <div className="max-w-[1536px] mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
           {categories.map(cat => (
             <button
               key={cat.id}
