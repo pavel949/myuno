@@ -43,4 +43,10 @@ export {
   mapBouquetToCatalogCard,
   mapPetServiceToCatalogCard,
   mapRestaurantToCatalogCard,
+  mapSalonToCatalogCard,
+  mapGymToCatalogCard,
+  mapEducationToCatalogCard,
+  mapCleaningToCatalogCard,
+  mapEventToCatalogCard,
+  mapClinicToCatalogCard,
 } from './catalogCardAdapters';

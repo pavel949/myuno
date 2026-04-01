@@ -195,9 +195,6 @@ export function mapRestaurantToCatalogCard(
     ? { text: isRu ? 'Бронь' : 'Reserve', icon: CalendarDays, className: 'bg-primary text-primary-foreground' }
     : undefined;
 
-  const meta: CatalogMeta[] = [];
-  // Add cuisine as subtitle instead
-
   const subtitle = cuisineTags?.slice(0, 2).join(', ') || undefined;
 
   return {
@@ -211,3 +208,180 @@ export function mapRestaurantToCatalogCard(
     subtitle,
   };
 }
+
+// ─── Salon (Beauty & Spa) ────────────────────────────────
+
+export function mapSalonToCatalogCard(
+  salon: any,
+  language: string,
+  navigate: (path: string) => void
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? salon.name_ru : salon.name_en;
+
+  const badges: CatalogBadge[] = [];
+  if (salon.is_verified) badges.push({ text: isRu ? 'Проверено' : 'Verified', icon: Shield, className: 'bg-primary text-primary-foreground' });
+
+  return {
+    image: salon.cover_image || PLACEHOLDER_IMAGES.salon,
+    title: name,
+    onClick: () => navigate(`/beauty/${salon.id}`),
+    badges,
+    rating: (salon.rating ?? 0) > 0 ? salon.rating : undefined,
+    location: salon.address || undefined,
+    price: salon.price_from || undefined,
+    pricePrefix: salon.price_from ? (isRu ? 'от' : 'from') : undefined,
+  };
+}
+
+// ─── Gym (Fitness) ───────────────────────────────────────
+
+export function mapGymToCatalogCard(
+  gym: any,
+  language: string,
+  navigate: (path: string) => void
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? gym.name_ru : gym.name_en;
+
+  const badges: CatalogBadge[] = [];
+  if (gym.is_verified) badges.push({ text: isRu ? 'Проверено' : 'Verified', icon: Shield, className: 'bg-primary text-primary-foreground' });
+
+  const price = gym.price_day_pass || gym.price_month_pass || undefined;
+  const priceSuffix = gym.price_day_pass
+    ? (isRu ? '/день' : '/day')
+    : gym.price_month_pass ? (isRu ? '/мес' : '/mo') : undefined;
+
+  return {
+    image: gym.cover_image || PLACEHOLDER_IMAGES.gym,
+    title: name,
+    onClick: () => navigate(`/fitness/${gym.id}`),
+    badges,
+    rating: (gym.rating ?? 0) > 0 ? gym.rating : undefined,
+    location: gym.address || undefined,
+    price,
+    priceSuffix,
+  };
+}
+
+// ─── Education Provider ──────────────────────────────────
+
+export function mapEducationToCatalogCard(
+  provider: any,
+  language: string,
+  navigate: (path: string) => void
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? provider.name_ru : provider.name_en;
+  const isSchool = provider.provider_type === 'school';
+
+  const badges: CatalogBadge[] = [
+    {
+      text: isSchool ? (isRu ? 'Школа' : 'School') : (isRu ? 'Репетитор' : 'Tutor'),
+      className: 'bg-primary/90 text-primary-foreground',
+    },
+  ];
+
+  return {
+    image: provider.cover_image || PLACEHOLDER_IMAGES.education,
+    title: name,
+    onClick: () => navigate(`/education/${provider.id}`),
+    badges,
+    rating: (provider.rating ?? 0) > 0 ? provider.rating : undefined,
+    price: provider.price_per_hour || undefined,
+    priceSuffix: provider.price_per_hour ? (isRu ? '/ч' : '/hr') : undefined,
+  };
+}
+
+// ─── Cleaning Service ────────────────────────────────────
+
+export function mapCleaningToCatalogCard(
+  service: any,
+  language: string,
+  navigate: (path: string) => void
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? service.name_ru : service.name_en;
+  const price = service.price_fixed || service.price_per_hour || 0;
+
+  const badges: CatalogBadge[] = [];
+  if (service.is_verified) badges.push({ text: isRu ? 'Проверено' : 'Verified', icon: Shield, className: 'bg-primary text-primary-foreground' });
+
+  const subtitleParts: string[] = [];
+  if (service.duration_hours) subtitleParts.push(`${service.duration_hours}h`);
+  if (service.service_type) subtitleParts.push(service.service_type);
+
+  return {
+    image: service.cover_image || PLACEHOLDER_IMAGES.service,
+    title: name,
+    onClick: () => navigate(`/cleaning/${service.id}`),
+    badges,
+    rating: (service.rating ?? 0) > 0 ? service.rating : undefined,
+    subtitle: subtitleParts.length > 0 ? subtitleParts.join(' · ') : undefined,
+    price: price > 0 ? price : undefined,
+    priceSuffix: service.price_per_hour ? (isRu ? '/ч' : '/hr') : undefined,
+  };
+}
+
+// ─── Event ───────────────────────────────────────────────
+
+export function mapEventToCatalogCard(
+  event: any,
+  language: string,
+  navigate: (path: string) => void,
+  formatDate: (dateStr: string | null) => string
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? event.title_ru : event.title_en;
+
+  const badges: CatalogBadge[] = [];
+  if (event.is_featured) badges.push({ text: isRu ? 'Топ' : 'Featured', icon: Star, className: 'bg-primary text-primary-foreground' });
+
+  const socialProof = event.event_date ? formatDate(event.event_date) : undefined;
+
+  return {
+    image: event.cover_image || PLACEHOLDER_IMAGES.event,
+    title: name,
+    onClick: () => navigate(`/events/${event.id}`),
+    badges,
+    socialProof,
+    location: event.location_name || undefined,
+    price: event.price || undefined,
+    pricePrefix: event.price ? (isRu ? 'от' : 'from') : undefined,
+    subtitle: !event.price ? (isRu ? 'Бесплатно' : 'Free') : undefined,
+  };
+}
+
+// ─── Clinic (Medical) ────────────────────────────────────
+
+export function mapClinicToCatalogCard(
+  clinic: any,
+  language: string,
+  navigate: (path: string) => void,
+  isOpen: boolean
+): CatalogCardProps {
+  const isRu = language === 'ru';
+  const name = isRu ? clinic.name_ru : clinic.name_en;
+
+  const badges: CatalogBadge[] = [];
+  if (clinic.is_24h) {
+    badges.push({ text: '24/7', className: 'bg-success text-success-foreground' });
+  } else if (isOpen) {
+    badges.push({ text: isRu ? 'Открыто' : 'Open', className: 'bg-success text-success-foreground' });
+  }
+
+  const hasRussian = clinic.languages?.includes('Russian');
+  const subtitle = hasRussian ? (isRu ? 'Русскоговорящий персонал' : 'Russian-speaking staff') : undefined;
+
+  return {
+    image: clinic.cover_image || PLACEHOLDER_IMAGES.medical,
+    title: name,
+    onClick: () => navigate(`/medical/${clinic.id}`),
+    badges,
+    rating: (clinic.rating ?? 0) > 0 ? clinic.rating : undefined,
+    location: clinic.address || undefined,
+    subtitle,
+  };
+}
+
+
