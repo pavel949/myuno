@@ -138,7 +138,6 @@ export default function SchoolFinderPage() {
       <SEOHead
         title={isRu ? 'Подбор школы на Пхукете' : 'School Finder Phuket'}
         description={isRu ? 'Найдите идеальную школу: фильтр по возрасту, языку и бюджету' : 'Find the perfect school: filter by age, language and budget'}
-        path="/school-finder"
       />
 
       {/* Header */}

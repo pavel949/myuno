@@ -122,7 +122,6 @@ export default function CostOfLivingPage() {
       <SEOHead
         title={isRu ? 'Стоимость жизни на Пхукете — Калькулятор' : 'Cost of Living in Phuket — Calculator'}
         description={isRu ? 'Рассчитайте ежемесячные расходы: жильё, еда, транспорт, медицина' : 'Calculate monthly expenses: housing, food, transport, healthcare'}
-        path="/cost-of-living"
       />
 
       {/* Header */}

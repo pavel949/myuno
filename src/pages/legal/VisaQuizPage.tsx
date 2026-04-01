@@ -247,7 +247,6 @@ export default function VisaQuizPage() {
       <SEOHead
         title={isRu ? 'Какая виза мне нужна? — Квиз' : 'Which Visa Do I Need? — Quiz'}
         description={isRu ? 'Пройдите квиз и узнайте какая виза подходит для вашей поездки в Таиланд' : 'Take a quick quiz to find the right visa for your Thailand trip'}
-        path="/visa/quiz"
       />
 
       {/* Header */}
