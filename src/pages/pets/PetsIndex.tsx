@@ -26,11 +26,18 @@ const CATEGORIES = [
 
 export default function PetsIndex() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { services: petServices, isLoading } = usePetServices();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all');
   const isRu = language === 'ru';
+
+  // Sync URL category param → state
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat && cat !== selectedCategory) setSelectedCategory(cat);
+  }, [searchParams]);
 
   const filteredServices = useMemo(() => {
     if (selectedCategory === 'all') return petServices;
