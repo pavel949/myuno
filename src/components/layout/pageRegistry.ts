@@ -55,6 +55,8 @@ export const ResaleDetail = lazy(() => import('@/pages/property/ResaleDetail'));
 export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLanding'));
 export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCatalog'));
 export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
+export const NewbuildsDevelopers = lazy(() => import('@/pages/newbuilds/NewbuildsDevelopers'));
+export const NewbuildDeveloperDetail = lazy(() => import('@/pages/newbuilds/NewbuildDeveloperDetail'));
 
 // ── Developer Portal ──
 export const DeveloperPortalLayout = lazy(() => import('@/components/newbuilds/DeveloperPortalLayout'));
