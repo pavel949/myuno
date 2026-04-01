@@ -21,6 +21,7 @@ import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanne
 
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
+import { ClusterHub } from '@/components/home/ClusterHub';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
