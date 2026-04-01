@@ -11,7 +11,7 @@ import {
   ChevronRight, Plane, Home, Building2, TrendingUp, Check,
   Scale, HardHat, Car, CreditCard, Stethoscope, Calculator,
   BarChart3, Shield, Calendar, Sparkles, FileSearch,
-  Baby, Heart, Music, Dumbbell, Laptop
+  Baby, Heart, Music, Dumbbell, Laptop, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
