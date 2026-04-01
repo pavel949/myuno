@@ -2,23 +2,9 @@ import React, { forwardRef, useCallback, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { 
-  Home, 
-  Compass, 
-  ShoppingBag, 
-  User,
-  LayoutDashboard,
-  Building2,
-  CalendarDays,
-  Calendar,
-  Package,
-  Wallet,
-  UserCheck,
-  MessageSquare,
-  FileCheck,
-  Plus,
-  Users,
-  MessageCircle,
-  LayoutGrid
+  Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
+  CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
+  FileCheck, Plus, Users, MessageCircle, LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -36,16 +22,13 @@ type NavItem = {
   labelRu: string;
 };
 
-// Guest/User navigation — 4 tabs + center apps button
 const guestNavItems: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная' },
   { path: APP_ROUTES.DISCOVER, icon: Compass, labelEn: 'Discover', labelRu: 'Навигатор' },
-  // Center slot is for "Apps" button (handled separately)
   { path: APP_ROUTES.MARKET, icon: ShoppingBag, labelEn: 'Market', labelRu: 'Маркет' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль' },
 ];
 
-// Owner/Host navigation
 const ownerNavItems: NavItem[] = [
   { path: APP_ROUTES.MC, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты' },
@@ -53,7 +36,6 @@ const ownerNavItems: NavItem[] = [
   { path: APP_ROUTES.MC_MESSAGES, icon: MessageCircle, labelEn: 'Messages', labelRu: 'Чаты' },
 ];
 
-// Vendor navigation
 const vendorNavItems: NavItem[] = [
   { path: APP_ROUTES.VENDOR, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: APP_ROUTES.VENDOR_SERVICES, icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
@@ -62,7 +44,6 @@ const vendorNavItems: NavItem[] = [
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Admin navigation
 const adminNavItems: NavItem[] = [
   { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/admin/leads', icon: UserCheck, labelEn: 'Leads', labelRu: 'Лиды' },
@@ -71,7 +52,6 @@ const adminNavItems: NavItem[] = [
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Team navigation
 const teamNavItems: NavItem[] = [
   { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
@@ -80,51 +60,26 @@ const teamNavItems: NavItem[] = [
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-// Routes that have their own fixed bottom bar and should hide the global nav
-// Layouts that render their own mobile bottom nav
 const layoutsWithOwnNav = ['/mc', '/admin', '/staff', '/my-stay', '/guest', '/team'];
 
-// Detail/checkout pages that have their own fixed bottom bar
 const routesWithOwnBottomBar = [
-  '/flowers/',
-  '/yachts/',
-  '/tours/',
-  '/beauty/',
-  '/cleaning/',
-  '/fitness/booking',
-  '/medical/appointment',
-  '/restaurants/',
-  '/pets/',
-  '/cart',
-  '/checkout',
-  '/auth',
-  '/market/product/',
-  '/market/category/',
-  '/experience/',
-  '/babysitter/',
-  '/transfer/',
-  '/transport/',
-  '/service/',
+  '/flowers/', '/yachts/', '/tours/', '/beauty/', '/cleaning/',
+  '/fitness/booking', '/medical/appointment', '/restaurants/',
+  '/pets/', '/cart', '/checkout', '/auth', '/market/product/',
+  '/market/category/', '/experience/', '/babysitter/',
+  '/transfer/', '/transport/', '/service/',
 ];
 
 function shouldHideBottomNav(pathname: string): boolean {
-  // Hide for layouts that have their own mobile nav
   if (layoutsWithOwnNav.some(prefix => pathname.startsWith(prefix))) return true;
-  // Hide for detail/checkout pages with own bottom bar
-  // Use exact startsWith for /property/ to avoid matching /mc/properties/
   if (pathname.startsWith('/property/')) return true;
   return routesWithOwnBottomBar.some(route => pathname.includes(route));
 }
 
-type NavConfig = {
-  items: NavItem[];
-  showAppsButton: boolean;
-};
+type NavConfig = { items: NavItem[]; showAppsButton: boolean };
 
 function getNavConfigForPath(pathname: string): NavConfig {
   if (pathname.includes('/onboarding')) return { items: guestNavItems, showAppsButton: true };
-  // These layouts have their own nav — should never reach here due to shouldHideBottomNav,
-  // but as a safety net return appropriate items
   if (pathname.startsWith('/admin')) return { items: adminNavItems, showAppsButton: false };
   if (pathname.startsWith('/mc')) return { items: ownerNavItems, showAppsButton: false };
   if (pathname.startsWith('/owner')) return { items: ownerNavItems, showAppsButton: false };
@@ -144,25 +99,17 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       prefetchRoute(path);
     }, [prefetchRoute]);
 
-    // Hide nav on pages that have their own fixed bottom bar
-    if (shouldHideBottomNav(location.pathname)) {
-      return null;
-    }
+    if (shouldHideBottomNav(location.pathname)) return null;
 
     const { items: navItems, showAppsButton } = getNavConfigForPath(location.pathname);
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       triggerRipple(e);
       const settings = getFeedbackSettings();
-      if (settings.hapticEnabled) {
-        triggerHaptic('light');
-      }
-      if (settings.soundEnabled) {
-        playSound('click');
-      }
+      if (settings.hapticEnabled) triggerHaptic('light');
+      if (settings.soundEnabled) playSound('click');
     };
 
-    // Check if current path matches nav item (handles nested routes)
     const isActive = (itemPath: string) => {
       if (itemPath === '/') return location.pathname === '/';
       if (itemPath === '/account') return location.pathname.startsWith('/account') || location.pathname.startsWith('/profile');
@@ -170,20 +117,30 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
       return location.pathname.startsWith(itemPath);
     };
 
-    // Split guest items for center button insertion
     const leftItems = showAppsButton ? navItems.slice(0, 2) : navItems;
     const rightItems = showAppsButton ? navItems.slice(2) : [];
     const gridCols = showAppsButton ? 'grid-cols-5' : `grid-cols-${navItems.length}`;
 
     return (
       <>
-        <nav ref={ref} className="fixed bottom-0 left-0 right-0 z-50 md:hidden" {...props}>
-          {/* Clean backdrop */}
-          <div className="absolute inset-0 bg-card/95 backdrop-blur-xl border-t border-border/40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]" />
-          
-          {/* Nav items */}
-          <div className={cn("relative grid gap-1 h-16 px-2 py-2.5 max-w-[420px] mx-auto", gridCols)}>
-            {/* Left items */}
+        <nav
+          ref={ref}
+          className="fixed bottom-0 left-0 right-0 z-[100] md:hidden"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          {...props}
+        >
+          {/* Glass backdrop */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'rgba(15,28,46,0.85)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              borderTop: '1px solid rgba(255,255,255,0.07)',
+            }}
+          />
+
+          <div className={cn("relative grid gap-0 h-16 px-2 max-w-[420px] mx-auto", gridCols)}>
             {leftItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               return (
@@ -193,46 +150,56 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className={cn(
-                    "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
-                    active
-                      ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
-                  )}
+                  className="flex flex-col items-center justify-center relative"
                 >
-                  <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
-                  <span className={cn(
-                    "text-[10px] whitespace-nowrap",
-                    active ? "font-bold" : "font-medium"
-                  )}>
-                    {language === 'ru' ? labelRu : labelEn}
-                  </span>
+                  {/* Pill indicator */}
+                  {active && (
+                    <div
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
+                      style={{ animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}
+                    />
+                  )}
+                  <Icon
+                    className={cn(
+                      "transition-all duration-250 mb-0.5",
+                      active
+                        ? "text-primary w-[22px] h-[22px]"
+                        : "text-muted-foreground w-[22px] h-[22px]"
+                    )}
+                    style={active ? {
+                      transform: 'scale(1.1)',
+                      animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                    } : undefined}
+                  />
+                  {active ? (
+                    <span className="text-[10px] font-semibold text-primary">
+                      {language === 'ru' ? labelRu : labelEn}
+                    </span>
+                  ) : null}
                 </NavLink>
               );
             })}
 
-            {/* Center Apps button */}
             {showAppsButton && (
               <button
-                onClick={(e) => {
-                  handleNavClick(e);
-                  setAppsOpen(true);
-                }}
-                className={cn(
-                  "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
-                  "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
-                )}
+                onClick={(e) => { handleNavClick(e); setAppsOpen(true); }}
+                className="flex flex-col items-center justify-center"
               >
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center -mt-1">
+                <div
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center -mt-1"
+                  style={{
+                    background: 'hsl(var(--primary) / 0.12)',
+                    border: '1px solid hsl(var(--primary) / 0.25)',
+                  }}
+                >
                   <LayoutGrid className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-[10px] font-medium whitespace-nowrap -mt-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap -mt-0.5">
                   {language === 'ru' ? 'Сервисы' : 'Apps'}
                 </span>
               </button>
             )}
 
-            {/* Right items */}
             {rightItems.map(({ path, icon: Icon, labelEn, labelRu }) => {
               const active = isActive(path);
               return (
@@ -242,30 +209,37 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   onClick={handleNavClick}
                   onMouseEnter={() => handlePrefetch(path)}
                   onTouchStart={() => handlePrefetch(path)}
-                  className={cn(
-                    "flex flex-col items-center justify-center rounded-2xl transition-all duration-200",
-                    active
-                      ? "text-white bg-gradient-to-br from-[hsl(var(--icon-dark))] via-primary to-[hsl(var(--primary))] shadow-md scale-105"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-105"
-                  )}
+                  className="flex flex-col items-center justify-center relative"
                 >
-                  <Icon className={cn("mb-0.5", active ? "w-6 h-6" : "w-5 h-5")} />
-                  <span className={cn(
-                    "text-[10px] whitespace-nowrap",
-                    active ? "font-bold" : "font-medium"
-                  )}>
-                    {language === 'ru' ? labelRu : labelEn}
-                  </span>
+                  {active && (
+                    <div
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-primary"
+                      style={{ animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}
+                    />
+                  )}
+                  <Icon
+                    className={cn(
+                      "transition-all duration-250 mb-0.5",
+                      active
+                        ? "text-primary w-[22px] h-[22px]"
+                        : "text-muted-foreground w-[22px] h-[22px]"
+                    )}
+                    style={active ? {
+                      transform: 'scale(1.1)',
+                      animation: 'navPop 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                    } : undefined}
+                  />
+                  {active ? (
+                    <span className="text-[10px] font-semibold text-primary">
+                      {language === 'ru' ? labelRu : labelEn}
+                    </span>
+                  ) : null}
                 </NavLink>
               );
             })}
           </div>
-          
-          {/* Safe area */}
-          <div className="h-safe-area-inset-bottom bg-card/95" />
         </nav>
 
-        {/* All Apps Drawer */}
         <AllAppsDrawer open={appsOpen} onOpenChange={setAppsOpen} />
       </>
     );

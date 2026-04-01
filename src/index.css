@@ -438,6 +438,40 @@ body {
   }
 }
 
+/* ═══ MICRO-INTERACTIONS ═══ */
+@layer components {
+  /* Card press effect */
+  .card-interactive:active,
+  .card-content:active {
+    transform: scale(0.97) !important;
+    box-shadow: none !important;
+  }
+  
+  /* Button press */
+  button:active, a:active, [role="button"]:active {
+    transform: scale(0.96);
+  }
+  
+  /* Button hover brightness */
+  button:hover, [role="button"]:hover {
+    filter: brightness(1.05);
+  }
+
+  /* Touch webkit scrolling for carousels */
+  .carousel-scroll {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .carousel-scroll::-webkit-scrollbar { display: none; }
+  .carousel-scroll > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
 /* Shimmer animation for Skeletons */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
