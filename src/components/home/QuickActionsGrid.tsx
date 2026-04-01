@@ -195,6 +195,7 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
   const actionScores: Record<string, { action: QuickAction; score: number }> = {};
   const personaToActions: Record<UserPersona, QuickAction[]> = {
     tourist: TOURIST_ACTIONS, resident: RESIDENT_ACTIONS,
+    relocation: RELOCATION_ACTIONS,
     property_owner: OWNER_ACTIONS, investor: INVESTOR_ACTIONS,
     family: FAMILY_ACTIONS, couple: COUPLE_ACTIONS,
     nightlife: NIGHTLIFE_ACTIONS, active: ACTIVE_ACTIONS,

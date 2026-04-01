@@ -121,6 +121,7 @@ const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu
   business: { titleRu: 'Найти юриста', titleEn: 'Find a lawyer', descRu: 'Бизнес-юристы', descEn: 'Business lawyers', icon: Scale, path: '/legal' },
   nomad: { titleRu: 'Найти коворкинг', titleEn: 'Find coworking', descRu: 'С быстрым WiFi', descEn: 'With fast WiFi', icon: Laptop, path: '/services?category=coworking' },
   pet_owner: { titleRu: 'Найти ветеринара', titleEn: 'Find a vet', descRu: 'Лучшие клиники', descEn: 'Best clinics', icon: Shield, path: '/pets' },
+  relocation: { titleRu: 'Бесплатная консультация', titleEn: 'Free consultation', descRu: 'Дорожная карта переезда', descEn: 'Relocation roadmap', icon: Globe, path: '/relocate' },
 };
 
 const slideVariants = {
