@@ -246,7 +246,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.LANDING_AIRPORT_TRANSFER} element={<LazyPage><Pages.AirportTransferLanding /></LazyPage>} />
         <Route path={APP_ROUTES.LANDING_FLOWER_DELIVERY} element={<LazyPage><Pages.FlowerDeliveryLanding /></LazyPage>} />
         <Route path={APP_ROUTES.LANDING_RENTAL} element={<LazyPage><Pages.RentalLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
+        <Route path={APP_ROUTES.LANDING_NEW_DEVELOPMENTS} element={<Navigate to={APP_ROUTES.NEWBUILDS} replace />} />
+        
+        {/* ── Newbuilds (Premium New Developments) ── */}
+        <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
+        <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
+        <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
         <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to={APP_ROUTES.TAXI} replace />} />
         <Route path="/transfers" element={<Navigate to={APP_ROUTES.LANDING_AIRPORT_TRANSFER} replace />} />
