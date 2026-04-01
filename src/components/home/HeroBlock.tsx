@@ -53,6 +53,7 @@ const PERSONA_ICONS: Record<string, React.ElementType> = {
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
   tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
   resident: 'linear-gradient(135deg, #10b981, #059669)',
+  relocation: 'linear-gradient(135deg, #6366f1, #4f46e5)',
   property_owner: 'linear-gradient(135deg, #f59e0b, #d97706)',
   investor: 'linear-gradient(135deg, #a855f7, #7c3aed)',
   pet_owner: 'linear-gradient(135deg, #f59e0b, #ea580c)',
