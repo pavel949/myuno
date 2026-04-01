@@ -312,4 +312,9 @@ export const PERSONA_INFO: Record<UserPersona, {
     descEn: 'Vet, grooming, hotels', descRu: 'Ветеринар, груминг, отели',
     icon: 'PawPrint', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
   },
+  relocation: {
+    labelEn: 'Relocating', labelRu: 'Переезд',
+    descEn: 'Visa, housing, schools, legal', descRu: 'Виза, жильё, школы, юрист',
+    icon: 'Globe', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10',
+  },
 };
