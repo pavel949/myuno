@@ -156,8 +156,17 @@ export const APP_ROUTES = {
   VETERINARY: '/veterinary',
 
   // ── ARRIVE Cluster ──
+  ARRIVE_CLUSTER: '/arrive',
   SIM_START: '/sim',
   EXCHANGE: '/exchange',
+
+  // ── LEGAL Cluster ──
+  LEGAL_CLUSTER: '/stay-legal',
+  TAX_NAV: '/tax',
+  CONTRACT_ANALYSIS: '/legal/contract-analysis',
+
+  // ── INVEST Cluster ──
+  INVEST_CLUSTER: '/invest-hub',
 
   // ── Experiences (tours + activities) ──
   EXPERIENCES: '/experiences',
@@ -370,7 +379,8 @@ export const ROUTE_OWNERSHIP = {
     '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
-    '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects'],
+    '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
+    '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa'],
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],
