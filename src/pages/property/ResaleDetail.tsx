@@ -219,7 +219,7 @@ export default function ResaleDetail() {
           </DialogHeader>
           <UniversalLeadForm
             verticalId="property"
-            leadSource="property_resale_detail"
+            leadSource="cta"
             entryPoint={`resale_${property.id}`}
             preselectedRequestType="property_viewing"
             onSuccess={() => setShowLeadForm(false)}
