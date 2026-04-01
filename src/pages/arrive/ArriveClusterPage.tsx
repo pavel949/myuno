@@ -5,6 +5,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
+import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 
 interface ClusterApp {
   icon: React.ElementType;
