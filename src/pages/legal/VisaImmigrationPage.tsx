@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VisaTracker } from '@/components/legal/VisaTracker';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVisaServices } from '@/hooks/useVisaServices';
