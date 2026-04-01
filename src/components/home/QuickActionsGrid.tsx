@@ -11,7 +11,8 @@ import {
   Stethoscope, ShoppingBag, MoreHorizontal, Scale, Shield,
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
   Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
-  Users, BarChart3, ClipboardList, Lock, ChevronRight
+  Users, BarChart3, ClipboardList, Lock, ChevronRight,
+  Baby, Heart, Music, Dumbbell, Laptop, Wifi
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -77,6 +78,62 @@ const INVESTOR_ACTIONS: QuickAction[] = [
   { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
 ];
 
+const FAMILY_ACTIONS: QuickAction[] = [
+  { id: 'education', icon: GraduationCap, label: 'Schools', labelRu: 'Школы', path: '/education', accentColor: '#F59E0B' },
+  { id: 'medical', icon: Stethoscope, label: 'Pediatrics', labelRu: 'Педиатр', path: '/medical', accentColor: '#F43F5E' },
+  { id: 'baby', icon: Baby, label: 'Nanny', labelRu: 'Няня', path: '/services?category=childcare', accentColor: '#EC4899' },
+  { id: 'experiences', icon: Compass, label: 'Kids Fun', labelRu: 'Для детей', path: '/experiences?tag=family', accentColor: '#A855F7' },
+  { id: 'restaurants', icon: Utensils, label: 'Family Dining', labelRu: 'Рестораны', path: '/restaurants?tag=family', accentColor: '#F59E0B' },
+  { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property', accentColor: '#00D68F' },
+  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
+];
+
+const COUPLE_ACTIONS: QuickAction[] = [
+  { id: 'spa', icon: Sparkles, label: 'Spa', labelRu: 'Спа', path: '/beauty?category=spa', accentColor: '#F43F5E' },
+  { id: 'restaurants', icon: Utensils, label: 'Dining', labelRu: 'Рестораны', path: '/restaurants?tag=romantic', accentColor: '#F59E0B' },
+  { id: 'yachts', icon: Anchor, label: 'Yacht', labelRu: 'Яхта', path: '/yachts', accentColor: '#4E7BFF' },
+  { id: 'experiences', icon: Heart, label: 'Romance', labelRu: 'Романтика', path: '/experiences?tag=romantic', accentColor: '#EC4899' },
+  { id: 'flowers', icon: Flower2, label: 'Flowers', labelRu: 'Цветы', path: '/flowers', accentColor: '#F43F5E' },
+  { id: 'property', icon: Home, label: 'Villas', labelRu: 'Виллы', path: '/property?type=villa', accentColor: '#00D68F' },
+];
+
+const NIGHTLIFE_ACTIONS: QuickAction[] = [
+  { id: 'clubs', icon: Music, label: 'Clubs', labelRu: 'Клубы', path: '/experiences?tag=nightlife', accentColor: '#A855F7' },
+  { id: 'yachts', icon: Anchor, label: 'Yacht Party', labelRu: 'Яхт-пати', path: '/yachts', accentColor: '#4E7BFF' },
+  { id: 'restaurants', icon: Utensils, label: 'Late Dining', labelRu: 'Рестораны', path: '/restaurants?tag=late', accentColor: '#F59E0B' },
+  { id: 'transport', icon: Car, label: 'Taxi', labelRu: 'Такси', path: '/transport', accentColor: '#F59E0B' },
+  { id: 'beauty', icon: Sparkles, label: 'Beauty', labelRu: 'Красота', path: '/beauty', accentColor: '#F43F5E' },
+  { id: 'spa', icon: Heart, label: 'Recovery', labelRu: 'Восстановление', path: '/beauty?category=spa', accentColor: '#06B6D4' },
+];
+
+const ACTIVE_ACTIONS: QuickAction[] = [
+  { id: 'fitness', icon: Dumbbell, label: 'Fitness', labelRu: 'Фитнес', path: '/fitness', accentColor: '#F59E0B' },
+  { id: 'experiences', icon: Compass, label: 'Surfing', labelRu: 'Серфинг', path: '/experiences?tag=surf', accentColor: '#06B6D4' },
+  { id: 'mma', icon: Shield, label: 'Muay Thai', labelRu: 'Муай-тай', path: '/experiences?tag=mma', accentColor: '#F43F5E' },
+  { id: 'diving', icon: Anchor, label: 'Diving', labelRu: 'Дайвинг', path: '/experiences?tag=diving', accentColor: '#4E7BFF' },
+  { id: 'bike', icon: Car, label: 'Bike Rent', labelRu: 'Байк', path: '/transport?type=bike', accentColor: '#00D68F' },
+  { id: 'medical', icon: Stethoscope, label: 'Sports Med', labelRu: 'Спортмед', path: '/medical', accentColor: '#A855F7' },
+];
+
+const BUSINESS_ACTIONS: QuickAction[] = [
+  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
+  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', accentColor: '#A855F7' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
+  { id: 'visa', icon: Briefcase, label: 'Work Permit', labelRu: 'Разрешения', path: '/visa', accentColor: '#F59E0B' },
+  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
+  { id: 'property', icon: Building, label: 'Office', labelRu: 'Офис', path: '/property?type=office', accentColor: '#F43F5E' },
+];
+
+const NOMAD_ACTIONS: QuickAction[] = [
+  { id: 'coworking', icon: Laptop, label: 'Coworking', labelRu: 'Коворкинг', path: '/services?category=coworking', accentColor: '#4E7BFF' },
+  { id: 'wifi', icon: Wifi, label: 'SIM & WiFi', labelRu: 'SIM и WiFi', path: '/services?category=connectivity', accentColor: '#06B6D4' },
+  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Виза', path: '/visa', accentColor: '#F59E0B' },
+  { id: 'property', icon: Home, label: 'Long-term', labelRu: 'Долгосрок', path: '/property?mode=long-term', accentColor: '#00D68F' },
+  { id: 'restaurants', icon: Utensils, label: 'Cafés', labelRu: 'Кафе', path: '/restaurants?tag=cafe', accentColor: '#F59E0B' },
+  { id: 'fitness', icon: Dumbbell, label: 'Fitness', labelRu: 'Фитнес', path: '/fitness', accentColor: '#F43F5E' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
+];
+
 const VENDOR_ACTIONS: QuickAction[] = [
   { id: 'vendor-dashboard', icon: Building2, label: 'Dashboard', labelRu: 'Панель', path: '/vendor', accentColor: '#4E7BFF' },
   { id: 'vendor-orders', icon: ShoppingBag, label: 'Orders', labelRu: 'Заказы', path: '/vendor/orders', accentColor: '#F59E0B' },
@@ -118,6 +175,9 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
   const personaToActions: Record<UserPersona, QuickAction[]> = {
     tourist: TOURIST_ACTIONS, resident: RESIDENT_ACTIONS,
     property_owner: OWNER_ACTIONS, investor: INVESTOR_ACTIONS,
+    family: FAMILY_ACTIONS, couple: COUPLE_ACTIONS,
+    nightlife: NIGHTLIFE_ACTIONS, active: ACTIVE_ACTIONS,
+    business: BUSINESS_ACTIONS, nomad: NOMAD_ACTIONS,
   };
   for (const persona of personas) {
     const actions = personaToActions[persona] || [];
@@ -195,14 +255,11 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const actionsKey = useMemo(() => quickActions.map(a => a.id).join(','), [quickActions]);
 
-  // Mobile: 2x2 primary grid + secondary pill row
-  // Desktop: horizontal row
   const primaryActions = quickActions.slice(0, 4);
   const secondaryActions = quickActions.slice(4);
 
   return (
     <div className="space-y-3">
-      {/* Primary grid: 2x2 mobile, horizontal desktop */}
       <motion.div
         key={actionsKey}
         className={cn(
@@ -248,7 +305,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
               <span className="text-[13px] font-semibold text-center leading-tight text-foreground">{label}</span>
             </motion.button>
           ) : (
-            // Mobile: compact card
             <button
               key={action.id}
               onClick={(e) => handleClick(action, e)}
@@ -284,7 +340,6 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
         })}
       </motion.div>
 
-      {/* Secondary pills row — mobile only */}
       {!isDesktop && secondaryActions.length > 0 && (
         <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
           {secondaryActions.map((action) => {
