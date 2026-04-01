@@ -1,118 +1,52 @@
 
 
-# Канонический формат мини-аппа: аудит и унификация
+# Миграция 7 вертикалей на MiniAppLayout + CatalogCard
 
-## Проблема
+## Что делаем
 
-Сейчас в проекте **два параллельных стандарта** layout и **6 разных форматов карточек**:
+Мигрируем Beauty, Fitness, Education, Cleaning, Events, Medical на единый `MiniAppLayout` + `CatalogCard`. Transport оставляем as-is (у него уникальный UX с hero search, sidebar filters, VehicleClassNav — это осознанное исключение).
 
-### Layout (обёртка страницы)
-| Страница | Обёртка | Header | Ширина контента |
-|----------|---------|--------|-----------------|
-| Experiences, Market, Invest | `MiniAppLayout` | `UnifiedHeader` + sticky ribbon | `max-w-[1536px] px-4` |
-| Yachts, Flowers, Restaurants, Pets | `AppLayout` + `CatalogHeader` | Свой sticky header | `max-w-[1536px] mx-auto px-4` |
-| Transport | `AppLayout` + custom hero search | Полностью custom | `container max-w-[1536px]` |
-| Landing pages | `AppLayout` + raw HTML | BackButton + custom hero | Разная ширина |
+## Изменения
 
-### Карточки (листинги)
-| Вертикаль | Компонент | Aspect ratio | Рейтинг | Цена | Badges |
-|-----------|-----------|-------------|---------|------|--------|
-| Yachts | Inline `YachtCard` | 4:3 | Star warning fill | `formatPrice()` | Instant/Request, Featured |
-| Experiences | Inline `ExperienceCard` | 4:3 | Star warning fill | `formatPrice()` | Tour/Activity type |
-| Transport | `VehicleCard` | 4:3 | Нет | Raw `toLocaleString()` | Year, Verified, Available |
-| Flowers | Inline card | **3:4** (портрет) | Нет | Raw `฿` hardcode | Popular, Box type, Scarcity |
-| Pets | Inline card | 4:3 | Star foreground fill | `formatPrice()` | Verified |
-| Insurance/Legal | `ItemCard` | 1:1 horizontal | Star primary fill | `formatPrice()` | New, Featured |
+### 1. Новые адаптеры в `catalogCardAdapters.ts`
 
-**Итого: 6 разных карточек, 3 формата layout, несогласованные цены, рейтинги и badges.**
+Добавляем 6 mapper-функций:
 
-## Решение
+| Mapper | Ключевые поля |
+|--------|--------------|
+| `mapSalonToCatalogCard` | badges: Verified; location; price с prefix "от/from" |
+| `mapGymToCatalogCard` | badges: Verified; location; price day_pass или month_pass с suffix |
+| `mapEducationToCatalogCard` | badges: School/Tutor с иконкой Building2/User; price_per_hour с suffix "/hr" |
+| `mapCleaningToCatalogCard` | badges: Verified; subtitle: duration + type; price fixed или per_hour |
+| `mapEventToCatalogCard` | badges: Featured; socialProof: date overlay; location; price с prefix "от" или "Free" |
+| `mapClinicToCatalogCard` | badges: 24/7 или Open (green); location; subtitle: Russian-speaking |
 
-### 1. Создать `CatalogCard` — единую карточку для grid-каталогов
+### 2. Миграция 6 Index-страниц
 
-Один компонент для **всех** вертикальных grid-каталогов (Yachts, Experiences, Transport, Flowers, Pets). Не заменяет `ItemCard` (он для horizontal list view), а стандартизирует vertical grid cards.
+Каждая страница: убрать `AppLayout` + `CatalogHeader` + inline cards → заменить на `MiniAppLayout` + grid из `CatalogCard`.
 
-```text
-┌──────────────────────┐
-│  [image aspect-[4/3]]│  ← configurable: 4:3 | 3:4 | 1:1
-│  ┌badges─┐  ┌─right─┐│
-│  │NEW    │  │Instant││
-│  └───────┘  └───────┘│
-│  ┌─social proof──────┐│
-│  └───────────────────┘│
-├──────────────────────┤
-│ ★ 4.8 (23) · 12 чел  │  ← meta row
-│ Yacht Name            │  ← title, font-semibold text-sm
-│ 📍 Chalong            │  ← location (optional)
-│ ฿15,000 /day          │  ← formatPrice() always
-└──────────────────────┘
-```
+Сохраняем специфику:
+- **Medical**: Emergency banner остаётся как `quickActions` слот в MiniAppLayout
+- **Events**: Date overlay → через `socialProof` в CatalogCard
+- **Education**: Type badge (School/Tutor) → через `badges`
+- **Cleaning**: Duration subtitle → через `subtitle`
 
-Props interface:
-- `image`, `title`, `onClick` — обязательные
-- `aspectRatio?: '4:3' | '3:4' | '1:1'` (default `4:3`)
-- `badges?: Badge[]` (top-left stack)
-- `statusBadge?: Badge` (top-right)
-- `socialProof?: string` (bottom overlay)
-- `rating?`, `reviewCount?`, `meta?: {icon, label}[]`
-- `location?`
-- `price?` (uses `formatPrice()` always)
-- `pricePrefix?`, `priceSuffix?`
+### 3. Обновить экспорты в `adapters/index.ts`
 
-**Файл**: `src/components/miniapp/CatalogCard.tsx`
+Добавить 6 новых экспортов.
 
-### 2. Мигрировать все inline-карточки на `CatalogCard`
+## Файлы
 
-| Файл | Что убираем | Что добавляем |
-|------|-------------|---------------|
-| `YachtsIndex.tsx` | Inline `YachtCard` (60 строк) | `<CatalogCard>` + adapter |
-| `ExperiencesIndex.tsx` | Inline `ExperienceCard` (70 строк) | `<CatalogCard>` + adapter |
-| `FlowersIndex.tsx` | Inline card (65 строк) | `<CatalogCard aspectRatio="3:4">` |
-| `PetsIndex.tsx` | Inline card (40 строк) | `<CatalogCard>` |
-| `VehicleCard.tsx` | Custom component | Адаптировать или заменить на `CatalogCard` |
+| Файл | Действие |
+|------|----------|
+| `src/lib/adapters/catalogCardAdapters.ts` | +6 mappers |
+| `src/lib/adapters/index.ts` | +6 exports |
+| `src/pages/beauty/BeautySpaIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
+| `src/pages/fitness/FitnessIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
+| `src/pages/education/EducationIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
+| `src/pages/cleaning/CleaningIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
+| `src/pages/events/EventsIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
+| `src/pages/medical/MedicalIndex.tsx` | Перезапись, emergency banner в quickActions |
 
-Для каждой вертикали создать тонкий **adapter** (маппер из domain entity в `CatalogCardProps`), по аналогии с существующими `mapYachtToCardProps`, `mapVehicleToCardProps`.
-
-### 3. Мигрировать layout: `CatalogHeader` → `MiniAppLayout`
-
-Перевести **все каталожные Index-страницы** на единый `MiniAppLayout`:
-
-| Страница | Сейчас | После |
-|----------|--------|-------|
-| `YachtsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
-| `FlowersIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
-| `RestaurantsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
-| `PetsIndex` | `AppLayout` + `CatalogHeader` | `MiniAppLayout` |
-| `TransportIndex` | `AppLayout` + custom hero | `MiniAppLayout` + hero slot |
-
-Это даст единый sticky header, search, filter ribbon, max-width, padding на **всех** страницах.
-
-### 4. Стандартизировать Landing Pages
-
-Создать `LandingLayout` — обёртку для Relocate, Wedding, Kids, Nomad:
-- Hero section с gradient + BackButton
-- Max-width `max-w-3xl mx-auto` для контента
-- Стандартный footer с CTA
-- WhatsApp button
-
-**Файл**: `src/components/miniapp/LandingLayout.tsx`
-
-### 5. Адаптеры (mappers)
-
-Обновить/создать в `src/lib/adapters/`:
-- `mapExperienceToCatalogCard.ts`
-- `mapFlowerToCatalogCard.ts`
-- `mapPetServiceToCatalogCard.ts`
-- Существующие `mapYachtToCardProps`, `mapVehicleToCardProps` — адаптировать к CatalogCard interface
-
-## Порядок реализации
-
-1. `CatalogCard` компонент
-2. Adapters для каждой вертикали
-3. Миграция карточек (Yachts → Experiences → Flowers → Pets → Transport)
-4. Миграция layout (все Index → MiniAppLayout)
-5. `LandingLayout` + миграция лендингов
-6. Удаление deprecated inline cards и `CatalogHeader` (если больше не используется)
-
-~12 файлов изменить, ~3 создать. Сокращение кода: ~300 строк inline-карточек заменяются на 1 компонент + 5 адаптеров.
+**~8 файлов, ~300 строк inline-кода заменяются на 6 тонких адаптеров + единый компонент.**
 
