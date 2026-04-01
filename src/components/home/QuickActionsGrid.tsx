@@ -1,3 +1,6 @@
+/**
+ * QuickActionsGrid — mobile 2x2 compact + secondary pills row
+ */
 import React, { useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,6 +17,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { useUserContext, type AppRole } from '@/hooks/useUserContext';
 import { useOwnerAccess } from '@/hooks/useOwnerAccess';
+import { useIsDesktop } from '@/hooks/use-desktop';
 import { cn } from '@/lib/utils';
 import { triggerRipple } from '@/hooks/useRipple';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
@@ -146,6 +150,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isDesktop = useIsDesktop();
   
   const { personas, isLoading: personasLoading } = useUserPersonas();
   const { activeRole, isLoading: roleLoading } = useUserContext();
@@ -190,62 +195,118 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
 
   const actionsKey = useMemo(() => quickActions.map(a => a.id).join(','), [quickActions]);
 
+  // Mobile: 2x2 primary grid + secondary pill row
+  // Desktop: horizontal row
+  const primaryActions = quickActions.slice(0, 4);
+  const secondaryActions = quickActions.slice(4);
+
   return (
-    <motion.div
-      key={actionsKey}
-      className="grid grid-cols-4 gap-3 lg:flex lg:items-start lg:justify-evenly lg:gap-4"
-      variants={staggerContainerVariants}
-      initial="initial"
-      animate="animate"
-    >
-      {quickActions.map((action) => {
-        const Icon = action.icon;
-        const label = language === 'ru' ? action.labelRu : action.label;
-        const color = action.accentColor || '#00D68F';
-        const isLocked = action.requiresFullAccess && !hasFullAccess;
-        
-        return (
-          <motion.button
-            key={action.id}
-            variants={staggerItemVariants}
-            onClick={(e) => handleClick(action, e)}
-            onMouseEnter={() => handlePrefetch(action.path)}
-            onTouchStart={() => handlePrefetch(action.path)}
-            className={cn(
-              "relative flex flex-col items-center gap-2 p-2 rounded-[var(--radius-md)]",
-              "transition-all group active:scale-[0.95]",
-              "lg:px-5 lg:py-3",
-              isLocked && "opacity-50",
-            )}
-          >
-            {/* Icon container */}
-            <div 
-              className="relative w-14 h-14 lg:w-16 lg:h-16 rounded-[var(--radius-md)] flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+    <div className="space-y-3">
+      {/* Primary grid: 2x2 mobile, horizontal desktop */}
+      <motion.div
+        key={actionsKey}
+        className={cn(
+          "grid gap-3",
+          isDesktop ? "grid-cols-4 lg:grid-cols-8" : "grid-cols-2"
+        )}
+        variants={staggerContainerVariants}
+        initial="initial"
+        animate="animate"
+      >
+        {(isDesktop ? quickActions : primaryActions).map((action, i) => {
+          const Icon = action.icon;
+          const label = isRu ? action.labelRu : action.label;
+          const color = action.accentColor || '#00D68F';
+          const isLocked = action.requiresFullAccess && !hasFullAccess;
+          const animClass = !isDesktop ? `anim-qa-${i + 1}` : '';
+          
+          return isDesktop ? (
+            <motion.button
+              key={action.id}
+              variants={staggerItemVariants}
+              onClick={(e) => handleClick(action, e)}
+              onMouseEnter={() => handlePrefetch(action.path)}
+              className={cn(
+                "relative flex flex-col items-center gap-2 p-2 rounded-[var(--radius-md)]",
+                "transition-all group active:scale-[0.95] lg:px-5 lg:py-3",
+                isLocked && "opacity-50",
+              )}
+            >
+              <div 
+                className="relative w-16 h-16 rounded-[var(--radius-md)] flex items-center justify-center transition-transform duration-200 group-hover:scale-105 group-active:scale-95"
+                style={{ background: color + '1A', border: `1px solid ${color}20` }}
+              >
+                <Icon className="!w-7 !h-7 drop-shadow-sm" style={{ width: 28, height: 28, color }} strokeWidth={2} />
+                {isLocked && (
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: 'hsl(var(--muted))', border: '2px solid hsl(var(--background))' }}
+                  >
+                    <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <span className="text-[13px] font-semibold text-center leading-tight text-foreground">{label}</span>
+            </motion.button>
+          ) : (
+            // Mobile: compact card
+            <button
+              key={action.id}
+              onClick={(e) => handleClick(action, e)}
+              onTouchStart={() => handlePrefetch(action.path)}
+              className={cn(
+                animClass,
+                "relative flex items-start gap-3 p-4 rounded-[var(--radius-md)] h-[100px] text-left",
+                "transition-all duration-150 active:scale-[0.97]",
+                isLocked && "opacity-50",
+              )}
               style={{
-                background: color + '1A',
-                border: `1px solid ${color}20`,
+                background: 'hsl(var(--card))',
+                border: '1px solid hsl(0 0% 100% / 0.07)',
+                boxShadow: 'var(--shadow-card)',
               }}
             >
-              <Icon 
-                className="lg:!w-7 lg:!h-7 drop-shadow-sm"
-                style={{ width: 24, height: 24, color }}
-                strokeWidth={2}
-              />
-              {isLocked && (
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ background: 'hsl(var(--muted))', border: '2px solid hsl(var(--background))' }}
-                >
-                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
-                </div>
+              <div 
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: color + '1A' }}
+              >
+                <Icon style={{ width: 18, height: 18, color }} strokeWidth={2} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-[13px] font-semibold text-foreground leading-tight line-clamp-2">{label}</span>
+              </div>
+              {isLocked ? (
+                <Lock className="w-3.5 h-3.5 text-muted-foreground absolute bottom-3 right-3" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-muted-foreground absolute bottom-3 right-3" />
               )}
-            </div>
-            
-            <span className="text-[11px] lg:text-[13px] font-semibold text-center leading-tight text-foreground">
-              {label}
-            </span>
-          </motion.button>
-        );
-      })}
-    </motion.div>
+            </button>
+          );
+        })}
+      </motion.div>
+
+      {/* Secondary pills row — mobile only */}
+      {!isDesktop && secondaryActions.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory -mx-4 px-4">
+          {secondaryActions.map((action) => {
+            const Icon = action.icon;
+            const color = action.accentColor || '#00D68F';
+            return (
+              <button
+                key={action.id}
+                onClick={(e) => handleClick(action, e)}
+                onTouchStart={() => handlePrefetch(action.path)}
+                className="flex items-center gap-2 h-10 px-3.5 rounded-[var(--radius-full)] shrink-0 snap-start whitespace-nowrap transition-all active:scale-[0.95]"
+                style={{ background: 'hsl(var(--bg-elevated))' }}
+              >
+                <Icon style={{ width: 16, height: 16, color }} strokeWidth={2} />
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  {isRu ? action.labelRu : action.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 });

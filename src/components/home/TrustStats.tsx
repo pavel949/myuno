@@ -1,5 +1,5 @@
 /**
- * TrustStats — Stats section with new design system
+ * TrustStats — with section reveal animation
  */
 import React, { memo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,11 +7,12 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Home, CalendarCheck, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { useSectionReveal } from '@/hooks/useScrollBehavior';
 
 export const TrustStats = memo(function TrustStats() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const sectionRef = useSectionReveal<HTMLElement>();
 
   const { data: stats } = useQuery({
     queryKey: ['trust-stats-home'],
@@ -31,40 +32,14 @@ export const TrustStats = memo(function TrustStats() {
   });
 
   const items = [
-    {
-      icon: Home,
-      value: stats ? `${stats.properties}+` : '…',
-      label: isRu ? 'объектов' : 'properties',
-      color: '#00D68F',
-    },
-    {
-      icon: CalendarCheck,
-      value: stats ? `${stats.bookings}+` : '…',
-      label: isRu ? 'бронирований' : 'bookings',
-      color: '#4E7BFF',
-    },
-    {
-      icon: Shield,
-      value: stats ? `${stats.providers}+` : '…',
-      label: isRu ? 'партнёров' : 'partners',
-      color: '#06B6D4',
-    },
-    {
-      icon: Clock,
-      value: '24/7',
-      label: isRu ? 'поддержка' : 'support',
-      color: '#F59E0B',
-    },
+    { icon: Home, value: stats ? `${stats.properties}+` : '…', label: isRu ? 'объектов' : 'properties', color: '#00D68F' },
+    { icon: CalendarCheck, value: stats ? `${stats.bookings}+` : '…', label: isRu ? 'бронирований' : 'bookings', color: '#4E7BFF' },
+    { icon: Shield, value: stats ? `${stats.providers}+` : '…', label: isRu ? 'партнёров' : 'partners', color: '#06B6D4' },
+    { icon: Clock, value: '24/7', label: isRu ? 'поддержка' : 'support', color: '#F59E0B' },
   ];
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      className="space-y-4"
-    >
-      {/* Stats */}
+    <section ref={sectionRef} className="section-reveal anim-stats space-y-4">
       <div className="rounded-[var(--radius-lg)] p-5"
         style={{
           background: 'hsl(var(--bg-surface))',
@@ -77,37 +52,30 @@ export const TrustStats = memo(function TrustStats() {
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {items.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <div key={i} className="flex flex-col items-center gap-2 py-3 relative">
-                {/* Separator between items on desktop */}
-                {i > 0 && (
-                  <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-8"
-                    style={{ background: 'hsl(0 0% 100% / 0.07)' }}
-                  />
-                )}
-                <span className="text-2xl md:text-3xl font-bold font-display"
-                  style={{ color: item.color }}
-                >
-                  {item.value}
-                </span>
-                <span className="text-xs text-muted-foreground font-medium text-center leading-tight">
-                  {item.label}
-                </span>
-              </div>
-            );
-          })}
+          {items.map((item, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 py-3 relative">
+              {i > 0 && (
+                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-8"
+                  style={{ background: 'hsl(0 0% 100% / 0.07)' }}
+                />
+              )}
+              <span className="text-2xl md:text-3xl font-bold font-display" style={{ color: item.color }}>
+                {item.value}
+              </span>
+              <span className="text-xs text-muted-foreground font-medium text-center leading-tight">
+                {item.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Trust badges */}
       <div className="flex flex-wrap justify-center gap-2">
         {[
           { icon: Shield, text: isRu ? 'Верифицировано' : 'Verified' },
           { icon: Clock, text: isRu ? 'Быстрый ответ' : 'Fast Response' },
         ].map((badge, i) => (
-          <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] text-xs font-medium text-muted-foreground"
+          <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] text-xs font-medium text-muted-foreground min-h-[44px]"
             style={{
               background: 'hsl(var(--card))',
               border: '1px solid hsl(0 0% 100% / 0.07)',
@@ -118,6 +86,6 @@ export const TrustStats = memo(function TrustStats() {
           </div>
         ))}
       </div>
-    </motion.section>
+    </section>
   );
 });
