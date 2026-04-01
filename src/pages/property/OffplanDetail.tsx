@@ -46,6 +46,7 @@ import { useDeveloper } from '@/hooks/useDevelopers';
 import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
+import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
 
