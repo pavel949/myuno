@@ -17,6 +17,7 @@ import { SEOHead, createOrganizationSchema } from '@/components/seo';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
+import { PersonaSmartFeed } from '@/components/home/PersonaSmartFeed';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { ClusterHub } from '@/components/home/ClusterHub';
