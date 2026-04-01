@@ -99,6 +99,11 @@ const Index = () => {
             <ProgressIndicator />
           </RevealOnScroll>
 
+          {/* ── PERSONA SMART FEED ── */}
+          <RevealOnScroll>
+            <PersonaSmartFeed />
+          </RevealOnScroll>
+
           {/* ── QUICK ACTIONS ── */}
           <RevealOnScroll>
             <QuickActionsGrid />
