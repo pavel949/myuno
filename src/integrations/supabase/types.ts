@@ -3228,6 +3228,7 @@ export type Database = {
           created_at: string
           currency: string | null
           current_occupancy: string | null
+          development_project_id: string | null
           districts: string[] | null
           email: string | null
           entry_point: string | null
@@ -3250,6 +3251,7 @@ export type Database = {
           property_types: string[] | null
           purpose: string | null
           request_type: string
+          resale_property_id: string | null
           services_requested: string[] | null
           sla_deadline: string | null
           status: string | null
@@ -3276,6 +3278,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
+          development_project_id?: string | null
           districts?: string[] | null
           email?: string | null
           entry_point?: string | null
@@ -3298,6 +3301,7 @@ export type Database = {
           property_types?: string[] | null
           purpose?: string | null
           request_type: string
+          resale_property_id?: string | null
           services_requested?: string[] | null
           sla_deadline?: string | null
           status?: string | null
@@ -3324,6 +3328,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           current_occupancy?: string | null
+          development_project_id?: string | null
           districts?: string[] | null
           email?: string | null
           entry_point?: string | null
@@ -3346,6 +3351,7 @@ export type Database = {
           property_types?: string[] | null
           purpose?: string | null
           request_type?: string
+          resale_property_id?: string | null
           services_requested?: string[] | null
           sla_deadline?: string | null
           status?: string | null
@@ -3360,6 +3366,20 @@ export type Database = {
             columns: ["conversion_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_development_project_id_fkey"
+            columns: ["development_project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_resale_property_id_fkey"
+            columns: ["resale_property_id"]
+            isOneToOne: false
+            referencedRelation: "resale_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -5735,6 +5755,80 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      development_units: {
+        Row: {
+          area_sqm: number
+          available_units: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string | null
+          development_id: string
+          features: string[] | null
+          floor_from: number | null
+          floor_plan_url: string | null
+          floor_to: number | null
+          id: string
+          name: string
+          name_ru: string | null
+          price: number
+          price_per_sqm: number | null
+          status: string | null
+          total_units: number | null
+          unit_type: string
+          views: string[] | null
+        }
+        Insert: {
+          area_sqm: number
+          available_units?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          development_id: string
+          features?: string[] | null
+          floor_from?: number | null
+          floor_plan_url?: string | null
+          floor_to?: number | null
+          id?: string
+          name: string
+          name_ru?: string | null
+          price: number
+          price_per_sqm?: number | null
+          status?: string | null
+          total_units?: number | null
+          unit_type?: string
+          views?: string[] | null
+        }
+        Update: {
+          area_sqm?: number
+          available_units?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          development_id?: string
+          features?: string[] | null
+          floor_from?: number | null
+          floor_plan_url?: string | null
+          floor_to?: number | null
+          id?: string
+          name?: string
+          name_ru?: string | null
+          price?: number
+          price_per_sqm?: number | null
+          status?: string | null
+          total_units?: number | null
+          unit_type?: string
+          views?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_units_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disputes: {
         Row: {
@@ -19585,6 +19679,167 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      resale_properties: {
+        Row: {
+          address: string | null
+          agent_company: string | null
+          agent_name: string | null
+          area_sqm: number | null
+          asking_price: number
+          assignment_premium: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          condition: string | null
+          cover_image: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          current_rental_income: number | null
+          days_on_market: number | null
+          description: string | null
+          description_ru: string | null
+          development_id: string | null
+          encumbrances: string | null
+          estimated_roi: number | null
+          featured: boolean | null
+          floor: number | null
+          furnished: string | null
+          id: string
+          inquiries_count: number | null
+          is_assignment: boolean | null
+          latitude: number | null
+          lease_years_remaining: number | null
+          longitude: number | null
+          media: Json | null
+          original_purchase_price: number | null
+          price_negotiable: boolean | null
+          price_per_sqm: number | null
+          property_type: string
+          remaining_payments: Json | null
+          seller_contact_name: string | null
+          seller_phone: string | null
+          seller_type: string | null
+          status: string | null
+          title: string
+          title_ru: string | null
+          title_type: string | null
+          transfer_fee_paid_by: string | null
+          unit_reference: string | null
+          updated_at: string | null
+          views_count: number | null
+          year_built: number | null
+          zone: string
+        }
+        Insert: {
+          address?: string | null
+          agent_company?: string | null
+          agent_name?: string | null
+          area_sqm?: number | null
+          asking_price: number
+          assignment_premium?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condition?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          current_rental_income?: number | null
+          days_on_market?: number | null
+          description?: string | null
+          description_ru?: string | null
+          development_id?: string | null
+          encumbrances?: string | null
+          estimated_roi?: number | null
+          featured?: boolean | null
+          floor?: number | null
+          furnished?: string | null
+          id?: string
+          inquiries_count?: number | null
+          is_assignment?: boolean | null
+          latitude?: number | null
+          lease_years_remaining?: number | null
+          longitude?: number | null
+          media?: Json | null
+          original_purchase_price?: number | null
+          price_negotiable?: boolean | null
+          price_per_sqm?: number | null
+          property_type?: string
+          remaining_payments?: Json | null
+          seller_contact_name?: string | null
+          seller_phone?: string | null
+          seller_type?: string | null
+          status?: string | null
+          title: string
+          title_ru?: string | null
+          title_type?: string | null
+          transfer_fee_paid_by?: string | null
+          unit_reference?: string | null
+          updated_at?: string | null
+          views_count?: number | null
+          year_built?: number | null
+          zone: string
+        }
+        Update: {
+          address?: string | null
+          agent_company?: string | null
+          agent_name?: string | null
+          area_sqm?: number | null
+          asking_price?: number
+          assignment_premium?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condition?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          current_rental_income?: number | null
+          days_on_market?: number | null
+          description?: string | null
+          description_ru?: string | null
+          development_id?: string | null
+          encumbrances?: string | null
+          estimated_roi?: number | null
+          featured?: boolean | null
+          floor?: number | null
+          furnished?: string | null
+          id?: string
+          inquiries_count?: number | null
+          is_assignment?: boolean | null
+          latitude?: number | null
+          lease_years_remaining?: number | null
+          longitude?: number | null
+          media?: Json | null
+          original_purchase_price?: number | null
+          price_negotiable?: boolean | null
+          price_per_sqm?: number | null
+          property_type?: string
+          remaining_payments?: Json | null
+          seller_contact_name?: string | null
+          seller_phone?: string | null
+          seller_type?: string | null
+          status?: string | null
+          title?: string
+          title_ru?: string | null
+          title_type?: string | null
+          transfer_fee_paid_by?: string | null
+          unit_reference?: string | null
+          updated_at?: string | null
+          views_count?: number | null
+          year_built?: number | null
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resale_properties_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resources: {
         Row: {
