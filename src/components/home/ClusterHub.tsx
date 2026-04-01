@@ -36,7 +36,7 @@ const CLUSTERS: Cluster[] = [
     descriptionRu: 'Первый день на острове',
     color: 'text-cluster-arrive',
     bgColor: 'bg-cluster-arrive/10',
-    path: APP_ROUTES.TRANSPORT,
+    path: APP_ROUTES.ARRIVE_CLUSTER,
     apps: ['Transfers', 'SIM Cards', 'Exchange', 'Car Rental'],
     appsRu: ['Трансферы', 'SIM-карты', 'Обмен валют', 'Аренда авто'],
   },
