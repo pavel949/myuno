@@ -1,0 +1,1 @@
+ALTER TYPE public.user_persona ADD VALUE IF NOT EXISTS 'relocation';
