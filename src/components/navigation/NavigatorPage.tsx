@@ -64,9 +64,7 @@ const CLUSTERS: Cluster[] = [
     services: [
       { labelRu: 'Визы', labelEn: 'Visas', icon: Plane, path: '/visa', status: 'available' },
       { labelRu: 'Налоги', labelEn: 'Taxes', icon: Calculator, path: '/tax', status: 'available' },
-      { labelRu: 'Договоры', labelEn: 'Contracts', icon: FileText, path: '/contract-analysis', status: 'available' },
-      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: '/contract-analysis', status: 'available' },
-      { labelRu: 'TaxNav', labelEn: 'TaxNav', icon: Calculator, path: '/tax', status: 'available' },
+      { labelRu: 'ContractAI', labelEn: 'ContractAI', icon: FileSearch, path: '/legal/contract-analysis', status: 'available' },
       { labelRu: 'Страхование', labelEn: 'Insurance', icon: Shield, path: '/insurance', status: 'available' },
     ],
   },
