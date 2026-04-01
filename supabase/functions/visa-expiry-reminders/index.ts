@@ -1,8 +1,9 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-import { createServiceClient } from "../_shared/supabase.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -10,9 +11,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createServiceClient();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Find visa records expiring in 30, 14, or 7 days
     const today = new Date();
     const checkDays = [
       { days: 30, field: "reminder_sent_30d" },
@@ -42,14 +44,12 @@ Deno.serve(async (req) => {
       if (!records || records.length === 0) continue;
 
       for (const record of records) {
-        // Get user email
         const { data: userData } = await supabase.auth.admin.getUserById(
           record.user_id
         );
         const email = userData?.user?.email;
         if (!email) continue;
 
-        // Send reminder email via Resend
         const resendKey = Deno.env.get("RESEND_API_KEY");
         if (resendKey) {
           try {
@@ -74,7 +74,6 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Mark reminder as sent
         await supabase
           .from("visa_records")
           .update({ [check.field]: true })
@@ -84,7 +83,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Also mark expired visas
     const { error: expireError } = await supabase
       .from("visa_records")
       .update({ status: "expired" })
