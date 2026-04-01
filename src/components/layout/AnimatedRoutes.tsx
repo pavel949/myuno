@@ -252,6 +252,16 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<LazyPage><Pages.NewbuildsCatalog /></LazyPage>} />
         <Route path="/newbuilds/projects/:slug" element={<LazyPage><Pages.NewbuildDetail /></LazyPage>} />
+        
+        {/* ── Developer Portal ── */}
+        <Route path="/developer-portal" element={<Suspense fallback={<LoadingState />}><Pages.DeveloperPortalLayout /></Suspense>}>
+          <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
+          <Route path="projects" element={<LazyPage><Pages.DeveloperProjects /></LazyPage>} />
+          <Route path="projects/new" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />
+          <Route path="projects/:id" element={<LazyPage><Pages.DeveloperProjectEditor /></LazyPage>} />
+          <Route path="leads" element={<LazyPage><Pages.DeveloperLeads /></LazyPage>} />
+          <Route path="analytics" element={<LazyPage><Pages.DeveloperAnalytics /></LazyPage>} />
+        </Route>
         <Route path={APP_ROUTES.TAXI} element={<LazyPage><Pages.TaxiBooking /></LazyPage>} />
         <Route path="/taxi-booking" element={<Navigate to={APP_ROUTES.TAXI} replace />} />
         <Route path="/transfers" element={<Navigate to={APP_ROUTES.LANDING_AIRPORT_TRANSFER} replace />} />
@@ -501,6 +511,7 @@ export const AnimatedRoutes: React.FC = () => {
            <Route path="/admin/legal-documents" element={<Pages.AdminLegalDocuments />} />
            <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
            <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
+           <Route path="/admin/newbuilds" element={<Pages.AdminNewbuilds />} />
         </Route>
         
         {/* ── Staff ── */}
