@@ -91,6 +91,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
       { verticalId: 'education' },
       { route: '/banking', icon: '🏦', labelEn: 'Banking & Finance', labelRu: 'Банки и финансы' },
       { route: '/visa', icon: '🌍', labelEn: 'Visa & Immigration', labelRu: 'Визы и иммиграция' },
+      { route: '/relocate', icon: '🧳', labelEn: 'Relocation', labelRu: 'Переезд' },
     ],
   },
   {

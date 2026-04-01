@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap } from 'lucide-react';
+import { Plane, Smartphone, ArrowLeftRight, Car, Landmark, Zap, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
@@ -25,6 +25,7 @@ const APPS: ClusterApp[] = [
   { icon: Car, label: 'Car & Scooter Rental', labelRu: 'Аренда авто', desc: 'Daily & weekly rentals', descRu: 'Посуточная и понедельная аренда', path: APP_ROUTES.TRANSPORT, ready: true },
   { icon: Landmark, label: 'Bank Account', labelRu: 'Банковский счёт', desc: 'Open a Thai bank account', descRu: 'Открыть счёт в тайском банке', path: APP_ROUTES.BANKING, ready: true },
   { icon: Zap, label: 'Airport Fast Track', labelRu: 'Fast Track', desc: 'Skip the immigration queue', descRu: 'Без очереди на паспортном контроле', path: APP_ROUTES.FAST_TRACK, ready: true },
+  { icon: Globe, label: 'Relocation Guide', labelRu: 'Гид по переезду', desc: 'Full relocation roadmap', descRu: 'Полная дорожная карта переезда', path: APP_ROUTES.RELOCATE, ready: true },
 ];
 
 export default function ArriveClusterPage() {

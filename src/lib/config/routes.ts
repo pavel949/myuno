@@ -235,6 +235,10 @@ export const APP_ROUTES = {
   LANDING_FLOWER_DELIVERY: '/flower-delivery',
   LANDING_RENTAL: '/rent-phuket',
   LANDING_NEW_DEVELOPMENTS: '/new-developments',
+  RELOCATE: '/relocate',
+  WEDDING: '/wedding',
+  KIDS: '/kids',
+  NOMAD_GUIDE: '/nomad-guide',
 
   // ── Info Pages ──
   ABOUT: '/about',
@@ -394,7 +398,7 @@ export const ROUTE_OWNERSHIP = {
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
     '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
     '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa',
-    '/newbuilds'],
+    '/newbuilds', '/relocate', '/wedding', '/kids', '/nomad-guide'],
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],

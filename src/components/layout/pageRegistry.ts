@@ -495,3 +495,9 @@ export const MCHelpPage = lazy(() => import('@/pages/mc/MCHelpPage'));
 export const MCRegistrationPage = lazy(() => import('@/pages/mc/MCRegistrationPage'));
 
 // ── Manager (removed — redirects to /owner) ──
+
+// ── Landing Pages (Monetization) ──
+export const RelocateLandingPage = lazy(() => import('@/pages/relocate/RelocateLandingPage'));
+export const WeddingLandingPage = lazy(() => import('@/pages/wedding/WeddingLandingPage'));
+export const KidsLandingPage = lazy(() => import('@/pages/kids/KidsLandingPage'));
+export const NomadGuidePage = lazy(() => import('@/pages/nomad/NomadGuidePage'));

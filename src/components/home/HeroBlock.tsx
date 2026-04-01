@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
 import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight,
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -47,12 +47,13 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
 }
 
 const PERSONA_ICONS: Record<string, React.ElementType> = {
-  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint,
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint, Globe,
 };
 
 const PERSONA_GRADIENTS: Record<UserPersona, string> = {
   tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
   resident: 'linear-gradient(135deg, #10b981, #059669)',
+  relocation: 'linear-gradient(135deg, #6366f1, #4f46e5)',
   property_owner: 'linear-gradient(135deg, #f59e0b, #d97706)',
   investor: 'linear-gradient(135deg, #a855f7, #7c3aed)',
   pet_owner: 'linear-gradient(135deg, #f59e0b, #ea580c)',
@@ -68,53 +69,42 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
-  const renderRow = (items: UserPersona[]) => (
-    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-      {items.map((p) => {
-        const info = PERSONA_INFO[p];
-        const Icon = PERSONA_ICONS[info.icon] || Plane;
-        const isActive = activePersona === p;
-        return (
-          <button
-            key={p}
-            onClick={() => setPersonas([p])}
-            disabled={isSetting}
-            className={cn(
-              "flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl shrink-0 transition-all duration-200 min-w-[56px]",
-              isActive
-                ? "scale-[1.05]"
-                : "opacity-60 hover:opacity-90"
-            )}
-          >
-            <div
+  return (
+    <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-1.5 w-max py-1">
+        {PERSONA_OPTIONS.map((p) => {
+          const info = PERSONA_INFO[p];
+          const Icon = PERSONA_ICONS[info.icon] || Plane;
+          const isActive = activePersona === p;
+          return (
+            <button
+              key={p}
+              onClick={() => setPersonas([p])}
+              disabled={isSetting}
               className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
-                isActive ? "shadow-lg ring-2 ring-white/20" : ""
+                "flex items-center gap-1.5 px-3 py-2 rounded-[var(--radius-full)] shrink-0 transition-all duration-200",
+                isActive
+                  ? "shadow-lg ring-1 ring-white/20 text-white"
+                  : "text-muted-foreground hover:text-foreground"
               )}
               style={{
                 background: isActive
                   ? PERSONA_GRADIENTS[p]
-                  : 'hsl(0 0% 100% / 0.08)',
+                  : 'hsl(0 0% 100% / 0.06)',
+                backdropFilter: isActive ? 'none' : 'blur(8px)',
               }}
             >
-              <Icon className="w-4.5 h-4.5" style={{ width: 18, height: 18, color: isActive ? '#fff' : 'hsl(0 0% 70%)' }} strokeWidth={2} />
-            </div>
-            <span className={cn(
-              "text-[10px] font-semibold whitespace-nowrap leading-none",
-              isActive ? "text-foreground" : "text-muted-foreground"
-            )}>
-              {isRu ? info.labelRu : info.labelEn}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  return (
-    <div className="w-full space-y-1">
-      {renderRow(PERSONA_OPTIONS.slice(0, 6))}
-      {renderRow(PERSONA_OPTIONS.slice(6))}
+              <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
+              <span className={cn(
+                "text-[11px] font-semibold whitespace-nowrap leading-none",
+                isActive ? "text-white" : ""
+              )}>
+                {isRu ? info.labelRu : info.labelEn}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

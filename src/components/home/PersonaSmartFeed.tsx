@@ -153,6 +153,18 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
       { id: 'p3', title: 'Отель для питомцев', subtitle: 'Пока вы в поездке', path: '/pets?category=hotel', emoji: '🏨' },
     ],
   },
+  relocation: {
+    en: [
+      { id: 'rl1', title: 'Free Consultation', subtitle: 'Relocation roadmap', path: '/relocate', emoji: '🗺️' },
+      { id: 'rl2', title: 'Find Housing', subtitle: 'Long-term rentals', path: '/property?mode=long-term', emoji: '🏡' },
+      { id: 'rl3', title: 'Schools for Kids', subtitle: 'International schools', path: '/education', emoji: '🎓' },
+    ],
+    ru: [
+      { id: 'rl1', title: 'Бесплатная консультация', subtitle: 'Дорожная карта переезда', path: '/relocate', emoji: '🗺️' },
+      { id: 'rl2', title: 'Найти жильё', subtitle: 'Долгосрочная аренда', path: '/property?mode=long-term', emoji: '🏡' },
+      { id: 'rl3', title: 'Школы для детей', subtitle: 'Международные школы', path: '/education', emoji: '🎓' },
+    ],
+  },
 };
 
 export const PersonaSmartFeed = memo(function PersonaSmartFeed() {

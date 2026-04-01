@@ -11,7 +11,7 @@ import {
   ChevronRight, Plane, Home, Building2, TrendingUp, Check,
   Scale, HardHat, Car, CreditCard, Stethoscope, Calculator,
   BarChart3, Shield, Calendar, Sparkles, FileSearch,
-  Baby, Heart, Music, Dumbbell, Laptop
+  Baby, Heart, Music, Dumbbell, Laptop, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -102,6 +102,11 @@ const ROLE_FEATURES: Record<UserPersona, { titleRu: string; titleEn: string; bul
     bulletsRu: ['Ветеринарные клиники', 'Груминг и отели', 'Перевозка питомцев'],
     bulletsEn: ['Vet clinics', 'Grooming & hotels', 'Pet transport'],
   },
+  relocation: {
+    titleRu: 'Переезд на Пхукет — пошагово', titleEn: 'Relocate to Phuket — step by step',
+    bulletsRu: ['Визы и документы', 'Жильё и школы', 'Юрист и банки'],
+    bulletsEn: ['Visas & documents', 'Housing & schools', 'Legal & banking'],
+  },
 };
 
 const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu: string; descEn: string; icon: React.ElementType; path: string }> = {
@@ -116,6 +121,7 @@ const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu
   business: { titleRu: 'Найти юриста', titleEn: 'Find a lawyer', descRu: 'Бизнес-юристы', descEn: 'Business lawyers', icon: Scale, path: '/legal' },
   nomad: { titleRu: 'Найти коворкинг', titleEn: 'Find coworking', descRu: 'С быстрым WiFi', descEn: 'With fast WiFi', icon: Laptop, path: '/services?category=coworking' },
   pet_owner: { titleRu: 'Найти ветеринара', titleEn: 'Find a vet', descRu: 'Лучшие клиники', descEn: 'Best clinics', icon: Shield, path: '/pets' },
+  relocation: { titleRu: 'Бесплатная консультация', titleEn: 'Free consultation', descRu: 'Дорожная карта переезда', descEn: 'Relocation roadmap', icon: Globe, path: '/relocate' },
 };
 
 const slideVariants = {

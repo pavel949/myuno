@@ -400,6 +400,28 @@
     <priority>0.6</priority>
   </url>
 
+  <!-- ══ Monetization Landing Pages ══ -->
+  <url>
+    <loc>https://myuno.app/relocate</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myuno.app/wedding</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://myuno.app/kids</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://myuno.app/nomad-guide</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- ══ Vendor Onboarding (public) ══ -->
   <url>
     <loc>https://myuno.app/vendor/join</loc>

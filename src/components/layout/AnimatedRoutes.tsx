@@ -405,6 +405,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/classifieds/sell" element={<AuthGuard><LazyPage><Pages.ClassifiedsSellPage /></LazyPage></AuthGuard>} />
         <Route path="/classifieds/:id" element={<LazyPage><Pages.ClassifiedDetailPage /></LazyPage>} />
         
+        {/* ── Monetization Landing Pages ── */}
+        <Route path={APP_ROUTES.RELOCATE} element={<LazyPage><Pages.RelocateLandingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.WEDDING} element={<LazyPage><Pages.WeddingLandingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.KIDS} element={<LazyPage><Pages.KidsLandingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.NOMAD_GUIDE} element={<LazyPage><Pages.NomadGuidePage /></LazyPage>} />
+        
         {/* ── Info ── */}
         <Route path="/about" element={<LazyPage><Pages.AboutPage /></LazyPage>} />
         <Route path="/how-it-works" element={<LazyPage><Pages.HowItWorksPage /></LazyPage>} />

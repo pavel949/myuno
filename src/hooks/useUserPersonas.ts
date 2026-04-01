@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export type UserPersona = 
   | 'tourist' | 'resident' | 'property_owner' | 'investor'
-  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad' | 'pet_owner';
+  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad' | 'pet_owner' | 'relocation';
 
 /** All DB-stored persona values (matches user_persona enum) */
 export type DbPersona = UserPersona;
@@ -244,7 +244,7 @@ export function hasPersona(personas: UserPersona[], persona: UserPersona): boole
 
 /** All persona options in display order */
 export const PERSONA_OPTIONS: UserPersona[] = [
-  'tourist', 'resident', 'property_owner', 'investor', 'pet_owner',
+  'tourist', 'resident', 'relocation', 'property_owner', 'investor', 'pet_owner',
   'family', 'couple', 'nightlife', 'active', 'business', 'nomad',
 ];
 
@@ -311,5 +311,10 @@ export const PERSONA_INFO: Record<UserPersona, {
     labelEn: 'Pet Owner', labelRu: 'С питомцем',
     descEn: 'Vet, grooming, hotels', descRu: 'Ветеринар, груминг, отели',
     icon: 'PawPrint', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
+  },
+  relocation: {
+    labelEn: 'Relocating', labelRu: 'Переезд',
+    descEn: 'Visa, housing, schools, legal', descRu: 'Виза, жильё, школы, юрист',
+    icon: 'Globe', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10',
   },
 };
