@@ -1,4 +1,4 @@
-/* Design system tokens — single source of truth (DS 2.0) */
+/* Design system tokens — single source of truth */
 @import './design-system/index.css';
 
 /* Fonts loaded via index.html for better performance */
@@ -31,10 +31,7 @@
   padding-top: env(safe-area-inset-top);
 }
 
-/* UNO SuperApp Premium Dark Design System */
-
-/* Prevent browser back/forward gestures - mobile app feel */
-/* Prevent browser back/forward gestures without blocking child scroll containers */
+/* Prevent browser back/forward gestures */
 html {
   overscroll-behavior-x: none;
 }
@@ -45,20 +42,16 @@ body {
   max-width: 100vw;
 }
 
-/* Root app container - IMPORTANT: No overflow-x:hidden here to allow nested horizontal scrolls */
 #root {
   max-width: 100vw;
-  /* overflow-x: hidden is moved to specific layout wrappers, not root */
 }
 
-/* Allow horizontal scroll ONLY for specific wide content like tables */
 .table-scroll-container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100vw;
 }
 
-/* Explicit horizontal scroll container - overrides parent restrictions */
 .scroll-x-container {
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch;
@@ -69,15 +62,7 @@ body {
 @layer base {
   * {
     @apply border-border;
-    /* Prevent any element from overflowing horizontally on mobile */
     min-width: 0;
-  }
-
-  /* Light theme: ensure body/root use semantic colors (dark text on light bg) */
-  html.light body,
-  html.light #root {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
   }
 
   body {
@@ -103,30 +88,33 @@ body {
     }
   }
 
-  @media (min-width: 1536px) {
-    body {
-      font-size: 17px;
-    }
-  }
-
-  /* Typography Scale — editorial chic */
+  /* Typography — Syne for headings, DM Sans for body */
   h1 {
-    @apply font-display text-xl sm:text-2xl lg:text-4xl xl:text-[2.5rem] font-bold tracking-[-0.025em] leading-[1.15];
+    @apply font-display font-bold tracking-tight leading-[1.15];
+    font-size: 1.75rem;
     overflow-wrap: break-word;
   }
+  @media (min-width: 640px) { h1 { font-size: 2rem; } }
+  @media (min-width: 1024px) { h1 { font-size: 2.5rem; } }
   
   h2 {
-    @apply font-display text-lg sm:text-xl lg:text-2xl xl:text-[1.75rem] font-semibold tracking-[-0.02em] leading-[1.2];
+    @apply font-display font-bold tracking-tight leading-[1.2];
+    font-size: 1.25rem;
     overflow-wrap: break-word;
   }
+  @media (min-width: 640px) { h2 { font-size: 1.5rem; } }
+  @media (min-width: 1024px) { h2 { font-size: 1.75rem; } }
   
   h3 {
-    @apply font-display text-base sm:text-lg lg:text-xl font-semibold tracking-[-0.015em] leading-[1.25];
+    @apply font-display font-semibold tracking-tight leading-[1.25];
+    font-size: 1rem;
     overflow-wrap: break-word;
   }
+  @media (min-width: 640px) { h3 { font-size: 1.125rem; } }
+  @media (min-width: 1024px) { h3 { font-size: 1.25rem; } }
   
   h4, h5, h6 {
-    @apply font-display text-sm sm:text-base lg:text-lg font-semibold tracking-[-0.01em] leading-[1.3];
+    @apply font-display font-semibold leading-[1.3];
     overflow-wrap: break-word;
   }
 
@@ -138,46 +126,16 @@ body {
     @apply text-xs lg:text-sm leading-normal tracking-[0.01em];
   }
 
-  /* Light theme: white text is unreadable on light bg — override to foreground unless on dark surfaces */
-  html.light .text-white {
-    color: hsl(var(--foreground));
-  }
-  /* Exception: hero/dark gradient blocks — keep white text on dark blue */
-  html.light .hero-on-dark,
-  html.light .hero-on-dark .text-white,
-  html.light .hero-on-dark [class*="text-white"] {
-    color: #ffffff !important;
-  }
-  html.light .hero-on-dark .text-white\/70 { color: rgba(255,255,255,0.7) !important; }
-  html.light .hero-on-dark .text-white\/80 { color: rgba(255,255,255,0.8) !important; }
-  html.light .hero-on-dark .text-white\/85 { color: rgba(255,255,255,0.85) !important; }
-  html.light .hero-on-dark .text-white\/90 { color: rgba(255,255,255,0.9) !important; }
-  html.light .hero-on-dark .text-white\/60 { color: rgba(255,255,255,0.6) !important; }
-  html.light .hero-on-dark .text-white\/30 { color: rgba(255,255,255,0.3) !important; }
-  html.light .hero-on-dark .text-white\/20 { color: rgba(255,255,255,0.2) !important; }
-  html.light .bg-primary .text-white,
-  html.light .bg-primary.text-white,
-  html.light .bg-destructive .text-white,
-  html.light .bg-destructive.text-white,
-  html.light [class*="bg-primary"].text-white,
-  html.light button.bg-primary,
-  html.light a.bg-primary {
-    color: hsl(var(--primary-foreground));
-  }
-
-  /* ============ Mobile normalization ============ */
-  /* Ensure text in flex/grid children never overflows */
+  /* Mobile normalization */
   @media (max-width: 767px) {
     .flex > *, .grid > * {
       min-width: 0;
     }
     
-    /* Slightly larger tap targets on mobile */
     button, a, [role="button"] {
       min-height: 44px;
     }
     
-    /* Ensure inputs are readable on iOS (prevents zoom) */
     input, select, textarea {
       font-size: 16px !important;
     }
@@ -185,7 +143,6 @@ body {
 }
 
 @layer components {
-  /* Text utilities for Russian/long text */
   .text-balance {
     text-wrap: balance;
   }
@@ -203,27 +160,26 @@ body {
     white-space: nowrap;
   }
   
-  /* Word breaking for long Russian words */
   .break-words-ru {
     word-break: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
   }
   
-  /* Premium gradient backgrounds — navy */
+  /* Premium gradient backgrounds */
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(224 55% 28%) 0%, hsl(224 50% 42%) 100%);
+    background: linear-gradient(135deg, hsl(157 100% 42%) 0%, hsl(157 80% 30%) 100%);
   }
 
   .gradient-dark {
-    background: linear-gradient(180deg, hsl(222 30% 6%) 0%, hsl(222 30% 4%) 100%);
+    background: linear-gradient(180deg, hsl(216 60% 7%) 0%, hsl(216 60% 5%) 100%);
   }
 
   .gradient-card {
-    background: linear-gradient(145deg, hsl(222 25% 9%) 0%, hsl(222 25% 6%) 100%);
+    background: linear-gradient(145deg, hsl(214 47% 12%) 0%, hsl(213 38% 15%) 100%);
   }
 
-  /* Luminescent gradient border — for buttons & cards */
+  /* Glow border effect */
   .glow-border {
     position: relative;
     background: hsl(var(--card));
@@ -253,7 +209,6 @@ body {
     opacity: 1;
   }
 
-  /* Thicker luminescent border variant */
   .glow-border-thick::before {
     padding: 1.5px;
     opacity: 0.75;
@@ -264,32 +219,30 @@ body {
 
   /* Glass morphism */
   .glass {
-    @apply backdrop-blur-xl bg-card/80 border border-border/50;
+    @apply backdrop-blur-xl border;
+    background: hsl(var(--card) / 0.8);
+    border-color: hsl(0 0% 100% / 0.07);
   }
 
   .glass-gold {
     @apply backdrop-blur-xl border;
-    background: hsl(224 55% 32% / 0.1);
-    border-color: hsl(224 55% 32% / 0.2);
+    background: hsl(var(--primary) / 0.08);
+    border-color: hsl(var(--primary) / 0.15);
   }
 
-  /* Premium shadows */
+  /* Shadows */
   .shadow-gold {
-    box-shadow: 0 4px 20px -4px hsl(224 55% 32% / 0.35);
+    box-shadow: var(--shadow-glow);
   }
 
   .shadow-elevated {
-    box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
+    box-shadow: var(--shadow-elevated);
   }
 
-  /* Text gradients — navy-anchored */
+  /* Text gradients */
   .text-gradient-gold {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(224 55% 26%) 0%, hsl(224 55% 32%) 50%, hsl(224 50% 42%) 100%);
-  }
-
-  .dark .text-gradient-gold {
-    background-image: linear-gradient(135deg, hsl(224 50% 68%) 0%, hsl(224 50% 58%) 50%, hsl(224 45% 65%) 100%);
+    background-image: linear-gradient(135deg, hsl(157 100% 42%) 0%, hsl(157 80% 55%) 100%);
   }
 
   /* Animations */
@@ -299,23 +252,16 @@ body {
 
   @keyframes glow {
     from {
-      box-shadow: 0 0 10px -5px hsl(230 45% 46% / 0.5);
+      box-shadow: 0 0 10px -5px hsl(157 100% 42% / 0.3);
     }
     to {
-      box-shadow: 0 0 20px -5px hsl(230 45% 46% / 0.8);
+      box-shadow: 0 0 20px -5px hsl(157 100% 42% / 0.6);
     }
   }
 
-  /* Material Design Ripple Effect */
   @keyframes ripple-animation {
-    0% {
-      transform: scale(0);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(2.5);
-      opacity: 0;
-    }
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
   }
 
   .ripple-container {
@@ -331,7 +277,6 @@ body {
   .status-completed { @apply bg-success/20 text-success; }
   .status-cancelled { @apply bg-destructive/20 text-destructive; }
   
-  /* Scrollbar hide utility */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -340,14 +285,11 @@ body {
     display: none;
   }
   
-  /* ============ Touch Target Improvements ============ */
-  /* 44px minimum for iOS/Android accessibility */
   .touch-target-44 {
     min-width: 44px;
     min-height: 44px;
   }
   
-  /* Owner Calendar touch improvements */
   .owner-calendar .rdp-day {
     min-width: 44px;
     min-height: 44px;
@@ -358,54 +300,50 @@ body {
     min-height: 44px;
   }
   
-  /* Task cards with proper touch targets */
   .task-card-touch {
     min-height: 48px;
     padding: 12px;
   }
   
-  /* Operations section improved touch */
   .operations-card {
     @apply min-h-[56px] p-3;
   }
 
-  /* ============ DS2.0 Card Hierarchy System ============ */
-  /* Level 1: Surface - subtle background, no shadow */
+  /* Card hierarchy system */
   .card-surface {
-    @apply bg-muted/30 rounded-xl;
+    background: hsl(var(--bg-surface));
+    border-radius: var(--radius-md);
   }
   
-  /* Level 2: Content - elevation-2 */
   .card-content {
-    @apply bg-card border border-border/60 rounded-xl;
-    box-shadow: var(--shadow-elevation-2);
+    background: hsl(var(--card));
+    border: 1px solid hsl(0 0% 100% / 0.07);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
   }
   
-  /* Level 3: Interactive - hover lift with elevation transition */
   .card-interactive {
-    @apply bg-card border border-border/60 rounded-xl 
-           hover:-translate-y-0.5 
-           transition-all duration-150 cursor-pointer;
-    box-shadow: var(--shadow-elevation-2);
+    background: hsl(var(--card));
+    border: 1px solid hsl(0 0% 100% / 0.07);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
   .card-interactive:hover {
     box-shadow: var(--shadow-elevation-3);
+    transform: translateY(-2px);
+    border-color: hsl(0 0% 100% / 0.12);
   }
   
-  /* Level 4: Elevated - prominent */
   .card-elevated {
-    @apply bg-card border border-border/60 rounded-xl;
+    background: hsl(var(--card));
+    border: 1px solid hsl(0 0% 100% / 0.07);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-elevation-4);
   }
-  
-  /* Dark mode: remove borders, rely on shadows */
-  .dark .card-content,
-  .dark .card-interactive,
-  .dark .card-elevated {
-    @apply border-transparent;
-  }
 
-  /* ============ Scroll Fade Indicators ============ */
+  /* Scroll fade indicators */
   .scroll-fade-right {
     mask-image: linear-gradient(to right, black 85%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
@@ -421,15 +359,19 @@ body {
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
   }
 
-  /* ============ Navigation Indicator ============ */
   .nav-indicator {
     @apply absolute -top-0.5 left-1/2 -translate-x-1/2 
            w-4 h-1 rounded-full bg-primary 
            transition-all duration-200;
   }
+
+  /* Global smooth transitions */
+  a, button, [role="button"], input, select, textarea {
+    transition: all 0.2s ease;
+  }
 }
 
-/* Motion accessibility — respect prefers-reduced-motion */
+/* Motion accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -442,22 +384,15 @@ body {
 
 /* Shimmer animation for Skeletons */
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .animate-shimmer::before {
   animation: shimmer 1.5s infinite;
 }
 
-/* ============================
-   Desktop Power-User Enhancements
-   Only applies on lg+ breakpoints
-   ============================ */
+/* Desktop Power-User Enhancements */
 @layer base {
   @media (min-width: 1024px) {
     *:focus-visible {
@@ -479,40 +414,16 @@ body {
   }
 }
 
-/* Print Styles for PDF Export */
+/* Print Styles */
 @media print {
-  .no-print {
-    display: none !important;
-  }
-
-  .print-break-before {
-    page-break-before: always;
-  }
-
-  .print-break-after {
-    page-break-after: always;
-  }
-
-  .print-avoid-break {
-    page-break-inside: avoid;
-  }
-
+  .no-print { display: none !important; }
+  .print-break-before { page-break-before: always; }
+  .print-break-after { page-break-after: always; }
+  .print-avoid-break { page-break-inside: avoid; }
   .print-colors * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  @page {
-    size: A4;
-    margin: 15mm;
-  }
-
-  body {
-    background: white !important;
-  }
-
-  .dark body {
-    background: white !important;
-    color: #1a1a1a !important;
-  }
+  @page { size: A4; margin: 15mm; }
+  body { background: white !important; }
 }
