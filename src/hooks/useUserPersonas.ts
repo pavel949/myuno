@@ -305,6 +305,11 @@ export const PERSONA_INFO: Record<UserPersona, {
   nomad: {
     labelEn: 'Nomad', labelRu: 'Номад',
     descEn: 'Coworking, SIM, visa', descRu: 'Коворкинг, SIM, виза',
-    icon: '💻', color: 'text-teal-600', bgColor: 'bg-teal-500/10',
+    icon: 'Laptop', color: 'text-teal-600', bgColor: 'bg-teal-500/10',
+  },
+  pet_owner: {
+    labelEn: 'Pet Owner', labelRu: 'С питомцем',
+    descEn: 'Vet, grooming, hotels', descRu: 'Ветеринар, груминг, отели',
+    icon: 'PawPrint', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
   },
 };
