@@ -398,7 +398,7 @@ export const ROUTE_OWNERSHIP = {
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
     '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
     '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa',
-    '/newbuilds'],
+    '/newbuilds', '/relocate', '/wedding', '/kids', '/nomad-guide'],
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],
