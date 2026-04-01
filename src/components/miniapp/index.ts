@@ -9,3 +9,6 @@ export { MiniAppQuickGrid } from './MiniAppQuickGrid';
 export type { QuickGridItem } from './MiniAppQuickGrid';
 export { ItemCard } from './ItemCard';
 export type { ItemCardProps, ItemCardMeta } from './ItemCard';
+export { CatalogCard } from './CatalogCard';
+export type { CatalogCardProps, CatalogBadge, CatalogMeta } from './CatalogCard';
+export { LandingLayout } from './LandingLayout';

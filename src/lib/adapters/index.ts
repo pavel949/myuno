@@ -35,3 +35,12 @@ export {
   mapYachtToBookingContext,
   type YachtCardProps,
 } from './yachtAdapters';
+
+// Catalog Card adapters (unified grid cards)
+export {
+  mapYachtToCatalogCard,
+  mapExperienceToCatalogCard,
+  mapBouquetToCatalogCard,
+  mapPetServiceToCatalogCard,
+  mapRestaurantToCatalogCard,
+} from './catalogCardAdapters';

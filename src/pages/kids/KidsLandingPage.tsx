@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
-import { Button } from '@/components/ui/button';
+import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Baby, GraduationCap, Stethoscope, Compass, Users, Utensils, Shield, ArrowRight } from 'lucide-react';
 
 const CATEGORIES = [
@@ -21,41 +19,29 @@ export default function KidsLandingPage() {
   const navigate = useNavigate();
 
   return (
-    <AppLayout>
-      <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 p-6 pt-16 pb-12">
-          <BackButton fallbackPath="/" variant="overlay" className="absolute top-4 left-4" />
-          <div className="text-white text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Baby className="w-8 h-8" />
-            </div>
-            <h1 className="text-3xl font-bold font-display mb-2">
-              {t ? 'Пхукет для детей' : 'Phuket for Kids'}
-            </h1>
-            <p className="text-white/80 text-sm">
-              {t ? 'Школы, врачи, активности — всё для семьи на острове' : 'Schools, doctors, activities — everything for families on the island'}
-            </p>
-          </div>
-        </div>
-
-        <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
-          {CATEGORIES.map((cat, i) => {
-            const Icon = cat.icon;
-            return (
-              <button key={i} onClick={() => navigate(cat.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:shadow-elevation-2 active:scale-[0.98]">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: cat.color + '15' }}>
-                  <Icon className="w-5 h-5" style={{ color: cat.color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-foreground">{t ? cat.labelRu : cat.labelEn}</h3>
-                  <p className="text-xs text-muted-foreground">{t ? cat.descRu : cat.descEn}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
-              </button>
-            );
-          })}
-        </div>
+    <LandingLayout
+      icon={Baby}
+      title={t ? 'Пхукет для детей' : 'Phuket for Kids'}
+      subtitle={t ? 'Школы, врачи, активности — всё для семьи на острове' : 'Schools, doctors, activities — everything for families on the island'}
+      gradient="from-amber-500 via-orange-500 to-pink-500"
+    >
+      <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
+        {CATEGORIES.map((cat, i) => {
+          const Icon = cat.icon;
+          return (
+            <button key={i} onClick={() => navigate(cat.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: cat.color + '15' }}>
+                <Icon className="w-5 h-5" style={{ color: cat.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-foreground">{t ? cat.labelRu : cat.labelEn}</h3>
+                <p className="text-xs text-muted-foreground">{t ? cat.descRu : cat.descEn}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </button>
+          );
+        })}
       </div>
-    </AppLayout>
+    </LandingLayout>
   );
 }
