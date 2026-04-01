@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/uno/BackButton';
-import { Button } from '@/components/ui/button';
+import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Laptop, Wifi, FileText, Home, Dumbbell, Utensils, Banknote, ArrowRight } from 'lucide-react';
 
 const SECTIONS = [
@@ -21,41 +19,29 @@ export default function NomadGuidePage() {
   const navigate = useNavigate();
 
   return (
-    <AppLayout>
-      <div className="pb-24">
-        <div className="relative bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-600 p-6 pt-16 pb-12">
-          <BackButton fallbackPath="/" variant="overlay" className="absolute top-4 left-4" />
-          <div className="text-white text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Laptop className="w-8 h-8" />
-            </div>
-            <h1 className="text-3xl font-bold font-display mb-2">
-              {t ? 'Гид для номадов' : 'Digital Nomad Guide'}
-            </h1>
-            <p className="text-white/80 text-sm">
-              {t ? 'Работай удалённо с Пхукета — всё что нужно для комфортной жизни' : 'Work remotely from Phuket — everything for a comfortable life'}
-            </p>
-          </div>
-        </div>
-
-        <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
-          {SECTIONS.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:shadow-elevation-2 active:scale-[0.98]">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: s.color + '15' }}>
-                  <Icon className="w-5 h-5" style={{ color: s.color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-foreground">{t ? s.labelRu : s.labelEn}</h3>
-                  <p className="text-xs text-muted-foreground">{t ? s.descRu : s.descEn}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
-              </button>
-            );
-          })}
-        </div>
+    <LandingLayout
+      icon={Laptop}
+      title={t ? 'Гид для номадов' : 'Digital Nomad Guide'}
+      subtitle={t ? 'Работай удалённо с Пхукета — всё для комфортной жизни' : 'Work remotely from Phuket — everything for a comfortable life'}
+      gradient="from-teal-600 via-teal-500 to-cyan-600"
+    >
+      <div className="px-4 py-8 max-w-lg mx-auto space-y-3">
+        {SECTIONS.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] active:scale-[0.98]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: s.color + '15' }}>
+                <Icon className="w-5 h-5" style={{ color: s.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-foreground">{t ? s.labelRu : s.labelEn}</h3>
+                <p className="text-xs text-muted-foreground">{t ? s.descRu : s.descEn}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </button>
+          );
+        })}
       </div>
-    </AppLayout>
+    </LandingLayout>
   );
 }
