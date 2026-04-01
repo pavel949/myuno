@@ -1,287 +1,355 @@
-import React, { forwardRef, useCallback, useState, memo } from 'react';
-import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
-import { ChevronRight, Globe, Plane, Home, Building2, TrendingUp, Check } from 'lucide-react';
+/**
+ * OnboardingModal — 4-step fullscreen onboarding
+ * Step 1: Who are you (persona selection)
+ * Step 2: Ecosystem map (animated cluster diagram)
+ * Step 3: Role-specific feature highlight
+ * Step 4: Quick win CTA
+ */
+import React, { forwardRef, useCallback, useState, memo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronRight, Plane, Home, Building2, TrendingUp, Check,
+  Scale, HardHat, Car, CreditCard, Stethoscope, Calculator,
+  BarChart3, Shield, Calendar, Sparkles, FileSearch
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useLocation } from '@/contexts/LocationContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
-
-const MotionDiv = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>((props, ref) => (
-  <motion.div ref={ref} {...props} />
-));
-MotionDiv.displayName = 'MotionDiv';
 
 interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
 }
 
-type Language = 'ru' | 'en' | 'th';
-
-const texts = {
-  headline: { 
-    en: 'Everything abroad, in one place', 
-    ru: 'Всё для жизни за рубежом — в одном месте', 
-    th: 'ทุกอย่างในต่างแดน ในที่เดียว' 
-  },
-  subtitle: { 
-    en: 'Trusted infrastructure for housing, services, and daily life', 
-    ru: 'Надёжная система для жилья, сервисов и повседневных задач', 
-    th: 'โครงสร้างพื้นฐานที่เชื่อถือได้สำหรับที่อยู่ บริการ และชีวิตประจำวัน' 
-  },
-  comingSoon: { en: 'Coming soon', ru: 'Скоро', th: 'เร็วๆ นี้' },
-  continue: { en: 'Continue', ru: 'Продолжить', th: 'ดำเนินการต่อ' },
-  personaTitle: { en: "I'm here as:", ru: 'Я здесь как:', th: 'ฉันอยู่ที่นี่ในฐานะ:' },
-  personaHint: { en: 'You can change this later', ru: 'Можно изменить позже', th: 'สามารถเปลี่ยนได้ภายหลัง' },
-  getStarted: { en: 'Get Started', ru: 'Начать', th: 'เริ่มต้น' },
-};
-
-const languageOptions = [
-  { code: 'en' as const, flag: '🇬🇧', label: 'EN' },
-  { code: 'ru' as const, flag: '🇷🇺', label: 'RU' },
-  { code: 'th' as const, flag: '🇹🇭', label: 'TH' },
-];
+type Step = 1 | 2 | 3 | 4;
 
 interface PersonaOption {
   persona: UserPersona;
-  icon: React.ElementType;
-  labelEn: string;
+  icon: string;
   labelRu: string;
-  labelTh: string;
-  descEn: string;
+  labelEn: string;
   descRu: string;
+  descEn: string;
 }
 
 const PERSONA_OPTIONS: PersonaOption[] = [
-  { persona: 'tourist', icon: Plane, labelEn: 'Tourist', labelRu: 'Турист', labelTh: 'นักท่องเที่ยว', descEn: 'Trips, tours, transfers', descRu: 'Поездки, туры, трансферы' },
-  { persona: 'resident', icon: Home, labelEn: 'Resident', labelRu: 'Резидент', labelTh: 'ผู้อาศัย', descEn: 'Daily life, services, docs', descRu: 'Быт, сервисы, документы' },
-  { persona: 'property_owner', icon: Building2, labelEn: 'Owner / MC', labelRu: 'Собственник / УК', labelTh: 'เจ้าของ / บจก.', descEn: 'Manage your property', descRu: 'Управление недвижимостью' },
-  { persona: 'investor', icon: TrendingUp, labelEn: 'Investor', labelRu: 'Инвестор', labelTh: 'นักลงทุน', descEn: 'Projects & opportunities', descRu: 'Проекты и возможности' },
+  { persona: 'tourist', icon: '🧳', labelRu: 'Турист', labelEn: 'Tourist', descRu: 'Отдых, туры, трансферы', descEn: 'Trips, tours, transfers' },
+  { persona: 'resident', icon: '🏠', labelRu: 'Резидент', labelEn: 'Resident', descRu: 'Жизнь и быт на острове', descEn: 'Daily life on the island' },
+  { persona: 'property_owner', icon: '🏢', labelRu: 'Собственник / УК', labelEn: 'Owner / MC', descRu: 'Управление недвижимостью', descEn: 'Property management' },
+  { persona: 'investor', icon: '📈', labelRu: 'Инвестор', labelEn: 'Investor', descRu: 'Проекты, доходность, надёжность', descEn: 'Projects, ROI, due diligence' },
 ];
+
+interface ClusterNode {
+  id: string;
+  labelRu: string;
+  labelEn: string;
+  color: string;
+  icon: React.ElementType;
+  servicesRu: string[];
+  servicesEn: string[];
+}
+
+const CLUSTER_NODES: ClusterNode[] = [
+  { id: 'arrive', labelRu: 'ПРИЕХАТЬ', labelEn: 'ARRIVE', color: '#00D68F', icon: Plane, servicesRu: ['Трансферы', 'SIM-карты', 'Обмен валют'], servicesEn: ['Transfers', 'SIM Cards', 'Exchange'] },
+  { id: 'live', labelRu: 'ЖИТЬ', labelEn: 'LIVE', color: '#4E7BFF', icon: Home, servicesRu: ['Рестораны', 'Уборка', 'Медицина'], servicesEn: ['Restaurants', 'Cleaning', 'Medical'] },
+  { id: 'legal', labelRu: 'ЛЕГАЛЬНО', labelEn: 'STAY LEGAL', color: '#F59E0B', icon: Scale, servicesRu: ['Визы', 'Налоги', 'Договоры'], servicesEn: ['Visas', 'Taxes', 'Contracts'] },
+  { id: 'invest', labelRu: 'КУПИТЬ', labelEn: 'INVEST', color: '#A855F7', icon: Building2, servicesRu: ['Поиск', 'Off-Plan', 'ROI'], servicesEn: ['Search', 'Off-Plan', 'ROI'] },
+  { id: 'manage', labelRu: 'УПРАВЛЯТЬ', labelEn: 'MANAGE', color: '#06B6D4', icon: Calendar, servicesRu: ['Календарь', 'Финансы', 'Команда'], servicesEn: ['Calendar', 'Finance', 'Team'] },
+  { id: 'build', labelRu: 'ДЕВЕЛОПЕРАМ', labelEn: 'BUILD', color: '#F43F5E', icon: HardHat, servicesRu: ['Продажи', 'Стройка', 'Аналитика'], servicesEn: ['Sales', 'Construction', 'Analytics'] },
+];
+
+const ROLE_FEATURES: Record<UserPersona, { titleRu: string; titleEn: string; bulletsRu: string[]; bulletsEn: string[] }> = {
+  tourist: {
+    titleRu: 'Ваш маршрут начинается здесь', titleEn: 'Your journey starts here',
+    bulletsRu: ['Трансфер с аэропорта', 'SIM-карта', 'Обмен валют'],
+    bulletsEn: ['Airport transfer', 'SIM card', 'Currency exchange'],
+  },
+  resident: {
+    titleRu: 'Всё для жизни под рукой', titleEn: 'Everything for daily life',
+    bulletsRu: ['Уборка и сервис', 'Медицина', 'Задачи и быт'],
+    bulletsEn: ['Cleaning & services', 'Medical', 'Tasks & daily life'],
+  },
+  property_owner: {
+    titleRu: 'Управляйте объектами из одного места', titleEn: 'Manage properties from one place',
+    bulletsRu: ['Календарь бронирований', 'Финансы', 'Задачи клининга'],
+    bulletsEn: ['Booking calendar', 'Finances', 'Cleaning tasks'],
+  },
+  investor: {
+    titleRu: 'Данные для принятия решений', titleEn: 'Data-driven decisions',
+    bulletsRu: ['Аналитика рынка', 'ROI калькулятор', 'Due Diligence AI'],
+    bulletsEn: ['Market analytics', 'ROI calculator', 'Due Diligence AI'],
+  },
+};
+
+const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu: string; descEn: string; icon: React.ElementType; path: string }> = {
+  tourist: { titleRu: 'Забронировать трансфер', titleEn: 'Book a transfer', descRu: 'Из аэропорта до отеля', descEn: 'Airport to hotel', icon: Car, path: '/transport/airport-transfer' },
+  resident: { titleRu: 'Заказать уборку', titleEn: 'Book cleaning', descRu: 'Профессиональный клининг', descEn: 'Professional cleaning', icon: Sparkles, path: '/cleaning' },
+  property_owner: { titleRu: 'Добавить объект', titleEn: 'Add property', descRu: 'Начните управлять', descEn: 'Start managing', icon: Building2, path: '/owner' },
+  investor: { titleRu: 'Открыть ROI калькулятор', titleEn: 'Open ROI Calculator', descRu: 'Рассчитайте доходность', descEn: 'Calculate returns', icon: BarChart3, path: '/invest' },
+};
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%', opacity: 0 }),
+};
+
+function ProgressDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2 justify-center">
+      {Array.from({ length: total }, (_, i) => (
+        <div
+          key={i}
+          className="h-1.5 rounded-full transition-all duration-300"
+          style={{
+            width: i + 1 === current ? 24 : 6,
+            background: i + 1 === current ? 'hsl(var(--primary))' : 'hsl(0 0% 100% / 0.15)',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; expandedNode: string | null; onTapNode: (id: string) => void }) {
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    let frame: number;
+    let start: number | null = null;
+    const duration = 1200;
+    const animate = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setCounter(Math.round(progress * 40));
+      if (progress < 1) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const r = 110;
+  const cx = 150;
+  const cy = 140;
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <svg width={300} height={280} viewBox="0 0 300 280" className="mx-auto">
+        {/* Lines from center to each node */}
+        {CLUSTER_NODES.map((node, i) => {
+          const angle = (i * 60 - 90) * (Math.PI / 180);
+          const nx = cx + r * Math.cos(angle);
+          const ny = cy + r * Math.sin(angle);
+          return (
+            <motion.line
+              key={node.id}
+              x1={cx} y1={cy} x2={nx} y2={ny}
+              stroke={node.color}
+              strokeOpacity={0.3}
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
+            />
+          );
+        })}
+
+        {/* Center logo */}
+        <motion.g
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <circle cx={cx} cy={cy} r={28} fill="hsl(var(--primary) / 0.15)" />
+          <circle cx={cx} cy={cy} r={22} fill="hsl(var(--primary) / 0.25)" />
+          <text x={cx} y={cy - 5} textAnchor="middle" fill="hsl(var(--primary))" fontSize={10} fontWeight={700}>my</text>
+          <text x={cx} y={cy + 9} textAnchor="middle" fill="hsl(var(--foreground))" fontSize={12} fontWeight={700}>UNO</text>
+        </motion.g>
+
+        {/* Cluster nodes */}
+        {CLUSTER_NODES.map((node, i) => {
+          const angle = (i * 60 - 90) * (Math.PI / 180);
+          const nx = cx + r * Math.cos(angle);
+          const ny = cy + r * Math.sin(angle);
+          const Icon = node.icon;
+          return (
+            <motion.g
+              key={node.id}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3 + i * 0.08, duration: 0.35, type: 'spring', stiffness: 300 }}
+              style={{ cursor: 'pointer' }}
+              onClick={() => onTapNode(node.id)}
+            >
+              <circle cx={nx} cy={ny} r={22} fill={node.color + '20'} stroke={node.color + '40'} strokeWidth={1} />
+              <foreignObject x={nx - 10} y={ny - 10} width={20} height={20}>
+                <div className="w-full h-full flex items-center justify-center">
+                  <Icon style={{ width: 14, height: 14, color: node.color }} />
+                </div>
+              </foreignObject>
+              <text x={nx} y={ny + 34} textAnchor="middle" fill={node.color} fontSize={8} fontWeight={600}>
+                {isRu ? node.labelRu : node.labelEn}
+              </text>
+            </motion.g>
+          );
+        })}
+      </svg>
+
+      {/* Expanded node services */}
+      <AnimatePresence mode="wait">
+        {expandedNode && (() => {
+          const node = CLUSTER_NODES.find(n => n.id === expandedNode);
+          if (!node) return null;
+          return (
+            <motion.div
+              key={expandedNode}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-wrap gap-1.5 justify-center mt-1"
+            >
+              {(isRu ? node.servicesRu : node.servicesEn).map(s => (
+                <span key={s} className="text-[11px] px-2.5 py-1 rounded-[var(--radius-full)] text-muted-foreground"
+                  style={{ background: 'hsl(var(--bg-elevated))' }}
+                >
+                  {s}
+                </span>
+              ))}
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* Counter */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="text-center mt-3 text-sm text-muted-foreground"
+      >
+        <span className="text-2xl font-bold font-display text-primary">{counter}+</span>{' '}
+        {isRu ? 'сервисов' : 'services'}
+      </motion.p>
+    </div>
+  );
+}
 
 export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalProps>(
   function OnboardingModal({ open, onComplete }, ref) {
-  const { language, setLanguage } = useLanguage();
-  const { activeCities, comingSoonCities, isLoading, setCity } = useLocation();
-  const { togglePersona } = useUserPersonas();
-  const navigate = useNavigate();
-  const lang = language as Language;
-  const [step, setStep] = useState<'welcome' | 'persona'>('welcome');
-  const [selectedPersonas, setSelectedPersonas] = useState<UserPersona[]>([]);
+    const { language } = useLanguage();
+    const { setPersonas } = useUserPersonas();
+    const navigate = useNavigate();
+    const isRu = language === 'ru';
+    const [step, setStep] = useState<Step>(1);
+    const [direction, setDirection] = useState(1);
+    const [selectedPersona, setSelectedPersona] = useState<UserPersona | null>(null);
+    const [expandedNode, setExpandedNode] = useState<string | null>(null);
 
-  const activeCity = activeCities[0];
+    const goNext = useCallback(() => {
+      if (step < 4) {
+        setDirection(1);
+        setStep(s => (s + 1) as Step);
+      }
+    }, [step]);
 
-  const handleContinueToPersona = useCallback(() => {
-    setStep('persona');
-  }, []);
+    const handleSelectPersona = useCallback((p: UserPersona) => {
+      triggerHaptic('light');
+      setSelectedPersona(p);
+    }, []);
 
-  const handleTogglePersona = useCallback((persona: UserPersona) => {
-    triggerHaptic('light');
-    setSelectedPersonas(prev => 
-      prev.includes(persona) ? prev.filter(p => p !== persona) : [...prev, persona]
-    );
-  }, []);
+    const handleComplete = useCallback(() => {
+      localStorage.setItem('myuno-onboarding-complete', 'true');
+      sessionStorage.setItem('myuno-onboarding-complete', 'true');
+      localStorage.setItem('myuno_onboarded', 'true');
+      if (selectedPersona) {
+        setPersonas([selectedPersona]);
+      }
+      onComplete();
+    }, [onComplete, selectedPersona, setPersonas]);
 
-  const handleComplete = useCallback(() => {
-    localStorage.setItem('myuno-onboarding-complete', 'true');
-    sessionStorage.setItem('myuno-onboarding-complete', 'true');
-    if (activeCity) {
-      setCity(activeCity.slug);
-    }
-    // Save selected personas
-    selectedPersonas.forEach(p => togglePersona(p));
-    onComplete();
+    const handleQuickWin = useCallback(() => {
+      handleComplete();
+      const win = QUICK_WINS[selectedPersona || 'tourist'];
+      navigate(win.path);
+    }, [handleComplete, navigate, selectedPersona]);
 
-    // Redirect based on persona
-    if (selectedPersonas.includes('property_owner')) {
-      navigate('/owner');
-    } else if (selectedPersonas.includes('investor')) {
-      navigate('/property/invest');
-    }
-  }, [onComplete, activeCity, setCity, selectedPersonas, togglePersona, navigate]);
+    const handleSkip = useCallback(() => {
+      localStorage.setItem('myuno-onboarding-complete', 'true');
+      sessionStorage.setItem('myuno-onboarding-complete', 'true');
+      localStorage.setItem('myuno_onboarded', 'true');
+      onComplete();
+    }, [onComplete]);
 
-  const handleSkip = useCallback(() => {
-    localStorage.setItem('myuno-onboarding-complete', 'true');
-    sessionStorage.setItem('myuno-onboarding-complete', 'true');
-    onComplete();
-  }, [onComplete]);
+    if (!open) return null;
 
-  const getCityName = (city: typeof activeCity, lang: Language) => {
-    if (!city) return '';
-    switch (lang) {
-      case 'ru': return city.name_ru || city.name_en;
-      case 'th': return city.name_th || city.name_en;
-      default: return city.name_en;
-    }
-  };
+    const persona = selectedPersona || 'tourist';
+    const features = ROLE_FEATURES[persona];
+    const quickWin = QUICK_WINS[persona];
+    const QuickWinIcon = quickWin.icon;
 
-  const getPersonaLabel = (opt: PersonaOption) => {
-    switch (lang) {
-      case 'ru': return opt.labelRu;
-      case 'th': return opt.labelTh;
-      default: return opt.labelEn;
-    }
-  };
+    return (
+      <div
+        ref={ref}
+        className="fixed inset-0 z-[9999] flex flex-col"
+        style={{ background: 'rgba(8,16,30,0.97)' }}
+      >
+        {/* Progress */}
+        <div className="pt-[env(safe-area-inset-top,12px)] px-6 pb-3 pt-6 flex items-center justify-between">
+          <ProgressDots current={step} total={4} />
+          <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] flex items-center px-2">
+            {isRu ? 'Пропустить' : 'Skip'}
+          </button>
+        </div>
 
-  const getPersonaDesc = (opt: PersonaOption) => {
-    return lang === 'ru' ? opt.descRu : opt.descEn;
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent ref={ref} className="sm:max-w-sm p-0 gap-0 overflow-hidden border-0" hideCloseButton>
-        <DialogTitle className="sr-only">Welcome to myUNO</DialogTitle>
-        <div className="relative flex flex-col">
-          <AnimatePresence mode="wait">
-            {step === 'welcome' ? (
-              <MotionDiv
-                key="welcome"
-                initial={{ opacity: 0, x: 0 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.3 }}
-                className="p-6 sm:p-8 relative z-10 flex flex-col items-center text-center"
+        {/* Step content */}
+        <div className="flex-1 overflow-y-auto">
+          <AnimatePresence mode="wait" custom={direction}>
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="px-6 py-4 flex flex-col items-center"
               >
-                {/* Icon */}
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
-                  className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"
-                >
-                  <Globe className="w-8 h-8 text-primary" />
-                </motion.div>
-
-                {/* Location badge */}
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border/60 mb-6">
-                  {isLoading ? (
-                    <Skeleton className="h-5 w-24" />
-                  ) : activeCity ? (
-                    <>
-                      <span className="text-lg">{activeCity.flag}</span>
-                      <span className="font-medium text-sm text-foreground">
-                        {getCityName(activeCity, lang)}
-                      </span>
-                    </>
-                  ) : null}
-                </div>
-                
-                <h1 className="text-xl font-semibold leading-tight mb-2">
-                  {texts.headline[lang]}
+                <h1 className="text-[26px] font-bold font-display text-foreground text-center leading-tight mb-2">
+                  {isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO'}
                 </h1>
-                
-                <p className="text-sm text-muted-foreground mb-8">
-                  {texts.subtitle[lang]}
+                <p className="text-sm text-muted-foreground text-center mb-6">
+                  {isRu ? 'Весь Пхукет в одном приложении. Выберите, кто вы:' : 'All of Phuket in one app. Choose your role:'}
                 </p>
 
-                {/* Future locations */}
-                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground/60 mb-8 flex-wrap">
-                  {isLoading ? (
-                    <Skeleton className="h-4 w-48" />
-                  ) : comingSoonCities.length > 0 ? (
-                    <>
-                      <span>{texts.comingSoon[lang]}:</span>
-                      {comingSoonCities.slice(0, 4).map((city) => (
-                        <span key={city.id} className="flex items-center gap-1">
-                          {city.flag} {getCityName(city, lang)}
-                        </span>
-                      ))}
-                    </>
-                  ) : null}
-                </div>
-
-                {/* Language Selection */}
-                <div className="flex justify-center gap-2 mb-6">
-                  {languageOptions.map(opt => (
-                    <button
-                      key={opt.code}
-                      onClick={() => setLanguage(opt.code)}
-                      className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-all",
-                        language === opt.code 
-                          ? "bg-primary text-primary-foreground" 
-                          : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                      )}
-                    >
-                      <span>{opt.flag}</span>
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* CTA → next step */}
-                <div className="w-full space-y-2">
-                  <Button 
-                    className="w-full h-12 text-base font-medium rounded-xl" 
-                    onClick={handleContinueToPersona}
-                    disabled={isLoading}
-                  >
-                    {texts.continue[lang]}
-                    <ChevronRight className="w-5 h-5 ml-1" />
-                  </Button>
-                  <button
-                    onClick={handleSkip}
-                    className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
-                  >
-                    {lang === 'ru' ? 'Пропустить' : lang === 'th' ? 'ข้าม' : 'Skip'}
-                  </button>
-                </div>
-              </MotionDiv>
-            ) : (
-              <MotionDiv
-                key="persona"
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 100 }}
-                transition={{ duration: 0.3 }}
-                className="p-6 sm:p-8 relative z-10 flex flex-col items-center text-center"
-              >
-                <h2 className="text-lg font-semibold mb-1">
-                  {texts.personaTitle[lang]}
-                </h2>
-                <p className="text-xs text-muted-foreground mb-6">
-                  {texts.personaHint[lang]}
-                </p>
-
-                {/* Persona cards */}
-                <div className="grid grid-cols-2 gap-3 w-full mb-6">
+                <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
                   {PERSONA_OPTIONS.map((opt) => {
-                    const Icon = opt.icon;
-                    const isSelected = selectedPersonas.includes(opt.persona);
+                    const isSelected = selectedPersona === opt.persona;
                     return (
                       <button
                         key={opt.persona}
-                        onClick={() => handleTogglePersona(opt.persona)}
+                        onClick={() => handleSelectPersona(opt.persona)}
                         className={cn(
-                          "relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
-                          "focus:outline-none focus:ring-2 focus:ring-primary/50 active:scale-[0.97]",
+                          "relative flex flex-col items-center gap-2 p-4 rounded-[var(--radius-md)] transition-all duration-200 min-h-[140px] justify-center",
                           isSelected
-                            ? "border-primary bg-primary/8 shadow-sm"
-                            : "border-border bg-card hover:border-primary/40"
+                            ? "scale-[1.03]"
+                            : "hover:border-primary/40 active:scale-[0.97]"
                         )}
+                        style={{
+                          background: isSelected ? 'hsl(var(--primary) / 0.12)' : 'hsl(var(--card))',
+                          border: `2px solid ${isSelected ? 'hsl(var(--primary))' : 'hsl(0 0% 100% / 0.07)'}`,
+                        }}
                       >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center",
-                          isSelected ? "bg-primary/15" : "bg-muted"
-                        )}>
-                          <Icon className={cn(
-                            "w-5 h-5",
-                            isSelected ? "text-primary" : "text-muted-foreground"
-                          )} />
-                        </div>
-                        <span className={cn(
-                          "text-sm font-medium",
-                          isSelected ? "text-primary" : "text-foreground"
-                        )}>
-                          {getPersonaLabel(opt)}
+                        <span className="text-[48px] leading-none">{opt.icon}</span>
+                        <span className={cn("text-base font-display font-semibold", isSelected ? "text-primary" : "text-foreground")}>
+                          {isRu ? opt.labelRu : opt.labelEn}
                         </span>
-                        <span className="text-[11px] text-muted-foreground leading-tight">
-                          {getPersonaDesc(opt)}
+                        <span className="text-[12px] text-muted-foreground text-center leading-tight">
+                          {isRu ? opt.descRu : opt.descEn}
                         </span>
                         {isSelected && (
                           <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
@@ -292,24 +360,133 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                     );
                   })}
                 </div>
+              </motion.div>
+            )}
 
-                {/* CTA */}
-                <div className="w-full">
-                  <Button 
-                    className="w-full h-12 text-base font-medium rounded-xl" 
-                    onClick={handleComplete}
-                  >
-                    {texts.getStarted[lang]}
-                    <ChevronRight className="w-5 h-5 ml-1" />
-                  </Button>
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="px-6 py-4 flex flex-col items-center"
+              >
+                <h2 className="text-xl font-bold font-display text-foreground text-center mb-1">
+                  {isRu ? '6 направлений, 40+ сервисов' : '6 clusters, 40+ services'}
+                </h2>
+                <p className="text-sm text-muted-foreground text-center mb-4">
+                  {isRu ? 'Всё связано в одну экосистему' : 'All connected in one ecosystem'}
+                </p>
+                <EcosystemDiagram isRu={isRu} expandedNode={expandedNode} onTapNode={(id) => setExpandedNode(prev => prev === id ? null : id)} />
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="px-6 py-8 flex flex-col items-center"
+              >
+                <h2 className="text-xl font-bold font-display text-foreground text-center mb-6">
+                  {isRu ? features.titleRu : features.titleEn}
+                </h2>
+                <div className="w-full max-w-sm space-y-4">
+                  {(isRu ? features.bulletsRu : features.bulletsEn).map((bullet, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.1 }}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="text-sm text-foreground font-medium">{bullet}</span>
+                    </motion.div>
+                  ))}
                 </div>
-              </MotionDiv>
+              </motion.div>
+            )}
+
+            {step === 4 && (
+              <motion.div
+                key="step4"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="px-6 py-8 flex flex-col items-center"
+              >
+                <h2 className="text-xl font-bold font-display text-foreground text-center mb-6">
+                  {isRu ? 'Ваш первый шаг на Пхукете' : 'Your first step in Phuket'}
+                </h2>
+
+                <button
+                  onClick={handleQuickWin}
+                  className="w-full max-w-sm p-5 rounded-[var(--radius-lg)] text-left transition-all active:scale-[0.98]"
+                  style={{
+                    background: 'hsl(var(--primary) / 0.12)',
+                    border: '1px solid hsl(var(--primary) / 0.3)',
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-[var(--radius-md)] bg-primary/20 flex items-center justify-center shrink-0">
+                      <QuickWinIcon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-display font-bold text-foreground mb-1">
+                        {isRu ? quickWin.titleRu : quickWin.titleEn}
+                      </h3>
+                      <p className="text-[13px] text-muted-foreground">
+                        {isRu ? quickWin.descRu : quickWin.descEn}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-primary">
+                    {isRu ? 'Открыть сейчас' : 'Open now'} <ChevronRight className="w-4 h-4" />
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleComplete}
+                  className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
+                >
+                  {isRu ? 'Изучу сам' : "I'll explore myself"}
+                </button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}));
+
+        {/* Bottom CTA */}
+        {step < 4 && (
+          <div className="px-6 pb-[env(safe-area-inset-bottom,16px)] pb-6">
+            <Button
+              className="w-full h-12 text-base font-semibold rounded-[var(--radius-md)]"
+              onClick={goNext}
+              disabled={step === 1 && !selectedPersona}
+            >
+              {step === 1 ? (isRu ? 'Продолжить' : 'Continue') :
+               step === 2 ? (isRu ? 'Понятно, вперёд' : 'Got it, next') :
+               (isRu ? 'Начать' : 'Start')}
+              <ChevronRight className="w-5 h-5 ml-1" />
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+));
 
 OnboardingModal.displayName = 'OnboardingModal';
