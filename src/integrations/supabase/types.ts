@@ -5702,8 +5702,10 @@ export type Database = {
           phone: string | null
           projects_completed: number | null
           slug: string | null
+          subscription_tier: string | null
           total_units_sold: number | null
           updated_at: string | null
+          user_id: string | null
           website: string | null
         }
         Insert: {
@@ -5726,8 +5728,10 @@ export type Database = {
           phone?: string | null
           projects_completed?: number | null
           slug?: string | null
+          subscription_tier?: string | null
           total_units_sold?: number | null
           updated_at?: string | null
+          user_id?: string | null
           website?: string | null
         }
         Update: {
@@ -5750,8 +5754,10 @@ export type Database = {
           phone?: string | null
           projects_completed?: number | null
           slug?: string | null
+          subscription_tier?: string | null
           total_units_sold?: number | null
           updated_at?: string | null
+          user_id?: string | null
           website?: string | null
         }
         Relationships: []
@@ -11636,6 +11642,252 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      nb_leads: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string | null
+          developer_id: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          message: string | null
+          phone: string | null
+          project_id: string | null
+          score: number | null
+          source: string | null
+          status: string | null
+          transferred_at: string | null
+          transferred_to_developer: boolean | null
+          unit_preference: string | null
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          developer_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          phone?: string | null
+          project_id?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          transferred_at?: string | null
+          transferred_to_developer?: boolean | null
+          unit_preference?: string | null
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          developer_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          message?: string | null
+          phone?: string | null
+          project_id?: string | null
+          score?: number | null
+          source?: string | null
+          status?: string | null
+          transferred_at?: string | null
+          transferred_to_developer?: boolean | null
+          unit_preference?: string | null
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_leads_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nb_leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_project_reports: {
+        Row: {
+          created_at: string | null
+          id: string
+          month: string
+          pdf_url: string | null
+          project_id: string
+          summary: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          month: string
+          pdf_url?: string | null
+          project_id: string
+          summary?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          month?: string
+          pdf_url?: string | null
+          project_id?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_project_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_project_updates: {
+        Row: {
+          content: string | null
+          id: string
+          photo_urls: string[] | null
+          progress_at_time: number | null
+          project_id: string
+          published_at: string | null
+          title: string
+        }
+        Insert: {
+          content?: string | null
+          id?: string
+          photo_urls?: string[] | null
+          progress_at_time?: number | null
+          project_id: string
+          published_at?: string | null
+          title: string
+        }
+        Update: {
+          content?: string | null
+          id?: string
+          photo_urls?: string[] | null
+          progress_at_time?: number | null
+          project_id?: string
+          published_at?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_promotions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          developer_id: string | null
+          ends_at: string | null
+          id: string
+          project_id: string | null
+          starts_at: string | null
+          status: string | null
+          type: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          developer_id?: string | null
+          ends_at?: string | null
+          id?: string
+          project_id?: string | null
+          starts_at?: string | null
+          status?: string | null
+          type?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          developer_id?: string | null
+          ends_at?: string | null
+          id?: string
+          project_id?: string | null
+          starts_at?: string | null
+          status?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_promotions_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nb_promotions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nb_special_terms: {
+        Row: {
+          created_at: string | null
+          discount_description: string | null
+          discount_percent: number | null
+          id: string
+          payment_details: string | null
+          payment_plan: string | null
+          project_id: string
+          promo_label: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          discount_description?: string | null
+          discount_percent?: number | null
+          id?: string
+          payment_details?: string | null
+          payment_plan?: string | null
+          project_id: string
+          promo_label?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          discount_description?: string | null
+          discount_percent?: number | null
+          id?: string
+          payment_details?: string | null
+          payment_plan?: string | null
+          project_id?: string
+          promo_label?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nb_special_terms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
@@ -18258,11 +18510,13 @@ export type Database = {
           developer_name: string | null
           district: string | null
           funding_goal: number | null
+          gallery_urls: string[] | null
           id: string
           images: string[] | null
           infrastructure: string[] | null
           investment_enabled: boolean | null
           is_active: boolean | null
+          is_approved: boolean | null
           is_featured: boolean | null
           juristic_address: string | null
           juristic_bank_account_name: string | null
@@ -18280,6 +18534,7 @@ export type Database = {
           juristic_whatsapp: string | null
           lat: number | null
           lng: number | null
+          location_area: string | null
           min_investment: number | null
           muuno_score: number | null
           name_en: string
@@ -18289,7 +18544,11 @@ export type Database = {
           project_status: string | null
           risk_level: string | null
           roi_projected: number | null
+          slug: string | null
+          tagline: string | null
+          tagline_ru: string | null
           total_units: number | null
+          unit_types: string[] | null
           units_available: number | null
           units_sold: number | null
           updated_at: string | null
@@ -18313,11 +18572,13 @@ export type Database = {
           developer_name?: string | null
           district?: string | null
           funding_goal?: number | null
+          gallery_urls?: string[] | null
           id?: string
           images?: string[] | null
           infrastructure?: string[] | null
           investment_enabled?: boolean | null
           is_active?: boolean | null
+          is_approved?: boolean | null
           is_featured?: boolean | null
           juristic_address?: string | null
           juristic_bank_account_name?: string | null
@@ -18335,6 +18596,7 @@ export type Database = {
           juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
+          location_area?: string | null
           min_investment?: number | null
           muuno_score?: number | null
           name_en: string
@@ -18344,7 +18606,11 @@ export type Database = {
           project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
+          slug?: string | null
+          tagline?: string | null
+          tagline_ru?: string | null
           total_units?: number | null
+          unit_types?: string[] | null
           units_available?: number | null
           units_sold?: number | null
           updated_at?: string | null
@@ -18368,11 +18634,13 @@ export type Database = {
           developer_name?: string | null
           district?: string | null
           funding_goal?: number | null
+          gallery_urls?: string[] | null
           id?: string
           images?: string[] | null
           infrastructure?: string[] | null
           investment_enabled?: boolean | null
           is_active?: boolean | null
+          is_approved?: boolean | null
           is_featured?: boolean | null
           juristic_address?: string | null
           juristic_bank_account_name?: string | null
@@ -18390,6 +18658,7 @@ export type Database = {
           juristic_whatsapp?: string | null
           lat?: number | null
           lng?: number | null
+          location_area?: string | null
           min_investment?: number | null
           muuno_score?: number | null
           name_en?: string
@@ -18399,7 +18668,11 @@ export type Database = {
           project_status?: string | null
           risk_level?: string | null
           roi_projected?: number | null
+          slug?: string | null
+          tagline?: string | null
+          tagline_ru?: string | null
           total_units?: number | null
+          unit_types?: string[] | null
           units_available?: number | null
           units_sold?: number | null
           updated_at?: string | null

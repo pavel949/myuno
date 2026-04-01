@@ -51,6 +51,11 @@ export const ManagementCompanyProfile = lazy(() => import('@/pages/property/Mana
 export const ResaleIndex = lazy(() => import('@/pages/property/ResaleIndex'));
 export const ResaleDetail = lazy(() => import('@/pages/property/ResaleDetail'));
 
+// ── Newbuilds (Premium Section) ──
+export const NewbuildsLanding = lazy(() => import('@/pages/newbuilds/NewbuildsLanding'));
+export const NewbuildsCatalog = lazy(() => import('@/pages/newbuilds/NewbuildsCatalog'));
+export const NewbuildDetail = lazy(() => import('@/pages/newbuilds/NewbuildDetail'));
+
 // ── Investment ──
 export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));

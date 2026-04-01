@@ -1,0 +1,176 @@
+/**
+ * Newbuilds "Dark Luxury Editorial" Theme
+ * Scoped under .nb-theme class
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+.nb-theme {
+  /* ─ Core palette (HSL) ─ */
+  --nb-bg: 0 0% 6%;                /* #0F0F0F */
+  --nb-surface: 0 0% 8%;           /* #141414 */
+  --nb-card: 0 0% 10%;             /* #1A1A1A */
+  --nb-gold: 43 52% 54%;           /* #C9A84C */
+  --nb-gold-dim: 43 40% 40%;       /* darker gold */
+  --nb-gold-bright: 43 70% 65%;    /* lighter gold */
+  --nb-muted: 50 5% 50%;           /* #8A8A7A */
+  --nb-text: 0 0% 95%;             /* near-white */
+  --nb-text-secondary: 50 5% 60%;  /* warm grey */
+  --nb-border: 43 52% 54%;         /* gold for borders */
+  --nb-glass-bg: 0 0% 100% / 0.04;
+  --nb-glass-border: 43 52% 54% / 0.2;
+
+  /* ─ Semantic overrides ─ */
+  --background: var(--nb-bg);
+  --foreground: var(--nb-text);
+  --card: var(--nb-surface);
+  --card-foreground: var(--nb-text);
+  --muted: var(--nb-muted);
+  --muted-foreground: var(--nb-text-secondary);
+  --border: var(--nb-glass-border);
+
+  /* ─ Typography ─ */
+  --font-display-nb: 'Cormorant Garamond', Georgia, serif;
+  --font-body-nb: 'DM Sans', system-ui, sans-serif;
+  --font-mono-nb: 'DM Mono', 'Fira Code', monospace;
+
+  font-family: var(--font-body-nb);
+  color: hsl(var(--nb-text));
+  background-color: hsl(var(--nb-bg));
+}
+
+/* ─ Grain texture overlay ─ */
+.nb-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─ Glass card ─ */
+.nb-glass {
+  background: hsl(var(--nb-glass-bg));
+  border: 1px solid hsl(var(--nb-glass-border));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  transition: all 300ms ease;
+}
+
+.nb-glass:hover {
+  border-color: hsl(var(--nb-gold) / 0.5);
+  box-shadow: 0 0 24px hsl(var(--nb-gold) / 0.1);
+}
+
+/* ─ Gold separator ─ */
+.nb-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--nb-gold) / 0.4), transparent);
+}
+
+/* ─ Typography helpers ─ */
+.nb-display {
+  font-family: var(--font-display-nb);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.nb-mono {
+  font-family: var(--font-mono-nb);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.nb-label {
+  font-family: var(--font-mono-nb);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--nb-gold));
+}
+
+/* ─ Gold progress bar ─ */
+.nb-progress-track {
+  background: hsl(var(--nb-muted) / 0.2);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.nb-progress-fill {
+  background: linear-gradient(90deg, hsl(var(--nb-gold-dim)), hsl(var(--nb-gold)));
+  height: 100%;
+  border-radius: 999px;
+  transition: width 600ms ease;
+}
+
+/* ─ Status badges ─ */
+.nb-badge {
+  font-family: var(--font-mono-nb);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.nb-badge-construction {
+  background: hsl(38 92% 50% / 0.15);
+  color: hsl(38 92% 60%);
+  border: 1px solid hsl(38 92% 50% / 0.3);
+}
+
+.nb-badge-completed {
+  background: hsl(142 70% 45% / 0.15);
+  color: hsl(142 70% 55%);
+  border: 1px solid hsl(142 70% 45% / 0.3);
+}
+
+.nb-badge-upcoming {
+  background: hsl(215 80% 55% / 0.15);
+  color: hsl(215 80% 65%);
+  border: 1px solid hsl(215 80% 55% / 0.3);
+}
+
+/* ─ Gold button ─ */
+.nb-btn-gold {
+  background: linear-gradient(135deg, hsl(var(--nb-gold)), hsl(var(--nb-gold-dim)));
+  color: hsl(0 0% 6%);
+  font-family: var(--font-body-nb);
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease;
+  letter-spacing: 0.02em;
+}
+
+.nb-btn-gold:hover {
+  box-shadow: 0 4px 20px hsl(var(--nb-gold) / 0.3);
+  transform: translateY(-1px);
+}
+
+/* ─ Blueprint grid pattern (for hero) ─ */
+.nb-blueprint {
+  background-image: 
+    linear-gradient(hsl(var(--nb-gold) / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--nb-gold) / 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─ Animation keyframes ─ */
+@keyframes nb-gold-glow {
+  0%, 100% { box-shadow: 0 0 8px hsl(var(--nb-gold) / 0.2); }
+  50% { box-shadow: 0 0 20px hsl(var(--nb-gold) / 0.4); }
+}
+
+.nb-glow-pulse {
+  animation: nb-gold-glow 3s ease-in-out infinite;
+}

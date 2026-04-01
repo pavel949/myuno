@@ -77,6 +77,15 @@ export const APP_ROUTES = {
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
 
+  // ── Newbuilds (Premium New Developments Section) ──
+  NEWBUILDS: '/newbuilds',
+  NEWBUILDS_PROJECTS: '/newbuilds/projects',
+  NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
+  NEWBUILDS_DEVELOPERS: '/newbuilds/developers',
+  NEWBUILDS_DEVELOPER: (slug: string) => `/newbuilds/developers/${slug}`,
+  DEVELOPER_PORTAL: '/developer-portal',
+  ADMIN_NEWBUILDS: '/admin/newbuilds',
+
   // ── Investment (under Property Hub) ──
   INVEST: '/property/invest',
   INVEST_DASHBOARD: '/property/invest/dashboard',
@@ -368,7 +377,7 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/invest': '/property/invest',
   '/invest/dashboard': '/property/invest/dashboard',
   '/invest/raise': '/property/invest/raise',
-  '/new-developments': '/property/offplan',
+  '/new-developments': '/newbuilds',
 } as const;
 
 /**
@@ -384,7 +393,8 @@ export const ROUTE_OWNERSHIP = {
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
     '/vendor/onboarding', '/provider/onboarding', '/owner/landing', '/owner/guide',
     '/list-with-us', '/property/invest', '/property/offplan', '/property/developers', '/property/projects',
-    '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa'],
+    '/arrive', '/stay-legal', '/invest-hub', '/tax', '/legal/contract-analysis', '/visa',
+    '/newbuilds'],
   AUTH_REQUIRED: ['/profile', '/bookings', '/favorites', '/wallet', '/cart', '/notifications',
     '/messages', '/support', '/account', '/sell', '/my-stay', '/vip-concierge'],
   VENDOR: ['/vendor'],
@@ -431,6 +441,8 @@ export function isValidRoute(path: string): boolean {
     /^\/insurance\/[^/]+$/,
     /^\/knowledge\/[^/]+$/,
     /^\/transport\/vehicle\/[^/]+$/,
+    /^\/newbuilds\/projects\/[^/]+$/,
+    /^\/newbuilds\/developers\/[^/]+$/,
     /^\/transport\/booking\/[^/]+$/,
   ];
   
