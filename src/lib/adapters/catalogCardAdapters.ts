@@ -383,10 +383,6 @@ export function mapClinicToCatalogCard(
     subtitle,
   };
 }
-  restaurant: any,
-  language: string,
-  navigate: (path: string) => void
-): CatalogCardProps {
   const isRu = language === 'ru';
   const r = restaurant as any;
   const cuisineTags = r.cuisine_tags as string[] | null;
