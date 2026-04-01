@@ -75,7 +75,8 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || location.pathname.startsWith('/for-management-companies')
     || location.pathname.startsWith('/vendor/join')
     || location.pathname.startsWith('/vendor/onboarding')
-    || location.pathname.startsWith('/ref/');
+    || location.pathname.startsWith('/ref/')
+    || location.pathname.startsWith('/newbuilds');
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
