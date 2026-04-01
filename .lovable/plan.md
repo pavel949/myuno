@@ -1,96 +1,99 @@
 
 
-# Расширение персон: Lifestyle Personas для AI-рекомендаций
+# Визуальный редизайн персон + Relocation + новые посадочные страницы
 
-## Анализ текущего состояния
+## Что делаем
 
-Сейчас на главной 4 персоны в `PersonaSwitcher`:
-- **Tourist** → трансферы, туры, яхты
-- **Resident** → визы, медицина, банки
-- **Property Owner** → управление объектами
-- **Investor** → новостройки, покупка
+### 1. Визуальный редизайн карточек персон (HeroBlock + PersonaSmartFeed)
 
-Хранятся в DB enum `user_persona` (только 3 значения: `tourist`, `resident`, `property_owner`; `investor` — клиентский). `QuickActionsGrid` маппит каждую персону на набор QuickActions.
+**Проблема**: текущие карточки — мелкие иконки 36px в двух рядах, выглядят как generic UI.
 
-## Нужно ли это?
+**Решение — компактный горизонтальный скролл с glassmorphism-чипами**:
+- Один ряд с горизонтальным скроллом вместо двух рядов по 6
+- Каждый чип: gradient-фон с blur-эффектом, Lucide-иконка 20px + label
+- Активный чип: яркий gradient + `ring-2` + subtle glow (`box-shadow`)
+- Неактивные: полупрозрачный `bg-white/5` с `backdrop-blur`
+- Для `PersonaSmartFeed` карточки: заменить emoji на Lucide-иконки в цветных кружках + описательный subtitle
 
-**Да, однозначно.** Причины:
+### 2. Новая персона: Relocation (переезд на Пхукет)
 
-1. **Увеличение конверсии**: персона "Мама" сразу видит школы, педиатров, детские активности → покупает. "Тусовщик" видит бич-клабы, яхт-пати → букает.
-2. **Увеличение среднего чека**: таргетированные рекомендации = больше релевантных покупок.
-3. **Рост retention**: пользователь чувствует "это для меня" → возвращается.
-4. **Данные для монетизации**: знание профиля → премиальные размещения для вендоров ("покажи мой ресторан всем Partygoers").
+**DB migration**: добавить `relocation` в enum `user_persona`.
 
-## Рекомендуемые персоны (оптимизированы под выручку)
+**Данные для всех систем**:
+- `PERSONA_INFO`: icon = `Globe`, label "Relocating" / "Переезд"
+- `QuickActionsGrid` — `RELOCATION_ACTIONS`: Visa, Property, Schools, Legal, Banking, Medical, Insurance, Transport
+- `PersonaSmartFeed` — рекомендации: "Первичная консультация", "Найти жильё", "Школы для детей"
+- `OnboardingModal` — `ROLE_FEATURES` + `QUICK_WINS`: "Бесплатная консультация по переезду"
 
-| Персона | EN | Иконка | Почему зарабатывает |
-|---------|-----|--------|---------------------|
-| **Турист** | Tourist | ✈️ | Трансферы, туры, яхты — высокая маржа |
-| **Резидент** | Resident | 🏠 | Визы, страховки, регулярные сервисы |
-| **Собственник** | Owner | 🏢 | Управление, клининг, ремонт — рекуррентный доход |
-| **Инвестор** | Investor | 📈 | Новостройки — крупнейшие чеки (5% комиссия) |
-| **Семья** | Family | 👨‍👩‍👧 | Школы, педиатры, няни, детские активности — высокий LTV |
-| **Пара** | Couple | 💑 | Свадьбы, рестораны, спа, романтические туры |
-| **Тусовщик** | Nightlife | 🎉 | Клубы, яхт-пати, VIP-столы — импульсные покупки |
-| **Спортсмен** | Active | 🏄 | Фитнес, серфинг, MMA, байк-туры — абонементы |
-| **Бизнес** | Business | 💼 | Коворкинги, юристы, бухгалтерия, банки — B2B-сервисы |
-| **Digital Nomad** | Nomad | 💻 | Коворкинги, SIM, визы, кафе — пересечение с Resident |
+### 3. Отдельная посадочная страница `/relocate`
 
-> **Отсеяно**: "Художник" — слишком узкий, мало монетизации. "Мама/Папа" — объединены в "Семья". "Девелопер" — это B2B роль, не персона покупателя.
+Полноценный лендинг "Relocate to Phuket" — мини-апп с пошаговым роадмапом переезда:
 
-## Что нужно сделать
+```text
+┌─────────────────────────────────┐
+│  Hero: "Переезд на Пхукет"     │
+│  CTA: Бесплатная консультация   │
+├─────────────────────────────────┤
+│  Roadmap (вертикальный timeline):│
+│  1. Визы и документы            │
+│  2. Жильё                      │
+│  3. Школы и сады                │
+│  4. Медицина и страховка        │
+│  5. Банки и финансы             │
+│  6. Транспорт                  │
+│  7. Юрист и бухгалтер          │
+│  8. Досуг и комьюнити          │
+├─────────────────────────────────┤
+│  Тарифы: DIY / Guided / VIP    │
+│  WhatsApp CTA                  │
+│  FAQ аккордеон                 │
+└─────────────────────────────────┘
+```
 
-### 1. Migration: расширить enum + seed
+Каждый шаг роадмапа — ссылка на соответствующий сервис платформы. Монетизация: консультации + пакеты "сопровождение переезда" (DIY бесплатно, Guided ₿15k, VIP ₿50k).
 
-Добавить 6 новых значений в `user_persona` enum: `family`, `couple`, `nightlife`, `active`, `business`, `nomad`. Обновить `user_personas` table constraint.
+### 4. Дополнительные посадочные страницы для монетизации
 
-### 2. Обновить `useUserPersonas.ts`
+Оценка целесообразности — создаём 3 высоко-конверсионные страницы:
 
-- Расширить `UserPersona` type до 10 значений
-- Добавить `PERSONA_INFO` записи для каждой новой персоны (иконки, цвета, описания RU/EN)
-- Убрать хардкод `investor` как "client-side only" — теперь все в DB
+| Страница | Путь | Зачем | Монетизация |
+|----------|------|-------|-------------|
+| **Wedding Phuket** | `/wedding` | Пары тратят $10-50k, высокий чек: venue + декор + фото + яхта | Комиссия 10% со всех вендоров |
+| **Phuket for Kids** | `/kids` | Семьи — самый долгосрочный LTV: школы + клиники + активности + няни | Лиды школам + booking fee |
+| **Digital Nomad Guide** | `/nomad-guide` | Привлечение номадов: коворкинги + визы + аренда + SIM | Подписки + реферальные |
 
-### 3. Обновить `HeroBlock.tsx` — PersonaSwitcher
+### 5. Добавить Relocation в кластерную навигацию
 
-Текущий switcher — горизонтальная полоса из 4 кнопок. С 10 персонами нужен новый UX:
-- **2 ряда по 5 чипов** (компактные pill-кнопки с emoji + label)
-- Multi-select: можно выбрать 1-3 персоны для гибридных рекомендаций
-- Анимация при выборе (scale + цвет)
+- Добавить `/relocate` в `APP_ROUTES`
+- Добавить карточку "Relocation" в `ArriveClusterPage` (логически — первый шаг после приезда)
+- Обновить `VERTICAL_GROUPS` (группа "Life Admin") — добавить relocation
+- Обновить `sitemap.xml` со всеми новыми страницами
 
-### 4. Обновить `QuickActionsGrid.tsx`
+## Файлы для изменения
 
-Добавить action-наборы для каждой новой персоны:
-
-- **Family**: школы, педиатры, няни, детские активности, семейные рестораны, парки
-- **Couple**: свадьбы, спа, романтические рестораны, фотограф, яхты
-- **Nightlife**: клубы, бич-клабы, яхт-пати, VIP-столы, такси
-- **Active**: фитнес, серфинг, муай-тай, дайвинг, байк-рент, йога
-- **Business**: коворкинги, юристы, банки, бухгалтерия, визы, нотариус
-- **Nomad**: коворкинги, SIM-карты, кафе, визы, банки, фитнес
-
-### 5. Обновить `OnboardingModal.tsx`
-
-Step 1 (Who are you) — показать расширенную сетку персон вместо 4 карточек. Добавить `ROLE_FEATURES` и `QUICK_WINS` для новых персон.
-
-### 6. Обновить `LifeOS` role_scope
-
-Расширить `LifeOSRole` type чтобы каталог life situations фильтровался и по новым персонам.
-
-### 7. AI-рекомендации (компонент `PersonaSmartFeed`)
-
-Новый компонент под PersonaSwitcher на главной: "Рекомендации для вас" — 3-4 карточки сервисов/листингов, подобранные по активной персоне. Данные из `life_os_catalog` view, фильтрованные по `role_scope`.
-
----
+| Файл | Действие |
+|------|----------|
+| `migration` | Добавить `relocation` в enum |
+| `src/hooks/useUserPersonas.ts` | +1 персона, обновить PERSONA_OPTIONS/INFO |
+| `src/components/home/HeroBlock.tsx` | Редизайн PersonaSwitcher — горизонтальный скролл + glassmorphism |
+| `src/components/home/PersonaSmartFeed.tsx` | Редизайн карточек + добавить relocation |
+| `src/components/home/QuickActionsGrid.tsx` | +RELOCATION_ACTIONS |
+| `src/components/onboarding/OnboardingModal.tsx` | +relocation в ROLE_FEATURES/QUICK_WINS |
+| `src/pages/relocate/RelocateLandingPage.tsx` | **Новый** — посадочная страница |
+| `src/pages/wedding/WeddingLandingPage.tsx` | **Новый** — свадьбы |
+| `src/pages/kids/KidsLandingPage.tsx` | **Новый** — для семей |
+| `src/pages/nomad/NomadGuidePage.tsx` | **Новый** — для номадов |
+| `src/lib/config/routes.ts` | +4 новых маршрута |
+| `AnimatedRoutes.tsx` | +4 lazy-импорта |
+| `public/sitemap.xml` | +4 URL |
 
 ## Порядок реализации
 
-1. **Migration** — enum extension
-2. **useUserPersonas** — types + PERSONA_INFO
-3. **HeroBlock PersonaSwitcher** — новый multi-row UX
-4. **QuickActionsGrid** — 6 новых action sets
-5. **OnboardingModal** — расширенный выбор
-6. **PersonaSmartFeed** — AI-рекомендации на главной
-7. **LifeOS integration** — role_scope mapping
-
-~8 файлов изменить, 1 создать, 1 migration.
+1. Migration + useUserPersonas (relocation)
+2. HeroBlock визуальный редизайн
+3. PersonaSmartFeed редизайн + relocation
+4. QuickActionsGrid + OnboardingModal
+5. RelocateLandingPage (главная посадочная)
+6. WeddingLandingPage, KidsLandingPage, NomadGuidePage
+7. Routes, navigation, sitemap
 
