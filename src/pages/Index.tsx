@@ -93,6 +93,11 @@ const Index = () => {
           {/* ── HERO ── */}
           <HeroBlock />
 
+          {/* ── PROGRESS INDICATOR ── */}
+          <RevealOnScroll>
+            <ProgressIndicator />
+          </RevealOnScroll>
+
           {/* ── QUICK ACTIONS ── */}
           <RevealOnScroll>
             <QuickActionsGrid />

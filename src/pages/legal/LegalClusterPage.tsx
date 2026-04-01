@@ -75,6 +75,10 @@ export default function LegalClusterPage() {
             );
           })}
         </div>
+
+        <div className="px-4 mt-6">
+          <ExploreMoreRail clusterId="legal" />
+        </div>
       </div>
     </AppLayout>
   );

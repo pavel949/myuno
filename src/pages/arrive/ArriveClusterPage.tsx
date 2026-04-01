@@ -76,6 +76,10 @@ export default function ArriveClusterPage() {
             );
           })}
         </div>
+
+        <div className="px-4 mt-6">
+          <ExploreMoreRail clusterId="arrive" />
+        </div>
       </div>
     </AppLayout>
   );

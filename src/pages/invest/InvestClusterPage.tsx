@@ -72,6 +72,10 @@ export default function InvestClusterPage() {
             );
           })}
         </div>
+
+        <div className="px-4 mt-6">
+          <ExploreMoreRail clusterId="invest" />
+        </div>
       </div>
     </AppLayout>
   );
