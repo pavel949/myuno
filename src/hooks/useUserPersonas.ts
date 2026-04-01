@@ -244,7 +244,7 @@ export function hasPersona(personas: UserPersona[], persona: UserPersona): boole
 
 /** All persona options in display order */
 export const PERSONA_OPTIONS: UserPersona[] = [
-  'tourist', 'resident', 'property_owner', 'investor', 'pet_owner',
+  'tourist', 'resident', 'relocation', 'property_owner', 'investor', 'pet_owner',
   'family', 'couple', 'nightlife', 'active', 'business', 'nomad',
 ];
 
