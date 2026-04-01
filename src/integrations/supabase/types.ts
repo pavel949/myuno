@@ -29269,6 +29269,7 @@ export type Database = {
         | "active"
         | "business"
         | "nomad"
+        | "pet_owner"
       user_type:
         | "tourist"
         | "resident"
@@ -29531,6 +29532,7 @@ export const Constants = {
         "active",
         "business",
         "nomad",
+        "pet_owner",
       ],
       user_type: [
         "tourist",
