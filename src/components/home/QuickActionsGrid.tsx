@@ -12,7 +12,7 @@ import {
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
   Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
   Users, BarChart3, ClipboardList, Lock, ChevronRight,
-  Baby, Heart, Music, Dumbbell, Laptop, Wifi
+  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -134,6 +134,16 @@ const NOMAD_ACTIONS: QuickAction[] = [
   { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
 ];
 
+const PET_OWNER_ACTIONS: QuickAction[] = [
+  { id: 'pets', icon: PawPrint, label: 'Pet Services', labelRu: 'Питомцы', path: '/pets', accentColor: '#F59E0B' },
+  { id: 'veterinary', icon: Stethoscope, label: 'Veterinary', labelRu: 'Ветеринар', path: '/pets?category=veterinary', accentColor: '#F43F5E' },
+  { id: 'grooming', icon: Sparkles, label: 'Grooming', labelRu: 'Груминг', path: '/pets?category=grooming', accentColor: '#A855F7' },
+  { id: 'pet-hotel', icon: Home, label: 'Pet Hotel', labelRu: 'Отель', path: '/pets?category=hotel', accentColor: '#06B6D4' },
+  { id: 'pet-transport', icon: Car, label: 'Transport', labelRu: 'Перевозка', path: '/pets?category=transport', accentColor: '#4E7BFF' },
+  { id: 'pet-shop', icon: ShoppingBag, label: 'Pet Shop', labelRu: 'Зоомагазин', path: '/market?category=pets', accentColor: '#00D68F' },
+  { id: 'insurance', icon: Shield, label: 'Pet Insurance', labelRu: 'Страховка', path: '/insurance?type=pet', accentColor: '#F59E0B' },
+];
+
 const VENDOR_ACTIONS: QuickAction[] = [
   { id: 'vendor-dashboard', icon: Building2, label: 'Dashboard', labelRu: 'Панель', path: '/vendor', accentColor: '#4E7BFF' },
   { id: 'vendor-orders', icon: ShoppingBag, label: 'Orders', labelRu: 'Заказы', path: '/vendor/orders', accentColor: '#F59E0B' },
@@ -178,6 +188,7 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
     family: FAMILY_ACTIONS, couple: COUPLE_ACTIONS,
     nightlife: NIGHTLIFE_ACTIONS, active: ACTIVE_ACTIONS,
     business: BUSINESS_ACTIONS, nomad: NOMAD_ACTIONS,
+    pet_owner: PET_OWNER_ACTIONS,
   };
   for (const persona of personas) {
     const actions = personaToActions[persona] || [];

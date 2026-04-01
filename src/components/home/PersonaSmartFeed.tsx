@@ -141,6 +141,18 @@ const PERSONA_RECS: Record<UserPersona, { en: Recommendation[]; ru: Recommendati
       { id: 'nm3', title: 'Долгосрочная аренда', subtitle: 'Помесячно', path: '/property?mode=long-term', emoji: '🏠' },
     ],
   },
+  pet_owner: {
+    en: [
+      { id: 'p1', title: 'Find a Vet', subtitle: '24/7 clinics', path: '/pets?category=veterinary', emoji: '🏥' },
+      { id: 'p2', title: 'Pet Grooming', subtitle: 'Best salons', path: '/pets?category=grooming', emoji: '✂️' },
+      { id: 'p3', title: 'Pet Hotel', subtitle: 'While you travel', path: '/pets?category=hotel', emoji: '🏨' },
+    ],
+    ru: [
+      { id: 'p1', title: 'Найти ветеринара', subtitle: 'Клиники 24/7', path: '/pets?category=veterinary', emoji: '🏥' },
+      { id: 'p2', title: 'Груминг', subtitle: 'Лучшие салоны', path: '/pets?category=grooming', emoji: '✂️' },
+      { id: 'p3', title: 'Отель для питомцев', subtitle: 'Пока вы в поездке', path: '/pets?category=hotel', emoji: '🏨' },
+    ],
+  },
 };
 
 export const PersonaSmartFeed = memo(function PersonaSmartFeed() {

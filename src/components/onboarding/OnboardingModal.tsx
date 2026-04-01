@@ -97,6 +97,11 @@ const ROLE_FEATURES: Record<UserPersona, { titleRu: string; titleEn: string; bul
     bulletsRu: ['Коворкинги с WiFi', 'SIM и интернет', 'Долгосрочная аренда'],
     bulletsEn: ['Coworking with WiFi', 'SIM & internet', 'Long-term rentals'],
   },
+  pet_owner: {
+    titleRu: 'Ваш питомец в надёжных руках', titleEn: 'Your pet in safe hands',
+    bulletsRu: ['Ветеринарные клиники', 'Груминг и отели', 'Перевозка питомцев'],
+    bulletsEn: ['Vet clinics', 'Grooming & hotels', 'Pet transport'],
+  },
 };
 
 const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu: string; descEn: string; icon: React.ElementType; path: string }> = {
@@ -110,6 +115,7 @@ const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu
   active: { titleRu: 'Записаться на серфинг', titleEn: 'Book surfing', descRu: 'Уроки серфинга', descEn: 'Surf lessons', icon: Dumbbell, path: '/experiences?tag=surf' },
   business: { titleRu: 'Найти юриста', titleEn: 'Find a lawyer', descRu: 'Бизнес-юристы', descEn: 'Business lawyers', icon: Scale, path: '/legal' },
   nomad: { titleRu: 'Найти коворкинг', titleEn: 'Find coworking', descRu: 'С быстрым WiFi', descEn: 'With fast WiFi', icon: Laptop, path: '/services?category=coworking' },
+  pet_owner: { titleRu: 'Найти ветеринара', titleEn: 'Find a vet', descRu: 'Лучшие клиники', descEn: 'Best clinics', icon: Shield, path: '/pets' },
 };
 
 const slideVariants = {
