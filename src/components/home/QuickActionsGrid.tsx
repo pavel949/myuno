@@ -144,6 +144,17 @@ const PET_OWNER_ACTIONS: QuickAction[] = [
   { id: 'insurance', icon: Shield, label: 'Pet Insurance', labelRu: 'Страховка', path: '/insurance?type=pet', accentColor: '#F59E0B' },
 ];
 
+const RELOCATION_ACTIONS: QuickAction[] = [
+  { id: 'relocate', icon: Compass, label: 'Roadmap', labelRu: 'Дорожная карта', path: '/relocate', accentColor: '#6366F1' },
+  { id: 'visa', icon: Briefcase, label: 'Visa', labelRu: 'Виза', path: '/visa', accentColor: '#4E7BFF' },
+  { id: 'property', icon: Home, label: 'Housing', labelRu: 'Жильё', path: '/property?mode=long-term', accentColor: '#00D68F' },
+  { id: 'education', icon: GraduationCap, label: 'Schools', labelRu: 'Школы', path: '/education', accentColor: '#F59E0B' },
+  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', accentColor: '#A855F7' },
+  { id: 'banking', icon: Banknote, label: 'Banking', labelRu: 'Банки', path: '/banking', accentColor: '#00D68F' },
+  { id: 'medical', icon: Stethoscope, label: 'Medical', labelRu: 'Медицина', path: '/medical', accentColor: '#F43F5E' },
+  { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
+];
+
 const VENDOR_ACTIONS: QuickAction[] = [
   { id: 'vendor-dashboard', icon: Building2, label: 'Dashboard', labelRu: 'Панель', path: '/vendor', accentColor: '#4E7BFF' },
   { id: 'vendor-orders', icon: ShoppingBag, label: 'Orders', labelRu: 'Заказы', path: '/vendor/orders', accentColor: '#F59E0B' },
