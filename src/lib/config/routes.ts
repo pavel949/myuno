@@ -155,6 +155,10 @@ export const APP_ROUTES = {
   BANKING: '/banking',
   VETERINARY: '/veterinary',
 
+  // ── ARRIVE Cluster ──
+  SIM_START: '/sim',
+  EXCHANGE: '/exchange',
+
   // ── Experiences (tours + activities) ──
   EXPERIENCES: '/experiences',
   EXPERIENCE_DETAIL: (id: string) => `/experiences/${id}`,
