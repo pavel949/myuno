@@ -5,6 +5,8 @@ import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Scale, Plane, Calculator, FileSearch, Shield, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
+import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 
 interface ClusterApp {
   icon: React.ElementType;
@@ -43,7 +45,10 @@ export default function LegalClusterPage() {
           </div>
         </div>
 
-        <div className="px-4 -mt-5 space-y-3">
+        <div className="px-4 py-3">
+          <ClusterBreadcrumb clusterId="legal" serviceLabelRu="Все сервисы" serviceLabelEn="All services" />
+        </div>
+        <div className="px-4 space-y-3">
           {APPS.map(app => {
             const Icon = app.icon;
             return (
@@ -69,6 +74,10 @@ export default function LegalClusterPage() {
               </button>
             );
           })}
+        </div>
+
+        <div className="px-4 mt-6">
+          <ExploreMoreRail clusterId="legal" />
         </div>
       </div>
     </AppLayout>
