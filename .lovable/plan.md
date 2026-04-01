@@ -1,146 +1,96 @@
 
 
-# "Новостройки Пхукета" — New Developments Section Plan
+# Расширение персон: Lifestyle Personas для AI-рекомендаций
 
-## What Already Exists (DO NOT rebuild)
+## Анализ текущего состояния
 
-| Asset | Details |
-|-------|---------|
-| **`property_projects`** table | 157 records, has `project_status`, `price_from/to`, `construction_progress`, `completion_date`, `developer_id`, `muuno_score`, `units_available/sold`, `is_featured`, `is_active` |
-| **`developers`** table | 39 records with `name_en/ru`, `slug`, `logo_url`, `muuno_score`, `is_verified`, `website`, `phone` |
-| **`development_units`** table | Unit configs per project (type, area, bedrooms, price, floor_plan_url, status) |
-| **`consultation_requests`** table | Full lead pipeline with `ai_score`, `development_project_id`, `vertical_id`, `status` pipeline |
-| **Hooks** | `useOffplanProjects`, `useDevelopers`, `useDevelopmentUnits`, `usePropertyProjects` |
-| **Pages** | `OffplanIndex`, `OffplanDetail`, `DevelopersIndex`, `DeveloperDetail` at `/property/offplan/*` and `/property/developers/*` |
-| **Components** | `OffplanProjectCard`, `DeveloperBadge`, `DevelopmentUnitsSection`, `UniversalLeadForm`, `OffplanCTASection` |
-| **Routes** | `APP_ROUTES.OFFPLAN`, `OFFPLAN_DETAIL`, `DEVELOPERS`, `DEVELOPER_DETAIL` |
+Сейчас на главной 4 персоны в `PersonaSwitcher`:
+- **Tourist** → трансферы, туры, яхты
+- **Resident** → визы, медицина, банки
+- **Property Owner** → управление объектами
+- **Investor** → новостройки, покупка
 
-**Key insight**: The entire data layer and basic pages exist. The user wants a **premium editorial redesign** of these pages under a new `/newbuilds` route hierarchy, with a developer portal and admin approval flow added on top.
+Хранятся в DB enum `user_persona` (только 3 значения: `tourist`, `resident`, `property_owner`; `investor` — клиентский). `QuickActionsGrid` маппит каждую персону на набор QuickActions.
 
----
+## Нужно ли это?
 
-## What Needs Building
+**Да, однозначно.** Причины:
 
-### Phase 1: Schema Extensions (migration)
+1. **Увеличение конверсии**: персона "Мама" сразу видит школы, педиатров, детские активности → покупает. "Тусовщик" видит бич-клабы, яхт-пати → букает.
+2. **Увеличение среднего чека**: таргетированные рекомендации = больше релевантных покупок.
+3. **Рост retention**: пользователь чувствует "это для меня" → возвращается.
+4. **Данные для монетизации**: знание профиля → премиальные размещения для вендоров ("покажи мой ресторан всем Partygoers").
 
-**Extend existing tables** (no new `nb_*` tables — reuse what's there):
+## Рекомендуемые персоны (оптимизированы под выручку)
 
-1. **Add to `property_projects`**: `slug TEXT UNIQUE`, `tagline TEXT`, `tagline_ru TEXT`, `is_approved BOOLEAN DEFAULT true`, `unit_types TEXT[]`, `gallery_urls TEXT[]` (alias for existing `images`), `location_area TEXT`
-2. **Add to `developers`**: `user_id UUID REFERENCES auth.users`, `verified BOOLEAN` (alias `is_verified`), `subscription_tier TEXT DEFAULT 'free'`, `company_name TEXT` (alias `name_en`)
-3. **New table `nb_special_terms`**: payment_plan, discount, promo_label, valid_until — linked to `property_projects`
-4. **New table `nb_project_updates`**: construction feed entries (title, content, photo_urls, progress_at_time) — linked to `property_projects`
-5. **New table `nb_project_reports`**: monthly PDF reports — linked to `property_projects`
-6. **New table `nb_leads`**: dedicated newbuild leads with `project_id`, `developer_id`, `score`, `status`, `source`, `transferred_to_developer` — separate from `consultation_requests` for developer-facing CRM
-7. **New table `nb_promotions`**: paid placements (featured, banner, email_blast)
-8. **RLS**: Public read on approved/active projects; developer write own; admin write all. Leads: developer read own, admin read all.
+| Персона | EN | Иконка | Почему зарабатывает |
+|---------|-----|--------|---------------------|
+| **Турист** | Tourist | ✈️ | Трансферы, туры, яхты — высокая маржа |
+| **Резидент** | Resident | 🏠 | Визы, страховки, регулярные сервисы |
+| **Собственник** | Owner | 🏢 | Управление, клининг, ремонт — рекуррентный доход |
+| **Инвестор** | Investor | 📈 | Новостройки — крупнейшие чеки (5% комиссия) |
+| **Семья** | Family | 👨‍👩‍👧 | Школы, педиатры, няни, детские активности — высокий LTV |
+| **Пара** | Couple | 💑 | Свадьбы, рестораны, спа, романтические туры |
+| **Тусовщик** | Nightlife | 🎉 | Клубы, яхт-пати, VIP-столы — импульсные покупки |
+| **Спортсмен** | Active | 🏄 | Фитнес, серфинг, MMA, байк-туры — абонементы |
+| **Бизнес** | Business | 💼 | Коворкинги, юристы, бухгалтерия, банки — B2B-сервисы |
+| **Digital Nomad** | Nomad | 💻 | Коворкинги, SIM, визы, кафе — пересечение с Resident |
 
-### Phase 2: Design System — Newbuilds Theme
+> **Отсеяно**: "Художник" — слишком узкий, мало монетизации. "Мама/Папа" — объединены в "Семья". "Девелопер" — это B2B роль, не персона покупателя.
 
-Create `src/styles/newbuilds-theme.css` with scoped CSS variables:
-- Colors: `--nb-bg: #0F0F0F`, `--nb-surface: #141414`, `--nb-gold: #C9A84C`, `--nb-muted: #8A8A7A`
-- Typography: Import "Cormorant Garamond" (serif) for headlines
-- Glass cards: `rgba(255,255,255,0.04)` + gold border + backdrop-blur
-- Gold progress bars, status badges, grain texture overlay
-- Wrapper component `<NewbuildsLayout>` that applies `.nb-theme` class scope
+## Что нужно сделать
 
-### Phase 3: Routes & Navigation
+### 1. Migration: расширить enum + seed
 
-Add to `APP_ROUTES`:
-```
-NEWBUILDS: '/newbuilds'
-NEWBUILDS_PROJECTS: '/newbuilds/projects'
-NEWBUILDS_PROJECT: (slug) => '/newbuilds/projects/${slug}'
-NEWBUILDS_DEVELOPERS: '/newbuilds/developers'
-NEWBUILDS_DEVELOPER: (slug) => '/newbuilds/developers/${slug}'
-DEVELOPER_PORTAL: '/developer-portal'
-DEVELOPER_PORTAL_PROJECTS: '/developer-portal/projects'
-DEVELOPER_PORTAL_NEW_PROJECT: '/developer-portal/projects/new'
-DEVELOPER_PORTAL_EDIT_PROJECT: (id) => '/developer-portal/projects/${id}'
-DEVELOPER_PORTAL_LEADS: '/developer-portal/leads'
-DEVELOPER_PORTAL_ANALYTICS: '/developer-portal/analytics'
-ADMIN_NEWBUILDS: '/admin/newbuilds'
-```
+Добавить 6 новых значений в `user_persona` enum: `family`, `couple`, `nightlife`, `active`, `business`, `nomad`. Обновить `user_personas` table constraint.
 
-Add "Новостройки" to main nav dropdown.
+### 2. Обновить `useUserPersonas.ts`
 
-### Phase 4: Public Pages (8 files)
+- Расширить `UserPersona` type до 10 значений
+- Добавить `PERSONA_INFO` записи для каждой новой персоны (иконки, цвета, описания RU/EN)
+- Убрать хардкод `investor` как "client-side only" — теперь все в DB
 
-**4.1 `/newbuilds` — Landing Page** (`src/pages/newbuilds/NewbuildsLanding.tsx`)
-- Hero: full-viewport, Cormorant Garamond 80px gold headline, search bar, filter pills
-- Stats bar pulling real counts from DB (157 projects, 39 developers)
-- Featured projects section (3 cards, horizontal editorial layout)
-- Map section with Leaflet dark tiles + gold markers
-- All projects grid preview (6 cards) with "Смотреть все →"
-- AI assistant widget with pre-filled prompts
-- Lead capture / alert signup form → `nb_leads` with `source='alert_signup'`
-- Developer CTA section
+### 3. Обновить `HeroBlock.tsx` — PersonaSwitcher
 
-**4.2 `/newbuilds/projects` — Catalog** (`src/pages/newbuilds/NewbuildsCatalog.tsx`)
-- Reuses `useOffplanProjects` hook with extended filters
-- Sidebar filters: area, unit type, price slider, status, completion year, developer, sort
-- Grid/list toggle, pagination (12/page)
-- New `<NewbuildProjectCard>` with gold design language
+Текущий switcher — горизонтальная полоса из 4 кнопок. С 10 персонами нужен новый UX:
+- **2 ряда по 5 чипов** (компактные pill-кнопки с emoji + label)
+- Multi-select: можно выбрать 1-3 персоны для гибридных рекомендаций
+- Анимация при выборе (scale + цвет)
 
-**4.3 `/newbuilds/projects/:slug` — Project Detail** (`src/pages/newbuilds/NewbuildDetail.tsx`)
-- Sticky header on scroll with CTA
-- Hero image gallery + video
-- Core info bar (developer, location, price, units, completion)
-- 7 tabs: Обзор | Инвентарь | Планировки | Условия | Обновления | Отчёты | О девелопере
-- Right sidebar: lead form → `nb_leads`, ROI calculator widget, share/save
-- Reuses `DevelopmentUnitsSection` for inventory tab
+### 4. Обновить `QuickActionsGrid.tsx`
 
-**4.4 `/newbuilds/developers` & `/:slug`** — Restyled versions of existing pages with gold theme
+Добавить action-наборы для каждой новой персоны:
 
-### Phase 5: Developer Portal (protected, 6 files)
+- **Family**: школы, педиатры, няни, детские активности, семейные рестораны, парки
+- **Couple**: свадьбы, спа, романтические рестораны, фотограф, яхты
+- **Nightlife**: клубы, бич-клабы, яхт-пати, VIP-столы, такси
+- **Active**: фитнес, серфинг, муай-тай, дайвинг, байк-рент, йога
+- **Business**: коворкинги, юристы, банки, бухгалтерия, визы, нотариус
+- **Nomad**: коворкинги, SIM-карты, кафе, визы, банки, фитнес
 
-**5.1 Portal layout** with sidebar nav (Overview, Projects, Leads, Analytics, Promotions, Settings)
-- Auth guard: requires login + developer record linked to `user_id`
-- "Apply to join" form if not a developer
+### 5. Обновить `OnboardingModal.tsx`
 
-**5.2 Overview**: KPI cards, recent leads, quick actions
-**5.3 My Projects**: list with status, views, leads, edit buttons
-**5.4 Project Editor**: 5-step wizard (Info → Media → Description → Inventory → Terms)
-- Media uploads to Supabase Storage bucket `newbuilds`
-- Inventory table editor for `development_units`
-- Creates project with `is_approved = false`
+Step 1 (Who are you) — показать расширенную сетку персон вместо 4 карточек. Добавить `ROLE_FEATURES` и `QUICK_WINS` для новых персон.
 
-**5.5 Leads CRM**: table with status pipeline, score badges, filters, CSV export
-**5.6 Analytics**: Recharts line/bar/funnel/donut charts
+### 6. Обновить `LifeOS` role_scope
 
-### Phase 6: Admin Panel (1 file)
+Расширить `LifeOSRole` type чтобы каталог life situations фильтровался и по новым персонам.
 
-`/admin/newbuilds` — Pending approvals queue, all projects/developers management, featured slot ordering
+### 7. AI-рекомендации (компонент `PersonaSmartFeed`)
 
-### Phase 7: Shared Components (~10 files)
-
-1. `<NewbuildProjectCard>` — compact + featured variants with gold design
-2. `<ProjectStatusBadge>` — Строится (amber) / Сдан (green) / Скоро (blue)
-3. `<ConstructionProgress>` — gold progress bar
-4. `<PriceDisplay>` — THB with ฿M/K formatting
-5. `<NewbuildLeadForm>` — inquiry form saving to `nb_leads`
-6. `<UnitStatusBadge>` — available/reserved/sold
-7. `<AIAssistantWidget>` — chat with project recommendations
-8. `<InventoryTable>` — sortable units table
-9. `<ConstructionFeed>` — timeline of updates
-10. `<NewbuildsLayout>` — dark editorial wrapper
-
-### Phase 8: Seed Data
-
-Insert via SQL: ensure 5+ projects have `slug`, `is_approved=true`, `gallery_urls`, `unit_types` populated. Add sample `nb_special_terms`, `nb_project_updates`, and `nb_leads`.
+Новый компонент под PersonaSwitcher на главной: "Рекомендации для вас" — 3-4 карточки сервисов/листингов, подобранные по активной персоне. Данные из `life_os_catalog` view, фильтрованные по `role_scope`.
 
 ---
 
-## Implementation Order
+## Порядок реализации
 
-1. **Migration**: schema extensions + new tables + RLS
-2. **Theme CSS** + `NewbuildsLayout` wrapper
-3. **Shared components** (cards, badges, price display)
-4. **Hooks** (`useNewbuildProjects`, `useNewbuildLeads`, `useProjectUpdates`, `useSpecialTerms`)
-5. **Public pages**: Landing → Catalog → Detail → Developers
-6. **Developer portal**: Layout → Overview → Editor → Leads → Analytics
-7. **Admin panel**
-8. **Routes + navigation** integration
-9. **Seed data**
+1. **Migration** — enum extension
+2. **useUserPersonas** — types + PERSONA_INFO
+3. **HeroBlock PersonaSwitcher** — новый multi-row UX
+4. **QuickActionsGrid** — 6 новых action sets
+5. **OnboardingModal** — расширенный выбор
+6. **PersonaSmartFeed** — AI-рекомендации на главной
+7. **LifeOS integration** — role_scope mapping
 
-Estimated: ~25 new files, 1 migration, ~5 modified files.
+~8 файлов изменить, 1 создать, 1 migration.
 
