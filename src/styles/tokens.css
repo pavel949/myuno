@@ -145,6 +145,14 @@
   --accent-cyan: 190 65% 40%;
   --accent-amber: 38 85% 48%;
   --icon-dark: 222 47% 15%;
+
+  /* ═══ Cluster Accents (Bible v2.0) ═══ */
+  --cluster-arrive: 166 76% 36%;
+  --cluster-live: 32 87% 50%;
+  --cluster-legal: 201 90% 40%;
+  --cluster-invest: 224 75% 37%;
+  --cluster-manage: 263 70% 50%;
+  --cluster-build: 346 77% 50%;
   /* Brand accents (external integrations) */
   --brand-google-blue: 212 100% 43%;
   --brand-google-green: 145 100% 34%;

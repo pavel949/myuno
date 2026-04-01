@@ -113,6 +113,14 @@ export default {
         "icon-dark": {
           DEFAULT: "hsl(var(--icon-dark))",
         },
+        cluster: {
+          arrive: "hsl(var(--cluster-arrive))",
+          live: "hsl(var(--cluster-live))",
+          legal: "hsl(var(--cluster-legal))",
+          invest: "hsl(var(--cluster-invest))",
+          manage: "hsl(var(--cluster-manage))",
+          build: "hsl(var(--cluster-build))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -365,7 +365,7 @@ export const ROUTE_OWNERSHIP = {
   PUBLIC: ['/', '/auth', '/discover', '/beauty', '/property', '/restaurants', '/transport',
     '/experiences', '/yachts', '/cleaning', '/babysitter', '/delivery', '/market',
     '/flowers', '/fitness', '/medical', '/events', '/education', '/legal', '/insurance',
-    '/pets', '/pharmacy', '/banking', '/veterinary', '/knowledge', '/about', '/faq',
+    '/pets', '/pharmacy', '/banking', '/veterinary', '/sim', '/exchange', '/knowledge', '/about', '/faq',
     '/contact', '/become-partner', '/g-trust', '/install', '/transfer', '/flower-delivery',
     '/rent-phuket', '/new-developments', '/how-it-works', '/privacy', '/terms', '/cookies',
     '/refund-policy', '/ip-policy', '/partner-agreement', '/dispute-resolution',
