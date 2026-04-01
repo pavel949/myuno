@@ -235,6 +235,10 @@ export const APP_ROUTES = {
   LANDING_FLOWER_DELIVERY: '/flower-delivery',
   LANDING_RENTAL: '/rent-phuket',
   LANDING_NEW_DEVELOPMENTS: '/new-developments',
+  RELOCATE: '/relocate',
+  WEDDING: '/wedding',
+  KIDS: '/kids',
+  NOMAD_GUIDE: '/nomad-guide',
 
   // ── Info Pages ──
   ABOUT: '/about',
