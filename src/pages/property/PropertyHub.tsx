@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { Home, ShoppingCart, Building2, User } from 'lucide-react';
+import { Home, ShoppingCart, Building2, User, ArrowRightLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CompareProvider } from '@/components/property/PropertyCompare';

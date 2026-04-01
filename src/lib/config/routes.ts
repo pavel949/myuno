@@ -83,6 +83,10 @@ export const APP_ROUTES = {
   INVEST_RAISE: '/property/invest/raise',
   INVEST_DETAIL: (id: string) => `/property/invest/${id}`,
 
+  // ── Resale / Secondary Market (under Property Hub) ──
+  RESALE: '/property/resale',
+  RESALE_DETAIL: (id: string) => `/property/resale/${id}`,
+
   // ── Restaurants ──
   RESTAURANTS: '/restaurants',
   RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`,
