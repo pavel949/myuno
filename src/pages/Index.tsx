@@ -1,14 +1,14 @@
 /**
- * Index — LifeOS Dashboard
+ * Index — myUNO Hub
  * 
- * Clean, calm, confident layout:
- * 1. Hero (greeting + weather + loyalty)
- * 2. Quick Actions (8 role-adaptive shortcuts)
- * 3. Smart tip (contextual, dismissable)
- * 4. Products (marketplace carousel)
- * 5. Services (photo cards — non-duplicate categories)
- * 6. Support (concierge + compact emergency)
- * 7. Trust
+ * Optimized layout for foreigners in Phuket:
+ * 1. Hero (greeting + weather + persona + search)
+ * 2. Quick Actions (role-adaptive shortcuts)
+ * 3. Featured Properties (real prices, horizontal scroll)
+ * 4. Cluster Hub (6 clusters)
+ * 5. WhatsApp CTA (concierge)
+ * 6. Trust Stats (real numbers)
+ * 7. Emergency
  */
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -18,32 +18,31 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { HeroBlock } from '@/components/home/HeroBlock';
 import { QuickActionsGrid } from '@/components/home/QuickActionsGrid';
 import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanner';
-
 import { InstallBanner } from '@/components/pwa/InstallBanner';
-import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
 import { ClusterHub } from '@/components/home/ClusterHub';
-import { HomeProductsSection } from '@/components/home/HomeProductsSection';
+import { FeaturedPropertiesCarousel } from '@/components/home/FeaturedPropertiesCarousel';
+import { WhatsAppCTA } from '@/components/home/WhatsAppCTA';
+import { TrustStats } from '@/components/home/TrustStats';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
-import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
-import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { PropertyTourBanner } from '@/components/home/PropertyTourBanner';
-import { YourDayFeed } from '@/components/shared/YourDayFeed';
-import { TodayEventsFeed } from '@/components/home/TodayEventsFeed';
+import { DocumentExpiryNotifier } from '@/components/notifications/DocumentExpiryNotifier';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
 import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
-import { ProactiveConcierge } from '@/components/home/ProactiveConcierge';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
 const ConciergeBanner = lazy(() => import('@/components/home/ConciergeBanner').then(m => ({ default: m.ConciergeBanner })));
 const TrustBanner = lazy(() => import('@/components/home/TrustBanner').then(m => ({ default: m.TrustBanner })));
 const OnboardingModal = lazy(() => import('@/components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
-
+const YourDayFeed = lazy(() => import('@/components/shared/YourDayFeed').then(m => ({ default: m.YourDayFeed })));
+const LifecycleSmartTip = lazy(() => import('@/components/home/LifecycleSmartTip').then(m => ({ default: m.LifecycleSmartTip })));
+const ProactiveConcierge = lazy(() => import('@/components/home/ProactiveConcierge').then(m => ({ default: m.ProactiveConcierge })));
+const TodayEventsFeed = lazy(() => import('@/components/home/TodayEventsFeed').then(m => ({ default: m.TodayEventsFeed })));
 
 const Index = () => {
   const { activeCode } = useLifeSituationContext();
@@ -82,87 +81,82 @@ const Index = () => {
 
       <ActiveSituationBanner />
 
-      {/* ─── PWA Install Banner ─── */}
+      {/* PWA Install Banner */}
       <div className="px-4 md:px-6 lg:px-8 xl:px-10 pt-3 w-full max-w-[1536px] mx-auto">
         <InstallBanner />
       </div>
 
       <PullToRefresh onRefresh={handleRefresh} key={refreshKey}>
-        <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10 xl:space-y-14">
+        <div className="px-4 md:px-6 lg:px-8 xl:px-10 py-5 pb-20 md:pb-8 w-full max-w-[1536px] mx-auto space-y-6 lg:space-y-10">
           
-          {/* ─── SECTION 1: Hero (full width) ─── */}
+          {/* ── HERO ── */}
           <HeroBlock />
 
-          {/* ─── SECTION 2: Quick Actions (full width) ─── */}
+          {/* ── QUICK ACTIONS ── */}
           <RevealOnScroll>
             <QuickActionsGrid />
           </RevealOnScroll>
 
-          {/* ─── SECTION 2.5: Cluster Hub (Bible v2.0 — 6 clusters) ─── */}
+          {/* ── FEATURED PROPERTIES (new — with real prices) ── */}
+          <RevealOnScroll>
+            <FeaturedPropertiesCarousel />
+          </RevealOnScroll>
+
+          {/* ── PROPERTY TOUR BANNER ── */}
+          <RevealOnScroll>
+            <PropertyTourBanner />
+          </RevealOnScroll>
+
+          {/* ── PERSONALIZED CONTENT (logged-in users) ── */}
+          {isLoggedIn && (
+            <Suspense fallback={null}>
+              <YourDayFeed compact />
+            </Suspense>
+          )}
+
+          {/* ── POPULAR SERVICES ── */}
+          <RevealOnScroll>
+            <PopularServicesStrip />
+          </RevealOnScroll>
+
+          {/* ── CLUSTER HUB ── */}
           <RevealOnScroll>
             <ClusterHub />
           </RevealOnScroll>
 
-          {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
-          {isLoggedIn ? (
-            isDesktop ? (
-              <>
-                {/* Row 1: YourDay full width */}
-                <Suspense fallback={null}>
-                  <YourDayFeed compact />
-                </Suspense>
-
-                {/* Row 2: Recommendations + Smart Tips — 2 equal columns */}
-                <div className="grid grid-cols-2 gap-6">
-                  <ProactiveConcierge />
-                  <div className="space-y-5">
-                    <LifecycleSmartTip />
-                    {hasContext ? (
-                      <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
-                    ) : (
-                      <Suspense fallback={null}><ConciergeBanner /></Suspense>
-                    )}
-                  </div>
-                </div>
-
-                <PropertyTourBanner />
-              </>
-            ) : (
-              <>
-                <Suspense fallback={null}>
-                  <YourDayFeed compact />
-                </Suspense>
-                <ProactiveConcierge />
-                <LifecycleSmartTip />
-                <PropertyTourBanner />
-                {hasContext ? (
-                  <Suspense fallback={null}><LifeOSStatusBlock /></Suspense>
-                ) : (
-                  <Suspense fallback={null}><ConciergeBanner /></Suspense>
-                )}
-              </>
-            )
-          ) : (
-            <>
-              <TodayEventsFeed compact />
-              <PopularServicesStrip />
-              <PropertyTourBanner />
-            </>
-          )}
-
-          {/* ─── SECTION 4: Products / Solutions (full width) ─── */}
+          {/* ── WHATSAPP CTA ── */}
           <RevealOnScroll>
-            <HomeProductsSection />
+            <WhatsAppCTA />
           </RevealOnScroll>
 
-          {/* ─── Offline Emergency Card ─── */}
+          {/* ── EVENTS (public) or Smart Tips (logged in) ── */}
+          {isLoggedIn ? (
+            <Suspense fallback={null}>
+              {hasContext ? (
+                <LifeOSStatusBlock />
+              ) : (
+                <ConciergeBanner />
+              )}
+            </Suspense>
+          ) : (
+            <Suspense fallback={null}>
+              <TodayEventsFeed compact />
+            </Suspense>
+          )}
+
+          {/* ── OFFLINE EMERGENCY ── */}
           {isOffline && (
             <RevealOnScroll>
               <OfflineEmergencyCard compact />
             </RevealOnScroll>
           )}
 
-          {/* ─── SECTION 5: Trust + Emergency (unified strip) ─── */}
+          {/* ── TRUST STATS ── */}
+          <RevealOnScroll>
+            <TrustStats />
+          </RevealOnScroll>
+
+          {/* ── TRUST BANNER + SOS ── */}
           <RevealOnScroll>
             <Suspense fallback={null}>
               <TrustBanner showEmergency />
