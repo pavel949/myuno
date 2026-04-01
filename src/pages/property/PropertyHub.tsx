@@ -48,6 +48,14 @@ const TABS: TabConfig[] = [
     matchPaths: ['/property/offplan', '/property/developers', '/property/projects'],
   },
   {
+    id: 'resale',
+    labelEn: 'Resale',
+    labelRu: 'Вторичка',
+    icon: ArrowRightLeft,
+    path: '/property/resale',
+    matchPaths: ['/property/resale'],
+  },
+  {
     id: 'my',
     labelEn: 'My Property',
     labelRu: 'Мои объекты',
