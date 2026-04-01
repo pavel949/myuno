@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { Home, ShoppingCart, Building2, User } from 'lucide-react';
+import { Home, ShoppingCart, Building2, User, ArrowRightLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CompareProvider } from '@/components/property/PropertyCompare';
@@ -48,6 +48,14 @@ const TABS: TabConfig[] = [
     matchPaths: ['/property/offplan', '/property/developers', '/property/projects'],
   },
   {
+    id: 'resale',
+    labelEn: 'Resale',
+    labelRu: 'Вторичка',
+    icon: ArrowRightLeft,
+    path: '/property/resale',
+    matchPaths: ['/property/resale'],
+  },
+  {
     id: 'my',
     labelEn: 'My Property',
     labelRu: 'Мои объекты',
@@ -61,6 +69,7 @@ const TABS: TabConfig[] = [
 function getActiveTab(pathname: string, search: string): string {
   if (pathname.startsWith('/property/my')) return 'my';
   if (pathname.startsWith('/property/invest')) return 'my';
+  if (pathname.startsWith('/property/resale')) return 'resale';
   if (pathname.startsWith('/property/offplan') || pathname.startsWith('/property/developers') || pathname.startsWith('/property/projects')) return 'newbuild';
   
   if (pathname === '/property' || pathname.startsWith('/property/search') || pathname.startsWith('/property/map') || pathname.startsWith('/property/consultation')) {

@@ -193,6 +193,10 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
           <Route path="projects" element={<LazyPage><Pages.ProjectsIndex /></LazyPage>} />
           
+          {/* Resale / Secondary Market */}
+          <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
+          <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
+          
           {/* Investment (moved from /invest) */}
           <Route path="invest" element={<LazyPage><Pages.InvestmentIndex /></LazyPage>} />
           <Route path="invest/dashboard" element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
