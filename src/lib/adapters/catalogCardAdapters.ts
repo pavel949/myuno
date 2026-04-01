@@ -383,32 +383,5 @@ export function mapClinicToCatalogCard(
     subtitle,
   };
 }
-  const reservationUrl = r.reservation_url as string | null;
-  const heroImage = r.hero_image_url || restaurant.cover_image;
-  const area = r.area as string | null;
 
-  const badges: CatalogBadge[] = [];
-  if (priceBand) {
-    badges.push({ text: PRICE_BAND_LABEL[priceBand] || '฿฿', className: 'bg-background/90 text-foreground font-semibold' });
-  }
 
-  const statusBadge = reservationUrl
-    ? { text: isRu ? 'Бронь' : 'Reserve', icon: CalendarDays, className: 'bg-primary text-primary-foreground' }
-    : undefined;
-
-  const meta: CatalogMeta[] = [];
-  // Add cuisine as subtitle instead
-
-  const subtitle = cuisineTags?.slice(0, 2).join(', ') || undefined;
-
-  return {
-    image: heroImage || PLACEHOLDER_IMAGES.food,
-    title: isRu ? restaurant.name_ru : restaurant.name_en,
-    onClick: () => navigate(`/restaurants/${restaurant.id}`),
-    badges,
-    statusBadge,
-    rating: restaurant.rating > 0 ? restaurant.rating : undefined,
-    location: area || undefined,
-    subtitle,
-  };
-}
