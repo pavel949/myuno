@@ -33,6 +33,7 @@ import { RevealOnScroll } from '@/components/ui/RevealOnScroll';
 import { PopularServicesStrip } from '@/components/home/PopularServicesStrip';
 import { OfflineEmergencyCard } from '@/components/home/OfflineEmergencyCard';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
+import { ProgressIndicator } from '@/components/home/ProgressIndicator';
 
 // Lazy load secondary components
 const LifeOSStatusBlock = lazy(() => import('@/components/home/LifeOSStatusBlock'));
