@@ -269,6 +269,9 @@ export default function OffplanDetail() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 pt-4">
+            {/* Development Units / Floor Plans */}
+            {id && <DevelopmentUnitsSection developmentId={id} />}
+
             {/* Amenities */}
             {project.amenities && project.amenities.length > 0 && (
               <div>
