@@ -74,6 +74,7 @@ const CLUSTERS: Cluster[] = [
     id: 'invest', labelRu: 'КУПИТЬ', labelEn: 'INVEST', color: '#A855F7', icon: TrendingUp,
     services: [
       { labelRu: 'Поиск недвижимости', labelEn: 'Property Search', icon: Search, path: '/property', status: 'available' },
+      { labelRu: 'Новостройки', labelEn: 'New Developments', icon: Building2, path: '/newbuilds', status: 'available' },
       { labelRu: 'Off-Plan', labelEn: 'Off-Plan', icon: Building, path: '/offplan', status: 'available' },
       { labelRu: 'ROI калькулятор', labelEn: 'ROI Calculator', icon: BarChart3, path: '/invest', status: 'available' },
       { labelRu: 'DueDiligence AI', labelEn: 'DueDiligence AI', icon: Shield, path: '/invest', status: 'soon' },
