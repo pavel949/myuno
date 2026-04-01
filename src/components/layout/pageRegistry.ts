@@ -169,6 +169,11 @@ export const ArriveClusterPage = lazy(() => import('@/pages/arrive/ArriveCluster
 export const SIMStartPage = lazy(() => import('@/pages/arrive/SIMStartPage'));
 export const ExchangeBotPage = lazy(() => import('@/pages/arrive/ExchangeBotPage'));
 
+// ── Utility Micro-apps ──
+export const VisaQuizPage = lazy(() => import('@/pages/legal/VisaQuizPage'));
+export const SchoolFinderPage = lazy(() => import('@/pages/education/SchoolFinderPage'));
+export const CostOfLivingPage = lazy(() => import('@/pages/tools/CostOfLivingPage'));
+
 // ── LEGAL Cluster ──
 export const LegalClusterPage = lazy(() => import('@/pages/legal/LegalClusterPage'));
 export const ContractAnalysisPage = lazy(() => import('@/pages/legal/ContractAnalysisPage'));

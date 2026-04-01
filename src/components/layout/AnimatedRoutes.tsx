@@ -333,6 +333,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.SIM_START} element={<LazyPage><Pages.SIMStartPage /></LazyPage>} />
         <Route path={APP_ROUTES.EXCHANGE} element={<LazyPage><Pages.ExchangeBotPage /></LazyPage>} />
         
+        {/* ── Utility Micro-apps ── */}
+        <Route path={APP_ROUTES.VISA_QUIZ} element={<LazyPage><Pages.VisaQuizPage /></LazyPage>} />
+        <Route path={APP_ROUTES.SCHOOL_FINDER} element={<LazyPage><Pages.SchoolFinderPage /></LazyPage>} />
+        <Route path={APP_ROUTES.COST_OF_LIVING} element={<LazyPage><Pages.CostOfLivingPage /></LazyPage>} />
+        
         {/* ── LEGAL Cluster ── */}
         <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<LazyPage><Pages.LegalClusterPage /></LazyPage>} />
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
