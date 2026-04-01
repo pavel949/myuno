@@ -77,6 +77,15 @@ export const APP_ROUTES = {
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
 
+  // ── Newbuilds (Premium New Developments Section) ──
+  NEWBUILDS: '/newbuilds',
+  NEWBUILDS_PROJECTS: '/newbuilds/projects',
+  NEWBUILDS_PROJECT: (slug: string) => `/newbuilds/projects/${slug}`,
+  NEWBUILDS_DEVELOPERS: '/newbuilds/developers',
+  NEWBUILDS_DEVELOPER: (slug: string) => `/newbuilds/developers/${slug}`,
+  DEVELOPER_PORTAL: '/developer-portal',
+  ADMIN_NEWBUILDS: '/admin/newbuilds',
+
   // ── Investment (under Property Hub) ──
   INVEST: '/property/invest',
   INVEST_DASHBOARD: '/property/invest/dashboard',
