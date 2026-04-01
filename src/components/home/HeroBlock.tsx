@@ -118,8 +118,6 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
     </div>
   );
 }
-  );
-}
 
 export const HeroBlock = memo(function HeroBlock() {
   const { language } = useLanguage();
