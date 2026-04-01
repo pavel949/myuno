@@ -188,6 +188,7 @@ function getActionsForPersonas(personas: UserPersona[]): QuickAction[] {
     family: FAMILY_ACTIONS, couple: COUPLE_ACTIONS,
     nightlife: NIGHTLIFE_ACTIONS, active: ACTIVE_ACTIONS,
     business: BUSINESS_ACTIONS, nomad: NOMAD_ACTIONS,
+    pet_owner: PET_OWNER_ACTIONS,
   };
   for (const persona of personas) {
     const actions = personaToActions[persona] || [];

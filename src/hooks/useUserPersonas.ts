@@ -260,47 +260,47 @@ export const PERSONA_INFO: Record<UserPersona, {
   tourist: {
     labelEn: 'Tourist', labelRu: 'Турист',
     descEn: 'Trips, tours, transfers', descRu: 'Поездки, туры, трансферы',
-    icon: '✈️', color: 'text-cyan-600', bgColor: 'bg-cyan-500/10',
+    icon: 'Plane', color: 'text-cyan-600', bgColor: 'bg-cyan-500/10',
   },
   resident: {
     labelEn: 'Resident', labelRu: 'Резидент',
     descEn: 'Daily life & services', descRu: 'Быт и сервисы',
-    icon: '🏠', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
+    icon: 'Home', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
   },
   property_owner: {
     labelEn: 'Owner', labelRu: 'Собственник',
     descEn: 'My property & services', descRu: 'Мой объект и сервисы',
-    icon: '🏢', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
+    icon: 'Building2', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
   },
   investor: {
     labelEn: 'Investor', labelRu: 'Инвестор',
     descEn: 'Projects & opportunities', descRu: 'Проекты и возможности',
-    icon: '📈', color: 'text-purple-600', bgColor: 'bg-purple-500/10',
+    icon: 'TrendingUp', color: 'text-purple-600', bgColor: 'bg-purple-500/10',
   },
   family: {
     labelEn: 'Family', labelRu: 'Семья',
     descEn: 'Schools, doctors, kids', descRu: 'Школы, врачи, дети',
-    icon: '👨‍👩‍👧', color: 'text-pink-600', bgColor: 'bg-pink-500/10',
+    icon: 'Baby', color: 'text-pink-600', bgColor: 'bg-pink-500/10',
   },
   couple: {
     labelEn: 'Couple', labelRu: 'Пара',
     descEn: 'Romance, spa, dining', descRu: 'Романтика, спа, рестораны',
-    icon: '💑', color: 'text-rose-600', bgColor: 'bg-rose-500/10',
+    icon: 'Heart', color: 'text-rose-600', bgColor: 'bg-rose-500/10',
   },
   nightlife: {
     labelEn: 'Nightlife', labelRu: 'Тусовщик',
     descEn: 'Clubs, parties, VIP', descRu: 'Клубы, вечеринки, VIP',
-    icon: '🎉', color: 'text-fuchsia-600', bgColor: 'bg-fuchsia-500/10',
+    icon: 'Music', color: 'text-fuchsia-600', bgColor: 'bg-fuchsia-500/10',
   },
   active: {
     labelEn: 'Active', labelRu: 'Спортсмен',
     descEn: 'Fitness, surf, MMA', descRu: 'Фитнес, серфинг, MMA',
-    icon: '🏄', color: 'text-orange-600', bgColor: 'bg-orange-500/10',
+    icon: 'Dumbbell', color: 'text-orange-600', bgColor: 'bg-orange-500/10',
   },
   business: {
     labelEn: 'Business', labelRu: 'Бизнес',
     descEn: 'Coworking, legal, banking', descRu: 'Коворкинг, юрист, банк',
-    icon: '💼', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
+    icon: 'Briefcase', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
   },
   nomad: {
     labelEn: 'Nomad', labelRu: 'Номад',
