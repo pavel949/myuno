@@ -3918,6 +3918,133 @@ export type Database = {
           },
         ]
       }
+      crm_cooperation_terms: {
+        Row: {
+          auto_renew: boolean | null
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_iban: string | null
+          bank_name: string | null
+          bank_swift: string | null
+          commission_currency: string | null
+          commission_fixed_amount: number | null
+          commission_percent: number | null
+          commission_type: string | null
+          company_id: string
+          contact_id: string | null
+          contract_end_date: string | null
+          contract_start_date: string | null
+          created_at: string
+          created_by: string | null
+          crypto_network: string | null
+          crypto_wallet_address: string | null
+          deal_id: string | null
+          id: string
+          minimum_payout_amount: number | null
+          notes: string | null
+          notice_period_days: number | null
+          payment_methods: string[] | null
+          payout_day: number | null
+          payout_frequency: string | null
+          paypal_email: string | null
+          preferred_payment_method: string | null
+          promptpay_id: string | null
+          stripe_account_id: string | null
+          updated_at: string
+          wise_email: string | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift?: string | null
+          commission_currency?: string | null
+          commission_fixed_amount?: number | null
+          commission_percent?: number | null
+          commission_type?: string | null
+          company_id: string
+          contact_id?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          crypto_network?: string | null
+          crypto_wallet_address?: string | null
+          deal_id?: string | null
+          id?: string
+          minimum_payout_amount?: number | null
+          notes?: string | null
+          notice_period_days?: number | null
+          payment_methods?: string[] | null
+          payout_day?: number | null
+          payout_frequency?: string | null
+          paypal_email?: string | null
+          preferred_payment_method?: string | null
+          promptpay_id?: string | null
+          stripe_account_id?: string | null
+          updated_at?: string
+          wise_email?: string | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          bank_swift?: string | null
+          commission_currency?: string | null
+          commission_fixed_amount?: number | null
+          commission_percent?: number | null
+          commission_type?: string | null
+          company_id?: string
+          contact_id?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          crypto_network?: string | null
+          crypto_wallet_address?: string | null
+          deal_id?: string | null
+          id?: string
+          minimum_payout_amount?: number | null
+          notes?: string | null
+          notice_period_days?: number | null
+          payment_methods?: string[] | null
+          payout_day?: number | null
+          payout_frequency?: string | null
+          paypal_email?: string | null
+          preferred_payment_method?: string | null
+          promptpay_id?: string | null
+          stripe_account_id?: string | null
+          updated_at?: string
+          wise_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_cooperation_terms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_cooperation_terms_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_cooperation_terms_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "agent_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_custom_field_values: {
         Row: {
           entity_id: string
