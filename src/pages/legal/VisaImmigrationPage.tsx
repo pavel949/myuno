@@ -443,7 +443,10 @@ export default function VisaImmigrationPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="types" className="px-4 pt-6">
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
+            <TabsTrigger value="tracker" className="text-xs sm:text-sm">
+              {language === 'ru' ? 'Трекер' : 'Tracker'}
+            </TabsTrigger>
             <TabsTrigger value="types" className="text-xs sm:text-sm">
               {language === 'ru' ? 'Типы виз' : 'Visa Types'}
             </TabsTrigger>
@@ -454,6 +457,11 @@ export default function VisaImmigrationPage() {
               {language === 'ru' ? 'Услуги' : 'Services'}
             </TabsTrigger>
           </TabsList>
+
+          {/* Visa Tracker Tab */}
+          <TabsContent value="tracker" className="space-y-4 mt-4">
+            <VisaTracker />
+          </TabsContent>
 
           {/* Visa Types Tab */}
           <TabsContent value="types" className="space-y-4 mt-4">
