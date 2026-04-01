@@ -173,6 +173,11 @@ export const APP_ROUTES = {
   SIM_START: '/sim',
   EXCHANGE: '/exchange',
 
+  // ── Utility Micro-apps ──
+  VISA_QUIZ: '/visa/quiz',
+  SCHOOL_FINDER: '/school-finder',
+  COST_OF_LIVING: '/cost-of-living',
+
   // ── LEGAL Cluster ──
   LEGAL_CLUSTER: '/stay-legal',
   TAX_NAV: '/tax',
