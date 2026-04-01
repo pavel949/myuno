@@ -10,11 +10,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
 import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
 import { cn } from '@/lib/utils';
-import { useIsDesktop } from '@/hooks/use-desktop';
-import { useAuth } from '@/contexts/AuthContext';
-import { useHeroData } from '@/hooks/useHeroData';
-import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
-import { cn } from '@/lib/utils';
 
 function HeroSearchInput({ isRu }: { isRu: boolean }) {
   const [query, setQuery] = useState('');
