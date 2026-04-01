@@ -29258,7 +29258,17 @@ export type Database = {
         | "sales_manager"
         | "moderation_officer"
         | "team_lead"
-      user_persona: "tourist" | "resident" | "property_owner"
+      user_persona:
+        | "tourist"
+        | "resident"
+        | "property_owner"
+        | "investor"
+        | "family"
+        | "couple"
+        | "nightlife"
+        | "active"
+        | "business"
+        | "nomad"
       user_type:
         | "tourist"
         | "resident"
@@ -29510,7 +29520,18 @@ export const Constants = {
         "moderation_officer",
         "team_lead",
       ],
-      user_persona: ["tourist", "resident", "property_owner"],
+      user_persona: [
+        "tourist",
+        "resident",
+        "property_owner",
+        "investor",
+        "family",
+        "couple",
+        "nightlife",
+        "active",
+        "business",
+        "nomad",
+      ],
       user_type: [
         "tourist",
         "resident",

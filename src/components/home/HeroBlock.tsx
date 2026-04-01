@@ -1,23 +1,13 @@
 import React, { memo, useMemo, useCallback, useState } from 'react';
-import { MapPin, AlertTriangle, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
+import { MapPin, Sun, Cloud, CloudRain, Calendar, Trophy, Flame, Search, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useWeather } from '@/hooks/useWeather';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHeroData } from '@/hooks/useHeroData';
-import { useUserPersonas, UserPersona, PERSONA_INFO } from '@/hooks/useUserPersonas';
-import { motion } from 'framer-motion';
+import { useUserPersonas, UserPersona, PERSONA_OPTIONS, PERSONA_INFO } from '@/hooks/useUserPersonas';
 import { cn } from '@/lib/utils';
-
-const PERSONA_OPTIONS: UserPersona[] = ['tourist', 'resident', 'property_owner', 'investor'];
-
-const PERSONA_LABELS: Record<UserPersona, { ru: string; en: string }> = {
-  tourist: { ru: 'Турист', en: 'Tourist' },
-  resident: { ru: 'Резидент', en: 'Resident' },
-  property_owner: { ru: 'Собственник', en: 'Owner' },
-  investor: { ru: 'Инвестор', en: 'Investor' },
-};
 
 function HeroSearchInput({ isRu }: { isRu: boolean }) {
   const [query, setQuery] = useState('');
@@ -59,30 +49,63 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
   return (
-    <div className="anim-switcher w-full rounded-[var(--radius-md)] p-1 flex gap-1 overflow-x-auto scrollbar-hide"
-      style={{
-        background: 'hsl(var(--bg-surface))',
-        border: '1px solid hsl(0 0% 100% / 0.07)',
-      }}
-    >
-      {PERSONA_OPTIONS.map((p) => {
-        const isActive = activePersona === p;
-        return (
-          <button
-            key={p}
-            onClick={() => setPersonas([p])}
-            disabled={isSetting}
-            className={cn(
-              "flex-1 min-w-0 px-3 py-2 rounded-[var(--radius-sm)] text-[13px] font-semibold transition-all duration-200 whitespace-nowrap",
-              isActive
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {isRu ? PERSONA_LABELS[p].ru : PERSONA_LABELS[p].en}
-          </button>
-        );
-      })}
+    <div className="w-full space-y-1.5">
+      {/* Row 1: core 5 */}
+      <div className="flex gap-1 rounded-[var(--radius-md)] p-1"
+        style={{
+          background: 'hsl(var(--bg-surface))',
+          border: '1px solid hsl(0 0% 100% / 0.07)',
+        }}
+      >
+        {PERSONA_OPTIONS.slice(0, 5).map((p) => {
+          const info = PERSONA_INFO[p];
+          const isActive = activePersona === p;
+          return (
+            <button
+              key={p}
+              onClick={() => setPersonas([p])}
+              disabled={isSetting}
+              className={cn(
+                "flex-1 min-w-0 px-1.5 py-2 rounded-[var(--radius-sm)] text-[11px] font-semibold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span className="text-[13px]">{info.icon}</span>
+              <span className="hidden sm:inline">{isRu ? info.labelRu : info.labelEn}</span>
+            </button>
+          );
+        })}
+      </div>
+      {/* Row 2: lifestyle 5 */}
+      <div className="flex gap-1 rounded-[var(--radius-md)] p-1"
+        style={{
+          background: 'hsl(var(--bg-surface))',
+          border: '1px solid hsl(0 0% 100% / 0.07)',
+        }}
+      >
+        {PERSONA_OPTIONS.slice(5).map((p) => {
+          const info = PERSONA_INFO[p];
+          const isActive = activePersona === p;
+          return (
+            <button
+              key={p}
+              onClick={() => setPersonas([p])}
+              disabled={isSetting}
+              className={cn(
+                "flex-1 min-w-0 px-1.5 py-2 rounded-[var(--radius-sm)] text-[11px] font-semibold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <span className="text-[13px]">{info.icon}</span>
+              <span className="hidden sm:inline">{isRu ? info.labelRu : info.labelEn}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -247,7 +270,7 @@ export const HeroBlock = memo(function HeroBlock() {
               </>
             ) : null}
           </div>
-          <div className="pt-3 max-w-xl">
+          <div className="pt-3 max-w-2xl">
             <PersonaSwitcher isRu={isRu} />
           </div>
         </div>

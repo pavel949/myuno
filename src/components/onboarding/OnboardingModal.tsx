@@ -1,21 +1,22 @@
 /**
  * OnboardingModal — 4-step fullscreen onboarding
- * Step 1: Who are you (persona selection)
+ * Step 1: Who are you (persona selection — 10 lifestyle personas)
  * Step 2: Ecosystem map (animated cluster diagram)
  * Step 3: Role-specific feature highlight
  * Step 4: Quick win CTA
  */
-import React, { forwardRef, useCallback, useState, memo, useEffect, useRef } from 'react';
+import React, { forwardRef, useCallback, useState, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronRight, Plane, Home, Building2, TrendingUp, Check,
   Scale, HardHat, Car, CreditCard, Stethoscope, Calculator,
-  BarChart3, Shield, Calendar, Sparkles, FileSearch
+  BarChart3, Shield, Calendar, Sparkles, FileSearch,
+  Baby, Heart, Music, Dumbbell, Laptop
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
+import { useUserPersonas, UserPersona, PERSONA_OPTIONS as ALL_PERSONAS, PERSONA_INFO } from '@/hooks/useUserPersonas';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 
@@ -25,22 +26,6 @@ interface OnboardingModalProps {
 }
 
 type Step = 1 | 2 | 3 | 4;
-
-interface PersonaOption {
-  persona: UserPersona;
-  icon: string;
-  labelRu: string;
-  labelEn: string;
-  descRu: string;
-  descEn: string;
-}
-
-const PERSONA_OPTIONS: PersonaOption[] = [
-  { persona: 'tourist', icon: '🧳', labelRu: 'Турист', labelEn: 'Tourist', descRu: 'Отдых, туры, трансферы', descEn: 'Trips, tours, transfers' },
-  { persona: 'resident', icon: '🏠', labelRu: 'Резидент', labelEn: 'Resident', descRu: 'Жизнь и быт на острове', descEn: 'Daily life on the island' },
-  { persona: 'property_owner', icon: '🏢', labelRu: 'Собственник / УК', labelEn: 'Owner / MC', descRu: 'Управление недвижимостью', descEn: 'Property management' },
-  { persona: 'investor', icon: '📈', labelRu: 'Инвестор', labelEn: 'Investor', descRu: 'Проекты, доходность, надёжность', descEn: 'Projects, ROI, due diligence' },
-];
 
 interface ClusterNode {
   id: string;
@@ -82,6 +67,36 @@ const ROLE_FEATURES: Record<UserPersona, { titleRu: string; titleEn: string; bul
     bulletsRu: ['Аналитика рынка', 'ROI калькулятор', 'Due Diligence AI'],
     bulletsEn: ['Market analytics', 'ROI calculator', 'Due Diligence AI'],
   },
+  family: {
+    titleRu: 'Всё для семьи на Пхукете', titleEn: 'Family life in Phuket',
+    bulletsRu: ['Лучшие школы', 'Детские врачи', 'Активности для детей'],
+    bulletsEn: ['Top schools', 'Pediatricians', 'Kids activities'],
+  },
+  couple: {
+    titleRu: 'Романтика на острове', titleEn: 'Romance on the island',
+    bulletsRu: ['Лучшие рестораны', 'Спа для двоих', 'Яхта на закате'],
+    bulletsEn: ['Best restaurants', 'Couples spa', 'Sunset yacht'],
+  },
+  nightlife: {
+    titleRu: 'Ночная жизнь Пхукета', titleEn: 'Phuket nightlife',
+    bulletsRu: ['Топ клубы', 'VIP-столы', 'Бич-клабы'],
+    bulletsEn: ['Top clubs', 'VIP tables', 'Beach clubs'],
+  },
+  active: {
+    titleRu: 'Спорт и активный отдых', titleEn: 'Sports & active lifestyle',
+    bulletsRu: ['Серфинг и дайвинг', 'Muay Thai', 'Фитнес-залы'],
+    bulletsEn: ['Surfing & diving', 'Muay Thai', 'Fitness gyms'],
+  },
+  business: {
+    titleRu: 'Бизнес на Пхукете', titleEn: 'Business in Phuket',
+    bulletsRu: ['Юристы и бухгалтеры', 'Банковские счета', 'Коворкинги'],
+    bulletsEn: ['Lawyers & accountants', 'Bank accounts', 'Coworking spaces'],
+  },
+  nomad: {
+    titleRu: 'Цифровой кочевник', titleEn: 'Digital nomad life',
+    bulletsRu: ['Коворкинги с WiFi', 'SIM и интернет', 'Долгосрочная аренда'],
+    bulletsEn: ['Coworking with WiFi', 'SIM & internet', 'Long-term rentals'],
+  },
 };
 
 const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu: string; descEn: string; icon: React.ElementType; path: string }> = {
@@ -89,6 +104,12 @@ const QUICK_WINS: Record<UserPersona, { titleRu: string; titleEn: string; descRu
   resident: { titleRu: 'Заказать уборку', titleEn: 'Book cleaning', descRu: 'Профессиональный клининг', descEn: 'Professional cleaning', icon: Sparkles, path: '/cleaning' },
   property_owner: { titleRu: 'Добавить объект', titleEn: 'Add property', descRu: 'Начните управлять', descEn: 'Start managing', icon: Building2, path: '/owner' },
   investor: { titleRu: 'Открыть ROI калькулятор', titleEn: 'Open ROI Calculator', descRu: 'Рассчитайте доходность', descEn: 'Calculate returns', icon: BarChart3, path: '/invest' },
+  family: { titleRu: 'Найти школу', titleEn: 'Find a school', descRu: 'Лучшие школы Пхукета', descEn: 'Best schools in Phuket', icon: Baby, path: '/education' },
+  couple: { titleRu: 'Забронировать спа', titleEn: 'Book a spa', descRu: 'Спа для двоих', descEn: 'Couples spa experience', icon: Heart, path: '/beauty?category=spa' },
+  nightlife: { titleRu: 'Топ клубы сегодня', titleEn: 'Top clubs tonight', descRu: 'Лучшие вечеринки', descEn: 'Best parties tonight', icon: Music, path: '/experiences?tag=nightlife' },
+  active: { titleRu: 'Записаться на серфинг', titleEn: 'Book surfing', descRu: 'Уроки серфинга', descEn: 'Surf lessons', icon: Dumbbell, path: '/experiences?tag=surf' },
+  business: { titleRu: 'Найти юриста', titleEn: 'Find a lawyer', descRu: 'Бизнес-юристы', descEn: 'Business lawyers', icon: Scale, path: '/legal' },
+  nomad: { titleRu: 'Найти коворкинг', titleEn: 'Find coworking', descRu: 'С быстрым WiFi', descEn: 'With fast WiFi', icon: Laptop, path: '/services?category=coworking' },
 };
 
 const slideVariants = {
@@ -138,7 +159,6 @@ function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; ex
   return (
     <div className="relative flex flex-col items-center">
       <svg width={300} height={280} viewBox="0 0 300 280" className="mx-auto">
-        {/* Lines from center to each node */}
         {CLUSTER_NODES.map((node, i) => {
           const angle = (i * 60 - 90) * (Math.PI / 180);
           const nx = cx + r * Math.cos(angle);
@@ -158,7 +178,6 @@ function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; ex
           );
         })}
 
-        {/* Center logo */}
         <motion.g
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -170,7 +189,6 @@ function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; ex
           <text x={cx} y={cy + 9} textAnchor="middle" fill="hsl(var(--foreground))" fontSize={12} fontWeight={700}>UNO</text>
         </motion.g>
 
-        {/* Cluster nodes */}
         {CLUSTER_NODES.map((node, i) => {
           const angle = (i * 60 - 90) * (Math.PI / 180);
           const nx = cx + r * Math.cos(angle);
@@ -199,7 +217,6 @@ function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; ex
         })}
       </svg>
 
-      {/* Expanded node services */}
       <AnimatePresence mode="wait">
         {expandedNode && (() => {
           const node = CLUSTER_NODES.find(n => n.id === expandedNode);
@@ -224,7 +241,6 @@ function EcosystemDiagram({ isRu, expandedNode, onTapNode }: { isRu: boolean; ex
         })()}
       </AnimatePresence>
 
-      {/* Counter */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -322,21 +338,23 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                 <h1 className="text-[26px] font-bold font-display text-foreground text-center leading-tight mb-2">
                   {isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO'}
                 </h1>
-                <p className="text-sm text-muted-foreground text-center mb-6">
-                  {isRu ? 'Весь Пхукет в одном приложении. Выберите, кто вы:' : 'All of Phuket in one app. Choose your role:'}
+                <p className="text-sm text-muted-foreground text-center mb-5">
+                  {isRu ? 'Кто вы? Мы подберём сервисы для вас:' : 'Who are you? We\'ll tailor services for you:'}
                 </p>
 
-                <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-                  {PERSONA_OPTIONS.map((opt) => {
-                    const isSelected = selectedPersona === opt.persona;
+                {/* 10 personas in a 2-col grid (scrollable on smaller screens) */}
+                <div className="grid grid-cols-2 gap-2.5 w-full max-w-sm">
+                  {ALL_PERSONAS.map((p) => {
+                    const info = PERSONA_INFO[p];
+                    const isSelected = selectedPersona === p;
                     return (
                       <button
-                        key={opt.persona}
-                        onClick={() => handleSelectPersona(opt.persona)}
+                        key={p}
+                        onClick={() => handleSelectPersona(p)}
                         className={cn(
-                          "relative flex flex-col items-center gap-2 p-4 rounded-[var(--radius-md)] transition-all duration-200 min-h-[140px] justify-center",
+                          "relative flex items-center gap-3 p-3 rounded-[var(--radius-md)] transition-all duration-200 text-left",
                           isSelected
-                            ? "scale-[1.03]"
+                            ? "scale-[1.02]"
                             : "hover:border-primary/40 active:scale-[0.97]"
                         )}
                         style={{
@@ -344,16 +362,18 @@ export const OnboardingModal = memo(forwardRef<HTMLDivElement, OnboardingModalPr
                           border: `2px solid ${isSelected ? 'hsl(var(--primary))' : 'hsl(0 0% 100% / 0.07)'}`,
                         }}
                       >
-                        <span className="text-[48px] leading-none">{opt.icon}</span>
-                        <span className={cn("text-base font-display font-semibold", isSelected ? "text-primary" : "text-foreground")}>
-                          {isRu ? opt.labelRu : opt.labelEn}
-                        </span>
-                        <span className="text-[12px] text-muted-foreground text-center leading-tight">
-                          {isRu ? opt.descRu : opt.descEn}
-                        </span>
+                        <span className="text-[28px] leading-none shrink-0">{info.icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <span className={cn("text-sm font-display font-semibold block", isSelected ? "text-primary" : "text-foreground")}>
+                            {isRu ? info.labelRu : info.labelEn}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground leading-tight block truncate">
+                            {isRu ? info.descRu : info.descEn}
+                          </span>
+                        </div>
                         {isSelected && (
-                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-3 h-3 text-primary-foreground" />
+                          <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5 text-primary-foreground" />
                           </div>
                         )}
                       </button>

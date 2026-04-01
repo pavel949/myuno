@@ -3,9 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type UserPersona = 'tourist' | 'resident' | 'property_owner' | 'investor';
-// Note: 'property_owner' persona key is kept for DB compatibility (user_persona enum)
-// but maps to 'owner' AppRole. UI label = "Собственник" / "Property Owner"
+export type UserPersona = 
+  | 'tourist' | 'resident' | 'property_owner' | 'investor'
+  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad';
+
+/** All DB-stored persona values (matches user_persona enum) */
+export type DbPersona = UserPersona;
 
 const GUEST_PERSONAS_KEY = 'myuno-guest-personas';
 const GUEST_PERSONAS_CHANGED_EVENT = 'myuno-guest-personas-changed';
@@ -85,7 +88,6 @@ export function useUserPersonas() {
   
   const queryKey = ['user-personas', user?.id];
 
-  // Fetch user's active personas (authenticated users)
   const { data: dbPersonas = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: async (): Promise<UserPersona[]> => {
@@ -104,15 +106,9 @@ export function useUserPersonas() {
     staleTime: 60000,
   });
 
-  // Toggle a persona on/off (authenticated users)
   const togglePersonaMutation = useMutation({
     mutationFn: async (persona: UserPersona) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
-      // Investor persona is handled client-side only for now (not in DB schema)
-      if (persona === 'investor') {
-        return { persona, wasActive: dbPersonas.includes(persona) };
-      }
       
       const isActive = dbPersonas.includes(persona);
       
@@ -121,14 +117,14 @@ export function useUserPersonas() {
           .from('user_personas')
           .delete()
           .eq('user_id', user.id)
-          .eq('persona', persona as 'tourist' | 'resident' | 'property_owner');
+          .eq('persona', persona as any);
         
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('user_personas')
           .upsert(
-            { user_id: user.id, persona: persona as 'tourist' | 'resident' | 'property_owner', is_active: true },
+            { user_id: user.id, persona: persona as any, is_active: true },
             { onConflict: 'user_id,persona' }
           );
         
@@ -138,7 +134,6 @@ export function useUserPersonas() {
       return { persona, wasActive: isActive };
     },
     onMutate: async (persona) => {
-      // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey });
       const previousPersonas = queryClient.getQueryData<UserPersona[]>(queryKey);
       
@@ -157,31 +152,25 @@ export function useUserPersonas() {
       }
     },
     onSuccess: () => {
-      // Only invalidate on success — not onSettled — to avoid refetch after errors
-      // that already rolled back via onError
       queryClient.invalidateQueries({ queryKey });
     },
   });
 
-  // Set multiple personas at once (authenticated users)
   const setPersonasMutation = useMutation({
     mutationFn: async (newPersonas: UserPersona[]) => {
       if (!user?.id) throw new Error('User not authenticated');
-      
-      // Filter out investor persona (client-side only)
-      const dbPersonasToSet = newPersonas.filter(p => p !== 'investor') as ('tourist' | 'resident' | 'property_owner')[];
       
       await supabase
         .from('user_personas')
         .delete()
         .eq('user_id', user.id);
       
-      if (dbPersonasToSet.length > 0) {
+      if (newPersonas.length > 0) {
         const { error } = await supabase
           .from('user_personas')
-          .insert(dbPersonasToSet.map(persona => ({
+          .insert(newPersonas.map(persona => ({
             user_id: user.id,
-            persona,
+            persona: persona as any,
             is_active: true,
           })));
         
@@ -214,7 +203,6 @@ export function useUserPersonas() {
         try {
           const parsed = JSON.parse(guestPersonas) as UserPersona[];
           if (parsed.length > 0 && dbPersonas.length === 0) {
-            // Migrate guest personas to authenticated user
             setPersonasMutation.mutate(parsed);
           }
         } catch {
@@ -225,7 +213,6 @@ export function useUserPersonas() {
     }
   }, [user?.id, dbPersonas.length]);
 
-  // Return appropriate hook based on auth status
   if (!user) {
     return {
       personas: guestHook.personas,
@@ -250,12 +237,17 @@ export function useUserPersonas() {
     isSetting: setPersonasMutation.isPending,
   };
 }
-// Helper to check if user has a specific persona
+
 export function hasPersona(personas: UserPersona[], persona: UserPersona): boolean {
   return personas.includes(persona);
 }
 
-// Get display info for personas
+/** All persona options in display order */
+export const PERSONA_OPTIONS: UserPersona[] = [
+  'tourist', 'resident', 'property_owner', 'investor',
+  'family', 'couple', 'nightlife', 'active', 'business', 'nomad',
+];
+
 export const PERSONA_INFO: Record<UserPersona, {
   labelEn: string;
   labelRu: string;
@@ -266,39 +258,53 @@ export const PERSONA_INFO: Record<UserPersona, {
   bgColor: string;
 }> = {
   tourist: {
-    labelEn: 'Tourist',
-    labelRu: 'Турист',
-    descEn: 'Trips, tours, transfers',
-    descRu: 'Поездки, туры, трансферы',
-    icon: '✈️',
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-500/10',
+    labelEn: 'Tourist', labelRu: 'Турист',
+    descEn: 'Trips, tours, transfers', descRu: 'Поездки, туры, трансферы',
+    icon: '✈️', color: 'text-cyan-600', bgColor: 'bg-cyan-500/10',
   },
   resident: {
-    labelEn: 'Resident',
-    labelRu: 'Резидент',
-    descEn: 'Daily life & services',
-    descRu: 'Быт и сервисы',
-    icon: '🏠',
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-500/10',
+    labelEn: 'Resident', labelRu: 'Резидент',
+    descEn: 'Daily life & services', descRu: 'Быт и сервисы',
+    icon: '🏠', color: 'text-emerald-600', bgColor: 'bg-emerald-500/10',
   },
   property_owner: {
-    labelEn: 'Property Owner',
-    labelRu: 'Собственник',
-    descEn: 'My property & services',
-    descRu: 'Мой объект и сервисы',
-    icon: '🏢',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-500/10',
+    labelEn: 'Owner', labelRu: 'Собственник',
+    descEn: 'My property & services', descRu: 'Мой объект и сервисы',
+    icon: '🏢', color: 'text-amber-600', bgColor: 'bg-amber-500/10',
   },
   investor: {
-    labelEn: 'Investor',
-    labelRu: 'Инвестор',
-    descEn: 'Projects & opportunities',
-    descRu: 'Проекты и возможности',
-    icon: '📈',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-500/10',
+    labelEn: 'Investor', labelRu: 'Инвестор',
+    descEn: 'Projects & opportunities', descRu: 'Проекты и возможности',
+    icon: '📈', color: 'text-purple-600', bgColor: 'bg-purple-500/10',
+  },
+  family: {
+    labelEn: 'Family', labelRu: 'Семья',
+    descEn: 'Schools, doctors, kids', descRu: 'Школы, врачи, дети',
+    icon: '👨‍👩‍👧', color: 'text-pink-600', bgColor: 'bg-pink-500/10',
+  },
+  couple: {
+    labelEn: 'Couple', labelRu: 'Пара',
+    descEn: 'Romance, spa, dining', descRu: 'Романтика, спа, рестораны',
+    icon: '💑', color: 'text-rose-600', bgColor: 'bg-rose-500/10',
+  },
+  nightlife: {
+    labelEn: 'Nightlife', labelRu: 'Тусовщик',
+    descEn: 'Clubs, parties, VIP', descRu: 'Клубы, вечеринки, VIP',
+    icon: '🎉', color: 'text-fuchsia-600', bgColor: 'bg-fuchsia-500/10',
+  },
+  active: {
+    labelEn: 'Active', labelRu: 'Спортсмен',
+    descEn: 'Fitness, surf, MMA', descRu: 'Фитнес, серфинг, MMA',
+    icon: '🏄', color: 'text-orange-600', bgColor: 'bg-orange-500/10',
+  },
+  business: {
+    labelEn: 'Business', labelRu: 'Бизнес',
+    descEn: 'Coworking, legal, banking', descRu: 'Коворкинг, юрист, банк',
+    icon: '💼', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
+  },
+  nomad: {
+    labelEn: 'Nomad', labelRu: 'Номад',
+    descEn: 'Coworking, SIM, visa', descRu: 'Коворкинг, SIM, виза',
+    icon: '💻', color: 'text-teal-600', bgColor: 'bg-teal-500/10',
   },
 };
