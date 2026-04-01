@@ -307,6 +307,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.BANKING} element={<LazyPage><Pages.BankingPage /></LazyPage>} />
         <Route path={APP_ROUTES.VETERINARY} element={<LazyPage><Pages.VeterinaryPage /></LazyPage>} />
         
+        {/* ── ARRIVE Cluster ── */}
+        <Route path={APP_ROUTES.SIM_START} element={<LazyPage><Pages.SIMStartPage /></LazyPage>} />
+        <Route path={APP_ROUTES.EXCHANGE} element={<LazyPage><Pages.ExchangeBotPage /></LazyPage>} />
+        
         {/* ── Knowledge ── */}
         <Route path={APP_ROUTES.KNOWLEDGE} element={<LazyPage><Pages.KnowledgeHub /></LazyPage>} />
         <Route path="/knowledge/:section" element={<LazyPage><Pages.KnowledgeSectionPage /></LazyPage>} />

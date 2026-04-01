@@ -21,6 +21,7 @@ import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanne
 
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { EmergencyQuickAccess } from '@/components/home/EmergencyQuickAccess';
+import { ClusterHub } from '@/components/home/ClusterHub';
 import { HomeProductsSection } from '@/components/home/HomeProductsSection';
 import { PostOrderReviewPrompt } from '@/components/reviews/PostOrderReviewPrompt';
 import { usePostOrderReview } from '@/hooks/usePostOrderReview';
@@ -95,6 +96,11 @@ const Index = () => {
           {/* ─── SECTION 2: Quick Actions (full width) ─── */}
           <RevealOnScroll>
             <QuickActionsGrid />
+          </RevealOnScroll>
+
+          {/* ─── SECTION 2.5: Cluster Hub (Bible v2.0 — 6 clusters) ─── */}
+          <RevealOnScroll>
+            <ClusterHub />
           </RevealOnScroll>
 
           {/* ─── SECTION 3: Events feed (public) or YourDay (auth) ─── */}
