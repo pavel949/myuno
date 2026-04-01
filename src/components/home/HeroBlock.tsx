@@ -46,69 +46,78 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   );
 }
 
+const PERSONA_ICONS: Record<string, React.ElementType> = {
+  Plane, Home, Building2, TrendingUp, Baby, Heart, Music, Dumbbell, Briefcase, Laptop, PawPrint,
+};
+
+const PERSONA_GRADIENTS: Record<UserPersona, string> = {
+  tourist: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+  resident: 'linear-gradient(135deg, #10b981, #059669)',
+  property_owner: 'linear-gradient(135deg, #f59e0b, #d97706)',
+  investor: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+  pet_owner: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+  family: 'linear-gradient(135deg, #ec4899, #db2777)',
+  couple: 'linear-gradient(135deg, #f43f5e, #e11d48)',
+  nightlife: 'linear-gradient(135deg, #d946ef, #a855f7)',
+  active: 'linear-gradient(135deg, #f97316, #ea580c)',
+  business: 'linear-gradient(135deg, #64748b, #475569)',
+  nomad: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+};
+
 function PersonaSwitcher({ isRu }: { isRu: boolean }) {
   const { personas, setPersonas, isSetting } = useUserPersonas();
   const activePersona = useMemo(() => personas[0] ?? ('tourist' as UserPersona), [personas]);
 
-  return (
-    <div className="w-full space-y-1.5">
-      {/* Row 1: core 5 */}
-      <div className="flex gap-1 rounded-[var(--radius-md)] p-1"
-        style={{
-          background: 'hsl(var(--bg-surface))',
-          border: '1px solid hsl(0 0% 100% / 0.07)',
-        }}
-      >
-        {PERSONA_OPTIONS.slice(0, 5).map((p) => {
-          const info = PERSONA_INFO[p];
-          const isActive = activePersona === p;
-          return (
-            <button
-              key={p}
-              onClick={() => setPersonas([p])}
-              disabled={isSetting}
+  const renderRow = (items: UserPersona[]) => (
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+      {items.map((p) => {
+        const info = PERSONA_INFO[p];
+        const Icon = PERSONA_ICONS[info.icon] || Plane;
+        const isActive = activePersona === p;
+        return (
+          <button
+            key={p}
+            onClick={() => setPersonas([p])}
+            disabled={isSetting}
+            className={cn(
+              "flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl shrink-0 transition-all duration-200 min-w-[56px]",
+              isActive
+                ? "scale-[1.05]"
+                : "opacity-60 hover:opacity-90"
+            )}
+          >
+            <div
               className={cn(
-                "flex-1 min-w-0 px-1.5 py-2 rounded-[var(--radius-sm)] text-[11px] font-semibold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                "w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
+                isActive ? "shadow-lg ring-2 ring-white/20" : ""
               )}
+              style={{
+                background: isActive
+                  ? PERSONA_GRADIENTS[p]
+                  : 'hsl(0 0% 100% / 0.08)',
+              }}
             >
-              <span className="text-[13px]">{info.icon}</span>
-              <span className="hidden sm:inline">{isRu ? info.labelRu : info.labelEn}</span>
-            </button>
-          );
-        })}
-      </div>
-      {/* Row 2: lifestyle 5 */}
-      <div className="flex gap-1 rounded-[var(--radius-md)] p-1"
-        style={{
-          background: 'hsl(var(--bg-surface))',
-          border: '1px solid hsl(0 0% 100% / 0.07)',
-        }}
-      >
-        {PERSONA_OPTIONS.slice(5).map((p) => {
-          const info = PERSONA_INFO[p];
-          const isActive = activePersona === p;
-          return (
-            <button
-              key={p}
-              onClick={() => setPersonas([p])}
-              disabled={isSetting}
-              className={cn(
-                "flex-1 min-w-0 px-1.5 py-2 rounded-[var(--radius-sm)] text-[11px] font-semibold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-1",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <span className="text-[13px]">{info.icon}</span>
-              <span className="hidden sm:inline">{isRu ? info.labelRu : info.labelEn}</span>
-            </button>
-          );
-        })}
-      </div>
+              <Icon className="w-4.5 h-4.5" style={{ width: 18, height: 18, color: isActive ? '#fff' : 'hsl(0 0% 70%)' }} strokeWidth={2} />
+            </div>
+            <span className={cn(
+              "text-[10px] font-semibold whitespace-nowrap leading-none",
+              isActive ? "text-foreground" : "text-muted-foreground"
+            )}>
+              {isRu ? info.labelRu : info.labelEn}
+            </span>
+          </button>
+        );
+      })}
     </div>
+  );
+
+  return (
+    <div className="w-full space-y-1">
+      {renderRow(PERSONA_OPTIONS.slice(0, 6))}
+      {renderRow(PERSONA_OPTIONS.slice(6))}
+    </div>
+  );
+}
   );
 }
 
