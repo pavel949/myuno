@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export type UserPersona = 
   | 'tourist' | 'resident' | 'property_owner' | 'investor'
-  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad';
+  | 'family' | 'couple' | 'nightlife' | 'active' | 'business' | 'nomad' | 'pet_owner';
 
 /** All DB-stored persona values (matches user_persona enum) */
 export type DbPersona = UserPersona;
