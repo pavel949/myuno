@@ -95,6 +95,26 @@ export default function FitnessBooking() {
 
     const scheduledAt = date || new Date();
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'fitness',
+        items: [{
+          id: id || membershipType,
+          name: language === 'ru' ? membership.labelRu : membership.labelEn,
+          price: membership.price,
+        }],
+        totalAmount: membership.price,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        notes: `Fitness Membership: ${membershipType}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
