@@ -3,7 +3,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { FinanceCategorySettings } from '@/components/mc/settings/FinanceCategorySettings';
 import { CompanyProfileSettings } from '@/components/mc/settings/CompanyProfileSettings';
 import { DataBackupSettings } from '@/components/mc/settings/DataBackupSettings';
-import { Settings, DollarSign, Target, Wrench, Building2, HardDrive } from 'lucide-react';
+import { AutomationRulesBuilder } from '@/components/mc/settings/AutomationRulesBuilder';
+import { Settings, DollarSign, Target, Wrench, Building2, HardDrive, Zap } from 'lucide-react';
 import React, { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
