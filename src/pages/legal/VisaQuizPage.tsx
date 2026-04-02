@@ -361,7 +361,7 @@ export default function VisaQuizPage() {
                     <p className="text-xs text-muted-foreground">
                       {isRu
                         ? 'Разберём ваш кейс и подготовим документы'
-                        : 'We'll review your case & prepare documents'}
+                        : "We'll review your case & prepare documents"}
                     </p>
                   </div>
                 </div>
