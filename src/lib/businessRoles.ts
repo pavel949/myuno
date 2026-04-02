@@ -49,6 +49,8 @@ export type DashboardWidgetKey =
   | 'ai_agents_status'
   | 'founder_inbox'
   | 'founder_quick_actions'
+  | 'business_health'
+  | 'top_actions'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
