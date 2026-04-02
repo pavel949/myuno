@@ -372,9 +372,11 @@ export default function LegalBooking() {
             <BookingBottomBar
               total={consultationPrice}
               onSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isStripeProcessing}
               disabled={!contactData.name || !contactData.phone}
-              submitLabel={language === 'ru' ? 'Отправить заявку' : 'Submit Request'}
+              submitLabel={paymentMethod === 'card'
+                ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+                : (language === 'ru' ? 'Отправить заявку' : 'Submit Request')}
             />
           </div>
         )}
