@@ -23,7 +23,7 @@ export function VendorRevenueWidget() {
       if (!user?.id) return null;
 
       // Get provider linked to user
-      const { data: provider } = await supabase
+      const { data: provider } = await (supabase as any)
         .from('providers')
         .select('id')
         .eq('user_id', user.id)
