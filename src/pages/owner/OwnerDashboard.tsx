@@ -40,6 +40,8 @@ import { CollapsibleWidget } from '@/components/owner/dashboard/CollapsibleWidge
 import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
 import { OverviewSection } from '@/components/owner/dashboard/OverviewSection';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
+import { BusinessHealthCard } from '@/components/owner/dashboard/BusinessHealthCard';
+import { TopActionsWidget } from '@/components/owner/dashboard/TopActionsWidget';
 import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
 
 function SectionSkeleton() {
@@ -252,6 +254,18 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <FounderQuickActions />
         </Suspense>
       );
+    case 'business_health':
+      return (
+        <Suspense fallback={skeleton}>
+          <BusinessHealthCard />
+        </Suspense>
+      );
+    case 'top_actions':
+      return (
+        <Suspense fallback={skeleton}>
+          <TopActionsWidget />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
@@ -278,6 +292,7 @@ const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'revenue_insights', 'upcoming_payments',
   'active_deals', 'crm_tasks',
   'ai_agents_status', 'founder_quick_actions',
+  'business_health', 'top_actions',
 ]);
 
 const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
@@ -287,6 +302,8 @@ const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'active_stays',
   'crm_tasks',
   'upcoming_payments',
+  'business_health',
+  'top_actions',
 ]);
 
 export default function OwnerDashboard() {
@@ -307,7 +324,7 @@ export default function OwnerDashboard() {
       titleEn: 'Today',
       titleRu: 'Сегодня',
       icon: Sun,
-      widgets: ['today_actions', 'founder_quick_actions', 'ai_agents_status', 'property_priority', 'your_day'] as DashboardWidgetKey[],
+      widgets: ['business_health', 'top_actions', 'today_actions', 'founder_quick_actions', 'ai_agents_status', 'property_priority', 'your_day'] as DashboardWidgetKey[],
     },
     health: {
       titleEn: 'Portfolio Health',

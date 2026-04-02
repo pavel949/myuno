@@ -37,6 +37,8 @@ export { YourDayFeed } from './YourDayFeed';
 export { CleaningDashboard } from './CleaningDashboard';
 export { MorningBriefing } from './MorningBriefing';
 export { WidgetErrorBoundary } from './WidgetErrorBoundary';
+export { BusinessHealthCard } from './BusinessHealthCard';
+export { TopActionsWidget } from './TopActionsWidget';
 
 // Property Wizard Steps
 export * from '../property-wizard';

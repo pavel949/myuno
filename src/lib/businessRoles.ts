@@ -49,6 +49,8 @@ export type DashboardWidgetKey =
   | 'ai_agents_status'
   | 'founder_inbox'
   | 'founder_quick_actions'
+  | 'business_health'
+  | 'top_actions'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -59,6 +61,8 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Управление объектами (УК)',
     icon: '🏠',
     widgets: [
+      'business_health',
+      'top_actions',
       'today_actions',
       'founder_quick_actions',
       'founder_inbox',
