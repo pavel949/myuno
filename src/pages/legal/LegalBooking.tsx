@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
 import { PageHeader } from "@/components/uno/PageHeader";
@@ -33,6 +34,7 @@ export default function LegalBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   // Form state
   const [step, setStep] = useState(1);
@@ -95,6 +97,35 @@ export default function LegalBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
+    // Stripe card payment flow
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'medical', // legal falls under professional services
+        items: [{
+          id: id || 'legal-consultation',
+          name: selectedService || (language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation'),
+          price: consultationPrice,
+          duration_minutes: 60,
+        }],
+        totalAmount: consultationPrice,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation',
+        notes: JSON.stringify({
+          provider_id: id,
+          service: selectedService,
+          consultation_type: consultationType,
+          description,
+          company,
+          visa_type: searchParams.get('visa_type'),
+        }),
+      });
+      return;
+    }
+
+    // Cash/wallet flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
@@ -327,6 +358,7 @@ export default function LegalBooking() {
                 currency="THB"
                 showWallet
                 showCash
+                showOnline
               />
             </div>
 
@@ -340,9 +372,11 @@ export default function LegalBooking() {
             <BookingBottomBar
               total={consultationPrice}
               onSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isStripeProcessing}
               disabled={!contactData.name || !contactData.phone}
-              submitLabel={language === 'ru' ? 'Отправить заявку' : 'Submit Request'}
+              submitLabel={paymentMethod === 'card'
+                ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+                : (language === 'ru' ? 'Отправить заявку' : 'Submit Request')}
             />
           </div>
         )}

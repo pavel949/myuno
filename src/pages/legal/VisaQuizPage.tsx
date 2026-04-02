@@ -4,7 +4,7 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, ChevronRight, CheckCircle2, ArrowLeft, FileText, Clock, DollarSign, AlertTriangle } from 'lucide-react';
+import { Shield, ChevronRight, CheckCircle2, ArrowLeft, FileText, Clock, DollarSign, AlertTriangle, Scale, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
@@ -347,13 +347,52 @@ export default function VisaQuizPage() {
               ))}
             </div>
 
-            {/* CTAs */}
+            {/* Lawyer Consultation CTA */}
+            <Card className="border-primary bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                    <Scale className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm">
+                      {isRu ? 'Консультация с юристом' : 'Lawyer Consultation'}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {isRu
+                        ? 'Разберём ваш кейс и подготовим документы'
+                        : "We'll review your case & prepare documents"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-lg font-bold text-primary">฿2,000</span>
+                  <Badge variant="outline" className="text-[10px]">
+                    <CreditCard className="w-3 h-3 mr-1" />
+                    {isRu ? 'Оплата онлайн' : 'Pay Online'}
+                  </Badge>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={() => navigate(
+                    `/legal/booking/visa-consultation?service=${encodeURIComponent(
+                      isRu ? 'Визовая консультация' : 'Visa Consultation'
+                    )}&visa_type=${encodeURIComponent(result.titleEn)}`
+                  )}
+                >
+                  <Scale className="w-4 h-4 mr-2" />
+                  {isRu ? 'Записаться на консультацию' : 'Book Consultation'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Other CTAs */}
             <div className="space-y-3">
-              <Button className="w-full" onClick={() => navigate('/legal')}>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/legal')}>
                 <FileText className="w-4 h-4 mr-2" />
-                {isRu ? 'Оформить визу с помощью эксперта' : 'Get Visa Help from Expert'}
+                {isRu ? 'Все юридические услуги' : 'Browse All Legal Services'}
               </Button>
-              <Button variant="outline" className="w-full" onClick={handleRestart}>
+              <Button variant="ghost" className="w-full" onClick={handleRestart}>
                 {isRu ? 'Пройти заново' : 'Retake Quiz'}
               </Button>
             </div>
