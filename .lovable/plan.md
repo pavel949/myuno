@@ -1,52 +1,67 @@
 
 
-# Миграция 7 вертикалей на MiniAppLayout + CatalogCard
+# Stripe Checkout для Beauty, Medical, Fitness
 
-## Что делаем
+## Текущее состояние
 
-Мигрируем Beauty, Fitness, Education, Cleaning, Events, Medical на единый `MiniAppLayout` + `CatalogCard`. Transport оставляем as-is (у него уникальный UX с hero search, sidebar filters, VehicleClassNav — это осознанное исключение).
+Все три вертикали (BeautyBooking, FitnessBooking, MedicalAppointment) используют `useBooking` → `useOrders` с `payment_method: 'cash'`. Stripe не задействован. Существующий `create-service-checkout` Edge Function подходит по структуре, но не использует Order-First паттерн и не считает комиссию 10%.
 
-## Изменения
+## Архитектура
 
-### 1. Новые адаптеры в `catalogCardAdapters.ts`
+Создаём **одну** Edge Function `create-wellness-checkout`, которая:
+- Следует Order-First паттерну (order создаётся ДО Stripe session)
+- Использует `create_order_atomic` RPC
+- Считает 10% platform fee через `calculateOrderTotals` или inline
+- Поддерживает все три вертикали через параметр `vertical: 'beauty' | 'fitness' | 'medical'`
+- Stripe webhook уже обрабатывает `service_payment` — переиспользуем этот тип
 
-Добавляем 6 mapper-функций:
-
-| Mapper | Ключевые поля |
-|--------|--------------|
-| `mapSalonToCatalogCard` | badges: Verified; location; price с prefix "от/from" |
-| `mapGymToCatalogCard` | badges: Verified; location; price day_pass или month_pass с suffix |
-| `mapEducationToCatalogCard` | badges: School/Tutor с иконкой Building2/User; price_per_hour с suffix "/hr" |
-| `mapCleaningToCatalogCard` | badges: Verified; subtitle: duration + type; price fixed или per_hour |
-| `mapEventToCatalogCard` | badges: Featured; socialProof: date overlay; location; price с prefix "от" или "Free" |
-| `mapClinicToCatalogCard` | badges: 24/7 или Open (green); location; subtitle: Russian-speaking |
-
-### 2. Миграция 6 Index-страниц
-
-Каждая страница: убрать `AppLayout` + `CatalogHeader` + inline cards → заменить на `MiniAppLayout` + grid из `CatalogCard`.
-
-Сохраняем специфику:
-- **Medical**: Emergency banner остаётся как `quickActions` слот в MiniAppLayout
-- **Events**: Date overlay → через `socialProof` в CatalogCard
-- **Education**: Type badge (School/Tutor) → через `badges`
-- **Cleaning**: Duration subtitle → через `subtitle`
-
-### 3. Обновить экспорты в `adapters/index.ts`
-
-Добавить 6 новых экспортов.
-
-## Файлы
+## Файлы и изменения
 
 | Файл | Действие |
 |------|----------|
-| `src/lib/adapters/catalogCardAdapters.ts` | +6 mappers |
-| `src/lib/adapters/index.ts` | +6 exports |
-| `src/pages/beauty/BeautySpaIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
-| `src/pages/fitness/FitnessIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
-| `src/pages/education/EducationIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
-| `src/pages/cleaning/CleaningIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
-| `src/pages/events/EventsIndex.tsx` | Полная перезапись → MiniAppLayout + CatalogCard |
-| `src/pages/medical/MedicalIndex.tsx` | Перезапись, emergency banner в quickActions |
+| `supabase/functions/create-wellness-checkout/index.ts` | **Новый** — Edge Function с Order-First + 10% fee |
+| `src/hooks/useWellnessCheckout.ts` | **Новый** — тонкая обёртка над `useStripeUnifiedCheckout` с подготовкой payload |
+| `src/pages/beauty/BeautyBooking.tsx` | **Изменение** — при `paymentMethod === 'card'` → вызов `createWellnessCheckout` вместо `createBooking` |
+| `src/pages/fitness/FitnessBooking.tsx` | **Изменение** — аналогично |
+| `src/pages/medical/MedicalAppointment.tsx` | **Изменение** — аналогично |
+| `src/pages/wellness/WellnessOrderSuccess.tsx` | **Новый** — страница успеха после Stripe оплаты |
+| `src/components/layout/AnimatedRoutes.tsx` | **Изменение** — +1 route для success page |
+| `src/components/layout/pageRegistry.ts` | **Изменение** — lazy import |
+| `src/lib/config/routes.ts` | **Изменение** — +1 route constant |
 
-**~8 файлов, ~300 строк inline-кода заменяются на 6 тонких адаптеров + единый компонент.**
+## Edge Function: create-wellness-checkout
+
+```text
+Input:
+  vertical: 'beauty' | 'fitness' | 'medical'
+  items: [{ id, name, price, duration_minutes? }]
+  total_amount: number
+  scheduled_at: string
+  contact_name, contact_phone, contact_email?
+  provider_id?, provider_name?
+  notes?
+
+Flow:
+  1. Auth check
+  2. Calculate: service_fee = round(total_amount * 0.10)
+  3. create_order_atomic(order_type=vertical, payment_method='stripe', ...)
+  4. Stripe session create (mode: 'payment', metadata.type='service_payment', metadata.order_id)
+  5. Return { url, sessionId, orderId }
+```
+
+## Изменения в Booking Pages
+
+Логика `handleSubmit`:
+- Если `paymentMethod === 'card'` или `'online'` → вызов Edge Function → redirect на Stripe
+- Если `paymentMethod === 'cash'` → существующий `createBooking` flow (без изменений)
+
+Добавляем `showOnline` prop в `BookingPaymentSelect` для отображения опции "Оплата картой онлайн".
+
+## Комиссия 10%
+
+- Service fee показывается в `BookingSummary` как отдельная строка
+- Stripe line items: услуги + "Platform Service Fee / Сервисный сбор"
+- Вендор получает 90%, fee остаётся платформе
+
+## ~9 файлов, 1 новая Edge Function
 
