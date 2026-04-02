@@ -208,11 +208,13 @@ export default function FitnessBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={membership.price}
+          total={paymentMethod === 'card' ? Math.round(membership.price * 1.1) : membership.price}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Подтвердить' : 'Confirm'}
+          submitLabel={paymentMethod === 'card'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить' : 'Confirm')}
         />
       </PageContainer>
 
