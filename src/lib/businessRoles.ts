@@ -46,6 +46,9 @@ export type DashboardWidgetKey =
   | 'unified_inbox'
   | 'maintenance_health'
   | 'myuno_services'
+  | 'ai_agents_status'
+  | 'founder_inbox'
+  | 'founder_quick_actions'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
@@ -57,6 +60,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '🏠',
     widgets: [
       'today_actions',
+      'founder_quick_actions',
+      'founder_inbox',
+      'ai_agents_status',
       'property_priority',
       'kpi',
       'your_day',

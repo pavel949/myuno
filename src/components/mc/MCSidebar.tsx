@@ -78,7 +78,6 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Channel Manager', titleRu: 'Channel Manager', path: APP_ROUTES.MC_CHANNELS, icon: Radio },
-      { title: 'Calendar Sync', titleRu: 'Синхронизация', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
     ],
   },
   {
@@ -103,10 +102,10 @@ export const navigationGroups: NavGroup[] = [
       { title: 'Contacts', titleRu: 'Контакты', path: APP_ROUTES.MC_CONTACTS, icon: ContactRound },
       { title: 'Sales Pipeline', titleRu: 'Воронка продаж', path: APP_ROUTES.MC_SALES, icon: TrendingUp },
       { title: 'Owners', titleRu: 'Собственники', path: APP_ROUTES.MC_OWNERS, icon: Crown },
+      { title: 'Vendor Acquisition', titleRu: 'Привлечение вендоров', path: APP_ROUTES.MC_VENDOR_ACQUISITION, icon: Target },
       { title: 'Sequences', titleRu: 'Цепочки', path: APP_ROUTES.MC_SEQUENCES, icon: Zap },
       { title: 'Quotes', titleRu: 'КП', path: APP_ROUTES.MC_QUOTES, icon: FileTextIcon },
       { title: 'Reviews', titleRu: 'Отзывы', path: APP_ROUTES.MC_REVIEWS, icon: Star },
-      { title: 'Marketing', titleRu: 'Маркетинг', path: APP_ROUTES.MC_MARKETING, icon: Megaphone },
     ],
   },
   {
@@ -133,6 +132,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_REVIEWS]: 'crm',
   [APP_ROUTES.MC_SETTINGS]: 'staff',
   [APP_ROUTES.MC_MARKETING]: 'crm',
+  [APP_ROUTES.MC_VENDOR_ACQUISITION]: 'crm',
   [APP_ROUTES.MC_TASKS]: 'tasks',
   [APP_ROUTES.MC_INVENTORY]: 'properties',
   [APP_ROUTES.MC_VENDORS]: 'properties',

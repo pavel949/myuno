@@ -314,6 +314,7 @@ export const APP_ROUTES = {
   MC_HELP: '/mc/help',
   MC_SETTINGS: '/mc/settings',
   MC_MANAGEMENT_TERMS: '/mc/management-terms',
+  MC_VENDOR_ACQUISITION: '/mc/vendor-acquisition',
   MC_SUPPORT_CHAT: '/mc/support-chat',
   MC_BOOKINGS: '/mc/bookings',
 

@@ -46,7 +46,7 @@ const vendorNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/admin/leads', icon: UserCheck, labelEn: 'Leads', labelRu: 'Лиды' },
+  { path: '/admin/crm', icon: UserCheck, labelEn: 'CRM', labelRu: 'CRM' },
   { path: '/admin/tickets', icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
@@ -56,7 +56,7 @@ const teamNavItems: NavItem[] = [
   { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
-  { path: '/admin/leads', icon: Users, labelEn: 'Leads', labelRu: 'Лиды' },
+  { path: '/admin/crm', icon: Users, labelEn: 'CRM', labelRu: 'CRM' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 

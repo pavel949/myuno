@@ -26,6 +26,9 @@ import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreetin
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
+import { AIAgentStatusWidget } from '@/components/owner/dashboard/AIAgentStatusWidget';
+import { FounderQuickActions } from '@/components/owner/dashboard/FounderQuickActions';
+import { FounderInboxWidget } from '@/components/owner/dashboard/FounderInboxWidget';
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
@@ -231,6 +234,24 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       );
     case 'myuno_services':
       return null;
+    case 'ai_agents_status':
+      return (
+        <Suspense fallback={skeleton}>
+          <AIAgentStatusWidget />
+        </Suspense>
+      );
+    case 'founder_inbox':
+      return (
+        <Suspense fallback={skeleton}>
+          <FounderInboxWidget />
+        </Suspense>
+      );
+    case 'founder_quick_actions':
+      return (
+        <Suspense fallback={skeleton}>
+          <FounderQuickActions />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
@@ -256,6 +277,7 @@ const COLLAPSIBLE_WIDGETS: Partial<Record<DashboardWidgetKey, { en: string; ru: 
 const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'revenue_insights', 'upcoming_payments',
   'active_deals', 'crm_tasks',
+  'ai_agents_status', 'founder_quick_actions',
 ]);
 
 const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
@@ -285,7 +307,7 @@ export default function OwnerDashboard() {
       titleEn: 'Today',
       titleRu: 'Сегодня',
       icon: Sun,
-      widgets: ['today_actions', 'property_priority', 'your_day'] as DashboardWidgetKey[],
+      widgets: ['today_actions', 'founder_quick_actions', 'ai_agents_status', 'property_priority', 'your_day'] as DashboardWidgetKey[],
     },
     health: {
       titleEn: 'Portfolio Health',
@@ -303,7 +325,7 @@ export default function OwnerDashboard() {
       titleEn: 'Sales & CRM',
       titleRu: 'Продажи и CRM',
       icon: Briefcase,
-      widgets: ['active_deals', 'crm_tasks', 'operations'] as DashboardWidgetKey[],
+      widgets: ['active_deals', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
     },
     exceptions: {
       titleEn: 'Exceptions',

@@ -1,0 +1,1 @@
+ALTER VIEW public.v_founder_inbox SET (security_invoker = on);

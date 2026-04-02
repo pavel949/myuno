@@ -27276,6 +27276,19 @@ export type Database = {
           },
         ]
       }
+      v_founder_inbox: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string | null
+          priority: string | null
+          source_type: string | null
+          status: string | null
+          target_date: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       v_marketplace_listings: {
         Row: {
           amenities: string[] | null
