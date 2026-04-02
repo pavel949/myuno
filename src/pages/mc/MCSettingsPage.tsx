@@ -104,6 +104,7 @@ export default function MCSettingsPage() {
                 </div>
               )}
               {id === 'data' && <DataBackupSettings />}
+              {id === 'automation' && <AutomationRulesBuilder />}
             </AccordionContent>
           </AccordionItem>
         ))}
