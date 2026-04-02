@@ -34,6 +34,7 @@ export default function MedicalAppointment() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   // Fetch clinic, doctors, and services
   const { clinic, isLoading: clinicLoading } = useClinic(id);
