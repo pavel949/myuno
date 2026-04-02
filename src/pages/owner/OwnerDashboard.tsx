@@ -40,6 +40,8 @@ import { CollapsibleWidget } from '@/components/owner/dashboard/CollapsibleWidge
 import { QuickTaskDialog } from '@/components/owner/dashboard/QuickTaskDialog';
 import { OverviewSection } from '@/components/owner/dashboard/OverviewSection';
 import { WidgetErrorBoundary } from '@/components/owner/dashboard/WidgetErrorBoundary';
+import { BusinessHealthCard } from '@/components/owner/dashboard/BusinessHealthCard';
+import { TopActionsWidget } from '@/components/owner/dashboard/TopActionsWidget';
 import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
 
 function SectionSkeleton() {

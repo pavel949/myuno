@@ -61,6 +61,8 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     labelRu: 'Управление объектами (УК)',
     icon: '🏠',
     widgets: [
+      'business_health',
+      'top_actions',
       'today_actions',
       'founder_quick_actions',
       'founder_inbox',
