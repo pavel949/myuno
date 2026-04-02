@@ -115,6 +115,27 @@ export default function MedicalAppointment() {
         ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
         : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation');
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'medical',
+        items: [{
+          id: selectedService?.id || selectedDoctor?.id || id || 'consultation',
+          name: itemName,
+          price,
+        }],
+        totalAmount: price,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: clinic?.name_en || undefined,
+        notes: `${selectedDoctor ? `Doctor: ${selectedDoctor.name_en}.` : ''} Symptoms: ${symptoms}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'medical',
       scheduled_at: scheduledAt,
