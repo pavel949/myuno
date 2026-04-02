@@ -78,7 +78,6 @@ export const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Channel Manager', titleRu: 'Channel Manager', path: APP_ROUTES.MC_CHANNELS, icon: Radio },
-      { title: 'Calendar Sync', titleRu: 'Синхронизация', path: APP_ROUTES.MC_CALENDAR, icon: CalendarDays },
     ],
   },
   {
