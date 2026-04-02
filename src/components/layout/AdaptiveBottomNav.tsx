@@ -56,7 +56,7 @@ const teamNavItems: NavItem[] = [
   { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
-  { path: '/admin/leads', icon: Users, labelEn: 'Leads', labelRu: 'Лиды' },
+  { path: '/admin/crm', icon: Users, labelEn: 'CRM', labelRu: 'CRM' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
