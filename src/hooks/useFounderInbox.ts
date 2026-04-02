@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export interface FounderInboxItem {
   id: string;
@@ -14,13 +13,9 @@ export interface FounderInboxItem {
 }
 
 export function useFounderInbox(limit = 20) {
-  const { activeCompanyId } = useActiveCompany();
-
   return useQuery({
-    queryKey: ['founder-inbox', activeCompanyId, limit],
+    queryKey: ['founder-inbox', limit],
     queryFn: async () => {
-      // Fetch from the three sources in parallel and merge client-side
-      // (v_founder_inbox view handles the UNION but we can also query directly for RLS)
       const [tasksRes, dealsRes, prospectsRes] = await Promise.all([
         supabase
           .from('crm_tasks')
@@ -36,9 +31,9 @@ export function useFounderInbox(limit = 20) {
           .limit(limit),
         supabase
           .from('vendor_prospects')
-          .select('id, company_name, score, status, next_action_date, created_at')
+          .select('id, business_name, ai_score, status, next_followup_at, created_at')
           .not('status', 'in', '("won","lost","archived")')
-          .order('score', { ascending: false })
+          .order('ai_score', { ascending: false })
           .limit(limit),
       ]);
 
@@ -74,16 +69,15 @@ export function useFounderInbox(limit = 20) {
         items.push({
           id: p.id,
           source_type: 'prospect',
-          title: p.company_name,
-          priority: (p.score ?? 0) >= 70 ? 'high' : (p.score ?? 0) >= 40 ? 'medium' : 'low',
+          title: p.business_name,
+          priority: (p.ai_score ?? 0) >= 70 ? 'high' : (p.ai_score ?? 0) >= 40 ? 'medium' : 'low',
           status: p.status,
-          target_date: p.next_action_date,
+          target_date: p.next_followup_at,
           company_id: null,
           created_at: p.created_at,
         });
       });
 
-      // Sort by priority then target_date
       const priorityOrder = { high: 1, medium: 2, low: 3 };
       items.sort((a, b) => {
         const pDiff = (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3);

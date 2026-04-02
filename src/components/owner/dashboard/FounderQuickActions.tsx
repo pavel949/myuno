@@ -33,7 +33,7 @@ export function FounderQuickActions() {
     {
       icon: Target,
       label: isRu ? 'Вендор' : 'Vendor',
-      path: APP_ROUTES.MC_VENDOR_ACQUISITION,
+      path: '/mc/vendor-acquisition',
       color: 'text-purple-500',
     },
   ];

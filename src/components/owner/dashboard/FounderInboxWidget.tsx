@@ -11,7 +11,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 const SOURCE_CONFIG = {
   task: { icon: ClipboardList, color: 'bg-blue-500/10 text-blue-600', label: 'Task', labelRu: 'Задача', route: APP_ROUTES.MC_TASKS },
   deal: { icon: Handshake, color: 'bg-emerald-500/10 text-emerald-600', label: 'Deal', labelRu: 'Сделка', route: APP_ROUTES.MC_SALES },
-  prospect: { icon: Target, color: 'bg-purple-500/10 text-purple-600', label: 'Prospect', labelRu: 'Проспект', route: APP_ROUTES.MC_VENDOR_ACQUISITION },
+  prospect: { icon: Target, color: 'bg-purple-500/10 text-purple-600', label: 'Prospect', labelRu: 'Проспект', route: '/mc/vendor-acquisition' },
 };
 
 const PRIORITY_BADGE: Record<string, string> = {
