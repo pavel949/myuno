@@ -254,11 +254,13 @@ export default function MedicalAppointment() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={price}
+          total={paymentMethod === 'card' ? Math.round(price * 1.1) : price}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Записаться' : 'Book Appointment'}
+          submitLabel={paymentMethod === 'card'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Записаться' : 'Book Appointment')}
         />
       </PageContainer>
     </AppLayout>
