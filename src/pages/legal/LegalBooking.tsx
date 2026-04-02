@@ -34,6 +34,7 @@ export default function LegalBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   // Form state
   const [step, setStep] = useState(1);
