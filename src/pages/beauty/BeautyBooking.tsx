@@ -31,6 +31,7 @@ export default function BeautyBooking() {
   const { language, t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   const { selectedServices = [], salon } = (location.state || {}) as {
     selectedServices?: string[];
