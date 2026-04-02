@@ -103,12 +103,34 @@ export default function BeautyBooking() {
       ? (language === 'ru' ? selectedStaff.name_ru : selectedStaff.name_en) 
       : undefined;
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'beauty',
+        items: selectedServiceDetails.map((service: any) => ({
+          id: service.id,
+          name: language === 'ru' ? service.nameRu : service.name,
+          price: service.price,
+          duration_minutes: service.duration,
+        })),
+        totalAmount: totalPrice,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: salon?.name,
+        notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
       total_amount: totalPrice,
       currency: 'THB',
-      staff_id: selectedStaffId, // Add staff selection
+      staff_id: selectedStaffId,
       notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
       items: selectedServiceDetails.map((service: any) => ({
         item_type: 'service',
