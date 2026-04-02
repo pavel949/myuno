@@ -66,8 +66,8 @@ export default function WellnessOrderSuccess() {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-6 max-w-sm">
-            <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-primary" />
             </div>
 
             <div>
