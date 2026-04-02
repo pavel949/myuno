@@ -1,131 +1,201 @@
 
 
-# Аудит и стратегический редизайн: два CRM, дублирование, AI-автоматизация
+# Маховик myUNO: комплексное видение и план улучшений
 
-## 1. Результаты аудита дублирования
+## Текущее состояние системы
 
-### Две CRM — что есть сейчас
+### Масштаб платформы
+Платформа охватывает 40+ сервисных вертикалей (property, beauty, restaurants, yachts, transport, legal, medical, wellness, education, etc.) с тремя уровнями пользователей:
+- **B2C гости/экспаты** — потребители услуг через единый хаб
+- **B2B вендоры** — поставщики услуг с dashboard, листингами, заказами
+- **MC (Management Company)** — операционное ядро с CRM, PMS, финансами
 
-| | Admin CRM (`/admin/crm`) | MC CRM (`/mc/contacts`, `/mc/sales`, `/mc/crm-dashboard`) |
-|---|---|---|
-| **Таблицы** | `vendor_prospects`, `mcc_leads` — свои таблицы | `crm_contacts`, `agent_deals`, `crm_tasks` — полноценные |
-| **Фокус** | Привлечение вендоров и пользователей на платформу | Управление собственниками, сделками, B2B/B2C клиентами |
-| **Функционал** | Pipeline вендоров, leads-таблица, outreach, activity log | Contacts + deals + tasks + sequences + quotes + scoring + AI assistant |
-| **Зрелость** | Базовая — 4 компонента | Полная — 20+ компонентов, импорт, Odoo, дубликаты |
+### Текущие проблемы
 
-**Вывод**: Admin CRM — это **acquisition tool** (привлечение поставщиков). MC CRM — это **operational CRM** (ведение клиентов). Это разные инструменты, но вы как владелец платформы вынуждены работать в двух местах.
+**1. Разрыв между привлечением и операциями**
+- `vendor_prospects` (acquisition) живёт отдельно от `crm_contacts` (operations)
+- Нет автоматической конверсии prospect → vendor → contact
+- Owner prospects (`owner_prospects`) — третья изолированная таблица
 
-### Обнаруженные дубликаты маршрутов и навигации
+**2. Фрагментация AI-агентов**
+- 30+ edge functions с AI-логикой, но нет единого orchestration layer
+- Агенты работают изолированно: `supplier-discovery`, `vendor-outreach-agent`, `ai-owner-nurture`, `auto-lead-scoring` — без обратной связи между собой
+- Нет системы приоритизации: какой агент важнее прямо сейчас?
 
-1. **Calendar Sync дублирование** — `/mc/calendar` присутствует в группах "Control Tower" И "Distribution" в sidebar
-2. **`/admin/leads`** → редирект на `/admin/operations` — мёртвый маршрут
-3. **`/admin/vendor-prospects`** — отдельная страница, но тот же контент встроен в `/admin/crm` (вкладка Vendors)
-4. **MC CRM Dashboard** vs **MC Dashboard** — два обзорных экрана с пересекающимися виджетами
-5. **Owner routes** (`/owner/*`) — все редиректят на `/mc/*`, но routes constants ещё определены
+**3. Guest lifecycle не связан с revenue**
+- `lifecycle-processor` отправляет сообщения гостям, но не генерирует cross-sell
+- `ai-cross-sell` существует, но не интегрирован в lifecycle pipeline
+- Гость после checkout — потерянный контакт
 
-## 2. Ваша проблема: как работать одному
+**4. Dashboard overload**
+- 50+ виджетов в `/src/components/owner/dashboard/`
+- Founder видит всё сразу вместо actionable priorities
+- Нет "score" по здоровью бизнеса — только отдельные метрики
 
-Сейчас для ежедневной работы вам нужно:
-- `/admin/crm` — чтобы видеть воронку привлечения вендоров
-- `/mc/contacts` — чтобы вести контакты собственников и клиентов
-- `/mc/sales` — чтобы вести сделки
-- `/mc/tasks` — чтобы видеть задачи
-- `/admin/ai-ops` — чтобы управлять AI-агентами
-
-Это **5 разных мест** в разных порталах.
-
-## 3. Предложение: единый Command Center для владельца
-
-### Концепция: "Founder Mode"
-
-Один рабочий стол (`/mc` dashboard), который агрегирует ВСЁ:
+## Маховик myUNO: как должна работать система
 
 ```text
-┌─────────────────────────────────────────────────────┐
-│  MC Dashboard (Founder Mode)                        │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐│
-│  │ Hot Leads │ │ Open     │ │ Today's  │ │ AI Agent││
-│  │ (all src) │ │ Deals    │ │ Tasks    │ │ Status  ││
-│  └──────────┘ └──────────┘ └──────────┘ └─────────┘│
-│                                                     │
-│  ┌─ Vendor Acquisition ─────────────────────────┐   │
-│  │ Pipeline from vendor_prospects (was /admin)   │   │
-│  └───────────────────────────────────────────────┘   │
-│                                                     │
-│  ┌─ AI Agents Summary ──────────────────────────┐   │
-│  │ Last runs, errors, pending actions            │   │
-│  └───────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────┘
+                    ┌──────────────────┐
+           ┌──────>│  DISCOVER         │──────┐
+           │       │  AI finds vendors │      │
+           │       │  & owners online  │      v
+      ┌────┴───┐   └──────────────────┘   ┌──────────┐
+      │REFERRAL│                          │ OUTREACH  │
+      │Guests  │                          │ Auto-email│
+      │refer   │                          │ WhatsApp  │
+      │vendors │                          │ sequences │
+      └────┬───┘                          └────┬─────┘
+           ^                                   v
+    ┌──────┴──────┐                    ┌───────┴──────┐
+    │ GUEST       │                    │ ONBOARD      │
+    │ Experience  │                    │ Vendor/Owner  │
+    │ Cross-sell  │<───Revenue────────>│ signs up      │
+    │ Upsell      │                    │ adds listings │
+    └──────┬──────┘                    └───────┬──────┘
+           ^                                   v
+    ┌──────┴──────┐                    ┌───────┴──────┐
+    │ BOOK &      │                    │ OPERATE      │
+    │ EXPERIENCE  │<───────────────────│ PMS, tasks   │
+    │ Guest stays │    services        │ cleaning     │
+    └──────┬──────┘                    └───────┬──────┘
+           │                                   │
+           └──── REVIEW & REPEAT ──────────────┘
 ```
 
-### Конкретные изменения
+**Ключевой принцип**: каждое действие в системе должно усиливать следующий шаг маховика.
 
-#### A. Объединить Vendor Pipeline в MC CRM (4 файла)
-- Перенести `VendorProspectsPipeline` из `/admin/crm` в MC sidebar как пункт "Vendor Acquisition"
-- Vendor prospects остаются в той же таблице, но доступны из MC
-- `/admin/crm` сохраняется как зеркало для будущих МС-операторов
+## Конкретные предложения по улучшению
 
-#### B. Виджет AI Agents на MC Dashboard (2 файла)
-- Мини-карточка с состоянием агентов (сколько работают, последние ошибки, pending actions)
-- Клик → `/admin/ai-ops` (для founder role)
+### Phase 1: Unified Entity Pipeline (Data Architecture)
 
-#### C. Убрать дубликаты из sidebar (1 файл)
-- Убрать дублирующийся Calendar Sync из "Distribution"
-- Переместить "Marketing" из CRM-группы в отдельную группу или убрать (пока placeholder)
+**Проблема**: 3 изолированные таблицы для лидов, нет единого lifecycle.
 
-#### D. Unified Inbox на Dashboard (2 файла)
-- Виджет "Quick Actions": создать контакт, записать сделку, добавить объект — одним кликом
-- AI-suggested next actions из `crm_tasks` + `vendor_prospects`
+**Решение**: Создать `entity_pipeline` — универсальную воронку для ВСЕХ сущностей:
 
-#### E. AI Agent автоматизация (3 файла)
-Расширить AI-агентов для автоматической рутины:
+```text
+Discovery → Prospect → Contacted → Interested → Onboarding → Active → Retained
+```
 
-| Агент | Триггер | Действие |
-|---|---|---|
-| **Lead Router** | Новый контакт через intake/webhook | Авто-категоризация, назначение температуры, создание задачи |
-| **Follow-up Nagger** | Задача без действия 48ч+ | Push в dashboard + telegram |
-| **Deal Progressor** | Сделка без движения 5д+ | AI предлагает next action, создаёт задачу |
-| **Owner Report** | Cron (weekly) | Авто-генерация отчёта для собственника |
-| **Vendor Onboarding** | Новый prospect score > 70 | Авто-отправка invite через outreach |
+Технически:
+- Добавить в `crm_contacts` поля `pipeline_stage`, `pipeline_type` (vendor/owner/guest/partner)
+- Создать database view `v_unified_pipeline` объединяющий `vendor_prospects` + `owner_prospects` + `crm_contacts`
+- Конверсия prospect → contact: автоматический trigger при смене статуса на "won"
+- 1 таблица `pipeline_stage_history` для трекинга всех переходов
 
-### Архитектура данных — что НЕ менять
-- `crm_contacts` — единая таблица, company_id scoped — **правильно**
-- `agent_deals` — deal pipeline — **правильно**
-- `vendor_prospects` — отдельная таблица для acquisition — **правильно** (другой lifecycle)
-- RLS через `mc_can_access()` — **правильно**
+### Phase 2: AI Orchestrator (Smart Prioritization)
 
-### Архитектура данных — что улучшить
-1. **Добавить `crm_contacts.source_entity`** — связь с `vendor_prospects.id` для трекинга конверсии vendor → contact
-2. **Добавить `ai_task_suggestions`** таблица — AI-предложения действий, которые founder одобряет одним кликом
-3. **Создать view `v_founder_inbox`** — объединённый view из tasks + deals + prospects + reminders, отсортированный по urgency
+**Проблема**: AI-агенты работают изолированно, founder не знает что приоритетно.
 
-## 4. Файлы для изменения
+**Решение**: Edge function `ai-orchestrator` — ежедневный cron:
 
-| Файл | Действие |
-|---|---|
-| `src/components/mc/MCSidebar.tsx` | Убрать дублирующий Calendar из Distribution, добавить "Vendor Acquisition" |
-| `src/components/owner/dashboard/` | Добавить виджет AI Agent Status + Vendor Pipeline mini |
-| `src/components/mc/MCLayout.tsx` | Без изменений |
-| `supabase/migrations/new` | View `v_founder_inbox`, колонка `source_entity`, таблица `ai_task_suggestions` |
-| `src/hooks/useFounderInbox.ts` | Новый хук для unified inbox |
-| `src/components/owner/dashboard/FounderQuickActions.tsx` | Quick-create контакт/сделку/задачу |
-| `src/components/owner/dashboard/AIAgentStatusWidget.tsx` | Мини-статус агентов |
-| `src/pages/admin/AdminCRM.tsx` | Добавить ссылку "Open in MC" для founder |
+1. Сканирует все таблицы: deals без движения, tasks просроченные, prospects без follow-up, guests pre-arrival
+2. Генерирует `ai_task_suggestions` с приоритетами
+3. Решает КАКОЙ агент должен запуститься: если есть hot prospect — запускает outreach, если guest arrival tomorrow — запускает welcome sequence
+4. Пишет в `founder_daily_brief` — одно краткое сообщение в Telegram с топ-5 действиями дня
 
-## 5. Порядок реализации
+### Phase 3: Guest Revenue Loop
 
-**Phase 1** — Cleanup (быстро, 30 мин):
-- Убрать дубликаты из sidebar
-- Убрать мёртвые маршруты
+**Проблема**: Guest после checkout — потерянный контакт.
 
-**Phase 2** — Founder Dashboard (основная работа):
-- Unified inbox виджет
-- Quick Actions panel
-- AI Agent status widget
-- Vendor Pipeline в MC sidebar
+**Решение**: Замкнуть цикл guest → revenue → referral:
 
-**Phase 3** — AI Automation (edge functions):
-- Lead Router agent
-- Follow-up Nagger (cron)
-- Deal Progressor (cron)
+1. **Post-checkout upsell**: через 24ч после выезда — AI-персонализированное письмо с релевантными услугами (визы, property buy, return booking) на основе данных о пребывании
+2. **Guest-to-referral**: если гость оставил 5-star review → автоматически предлагает referral program (скидка за приведённого друга)
+3. **Guest-to-owner**: если гость интересовался покупкой → автоматически создаётся deal в Sales Pipeline с тегом "guest-conversion"
+4. Интегрировать `ai-cross-sell` в `lifecycle-processor` как 6-й stage
+
+### Phase 4: Vendor Self-Service Acceleration
+
+**Проблема**: Вендор onboarding требует ручного внимания founder.
+
+**Решение**: 
+1. **AI Quality Gate**: при добавлении листинга `listing-quality-analyzer` автоматически проверяет и возвращает actionable feedback вендору
+2. **Automated Verification**: если вендор загрузил 3+ фото, описание на 2 языках, цену в THB → автоматический переход в "Verified" статус
+3. **Revenue Dashboard для вендора**: показать вендору его earnings, conversion rate, ranking vs competitors — мотивация улучшать листинги
+4. **Smart Pricing Suggestions**: `ai-pricing-optimizer` предлагает цены на основе рыночных данных — вендор одобряет одним кликом
+
+### Phase 5: Founder Dashboard v2 — "Business Health Score"
+
+**Проблема**: 50+ виджетов, нет единого показателя здоровья бизнеса.
+
+**Решение**: Заменить текущий multi-widget layout на:
+
+```text
+┌─────────────────────────────────────────────┐
+│ Business Health Score: 73/100               │
+│ ████████████████████░░░░░░░░                │
+│                                             │
+│ ⚠ 3 urgent actions    ✓ 12 on track        │
+├─────────────┬───────────────────────────────┤
+│ TOP 5 NOW   │ Pipeline     Revenue  Guests  │
+│ 1. Call X   │ ██ 12 deals  ₿340K    23 arr  │
+│ 2. Reply Y  │ ██ 4 hot     ₿120K    8 dep   │
+│ 3. Approve Z│ ██ 2 stale   ₿45K     5 new   │
+│ 4. Review W │                               │
+│ 5. Send doc │                               │
+└─────────────┴───────────────────────────────┘
+```
+
+Технически:
+- Новый хук `useBusinessHealthScore` — агрегирует метрики из deals, tasks, properties, revenue
+- Score формула: `(active_deals_moving * 20) + (tasks_on_time * 20) + (occupancy * 20) + (revenue_growth * 20) + (response_time * 20)`
+- "Top 5 Now" — из `ai_task_suggestions`, сортированные по impact score
+- Все остальные виджеты — в collapsible секции ниже, а не загружены по умолчанию
+
+### Phase 6: Workflow Automation Rules
+
+**Проблема**: Бизнес-правила зашиты в код, нельзя менять без разработчика.
+
+**Решение**: Расширить `mcc_automation_rules` для реальных use cases:
+
+| Trigger | Condition | Action |
+|---------|-----------|--------|
+| New vendor prospect | ai_score > 70 | Send outreach sequence |
+| Deal stage = "viewing" | 48h no update | Create follow-up task |
+| Guest checkout | rating >= 4.5 | Send referral invite |
+| Property occupancy | < 40% this month | Alert + AI pricing suggestion |
+| Invoice overdue | 7+ days | Send reminder + flag in dashboard |
+| New contact created | source = "website" | Auto-assign to Sales Pipeline |
+
+UI: визуальный rule builder в `/mc/settings` → Automation tab.
+
+## Файлы для изменения
+
+### Database (migrations)
+1. View `v_unified_pipeline` — объединение 3 таблиц лидов
+2. Таблица `pipeline_stage_history` — трекинг переходов
+3. Таблица `founder_daily_brief` — AI-генерированные дайджесты
+4. Расширение `crm_contacts`: `pipeline_stage`, `pipeline_type`
+5. Расширение `mcc_automation_rules` для новых trigger types
+
+### Edge Functions
+1. `ai-orchestrator/index.ts` — главный координатор AI-агентов (cron)
+2. Обновить `lifecycle-processor` — добавить cross-sell stage
+3. `guest-referral-engine/index.ts` — автоматизация referral после отзыва
+4. Обновить `listing-quality-analyzer` — auto-verify при соблюдении критериев
+
+### Frontend
+1. `useBusinessHealthScore.ts` — новый хук для агрегированного скора
+2. `BusinessHealthCard.tsx` — главная карточка dashboard
+3. `TopActionsWidget.tsx` — "Top 5 Now" из AI suggestions
+4. `AutomationRulesBuilder.tsx` — визуальный конструктор правил
+5. Рефакторинг `OwnerDashboard.tsx` — Health Score первым, виджеты collapsible
+6. Обновить vendor dashboard — revenue analytics виджет
+
+### Sidebar & Navigation
+1. Упростить MC sidebar: объединить "CRM Dashboard" и "Dashboard" в один экран
+2. Добавить бейдж "AI Suggestions" на Tasks с числом pending suggestions
+
+## Порядок реализации
+
+| Phase | Effort | Impact | Priority |
+|-------|--------|--------|----------|
+| 1. Unified Pipeline View | 4h | High — убирает фрагментацию данных | 1 |
+| 5. Business Health Score | 4h | High — упрощает daily workflow founder | 2 |
+| 2. AI Orchestrator | 6h | High — автоматизирует приоритизацию | 3 |
+| 3. Guest Revenue Loop | 4h | Medium — новый revenue stream | 4 |
+| 6. Automation Rules | 6h | Medium — убирает ручную рутину | 5 |
+| 4. Vendor Self-Service | 4h | Medium — масштабируемость | 6 |
+
+Готов начать с Phase 1 (Unified Pipeline) + Phase 5 (Business Health Score) — они дают максимальный эффект при минимальных изменениях.
 
