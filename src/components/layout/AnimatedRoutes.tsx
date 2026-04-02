@@ -280,6 +280,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/medical/clinic/:id" element={<LazyPage><Pages.ClinicDetail /></LazyPage>} />
         <Route path="/medical/appointment/:id" element={<LazyPage><Pages.MedicalAppointment /></LazyPage>} />
         
+        {/* ── Wellness (shared) ── */}
+        <Route path={APP_ROUTES.WELLNESS_ORDER_SUCCESS} element={<LazyPage><Pages.WellnessOrderSuccess /></LazyPage>} />
+        
         {/* ── Events ── */}
         <Route path={APP_ROUTES.EVENTS} element={<LazyPage><Pages.EventsIndex /></LazyPage>} />
         <Route path="/events/:id" element={<LazyPage><Pages.EventDetail /></LazyPage>} />

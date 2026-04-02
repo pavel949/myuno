@@ -118,6 +118,9 @@ export const MedicalIndex = lazy(() => import('@/pages/medical/MedicalIndex'));
 export const ClinicDetail = lazy(() => import('@/pages/medical/ClinicDetail'));
 export const MedicalAppointment = lazy(() => import('@/pages/medical/MedicalAppointment'));
 
+// ── Wellness (shared) ──
+export const WellnessOrderSuccess = lazy(() => import('@/pages/wellness/WellnessOrderSuccess'));
+
 // ── Events ──
 export const EventsIndex = lazy(() => import('@/pages/events/EventsIndex'));
 export const EventDetail = lazy(() => import('@/pages/events/EventDetail'));
