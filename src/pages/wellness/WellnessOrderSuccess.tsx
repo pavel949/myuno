@@ -25,11 +25,11 @@ export default function WellnessOrderSuccess() {
       const { data } = await supabase
         .from('orders')
         .select('id, status, total_amount, currency, metadata, created_at')
-        .eq('stripe_session_id', sessionId)
-        .maybeSingle();
+        .eq('stripe_session_id', sessionId as string)
+        .limit(1);
 
-      if (data) {
-        setOrder(data);
+      if (data && data.length > 0) {
+        setOrder(data[0]);
         setLoading(false);
         return;
       }
