@@ -3789,10 +3789,14 @@ export type Database = {
           outreach_status: string | null
           phone: string | null
           phone2: string | null
+          pipeline_stage: string | null
+          pipeline_type: string | null
           preferred_districts: string[] | null
           preferred_types: string[] | null
           scoring: number | null
           source: string | null
+          source_entity_id: string | null
+          source_entity_type: string | null
           special_notes: string | null
           tags: string[] | null
           tax_id: string | null
@@ -3849,10 +3853,14 @@ export type Database = {
           outreach_status?: string | null
           phone?: string | null
           phone2?: string | null
+          pipeline_stage?: string | null
+          pipeline_type?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
           scoring?: number | null
           source?: string | null
+          source_entity_id?: string | null
+          source_entity_type?: string | null
           special_notes?: string | null
           tags?: string[] | null
           tax_id?: string | null
@@ -3909,10 +3917,14 @@ export type Database = {
           outreach_status?: string | null
           phone?: string | null
           phone2?: string | null
+          pipeline_stage?: string | null
+          pipeline_type?: string | null
           preferred_districts?: string[] | null
           preferred_types?: string[] | null
           scoring?: number | null
           source?: string | null
+          source_entity_id?: string | null
+          source_entity_type?: string | null
           special_notes?: string | null
           tags?: string[] | null
           tax_id?: string | null
@@ -6899,6 +6911,50 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_daily_brief: {
+        Row: {
+          ai_model: string | null
+          brief_date: string
+          company_id: string | null
+          created_at: string
+          id: string
+          metrics_snapshot: Json | null
+          summary_en: string | null
+          summary_ru: string | null
+          top_actions: Json | null
+        }
+        Insert: {
+          ai_model?: string | null
+          brief_date?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          metrics_snapshot?: Json | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          top_actions?: Json | null
+        }
+        Update: {
+          ai_model?: string | null
+          brief_date?: string
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          metrics_snapshot?: Json | null
+          summary_en?: string | null
+          summary_ru?: string | null
+          top_actions?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_daily_brief_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -14120,6 +14176,50 @@ export type Database = {
             columns: ["pharmacy_id"]
             isOneToOne: false
             referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pipeline_stage_history: {
+        Row: {
+          changed_by: string | null
+          company_id: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          from_stage: string | null
+          id: string
+          metadata: Json | null
+          to_stage: string
+        }
+        Insert: {
+          changed_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          from_stage?: string | null
+          id?: string
+          metadata?: Json | null
+          to_stage: string
+        }
+        Update: {
+          changed_by?: string | null
+          company_id?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          from_stage?: string | null
+          id?: string
+          metadata?: Json | null
+          to_stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_stage_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
         ]
@@ -28096,6 +28196,28 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_unified_pipeline: {
+        Row: {
+          ai_score: number | null
+          category: string | null
+          company_id: string | null
+          contact_person: string | null
+          created_at: string | null
+          email: string | null
+          entity_type: string | null
+          id: string | null
+          last_contact_at: string | null
+          name: string | null
+          next_action_date: string | null
+          phone: string | null
+          pipeline_stage: string | null
+          pipeline_type: string | null
+          priority: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Relationships: []
       }
       vehicles: {
         Row: {
