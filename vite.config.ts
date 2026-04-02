@@ -10,7 +10,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      host: "::",
+      // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
+      host: true,
+      port: 8080,
+      // OneDrive-synced folders can miss file events; polling avoids stale HMR and odd Vite cache behavior.
+      watch: {
+        usePolling: true,
+        interval: 1000,
+      },
+    },
+    preview: {
+      host: true,
       port: 8080,
     },
     define: {

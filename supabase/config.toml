@@ -123,6 +123,8 @@ project_id = "kakkwibljrjsawxgnupk"
     verify_jwt = false
   [functions.send-property-report]
     verify_jwt = false
+  [functions.stays-subscribe]
+    verify_jwt = true
   [functions.stripe-webhook]
     verify_jwt = false
   [functions.submit-web-form]

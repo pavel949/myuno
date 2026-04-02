@@ -21673,6 +21673,90 @@ export type Database = {
           },
         ]
       }
+      stays_subscription_tiers: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          price_thb_monthly: number
+          stripe_price_id: string | null
+          max_ota_links: number | null
+          dynamic_pricing: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          price_thb_monthly: number
+          stripe_price_id?: string | null
+          max_ota_links?: number | null
+          dynamic_pricing?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          price_thb_monthly?: number
+          stripe_price_id?: string | null
+          max_ota_links?: number | null
+          dynamic_pricing?: boolean | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      property_stays_subscriptions: {
+        Row: {
+          id: string
+          property_id: string
+          owner_id: string
+          tier_id: string | null
+          stripe_subscription_id: string | null
+          stripe_customer_id: string | null
+          status: string | null
+          current_period_end: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          owner_id: string
+          tier_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          status?: string | null
+          current_period_end?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          owner_id?: string
+          tier_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          status?: string | null
+          current_period_end?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_stays_subscriptions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: true
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stays_subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "stays_subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_products: {
         Row: {
           category: string | null

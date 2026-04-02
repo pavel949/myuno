@@ -92,6 +92,9 @@ export const APP_ROUTES = {
   INVEST_RAISE: '/property/invest/raise',
   INVEST_DETAIL: (id: string) => `/property/invest/${id}`,
 
+  // ── STAYS (guest short-term search, Russian UI) ──
+  STAYS_SEARCH: '/stays/search',
+
   // ── Resale / Secondary Market (under Property Hub) ──
   RESALE: '/property/resale',
   RESALE_DETAIL: (id: string) => `/property/resale/${id}`,

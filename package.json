@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:fresh": "vite --force",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
