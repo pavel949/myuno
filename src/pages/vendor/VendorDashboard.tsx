@@ -206,6 +206,9 @@ const VendorDashboard = () => {
         bookingsCount={stats.completedCount || 0}
       />
 
+      {/* Revenue Analytics */}
+      <VendorRevenueWidget />
+
       {/* KPI Cards with Comparison */}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <VendorKPICard 
