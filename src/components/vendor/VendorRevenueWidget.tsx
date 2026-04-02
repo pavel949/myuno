@@ -37,19 +37,20 @@ export function VendorRevenueWidget() {
       const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
 
       // Orders this month + previous month
+      const sb = supabase as any;
       const [currentRes, prevRes, totalOrdersRes] = await Promise.all([
-        supabase.from('orders')
+        sb.from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfMonth),
-        supabase.from('orders')
+        sb.from('orders')
           .select('total_amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfPrevMonth)
           .lt('created_at', endOfPrevMonth),
-        supabase.from('orders')
+        sb.from('orders')
           .select('id', { count: 'exact', head: true })
           .eq('provider_id', provider.id)
           .eq('status', 'completed'),
