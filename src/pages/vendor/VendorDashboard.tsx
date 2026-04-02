@@ -39,6 +39,7 @@ import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorO
 import { VendorVerificationBadge } from '@/components/vendor/dashboard/VendorVerificationBadge';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
+import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
