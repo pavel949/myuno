@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
 import { useClinic, useDoctors, useMedicalServices } from "@/hooks/useClinics";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -33,6 +34,7 @@ export default function MedicalAppointment() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   // Fetch clinic, doctors, and services
   const { clinic, isLoading: clinicLoading } = useClinic(id);
@@ -113,6 +115,27 @@ export default function MedicalAppointment() {
         ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
         : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation');
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'medical',
+        items: [{
+          id: selectedService?.id || selectedDoctor?.id || id || 'consultation',
+          name: itemName,
+          price,
+        }],
+        totalAmount: price,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: clinic?.name_en || undefined,
+        notes: `${selectedDoctor ? `Doctor: ${selectedDoctor.name_en}.` : ''} Symptoms: ${symptoms}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'medical',
       scheduled_at: scheduledAt,
@@ -231,11 +254,13 @@ export default function MedicalAppointment() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={price}
+          total={paymentMethod === 'card' ? Math.round(price * 1.1) : price}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Записаться' : 'Book Appointment'}
+          submitLabel={paymentMethod === 'card'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Записаться' : 'Book Appointment')}
         />
       </PageContainer>
     </AppLayout>

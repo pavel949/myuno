@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
 import { useGuestCheckout } from "@/hooks/useGuestCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -33,6 +34,7 @@ export default function FitnessBooking() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
   const { 
     showLoginModal, 
     setShowLoginModal, 
@@ -93,6 +95,26 @@ export default function FitnessBooking() {
 
     const scheduledAt = date || new Date();
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'fitness',
+        items: [{
+          id: id || membershipType,
+          name: language === 'ru' ? membership.labelRu : membership.labelEn,
+          price: membership.price,
+        }],
+        totalAmount: membership.price,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        notes: `Fitness Membership: ${membershipType}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
@@ -186,11 +208,13 @@ export default function FitnessBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={membership.price}
+          total={paymentMethod === 'card' ? Math.round(membership.price * 1.1) : membership.price}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Подтвердить' : 'Confirm'}
+          submitLabel={paymentMethod === 'card'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить' : 'Confirm')}
         />
       </PageContainer>
 

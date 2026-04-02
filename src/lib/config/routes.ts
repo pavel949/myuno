@@ -123,6 +123,9 @@ export const APP_ROUTES = {
   MEDICAL_CLINIC: (id: string) => `/medical/clinic/${id}`,
   MEDICAL_APPOINTMENT: (id: string) => `/medical/appointment/${id}`,
 
+  // ── Wellness (shared) ──
+  WELLNESS_ORDER_SUCCESS: '/wellness/order/success',
+
   // ── Events ──
   EVENTS: '/events',
   EVENT_DETAIL: (id: string) => `/events/${id}`,

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useWellnessCheckout } from "@/hooks/useWellnessCheckout";
 import { useSalonStaff } from "@/hooks/useSalonStaff";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -30,6 +31,7 @@ export default function BeautyBooking() {
   const { language, t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
 
   const { selectedServices = [], salon } = (location.state || {}) as {
     selectedServices?: string[];
@@ -101,12 +103,34 @@ export default function BeautyBooking() {
       ? (language === 'ru' ? selectedStaff.name_ru : selectedStaff.name_en) 
       : undefined;
 
+    // Online card payment → Stripe checkout
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'beauty',
+        items: selectedServiceDetails.map((service: any) => ({
+          id: service.id,
+          name: language === 'ru' ? service.nameRu : service.name,
+          price: service.price,
+          duration_minutes: service.duration,
+        })),
+        totalAmount: totalPrice,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: salon?.name,
+        notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
+      });
+      return;
+    }
+
+    // Cash / wallet → existing booking flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
       total_amount: totalPrice,
       currency: 'THB',
-      staff_id: selectedStaffId, // Add staff selection
+      staff_id: selectedStaffId,
       notes: `Salon: ${salon?.name || 'Beauty Salon'}. Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
       items: selectedServiceDetails.map((service: any) => ({
         item_type: 'service',
@@ -225,12 +249,14 @@ export default function BeautyBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={totalPrice}
+          total={paymentMethod === 'card' ? Math.round(totalPrice * 1.1) : totalPrice}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'}
-          hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}
+          submitLabel={paymentMethod === 'card' 
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking')}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование' : '🔒 Secure booking'}
         />
       </PageContainer>
     </AppLayout>
