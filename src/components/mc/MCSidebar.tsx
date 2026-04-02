@@ -132,6 +132,7 @@ const PATH_TO_MODULE: Record<string, ModuleKey> = {
   [APP_ROUTES.MC_REVIEWS]: 'crm',
   [APP_ROUTES.MC_SETTINGS]: 'staff',
   [APP_ROUTES.MC_MARKETING]: 'crm',
+  [APP_ROUTES.MC_VENDOR_ACQUISITION]: 'crm',
   [APP_ROUTES.MC_TASKS]: 'tasks',
   [APP_ROUTES.MC_INVENTORY]: 'properties',
   [APP_ROUTES.MC_VENDORS]: 'properties',
