@@ -45,6 +45,12 @@ export default function MCSettingsPage() {
       title: isRu ? 'Данные и бэкап' : 'Data & Backup',
       desc: isRu ? 'Экспорт данных, автоматический бэкап' : 'Data export, automatic backups',
     },
+    {
+      id: 'automation',
+      icon: Zap,
+      title: isRu ? 'Автоматизация' : 'Automation',
+      desc: isRu ? 'Бизнес-правила и триггеры без кода' : 'Business rules and triggers without code',
+    },
   ];
 
   return (
