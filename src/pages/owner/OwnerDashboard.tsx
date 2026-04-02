@@ -26,6 +26,9 @@ import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreetin
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
+import { AIAgentStatusWidget } from '@/components/owner/dashboard/AIAgentStatusWidget';
+import { FounderQuickActions } from '@/components/owner/dashboard/FounderQuickActions';
+import { FounderInboxWidget } from '@/components/owner/dashboard/FounderInboxWidget';
 import { MaintenanceHealthWidget } from '@/components/owner/dashboard/MaintenanceHealthWidget';
 import { TodayActionsWidget } from '@/components/owner/dashboard/TodayActionsWidget';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
