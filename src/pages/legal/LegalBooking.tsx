@@ -358,6 +358,7 @@ export default function LegalBooking() {
                 currency="THB"
                 showWallet
                 showCash
+                showOnline
               />
             </div>
 
