@@ -8,6 +8,7 @@ export interface ExternalCalendar {
   owner_id: string;
   name: string;
   ical_url: string;
+  channel_type: string | null;
   last_synced_at: string | null;
   sync_error: string | null;
   is_active: boolean;
@@ -111,16 +112,21 @@ export function useExternalCalendars(propertyId?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });
     },
   });
 
   const syncAllCalendars = useMutation({
     mutationFn: async (propertyId?: string) => {
-      const calendarIds = calendars
-        ?.filter(c => !propertyId || c.property_id === propertyId)
-        .map(c => c.id) || [];
+      const calendarIds =
+        calendars
+          ?.filter(
+            (c) =>
+              (!propertyId || c.property_id === propertyId) && c.is_active !== false,
+          )
+          .map((c) => c.id) ?? [];
 
-      if (calendarIds.length === 0) return { results: [] };
+      if (calendarIds.length === 0) return { results: [], skipped: true as const };
 
       const { data, error } = await supabase.functions.invoke('ical-sync', {
         body: { calendar_ids: calendarIds },
@@ -132,6 +138,7 @@ export function useExternalCalendars(propertyId?: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });
     },
   });
 

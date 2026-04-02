@@ -176,6 +176,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/clinics" element={<Navigate to={APP_ROUTES.MEDICAL} replace />} />
         <Route path="/water_activities" element={<Navigate to={`${APP_ROUTES.EXPERIENCES}?type=activity`} replace />} />
         
+        <Route path={APP_ROUTES.STAYS_SEARCH} element={<LazyPage><Pages.StaysSearchPage /></LazyPage>} />
+
         {/* ── Property Hub ── */}
         <Route path="/properties" element={<Navigate to={APP_ROUTES.PROPERTY} replace />} />
         <Route path={APP_ROUTES.PROPERTY} element={<Suspense fallback={<LoadingState />}><PropertyHub /></Suspense>}>

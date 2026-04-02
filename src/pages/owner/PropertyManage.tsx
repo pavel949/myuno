@@ -31,6 +31,7 @@ import { PropertyManagePricingSection } from '@/components/owner/property-manage
 import { PropertyManageRulesSection } from '@/components/owner/property-manage/RulesSection';
 import { PropertyManageInvestmentSection } from '@/components/owner/property-manage/InvestmentSection';
 import { PropertyManageMarketingSection } from '@/components/owner/marketing';
+import { StaysSubscriptionCard } from '@/components/owner/property-manage/StaysSubscriptionCard';
 
 interface MenuSection {
   id: string;
@@ -211,6 +212,7 @@ export default function PropertyManage() {
       case 'calendar':
         return (
           <PropertyManageCalendarSection
+            propertyId={id}
             availability={localAvailability}
             onChange={(newAvailability) => {
               setLocalAvailability(newAvailability);
@@ -417,6 +419,7 @@ export default function PropertyManage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
           <div className="p-4 md:p-6 max-w-4xl mx-auto">
+            {id ? <StaysSubscriptionCard propertyId={id} isRu={isRu} /> : null}
             {renderSection()}
           </div>
         </main>

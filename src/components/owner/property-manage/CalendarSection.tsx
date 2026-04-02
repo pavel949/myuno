@@ -4,9 +4,13 @@ import { PropertyCalendar, AvailabilityEntry, ActivityLogEntry } from '@/compone
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, RefreshCw, Link2, ExternalLink } from 'lucide-react';
+import { Calendar, RefreshCw, Link2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import type { SeasonalPricingRule } from '@/lib/pricingEngine';
+import { useExternalCalendars } from '@/hooks/useExternalCalendars';
+import { useStaysUnifiedCalendar } from '@/hooks/useStaysUnifiedCalendar';
+import { useToast } from '@/hooks/use-toast';
 
 interface CalendarSectionProps {
   availability: AvailabilityEntry[];
@@ -27,10 +31,18 @@ export function PropertyManageCalendarSection({
 }: CalendarSectionProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const isRu = language === 'ru';
 
-  const blockedDays = availability.filter(a => a.status === 'blocked').length;
-  const bookedDays = availability.filter(a => a.status === 'booked').length;
+  const { calendars, syncAllCalendars, isSyncing } = useExternalCalendars(propertyId);
+  const { data: unifiedData } = useStaysUnifiedCalendar(propertyId);
+
+  const blockedDays = availability.filter((a) => a.status === 'blocked').length;
+  const bookedDays = availability.filter((a) => a.status === 'booked').length;
+
+  const activeChannelCount = calendars?.filter(
+    (c) => c.property_id === propertyId && c.is_active !== false,
+  ).length ?? 0;
 
   const handleLogActivity = async (entry: ActivityLogEntry) => {
     if (!propertyId || !user) return;
@@ -42,12 +54,43 @@ export function PropertyManageCalendarSection({
         action: entry.action,
         entity_type: entry.entity_type || null,
         entity_id: entry.entity_id || null,
-        details: entry.details as any,
+        details: entry.details as unknown as Json,
       });
-    } catch (err) {
-      console.error('Failed to log activity:', err);
+    } catch {
+      /* non-fatal */
     }
   };
+
+  const handleSyncAll = async () => {
+    if (!propertyId) return;
+    try {
+      const result = await syncAllCalendars(propertyId);
+      if (result && typeof result === 'object' && 'skipped' in result && result.skipped) {
+        toast({
+          title: isRu ? 'Нет каналов' : 'No channels',
+          description: isRu
+            ? 'Добавьте активный iCal канал для этого объекта.'
+            : 'Add an active iCal channel for this property first.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      toast({
+        title: isRu ? 'Синхронизация запущена' : 'Sync started',
+        description: isRu
+          ? 'Календари обновляются. Данные появятся через несколько секунд.'
+          : 'Calendars are updating. Data will refresh shortly.',
+      });
+    } catch (e) {
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: e instanceof Error ? e.message : 'Sync failed',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const unifiedDayMeta = propertyId ? unifiedData?.unifiedDayMeta : undefined;
 
   return (
     <div className="space-y-6">
@@ -57,23 +100,34 @@ export function PropertyManageCalendarSection({
           {isRu ? 'Календарь доступности' : 'Availability Calendar'}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {isRu 
-            ? 'Управляйте датами бронирования и ценами для каждого дня' 
-            : 'Manage booking dates and prices for each day'}
+          {isRu
+            ? 'Все каналы (OTA и вручную) на одном календаре. Конфликты подсвечены красным.'
+            : 'All channels (OTA and manual) in one view. Conflicts are highlighted in red.'}
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         <Badge variant="secondary" className="px-3 py-1">
           {isRu ? 'Заблокировано:' : 'Blocked:'} {blockedDays}
         </Badge>
         <Badge variant="secondary" className="px-3 py-1">
-          {isRu ? 'Забронировано:' : 'Booked:'} {bookedDays}
+          {isRu ? 'Забронировано (лист):' : 'Booked (sheet):'} {bookedDays}
         </Badge>
+        {propertyId && (
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            className="gap-2 ml-auto"
+            disabled={isSyncing || activeChannelCount === 0}
+            onClick={handleSyncAll}
+          >
+            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isRu ? 'Синхронизировать все' : 'Sync all channels'}
+          </Button>
+        )}
       </div>
 
-      {/* Calendar */}
       <PropertyCalendar
         availability={availability}
         onChange={onChange}
@@ -81,37 +135,25 @@ export function PropertyManageCalendarSection({
         currency={currency}
         seasonalPricing={seasonalPricing}
         onLogActivity={propertyId ? handleLogActivity : undefined}
+        unifiedDayMeta={unifiedDayMeta}
       />
 
-      {/* iCal Sync Section */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Link2 className="h-4 w-4" />
-            {isRu ? 'Синхронизация календаря' : 'Calendar Sync'}
+            {isRu ? 'Каналы iCal' : 'iCal channels'}
           </CardTitle>
           <CardDescription>
-            {isRu 
-              ? 'Синхронизируйте с Airbnb, Booking.com и другими платформами' 
-              : 'Sync with Airbnb, Booking.com and other platforms'}
+            {isRu
+              ? `Активных каналов: ${activeChannelCount}. Управление каналами — в настройках канал-менеджера.`
+              : `Active channels: ${activeChannelCount}. Manage links in channel manager settings.`}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" size="sm" className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              {isRu ? 'Импорт iCal' : 'Import iCal'}
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <ExternalLink className="h-4 w-4" />
-              {isRu ? 'Экспорт iCal' : 'Export iCal'}
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {isRu 
-              ? 'Вставьте ссылку iCal с другой платформы для автоматической синхронизации занятости' 
-              : 'Paste an iCal link from another platform to automatically sync availability'}
-          </p>
+        <CardContent className="text-xs text-muted-foreground">
+          {isRu
+            ? 'Кнопка «Синхронизировать все» вызывает edge function ical-sync для каждого активного канала этого объекта.'
+            : '“Sync all channels” invokes the ical-sync edge function for each active calendar of this property.'}
         </CardContent>
       </Card>
     </div>

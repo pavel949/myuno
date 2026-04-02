@@ -11,6 +11,9 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterv
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { getEffectiveNightlyRate, buildPricingRulesFromSeasons, type SeasonalPricingRule, type RateSeasonRecord } from '@/lib/pricingEngine';
+import type { UnifiedDayMeta } from '@/hooks/useStaysUnifiedCalendar';
+import { getStaysChannelColor, STAYS_CHANNEL_COLORS } from '@/lib/staysCalendarChannelColors';
+import type { StaysChannelKey } from '@/lib/staysCalendarChannelColors';
 
 export interface AvailabilityEntry {
   date: Date;
@@ -37,6 +40,8 @@ interface PropertyCalendarProps {
   rateSeasons?: RateSeasonRecord[];
   onLogActivity?: (entry: ActivityLogEntry) => void;
   className?: string;
+  /** STAYS: merged OTA/manual bookings per night — channel stripes + conflict badge */
+  unifiedDayMeta?: Map<string, UnifiedDayMeta>;
 }
 
 export function PropertyCalendar({ 
@@ -47,7 +52,8 @@ export function PropertyCalendar({
   seasonalPricing,
   rateSeasons,
   onLogActivity,
-  className 
+  className,
+  unifiedDayMeta,
 }: PropertyCalendarProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -324,6 +330,28 @@ export function PropertyCalendar({
             <div className={cn("w-4 h-4 rounded", statusColors.booked)} />
             <span>{isRu ? 'Забронировано' : 'Booked'}</span>
           </div>
+          {unifiedDayMeta && (
+            <div className="w-full flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border/60 pt-3 mt-1">
+              <span className="text-muted-foreground shrink-0">
+                {isRu ? 'Каналы:' : 'Channels:'}
+              </span>
+              {(Object.keys(STAYS_CHANNEL_COLORS) as StaysChannelKey[]).map((k) => (
+                <span key={k} className="inline-flex items-center gap-1">
+                  <span
+                    className="w-3 h-3 rounded-sm border border-border/50 shrink-0"
+                    style={{ backgroundColor: getStaysChannelColor(k) }}
+                  />
+                  <span className="text-[10px] capitalize">
+                    {k === 'booking' ? 'Booking.com' : k === 'manual' ? (isRu ? 'Вручную' : 'Manual') : k}
+                  </span>
+                </span>
+              ))}
+              <span className="inline-flex items-center gap-1">
+                <span className="w-3 h-3 rounded-sm ring-2 ring-red-500 bg-background shrink-0" />
+                <span className="text-[10px]">{isRu ? 'Конфликт' : 'Conflict'}</span>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Calendar Grid */}
@@ -343,31 +371,65 @@ export function PropertyCalendar({
               const isCurrentMonth = isSameMonth(day, currentMonth);
               const isPast = isBefore(day, startOfDay(new Date()));
               const isSelected = isDateInSelection(day);
+              const dayKey = format(day, 'yyyy-MM-dd');
+              const unified = unifiedDayMeta?.get(dayKey);
+              const conflictCount = unified?.conflictBadgeCount ?? 0;
+              const channelKeys = unified?.channelKeys ?? [];
 
               return (
                 <div
                   key={index}
                   className={cn(
-                    "relative h-16 p-1 rounded-md border transition-all cursor-pointer",
+                    "relative h-16 p-1 rounded-md border transition-all cursor-pointer overflow-hidden",
                     !isCurrentMonth && "opacity-40",
                     isPast && "opacity-30 cursor-not-allowed",
-                    isToday(day) && "ring-2 ring-primary",
-                    isSelected && "ring-2 ring-primary bg-primary/10",
-                    !isSelected && !isPast && statusColors[status],
-                    !isPast && "hover:ring-2 hover:ring-primary/50"
+                    isToday(day) && !conflictCount && "ring-2 ring-primary",
+                    isSelected && !conflictCount && "ring-2 ring-primary bg-primary/10",
+                    conflictCount > 0 && "ring-2 ring-red-500 bg-red-500/5",
+                    !isSelected && !isPast && !conflictCount && statusColors[status],
+                    !isPast && !conflictCount && "hover:ring-2 hover:ring-primary/50"
                   )}
                   onMouseDown={() => handleMouseDown(day)}
                   onMouseEnter={() => handleMouseEnter(day)}
                 >
                   <span className={cn(
-                    "text-xs font-medium",
+                    "text-xs font-medium relative z-[1]",
                     isToday(day) && "text-primary"
                   )}>
                     {format(day, 'd')}
                   </span>
+
+                  {conflictCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute top-0.5 right-0.5 h-5 min-w-[1.25rem] px-1 text-[10px] leading-none z-[2]"
+                    >
+                      {conflictCount}
+                    </Badge>
+                  )}
+
+                  {channelKeys.length > 0 && !isPast && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-1.5 flex pointer-events-none z-[1]"
+                      aria-hidden
+                    >
+                      {channelKeys.map((k) => (
+                        <div
+                          key={k}
+                          className="flex-1 min-w-0"
+                          style={{ backgroundColor: getStaysChannelColor(k) }}
+                        />
+                      ))}
+                    </div>
+                  )}
                   
                   {isCurrentMonth && !isPast && price > 0 && (
-                    <div className="absolute bottom-1 left-1 right-1">
+                    <div
+                      className={cn(
+                        'absolute left-1 right-1 z-[1]',
+                        channelKeys.length > 0 ? 'bottom-2' : 'bottom-1',
+                      )}
+                    >
                       <span className={cn(
                         "text-[10px] block truncate",
                         price > basePrice
@@ -382,7 +444,12 @@ export function PropertyCalendar({
                   )}
 
                   {status === 'blocked' && !isPast && (
-                    <Lock className="absolute top-1 right-1 h-3 w-3 text-muted-foreground" />
+                    <Lock
+                      className={cn(
+                        'absolute top-1 h-3 w-3 text-muted-foreground z-[2] pointer-events-none',
+                        conflictCount > 0 ? 'left-1' : 'right-1',
+                      )}
+                    />
                   )}
                 </div>
               );

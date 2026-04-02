@@ -899,6 +899,45 @@ Deno.serve(async (req) => {
           logStep("MC subscription updated", { companyId, quantity });
         }
       }
+
+      // STAYS: per-property subscription
+      const isStaysSub = subscription.metadata?.type === "stays_subscription";
+      const staysPropertyId = subscription.metadata?.property_id;
+      if (isStaysSub && staysPropertyId) {
+        logStep("Processing STAYS subscription event", {
+          type: event.type,
+          propertyId: redactId(staysPropertyId),
+        });
+
+        if (event.type === "customer.subscription.deleted") {
+          await supabaseAdmin
+            .from("property_stays_subscriptions")
+            .update({
+              status: "cancelled",
+              stripe_subscription_id: null,
+              current_period_end: null,
+            })
+            .eq("property_id", staysPropertyId);
+
+          logStep("STAYS subscription cancelled", { propertyId: redactId(staysPropertyId) });
+        } else {
+          await supabaseAdmin
+            .from("property_stays_subscriptions")
+            .update({
+              status: subscription.status,
+              stripe_subscription_id: subscription.id,
+              current_period_end: subscription.current_period_end
+                ? new Date(subscription.current_period_end * 1000).toISOString()
+                : null,
+            })
+            .eq("property_id", staysPropertyId);
+
+          logStep("STAYS subscription updated", {
+            propertyId: redactId(staysPropertyId),
+            status: subscription.status,
+          });
+        }
+      }
     }
 
     // =====================================================
@@ -918,6 +957,49 @@ Deno.serve(async (req) => {
           .eq("id", companyId);
 
         logStep("MC subscription ID saved after checkout", { companyId: redactId(companyId) });
+      }
+
+      if (session.metadata?.type === "stays_subscription" && session.subscription) {
+        const propertyId = session.metadata.property_id as string | undefined;
+        const ownerId = session.metadata.owner_id as string | undefined;
+        const tierId = session.metadata.tier_id as string | undefined;
+        if (!propertyId || !ownerId || !tierId) {
+          logStep("WARN", "STAYS checkout.session.completed missing property_id, owner_id, or tier_id in metadata");
+        } else {
+          const subId = typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription.id;
+
+          const customerRaw = session.customer;
+          const customerId = typeof customerRaw === "string"
+            ? customerRaw
+            : customerRaw?.id ?? null;
+
+          const sub = await stripe.subscriptions.retrieve(subId);
+
+          const { error: staysUpsertError } = await supabaseAdmin
+            .from("property_stays_subscriptions")
+            .upsert(
+              {
+                property_id: propertyId,
+                owner_id: ownerId,
+                tier_id: tierId,
+                stripe_subscription_id: subId,
+                stripe_customer_id: customerId,
+                status: sub.status,
+                current_period_end: sub.current_period_end
+                  ? new Date(sub.current_period_end * 1000).toISOString()
+                  : null,
+              },
+              { onConflict: "property_id" },
+            );
+
+          if (staysUpsertError) {
+            logStep("ERROR", `STAYS upsert after checkout: ${staysUpsertError.message}`);
+          } else {
+            logStep("STAYS subscription saved after checkout", { propertyId: redactId(propertyId) });
+          }
+        }
       }
     }
 
