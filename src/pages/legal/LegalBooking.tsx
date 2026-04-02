@@ -97,6 +97,35 @@ export default function LegalBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
+    // Stripe card payment flow
+    if (paymentMethod === 'card') {
+      await createWellnessCheckout({
+        vertical: 'medical', // legal falls under professional services
+        items: [{
+          id: id || 'legal-consultation',
+          name: selectedService || (language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation'),
+          price: consultationPrice,
+          duration_minutes: 60,
+        }],
+        totalAmount: consultationPrice,
+        scheduledAt: scheduledAt.toISOString(),
+        contactName: contactData.name,
+        contactPhone: contactData.phone,
+        contactEmail: contactData.email,
+        providerName: language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation',
+        notes: JSON.stringify({
+          provider_id: id,
+          service: selectedService,
+          consultation_type: consultationType,
+          description,
+          company,
+          visa_type: searchParams.get('visa_type'),
+        }),
+      });
+      return;
+    }
+
+    // Cash/wallet flow
     const result = await createBooking({
       booking_type: 'service',
       scheduled_at: scheduledAt,
