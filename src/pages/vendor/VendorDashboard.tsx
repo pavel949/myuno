@@ -39,6 +39,7 @@ import { VendorOnboardingChecklist } from '@/components/vendor/dashboard/VendorO
 import { VendorVerificationBadge } from '@/components/vendor/dashboard/VendorVerificationBadge';
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
+import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
@@ -204,6 +205,9 @@ const VendorDashboard = () => {
         rating={0}
         bookingsCount={stats.completedCount || 0}
       />
+
+      {/* Revenue Analytics */}
+      <VendorRevenueWidget />
 
       {/* KPI Cards with Comparison */}
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">

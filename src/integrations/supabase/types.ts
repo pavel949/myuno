@@ -7186,6 +7186,48 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_referral_codes: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          discount_percent: number | null
+          expires_at: string | null
+          guest_user_id: string
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          referral_code: string
+          referred_user_ids: string[] | null
+          used_count: number | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          discount_percent?: number | null
+          expires_at?: string | null
+          guest_user_id: string
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          referral_code: string
+          referred_user_ids?: string[] | null
+          used_count?: number | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          discount_percent?: number | null
+          expires_at?: string | null
+          guest_user_id?: string
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          referral_code?: string
+          referred_user_ids?: string[] | null
+          used_count?: number | null
+        }
+        Relationships: []
+      }
       gyms: {
         Row: {
           address: string | null
@@ -10576,7 +10618,13 @@ export type Database = {
       }
       mcc_automation_rules: {
         Row: {
+          action_config: Json | null
+          action_type: string | null
           actions: Json
+          condition_field: string | null
+          condition_operator: string | null
+          condition_value: string | null
+          cooldown_hours: number | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -10587,12 +10635,19 @@ export type Database = {
           last_executed_at: string | null
           name: string
           trigger_conditions: Json
+          trigger_entity_type: string | null
           trigger_type: string
           updated_at: string | null
           user_state_filter: string[] | null
         }
         Insert: {
+          action_config?: Json | null
+          action_type?: string | null
           actions: Json
+          condition_field?: string | null
+          condition_operator?: string | null
+          condition_value?: string | null
+          cooldown_hours?: number | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -10603,12 +10658,19 @@ export type Database = {
           last_executed_at?: string | null
           name: string
           trigger_conditions: Json
+          trigger_entity_type?: string | null
           trigger_type: string
           updated_at?: string | null
           user_state_filter?: string[] | null
         }
         Update: {
+          action_config?: Json | null
+          action_type?: string | null
           actions?: Json
+          condition_field?: string | null
+          condition_operator?: string | null
+          condition_value?: string | null
+          cooldown_hours?: number | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -10619,6 +10681,7 @@ export type Database = {
           last_executed_at?: string | null
           name?: string
           trigger_conditions?: Json
+          trigger_entity_type?: string | null
           trigger_type?: string
           updated_at?: string | null
           user_state_filter?: string[] | null
