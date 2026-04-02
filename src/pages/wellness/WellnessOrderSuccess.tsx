@@ -22,11 +22,12 @@ export default function WellnessOrderSuccess() {
     const maxAttempts = 10;
 
     const poll = async () => {
-      const { data } = await (supabase
-        .from('orders')
+      const query = supabase
+        .from('orders' as any)
         .select('id, status, total_amount, currency, metadata, created_at')
         .eq('stripe_session_id', sessionId as string)
-        .limit(1) as any);
+        .limit(1);
+      const { data } = await query;
 
       if (data && data.length > 0) {
         setOrder(data[0]);
