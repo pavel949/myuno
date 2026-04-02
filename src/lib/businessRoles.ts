@@ -46,6 +46,9 @@ export type DashboardWidgetKey =
   | 'unified_inbox'
   | 'maintenance_health'
   | 'myuno_services'
+  | 'ai_agents_status'
+  | 'founder_inbox'
+  | 'founder_quick_actions'
   | 'menu';
 
 export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
