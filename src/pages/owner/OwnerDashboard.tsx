@@ -306,7 +306,7 @@ export default function OwnerDashboard() {
       titleEn: 'Today',
       titleRu: 'Сегодня',
       icon: Sun,
-      widgets: ['today_actions', 'property_priority', 'your_day'] as DashboardWidgetKey[],
+      widgets: ['today_actions', 'founder_quick_actions', 'ai_agents_status', 'property_priority', 'your_day'] as DashboardWidgetKey[],
     },
     health: {
       titleEn: 'Portfolio Health',
