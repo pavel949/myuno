@@ -43,7 +43,7 @@ export function TopActionsWidget() {
   const { data: suggestions, isLoading: loadingSuggestions } = useQuery({
     queryKey: ['ai-task-suggestions-top5'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('ai_task_suggestions')
         .select('*')
         .eq('status', 'pending')
