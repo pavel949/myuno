@@ -254,6 +254,18 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
           <FounderQuickActions />
         </Suspense>
       );
+    case 'business_health':
+      return (
+        <Suspense fallback={skeleton}>
+          <BusinessHealthCard />
+        </Suspense>
+      );
+    case 'top_actions':
+      return (
+        <Suspense fallback={skeleton}>
+          <TopActionsWidget />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
