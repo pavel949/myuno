@@ -60,6 +60,9 @@ export const BUSINESS_ROLES: Record<BusinessRole, BusinessRoleConfig> = {
     icon: '🏠',
     widgets: [
       'today_actions',
+      'founder_quick_actions',
+      'founder_inbox',
+      'ai_agents_status',
       'property_priority',
       'kpi',
       'your_day',
