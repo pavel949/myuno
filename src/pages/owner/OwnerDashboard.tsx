@@ -324,7 +324,7 @@ export default function OwnerDashboard() {
       titleEn: 'Sales & CRM',
       titleRu: 'Продажи и CRM',
       icon: Briefcase,
-      widgets: ['active_deals', 'crm_tasks', 'operations'] as DashboardWidgetKey[],
+      widgets: ['active_deals', 'crm_tasks', 'founder_inbox', 'operations'] as DashboardWidgetKey[],
     },
     exceptions: {
       titleEn: 'Exceptions',
