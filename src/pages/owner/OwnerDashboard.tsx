@@ -234,6 +234,24 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       );
     case 'myuno_services':
       return null;
+    case 'ai_agents_status':
+      return (
+        <Suspense fallback={skeleton}>
+          <AIAgentStatusWidget />
+        </Suspense>
+      );
+    case 'founder_inbox':
+      return (
+        <Suspense fallback={skeleton}>
+          <FounderInboxWidget />
+        </Suspense>
+      );
+    case 'founder_quick_actions':
+      return (
+        <Suspense fallback={skeleton}>
+          <FounderQuickActions />
+        </Suspense>
+      );
     case 'menu':
       return null;
     default:
