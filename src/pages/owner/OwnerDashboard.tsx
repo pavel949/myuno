@@ -301,6 +301,8 @@ const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'active_stays',
   'crm_tasks',
   'upcoming_payments',
+  'business_health',
+  'top_actions',
 ]);
 
 export default function OwnerDashboard() {
