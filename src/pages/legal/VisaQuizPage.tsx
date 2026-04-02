@@ -4,7 +4,7 @@
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, ChevronRight, CheckCircle2, ArrowLeft, FileText, Clock, DollarSign, AlertTriangle } from 'lucide-react';
+import { Shield, ChevronRight, CheckCircle2, ArrowLeft, FileText, Clock, DollarSign, AlertTriangle, Scale, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
