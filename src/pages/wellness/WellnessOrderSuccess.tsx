@@ -33,7 +33,6 @@ export default function WellnessOrderSuccess() {
         setLoading(false);
         return;
       }
-      }
 
       attempts++;
       if (attempts < maxAttempts) {
