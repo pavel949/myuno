@@ -277,6 +277,7 @@ const COLLAPSIBLE_WIDGETS: Partial<Record<DashboardWidgetKey, { en: string; ru: 
 const HALF_WIDTH_WIDGETS: Set<DashboardWidgetKey> = new Set([
   'revenue_insights', 'upcoming_payments',
   'active_deals', 'crm_tasks',
+  'ai_agents_status', 'founder_quick_actions',
 ]);
 
 const OVERVIEW_SUPPRESSED_WIDGETS: Set<DashboardWidgetKey> = new Set([
