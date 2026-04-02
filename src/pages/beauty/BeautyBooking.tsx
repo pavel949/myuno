@@ -249,12 +249,14 @@ export default function BeautyBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={totalPrice}
+          total={paymentMethod === 'card' ? Math.round(totalPrice * 1.1) : totalPrice}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking'}
-          hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}
+          submitLabel={paymentMethod === 'card' 
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking')}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование' : '🔒 Secure booking'}
         />
       </PageContainer>
     </AppLayout>
