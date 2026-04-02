@@ -46,7 +46,7 @@ const vendorNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/admin/leads', icon: UserCheck, labelEn: 'Leads', labelRu: 'Лиды' },
+  { path: '/admin/crm', icon: UserCheck, labelEn: 'CRM', labelRu: 'CRM' },
   { path: '/admin/tickets', icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
   { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
