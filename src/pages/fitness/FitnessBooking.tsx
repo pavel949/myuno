@@ -34,6 +34,7 @@ export default function FitnessBooking() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createWellnessCheckout, isProcessing: isStripeProcessing } = useWellnessCheckout();
   const { 
     showLoginModal, 
     setShowLoginModal, 
