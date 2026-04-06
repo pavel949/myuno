@@ -20,12 +20,12 @@ export function QuickInstallButton() {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/30"
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success/10 border border-success/30"
       >
-        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-          <Check className="h-5 w-5 text-white" />
+        <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center">
+          <Check className="h-5 w-5 text-success-foreground" />
         </div>
-        <span className="font-medium text-green-600 dark:text-green-400">
+        <span className="font-medium text-success">
           {isRu ? 'Приложение установлено' : 'App Installed'}
         </span>
       </motion.div>

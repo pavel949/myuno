@@ -71,7 +71,7 @@ export const PromoCarousel: React.FC<PromoCarouselProps> = ({ className }) => {
                     "bg-gradient-to-r",
                     banner.gradient,
                     "p-5 sm:p-6 text-left",
-                    "shadow-lg hover:shadow-xl transition-shadow duration-300",
+                    "[box-shadow:var(--shadow-elevation-2)] hover:[box-shadow:var(--shadow-elevation-3)] transition-shadow duration-300",
                     "group touch-manipulation",
                     "min-h-[140px]"
                   )}

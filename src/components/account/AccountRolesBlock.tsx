@@ -38,8 +38,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'Orders, bookings & services',
     descRu: 'Заказы, брони и услуги',
     icon: User,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    color: 'text-info',
+    bgColor: 'bg-info/10',
     path: '/account',
   },
   {
@@ -49,8 +49,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'My property & services',
     descRu: 'Мой объект и сервисы',
     icon: Building2,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-100 dark:bg-teal-900/30',
+    color: 'text-teal',
+    bgColor: 'bg-teal/10',
     path: '/owner',
   },
   {
@@ -60,8 +60,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'Manage services & orders',
     descRu: 'Управление услугами',
     icon: Store,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+    color: 'text-accent-purple',
+    bgColor: 'bg-accent-purple/10',
     path: '/vendor',
   },
   {
@@ -82,8 +82,8 @@ const ROLE_CARDS: RoleCardConfig[] = [
     descEn: 'Content & operations',
     descRu: 'Контент и операции',
     icon: UserCog,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+    color: 'text-success',
+    bgColor: 'bg-success/10',
     path: '/team',
   },
 ];

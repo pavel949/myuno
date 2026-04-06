@@ -15,8 +15,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 const CHANNEL_CONFIG = {
-  whatsapp: { icon: Phone, label: 'WhatsApp', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-  email: { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+  whatsapp: { icon: Phone, label: 'WhatsApp', color: 'text-success bg-success/10' },
+  email: { icon: Mail, label: 'Email', color: 'text-info bg-info/10' },
   chat: { icon: MessageCircle, label: 'Chat', color: 'text-primary bg-primary/10' },
 } as const;
 

@@ -39,27 +39,27 @@ export function PromoCodeInput({ subtotal, onPromoApplied, className }: PromoCod
   if (appliedPromo) {
     const discount = calculateDiscount(subtotal);
     return (
-      <div className={cn('bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-3', className)}>
+      <div className={cn('bg-success/10 border border-success/30 rounded-lg p-3', className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-green-600" />
+            <Check className="w-4 h-4 text-success" />
             <div>
-              <span className="font-medium text-green-700 dark:text-green-400">
+              <span className="font-medium text-success">
                 {appliedPromo.code}
               </span>
-              <span className="text-sm text-green-600 dark:text-green-500 ml-2">
+              <span className="text-sm text-success/80 ml-2">
                 −{getCurrencySymbol('THB')}{discount}
               </span>
             </div>
           </div>
           <button
             onClick={handleClear}
-            className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded"
+            className="p-1 hover:bg-success/15 rounded"
           >
-            <X className="w-4 h-4 text-green-600" />
+            <X className="w-4 h-4 text-success" />
           </button>
         </div>
-        <p className="text-xs text-green-600 dark:text-green-500 mt-1">
+        <p className="text-xs text-success/80 mt-1">
           {language === 'ru' ? appliedPromo.description_ru : appliedPromo.description_en}
         </p>
       </div>
@@ -92,7 +92,7 @@ export function PromoCodeInput({ subtotal, onPromoApplied, className }: PromoCod
         </Button>
       </div>
       {error && (
-        <p className="text-sm text-red-500 mt-1">{error}</p>
+        <p className="text-sm text-destructive mt-1">{error}</p>
       )}
     </div>
   );
