@@ -50,7 +50,35 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
         logged_by: user.id,
         activity_date: new Date().toISOString(),
       });
-      toast(isRu)toast.error(isRu, { description: '' }))}
+      toast(isRu ? 'Активность добавлена' : 'Activity logged');
+      setForm({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
+      setOpen(false);
+    } catch {
+      toast.error(isRu ? 'Ошибка сохранения' : 'Failed to save');
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">{isRu ? 'Активность' : 'Activity'}</h3>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="sm"><Plus className="h-4 w-4" /></Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>{isRu ? 'Добавить активность' : 'Log Activity'}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>{isRu ? 'Тип' : 'Type'}</Label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {ACTIVITY_TYPES.map(t => {
+                    const cfg = ACTIVITY_TYPE_CONFIG[t];
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, activity_type: t }))}
                         className={cn(
                           'px-2.5 py-1 rounded-full text-xs border transition-colors',
                           form.activity_type === t
