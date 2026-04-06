@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Save, GripVertical, Clock, Phone, Mail, MessageCircle, ClipboardList } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 const ACTION_TYPES = [
   { value: 'task', labelEn: 'Create Task', labelRu: 'Создать задачу', icon: ClipboardList, color: 'text-primary' },
@@ -34,6 +34,7 @@ interface Props {
 export function SequenceBuilder({ sequence }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { toast } = useToast();
   const upsertSteps = useUpsertSequenceSteps();
   const updateSequence = useUpdateSequence();
 
@@ -92,18 +93,18 @@ export function SequenceBuilder({ sequence }: Props) {
         })),
       });
       setDirty(false);
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Шаги сохранены' : 'Steps saved' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка сохранения' : 'Save error', variant: 'destructive' });
     }
   };
 
   const toggleActive = async () => {
     try {
       await updateSequence.mutateAsync({ id: sequence.id, is_active: !sequence.is_active });
-      toast(sequence);
+      toast({ title: sequence.is_active ? (isRu ? 'Приостановлена' : 'Paused') : (isRu ? 'Активирована' : 'Activated') });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 

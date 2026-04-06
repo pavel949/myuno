@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plane, MapPin, Phone, Calendar, Car } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
-import { toast } from 'sonner';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -24,6 +24,7 @@ const statusColors: Record<string, string> = {
 export default function AdminTransfers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -67,8 +68,52 @@ export default function AdminTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-transfers'] });
-      toast(isRu);
-      // Error handled as Record<string, unknown>;
+      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
+    },
+    onError: () => {
+      toast({ title: isRu ? 'Ошибка обновления' : 'Update failed', variant: 'destructive' });
+    },
+  });
+
+  // Filter only transfer-type orders (metadata.transfer_type === 'airport')
+  const transferOrders = orders?.filter(o => {
+    const meta = o.metadata as Record<string, unknown> | null;
+    return meta?.transfer_type === 'airport' || meta?.direction;
+  }) || [];
+
+  return (
+    <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-[1536px] mx-auto w-full">
+      <div>
+        <h1 className="text-2xl font-display font-bold">{isRu ? 'Трансферы' : 'Airport Transfers'}</h1>
+        <p className="text-sm text-muted-foreground">{transferOrders.length} {isRu ? 'заказов' : 'orders'}</p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={isRu ? 'Все статусы' : 'All statuses'} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{isRu ? 'Все' : 'All'}</SelectItem>
+            {STATUS_OPTIONS.map(s => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : transferOrders.length === 0 ? (
+        <div className="text-center py-20 text-muted-foreground">
+          {isRu ? 'Нет заказов на трансфер' : 'No transfer orders yet'}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {transferOrders.map(order => {
+            const meta = (order.metadata || {}) as Record<string, unknown>;
             const participants = order.order_participants as Array<{ name: string; phone: string | null; email: string | null; role: string }> | null;
             const addresses = order.order_addresses as Array<{ address_type: string; address_text: string }> | null;
             const primary = participants?.find(p => p.role === 'primary') || participants?.[0];

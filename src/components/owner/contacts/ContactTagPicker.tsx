@@ -11,7 +11,7 @@ import { X, Plus, Tag, Settings2, Trash2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContactTags, useCreateContactTag, useDeleteContactTag, ContactTag, TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContactTagPickerProps {
   companyId: string | undefined;
@@ -27,6 +27,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
   const { data: tags = [] } = useContactTags(companyId);
   const createTag = useCreateContactTag();
   const deleteTag = useDeleteContactTag();
+  const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');
@@ -37,7 +38,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
     const name = newTagName.trim();
     if (!name || !companyId) return;
     if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Тег уже существует' : 'Tag already exists', variant: 'destructive' });
       return;
     }
     try {
@@ -45,7 +46,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
       onToggle(name); // auto-select the new tag
       setNewTagName('');
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -57,7 +58,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
         onToggle(tag.name);
       }
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 

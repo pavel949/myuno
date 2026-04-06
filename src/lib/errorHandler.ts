@@ -1,5 +1,5 @@
+import { toast } from '@/hooks/use-toast';
 import { getStoredLang } from '@/lib/languageConfig';
-import { toast } from 'sonner';
 
 type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
 

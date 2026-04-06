@@ -11,9 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Plus, GripVertical, Trash2, Save, Pencil, X, Check, Upload } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
-import { toast } from 'sonner';
 
 // ─── Reusable option list editor ───
 
@@ -30,6 +30,7 @@ function OptionListEditor({
   const createOption = useCreateCrmOption();
   const updateOption = useUpdateCrmOption();
   const deleteOption = useDeleteCrmOption();
+  const { toast } = useToast();
 
   const [showAdd, setShowAdd] = useState(false);
   const [newItem, setNewItem] = useState({ value: '', label_en: '', label_ru: '', color: '#3b82f6' });
@@ -39,7 +40,75 @@ function OptionListEditor({
   const handleAdd = async () => {
     const value = newItem.value.trim().toLowerCase().replace(/\s+/g, '_');
     if (!value || !newItem.label_en.trim() || !newItem.label_ru.trim()) {
-      toast.error(isRu)toast.error(isRu))} />
+      toast({ title: isRu ? 'Заполните все поля' : 'Fill all fields', variant: 'destructive' });
+      return;
+    }
+    try {
+      await createOption.mutateAsync({
+        company_id: companyId,
+        category,
+        value,
+        label_en: newItem.label_en.trim(),
+        label_ru: newItem.label_ru.trim(),
+        color: newItem.color,
+        icon: null,
+        short_en: null,
+        short_ru: null,
+        probability: null,
+        is_system: false,
+        is_active: true,
+        sort_order: options.length + 1,
+      });
+      toast({ title: isRu ? 'Добавлено' : 'Added' });
+      setNewItem({ value: '', label_en: '', label_ru: '', color: '#3b82f6' });
+      setShowAdd(false);
+    } catch {
+      toast({ title: isRu ? 'Ошибка (возможно дубликат)' : 'Error (possibly duplicate)', variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (opt: CrmCustomOption) => {
+    if (opt.is_system) {
+      toast({ title: isRu ? 'Системный элемент нельзя удалить' : 'Cannot delete system item', variant: 'destructive' });
+      return;
+    }
+    try {
+      await deleteOption.mutateAsync(opt.id);
+      toast({ title: isRu ? 'Удалено' : 'Deleted' });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  const startEdit = (opt: CrmCustomOption) => {
+    setEditingId(opt.id);
+    setEditData({ label_en: opt.label_en, label_ru: opt.label_ru, color: opt.color || '#78716c' });
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    try {
+      await updateOption.mutateAsync({ id, label_en: editData.label_en, label_ru: editData.label_ru, color: editData.color });
+      setEditingId(null);
+      toast({ title: isRu ? 'Сохранено' : 'Saved' });
+    } catch {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+    }
+  };
+
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
+
+  return (
+    <div className="space-y-3">
+      {options.filter(o => o.is_active).map(opt => (
+        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-xl border bg-card group">
+          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 opacity-30" />
+          <div
+            className="h-4 w-4 rounded-full shrink-0 border"
+            style={{ backgroundColor: editingId === opt.id ? editData.color : (opt.color || '#78716c') }}
+          />
+          {editingId === opt.id ? (
+            <div className="flex-1 flex items-center gap-2">
+              <Input className="h-7 text-xs" value={editData.label_en} onChange={e => setEditData(d => ({ ...d, label_en: e.target.value }))} />
               <Input className="h-7 text-xs" value={editData.label_ru} onChange={e => setEditData(d => ({ ...d, label_ru: e.target.value }))} />
               <Input type="color" className="h-7 w-10 p-0.5" value={editData.color} onChange={e => setEditData(d => ({ ...d, color: e.target.value }))} />
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleSaveEdit(opt.id)}>
@@ -120,6 +189,7 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
   const { data: stages = [], isLoading } = useAllPipelineStages(companyId);
   const createStage = useCreatePipelineStage();
   const deleteStage = useDeletePipelineStage();
+  const { toast } = useToast();
 
   const [selectedType, setSelectedType] = useState<DealType>('sale');
   const [showAdd, setShowAdd] = useState(false);
@@ -129,7 +199,7 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
 
   const handleAdd = async () => {
     if (!newStage.stage_key || !newStage.name_en || !newStage.name_ru) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Заполните все поля' : 'Fill all fields', variant: 'destructive' });
       return;
     }
     try {
@@ -146,24 +216,24 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
         is_system: false,
         is_active: true,
       });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Этап добавлен' : 'Stage added' });
       setNewStage({ stage_key: '', name_en: '', name_ru: '', short_label: '', color: '#6366f1', probability: '0.5' });
       setShowAdd(false);
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
   const handleDelete = async (stage: PipelineStage) => {
     if (stage.is_system) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Системный этап нельзя удалить' : 'Cannot delete system stage', variant: 'destructive' });
       return;
     }
     try {
       await deleteStage.mutateAsync(stage.id);
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Этап удалён' : 'Stage deleted' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -172,9 +242,9 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
       for (const s of DEFAULT_STAGES.map(s => ({ ...s, deal_type: dealType, company_id: companyId }))) {
         await createStage.mutateAsync(s);
       }
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Стандартные этапы созданы' : 'Default stages created' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 

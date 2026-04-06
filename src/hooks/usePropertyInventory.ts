@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 
 export interface InventoryItem {
   id: string;
@@ -154,10 +154,17 @@ export function usePropertyInventory(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-inventory', propertyId] });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: t('Item added', 'Предмет добавлен'),
+        description: t('Inventory item has been added', 'Предмет добавлен в опись'),
+      });
     },
     onError: (error: Error) => {
-      toast.error(t, { description: error.message });
+      toast({
+        title: t('Error', 'Ошибка'),
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -176,7 +183,9 @@ export function usePropertyInventory(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-inventory', propertyId] });
-      toast(t);
+      toast({
+        title: t('Item updated', 'Предмет обновлён'),
+      });
     },
   });
 
@@ -192,7 +201,9 @@ export function usePropertyInventory(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-inventory', propertyId] });
-      toast(t);
+      toast({
+        title: t('Item removed', 'Предмет удалён'),
+      });
     },
   });
 
@@ -274,10 +285,16 @@ export function useInventoryReports(bookingId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-reports', bookingId] });
-      toast(t);
+      toast({
+        title: t('Damage reported', 'Повреждение зафиксировано'),
+      });
     },
     onError: (error: Error) => {
-      toast.error(t, { description: error.message });
+      toast({
+        title: t('Error', 'Ошибка'),
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -299,7 +316,9 @@ export function useInventoryReports(bookingId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-reports', bookingId] });
-      toast(t);
+      toast({
+        title: t('Report resolved', 'Отчёт закрыт'),
+      });
     },
   });
 

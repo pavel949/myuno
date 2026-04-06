@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Database } from '@/integrations/supabase/types';
-import { toast } from 'sonner';
 
 type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert'];
 
@@ -72,6 +72,7 @@ export interface CreateTicketInput {
 
 export function useTickets() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Main tickets query with React Query
@@ -123,11 +124,18 @@ export function useTickets() {
       return data as unknown as SupportTicket;
     },
     onSuccess: (data) => {
-      toast('Обращение создано', { description: `Номер: ${data.ticket_number}` });
+      toast({
+        title: 'Обращение создано',
+        description: `Номер: ${data.ticket_number}`,
+      });
       queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
     },
     onError: () => {
-      toast.error('Ошибка', { description: 'Не удалось создать обращение' });
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось создать обращение',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -185,11 +193,17 @@ export function useTickets() {
 
       if (error) throw error;
 
-      toast('Сообщение отправлено');
+      toast({
+        title: 'Сообщение отправлено',
+      });
 
       return true;
     } catch {
-      toast.error('Ошибка', { description: 'Не удалось отправить сообщение' });
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить сообщение',
+        variant: 'destructive',
+      });
       return false;
     }
   };

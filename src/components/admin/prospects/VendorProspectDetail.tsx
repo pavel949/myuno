@@ -15,9 +15,9 @@ import {
   Send, Bot, Copy, MessageSquare, UserPlus,
   Sparkles, Loader2, Facebook
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 interface VendorProspectDetailProps {
   prospect: VendorProspect;
@@ -28,6 +28,7 @@ interface VendorProspectDetailProps {
 export function VendorProspectDetail({ prospect, open, onClose }: VendorProspectDetailProps) {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const { toast } = useToast();
   
   const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();
@@ -58,9 +59,14 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
         stage: prospect.status
       });
       setGeneratedMessage(result.message || '');
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRussian ? 'Сообщение сгенерировано' : 'Message generated',
+      });
     } catch (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRussian ? 'Ошибка генерации' : 'Generation failed',
+        variant: 'destructive'
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -70,9 +76,14 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
     setIsScoring(true);
     try {
       await scoreProspect.mutateAsync(prospect.id);
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRussian ? 'Оценка обновлена' : 'Score updated',
+      });
     } catch (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRussian ? 'Ошибка оценки' : 'Scoring failed',
+        variant: 'destructive'
+      });
     } finally {
       setIsScoring(false);
     }
@@ -80,8 +91,27 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(generatedMessage);
-    toast(isRu ? 'Готово' : 'Done');
-      // Error handled;
+    toast({
+      title: isRussian ? 'Скопировано' : 'Copied',
+    });
+  };
+
+  const handleAddNote = () => {
+    if (!noteText.trim()) return;
+    logActivity.mutate({
+      prospect_id: prospect.id,
+      activity_type: 'note',
+      new_value: noteText
+    });
+    setNoteText('');
+    toast({
+      title: isRussian ? 'Заметка добавлена' : 'Note added',
+    });
+  };
+
+  const handleConvertToCrm = async () => {
+    if (!myCompany?.company_id) {
+      toast({ title: isRussian ? 'Нет активной компании' : 'No active company', variant: 'destructive' });
       return;
     }
     setIsConvertingToCrm(true);
@@ -98,7 +128,10 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
           .eq('email', prospect.email)
           .maybeSingle();
         if (byEmail) {
-          toast(isRussian, { description: `${byEmail.first_name} (${prospect.email})` });
+          toast({
+            title: isRussian ? 'Контакт уже в CRM' : 'Contact already in CRM',
+            description: `${byEmail.first_name} (${prospect.email})`,
+          });
           setIsConvertingToCrm(false);
           return;
         }
@@ -149,9 +182,16 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
       // Mark prospect as converted
       updateProspect.mutate({ id: prospect.id, status: 'won' });
 
-      toast(isRussian, { description: `${firstName} ${lastName} — ${tags.join(', ')}` });
+      toast({
+        title: isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM',
+        description: `${firstName} ${lastName} — ${tags.join(', ')}`,
+      });
     } catch (error: any) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
       setIsConvertingToCrm(false);
     }

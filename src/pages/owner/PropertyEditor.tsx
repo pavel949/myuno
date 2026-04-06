@@ -18,9 +18,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bed, Calendar, UsersRound, Eye, Loader2, Check, Rocket, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
-import { toast } from 'sonner';
 
 const errorLog = createErrorHandler('PropertyEditor');
 
@@ -105,6 +105,7 @@ export default function PropertyEditor() {
   const { id } = useParams();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const { data: property, isLoading } = useOwnerProperty(id);
@@ -426,7 +427,10 @@ export default function PropertyEditor() {
         return;
       }
 
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRu ? 'Сохранено' : 'Saved',
+        description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully',
+      });
       navigate(`/mc/properties/${id}`);
     } catch (error) {
       errorLog.error(error, 'save_property');

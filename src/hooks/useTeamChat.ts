@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export interface TeamChannel {
   id: string;
@@ -63,6 +63,7 @@ export function useTeamChannels() {
  */
 export function useTeamMessages(channelSlug: string) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [realtimeMessages, setRealtimeMessages] = useState<TeamMessage[]>([]);
 
@@ -179,7 +180,7 @@ export function useTeamMessages(channelSlug: string) {
       if (error) throw error;
     },
     onError: () => {
-      toast.error('Ошибка отправки');
+      toast({ title: 'Ошибка отправки', variant: 'destructive' });
     },
   });
 

@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
 import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
 import { PriceDisplay } from '@/components/uno/PriceDisplay';
@@ -18,7 +19,6 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { addDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 // ─── Validation ───
 const LATIN_REGEX = /^[a-zA-Z\s\-'.]+$/;
@@ -59,6 +59,7 @@ export default function AirportFastTrackPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const isRu = language === 'ru';
 
   // White-label: fetch ALL services (no supplier filter), supplier routing is internal
@@ -207,7 +208,7 @@ export default function AirportFastTrackPage() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Войдите в аккаунт' : 'Please sign in', variant: 'destructive' });
       navigate('/auth');
       return;
     }
@@ -251,7 +252,10 @@ export default function AirportFastTrackPage() {
 
       if (error) throw error;
 
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRu ? 'Бронирование создано!' : 'Booking created!',
+        description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
+      });
 
       if (direction === 'arrival') {
         setShowUpsell(true);
@@ -260,7 +264,11 @@ export default function AirportFastTrackPage() {
       }
     } catch (err) {
       console.error('Fast Track booking error:', err);
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }

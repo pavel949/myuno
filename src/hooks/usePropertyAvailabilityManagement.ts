@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { AvailabilityEntry } from '@/components/property/PropertyCalendar';
-import { toast } from 'sonner';
 
 interface PropertyAvailabilityRow {
   id: string;
@@ -19,6 +19,7 @@ interface PropertyAvailabilityRow {
 }
 
 export function usePropertyAvailabilityManagement(propertyId?: string) {
+  const { toast } = useToast();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
@@ -77,11 +78,18 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRu ? 'Сохранено' : 'Saved',
+        description: isRu ? 'Доступность обновлена' : 'Availability updated successfully',
+      });
     },
     onError: (error) => {
       console.error('Error updating availability:', error);
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось обновить доступность' : 'Failed to update availability',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -105,7 +113,11 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
     },
     onError: (error) => {
       console.error('Error deleting availability:', error);
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось удалить записи' : 'Failed to delete availability entries',
+        variant: 'destructive',
+      });
     },
   });
 

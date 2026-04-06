@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export type TeamSpecialization = 
   | 'content_manager'
@@ -38,6 +38,7 @@ export const SPECIALIZATION_LABELS: Record<TeamSpecialization, { en: string; ru:
  */
 export function useTeamMember() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: member, isLoading, error } = useQuery({
@@ -70,10 +71,10 @@ export function useTeamMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-member', user?.id] });
-      toast('Профиль обновлён');
+      toast({ title: 'Профиль обновлён' });
     },
     onError: () => {
-      toast.error('Ошибка обновления');
+      toast({ title: 'Ошибка обновления', variant: 'destructive' });
     },
   });
 

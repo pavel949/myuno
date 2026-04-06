@@ -3,10 +3,10 @@ import { RefreshCw, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/hooks/useOrders';
-import { toast } from 'sonner';
 
 interface ReorderButtonProps {
   order: Order;
@@ -25,6 +25,7 @@ export function ReorderButton({
 }: ReorderButtonProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(false);
   const isRu = language === 'ru';
@@ -46,7 +47,10 @@ export function ReorderButton({
 
   const handleReorder = async () => {
     if (!user) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Войдите в аккаунт' : 'Please login',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -86,7 +90,12 @@ export function ReorderButton({
 
           if (error) throw error;
 
-          toast(isRu ? 'Готово' : 'Done');
+          toast({
+            title: isRu ? 'Добавлено в корзину' : 'Added to cart',
+            description: isRu 
+              ? `${cartItems.length} товаров добавлено` 
+              : `${cartItems.length} items added`,
+          });
 
           // Navigate to checkout or cart
           navigate('/cart');
@@ -95,7 +104,10 @@ export function ReorderButton({
         // For service orders, navigate to the service page with pre-filled data
         const path = getRedirectPath(order.order_type);
         
-        toast(isRu ? 'Готово' : 'Done');
+        toast({
+          title: isRu ? 'Перенаправление' : 'Redirecting',
+          description: isRu ? 'Выберите дату и время' : 'Please select date and time',
+        });
 
         // Pass order data as state for pre-filling
         navigate(path, {
@@ -111,7 +123,11 @@ export function ReorderButton({
       }
     } catch (error) {
       console.error('Reorder error:', error);
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: isRu ? 'Не удалось повторить заказ' : 'Failed to reorder',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }

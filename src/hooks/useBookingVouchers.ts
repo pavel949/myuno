@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 
 export interface BookingVoucher {
   id: string;
@@ -24,6 +24,7 @@ export interface BookingVoucher {
 export function useBookingVouchers() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch user's vouchers
@@ -58,10 +59,15 @@ export function useBookingVouchers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking-vouchers', user?.id] });
-      toast(language);
+      toast({
+        title: language === 'ru' ? 'Ваучер создан' : 'Voucher generated',
+      });
     },
     onError: () => {
-      toast.error(language);
+      toast({
+        title: language === 'ru' ? 'Ошибка создания ваучера' : 'Failed to generate voucher',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -115,7 +121,9 @@ export function useBookingVouchers() {
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(shareData.url);
-      toast(language);
+      toast({
+        title: language === 'ru' ? 'Ссылка скопирована' : 'Link copied',
+      });
     }
   };
 

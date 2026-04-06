@@ -10,8 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
-import {
+import { 
   Wifi, 
   Key, 
   Home, 
@@ -35,6 +34,7 @@ import {
   AlertCircle,
   Book
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const categoryIcons: Record<string, React.ElementType> = {
   restaurant: Utensils,
@@ -69,7 +69,10 @@ export default function GuestGuidebook() {
   const copyToClipboard = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast(isRu ? 'Готово' : 'Done');
+    toast({
+      title: isRu ? 'Скопировано' : 'Copied',
+      description: text,
+    });
     setTimeout(() => setCopiedField(null), 2000);
   };
 

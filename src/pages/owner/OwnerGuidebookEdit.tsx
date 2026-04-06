@@ -14,10 +14,10 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-import { toast } from 'sonner';
   Wifi, Key, Phone, MapPin, Plus, Trash2, Save, Loader2, Book, User,
   Share2, Copy, Check, Navigation, MessageSquare, ExternalLink
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const tipCategories = [
   { value: 'restaurant', label: { en: 'Restaurant', ru: 'Ресторан' } },
@@ -161,7 +161,7 @@ export default function OwnerGuidebookEdit() {
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Ссылка скопирована' : 'Link copied' });
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };

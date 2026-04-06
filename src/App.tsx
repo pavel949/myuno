@@ -97,6 +97,7 @@ function AppContent() {
       <>
         <SkipToContent />
         <Toaster />
+        <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />
         <BrowserRouter>

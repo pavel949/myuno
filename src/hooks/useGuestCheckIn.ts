@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 
 export interface GuestCheckInData {
   id: string;
@@ -172,7 +172,13 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['guest-check-in', propertyBookingId] });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: t('Check-in submitted', 'Регистрация отправлена'),
+        description: t(
+          'Your check-in information has been submitted successfully',
+          'Ваши данные для регистрации успешно отправлены'
+        ),
+      });
 
       // Notify property owner about new check-in submission
       if (propertyBooking?.property_id) {
@@ -180,7 +186,11 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
       }
     },
     onError: (error: Error) => {
-      toast.error(t, { description: error.message });
+      toast({
+        title: t('Error', 'Ошибка'),
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -203,7 +213,10 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-check-in'] });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: t('Verified', 'Подтверждено'),
+        description: t('Guest check-in has been verified', 'Регистрация гостя подтверждена'),
+      });
     },
   });
 

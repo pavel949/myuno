@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { Upload, FileSpreadsheet, Bot, Loader2, Instagram, MapPin, Globe } from 'lucide-react';
-import { toast } from 'sonner';
 
 export function VendorProspectImport() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const { toast } = useToast();
   
   const createProspect = useCreateProspect();
   const batchImport = useBatchImport();
@@ -42,14 +43,14 @@ export function VendorProspectImport() {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualForm.business_name.trim()) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Укажите название' : 'Name required', variant: 'destructive' });
       return;
     }
 
     setIsLoading(true);
     try {
       await createProspect.mutateAsync(manualForm);
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRussian ? 'Лид добавлен' : 'Lead added' });
       setManualForm({
         business_name: '',
         business_type: '',
@@ -61,7 +62,7 @@ export function VendorProspectImport() {
         source_type: 'manual'
       });
     } catch (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Ошибка' : 'Error', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +70,7 @@ export function VendorProspectImport() {
 
   const handleUrlImport = async () => {
     if (!urlInput.trim()) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Укажите URL' : 'URL required', variant: 'destructive' });
       return;
     }
 
@@ -82,10 +83,10 @@ export function VendorProspectImport() {
     setIsLoading(true);
     try {
       await analyzeUrl.mutateAsync({ url: urlInput, sourceType });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRussian ? 'Данные извлечены' : 'Data extracted' });
       setUrlInput('');
     } catch (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Ошибка анализа' : 'Analysis failed', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +94,7 @@ export function VendorProspectImport() {
 
   const handleBatchImport = async () => {
     if (!batchInput.trim()) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Введите данные' : 'Data required', variant: 'destructive' });
       return;
     }
 
@@ -113,10 +114,10 @@ export function VendorProspectImport() {
       }).filter(p => p.business_name);
 
       await batchImport.mutateAsync({ prospects });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRussian ? `Импортировано: ${prospects.length}` : `Imported: ${prospects.length}` });
       setBatchInput('');
     } catch (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRussian ? 'Ошибка импорта' : 'Import failed', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

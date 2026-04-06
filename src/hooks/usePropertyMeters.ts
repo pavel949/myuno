@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { toast } from 'sonner';
 
 export interface PropertyMeter {
   id: string;
@@ -106,10 +106,16 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast(t);
+      toast({
+        title: t('Meter added', 'Счётчик добавлен'),
+      });
     },
     onError: (error: Error) => {
-      toast.error(t, { description: error.message });
+      toast({
+        title: t('Error', 'Ошибка'),
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -128,7 +134,9 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast(t);
+      toast({
+        title: t('Meter updated', 'Счётчик обновлён'),
+      });
     },
   });
 
@@ -144,7 +152,9 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast(t);
+      toast({
+        title: t('Meter removed', 'Счётчик удалён'),
+      });
     },
   });
 

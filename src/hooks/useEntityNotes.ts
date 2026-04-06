@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export interface EntityNote {
   id: string;
@@ -36,6 +36,7 @@ export type EntityType =
  */
 export function useEntityNotes(entityType: EntityType, entityId: string) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: notes, isLoading } = useQuery({
@@ -103,10 +104,10 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast('Заметка добавлена');
+      toast({ title: 'Заметка добавлена' });
     },
     onError: () => {
-      toast.error('Ошибка добавления заметки');
+      toast({ title: 'Ошибка добавления заметки', variant: 'destructive' });
     },
   });
 
@@ -149,7 +150,7 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast('Заметка удалена');
+      toast({ title: 'Заметка удалена' });
     },
   });
 

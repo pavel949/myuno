@@ -10,7 +10,7 @@ import type { Json } from '@/integrations/supabase/types';
 import type { SeasonalPricingRule } from '@/lib/pricingEngine';
 import { useExternalCalendars } from '@/hooks/useExternalCalendars';
 import { useStaysUnifiedCalendar } from '@/hooks/useStaysUnifiedCalendar';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 interface CalendarSectionProps {
   availability: AvailabilityEntry[];
@@ -31,6 +31,7 @@ export function PropertyManageCalendarSection({
 }: CalendarSectionProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const { calendars, syncAllCalendars, isSyncing } = useExternalCalendars(propertyId);
@@ -65,12 +66,27 @@ export function PropertyManageCalendarSection({
     try {
       const result = await syncAllCalendars(propertyId);
       if (result && typeof result === 'object' && 'skipped' in result && result.skipped) {
-        toast.error(isRu ? 'Ошибка' : 'Error');
+        toast({
+          title: isRu ? 'Нет каналов' : 'No channels',
+          description: isRu
+            ? 'Добавьте активный iCal канал для этого объекта.'
+            : 'Add an active iCal channel for this property first.',
+          variant: 'destructive',
+        });
         return;
       }
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: isRu ? 'Синхронизация запущена' : 'Sync started',
+        description: isRu
+          ? 'Календари обновляются. Данные появятся через несколько секунд.'
+          : 'Calendars are updating. Data will refresh shortly.',
+      });
     } catch (e) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Ошибка' : 'Error',
+        description: e instanceof Error ? e.message : 'Sync failed',
+        variant: 'destructive',
+      });
     }
   };
 

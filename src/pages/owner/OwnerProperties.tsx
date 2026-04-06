@@ -19,6 +19,7 @@ import {
   ChevronDown, ChevronRight, Archive,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -32,7 +33,6 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
@@ -107,6 +107,7 @@ export default function OwnerProperties() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -218,9 +219,9 @@ export default function OwnerProperties() {
     const { error } = await supabase.from('properties').update({ is_active: activate }).in('id', ids);
     setBulkProcessing(false);
     if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? `${ids.length} объектов ${activate ? 'активированы' : 'деактивированы'}` : `${ids.length} properties ${activate ? 'activated' : 'deactivated'}` });
       invalidateAll();
       exitSelectionMode();
     }
@@ -236,9 +237,9 @@ export default function OwnerProperties() {
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
     if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
     } else {
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? `${ids.length} объектов удалено` : `${ids.length} properties deleted` });
       invalidateAll();
       exitSelectionMode();
     }
@@ -256,9 +257,9 @@ export default function OwnerProperties() {
     setBulkReassignOpen(false);
     setReassignTargetId('');
     if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? `${ids.length} объектов обновлено` : `${ids.length} properties updated` });
       invalidateAll();
       queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
       queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
@@ -298,9 +299,20 @@ export default function OwnerProperties() {
     link.download = `properties_export_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast(isRu)toast.error(isRu ? 'Ошибка' : 'Error');
+    toast({ title: isRu ? `Экспорт ${selected.length} объектов` : `Exported ${selected.length} properties` });
+  };
+
+  // --- Single handlers ---
+  const handleView = (id: string) => navigate(`/mc/properties/${id}`);
+  const handleEdit = (id: string) => navigate(`/mc/properties/${id}/editor`);
+  const handleDuplicate = (id: string) => navigate(`/mc/properties/new?cloneFrom=${id}`);
+
+  const handleToggleActive = async (id: string, activate: boolean) => {
+    const { error } = await supabase.from('properties').update({ is_active: activate }).eq('id', id);
+    if (error) {
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     } else {
-      toast(activate);
+      toast({ title: activate ? (isRu ? 'Объект активирован' : 'Property activated') : (isRu ? 'Объект деактивирован' : 'Property deactivated') });
       invalidateAll();
     }
   };
@@ -312,9 +324,9 @@ export default function OwnerProperties() {
       .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
       .eq('id', deleteTarget);
     if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка удаления' : 'Delete failed', description: error.message, variant: 'destructive' });
     } else {
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Объект удалён' : 'Property deleted' });
       invalidateAll();
     }
     setDeleteTarget(null);

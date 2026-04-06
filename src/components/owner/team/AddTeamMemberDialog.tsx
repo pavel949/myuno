@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserPlus, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 const ROLES = [
   { value: 'director', labelEn: 'Director', labelRu: 'Директор' },
@@ -56,7 +56,14 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
     const emailPattern = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
 
     if (!emailPattern.test(normalizedEmail)) {
-      toast.error(t, { description: t( });
+      toast({
+        title: t('Invalid email', 'Некорректный email'),
+        description: t(
+          'Please use a valid email in latin format (example: name@example.com)',
+          'Используйте корректный email латиницей (пример: name@example.com)'
+        ),
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -75,7 +82,13 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast(isRu ? 'Готово' : 'Done');
+      toast({
+        title: t('Team member added', 'Сотрудник добавлен'),
+        description: t(
+          `Credentials sent to ${normalizedEmail}`,
+          `Данные для входа отправлены на ${normalizedEmail}`
+        ),
+      });
 
       // Reset form
       setFullName('');
@@ -88,7 +101,16 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       const errorMessage = err instanceof Error ? err.message : '';
       const invalidEmailFromBackend = errorMessage.toLowerCase().includes('invalid email');
 
-      toast.error(t, { description: invalidEmailFromBackend });
+      toast({
+        title: t('Error', 'Ошибка'),
+        description: invalidEmailFromBackend
+          ? t(
+              'Please use a valid email in latin format (example: name@example.com)',
+              'Используйте корректный email латиницей (пример: name@example.com)'
+            )
+          : errorMessage || t('Failed to add team member', 'Не удалось добавить сотрудника'),
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }

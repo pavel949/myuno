@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Workflow, Trash2, Play, Pause, ArrowRight, Clock } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CrmWorkflowsPage() {
   const { language } = useLanguage();
@@ -26,6 +26,7 @@ export default function CrmWorkflowsPage() {
   const createWorkflow = useCreateWorkflow();
   const deleteWorkflow = useDeleteWorkflow();
   const updateWorkflow = useUpdateWorkflow();
+  const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ name: '', trigger_type: 'deal_created' });
 
@@ -42,9 +43,9 @@ export default function CrmWorkflowsPage() {
       });
       setCreateOpen(false);
       setForm({ name: '', trigger_type: 'deal_created' });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Автоматизация создана' : 'Workflow created' });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
@@ -52,7 +53,7 @@ export default function CrmWorkflowsPage() {
     try {
       await updateWorkflow.mutateAsync({ id: wf.id, is_active: !wf.is_active });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 

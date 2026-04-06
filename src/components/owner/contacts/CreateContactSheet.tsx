@@ -10,11 +10,11 @@ import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 import { UserPlus } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
-import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -26,6 +26,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
+  const { toast } = useToast();
   const createContact = useCreateContact();
   const { data: contactTypes = [] } = useCrmOptions(companyId, 'contact_type');
   const { data: leadSources = [] } = useCrmOptions(companyId, 'lead_source');
@@ -39,7 +40,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
 
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Введите имя' : 'Enter first name', variant: 'destructive' });
       return;
     }
     try {
@@ -58,11 +59,11 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         notes: form.notes || null, tags: form.tags, avatar_url: null, is_archived: false,
         created_by: user?.id || null,
       });
-      toast(isRu ? 'Готово' : 'Done');
+      toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
       setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
   };
 

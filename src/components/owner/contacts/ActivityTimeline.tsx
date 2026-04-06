@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Phone, Mail, Users, FileText, MessageCircle, MessageSquare, Eye, Send, ClipboardList, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 const iconMap: Record<string, React.ElementType> = {
   Phone, Mail, MailOpen: Mail, Users, FileText, MessageCircle, MessageSquare,
@@ -29,6 +29,7 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: activities = [], isLoading } = useCrmActivities(contactId, dealId);
   const logActivity = useLogActivity();
   const [open, setOpen] = useState(false);
@@ -50,29 +51,36 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
         logged_by: user.id,
         activity_date: new Date().toISOString(),
       });
-      toast(isRu ? 'Активность добавлена' : 'Activity logged');
-      setForm({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
+      toast({ title: isRu ? 'Активность записана' : 'Activity logged' });
       setOpen(false);
+      setForm({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
     } catch {
-      toast.error(isRu ? 'Ошибка сохранения' : 'Failed to save');
+      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
     }
   };
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">{isRu ? 'Активность' : 'Activity'}</h3>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          {isRu ? 'Активность' : 'Activity'}
+        </h4>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="sm"><Plus className="h-4 w-4" /></Button>
+            <Button variant="outline" size="sm" className="h-7 text-xs">
+              <Plus className="h-3 w-3 mr-1" />
+              {isRu ? 'Записать' : 'Log'}
+            </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>{isRu ? 'Добавить активность' : 'Log Activity'}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{isRu ? 'Записать активность' : 'Log Activity'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 mt-2">
               <div>
                 <Label>{isRu ? 'Тип' : 'Type'}</Label>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {ACTIVITY_TYPES.map(t => {
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {['call', 'email_sent', 'meeting', 'whatsapp', 'note', 'property_viewed'].map(t => {
                     const cfg = ACTIVITY_TYPE_CONFIG[t];
                     return (
                       <button

@@ -9,10 +9,10 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 
 // Validation schemas
 const emailSchema = z.string().email();
@@ -40,6 +40,7 @@ export default function Auth() {
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const isRu = language === 'ru';
@@ -113,7 +114,11 @@ export default function Auth() {
   const handleSignup = async () => {
     if (!validateStep('password')) return;
     if (!termsAccepted) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({
+        title: isRu ? 'Примите условия' : 'Accept terms',
+        description: isRu ? 'Необходимо принять Условия использования' : 'You must accept the Terms of Service',
+        variant: 'destructive',
+      });
       return;
     }
     setIsLoading(true);
@@ -131,7 +136,7 @@ export default function Auth() {
         } else if (error.message.includes('Password should be')) {
           description = isRu ? 'Пароль должен содержать не менее 6 символов' : 'Password must be at least 6 characters';
         }
-        toast.error(isRu ? 'Ошибка' : 'Error');
+        toast({ title: isRu ? 'Ошибка регистрации' : 'Registration failed', description, variant: 'destructive' });
       } else {
         if (referralCode && data?.user) {
           try {
@@ -155,12 +160,15 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
         
-        toast(isRu ? 'Готово' : 'Done');
+        toast({
+          title: isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
+          description: isRu ? 'Аккаунт создан. Проверьте почту для подтверждения email.' : 'Account created. Check your email to verify your address.',
+        });
 
         navigate(redirectPath, { replace: true });
       }
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -186,14 +194,14 @@ export default function Auth() {
           description = error.message;
         }
 
-        toast.error(isRu ? 'Ошибка' : 'Error');
+        toast({ title: isRu ? 'Ошибка входа' : 'Login failed', description, variant: 'destructive' });
       } else {
         setLoginAttempts(0);
-        toast(t, { description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
+        toast({ title: t('auth.welcomeBack'), description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
       }
     } catch {
       setLoginAttempts(prev => prev + 1);
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
