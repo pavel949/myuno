@@ -94,6 +94,7 @@ function AppContent() {
   
     return (
       <>
+        <SkipToContent />
         <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />
