@@ -39,7 +39,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
 
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
-      toast({ title: isRu ? 'Введите имя' : 'Enter first name', variant: 'destructive' });
+      toast.error(isRu);
       return;
     }
     try {
@@ -58,11 +58,11 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         notes: form.notes || null, tags: form.tags, avatar_url: null, is_archived: false,
         created_by: user?.id || null,
       });
-      toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
+      toast(isRu);
       onOpenChange(false);
       setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

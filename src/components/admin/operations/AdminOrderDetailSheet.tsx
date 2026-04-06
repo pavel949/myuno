@@ -115,10 +115,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       const label = isRu
         ? ORDER_STATUS_CONFIG[newStatus]?.labelRu
         : ORDER_STATUS_CONFIG[newStatus]?.labelEn;
-      toast({
-        title: isRu ? 'Статус обновлён' : 'Status Updated',
-        description: isRu ? `Заказ переведён в "${label}"` : `Order moved to "${label}"`,
-      });
+      toast(isRu, { description: isRu ? `Заказ переведён в "${label });
       queryClient.invalidateQueries({ queryKey: ['admin-order-detail', orderId] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       onStatusChanged();
@@ -126,11 +123,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       setCancelReason('');
     },
     onError: (err: any) => {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: err.message });
     },
   });
 
@@ -169,7 +162,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
     ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(lines);
-    toast({ title: isRu ? 'Скопировано!' : 'Copied!' });
+    toast(isRu);
   };
 
   const openWhatsApp = () => {

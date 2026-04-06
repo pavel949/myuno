@@ -92,18 +92,18 @@ export function SequenceBuilder({ sequence }: Props) {
         })),
       });
       setDirty(false);
-      toast({ title: isRu ? 'Шаги сохранены' : 'Steps saved' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка сохранения' : 'Save error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const toggleActive = async () => {
     try {
       await updateSequence.mutateAsync({ id: sequence.id, is_active: !sequence.is_active });
-      toast({ title: sequence.is_active ? (isRu ? 'Приостановлена' : 'Paused') : (isRu ? 'Активирована' : 'Activated') });
+      toast(sequence);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

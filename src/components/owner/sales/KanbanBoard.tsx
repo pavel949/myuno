@@ -345,10 +345,10 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         user_id: user!.id,
       };
       supabase.from('deal_field_changes').insert(changeRow).then(({ error }) => {
-        if (error) toast({ title: isRu ? 'Не удалось записать историю изменений' : 'Audit log failed to save', variant: 'destructive' });
+        if (error) toast.error(isRu);
       });
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

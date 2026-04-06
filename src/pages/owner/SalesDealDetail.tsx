@@ -112,9 +112,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
         stage_from: deal.stage, stage_to: newStage,
       });
-      toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
@@ -129,9 +129,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
         stage_from: null, stage_to: null,
       });
-      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
@@ -143,19 +143,19 @@ export default function SalesDealDetail() {
         description: activityText.trim(), stage_from: null, stage_to: null,
       });
       setActivityText('');
-      toast({ title: isRu ? 'Добавлено' : 'Added' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteDeal.mutateAsync(deal.id);
-      toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
+      toast(isRu);
       navigate(APP_ROUTES.MC_SALES);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

@@ -70,10 +70,10 @@ export function useTeamMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-member', user?.id] });
-      toast({ title: 'Профиль обновлён' });
+      toast('Профиль обновлён');
     },
     onError: () => {
-      toast({ title: 'Ошибка обновления', variant: 'destructive' });
+      toast.error('Ошибка обновления');
     },
   });
 

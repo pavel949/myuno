@@ -184,17 +184,10 @@ export function usePropertyGuidebook(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-guidebook', propertyId] });
-      toast({
-        title: t('Saved', 'Сохранено'),
-        description: t('Guidebook has been updated', 'Гид по объекту обновлён'),
-      });
+      toast(t, { description: t('Guidebook has been updated' });
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t, { description: error.message });
     },
   });
 

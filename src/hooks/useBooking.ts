@@ -146,7 +146,7 @@ export function useBooking() {
 
   const createBooking = useCallback(async (params: CreateBookingParams): Promise<BookingResult> => {
     if (!user) {
-      toast({ title: t('booking.loginRequired'), variant: 'destructive' });
+      toast.error(t);
       navigate('/auth');
       return { success: false, error: 'not_authenticated' };
     }
@@ -228,25 +228,11 @@ export function useBooking() {
       };
 
     } catch (error) {
-      toast({ title: t('booking.error'), variant: 'destructive' });
-      return { success: false, error: error instanceof Error ? error.message : 'unknown' };
-    }
-  }, [user, navigate, toast, t, createOrder]);
-
-  const cancelBookingFn = useCallback(async (bookingId: string): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      const result = await cancelOrder(bookingId);
-      if (result) {
-        toast({ title: t('booking.cancelled') });
+      toast.error(t)toast(t);
       }
       return result;
     } catch (error) {
-      toast({ 
-        title: language === 'ru' ? 'Ошибка отмены' : 'Cancel failed', 
-        variant: 'destructive' 
-      });
+      toast.error(language);
       return false;
     }
   }, [user, cancelOrder, toast, language, t]);

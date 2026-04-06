@@ -135,17 +135,10 @@ export function useTeamLeads(filters?: LeadFilters) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-leads'] });
-      toast({
-        title: 'Контакт записан',
-        description: 'Информация о звонке сохранена',
-      });
+      toast('Контакт записан', { description: 'Информация о звонке сохранена' });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось сохранить контакт',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось сохранить контакт' });
     },
   });
 
@@ -177,10 +170,7 @@ export function useTeamLeads(filters?: LeadFilters) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['team-leads'] });
-      toast({
-        title: 'Назначено',
-        description: 'Лид назначен менеджеру',
-      });
+      toast('Назначено', { description: 'Лид назначен менеджеру' });
     },
   });
 

@@ -89,10 +89,7 @@ export default function TaxiBooking() {
   // Get current location and reverse geocode
   const useCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      toast({
-        title: language === 'ru' ? 'Геолокация недоступна' : 'Geolocation unavailable',
-        variant: 'destructive',
-      });
+      toast.error(language);
       return;
     }
 
@@ -114,10 +111,7 @@ export default function TaxiBooking() {
           lat: latitude,
           lng: longitude,
         });
-        toast({
-          title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
-          description: language === 'ru' ? 'Координаты установлены' : 'Coordinates set',
-        });
+        toast(language, { description: language === 'ru' ? 'Координаты установлены' : 'Coordinates set' });
         return;
       }
 
@@ -130,148 +124,7 @@ export default function TaxiBooking() {
         lng: longitude,
       });
 
-      toast({
-        title: language === 'ru' ? 'Местоположение определено' : 'Location detected',
-        description: address,
-      });
-    } catch (error: unknown) {
-      let message = language === 'ru' ? 'Не удалось определить местоположение' : 'Could not get location';
-      const geoError = error as { code?: number };
-      
-      if (geoError.code === 1) {
-        message = language === 'ru' 
-          ? 'Доступ к геолокации запрещён. Разрешите в настройках браузера.' 
-          : 'Location access denied. Enable in browser settings.';
-      } else if (geoError.code === 2) {
-        message = language === 'ru' ? 'Местоположение недоступно' : 'Location unavailable';
-      } else if (geoError.code === 3) {
-        message = language === 'ru' ? 'Превышено время ожидания' : 'Request timed out';
-      }
-      
-      toast({
-        title: message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsGettingCurrentLocation(false);
-    }
-  };
-
-  // Set default vehicle type when loaded
-  useEffect(() => {
-    if (vehicleTypes.length > 0 && !formData.vehicleType) {
-      setFormData(prev => ({ ...prev, vehicleType: vehicleTypes[0].id }));
-    }
-  }, [vehicleTypes, formData.vehicleType]);
-
-  // BUGFIX: Safe vehicle lookup with fallback to prevent crashes when vehicleTypes not loaded
-  const selectedVehicle = useMemo(() => {
-    if (!vehicleTypes.length) return null;
-    return vehicleTypes.find(v => v.id === formData.vehicleType) || vehicleTypes[0] || null;
-  }, [vehicleTypes, formData.vehicleType]);
-
-  const estimatedDistance = useMemo(() => 
-    pickupLocation && destinationLocation 
-      ? getEstimatedDistance(pickupLocation, destinationLocation)
-      : 0,
-    [pickupLocation, destinationLocation]
-  );
-
-  // BUGFIX: Safe price calculation - prevent NaN when selectedVehicle is null
-  const estimatedPrice = useMemo(() => {
-    if (!selectedVehicle) return 0;
-    const basePrice = selectedVehicle.base_price ?? 0;
-    const pricePerKm = selectedVehicle.price_per_km ?? 0;
-    return basePrice + (estimatedDistance * pricePerKm);
-  }, [selectedVehicle, estimatedDistance]);
-
-  const timeOptions = useMemo(() => getTimeOptions(language), [language]);
-
-  const handleLocationSelect = (location: LocationData) => {
-    if (locationPickerType === 'pickup') {
-      setPickupLocation(location);
-    } else if (locationPickerType === 'destination') {
-      setDestinationLocation(location);
-    }
-    setLocationPickerType(null);
-  };
-
-  const handlePassengerChange = (delta: number) => {
-    const maxPassengers = selectedVehicle?.max_passengers || 4;
-    const newValue = Math.max(1, Math.min(maxPassengers, formData.passengers + delta));
-    setFormData({ ...formData, passengers: newValue });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
-        variant: 'destructive',
-      });
-      navigate('/auth');
-      return;
-    }
-
-    if (!pickupLocation || !destinationLocation) {
-      toast({
-        title: language === 'ru' ? 'Укажите маршрут' : 'Enter route',
-        description: language === 'ru' ? 'Выберите точку подачи и назначения' : 'Select pickup and destination',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const result = await createBooking({
-      booking_type: 'transport',
-      scheduled_at: formData.scheduledTime || new Date().toISOString(),
-      total_amount: Math.round(estimatedPrice),
-      currency: 'THB',
-      notes: `Taxi booking\nVehicle: ${selectedVehicle?.name_en || formData.vehicleType}\nPassengers: ${formData.passengers}\nScheduled: ${formData.scheduledTime ? new Date(formData.scheduledTime).toLocaleString() : 'Now'}\n${formData.notes}`,
-      participants: [{
-        name: user.email?.split('@')[0] || 'Guest',
-        phone: formData.phone,
-        is_primary: true,
-      }],
-      addresses: [
-        {
-          address_type: 'pickup',
-          address: pickupLocation.address,
-          lat: pickupLocation.lat,
-          lng: pickupLocation.lng,
-        },
-        {
-          address_type: 'dropoff',
-          address: destinationLocation.address,
-          lat: destinationLocation.lat,
-          lng: destinationLocation.lng,
-        },
-      ],
-      metadata: {
-        vehicle_type: formData.vehicleType,
-        passengers: formData.passengers,
-        distance_km: estimatedDistance,
-      },
-    });
-
-    if (result.success && result.booking_id) {
-      // Save transport-specific details to order_item_transport_details
-      const { data: orderItems } = await supabase
-        .from('order_items')
-        .select('id')
-        .eq('order_id', result.booking_id)
-        .limit(1);
-
-      if (orderItems && orderItems.length > 0) {
-        await supabase
-          .from('order_item_transport_details')
-          .insert({
-            order_item_id: orderItems[0].id,
-            vehicle_type: formData.vehicleType,
-            passenger_count: formData.passengers,
-            is_round_trip: false,
-          });
+      toast(language, { description: address })toast.error(message, { description: language === 'ru' ? 'Выберите точку подачи и назначения' : 'Select pickup and destination' });
       }
 
       setIsSuccess(true);

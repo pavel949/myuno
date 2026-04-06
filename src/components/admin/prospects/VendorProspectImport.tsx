@@ -42,14 +42,14 @@ export function VendorProspectImport() {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualForm.business_name.trim()) {
-      toast({ title: isRussian ? 'Укажите название' : 'Name required', variant: 'destructive' });
+      toast.error(isRussian);
       return;
     }
 
     setIsLoading(true);
     try {
       await createProspect.mutateAsync(manualForm);
-      toast({ title: isRussian ? 'Лид добавлен' : 'Lead added' });
+      toast(isRussian);
       setManualForm({
         business_name: '',
         business_type: '',
@@ -61,7 +61,7 @@ export function VendorProspectImport() {
         source_type: 'manual'
       });
     } catch (error) {
-      toast({ title: isRussian ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRussian);
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ export function VendorProspectImport() {
 
   const handleUrlImport = async () => {
     if (!urlInput.trim()) {
-      toast({ title: isRussian ? 'Укажите URL' : 'URL required', variant: 'destructive' });
+      toast.error(isRussian);
       return;
     }
 
@@ -82,10 +82,10 @@ export function VendorProspectImport() {
     setIsLoading(true);
     try {
       await analyzeUrl.mutateAsync({ url: urlInput, sourceType });
-      toast({ title: isRussian ? 'Данные извлечены' : 'Data extracted' });
+      toast(isRussian);
       setUrlInput('');
     } catch (error) {
-      toast({ title: isRussian ? 'Ошибка анализа' : 'Analysis failed', variant: 'destructive' });
+      toast.error(isRussian);
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +93,7 @@ export function VendorProspectImport() {
 
   const handleBatchImport = async () => {
     if (!batchInput.trim()) {
-      toast({ title: isRussian ? 'Введите данные' : 'Data required', variant: 'destructive' });
+      toast.error(isRussian);
       return;
     }
 
@@ -113,10 +113,10 @@ export function VendorProspectImport() {
       }).filter(p => p.business_name);
 
       await batchImport.mutateAsync({ prospects });
-      toast({ title: isRussian ? `Импортировано: ${prospects.length}` : `Imported: ${prospects.length}` });
+      toast(isRussian);
       setBatchInput('');
     } catch (error) {
-      toast({ title: isRussian ? 'Ошибка импорта' : 'Import failed', variant: 'destructive' });
+      toast.error(isRussian);
     } finally {
       setIsLoading(false);
     }

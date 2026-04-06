@@ -169,13 +169,7 @@ export default function PartnerApplicationsAdmin() {
       setApplications((data as PartnerApplication[]) || []);
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
-        description: language === 'ru' 
-          ? 'Не удалось загрузить заявки' 
-          : 'Failed to load applications',
-        variant: 'destructive',
-      });
+      toast.error(language, { description: language === 'ru' });
     } finally {
       setIsLoading(false);
     }
@@ -203,12 +197,7 @@ export default function PartnerApplicationsAdmin() {
             app.id === selectedApp.id ? { ...app, ...updateData, status: 'approved' } as PartnerApplication : app
           )
         );
-        toast({
-          title: language === 'ru' ? 'Успешно' : 'Success',
-          description: data?.vendor_granted
-            ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан' : 'Application approved, vendor access granted')
-            : (language === 'ru' ? 'Заявка одобрена (без user_id — доступ не создан)' : 'Application approved (no user_id — access not created)'),
-        });
+        toast(language, { description: data?.vendor_granted });
       } else {
         const updateData: Record<string, unknown> = {
           status: newStatus,
@@ -228,12 +217,7 @@ export default function PartnerApplicationsAdmin() {
             app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
           )
         );
-        toast({
-          title: language === 'ru' ? 'Успешно' : 'Success',
-          description: newStatus === 'rejected'
-            ? (language === 'ru' ? 'Заявка отклонена' : 'Application rejected')
-            : (language === 'ru' ? 'Статус обновлён' : 'Status updated'),
-        });
+        toast(language, { description: newStatus === 'rejected' });
       }
 
       setIsActionDialogOpen(false);
@@ -242,13 +226,7 @@ export default function PartnerApplicationsAdmin() {
       setActionType(null);
     } catch (error) {
       console.error('Error updating application:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
-        description: language === 'ru'
-          ? 'Не удалось обновить статус'
-          : 'Failed to update status',
-        variant: 'destructive',
-      });
+      toast.error(language, { description: language === 'ru' });
     } finally {
       setIsProcessing(false);
     }

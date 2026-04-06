@@ -181,11 +181,7 @@ export function AddBookingFromCalendarDialog({
       for (const file of Array.from(files)) {
         // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
-          toast({
-            title: isRu ? 'Ошибка' : 'Error',
-            description: isRu ? 'Файл слишком большой (макс. 10 МБ)' : 'File too large (max 10MB)',
-            variant: 'destructive',
-          });
+          toast.error(isRu, { description: isRu ? 'Файл слишком большой (макс. 10 МБ)' : 'File too large (max 10MB)' });
           continue;
         }
         
@@ -198,11 +194,7 @@ export function AddBookingFromCalendarDialog({
         
         if (uploadError) {
           console.error('Upload error:', uploadError);
-          toast({
-            title: isRu ? 'Ошибка загрузки' : 'Upload Error',
-            description: uploadError.message,
-            variant: 'destructive',
-          });
+          toast.error(isRu, { description: uploadError.message });
           continue;
         }
         
@@ -217,17 +209,10 @@ export function AddBookingFromCalendarDialog({
         }]);
       }
       
-      toast({
-        title: isRu ? 'Загружено' : 'Uploaded',
-        description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully',
-      });
+      toast(isRu, { description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully' });
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document' });
     } finally {
       setIsUploadingDoc(false);
       // Reset input
@@ -241,22 +226,12 @@ export function AddBookingFromCalendarDialog({
   
   const handleSubmit = async () => {
     if (!checkIn || !checkOut) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Выберите даты заезда и выезда' : 'Select check-in and check-out dates',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Выберите даты заезда и выезда' : 'Select check-in and check-out dates' });
       return;
     }
     
     if (hasConflicts) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu 
-          ? 'Выбранные даты пересекаются с существующими бронированиями или закрыты'
-          : 'Selected dates overlap with existing bookings or are blocked',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu });
       return;
     }
     
@@ -281,23 +256,14 @@ export function AddBookingFromCalendarDialog({
         documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
-      toast({
-        title: isRu ? 'Бронирование создано' : 'Booking Created',
-        description: guestName 
-          ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
-          : `${nights} ${isRu ? 'ночей' : 'nights'}`,
-      });
+      toast(isRu, { description: guestName });
       
       onSuccess?.();
       onOpenChange(false);
       resetForm();
     } catch (error) {
       console.error('Error creating booking:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось создать бронирование' : 'Failed to create booking',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось создать бронирование' : 'Failed to create booking' });
     } finally {
       setIsSubmitting(false);
     }

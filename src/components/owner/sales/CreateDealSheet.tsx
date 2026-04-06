@@ -123,7 +123,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
+      toast.error(isRu);
       return;
     }
     try {
@@ -156,11 +156,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           });
           contactId = (newContact as any)?.id || null;
         } catch (contactError: any) {
-          toast({
-            title: isRu ? 'Не удалось создать контакт' : 'Failed to create contact',
-            description: contactError?.message || String(contactError),
-            variant: 'destructive',
-          });
+          toast.error(isRu, { description: contactError?.message || String(contactError) });
         }
       }
 
@@ -188,10 +184,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         closed_at: null, lost_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
       } as any);
-      toast({
-        title: isRu ? 'Сделка создана' : 'Deal created',
-        description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.',
-      });
+      toast(isRu, { description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.' });
       onOpenChange(false);
       setSelectedContact(null);
       setErrors({});
@@ -200,11 +193,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
       }
     } catch (dealError: any) {
-      toast({
-        title: isRu ? 'Ошибка при создании сделки' : 'Failed to create deal',
-        description: dealError?.message || String(dealError),
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: dealError?.message || String(dealError) });
     }
   };
 

@@ -106,16 +106,10 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast({
-        title: t('Meter added', 'Счётчик добавлен'),
-      });
+      toast(t);
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t, { description: error.message });
     },
   });
 
@@ -134,9 +128,7 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast({
-        title: t('Meter updated', 'Счётчик обновлён'),
-      });
+      toast(t);
     },
   });
 
@@ -152,9 +144,7 @@ export function usePropertyMeters(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-meters', propertyId] });
-      toast({
-        title: t('Meter removed', 'Счётчик удалён'),
-      });
+      toast(t);
     },
   });
 

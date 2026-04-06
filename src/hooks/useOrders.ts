@@ -189,129 +189,7 @@ export function useOrders() {
   const createOrderMutation = useMutation({
     mutationFn: async (input: CreateOrderInput): Promise<CreateOrderResult> => {
       if (!user?.id) {
-        toast({ title: t('order.loginRequired'), variant: 'destructive' });
-        return { success: false, error: 'not_authenticated' };
-      }
-
-      const startAt = input.start_at 
-        ? (input.start_at instanceof Date ? input.start_at.toISOString() : input.start_at)
-        : null;
-      const endAt = input.end_at
-        ? (input.end_at instanceof Date ? input.end_at.toISOString() : input.end_at)
-        : null;
-
-      // P0 FIX: Use atomic RPC to eliminate zombie records
-      // Prepare items for RPC - cast to Json compatible type
-      const itemsJson = JSON.parse(JSON.stringify(input.items.map(item => ({
-        product_id: item.product_id || null,
-        resource_id: item.resource_id || null,
-        provider_org_id: item.provider_org_id || input.provider_org_id || null,
-        item_name: item.item_name,
-        item_type: item.item_type,
-        qty: item.qty || 1,
-        unit_price: item.unit_price,
-        amount: item.amount,
-        start_at: item.start_at ? (item.start_at instanceof Date ? item.start_at.toISOString() : item.start_at) : null,
-        end_at: item.end_at ? (item.end_at instanceof Date ? item.end_at.toISOString() : item.end_at) : null,
-        metadata: item.metadata || {},
-      }))));
-
-      // Prepare participants for RPC
-      const participantsJson = input.participants 
-        ? JSON.parse(JSON.stringify(input.participants.map((p, idx) => ({
-            role: p.role || (idx === 0 ? 'primary' : 'guest'),
-            name: p.name,
-            phone: p.phone || null,
-            email: p.email || null,
-          }))))
-        : null;
-
-      // Prepare addresses for RPC
-      const addressesJson = input.addresses 
-        ? JSON.parse(JSON.stringify(input.addresses.map(addr => ({
-            address_type: addr.address_type,
-            address_text: addr.address_text,
-            lat: addr.lat || null,
-            lng: addr.lng || null,
-            notes: addr.notes || null,
-          }))))
-        : null;
-
-      // Call atomic RPC
-      const { data: orderResult, error: orderError } = await supabase
-        .rpc('create_order_atomic', {
-          p_order_type: input.order_type,
-          p_customer_user_id: user.id,
-          p_provider_org_id: input.provider_org_id || null,
-          p_start_at: startAt,
-          p_end_at: endAt,
-          p_total_amount: input.total_amount,
-          p_currency: input.currency || 'THB',
-          p_notes: input.notes || null,
-          p_metadata: input.metadata ? JSON.parse(JSON.stringify(input.metadata)) : null,
-          p_items: itemsJson,
-          p_participants: participantsJson,
-          p_addresses: addressesJson,
-          p_payment_method: input.payment?.method || null,
-          p_payment_amount: input.payment?.amount || null,
-        });
-
-      if (orderError) {
-        // P0 FIX: Better error handling with localized messages
-        const errorMessage = getLocalizedRpcError(orderError, language as 'en' | 'ru');
-        throw new Error(errorMessage);
-      }
-      
-      // Type assertion for RPC result
-      const result = orderResult as { success: boolean; order_id?: string; order_number?: string; error?: string };
-      
-      if (!result.success) {
-        const errorMessage = getLocalizedRpcError(result.error || 'order_creation_failed', language as 'en' | 'ru');
-        throw new Error(errorMessage);
-      }
-
-      const orderId = result.order_id!;
-      const orderNumber = result.order_number!;
-
-      // Create notification for customer
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        title: language === 'ru' ? 'Заказ создан' : 'Order Created',
-        body: language === 'ru' 
-          ? `Ваш заказ ${orderNumber} успешно создан`
-          : `Your order ${orderNumber} has been created`,
-        type: 'booking',
-        data: { order_id: orderId, order_type: input.order_type },
-      });
-
-      // Send customer email notification (non-blocking)
-      supabase.functions.invoke('send-order-email', {
-        body: {
-          type: 'order_request_received',
-          order_id: orderId,
-          user_id: user.id,
-          payment_method: input.payment?.method || 'cash',
-        },
-      }).catch(err => errorLog.silent(err, 'send_customer_email'));
-
-      // Send admin email notification (non-blocking)
-      const primaryParticipant = input.participants?.find(p => p.role === 'primary') || input.participants?.[0];
-      const meta = input.metadata as Record<string, unknown> | undefined;
-      supabase.functions.invoke('notify-admin-order', {
-        body: {
-          order_id: orderId,
-          order_number: orderNumber,
-          order_type: input.order_type,
-          total_amount: input.total_amount,
-          currency: input.currency || 'THB',
-          customer_name: primaryParticipant?.name || user.email?.split('@')[0],
-          customer_email: primaryParticipant?.email || user.email,
-          customer_phone: primaryParticipant?.phone,
-          items: input.items?.map(i => ({
-            name: i.item_name,
-            quantity: i.qty || 1,
-            price: i.unit_price,
-          })),
+        toast.error(t)toast(language)),
           scheduled_at: startAt,
           notes: input.notes,
           provider_name: input.providerName,
@@ -326,10 +204,7 @@ export function useOrders() {
         },
       }).catch(err => errorLog.silent(err, 'send_admin_notification'));
 
-      toast({ 
-        title: t('order.success'),
-        description: orderNumber,
-      });
+      toast(t, { description: orderNumber });
 
       // WhatsApp for cash payments
       if (input.payment?.method === 'cash' && input.openWhatsAppOnCash !== false) {
@@ -353,11 +228,7 @@ export function useOrders() {
       errorLog.error(error, 'create_order');
       // P0 FIX: Use localized error message instead of generic one
       const localizedError = getLocalizedRpcError(error, language as 'en' | 'ru');
-      toast({ 
-        title: t('order.error'), 
-        description: localizedError,
-        variant: 'destructive' 
-      });
+      toast.error(t, { description: localizedError });
     },
   });
 
@@ -391,7 +262,7 @@ export function useOrders() {
         reason: 'Cancelled by customer',
       });
 
-      toast({ title: t('order.cancelled') });
+      toast(t);
       return true;
     },
     onSuccess: () => {

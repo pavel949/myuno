@@ -50,9 +50,9 @@ export default function CrmTemplatesPage() {
       });
       setOpen(false);
       setForm({ name: '', channel: 'email', subject: '', body: '', language: 'en' });
-      toast({ title: isRu ? 'Шаблон создан' : 'Template created' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

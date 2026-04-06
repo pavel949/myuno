@@ -60,21 +60,21 @@ export function PropertyContactsSection({ propertyId, companyId }: Props) {
         relationshipType: selectedRole,
         companyId,
       });
-      toast({ title: isRu ? 'Связь добавлена' : 'Link added' });
+      toast(isRu);
       setLinkDialogOpen(false);
       setSelectedContactId('');
       setSelectedRole('owner');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const handleUnlink = async (linkId: string) => {
     try {
       await unlinkMutation.mutateAsync(linkId);
-      toast({ title: isRu ? 'Связь удалена' : 'Link removed' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

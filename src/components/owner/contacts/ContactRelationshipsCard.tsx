@@ -60,21 +60,21 @@ export function ContactRelationshipsCard({ contactId, companyId }: Props) {
         relationshipType: selectedType,
         companyId,
       });
-      toast({ title: isRu ? 'Связь добавлена' : 'Relationship added' });
+      toast(isRu);
       setDialogOpen(false);
       setSelectedContactId('');
       setSelectedType('friend');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const handleUnlink = async (linkId: string) => {
     try {
       await unlinkMutation.mutateAsync(linkId);
-      toast({ title: isRu ? 'Связь удалена' : 'Relationship removed' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

@@ -426,10 +426,7 @@ export default function PropertyEditor() {
         return;
       }
 
-      toast({
-        title: isRu ? 'Сохранено' : 'Saved',
-        description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully',
-      });
+      toast(isRu, { description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully' });
       navigate(`/mc/properties/${id}`);
     } catch (error) {
       errorLog.error(error, 'save_property');

@@ -172,13 +172,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['guest-check-in', propertyBookingId] });
-      toast({
-        title: t('Check-in submitted', 'Регистрация отправлена'),
-        description: t(
-          'Your check-in information has been submitted successfully',
-          'Ваши данные для регистрации успешно отправлены'
-        ),
-      });
+      toast(t, { description: t( });
 
       // Notify property owner about new check-in submission
       if (propertyBooking?.property_id) {
@@ -186,11 +180,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
       }
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t, { description: error.message });
     },
   });
 
@@ -213,10 +203,7 @@ export function useGuestCheckIn(marketplaceBookingId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guest-check-in'] });
-      toast({
-        title: t('Verified', 'Подтверждено'),
-        description: t('Guest check-in has been verified', 'Регистрация гостя подтверждена'),
-      });
+      toast(t, { description: t('Guest check-in has been verified' });
     },
   });
 

@@ -380,10 +380,7 @@ export default function OwnerRentalTerms() {
         host_languages: formData.host_languages,
       } as Partial<OwnerProperty> & { id: string });
 
-      toast({
-        title: isRu ? 'Сохранено!' : 'Saved!',
-        description: isRu ? 'Условия аренды обновлены' : 'Rental terms updated',
-      });
+      toast(isRu, { description: isRu ? 'Условия аренды обновлены' : 'Rental terms updated' });
 
       navigate(`/mc/properties/${id}`);
     } catch (error) {

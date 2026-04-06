@@ -38,20 +38,12 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
   useEffect(() => {
     const flag = searchParams.get('stays_sub');
     if (flag === 'success') {
-      toast({
-        title: isRu ? 'Подписка Stays' : 'Stays subscription',
-        description: isRu
-          ? 'Оплата прошла успешно. Статус обновится через несколько секунд.'
-          : 'Payment successful. Status will update shortly.',
-      });
+      toast(isRu, { description: isRu });
       const next = new URLSearchParams(searchParams);
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
     } else if (flag === 'cancelled') {
-      toast({
-        title: isRu ? 'Оплата отменена' : 'Checkout cancelled',
-        variant: 'destructive',
-      });
+      toast.error(isRu);
       const next = new URLSearchParams(searchParams);
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
@@ -71,11 +63,7 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
       });
       window.location.href = url;
     } catch (e) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: e instanceof Error ? e.message : 'Checkout failed',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: e instanceof Error ? e.message : 'Checkout failed' });
     }
   };
 

@@ -77,18 +77,11 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-availability-management', propertyId] });
-      toast({
-        title: isRu ? 'Сохранено' : 'Saved',
-        description: isRu ? 'Доступность обновлена' : 'Availability updated successfully',
-      });
+      toast(isRu, { description: isRu ? 'Доступность обновлена' : 'Availability updated successfully' });
     },
     onError: (error) => {
       console.error('Error updating availability:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось обновить доступность' : 'Failed to update availability',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось обновить доступность' : 'Failed to update availability' });
     },
   });
 
@@ -112,11 +105,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
     },
     onError: (error) => {
       console.error('Error deleting availability:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось удалить записи' : 'Failed to delete availability entries',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось удалить записи' : 'Failed to delete availability entries' });
     },
   });
 

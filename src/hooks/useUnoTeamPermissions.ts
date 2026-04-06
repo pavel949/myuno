@@ -137,10 +137,10 @@ export function useUnoTeamMembers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
       queryClient.invalidateQueries({ queryKey: ['my-uno-permissions'] });
-      toast({ title: 'Права обновлены', description: 'Изменения сохранены' });
+      toast('Права обновлены', { description: 'Изменения сохранены' });
     },
     onError: () => {
-      toast({ title: 'Ошибка', description: 'Не удалось обновить права', variant: 'destructive' });
+      toast.error('Ошибка', { description: 'Не удалось обновить права' });
     },
   });
 
@@ -157,7 +157,7 @@ export function useUnoTeamMembers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
       queryClient.invalidateQueries({ queryKey: ['my-uno-permissions'] });
-      toast({ title: 'Доступ удалён' });
+      toast('Доступ удалён');
     },
   });
 
@@ -183,7 +183,7 @@ export function useUnoTeamMembers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
-      toast({ title: 'Права назначены' });
+      toast('Права назначены');
     },
   });
 

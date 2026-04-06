@@ -72,33 +72,16 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       if (data.error) {
         if (data.error.includes('Rate limit')) {
-          toast({
-            title: isRu ? 'Превышен лимит' : 'Rate Limited',
-            description: isRu 
-              ? 'Слишком много запросов. Попробуйте позже.'
-              : 'Too many requests. Please try again later.',
-            variant: 'destructive',
-          });
+          toast.error(isRu, { description: isRu });
         } else if (data.error.includes('credits')) {
-          toast({
-            title: isRu ? 'Кредиты исчерпаны' : 'Credits Exhausted',
-            description: isRu
-              ? 'Свяжитесь с администратором.'
-              : 'Please contact the administrator.',
-            variant: 'destructive',
-          });
+          toast.error(isRu, { description: isRu });
         }
         throw new Error(data.error);
       }
 
       setResult(data as AnalysisResult);
       
-      toast({
-        title: isRu ? 'Анализ завершён' : 'Analysis Complete',
-        description: isRu
-          ? `Найдено ${data.suggestions?.length || 0} рекомендаций`
-          : `Found ${data.suggestions?.length || 0} suggestions`,
-      });
+      toast(isRu, { description: isRu });
 
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Analysis failed';
@@ -123,21 +106,11 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       setFixResults(prev => ({ ...prev, [index]: { success: data.success, actions: data.actions } }));
 
-      toast({
-        title: data.success
-          ? (isRu ? 'Исправление применено' : 'Fix Applied')
-          : (isRu ? 'Частично применено' : 'Partially Applied'),
-        description: data.actions?.[0] || '',
-        variant: data.success ? 'default' : 'destructive',
-      });
+      toast(data, { description: data.actions?.[0] || '' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fix failed';
       setFixResults(prev => ({ ...prev, [index]: { success: false, actions: [message] } }));
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: message,
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: message });
     } finally {
       setIsFixing(null);
     }

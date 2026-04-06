@@ -123,18 +123,11 @@ export function useTickets() {
       return data as unknown as SupportTicket;
     },
     onSuccess: (data) => {
-      toast({
-        title: 'Обращение создано',
-        description: `Номер: ${data.ticket_number}`,
-      });
+      toast('Обращение создано', { description: `Номер: ${data.ticket_number}` });
       queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось создать обращение',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось создать обращение' });
     },
   });
 
@@ -192,17 +185,11 @@ export function useTickets() {
 
       if (error) throw error;
 
-      toast({
-        title: 'Сообщение отправлено',
-      });
+      toast('Сообщение отправлено');
 
       return true;
     } catch {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось отправить сообщение',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось отправить сообщение' });
       return false;
     }
   };

@@ -65,27 +65,12 @@ export function PropertyManageCalendarSection({
     try {
       const result = await syncAllCalendars(propertyId);
       if (result && typeof result === 'object' && 'skipped' in result && result.skipped) {
-        toast({
-          title: isRu ? 'Нет каналов' : 'No channels',
-          description: isRu
-            ? 'Добавьте активный iCal канал для этого объекта.'
-            : 'Add an active iCal channel for this property first.',
-          variant: 'destructive',
-        });
+        toast.error(isRu, { description: isRu });
         return;
       }
-      toast({
-        title: isRu ? 'Синхронизация запущена' : 'Sync started',
-        description: isRu
-          ? 'Календари обновляются. Данные появятся через несколько секунд.'
-          : 'Calendars are updating. Data will refresh shortly.',
-      });
+      toast(isRu, { description: isRu });
     } catch (e) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: e instanceof Error ? e.message : 'Sync failed',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: e instanceof Error ? e.message : 'Sync failed' });
     }
   };
 

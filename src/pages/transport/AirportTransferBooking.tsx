@@ -170,10 +170,7 @@ export default function AirportTransferBooking() {
     e.preventDefault();
     
     if (!user) {
-      toast({
-        title: language === 'ru' ? 'Требуется авторизация' : 'Login Required',
-        variant: 'destructive',
-      });
+      toast.error(language);
       navigate(APP_ROUTES.AUTH);
       return;
     }
@@ -290,11 +287,7 @@ export default function AirportTransferBooking() {
           }
         } catch (err) {
           console.error('Stripe checkout error:', err);
-          toast({
-            title: language === 'ru' ? 'Ошибка оплаты' : 'Payment Error',
-            description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',
-            variant: 'destructive',
-          });
+          toast.error(language, { description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method' });
           setIsProcessingPayment(false);
           return;
         }

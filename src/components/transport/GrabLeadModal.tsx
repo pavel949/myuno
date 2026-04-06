@@ -34,10 +34,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
     e.preventDefault();
     
     if (!formData.phone || !formData.pickup) {
-      toast({
-        title: isRu ? 'Заполните обязательные поля' : 'Fill required fields',
-        variant: 'destructive',
-      });
+      toast.error(isRu);
       return;
     }
 
@@ -77,11 +74,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
 
     } catch (error) {
       console.error('Error saving lead:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Попробуйте ещё раз' : 'Please try again',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Попробуйте ещё раз' : 'Please try again' });
     } finally {
       setIsSubmitting(false);
     }

@@ -91,11 +91,7 @@ export function useLeadActivityLog(leadId?: string) {
       queryClient.invalidateQueries({ queryKey: ['admin-lead-analytics'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось сохранить активность',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось сохранить активность' });
     },
   });
 

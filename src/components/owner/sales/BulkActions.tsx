@@ -24,20 +24,20 @@ export function BulkActions({ selectedIds, onClear }: Props) {
     if (!targetStage) return;
     try {
       await bulkStage.mutateAsync({ ids: selectedIds, stage: targetStage as DealStage });
-      toast({ title: isRu ? `${selectedIds.length} сделок обновлено` : `${selectedIds.length} deals updated` });
+      toast(isRu);
       onClear();
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const handleBulkDelete = async () => {
     try {
       await bulkDelete.mutateAsync(selectedIds);
-      toast({ title: isRu ? `${selectedIds.length} сделок удалено` : `${selectedIds.length} deals deleted` });
+      toast(isRu);
       onClear();
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

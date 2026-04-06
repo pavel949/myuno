@@ -179,7 +179,7 @@ export function useTeamMessages(channelSlug: string) {
       if (error) throw error;
     },
     onError: () => {
-      toast({ title: 'Ошибка отправки', variant: 'destructive' });
+      toast.error('Ошибка отправки');
     },
   });
 

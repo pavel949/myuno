@@ -50,42 +50,7 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
         logged_by: user.id,
         activity_date: new Date().toISOString(),
       });
-      toast({ title: isRu ? 'Активность записана' : 'Activity logged' });
-      setOpen(false);
-      setForm({ activity_type: 'call', subject: '', description: '', outcome: '', duration_minutes: '' });
-    } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {isRu ? 'Активность' : 'Activity'}
-        </h4>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="h-7 text-xs">
-              <Plus className="h-3 w-3 mr-1" />
-              {isRu ? 'Записать' : 'Log'}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>{isRu ? 'Записать активность' : 'Log Activity'}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 mt-2">
-              <div>
-                <Label>{isRu ? 'Тип' : 'Type'}</Label>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {['call', 'email_sent', 'meeting', 'whatsapp', 'note', 'property_viewed'].map(t => {
-                    const cfg = ACTIVITY_TYPE_CONFIG[t];
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setForm(f => ({ ...f, activity_type: t }))}
+      toast(isRu)toast.error(isRu, { description: '' }))}
                         className={cn(
                           'px-2.5 py-1 rounded-full text-xs border transition-colors',
                           form.activity_type === t

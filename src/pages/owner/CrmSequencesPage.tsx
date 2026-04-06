@@ -30,7 +30,7 @@ export default function CrmSequencesPage() {
   const handleCreate = async () => {
     if (!companyId || !user) return;
     if (!form.name.trim()) {
-      toast({ title: isRu ? 'Введите название' : 'Please enter a name', variant: 'destructive' });
+      toast.error(isRu);
       return;
     }
     try {
@@ -44,13 +44,9 @@ export default function CrmSequencesPage() {
       setCreateOpen(false);
       setForm({ name: '', description: '' });
       setSelectedId(seq.id);
-      toast({ title: isRu ? 'Последовательность создана' : 'Sequence created' });
+      toast(isRu);
     } catch (createError: any) {
-      toast({
-        title: isRu ? 'Ошибка создания последовательности' : 'Failed to create sequence',
-        description: createError?.message || String(createError),
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: createError?.message || String(createError) });
     }
   };
 
@@ -147,14 +143,10 @@ export default function CrmSequencesPage() {
                       if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
                         deleteSequence.mutate(seq.id, {
                           onSuccess: () => {
-                            toast({ title: isRu ? 'Последовательность удалена' : 'Sequence deleted' });
+                            toast(isRu);
                           },
                           onError: (deleteError: any) => {
-                            toast({
-                              title: isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence',
-                              description: deleteError?.message || String(deleteError),
-                              variant: 'destructive',
-                            });
+                            toast.error(isRu, { description: deleteError?.message || String(deleteError) });
                           },
                         });
                         if (selectedId === seq.id) setSelectedId(null);

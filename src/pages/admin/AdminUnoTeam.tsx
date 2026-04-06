@@ -36,29 +36,7 @@ export default function AdminUnoTeam() {
 
   const handleAddMember = async () => {
     if (!addEmail.trim()) {
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
-        description: isRu ? 'Введите email' : 'Enter email',
-        variant: 'destructive' 
-      });
-      return;
-    }
-
-    setIsAdding(true);
-    try {
-      // Find user by email
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, email, full_name')
-        .eq('email', addEmail.trim().toLowerCase())
-        .single();
-
-      if (profileError || !profile) {
-        toast({ 
-          title: isRu ? 'Пользователь не найден' : 'User not found', 
-          description: isRu ? 'Убедитесь, что пользователь зарегистрирован' : 'Make sure the user is registered',
-          variant: 'destructive' 
-        });
+      toast.error(isRu, { description: isRu ? 'Введите email' : 'Enter email' })toast.error(isRu, { description: isRu ? 'Убедитесь });
         setIsAdding(false);
         return;
       }
@@ -72,11 +50,7 @@ export default function AdminUnoTeam() {
         .single();
 
       if (existingRole) {
-        toast({ 
-          title: isRu ? 'Уже в команде' : 'Already in team', 
-          description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member',
-          variant: 'destructive' 
-        });
+        toast.error(isRu, { description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member' });
         setIsAdding(false);
         return;
       }
@@ -88,21 +62,14 @@ export default function AdminUnoTeam() {
 
       if (roleError) throw roleError;
 
-      toast({ 
-        title: isRu ? 'Успешно' : 'Success', 
-        description: isRu ? `${profile.full_name || profile.email} добавлен в myUNO Team` : `${profile.full_name || profile.email} added to myUNO Team`
-      });
+      toast(isRu, { description: isRu ? `${profile.full_name || profile.email });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
       setShowAddDialog(false);
       setAddEmail('');
     } catch (err) {
       console.error('Error adding member:', err);
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
-        description: isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member',
-        variant: 'destructive' 
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member' });
     } finally {
       setIsAdding(false);
     }
@@ -125,19 +92,12 @@ export default function AdminUnoTeam() {
         .delete()
         .eq('user_id', userId);
 
-      toast({ 
-        title: isRu ? 'Удалено' : 'Removed', 
-        description: isRu ? `${memberName} удалён из myUNO Team` : `${memberName} removed from myUNO Team`
-      });
+      toast(isRu, { description: isRu ? `${memberName });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
     } catch (err) {
       console.error('Error removing member:', err);
-      toast({ 
-        title: isRu ? 'Ошибка' : 'Error', 
-        description: isRu ? 'Не удалось удалить сотрудника' : 'Failed to remove member',
-        variant: 'destructive' 
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось удалить сотрудника' : 'Failed to remove member' });
     }
   };
 

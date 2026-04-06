@@ -69,10 +69,7 @@ export default function GuestGuidebook() {
   const copyToClipboard = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast({
-      title: isRu ? 'Скопировано' : 'Copied',
-      description: text,
-    });
+    toast(isRu, { description: text });
     setTimeout(() => setCopiedField(null), 2000);
   };
 

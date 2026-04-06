@@ -51,18 +51,18 @@ export default function CrmEmailsPage() {
       });
       setOpen(false);
       setForm({ to_email: '', subject: '', body_html: '' });
-      toast({ title: isRu ? 'Черновик создан' : 'Draft created' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
   const handleSend = async (id: string) => {
     try {
       await sendEmail.mutateAsync(id);
-      toast({ title: isRu ? 'Email отправлен' : 'Email sent' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка отправки' : 'Send failed', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

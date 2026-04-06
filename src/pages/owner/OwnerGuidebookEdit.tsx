@@ -161,7 +161,7 @@ export default function OwnerGuidebookEdit() {
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedLink(true);
-      toast({ title: isRu ? 'Ссылка скопирована' : 'Link copied' });
+      toast(isRu);
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };

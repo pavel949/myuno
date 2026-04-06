@@ -73,10 +73,10 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
         stage_from: currentStage,
         stage_to: mode === 'won' ? 'closed_won' : 'closed_lost',
       });
-      toast({ title: mode === 'won' ? (isRu ? 'Поздравляем! 🎉' : 'Congratulations! 🎉') : (isRu ? 'Сделка закрыта' : 'Deal closed') });
+      toast(mode);
       onOpenChange(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

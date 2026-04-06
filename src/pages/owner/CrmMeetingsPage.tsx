@@ -43,9 +43,9 @@ export default function CrmMeetingsPage() {
       });
       setOpen(false);
       setForm({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
-      toast({ title: isRu ? 'Встреча создана' : 'Meeting created' });
+      toast(isRu);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

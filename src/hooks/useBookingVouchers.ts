@@ -58,15 +58,10 @@ export function useBookingVouchers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking-vouchers', user?.id] });
-      toast({
-        title: language === 'ru' ? 'Ваучер создан' : 'Voucher generated',
-      });
+      toast(language);
     },
     onError: () => {
-      toast({
-        title: language === 'ru' ? 'Ошибка создания ваучера' : 'Failed to generate voucher',
-        variant: 'destructive',
-      });
+      toast.error(language);
     },
   });
 
@@ -120,9 +115,7 @@ export function useBookingVouchers() {
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard.writeText(shareData.url);
-      toast({
-        title: language === 'ru' ? 'Ссылка скопирована' : 'Link copied',
-      });
+      toast(language);
     }
   };
 

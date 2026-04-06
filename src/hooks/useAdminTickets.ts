@@ -128,16 +128,12 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: 'Статус обновлён' });
+      toast('Статус обновлён');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить статус',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось обновить статус' });
     },
   });
 
@@ -166,15 +162,11 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: (_, { adminId }) => {
-      toast({ title: adminId ? 'Тикет назначен' : 'Назначение снято' });
+      toast(adminId);
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось назначить тикет',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось назначить тикет' });
     },
   });
 
@@ -198,16 +190,12 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: 'Приоритет обновлён' });
+      toast('Приоритет обновлён');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
     },
     onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить приоритет',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось обновить приоритет' });
     },
   });
 
@@ -257,71 +245,14 @@ export function useAdminTickets() {
         });
     },
     onSuccess: () => {
-      toast({ title: 'Тикет решён' });
-      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-tickets-stats'] });
-    },
-    onError: () => {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось решить тикет',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const resolveTicket = async (
-    ticketId: string,
-    resolutionType: ResolutionType,
-    resolution: string,
-    refundAmount?: number
-  ): Promise<boolean> => {
-    try {
-      await resolveMutation.mutateAsync({ ticketId, resolutionType, resolution, refundAmount });
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const addAdminMessage = async (
-    ticketId: string,
-    message: string,
-    isInternal: boolean = false,
-    senderName?: string
-  ): Promise<boolean> => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-
-      const { error } = await supabase
-        .from('ticket_messages')
-        .insert({
-          ticket_id: ticketId,
-          sender_id: userData.user?.id,
-          sender_type: 'admin',
-          sender_name: senderName || 'Поддержка UNO',
-          message,
-          is_internal: isInternal,
-        });
-
-      if (error) throw error;
-
-      // Update ticket status to waiting_response if sending to user
-      if (!isInternal) {
-        await supabase
-          .from('support_tickets')
-          .update({ status: 'waiting_response' })
+      toast('Тикет решён')toast.error('Ошибка', { description: 'Не удалось решить тикет' })
           .eq('id', ticketId);
       }
 
-      toast({ title: isInternal ? 'Заметка добавлена' : 'Ответ отправлен' });
+      toast(isInternal);
       return true;
     } catch {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось отправить сообщение',
-        variant: 'destructive',
-      });
+      toast.error('Ошибка', { description: 'Не удалось отправить сообщение' });
       return false;
     }
   };

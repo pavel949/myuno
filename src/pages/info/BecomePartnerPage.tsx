@@ -69,10 +69,7 @@ export default function BecomePartnerPage() {
     e.preventDefault();
     
     if (!selectedCategory) {
-      toast({
-        title: language === 'ru' ? 'Выберите категорию' : 'Select a category',
-        variant: 'destructive',
-      });
+      toast.error(language);
       return;
     }
 
@@ -104,21 +101,10 @@ export default function BecomePartnerPage() {
       }
 
       setIsSubmitted(true);
-      toast({
-        title: language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!',
-        description: language === 'ru'
-          ? 'Мы свяжемся с вами в ближайшее время'
-          : 'We will contact you soon',
-      });
+      toast(language, { description: language === 'ru' });
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Error',
-        description: language === 'ru' 
-          ? 'Не удалось отправить заявку. Попробуйте позже.' 
-          : 'Failed to submit application. Please try again.',
-        variant: 'destructive',
-      });
+      toast.error(language, { description: language === 'ru' });
     } finally {
       setIsSubmitting(false);
     }

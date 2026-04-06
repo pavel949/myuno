@@ -108,21 +108,12 @@ export function BusinessCardScanButton({
 
       onDataExtracted(formData);
 
-      toast({
-        title: isRu ? 'Данные извлечены' : 'Data Extracted',
-        description: isRu
-          ? `Уверенность: ${data.confidence}%. Проверьте и сохраните.`
-          : `Confidence: ${data.confidence}%. Review and save.`,
-      });
+      toast(isRu, { description: isRu });
 
       handleClose();
     } catch (err) {
       console.error('Scan error:', err);
-      toast({
-        title: isRu ? 'Ошибка сканирования' : 'Scan Error',
-        description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card' });
     } finally {
       setIsProcessing(false);
     }
@@ -148,11 +139,7 @@ export function BusinessCardScanButton({
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image' });
     }
   }, [isRu, toast, processImage]);
 
@@ -177,19 +164,9 @@ export function BusinessCardScanButton({
       setIsCameraActive(false);
       
       if (err.name === 'NotAllowedError') {
-        toast({
-          title: isRu ? 'Доступ запрещён' : 'Access Denied',
-          description: isRu 
-            ? 'Разрешите доступ к камере в настройках браузера' 
-            : 'Please allow camera access in browser settings',
-          variant: 'destructive',
-        });
+        toast.error(isRu, { description: isRu });
       } else {
-        toast({
-          title: isRu ? 'Ошибка камеры' : 'Camera Error',
-          description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
-          variant: 'destructive',
-        });
+        toast.error(isRu, { description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera' });
       }
     }
   }, [isRu, toast]);

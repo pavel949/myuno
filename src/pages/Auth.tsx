@@ -113,11 +113,7 @@ export default function Auth() {
   const handleSignup = async () => {
     if (!validateStep('password')) return;
     if (!termsAccepted) {
-      toast({
-        title: isRu ? 'Примите условия' : 'Accept terms',
-        description: isRu ? 'Необходимо принять Условия использования' : 'You must accept the Terms of Service',
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: isRu ? 'Необходимо принять Условия использования' : 'You must accept the Terms of Service' });
       return;
     }
     setIsLoading(true);
@@ -135,7 +131,7 @@ export default function Auth() {
         } else if (error.message.includes('Password should be')) {
           description = isRu ? 'Пароль должен содержать не менее 6 символов' : 'Password must be at least 6 characters';
         }
-        toast({ title: isRu ? 'Ошибка регистрации' : 'Registration failed', description, variant: 'destructive' });
+        toast.error(isRu);
       } else {
         if (referralCode && data?.user) {
           try {
@@ -159,15 +155,12 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
         
-        toast({
-          title: isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!',
-          description: isRu ? 'Аккаунт создан. Проверьте почту для подтверждения email.' : 'Account created. Check your email to verify your address.',
-        });
+        toast(isRu, { description: isRu ? 'Аккаунт создан. Проверьте почту для подтверждения email.' : 'Account created. Check your email to verify your address.' });
 
         navigate(redirectPath, { replace: true });
       }
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
+      toast.error(isRu, { description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred' });
     } finally {
       setIsLoading(false);
     }
@@ -193,14 +186,14 @@ export default function Auth() {
           description = error.message;
         }
 
-        toast({ title: isRu ? 'Ошибка входа' : 'Login failed', description, variant: 'destructive' });
+        toast.error(isRu);
       } else {
         setLoginAttempts(0);
-        toast({ title: t('auth.welcomeBack'), description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
+        toast(t, { description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
       }
     } catch {
       setLoginAttempts(prev => prev + 1);
-      toast({ title: isRu ? 'Ошибка' : 'Error', description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred', variant: 'destructive' });
+      toast.error(isRu, { description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred' });
     } finally {
       setIsLoading(false);
     }

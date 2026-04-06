@@ -109,7 +109,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
+      toast.error(isRu);
       return;
     }
     try {
@@ -139,14 +139,10 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       }
 
       await updateDeal.mutateAsync({ id: deal.id, ...updates });
-      toast({ title: isRu ? 'Сделка обновлена' : 'Deal updated' });
+      toast(isRu);
       onOpenChange(false);
     } catch (updateError: any) {
-      toast({
-        title: isRu ? 'Ошибка сохранения сделки' : 'Failed to save deal',
-        description: updateError?.message || String(updateError),
-        variant: 'destructive',
-      });
+      toast.error(isRu, { description: updateError?.message || String(updateError) });
     }
   };
 

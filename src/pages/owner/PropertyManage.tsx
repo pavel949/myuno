@@ -183,10 +183,7 @@ export default function PropertyManage() {
         await syncAvailability(localAvailability);
       }
 
-      toast({
-        title: isRu ? 'Сохранено' : 'Saved',
-        description: isRu ? 'Все изменения сохранены' : 'All changes saved successfully',
-      });
+      toast(isRu, { description: isRu ? 'Все изменения сохранены' : 'All changes saved successfully' });
       
       setHasChanges(false);
       setFormInitialized(false); // Allow re-sync from server after save

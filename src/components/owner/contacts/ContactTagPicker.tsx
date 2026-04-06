@@ -37,7 +37,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
     const name = newTagName.trim();
     if (!name || !companyId) return;
     if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
-      toast({ title: isRu ? 'Тег уже существует' : 'Tag already exists', variant: 'destructive' });
+      toast.error(isRu);
       return;
     }
     try {
@@ -45,7 +45,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
       onToggle(name); // auto-select the new tag
       setNewTagName('');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 
@@ -57,7 +57,7 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
         onToggle(tag.name);
       }
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu);
     }
   };
 

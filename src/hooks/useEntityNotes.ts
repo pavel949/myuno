@@ -103,10 +103,10 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast({ title: 'Заметка добавлена' });
+      toast('Заметка добавлена');
     },
     onError: () => {
-      toast({ title: 'Ошибка добавления заметки', variant: 'destructive' });
+      toast.error('Ошибка добавления заметки');
     },
   });
 
@@ -149,7 +149,7 @@ export function useEntityNotes(entityType: EntityType, entityId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entity-notes', entityType, entityId] });
-      toast({ title: 'Заметка удалена' });
+      toast('Заметка удалена');
     },
   });
 

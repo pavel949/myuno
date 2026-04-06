@@ -185,17 +185,10 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
-      toast({
-        title: t('Check-in completed', 'Заезд подтверждён'),
-        description: t('Guest has been checked in successfully', 'Гость успешно заселён'),
-      });
+      toast(t, { description: t('Guest has been checked in successfully' });
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t, { description: error.message });
     },
   });
 
@@ -251,17 +244,10 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
-      toast({
-        title: t('Check-out completed', 'Выезд подтверждён'),
-        description: t('Guest has been checked out successfully', 'Гость успешно выселен'),
-      });
+      toast(t, { description: t('Guest has been checked out successfully' });
     },
     onError: (error: Error) => {
-      toast({
-        title: t('Error', 'Ошибка'),
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast.error(t, { description: error.message });
     },
   });
 
@@ -305,9 +291,7 @@ export function useBookingOperations(bookingId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['booking-meter-readings', bookingId] });
-      toast({
-        title: t('Reading recorded', 'Показания записаны'),
-      });
+      toast(t);
     },
   });
 
