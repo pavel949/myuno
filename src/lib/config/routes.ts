@@ -359,6 +359,11 @@ export const APP_ROUTES = {
   ADMIN_CONSULTATIONS: '/admin/consultations',
   ADMIN_CITIES: '/admin/cities',
   ADMIN_TRANSFERS: '/admin/transfers',
+  ADMIN_CRM: '/admin/crm',
+  ADMIN_TICKETS: '/admin/tickets',
+  ADMIN_MODERATION: '/admin/operations',
+  VENDOR_PAYOUTS: '/vendor/payouts',
+  TEAM_CONTENT: '/team/content',
 } as const;
 
 /**
