@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
@@ -33,7 +33,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
 
   const [form, setForm] = useState({
     first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '',
-    contact_type: 'buyer', crm_role: 'other' as const, source: 'website', nationality: '', notes: '',
+    contact_type: 'buyer', source: 'website', nationality: '', notes: '',
     budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '',
     preferred_types: [] as string[], preferred_districts: [] as string[], tags: [] as string[],
   });
@@ -49,7 +49,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         phone: form.phone || null, phone2: null, email: form.email || null,
         whatsapp: form.whatsapp || null, telegram: form.telegram || null, line_id: null,
         nationality: form.nationality || null, language: 'en', source: form.source,
-        contact_type: form.contact_type, crm_role: form.crm_role, company_name: null,
+        contact_type: form.contact_type, company_name: null,
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null, currency: form.currency,
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,
@@ -61,7 +61,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
-      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', crm_role: 'other' as const, source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
+      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
@@ -96,23 +96,12 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} placeholder={isRu ? 'Если отличается' : 'If different'} /></div>
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} placeholder="@username" /></div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>{isRu ? 'Роль' : 'Role'}</Label>
-           <Select value={form.crm_role} onValueChange={v => setForm(f => ({ ...f, crm_role: v as typeof f.crm_role }))}>
-             <SelectTrigger><SelectValue /></SelectTrigger>
-             <SelectContent>
-               {CRM_ROLES.map(r => (
-                 <SelectItem key={r} value={r}>{isRu ? CRM_ROLE_LABELS[r].ru : CRM_ROLE_LABELS[r].en}</SelectItem>
-              ))}
-            </SelectContent>
           </Select>
         </div>
         <div>

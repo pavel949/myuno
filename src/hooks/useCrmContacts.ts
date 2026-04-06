@@ -274,9 +274,11 @@ export function useCreateContact() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (contact: CrmContactInsert) => {
+      // Strip fields that exist in the TS type but not in the DB schema
+      const { crm_role, key_dates, ...cleanContact } = contact as any;
       const { data, error } = await supabase
         .from('crm_contacts')
-        .insert(contact as any)
+        .insert(cleanContact)
         .select()
         .single();
       if (error) throw error;
