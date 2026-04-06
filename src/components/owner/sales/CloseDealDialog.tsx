@@ -76,7 +76,7 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
       toast(mode);
       onOpenChange(false);
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

@@ -42,9 +42,9 @@ export default function CrmWorkflowsPage() {
       });
       setCreateOpen(false);
       setForm({ name: '', trigger_type: 'deal_created' });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -52,7 +52,7 @@ export default function CrmWorkflowsPage() {
     try {
       await updateWorkflow.mutateAsync({ id: wf.id, is_active: !wf.is_active });
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

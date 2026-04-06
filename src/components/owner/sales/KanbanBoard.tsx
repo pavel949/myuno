@@ -345,10 +345,10 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
         user_id: user!.id,
       };
       supabase.from('deal_field_changes').insert(changeRow).then(({ error }) => {
-        if (error) toast.error(isRu);
+        if (error) toast.error(isRu ? 'Ошибка' : 'Error');
       });
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

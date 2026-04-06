@@ -92,9 +92,9 @@ export function SequenceBuilder({ sequence }: Props) {
         })),
       });
       setDirty(false);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -103,7 +103,7 @@ export function SequenceBuilder({ sequence }: Props) {
       await updateSequence.mutateAsync({ id: sequence.id, is_active: !sequence.is_active });
       toast(sequence);
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

@@ -38,7 +38,7 @@ export default function PublicGuidebook() {
   const copyToClipboard = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast(isRu, { description: text });
+    toast(isRu ? 'Готово' : 'Done');
     setTimeout(() => setCopiedField(null), 2000);
   };
 

@@ -73,7 +73,7 @@ export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAI
   const copySuggestion = (suggestion: AISuggestion) => {
     const text = `${suggestion.reason}\n\nAction: ${suggestion.recommended_human_action}`;
     navigator.clipboard.writeText(text);
-    toast(isRu, { description: isRu ? 'Рекомендация скопирована' : 'Suggestion copied to clipboard' });
+    toast(isRu ? 'Готово' : 'Done');
   };
 
   return (

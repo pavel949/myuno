@@ -103,7 +103,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [isRu, toast]);
 
@@ -121,7 +121,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       }
     } catch (err) {
       console.error('Camera access error:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [isRu, toast]);
 
@@ -169,10 +169,10 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       setExtractedData(data);
       setEditedData(data);
 
-      toast(isRu, { description: isRu });
+      toast(isRu ? 'Готово' : 'Done');
     } catch (err) {
       console.error('Scan error:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsProcessing(false);
     }
@@ -181,7 +181,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
   // Create provider from extracted data
   const createProvider = useCallback(async () => {
     if (!editedData?.company_name) {
-      toast.error(isRu, { description: isRu ? 'Название компании обязательно' : 'Company name is required' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -214,7 +214,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
       if (error) throw error;
 
-      toast(isRu, { description: editedData.company_name });
+      toast(isRu ? 'Готово' : 'Done');
 
       onProviderCreated?.(data.id);
 
@@ -225,7 +225,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
     } catch (err) {
       console.error('Create provider error:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось создать провайдера' : 'Failed to create provider' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsCreating(false);
     }

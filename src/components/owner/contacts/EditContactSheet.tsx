@@ -121,7 +121,7 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
 
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -165,10 +165,10 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         tax_id: form.tax_id || null,
         website: form.website || null,
       });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

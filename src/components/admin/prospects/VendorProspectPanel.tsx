@@ -50,9 +50,9 @@ export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
     setIsScoring(true);
     try {
       await scoreProspect.mutateAsync(prospect.id);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsScoring(false);
     }
@@ -62,7 +62,7 @@ export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
     if (!noteText.trim()) return;
     logActivity.mutate({ prospect_id: prospect.id, activity_type: 'note', new_value: noteText });
     setNoteText('');
-    toast(isRu);
+    toast(isRu ? 'Готово' : 'Done');
   };
 
   return (

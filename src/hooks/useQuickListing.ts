@@ -45,7 +45,7 @@ export function useQuickListing() {
       if (error) throw error;
 
       const isRu = getLang() === 'ru';
-      toast(isRu, { description: isRu ? 'Заявка отправлена на модерацию!' : 'Listing submitted for review!' });
+      toast(isRu ? 'Готово' : 'Done');
 
       return { success: true, id: result.id };
     } catch (error) {

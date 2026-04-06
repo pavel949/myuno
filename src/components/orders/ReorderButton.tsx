@@ -46,7 +46,7 @@ export function ReorderButton({
 
   const handleReorder = async () => {
     if (!user) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -86,7 +86,7 @@ export function ReorderButton({
 
           if (error) throw error;
 
-          toast(isRu, { description: isRu });
+          toast(isRu ? 'Готово' : 'Done');
 
           // Navigate to checkout or cart
           navigate('/cart');
@@ -95,7 +95,7 @@ export function ReorderButton({
         // For service orders, navigate to the service page with pre-filled data
         const path = getRedirectPath(order.order_type);
         
-        toast(isRu, { description: isRu ? 'Выберите дату и время' : 'Please select date and time' });
+        toast(isRu ? 'Готово' : 'Done');
 
         // Pass order data as state for pre-filling
         navigate(path, {
@@ -111,7 +111,7 @@ export function ReorderButton({
       }
     } catch (error) {
       console.error('Reorder error:', error);
-      toast.error(isRu, { description: isRu ? 'Не удалось повторить заказ' : 'Failed to reorder' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }

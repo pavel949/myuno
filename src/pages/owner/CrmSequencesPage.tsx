@@ -30,7 +30,7 @@ export default function CrmSequencesPage() {
   const handleCreate = async () => {
     if (!companyId || !user) return;
     if (!form.name.trim()) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -44,9 +44,9 @@ export default function CrmSequencesPage() {
       setCreateOpen(false);
       setForm({ name: '', description: '' });
       setSelectedId(seq.id);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch (createError: any) {
-      toast.error(isRu, { description: createError?.message || String(createError) });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -143,10 +143,10 @@ export default function CrmSequencesPage() {
                       if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
                         deleteSequence.mutate(seq.id, {
                           onSuccess: () => {
-                            toast(isRu);
+                            toast(isRu ? 'Готово' : 'Done');
                           },
                           onError: (deleteError: any) => {
-                            toast.error(isRu, { description: deleteError?.message || String(deleteError) });
+                            toast.error(isRu ? 'Ошибка' : 'Error');
                           },
                         });
                         if (selectedId === seq.id) setSelectedId(null);

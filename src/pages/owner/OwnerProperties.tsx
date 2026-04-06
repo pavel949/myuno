@@ -218,9 +218,9 @@ export default function OwnerProperties() {
     const { error } = await supabase.from('properties').update({ is_active: activate }).in('id', ids);
     setBulkProcessing(false);
     if (error) {
-      toast.error(isRu, { description: error.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } else {
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       invalidateAll();
       exitSelectionMode();
     }
@@ -236,9 +236,9 @@ export default function OwnerProperties() {
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
     if (error) {
-      toast.error(isRu, { description: error.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } else {
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       invalidateAll();
       exitSelectionMode();
     }
@@ -256,9 +256,9 @@ export default function OwnerProperties() {
     setBulkReassignOpen(false);
     setReassignTargetId('');
     if (error) {
-      toast.error(isRu, { description: error.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } else {
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       invalidateAll();
       queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
       queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
@@ -298,7 +298,7 @@ export default function OwnerProperties() {
     link.download = `properties_export_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    toast(isRu)toast.error(isRu);
+    toast(isRu)toast.error(isRu ? 'Ошибка' : 'Error');
     } else {
       toast(activate);
       invalidateAll();
@@ -312,9 +312,9 @@ export default function OwnerProperties() {
       .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as Record<string, unknown>)
       .eq('id', deleteTarget);
     if (error) {
-      toast.error(isRu, { description: error.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } else {
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       invalidateAll();
     }
     setDeleteTarget(null);

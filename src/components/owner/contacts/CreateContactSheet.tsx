@@ -39,7 +39,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
 
   const handleSubmit = async () => {
     if (!form.first_name.trim()) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -58,11 +58,11 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         notes: form.notes || null, tags: form.tags, avatar_url: null, is_archived: false,
         created_by: user?.id || null,
       });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
       setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

@@ -65,12 +65,12 @@ export function PropertyManageCalendarSection({
     try {
       const result = await syncAllCalendars(propertyId);
       if (result && typeof result === 'object' && 'skipped' in result && result.skipped) {
-        toast.error(isRu, { description: isRu });
+        toast.error(isRu ? 'Ошибка' : 'Error');
         return;
       }
-      toast(isRu, { description: isRu });
+      toast(isRu ? 'Готово' : 'Done');
     } catch (e) {
-      toast.error(isRu, { description: e instanceof Error ? e.message : 'Sync failed' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

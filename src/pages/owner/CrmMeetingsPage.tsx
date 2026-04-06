@@ -43,9 +43,9 @@ export default function CrmMeetingsPage() {
       });
       setOpen(false);
       setForm({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

@@ -42,14 +42,14 @@ export function VendorProspectImport() {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualForm.business_name.trim()) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
     setIsLoading(true);
     try {
       await createProspect.mutateAsync(manualForm);
-      toast(isRussian);
+      toast(isRu ? 'Готово' : 'Done');
       setManualForm({
         business_name: '',
         business_type: '',
@@ -61,7 +61,7 @@ export function VendorProspectImport() {
         source_type: 'manual'
       });
     } catch (error) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ export function VendorProspectImport() {
 
   const handleUrlImport = async () => {
     if (!urlInput.trim()) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -82,10 +82,10 @@ export function VendorProspectImport() {
     setIsLoading(true);
     try {
       await analyzeUrl.mutateAsync({ url: urlInput, sourceType });
-      toast(isRussian);
+      toast(isRu ? 'Готово' : 'Done');
       setUrlInput('');
     } catch (error) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +93,7 @@ export function VendorProspectImport() {
 
   const handleBatchImport = async () => {
     if (!batchInput.trim()) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -113,10 +113,10 @@ export function VendorProspectImport() {
       }).filter(p => p.business_name);
 
       await batchImport.mutateAsync({ prospects });
-      toast(isRussian);
+      toast(isRu ? 'Готово' : 'Done');
       setBatchInput('');
     } catch (error) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }

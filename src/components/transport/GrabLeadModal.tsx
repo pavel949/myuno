@@ -34,7 +34,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
     e.preventDefault();
     
     if (!formData.phone || !formData.pickup) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -74,7 +74,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
 
     } catch (error) {
       console.error('Error saving lead:', error);
-      toast.error(isRu, { description: isRu ? 'Попробуйте ещё раз' : 'Please try again' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsSubmitting(false);
     }

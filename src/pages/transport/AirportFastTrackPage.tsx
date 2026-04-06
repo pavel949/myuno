@@ -207,7 +207,7 @@ export default function AirportFastTrackPage() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       navigate('/auth');
       return;
     }
@@ -251,7 +251,7 @@ export default function AirportFastTrackPage() {
 
       if (error) throw error;
 
-      toast(isRu, { description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm" });
+      toast(isRu ? 'Готово' : 'Done');
 
       if (direction === 'arrival') {
         setShowUpsell(true);
@@ -260,7 +260,7 @@ export default function AirportFastTrackPage() {
       }
     } catch (err) {
       console.error('Fast Track booking error:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsSubmitting(false);
     }

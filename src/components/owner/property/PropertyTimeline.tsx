@@ -83,10 +83,10 @@ export function PropertyTimeline({ propertyId }: { propertyId: string }) {
       qc.invalidateQueries({ queryKey: ['passport-events', propertyId] });
       setDialogOpen(false);
       setForm({ event_type: 'other', event_date: '', title: '', description: '' });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (err: any) => {
-      toast.error(isRu, { description: err.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     },
   });
 

@@ -69,7 +69,7 @@ export function RevenueInsightsWidget() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pricing-recommendations'] });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     },
   });
 

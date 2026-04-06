@@ -65,7 +65,7 @@ export function useStaffProfile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-profile'] });
       const isRu = getLang() === 'ru';
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (error) => {
       errorLog.error(error, 'update_profile', {

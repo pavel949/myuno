@@ -58,9 +58,9 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
         stage: prospect.status
       });
       setGeneratedMessage(result.message || '');
-      toast(isRussian);
+      toast(isRu ? 'Готово' : 'Done');
     } catch (error) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsGenerating(false);
     }
@@ -70,9 +70,9 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
     setIsScoring(true);
     try {
       await scoreProspect.mutateAsync(prospect.id);
-      toast(isRussian);
+      toast(isRu ? 'Готово' : 'Done');
     } catch (error) {
-      toast.error(isRussian);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsScoring(false);
     }
@@ -80,7 +80,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(generatedMessage);
-    toast(isRussian)toast.error(isRussian);
+    toast(isRussian)toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     setIsConvertingToCrm(true);
@@ -150,7 +150,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
       toast(isRussian, { description: `${firstName} ${lastName} — ${tags.join(', ')}` });
     } catch (error: any) {
-      toast.error(isRussian, { description: error.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsConvertingToCrm(false);
     }

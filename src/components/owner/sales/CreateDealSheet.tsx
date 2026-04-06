@@ -123,7 +123,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -156,7 +156,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           });
           contactId = (newContact as any)?.id || null;
         } catch (contactError: any) {
-          toast.error(isRu, { description: contactError?.message || String(contactError) });
+          toast.error(isRu ? 'Ошибка' : 'Error');
         }
       }
 
@@ -184,7 +184,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         closed_at: null, lost_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
       } as any);
-      toast(isRu, { description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.' });
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
       setSelectedContact(null);
       setErrors({});
@@ -193,7 +193,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
       }
     } catch (dealError: any) {
-      toast.error(isRu, { description: dealError?.message || String(dealError) });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

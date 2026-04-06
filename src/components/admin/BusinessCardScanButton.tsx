@@ -108,12 +108,12 @@ export function BusinessCardScanButton({
 
       onDataExtracted(formData);
 
-      toast(isRu, { description: isRu });
+      toast(isRu ? 'Готово' : 'Done');
 
       handleClose();
     } catch (err) {
       console.error('Scan error:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsProcessing(false);
     }
@@ -139,7 +139,7 @@ export function BusinessCardScanButton({
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast.error(isRu, { description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [isRu, toast, processImage]);
 
@@ -164,9 +164,9 @@ export function BusinessCardScanButton({
       setIsCameraActive(false);
       
       if (err.name === 'NotAllowedError') {
-        toast.error(isRu, { description: isRu });
+        toast.error(isRu ? 'Ошибка' : 'Error');
       } else {
-        toast.error(isRu, { description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera' });
+        toast.error(isRu ? 'Ошибка' : 'Error');
       }
     }
   }, [isRu, toast]);

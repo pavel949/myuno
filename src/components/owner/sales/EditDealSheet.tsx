@@ -109,7 +109,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -139,10 +139,10 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       }
 
       await updateDeal.mutateAsync({ id: deal.id, ...updates });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
     } catch (updateError: any) {
-      toast.error(isRu, { description: updateError?.message || String(updateError) });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

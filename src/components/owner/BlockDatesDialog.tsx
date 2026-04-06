@@ -78,7 +78,7 @@ export function BlockDatesDialog({
     if (!dateRange?.from) return;
     
     if (mode === 'block' && hasConflicts) {
-      toast.error(isRu, { description: isRu });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     
@@ -98,12 +98,12 @@ export function BlockDatesDialog({
         
         await upsertAvailability(entries);
         
-        toast(isRu, { description: isRu });
+        toast(isRu ? 'Готово' : 'Done');
       } else {
         // Unblock dates
         await deleteAvailability(dates);
         
-        toast(isRu, { description: isRu });
+        toast(isRu ? 'Готово' : 'Done');
       }
       
       onSuccess?.();
@@ -112,7 +112,7 @@ export function BlockDatesDialog({
       setNote('');
     } catch (error) {
       console.error('Error managing dates:', error);
-      toast.error(isRu, { description: isRu ? 'Не удалось обновить даты' : 'Failed to update dates' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsSubmitting(false);
     }

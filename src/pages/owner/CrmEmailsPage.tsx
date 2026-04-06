@@ -51,18 +51,18 @@ export default function CrmEmailsPage() {
       });
       setOpen(false);
       setForm({ to_email: '', subject: '', body_html: '' });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleSend = async (id: string) => {
     try {
       await sendEmail.mutateAsync(id);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

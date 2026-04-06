@@ -181,7 +181,7 @@ export function AddBookingFromCalendarDialog({
       for (const file of Array.from(files)) {
         // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
-          toast.error(isRu, { description: isRu ? 'Файл слишком большой (макс. 10 МБ)' : 'File too large (max 10MB)' });
+          toast.error(isRu ? 'Ошибка' : 'Error');
           continue;
         }
         
@@ -194,7 +194,7 @@ export function AddBookingFromCalendarDialog({
         
         if (uploadError) {
           console.error('Upload error:', uploadError);
-          toast.error(isRu, { description: uploadError.message });
+          toast.error(isRu ? 'Ошибка' : 'Error');
           continue;
         }
         
@@ -209,10 +209,10 @@ export function AddBookingFromCalendarDialog({
         }]);
       }
       
-      toast(isRu, { description: isRu ? 'Документы успешно загружены' : 'Documents uploaded successfully' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(isRu, { description: isRu ? 'Не удалось загрузить документ' : 'Failed to upload document' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsUploadingDoc(false);
       // Reset input
@@ -226,12 +226,12 @@ export function AddBookingFromCalendarDialog({
   
   const handleSubmit = async () => {
     if (!checkIn || !checkOut) {
-      toast.error(isRu, { description: isRu ? 'Выберите даты заезда и выезда' : 'Select check-in and check-out dates' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     
     if (hasConflicts) {
-      toast.error(isRu, { description: isRu });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     
@@ -256,14 +256,14 @@ export function AddBookingFromCalendarDialog({
         documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
-      toast(isRu, { description: guestName });
+      toast(isRu ? 'Готово' : 'Done');
       
       onSuccess?.();
       onOpenChange(false);
       resetForm();
     } catch (error) {
       console.error('Error creating booking:', error);
-      toast.error(isRu, { description: isRu ? 'Не удалось создать бронирование' : 'Failed to create booking' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsSubmitting(false);
     }

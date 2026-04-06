@@ -129,7 +129,7 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
 
   const handleAdd = async () => {
     if (!newStage.stage_key || !newStage.name_en || !newStage.name_ru) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -146,24 +146,24 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
         is_system: false,
         is_active: true,
       });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       setNewStage({ stage_key: '', name_en: '', name_ru: '', short_label: '', color: '#6366f1', probability: '0.5' });
       setShowAdd(false);
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async (stage: PipelineStage) => {
     if (stage.is_system) {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
       await deleteStage.mutateAsync(stage.id);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -172,9 +172,9 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
       for (const s of DEFAULT_STAGES.map(s => ({ ...s, deal_type: dealType, company_id: companyId }))) {
         await createStage.mutateAsync(s);
       }
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

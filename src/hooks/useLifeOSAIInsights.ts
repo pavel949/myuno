@@ -72,16 +72,16 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
 
       if (data.error) {
         if (data.error.includes('Rate limit')) {
-          toast.error(isRu, { description: isRu });
+          toast.error(isRu ? 'Ошибка' : 'Error');
         } else if (data.error.includes('credits')) {
-          toast.error(isRu, { description: isRu });
+          toast.error(isRu ? 'Ошибка' : 'Error');
         }
         throw new Error(data.error);
       }
 
       setResult(data as AnalysisResult);
       
-      toast(isRu, { description: isRu });
+      toast(isRu ? 'Готово' : 'Done');
 
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Analysis failed';
@@ -110,7 +110,7 @@ export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Fix failed';
       setFixResults(prev => ({ ...prev, [index]: { success: false, actions: [message] } }));
-      toast.error(isRu, { description: message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsFixing(null);
     }

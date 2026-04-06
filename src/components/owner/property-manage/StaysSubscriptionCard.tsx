@@ -38,12 +38,12 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
   useEffect(() => {
     const flag = searchParams.get('stays_sub');
     if (flag === 'success') {
-      toast(isRu, { description: isRu });
+      toast(isRu ? 'Готово' : 'Done');
       const next = new URLSearchParams(searchParams);
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
     } else if (flag === 'cancelled') {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
       const next = new URLSearchParams(searchParams);
       next.delete('stays_sub');
       setSearchParams(next, { replace: true });
@@ -63,7 +63,7 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
       });
       window.location.href = url;
     } catch (e) {
-      toast.error(isRu, { description: e instanceof Error ? e.message : 'Checkout failed' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

@@ -115,7 +115,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       const label = isRu
         ? ORDER_STATUS_CONFIG[newStatus]?.labelRu
         : ORDER_STATUS_CONFIG[newStatus]?.labelEn;
-      toast(isRu, { description: isRu ? `Заказ переведён в "${label });
+      toast(isRu ? 'Готово' : 'Done');
       queryClient.invalidateQueries({ queryKey: ['admin-order-detail', orderId] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       onStatusChanged();
@@ -123,7 +123,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
       setCancelReason('');
     },
     onError: (err: any) => {
-      toast.error(isRu, { description: err.message });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     },
   });
 
@@ -162,7 +162,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
     ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(lines);
-    toast(isRu);
+    toast(isRu ? 'Готово' : 'Done');
   };
 
   const openWhatsApp = () => {

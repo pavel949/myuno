@@ -113,7 +113,7 @@ export default function Auth() {
   const handleSignup = async () => {
     if (!validateStep('password')) return;
     if (!termsAccepted) {
-      toast.error(isRu, { description: isRu ? 'Необходимо принять Условия использования' : 'You must accept the Terms of Service' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     setIsLoading(true);
@@ -131,7 +131,7 @@ export default function Auth() {
         } else if (error.message.includes('Password should be')) {
           description = isRu ? 'Пароль должен содержать не менее 6 символов' : 'Password must be at least 6 characters';
         }
-        toast.error(isRu);
+        toast.error(isRu ? 'Ошибка' : 'Error');
       } else {
         if (referralCode && data?.user) {
           try {
@@ -155,12 +155,12 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
         
-        toast(isRu, { description: isRu ? 'Аккаунт создан. Проверьте почту для подтверждения email.' : 'Account created. Check your email to verify your address.' });
+        toast(isRu ? 'Готово' : 'Done');
 
         navigate(redirectPath, { replace: true });
       }
     } catch {
-      toast.error(isRu, { description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }
@@ -186,14 +186,14 @@ export default function Auth() {
           description = error.message;
         }
 
-        toast.error(isRu);
+        toast.error(isRu ? 'Ошибка' : 'Error');
       } else {
         setLoginAttempts(0);
         toast(t, { description: isRu ? 'Вход выполнен успешно' : 'Successfully logged in' });
       }
     } catch {
       setLoginAttempts(prev => prev + 1);
-      toast.error(isRu, { description: isRu ? 'Произошла непредвиденная ошибка' : 'An unexpected error occurred' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsLoading(false);
     }

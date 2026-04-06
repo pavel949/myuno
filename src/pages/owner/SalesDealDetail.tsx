@@ -112,9 +112,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
         stage_from: deal.stage, stage_to: newStage,
       });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -129,9 +129,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
         stage_from: null, stage_to: null,
       });
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -143,19 +143,19 @@ export default function SalesDealDetail() {
         description: activityText.trim(), stage_from: null, stage_to: null,
       });
       setActivityText('');
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteDeal.mutateAsync(deal.id);
-      toast(isRu);
+      toast(isRu ? 'Готово' : 'Done');
       navigate(APP_ROUTES.MC_SALES);
     } catch {
-      toast.error(isRu);
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
