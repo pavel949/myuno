@@ -148,6 +148,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
       // Rich CRM mapping
       const { error } = await supabase.from('crm_contacts').insert({
+        company_id: myCompany.company_id,
         first_name: firstName,
         last_name: lastName || null,
         email: prospect.email,
