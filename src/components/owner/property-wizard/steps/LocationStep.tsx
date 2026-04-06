@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MapPin, AlertTriangle, Lock, EyeOff, Pencil } from 'lucide-react';
 import { ProjectLocationPicker } from '@/components/property/ProjectLocationPicker';
+import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 
@@ -23,6 +24,25 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
 
   const hasLocationFromSearch = !!(formData.address && formData.lat != null && formData.lng != null);
   const showCompactLocation = hasLocationFromSearch && !showEditAddress;
+
+  const handlePlaceSelect = (place: { address: string; lat: number; lng: number; district?: string }) => {
+    const updates: Partial<PropertyFormData> = {
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
+    };
+    if (place.district) {
+      const matchedDistrict = PHUKET_DISTRICTS.find(d =>
+        d.labelEn.toLowerCase() === place.district!.toLowerCase() ||
+        d.labelRu.toLowerCase() === place.district!.toLowerCase() ||
+        d.id.toLowerCase() === place.district!.toLowerCase()
+      );
+      if (matchedDistrict) {
+        updates.district = matchedDistrict.id;
+      }
+    }
+    updateFormData(updates);
+  };
 
   return (
     <div className="space-y-6">
@@ -56,10 +76,11 @@ export function LocationStep({ formData, updateFormData }: LocationStepProps) {
             <>
               <div className="space-y-2">
                 <Label>{isRu ? 'Адрес' : 'Address'} *</Label>
-                <Input
+                <GooglePlacesAutocomplete
                   value={formData.address}
-                  onChange={(e) => updateFormData({ address: e.target.value })}
-                  placeholder="123 Beach Road, Patong"
+                  onChange={(val) => updateFormData({ address: val })}
+                  onPlaceSelect={handlePlaceSelect}
+                  placeholder={isRu ? 'Начните вводить адрес...' : 'Start typing an address...'}
                 />
               </div>
 
