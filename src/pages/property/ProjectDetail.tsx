@@ -22,7 +22,6 @@ import { ProjectHeroMedia } from '@/components/property/ProjectHeroMedia';
 import { ProjectAmenitiesGrid } from '@/components/property/ProjectAmenitiesGrid';
 import { ProjectUnitsSection } from '@/components/property/ProjectUnitsSection';
 import { ProjectGalleryModal } from '@/components/property/ProjectGalleryModal';
-import { AdaptiveBottomNav } from '@/components/layout/AdaptiveBottomNav';
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
@@ -230,7 +229,6 @@ export default function ProjectDetail() {
           projectName={name}
         />
 
-        <AdaptiveBottomNav />
       </div>
     </>
   );

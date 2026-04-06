@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { ProjectCard } from '@/components/property/ProjectCard';
-import { AdaptiveBottomNav } from '@/components/layout/AdaptiveBottomNav';
 import { cn } from '@/lib/utils';
 
 // Phuket districts for filtering
@@ -237,7 +236,6 @@ export default function ProjectsIndex() {
           </section>
         </main>
 
-        <AdaptiveBottomNav />
       </div>
     </>
   );

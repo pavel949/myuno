@@ -40,40 +40,41 @@ const vendorNavItems: NavItem[] = [
   { path: APP_ROUTES.VENDOR, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
   { path: APP_ROUTES.VENDOR_SERVICES, icon: Package, labelEn: 'Services', labelRu: 'Услуги' },
   { path: APP_ROUTES.VENDOR_BOOKINGS, icon: Calendar, labelEn: 'Bookings', labelRu: 'Заказы' },
-  { path: '/vendor/payouts', icon: Wallet, labelEn: 'Payouts', labelRu: 'Выплаты' },
+  { path: APP_ROUTES.VENDOR_PAYOUTS, icon: Wallet, labelEn: 'Payouts', labelRu: 'Выплаты' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
 const adminNavItems: NavItem[] = [
   { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/admin/crm', icon: UserCheck, labelEn: 'CRM', labelRu: 'CRM' },
-  { path: '/admin/tickets', icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
-  { path: '/admin/moderation', icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
+  { path: APP_ROUTES.ADMIN_CRM, icon: UserCheck, labelEn: 'CRM', labelRu: 'CRM' },
+  { path: APP_ROUTES.ADMIN_TICKETS, icon: MessageSquare, labelEn: 'Tickets', labelRu: 'Тикеты' },
+  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck, labelEn: 'Moderation', labelRu: 'Модерация' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
 const teamNavItems: NavItem[] = [
   { path: APP_ROUTES.TEAM, icon: LayoutDashboard, labelEn: 'Dashboard', labelRu: 'Обзор' },
-  { path: '/team/content', icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
-  { path: '/admin/moderation', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
-  { path: '/admin/crm', icon: Users, labelEn: 'CRM', labelRu: 'CRM' },
+  { path: APP_ROUTES.TEAM_CONTENT, icon: Plus, labelEn: 'Content', labelRu: 'Создать' },
+  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка' },
+  { path: APP_ROUTES.ADMIN_CRM, icon: Users, labelEn: 'CRM', labelRu: 'CRM' },
   { path: APP_ROUTES.PROFILE, icon: User, labelEn: 'Profile', labelRu: 'Профиль' },
 ];
 
-const layoutsWithOwnNav = ['/mc', '/admin', '/staff', '/my-stay', '/guest', '/team'];
+const layoutsWithOwnNav = ['/mc', '/admin', '/staff', '/my-stay', '/guest', '/team', '/developer-portal'];
 
-const routesWithOwnBottomBar = [
+const detailPrefixes = [
   '/flowers/', '/yachts/', '/tours/', '/beauty/', '/cleaning/',
   '/fitness/booking', '/medical/appointment', '/restaurants/',
   '/pets/', '/cart', '/checkout', '/auth', '/market/product/',
   '/market/category/', '/experience/', '/babysitter/',
-  '/transfer/', '/transport/', '/service/',
+  '/transfer/', '/transport/', '/service/', '/newbuilds/projects/',
 ];
 
 function shouldHideBottomNav(pathname: string): boolean {
   if (layoutsWithOwnNav.some(prefix => pathname.startsWith(prefix))) return true;
+  // /property exact → show nav; /property/* sub-pages → hide
   if (pathname.startsWith('/property/')) return true;
-  return routesWithOwnBottomBar.some(route => pathname.includes(route));
+  return detailPrefixes.some(prefix => pathname.startsWith(prefix));
 }
 
 type NavConfig = { items: NavItem[]; showAppsButton: boolean };
@@ -164,16 +165,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}>
                     <Icon className="w-[22px] h-[22px]" />
                   </div>
-                  {active ? (
+                  {active && (
                     <span className="text-[10px] font-semibold text-primary">
                       {language === 'ru' ? labelRu : labelEn}
                     </span>
-                  ) : null}
-                  {active ? (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  ) : null}
+                  )}
                 </NavLink>
               );
             })}
@@ -220,16 +216,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}>
                     <Icon className="w-[22px] h-[22px]" />
                   </div>
-                  {active ? (
+                  {active && (
                     <span className="text-[10px] font-semibold text-primary">
                       {language === 'ru' ? labelRu : labelEn}
                     </span>
-                  ) : null}
-                  {active ? (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  ) : null}
+                  )}
                 </NavLink>
               );
             })}
