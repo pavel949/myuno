@@ -7,7 +7,6 @@
  *
  * @see docs/ARCHITECTURE.md for full architecture overview
  */
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SkipToContent } from "@/components/a11y/SkipToContent";
@@ -96,7 +95,6 @@ function AppContent() {
     return (
       <>
         <SkipToContent />
-        <Toaster />
         <Sonner />
         <PWAUpdatePrompt />
         <LegalComplianceModal />
