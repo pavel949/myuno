@@ -4,9 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 export interface StaysTier {
   id: string;
   code: string;
+  name: string;
   name_en: string;
   name_ru: string;
   price_thb_monthly: number;
+  max_ota_links: number | null;
+  dynamic_pricing: boolean | null;
   features: string[] | null;
   is_active: boolean;
   created_at: string;
