@@ -63,8 +63,8 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
           </>
         ) : (
           <>
-            <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
-            <span className="text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+            <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning shrink-0" />
+            <span className="text-xs sm:text-sm text-warning">
               {language === 'ru' ? 'Email не подтверждён' : 'Email not verified'}
             </span>
             <PremiumButton
