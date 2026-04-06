@@ -283,6 +283,7 @@ export const APP_ROUTES = {
   MC_PROPERTY_GUIDEBOOK: (id: string) => `/mc/properties/${id}/guidebook`,
   MC_PROPERTY_PORTAL: (id: string) => `/mc/properties/${id}/portal-settings`,
   MC_PROPERTY_NEW: '/mc/properties/new',
+  MC_COMPLEXES: '/mc/complexes',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',

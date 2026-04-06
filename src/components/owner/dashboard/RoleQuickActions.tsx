@@ -23,7 +23,8 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
     { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
     { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', path: '/mc/service-request?type=cleaning' },
     { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/mc/calendar' },
-    { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: '/mc/properties/new' },
+    { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: APP_ROUTES.MC_PROPERTY_NEW },
+    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Комплексы', path: APP_ROUTES.MC_COMPLEXES },
   ],
   sales_agent: [
     { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Новая сделка', path: APP_ROUTES.MC_SALES_NEW },
@@ -41,8 +42,8 @@ const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
     { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Импорт OTA', path: '/mc/channels' },
     { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Сделка', path: APP_ROUTES.MC_SALES_NEW },
     { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
-    { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', path: '/mc/service-request?type=cleaning' },
-    { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: '/mc/properties/new' },
+    { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: APP_ROUTES.MC_PROPERTY_NEW },
+    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Комплексы', path: APP_ROUTES.MC_COMPLEXES },
   ],
 };
 

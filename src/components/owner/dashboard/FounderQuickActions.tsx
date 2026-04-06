@@ -31,6 +31,12 @@ export function FounderQuickActions() {
       color: 'text-amber-500',
     },
     {
+      icon: Building2,
+      label: isRu ? 'Комплекс' : 'Complex',
+      path: APP_ROUTES.MC_COMPLEXES,
+      color: 'text-cyan-500',
+    },
+    {
       icon: Target,
       label: isRu ? 'Вендор' : 'Vendor',
       path: '/mc/vendor-acquisition',
