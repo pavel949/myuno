@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { supabase } from '@/integrations/supabase/client';
+import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
   Send, Bot, Copy, MessageSquare, UserPlus,
@@ -33,6 +34,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   const scoreProspect = useScoreProspect();
   const generateOutreach = useGenerateOutreach();
   const logActivity = useLogActivity();
+  const { data: myCompany } = useMyCompanyId();
   
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -108,6 +110,10 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   };
 
   const handleConvertToCrm = async () => {
+    if (!myCompany?.company_id) {
+      toast({ title: isRussian ? 'Нет активной компании' : 'No active company', variant: 'destructive' });
+      return;
+    }
     setIsConvertingToCrm(true);
     try {
       const nameParts = (prospect.contact_name || prospect.business_name || '').split(' ');
@@ -142,6 +148,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
       // Rich CRM mapping
       const { error } = await supabase.from('crm_contacts').insert({
+        company_id: myCompany.company_id,
         first_name: firstName,
         last_name: lastName || null,
         email: prospect.email,
