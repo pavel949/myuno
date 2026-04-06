@@ -42,7 +42,72 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
         id: contactId,
         key_dates: updated,
       } as { id: string; key_dates: KeyDateEntry[] });
-      toast(isRu)toast.error(isRu)}
+      toast(isRu ? 'Дата добавлена' : 'Date added');
+      setNewLabel('');
+      setNewDate('');
+      setDialogOpen(false);
+    } catch {
+      toast.error(isRu ? 'Ошибка' : 'Error');
+    }
+  };
+
+  const handleRemove = async (index: number) => {
+    const updated = keyDates.filter((_, i) => i !== index);
+    try {
+      await updateContact.mutateAsync({
+        id: contactId,
+        key_dates: updated,
+      } as { id: string; key_dates: KeyDateEntry[] });
+      toast(isRu ? 'Дата удалена' : 'Date removed');
+    } catch {
+      toast.error(isRu ? 'Ошибка' : 'Error');
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium flex items-center gap-1.5">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          {isRu ? 'Ключевые даты' : 'Key Dates'}
+        </h4>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{isRu ? 'Добавить дату' : 'Add Key Date'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>{isRu ? 'Название' : 'Label'}</Label>
+                <Input value={newLabel} onChange={e => setNewLabel(e.target.value)} placeholder={isRu ? 'День рождения' : 'Birthday'} />
+              </div>
+              <div>
+                <Label>{isRu ? 'Дата' : 'Date'}</Label>
+                <Input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+              </div>
+              <Button onClick={handleAdd} disabled={updateContact.isPending} className="w-full">
+                {isRu ? 'Добавить' : 'Add'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {keyDates.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{isRu ? 'Нет дат' : 'No dates'}</p>
+      ) : (
+        <div className="space-y-1">
+          {keyDates.map((entry, i) => (
+            <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 group">
+              <div>
+                <p className="text-xs font-medium">{entry.label}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {format(new Date(entry.date), 'dd MMM yyyy', { locale })}
                   {isPast(new Date(entry.date)) && (
                     <span className="ml-1 text-muted-foreground/70">({isRu ? 'прошло' : 'past'})</span>
                   )}
