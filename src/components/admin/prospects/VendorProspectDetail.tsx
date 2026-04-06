@@ -34,6 +34,7 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   const scoreProspect = useScoreProspect();
   const generateOutreach = useGenerateOutreach();
   const logActivity = useLogActivity();
+  const { data: myCompany } = useMyCompanyId();
   
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
