@@ -96,16 +96,13 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         <div><Label>WhatsApp</Label><Input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))} placeholder={isRu ? 'Если отличается' : 'If different'} /></div>
         <div><Label>Telegram</Label><Input value={form.telegram} onChange={e => setForm(f => ({ ...f, telegram: e.target.value }))} placeholder="@username" /></div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <Label>{isRu ? 'Тип' : 'Type'}</Label>
           <Select value={form.contact_type} onValueChange={v => setForm(f => ({ ...f, contact_type: v }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>{contactTypes.map(t => <SelectItem key={t.value} value={t.value}>{isRu ? t.label_ru : t.label_en}</SelectItem>)}</SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label>{isRu ? 'Нац.' : 'Nation.'}</Label><Input value={form.nationality} onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))} placeholder="RU" />
         </div>
         <div>
           <Label>{isRu ? 'Источник' : 'Source'}</Label>
