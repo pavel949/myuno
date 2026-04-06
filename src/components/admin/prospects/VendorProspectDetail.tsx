@@ -110,6 +110,10 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
   };
 
   const handleConvertToCrm = async () => {
+    if (!myCompany?.company_id) {
+      toast({ title: isRussian ? 'Нет активной компании' : 'No active company', variant: 'destructive' });
+      return;
+    }
     setIsConvertingToCrm(true);
     try {
       const nameParts = (prospect.contact_name || prospect.business_name || '').split(' ');
