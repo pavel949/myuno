@@ -53,26 +53,26 @@ export function QuickAccessSection({ onNavigate }: QuickAccessSectionProps) {
 
   const links = [
     {
-      icon: <Flame className="w-5 h-5 text-orange-600" />,
-      iconBg: 'bg-orange-100 dark:bg-orange-900/30',
+      icon: <Flame className="w-5 h-5 text-warning" />,
+      iconBg: 'bg-warning/10',
       label: language === 'ru' ? 'Акции и скидки' : 'Deals & Discounts',
       path: '/market/category/deals',
     },
     {
-      icon: <Star className="w-5 h-5 text-amber-600" />,
-      iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+      icon: <Star className="w-5 h-5 text-warning" />,
+      iconBg: 'bg-warning/10',
       label: language === 'ru' ? 'Хиты продаж' : 'Bestsellers',
       path: '/market/category/popular',
     },
     {
-      icon: <Sparkles className="w-5 h-5 text-purple-600" />,
-      iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+      icon: <Sparkles className="w-5 h-5 text-accent-purple" />,
+      iconBg: 'bg-accent-purple/10',
       label: language === 'ru' ? 'Новинки' : 'New Arrivals',
       path: '/market/category/new',
     },
     {
-      icon: <Heart className="w-5 h-5 text-rose-600" />,
-      iconBg: 'bg-rose-100 dark:bg-rose-900/30',
+      icon: <Heart className="w-5 h-5 text-destructive" />,
+      iconBg: 'bg-destructive/10',
       label: language === 'ru' ? 'Избранное' : 'Wishlist',
       path: '/market/wishlist',
       badge: wishlistCount,

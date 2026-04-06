@@ -124,7 +124,7 @@ export const SupportFAB = forwardRef<HTMLDivElement, SupportFABProps>(({ classNa
         ) : (
           <>
             <MessageCircle className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-background" />
           </>
         )}
       </motion.button>

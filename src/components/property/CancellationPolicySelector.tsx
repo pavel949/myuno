@@ -50,24 +50,24 @@ export function CancellationPolicySelector({
   const getColorClasses = (color: string, isSelected: boolean) => {
     const colorMap: Record<string, { bg: string; border: string; text: string }> = {
       green: {
-        bg: isSelected ? 'bg-green-500/20' : 'bg-green-500/5',
-        border: isSelected ? 'border-green-500' : 'border-green-500/30',
-        text: 'text-green-600',
+        bg: isSelected ? 'bg-success/20' : 'bg-success/5',
+        border: isSelected ? 'border-success' : 'border-success/30',
+        text: 'text-success',
       },
       yellow: {
-        bg: isSelected ? 'bg-yellow-500/20' : 'bg-yellow-500/5',
-        border: isSelected ? 'border-yellow-500' : 'border-yellow-500/30',
-        text: 'text-yellow-600',
+        bg: isSelected ? 'bg-warning/20' : 'bg-warning/5',
+        border: isSelected ? 'border-warning' : 'border-warning/30',
+        text: 'text-warning',
       },
       orange: {
-        bg: isSelected ? 'bg-orange-500/20' : 'bg-orange-500/5',
-        border: isSelected ? 'border-orange-500' : 'border-orange-500/30',
-        text: 'text-orange-600',
+        bg: isSelected ? 'bg-warning/20' : 'bg-warning/5',
+        border: isSelected ? 'border-warning' : 'border-warning/30',
+        text: 'text-warning',
       },
       red: {
-        bg: isSelected ? 'bg-red-500/20' : 'bg-red-500/5',
-        border: isSelected ? 'border-red-500' : 'border-red-500/30',
-        text: 'text-red-600',
+        bg: isSelected ? 'bg-destructive/20' : 'bg-destructive/5',
+        border: isSelected ? 'border-destructive' : 'border-destructive/30',
+        text: 'text-destructive',
       },
       destructive: {
         bg: isSelected ? 'bg-destructive/20' : 'bg-destructive/5',
@@ -128,7 +128,7 @@ export function CancellationPolicySelector({
                 </h5>
                 <div className="space-y-2 text-sm">
                   {selectedPolicy.fullRefundHours > 0 && (
-                    <div className="flex items-center gap-2 text-green-600">
+                    <div className="flex items-center gap-2 text-success">
                       <Check className="w-4 h-4" />
                       <span>
                         {isRu ? 'Полный возврат до' : 'Full refund until'}{' '}
@@ -137,7 +137,7 @@ export function CancellationPolicySelector({
                     </div>
                   )}
                   {selectedPolicy.partialRefundPercent > 0 && (
-                    <div className="flex items-center gap-2 text-yellow-600">
+                    <div className="flex items-center gap-2 text-warning">
                       <Clock className="w-4 h-4" />
                       <span>
                         {selectedPolicy.partialRefundPercent}% {isRu ? 'возврат после' : 'refund after that'}

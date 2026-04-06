@@ -61,10 +61,10 @@ export function DosDontsCard({ dos, donts, className }: DosDontsCardProps) {
   return (
     <div className={cn("grid md:grid-cols-2 gap-4", className)}>
       {/* Do's Card */}
-      <Card className="border-green-200 dark:border-green-800/50">
+      <Card className="border-success/30">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2 text-green-600 dark:text-green-400">
-            <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-full">
+          <CardTitle className="text-lg flex items-center gap-2 text-success">
+            <div className="p-1.5 bg-success/10 rounded-full">
               <Check className="h-4 w-4" />
             </div>
             {language === 'ru' ? 'Что делать' : "Do's"}
@@ -73,7 +73,7 @@ export function DosDontsCard({ dos, donts, className }: DosDontsCardProps) {
         <CardContent className="space-y-2">
           {displayDos.map((item, index) => (
             <div key={index} className="flex items-start gap-2">
-              <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <Check className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
               <span className="text-sm text-foreground">{item.text}</span>
             </div>
           ))}

@@ -10,10 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<string, { label: { en: string; ru: string }; dot: string }> = {
-  pending: { label: { en: 'Pending', ru: 'Ожидает' }, dot: 'bg-yellow-500' },
-  confirmed: { label: { en: 'Confirmed', ru: 'Подтверждён' }, dot: 'bg-blue-500' },
-  in_progress: { label: { en: 'In Progress', ru: 'Выполняется' }, dot: 'bg-purple-500' },
-  completed: { label: { en: 'Completed', ru: 'Завершён' }, dot: 'bg-green-500' },
+  pending: { label: { en: 'Pending', ru: 'Ожидает' }, dot: 'bg-warning' },
+  confirmed: { label: { en: 'Confirmed', ru: 'Подтверждён' }, dot: 'bg-info' },
+  in_progress: { label: { en: 'In Progress', ru: 'Выполняется' }, dot: 'bg-accent-purple' },
+  completed: { label: { en: 'Completed', ru: 'Завершён' }, dot: 'bg-success' },
   cancelled: { label: { en: 'Cancelled', ru: 'Отменён' }, dot: 'bg-muted-foreground' },
 };
 

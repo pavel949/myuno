@@ -40,8 +40,8 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
     >
       <div className="rounded-2xl border border-border/60 bg-card p-5 space-y-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
-            <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+            <MessageCircle className="w-5 h-5 text-success" />
           </div>
           <div className="flex-1 pt-0.5">
             <h3 className="text-sm font-semibold">
@@ -56,7 +56,7 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
         </div>
 
         <Button
-          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          className="w-full bg-success hover:bg-success/90 text-success-foreground"
           onClick={() => window.open(whatsappUrl, '_blank')}
         >
           <MessageCircle className="w-4 h-4" />
