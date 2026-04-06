@@ -71,7 +71,7 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
 
   return (
     <div className="w-full overflow-x-auto scrollbar-hide -mx-1 px-1">
-      <div className="flex gap-1.5 w-max py-1">
+      <div className="flex gap-1.5 flex-wrap md:flex-wrap w-max md:w-auto py-1">
         {PERSONA_OPTIONS.map((p) => {
           const info = PERSONA_INFO[p];
           const Icon = PERSONA_ICONS[info.icon] || Plane;
@@ -269,7 +269,7 @@ export const HeroBlock = memo(function HeroBlock() {
               </>
             ) : null}
           </div>
-          <div className="pt-3 max-w-2xl">
+          <div className="pt-3 max-w-4xl">
             <PersonaSwitcher isRu={isRu} />
           </div>
         </div>
