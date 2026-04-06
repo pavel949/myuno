@@ -68,21 +68,25 @@ export const CatalogHeader = memo(function CatalogHeader({
 
       {/* Category ribbon */}
       {categories && categories.length > 0 && onCategoryChange && (
-        <div className="max-w-[1536px] mx-auto px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y">
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => onCategoryChange(cat.id)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border",
-                selectedCategory === cat.id
-                  ? "bg-primary-foreground text-primary border-primary-foreground"
-                  : "bg-primary-foreground/15 text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/25"
-              )}
-            >
-              {cat.label}
-            </button>
-          ))}
+        <div className="relative max-w-[1536px] mx-auto">
+          <div className="px-4 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory scroll-pl-4">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => onCategoryChange(cat.id)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors border snap-start min-w-[auto]",
+                  selectedCategory === cat.id
+                    ? "bg-primary-foreground text-primary border-primary-foreground"
+                    : "bg-primary-foreground/15 text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/25"
+                )}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+          {/* Fade edge indicator */}
+          <div className="absolute right-0 top-0 bottom-2.5 w-8 bg-gradient-to-l from-primary to-transparent pointer-events-none" />
         </div>
       )}
 

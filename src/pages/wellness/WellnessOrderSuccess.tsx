@@ -6,6 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 
 export default function WellnessOrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -106,6 +107,8 @@ export default function WellnessOrderSuccess() {
                 </div>
               </div>
             )}
+
+            <CrossSellRecommendations orderType="wellness" className="mt-4" />
 
             <div className="flex flex-col gap-3 w-full mt-2">
               <Button onClick={() => navigate('/bookings')} className="w-full">

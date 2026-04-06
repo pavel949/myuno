@@ -60,16 +60,13 @@ interface LoadingStateProps {
 }
 
 export const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
-  ({ message, branded = true }, ref) => {
+  ({ message, branded = false }, ref) => {
     return (
-      <div 
-        ref={ref} 
-        className="min-h-screen bg-background flex flex-col items-center justify-center gap-4"
+      <div
+        ref={ref}
+        className="min-h-[60vh] bg-background flex flex-col items-center justify-center gap-4 p-8"
       >
         <LoadingSpinner size="lg" variant={branded ? 'logo' : 'default'} />
-        {branded && (
-          <h2 className="text-xl font-semibold text-foreground">myUNO</h2>
-        )}
         {message && (
           <p className="text-muted-foreground text-sm animate-pulse">{message}</p>
         )}

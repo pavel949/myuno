@@ -23,15 +23,31 @@ function GoogleMapsLoader({ apiKey, children }: { apiKey: string; children: Reac
     preventGoogleFontsLoading: true,
   });
 
+  // Detect Google Maps auth failures (RefererNotAllowedMapError, InvalidKeyMapError, etc.)
+  // These happen AFTER the script loads and aren't caught by useJsApiLoader's loadError.
+  const [authError, setAuthError] = useState<Error | undefined>(undefined);
+
+  useEffect(() => {
+    // Google Maps calls window.gm_authFailure when the API key is rejected
+    (window as Record<string, unknown>).gm_authFailure = () => {
+      setAuthError(new Error('Google Maps auth failed: check API key restrictions (HTTP referrers) in Google Cloud Console'));
+    };
+    return () => {
+      delete (window as Record<string, unknown>).gm_authFailure;
+    };
+  }, []);
+
+  const effectiveError = loadError ?? authError;
+
   const value = useMemo<GoogleMapsContextValue>(
     () => ({
       isLoaded,
-      loadError: loadError ?? undefined,
+      loadError: effectiveError,
       hasKey: true,
       apiKey,
-      apiAvailable: isLoaded && !loadError,
+      apiAvailable: isLoaded && !effectiveError,
     }),
-    [isLoaded, loadError, apiKey]
+    [isLoaded, effectiveError, apiKey]
   );
 
   return (
@@ -68,6 +84,10 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
       if (!cancelled) {
         setApiKey(key);
         setFetched(true);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setFetched(true); // Allow fallback to noKeyValue state
       }
     });
     return () => { cancelled = true; };

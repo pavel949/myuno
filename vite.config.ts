@@ -41,12 +41,12 @@ export default defineConfig(({ mode }) => {
           name: 'myUNO - All Services in One',
           short_name: 'myUNO',
           description: 'Все услуги в одном приложении',
-          theme_color: '#d4af37',
-          background_color: '#0a0a0b',
+          theme_color: '#0d6e4f',
+          background_color: '#fafaf9',
           display: 'standalone',
           orientation: 'portrait-primary',
           start_url: '/',
-          id: '/myuno-pwa-2025',
+          id: '/myuno-pwa',
           scope: '/',
           icons: [
             {
@@ -135,7 +135,7 @@ export default defineConfig(({ mode }) => {
             'vendor-query': ['@tanstack/react-query'],
             'vendor-charts': ['recharts'],
             'vendor-map': ['@react-google-maps/api'],
-            'vendor-pdf': ['jspdf', 'jspdf-autotable', 'exceljs'],
+            // jspdf, jspdf-autotable, exceljs — dynamically imported, auto-chunked by Vite
             'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
 
           },

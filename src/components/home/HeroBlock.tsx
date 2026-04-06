@@ -23,8 +23,8 @@ function HeroSearchInput({ isRu }: { isRu: boolean }) {
   return (
     <div className="flex items-center gap-2 rounded-[var(--radius-md)] px-4 py-3"
       style={{
-        background: 'hsl(var(--bg-elevated))',
-        border: '1px solid hsl(0 0% 100% / 0.07)',
+        background: 'hsl(var(--card))',
+        border: '1px solid hsl(var(--border))',
       }}
     >
       <Search className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -90,8 +90,8 @@ function PersonaSwitcher({ isRu }: { isRu: boolean }) {
               style={{
                 background: isActive
                   ? PERSONA_GRADIENTS[p]
-                  : 'hsl(0 0% 100% / 0.06)',
-                backdropFilter: isActive ? 'none' : 'blur(8px)',
+                  : 'hsl(var(--muted))',
+                backdropFilter: isActive ? 'none' : 'none',
               }}
             >
               <Icon className="w-4 h-4 shrink-0" strokeWidth={2} />
@@ -138,14 +138,9 @@ export const HeroBlock = memo(function HeroBlock() {
 
   if (!isDesktop) {
     return (
-      <div className="relative rounded-[var(--radius-lg)] overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
-        }} />
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(0 0% 100%) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }} />
+      <div className="relative rounded-[var(--radius-lg)] overflow-hidden hero-block" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="absolute inset-0 hero-bg" />
+        <div className="absolute inset-0 hero-dots" />
         
         <div className="relative px-4 py-6 space-y-4">
           {/* Location + SOS */}
@@ -215,14 +210,9 @@ export const HeroBlock = memo(function HeroBlock() {
 
   // Desktop
   return (
-    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10" style={{ boxShadow: 'var(--shadow-card)' }}>
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(135deg, hsl(216 60% 7%) 0%, hsl(214 50% 14%) 100%)'
-      }} />
-      <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: 'radial-gradient(circle at 2px 2px, hsl(0 0% 100%) 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
-      }} />
+    <div className="relative rounded-[var(--radius-lg)] overflow-hidden p-8 xl:p-10 hero-block" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="absolute inset-0 hero-bg" />
+      <div className="absolute inset-0 hero-dots" />
       
       <div className="relative flex items-start justify-between">
         <div className="space-y-3 flex-1">

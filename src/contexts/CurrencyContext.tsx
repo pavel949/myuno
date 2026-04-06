@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { CURRENCIES, getCurrencySymbol, type CurrencyCode } from '@/lib/config/currencies';
@@ -57,51 +57,47 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load rates from database
-  const loadRates = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .rpc('get_all_currency_rates');
-
-      if (error) throw error;
-
-      if (data && typeof data === 'object') {
-        const ratesData = data as Record<string, { rate: number; updated_at: string }>;
-        const newRates: Record<Currency, number> = { ...fallbackRates };
-        let latestUpdate: string | null = null;
-
-        Object.entries(ratesData).forEach(([code, info]) => {
-          if (code in currencyMeta) {
-            newRates[code as Currency] = info.rate;
-            if (!latestUpdate || info.updated_at > latestUpdate) {
-              latestUpdate = info.updated_at;
-            }
-          }
-        });
-
-        setRates(newRates);
-        setLastUpdated(latestUpdate);
-      }
-    } catch (error) {
-      errorLog.silent(error, 'load_currency_rates');
-      // Keep using fallback rates
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Load rates from database with proper cancellation
   useEffect(() => {
     let cancelled = false;
-    loadRates().then(() => {
-      if (cancelled) return;
-    });
-    // Refresh rates every hour
-    const interval = setInterval(loadRates, 60 * 60 * 1000);
+
+    const doLoad = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_all_currency_rates');
+        if (cancelled) return;
+        if (error) throw error;
+
+        if (data && typeof data === 'object') {
+          const ratesData = data as Record<string, { rate: number; updated_at: string }>;
+          const newRates: Record<Currency, number> = { ...fallbackRates };
+          let latestUpdate: string | null = null;
+
+          Object.entries(ratesData).forEach(([code, info]) => {
+            if (code in currencyMeta) {
+              newRates[code as Currency] = info.rate;
+              if (!latestUpdate || info.updated_at > latestUpdate) {
+                latestUpdate = info.updated_at;
+              }
+            }
+          });
+
+          setRates(newRates);
+          setLastUpdated(latestUpdate);
+        }
+      } catch (error) {
+        if (!cancelled) errorLog.silent(error, 'load_currency_rates');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    doLoad();
+    const interval = setInterval(doLoad, 60 * 60 * 1000);
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [loadRates]);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('myuno-currency', currency);

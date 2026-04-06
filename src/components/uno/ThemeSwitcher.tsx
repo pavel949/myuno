@@ -27,11 +27,11 @@ export function ThemeSwitcher({ variant = 'dropdown', size = 'default', classNam
       label: language === 'ru' ? 'Светлая' : 'Light',
       shortLabel: language === 'ru' ? 'Свет' : 'Light'
     },
-    { 
-      value: 'dark' as const, 
-      icon: Moon, 
+    {
+      value: 'dark' as const,
+      icon: Moon,
       label: language === 'ru' ? 'Тёмная' : 'Dark',
-      shortLabel: language === 'ru' ? 'Тёмн' : 'Dark'
+      shortLabel: language === 'ru' ? 'Тёмный' : 'Dark'
     },
     { 
       value: 'system' as const, 

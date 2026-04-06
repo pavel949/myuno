@@ -38,9 +38,9 @@ export function CompactFooter() {
   const serviceLinks = [
     { to: '/property', label: isRu ? 'Недвижимость' : 'Real Estate' },
     { to: '/transport', label: isRu ? 'Транспорт' : 'Transport' },
-    { to: '/experiences', label: isRu ? 'Впечатления' : 'Things To Do' },
+    { to: '/experiences', label: isRu ? 'Впечатления' : 'Experiences' },
     { to: '/beauty', label: isRu ? 'Красота' : 'Beauty' },
-    { to: '/medical', label: isRu ? 'Медицина' : 'Healthcare' },
+    { to: '/medical', label: isRu ? 'Медицина' : 'Medical' },
     { to: '/yachts', label: isRu ? 'Яхты' : 'Yachts' },
   ];
 

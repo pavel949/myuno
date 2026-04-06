@@ -164,16 +164,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}>
                     <Icon className="w-[22px] h-[22px]" />
                   </div>
-                  {active ? (
+                  {active && (
                     <span className="text-[10px] font-semibold text-primary">
                       {language === 'ru' ? labelRu : labelEn}
                     </span>
-                  ) : null}
-                  {active ? (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  ) : null}
+                  )}
                 </NavLink>
               );
             })}
@@ -220,16 +215,11 @@ export const AdaptiveBottomNav = forwardRef<HTMLDivElement, React.HTMLAttributes
                   )}>
                     <Icon className="w-[22px] h-[22px]" />
                   </div>
-                  {active ? (
+                  {active && (
                     <span className="text-[10px] font-semibold text-primary">
                       {language === 'ru' ? labelRu : labelEn}
                     </span>
-                  ) : null}
-                  {active ? (
-                    <span className="text-[10px] font-semibold text-primary">
-                      {language === 'ru' ? labelRu : labelEn}
-                    </span>
-                  ) : null}
+                  )}
                 </NavLink>
               );
             })}

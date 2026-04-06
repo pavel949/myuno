@@ -72,7 +72,7 @@ async function fetchCategoryCounts(): Promise<CategoryCounts> {
   ]);
 
   // Fallback: if RPC doesn't exist, query listings directly
-  let verticalCounts: Record<string, number> = {};
+  const verticalCounts: Record<string, number> = {};
   if (listingsResult.error || !listingsResult.data) {
     // Fallback: direct count query
     const { data } = await supabase

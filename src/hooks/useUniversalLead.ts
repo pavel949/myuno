@@ -110,7 +110,14 @@ export function useUniversalLead() {
           },
         }).catch(() => { /* fire & forget */ });
       }
-      
+
+      // Trigger auto lead scoring (fire & forget)
+      if (data) {
+        supabase.functions.invoke('auto-lead-scoring', {
+          body: { leadId: data.id },
+        }).catch(() => { /* fire & forget */ });
+      }
+
       return data;
     },
     onSuccess: (_, variables) => {

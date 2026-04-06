@@ -184,6 +184,8 @@ const PROPERTY_LIST_COLUMNS = `
 export function usePropertiesInfinite(filters: PropertyFilters = {}) {
   return useInfiniteQuery({
     queryKey: ['properties-infinite', filters],
+    staleTime: 5 * 60 * 1000,   // 5 min — avoid refetch on every visit
+    gcTime: 10 * 60 * 1000,     // 10 min cache
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
         .from('properties')
@@ -244,6 +246,8 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
 export function useProperties(filters: PropertyFilters = {}, limit = 50) {
   return useQuery({
     queryKey: ['properties', filters, limit],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       let query = supabase
         .from('properties')
@@ -385,6 +389,8 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
 export function useFeaturedProperties(limit = 6) {
   return useQuery({
     queryKey: ['featured-properties', limit],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')

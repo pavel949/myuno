@@ -264,6 +264,7 @@ export function useAdminVendorLocations() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setLocations((data as any[]) || []);
     } catch {
+      // ignored — UI shows empty locations list on fetch failure
     } finally {
       setIsLoading(false);
     }

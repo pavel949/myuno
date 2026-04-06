@@ -138,7 +138,6 @@ export function EditContactSheet({ open, onOpenChange, contact }: Props) {
         facebook: form.facebook || null,
         linkedin: form.linkedin || null,
         contact_type: form.contact_type,
-        crm_role: form.crm_role,
         source: form.source,
         nationality: form.nationality || null,
         language: form.language || null,

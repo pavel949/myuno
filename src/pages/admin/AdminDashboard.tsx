@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { 
+import {
   AdminKPIGrid,
   AdminOperationalAlerts,
   AdminActivityBlock,
@@ -9,10 +9,20 @@ import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
 import { SectionHeader } from '@/components/ds';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { LayoutDashboard } from 'lucide-react';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { StaffDashboard } from '@/components/admin/StaffDashboard';
+import { GoLiveChecklist } from '@/components/admin/GoLiveChecklist';
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const { roles } = useUserRoles();
+  const isAdmin = roles.some(r => r.role === 'admin');
+
+  // Staff users see simplified dashboard
+  if (!isAdmin && roles.some(r => r.role === 'staff' || r.role === 'uno_team')) {
+    return <StaffDashboard />;
+  }
 
   return (
     <PageContainer className="space-y-4 lg:space-y-3">
@@ -26,6 +36,9 @@ export default function AdminDashboard() {
         />
         <LaunchSwitch variant="compact" />
       </div>
+
+      {/* Go-Live Checklist — hidden when all green */}
+      <GoLiveChecklist />
 
       {/* Row 1: KPI Metrics — 6 cards */}
       <AdminKPIGrid />

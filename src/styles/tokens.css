@@ -23,7 +23,7 @@
   
   /* Text */
   --color-text-raw: 222 73% 96%;      /* #EDF2FF */
-  --color-muted-raw: 211 17% 56%;     /* #7A8FA6 */
+  --color-muted-raw: 211 17% 64%;     /* #8FA3B8 — improved contrast */
   
   /* Border & glass */
   --color-border-raw: 0 0% 100%;
@@ -54,7 +54,7 @@
   --secondary: 214 47% 12%;
   --secondary-foreground: 222 73% 96%;
   --muted: 213 38% 19%;
-  --muted-foreground: 211 17% 56%;
+  --muted-foreground: 211 17% 64%;    /* improved from 56% for WCAG AA */
   --accent: 224 100% 65%;
   --accent-foreground: 222 73% 96%;
   --destructive: 0 72% 51%;
@@ -64,7 +64,7 @@
   --border-subtle: 0 0% 100% / 0.04;
   --input: 0 0% 100% / 0.07;
   --ring: 157 100% 42%;
-  --success: 157 100% 42%;
+  --success: 152 58% 42%;             /* distinct from primary #00D68F */
   --warning: 38 92% 50%;
   --info: 224 100% 65%;
   --radius: 16px;
@@ -155,12 +155,128 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Dark class = same (dark-first design) */
+/* Dark class = same as :root (dark-first design) */
 .dark {
-  /* Already dark by default — no overrides needed */
+  /* Inherits all :root values — dark is the default */
 }
 
-/* Light mode override — keep same dark design (dark-only app) */
+/* ═══ LIGHT MODE ═══ */
 html.light {
-  /* Force dark theme for this super-app design */
+  /* Background hierarchy — warm white */
+  --bg-base: 40 10% 97%;           /* #fafaf9 */
+  --bg-surface: 0 0% 100%;         /* #ffffff */
+  --bg-card: 0 0% 100%;            /* #ffffff */
+  --bg-elevated: 0 0% 100%;        /* #ffffff */
+
+  /* Accent colors */
+  --color-primary-raw: 160 79% 24%;    /* #0d6e4f — emerald */
+  --color-primary-dim: 160 79% 20%;
+  --color-accent-raw: 224 55% 32%;     /* brand navy */
+  --color-accent-dim: 224 55% 28%;
+  --color-warning-raw: 38 92% 44%;     /* #d97706 */
+
+  /* Text */
+  --color-text-raw: 60 3% 10%;         /* #1a1a19 */
+  --color-muted-raw: 25 7% 32%;        /* #57534e */
+
+  /* Border & glass */
+  --color-border-raw: 0 0% 0%;
+  --color-glass-raw: 0 0% 0%;
+
+  /* Shadows — lighter for light mode */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-glow: 0 0 24px rgba(13,110,79,0.08);
+  --shadow-glow-accent: 0 0 24px rgba(30,64,175,0.08);
+
+  /* ═══ Tailwind/HSL Semantic Mapping — Light ═══ */
+  --background: 40 10% 97%;          /* #fafaf9 */
+  --foreground: 60 3% 10%;           /* #1a1a19 */
+  --primary: 160 79% 24%;            /* #0d6e4f */
+  --primary-hover: 160 79% 20%;
+  --primary-light: 160 60% 40%;
+  --primary-foreground: 0 0% 100%;   /* white text on primary */
+  --card: 0 0% 100%;                 /* #ffffff */
+  --card-foreground: 60 3% 10%;
+  --card-elevated: 0 0% 100%;
+  --card-hover: 40 10% 96%;
+  --secondary: 40 10% 95%;           /* #f5f5f4 */
+  --secondary-foreground: 60 3% 10%;
+  --muted: 40 10% 93%;               /* #edeceb */
+  --muted-foreground: 25 7% 32%;     /* #57534e — WCAG AA compliant */
+  --accent: 224 55% 32%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 51%;          /* #dc2626 */
+  --destructive-foreground: 0 0% 100%;
+  --border: 60 2% 90%;               /* #e5e5e4 */
+  --border-strong: 60 2% 80%;
+  --border-subtle: 60 2% 94%;
+  --input: 60 2% 90%;
+  --ring: 160 79% 24%;
+  --success: 142 72% 36%;            /* #16a34a — distinct from primary */
+  --warning: 38 92% 44%;             /* #d97706 */
+  --info: 224 55% 32%;
+
+  /* Accents — slightly muted for light */
+  --gold: 38 85% 45%;
+  --gold-light: 38 90% 55%;
+  --gold-dark: 38 85% 35%;
+  --accent-coral: 12 65% 50%;
+  --accent-teal: 180 55% 36%;
+  --accent-purple: 270 55% 50%;
+  --accent-cyan: 190 65% 40%;
+  --accent-amber: 38 85% 45%;
+  --icon-dark: 60 3% 10%;
+
+  /* Cluster Accents — richer for light bg */
+  --cluster-arrive: 168 80% 30%;
+  --cluster-live: 38 92% 44%;
+  --cluster-legal: 201 90% 40%;
+  --cluster-invest: 221 83% 53%;
+  --cluster-manage: 263 70% 50%;
+  --cluster-build: 347 77% 50%;
+
+  /* State tokens */
+  --color-disabled: 40 10% 85%;
+  --ring-offset: 40 10% 97%;
+  --color-skeleton-base: 40 10% 93%;
+  --color-skeleton-highlight: 40 10% 97%;
+  --color-success-border: 142 72% 36%;
+  --color-warning-border: 38 92% 44%;
+
+  /* Sidebar — light */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 60 3% 10%;
+  --sidebar-accent: 40 10% 95%;
+  --sidebar-accent-foreground: 60 3% 10%;
+  --sidebar-border: 60 2% 90%;
+
+  /* Popover */
+  --popover: 0 0% 100%;
+  --popover-foreground: 60 3% 10%;
+
+  /* Chart palette — deeper for readability on white */
+  --chart-1: 160 79% 24%;
+  --chart-2: 224 55% 32%;
+  --chart-3: 38 85% 45%;
+  --chart-4: 270 55% 50%;
+  --chart-5: 190 65% 40%;
+
+  /* Elevation shadows — subtle for light */
+  --shadow-elevation-0: none;
+  --shadow-elevation-1: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-elevation-2: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-elevation-3: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-elevation-4: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+  --shadow-elevation-5: 0 20px 25px rgba(0,0,0,0.1), 0 8px 10px rgba(0,0,0,0.04);
+  --shadow-card-hover: var(--shadow-elevation-3);
+  --shadow-elevated: var(--shadow-elevation-4);
+  --shadow-float: var(--shadow-elevation-5);
+  --shadow-btn: 0 1px 3px rgba(13,110,79,0.12);
+  --shadow-btn-hover: 0 4px 12px rgba(13,110,79,0.2);
+  --shadow-neu-inset: inset 0 1px 2px rgba(0,0,0,0.06);
+
+  /* Glow — subtle for light */
+  --glow-from: 160 79% 24%;
+  --glow-via: 224 55% 32%;
+  --glow-to: 190 65% 40%;
 }

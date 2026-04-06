@@ -1,7 +1,8 @@
  // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
- 
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+
  const corsHeaders = {
    "Access-Control-Allow-Origin": "*",
    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -35,7 +36,11 @@ import { createClient } from "../_shared/supabase.ts";
      const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
      
      if (userError || !user) throw new Error("Unauthorized");
- 
+
+     // Rate limiting
+     const rlResponse = await withRateLimit(req, 'create-checkout', RATE_LIMITS.payment, corsHeaders, user.id);
+     if (rlResponse) return rlResponse;
+
      const body: CheckoutRequest = await req.json();
      const { order_id, order_type, amount, currency = "THB", description, success_url, cancel_url } = body;
  

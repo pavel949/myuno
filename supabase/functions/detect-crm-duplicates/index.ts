@@ -17,7 +17,7 @@ function normalizeStr(s: string | null | undefined): string {
 }
 
 function normalizePhone(p: string | null | undefined): string {
-  return (p || '').replace(/[\s\-\(\)\+]/g, '').slice(-9);
+  return (p || '').replace(/[\s-()+]/g, '').slice(-9);
 }
 
 function levenshtein(a: string, b: string): number {

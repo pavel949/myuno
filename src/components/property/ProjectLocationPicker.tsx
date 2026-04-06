@@ -370,7 +370,8 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
             <div className="flex-1 relative min-h-[280px]">
               {!hasKey && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-muted p-4 text-center text-sm text-muted-foreground">
-                  <p>{isRu ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env' : 'Set VITE_GOOGLE_MAPS_API_KEY in .env'}</p>
+                  <MapPin className="w-8 h-8" />
+                  <p>{isRu ? 'Карта недоступна' : 'Map unavailable'}</p>
                 </div>
               )}
               {hasKey && loadError && (

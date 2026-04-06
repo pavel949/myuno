@@ -40,6 +40,7 @@ export function usePushSubscription() {
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
     } catch {
+      // ignored — subscription status defaults to false on error
     }
     setIsLoading(false);
   }, [isSupported, user]);
@@ -90,6 +91,7 @@ export function usePushSubscription() {
       toast.success('Уведомления включены');
       return true;
     } catch {
+      // ignored — error feedback provided via toast above
       toast.error('Не удалось подписаться на уведомления');
       return false;
     }

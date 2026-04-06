@@ -9,6 +9,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 
 interface OrderData {
   id: string;
@@ -153,6 +154,8 @@ export default function EventSuccess() {
                 </CardContent>
               </Card>
             )}
+
+            <CrossSellRecommendations orderType="event" className="mt-4" />
 
             {/* Actions */}
             <div className="flex flex-col gap-3">

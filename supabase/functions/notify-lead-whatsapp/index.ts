@@ -1,5 +1,6 @@
  // Deno.serve used (native edge runtime)
  import { createClient } from "../_shared/supabase.ts";
+ import { getAdminWhatsApp } from "../_shared/admin-config.ts";
  
  const corsHeaders = {
    "Access-Control-Allow-Origin": "*",
@@ -84,8 +85,8 @@
  
  🔗 Открыть: https://uno.ae/admin/consultations`;
  
-     // Admin phone number (Thailand format)
-     const adminPhone = "66922407355";
+     // Admin phone number from system_settings
+     const adminPhone = await getAdminWhatsApp();
  
      // Send via WhatsApp Cloud API (placeholder - needs WHATSAPP_TOKEN secret)
      const whatsappToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");

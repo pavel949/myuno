@@ -5,19 +5,17 @@
  * vs production mode (normal user experience).
  */
 
-// Check for simulation mode via environment or URL parameter
+// Check for simulation mode via URL parameter (admin only, dev builds)
 export function isSimulationMode(): boolean {
-  // Check environment variable
-  if (import.meta.env.VITE_SIMULATION_MODE === 'true') {
-    return true;
-  }
-  
+  // Only allow simulation in development builds
+  if (!import.meta.env.DEV) return false;
+
   // Check URL parameter (admin only, for testing)
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search);
     return params.get('simulation') === 'true';
   }
-  
+
   return false;
 }
 

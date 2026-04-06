@@ -71,6 +71,7 @@ export const usePharmacies = () => {
         setPharmacies(formatted);
       }
     } catch {
+      // ignored — UI shows empty list on fetch failure
     } finally {
       if (isMounted.current) setIsLoading(false);
     }
@@ -109,12 +110,13 @@ export const usePharmacy = (pharmacyId: string | undefined) => {
           });
         }
       } catch {
+        // ignored — UI shows empty state on fetch failure
       } finally {
         if (isMounted) setIsLoading(false);
       }
     };
     fetch();
-    
+
     return () => { isMounted = false; };
   }, [pharmacyId]);
 
@@ -145,12 +147,13 @@ export const usePharmacyProducts = (pharmacyId: string | undefined, category?: s
         const { data } = await query.order('name_en');
         if (isMounted) setProducts(data || []);
       } catch {
+        // ignored — UI shows empty list on fetch failure
       } finally {
         if (isMounted) setIsLoading(false);
       }
     };
     fetch();
-    
+
     return () => { isMounted = false; };
   }, [pharmacyId, category]);
 

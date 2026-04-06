@@ -28,7 +28,9 @@ export function useBusinessRole() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored && stored in BUSINESS_ROLES) return stored as BusinessRole;
-    } catch {}
+    } catch {
+      // ignored — localStorage may be unavailable
+    }
     return null;
   });
 
@@ -37,7 +39,7 @@ export function useBusinessRole() {
 
   const setRole = useCallback((newRole: BusinessRole) => {
     setOverrideState(newRole);
-    try { localStorage.setItem(STORAGE_KEY, newRole); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, newRole); } catch { /* ignored */ }
   }, []);
 
   const config = useMemo(() => BUSINESS_ROLES[role], [role]);

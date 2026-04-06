@@ -6,6 +6,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
+import { CHECKLIST_TEMPLATES } from '@/hooks/useDealChecklist';
 import { toast } from 'sonner';
 
 export type LeadSource = 'consultation_requests' | 'mcc_leads';
@@ -150,12 +152,18 @@ export function useConvertLeadToDeal() {
       const phoneNorm = normalizePhone(phone);
       const clientSource = mapLeadSourceToClientSource(leadSource, entryPoint);
 
-      // 2. Check if crm_contact exists with same phone/email
+      // 2. Check if crm_contact exists with same phone/email (use normalized phone for matching)
       let contactId: string | null = null;
       if (phoneNorm || email) {
         const orParts: string[] = [];
-        if (phone) orParts.push(`phone.eq.${phone}`, `mobile.eq.${phone}`, `whatsapp.eq.${phone}`);
-        if (email) orParts.push(`email.eq.${email}`);
+        if (phoneNorm) {
+          // Match both raw and normalized phone across all phone fields
+          orParts.push(`phone.eq.${phoneNorm}`, `mobile.eq.${phoneNorm}`, `whatsapp.eq.${phoneNorm}`);
+          if (phone && phone !== phoneNorm) {
+            orParts.push(`phone.eq.${phone}`, `mobile.eq.${phone}`, `whatsapp.eq.${phone}`);
+          }
+        }
+        if (email) orParts.push(`email.ilike.${email.trim()}`);
         if (orParts.length > 0) {
           const { data: existing } = await supabase
             .from('crm_contacts')
@@ -253,35 +261,70 @@ export function useConvertLeadToDeal() {
         if (updateErr) throw updateErr;
       }
 
-      // 6. Log to crm_activities
-      let loggedBy = user.id;
-      const { data: admin } = await supabase
-        .from('management_company_members')
-        .select('user_id')
-        .eq('company_id', companyId)
-        .eq('is_active', true)
-        .in('role', ['director', 'manager', 'admin'])
-        .limit(1)
-        .maybeSingle();
-      if (admin?.user_id) loggedBy = admin.user_id;
+      // 6. Log to crm_activities (non-blocking — don't fail the conversion)
+      try {
+        let loggedBy = user.id;
+        const { data: admin } = await supabase
+          .from('management_company_members')
+          .select('user_id')
+          .eq('company_id', companyId)
+          .eq('is_active', true)
+          .in('role', ['director', 'manager', 'admin'])
+          .limit(1)
+          .maybeSingle();
+        if (admin?.user_id) loggedBy = admin.user_id;
 
-      await supabase.from('crm_activities').insert({
+        const { error: actErr } = await supabase.from('crm_activities').insert({
+          company_id: companyId,
+          contact_id: contactId,
+          deal_id: dealId,
+          activity_type: 'lead_converted',
+          subject: `Lead converted to deal (${source})`,
+          description: `Lead ${leadId} from ${source} converted to deal ${dealId}`,
+          logged_by: loggedBy,
+        });
+        if (actErr) console.error('Activity logging failed:', actErr.message);
+      } catch (e) {
+        console.error('Activity logging failed:', e);
+      }
+
+      // 7. Auto-create closing checklist (non-blocking)
+      try {
+        const template = CHECKLIST_TEMPLATES[dealType] || CHECKLIST_TEMPLATES.sale;
+        const checklistItems = template.map((item) => ({
+          deal_id: dealId,
+          company_id: companyId,
+          title: item.title_en,
+          task_type: 'checklist',
+          priority: item.priority,
+          status: 'pending',
+          created_by: user.id,
+        }));
+        await supabase.from('crm_tasks').insert(checklistItems as any[]);
+      } catch (e) {
+        console.error('Checklist creation failed:', e);
+      }
+
+      // 8. Fire workflow trigger (non-blocking)
+      fireCrmWorkflowTrigger({
+        trigger_type: 'deal_created',
         company_id: companyId,
-        contact_id: contactId,
-        deal_id: dealId,
-        activity_type: 'lead_converted',
-        subject: `Lead converted to deal (${source})`,
-        description: `Lead ${leadId} from ${source} converted to deal ${dealId}`,
-        logged_by: loggedBy,
+        entity_id: dealId,
+        entity_type: 'deal',
+        metadata: { deal_type: dealType, source: source, from_lead: leadId },
       });
 
       return { dealId, contactId, wasContactCreated };
     },
     onSuccess: (_, vars) => {
+      toast.success('Lead converted to deal');
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
       qc.invalidateQueries({ queryKey: ['admin-consultations'] });
       qc.invalidateQueries({ queryKey: ['lead-hub'] });
       qc.invalidateQueries({ queryKey: ['crm-contacts'] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || 'Failed to convert lead');
     },
   });
 }

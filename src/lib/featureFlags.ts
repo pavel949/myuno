@@ -105,6 +105,33 @@ const FLAGS: Record<string, FeatureFlag> = {
     description: 'New map-based property search',
     rolloutPercentage: 100,
   },
+
+  // Verticals — kill-switch for each business vertical
+  VERTICAL_PROPERTY: {
+    key: 'vertical_property',
+    enabled: true,
+    description: 'Property rental & sales vertical',
+  },
+  VERTICAL_RESTAURANTS: {
+    key: 'vertical_restaurants',
+    enabled: true,
+    description: 'Restaurants vertical',
+  },
+  VERTICAL_FLOWERS: {
+    key: 'vertical_flowers',
+    enabled: true,
+    description: 'Flowers & gifts vertical',
+  },
+  VERTICAL_YACHTS: {
+    key: 'vertical_yachts',
+    enabled: true,
+    description: 'Yacht charters vertical',
+  },
+  VERTICAL_EXPERIENCES: {
+    key: 'vertical_experiences',
+    enabled: true,
+    description: 'Tours & experiences vertical',
+  },
 } as const;
 
 /**

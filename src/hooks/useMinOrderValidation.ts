@@ -105,6 +105,7 @@ export function useMinOrderValidation() {
 
       setProviderMinOrders(newMinOrders);
     } catch {
+      // ignored
     } finally {
       setIsLoading(false);
     }

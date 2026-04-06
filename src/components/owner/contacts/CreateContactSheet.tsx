@@ -49,7 +49,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
         phone: form.phone || null, phone2: null, email: form.email || null,
         whatsapp: form.whatsapp || null, telegram: form.telegram || null, line_id: null,
         nationality: form.nationality || null, language: 'en', source: form.source,
-        contact_type: form.contact_type, crm_role: form.crm_role, company_name: null,
+        contact_type: form.contact_type, company_name: null,
         budget_min: form.budget_min ? Number(form.budget_min) : null,
         budget_max: form.budget_max ? Number(form.budget_max) : null, currency: form.currency,
         preferred_districts: form.preferred_districts.length ? form.preferred_districts : null,

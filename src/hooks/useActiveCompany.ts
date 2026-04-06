@@ -55,7 +55,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(() => {
-    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+    try { return localStorage.getItem(STORAGE_KEY); } catch { /* ignored */ return null; }
   });
 
   const { data: companies = [], isLoading } = useQuery({
@@ -89,7 +89,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
     if (id === selectedId) return; // no-op if same company
     
     setSelectedId(id);
-    try { localStorage.setItem(STORAGE_KEY, id); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, id); } catch { /* ignored */ }
 
     // Invalidate all company-scoped queries to prevent stale data from another MC
     queryClient.invalidateQueries({

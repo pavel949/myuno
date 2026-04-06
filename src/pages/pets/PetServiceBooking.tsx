@@ -19,6 +19,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { addDays, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,7 @@ export default function PetServiceBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
 
   const selectedServiceFromState = location.state?.selectedService;
 
@@ -87,6 +89,28 @@ export default function PetServiceBooking() {
     const scheduledAt = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
+
+    // Stripe online payment flow
+    if (paymentMethod === 'online') {
+      await createCheckout('create-pet-checkout', {
+        provider_id: id,
+        provider_name: language === 'ru' ? service.nameRu : service.name,
+        service_name: selectedServiceFromState?.name || service.name,
+        service_price: service.price,
+        service_fee: 0,
+        total_amount: service.price,
+        currency: 'THB',
+        scheduled_at: scheduledAt.toISOString(),
+        pet_type: petType,
+        pet_name: petName,
+        pet_breed: petBreed,
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
+        notes: contactData.notes,
+      });
+      return;
+    }
 
     const result = await createBooking({
       booking_type: 'service',
@@ -223,6 +247,7 @@ export default function PetServiceBooking() {
             currency="THB"
             showWallet
             showCash
+            showOnline
           />
         </div>
 
@@ -230,9 +255,11 @@ export default function PetServiceBooking() {
         <BookingBottomBar
           total={service.price}
           onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!isValid}
-          submitLabel={language === 'ru' ? 'Подтвердить' : 'Confirm'}
+          submitLabel={paymentMethod === 'online'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить' : 'Confirm')}
         />
       </PageContainer>
     </AppLayout>

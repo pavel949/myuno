@@ -83,7 +83,7 @@ export const VERTICAL_GROUPS: VerticalGroup[] = [
   },
   {
     id: 'admin',
-    labelEn: 'Life Admin',
+    labelEn: 'Documents & Finance',
     labelRu: 'Документы и финансы',
     icon: '📋',
     items: [

@@ -79,7 +79,7 @@ async function processFaqBatch(
 
     // Extract question and answer from markdown
     const lines = scraped.markdown.split("\n").filter((l) => l.trim());
-    let question = scraped.title.replace(/ – .+$/, "").replace(/ \| .+$/, "");
+    const question = scraped.title.replace(/ – .+$/, "").replace(/ \| .+$/, "");
     let answer = scraped.markdown;
 
     // Try to extract the answer part (after the question heading)

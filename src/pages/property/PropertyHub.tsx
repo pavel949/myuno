@@ -100,7 +100,7 @@ export function PropertyHubTabs() {
   const visibleTabs = TABS.filter(tab => !tab.authOnly || user);
 
   return (
-    <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 bg-background/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-30">
+    <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 bg-background border-b border-border/50">
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -125,9 +125,12 @@ export function PropertyHubTabs() {
 }
 
 export default function PropertyHub() {
+  const location = useLocation();
+  // PropertyIndex has its own sticky header that embeds the tabs — avoid double nav
+  const isIndexRoute = location.pathname === '/property' || location.pathname === '/property/';
   return (
     <CompareProvider>
-      <PropertyHubTabs />
+      {!isIndexRoute && <PropertyHubTabs />}
       <Outlet />
     </CompareProvider>
   );

@@ -72,6 +72,7 @@ export const useChat = (bookingId?: string) => {
         }
       }
     } catch {
+      // ignored — UI shows empty message list on fetch failure
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -96,6 +97,7 @@ export const useChat = (bookingId?: string) => {
       }
       return false;
     } catch {
+      // ignored — caller checks return value for failure
       return false;
     }
   }, [user, bookingId, fetchMessages]);

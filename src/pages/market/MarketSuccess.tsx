@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 
 export default function MarketSuccess() {
   const navigate = useNavigate();
@@ -60,6 +61,8 @@ export default function MarketSuccess() {
                 </li>
               </ul>
             </div>
+
+            <CrossSellRecommendations orderType="default" className="mt-4" />
 
             <div className="space-y-3">
               <Button onClick={() => navigate('/market')} className="w-full">

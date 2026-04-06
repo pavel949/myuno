@@ -421,17 +421,18 @@ const FlowersOrder = () => {
         if (!isBuyNow) {
           clearByType('flowers');
         }
-        
+
         toast.success(
           formData.paymentMethod === 'wallet'
             ? (language === 'ru' ? 'Заказ оплачен из кошелька!' : 'Order paid from wallet!')
             : (language === 'ru' ? 'Заказ успешно оформлен!' : 'Order placed successfully!')
         );
-        
+
         navigate('/bookings');
+      } else {
+        toast.error(language === 'ru' ? 'Не удалось создать заказ' : 'Failed to create order');
       }
-    } catch (error) {
-      console.error('Error creating order:', error);
+    } catch {
       toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
     }
   };

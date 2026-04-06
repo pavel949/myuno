@@ -1,11 +1,10 @@
 import { Resend } from 'npm:resend@2.0.0';
+import { getAdminEmails } from '../_shared/admin-config.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const ADMIN_EMAIL = 'pavel@ignatevestate.com';
 
 interface SignupNotificationPayload {
   user_email: string;
@@ -105,9 +104,10 @@ Deno.serve(async (req) => {
       </html>
     `;
 
+    const adminEmails = await getAdminEmails();
     const emailResponse = await resend.emails.send({
       from: 'myUNO <orders@resend.dev>',
-      to: [ADMIN_EMAIL],
+      to: adminEmails,
       subject: `🎉 New User: ${payload.user_name || payload.user_email}`,
       html: emailHtml,
     });

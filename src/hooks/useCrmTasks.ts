@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyCompanyId } from './useAgentDeals';
 import { CRM_TASK_ACTIVE_STATUSES } from '@/lib/tasks/taskStatus';
+import { toast } from 'sonner';
 
 export interface CrmTask {
   id: string;
@@ -118,6 +119,7 @@ export function useCreateCrmTask() {
       qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
       qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to create task'); },
   });
 }
 
@@ -137,6 +139,7 @@ export function useUpdateCrmTask() {
       qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
       qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to update task'); },
   });
 }
 
@@ -156,5 +159,6 @@ export function useDeleteCrmTask() {
       qc.invalidateQueries({ queryKey: ['crm-tasks-today-count'] });
       qc.invalidateQueries({ queryKey: ['day-briefing'] });
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to delete task'); },
   });
 }

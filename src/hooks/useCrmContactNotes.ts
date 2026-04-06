@@ -41,6 +41,9 @@ export function useAddContactNote() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['crm-contact-notes', vars.contact_id] });
     },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to add note'));
+    },
   });
 }
 
@@ -54,6 +57,9 @@ export function useDeleteContactNote() {
     },
     onSuccess: (contactId) => {
       qc.invalidateQueries({ queryKey: ['crm-contact-notes', contactId] });
+    },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete note'));
     },
   });
 }

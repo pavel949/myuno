@@ -22,6 +22,7 @@ export function EmailVerificationBanner() {
     try {
       return sessionStorage.getItem(SESSION_KEY) === '1';
     } catch {
+      // ignored — sessionStorage may be unavailable (private browsing)
       return false;
     }
   });
@@ -32,7 +33,7 @@ export function EmailVerificationBanner() {
   if (!user || user.email_confirmed_at || dismissed) return null;
 
   const handleDismiss = () => {
-    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch {}
+    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* ignored */ }
     setDismissed(true);
   };
 

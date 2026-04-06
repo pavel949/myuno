@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrders } from "@/hooks/useOrders";
+import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { useCleaningService } from "@/hooks/useCleaningServices";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -30,7 +31,8 @@ export default function CleaningBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createOrder, isCreating } = useOrders();
-  
+  const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
+
   // P0 FIX: Fetch service from database instead of hardcoded object
   const { service, isLoading: serviceLoading } = useCleaningService(id);
 
@@ -105,8 +107,28 @@ export default function CleaningBooking() {
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
 
+    // Stripe online payment flow
+    if (paymentMethod === 'online') {
+      await createCheckout('create-cleaning-checkout', {
+        provider_id: service.providerId,
+        provider_name: language === 'ru' ? service.nameRu : service.nameEn,
+        service_name: language === 'ru' ? service.nameRu : service.nameEn,
+        service_price: service.price,
+        service_fee: serviceFee,
+        total_amount: totalAmount,
+        currency: 'THB',
+        scheduled_at: scheduledAt.toISOString(),
+        address,
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        contact_email: contactData.email,
+        notes: contactData.notes,
+      });
+      return;
+    }
+
     // Map UI payment method to useOrders payment method
-    const orderPaymentMethod = paymentMethod === 'card' || paymentMethod === 'online' ? 'stripe' : 
+    const orderPaymentMethod = paymentMethod === 'card' || paymentMethod === 'online' ? 'stripe' :
                                paymentMethod === 'promptpay' ? 'stripe' :
                                paymentMethod === 'concierge_advance' ? 'wallet' : 
                                paymentMethod as 'cash' | 'wallet';
@@ -235,6 +257,7 @@ export default function CleaningBooking() {
             currency="THB"
             showWallet
             showCash
+            showOnline
           />
         </div>
 
@@ -264,9 +287,11 @@ export default function CleaningBooking() {
         <BookingBottomBar
           total={totalAmount}
           onSubmit={handleSubmit}
-          isSubmitting={isCreating}
+          isSubmitting={isCreating || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address}
-          submitLabel={language === 'ru' ? 'Подтвердить заказ' : 'Confirm Order'}
+          submitLabel={paymentMethod === 'online'
+            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить заказ' : 'Confirm Order')}
           hint={language === 'ru' ? '🔒 Безопасное бронирование — заполните форму' : '🔒 Secure booking — complete the form'}
         />
       </PageContainer>

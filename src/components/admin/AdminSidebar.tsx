@@ -1,15 +1,18 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   Users,
-  Package, 
+  Package,
   Sparkles,
   DollarSign,
   Building2,
   Settings,
   LogOut,
   Badge as BadgeIcon,
+  BarChart3,
+  CalendarCheck,
+  Wrench,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -26,6 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -34,18 +38,22 @@ interface NavItem {
   path: string;
   icon: React.ElementType;
   badgeKey?: 'pendingContent' | 'pendingProviders';
+  /** If set, only these roles see this item. Empty = everyone. */
+  adminOnly?: boolean;
 }
 
 const navigationItems: NavItem[] = [
   { title: 'Dashboard', titleRu: 'Обзор', path: '/admin', icon: LayoutDashboard },
-  { title: 'Users & Access', titleRu: 'Пользователи', path: '/admin/users', icon: Users },
   { title: 'Catalog & Content', titleRu: 'Каталог', path: '/admin/catalog', icon: Package, badgeKey: 'pendingContent' },
-  { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
-  { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign },
-  { title: 'Partners', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, badgeKey: 'pendingProviders' },
+  { title: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: CalendarCheck },
   { title: 'CRM', titleRu: 'CRM', path: '/admin/crm', icon: BadgeIcon },
+  { title: 'Partners', titleRu: 'Партнёры', path: '/admin/providers', icon: Building2, badgeKey: 'pendingProviders' },
+  { title: 'Finance', titleRu: 'Финансы', path: '/admin/finance', icon: DollarSign, adminOnly: true },
+  { title: 'Analytics', titleRu: 'Аналитика', path: '/admin/analytics', icon: BarChart3, adminOnly: true },
+  { title: 'LifeOS', titleRu: 'LifeOS', path: '/admin/life-situations', icon: Sparkles },
   { title: 'New Developments', titleRu: 'Новостройки', path: '/admin/newbuilds', icon: Building2 },
-  { title: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings },
+  { title: 'Users & Access', titleRu: 'Пользователи', path: '/admin/users', icon: Users, adminOnly: true },
+  { title: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings, adminOnly: true },
 ];
 
 export function AdminSidebar() {
@@ -56,6 +64,9 @@ export function AdminSidebar() {
   const { user, signOut } = useAuth();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { data: stats } = useAdminDashboardStats();
+  const { roles } = useUserRoles();
+  const isAdmin = roles.some(r => r.role === 'admin');
+  const visibleItems = navigationItems.filter(item => !item.adminOnly || isAdmin);
   
   const isCollapsed = isMobile ? false : state === 'collapsed';
 
@@ -94,7 +105,7 @@ export function AdminSidebar() {
       {/* Navigation — 7 flat items */}
       <SidebarContent className="px-3 py-4">
         <SidebarMenu className="space-y-1">
-          {navigationItems.map((item) => {
+          {visibleItems.map((item) => {
             const badgeCount = getBadgeCount(item.badgeKey);
             
             return (

@@ -19,13 +19,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
+import { DealClosingChecklist } from '@/components/owner/sales/DealClosingChecklist';
+import { CommissionSummary } from '@/components/owner/sales/CommissionSummary';
+import { OfferGeneratorModal } from '@/components/owner/sales/OfferGeneratorModal';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const activityIcons: Record<string, React.ElementType> = {
@@ -67,6 +70,7 @@ export default function SalesDealDetail() {
   const [activityText, setActivityText] = useState('');
   const [showEdit, setShowEdit] = useState(false);
   const [closeMode, setCloseMode] = useState<'won' | 'lost' | null>(null);
+  const [showOfferGenerator, setShowOfferGenerator] = useState(false);
 
   if (isLoading) {
     return (
@@ -177,6 +181,10 @@ export default function SalesDealDetail() {
           {isRu ? 'Назад' : 'Back'}
         </button>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowOfferGenerator(true)} className="text-primary border-primary/30 hover:bg-primary/10">
+            <Sparkles className="h-3.5 w-3.5 mr-1" />
+            {isRu ? 'Оффер' : 'Offer'}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
             <Pencil className="h-3.5 w-3.5 mr-1" />
             {isRu ? 'Ред.' : 'Edit'}
@@ -378,6 +386,10 @@ export default function SalesDealDetail() {
         </div>
       </div>
 
+      {/* Commission + Checklist */}
+      <CommissionSummary deal={deal} />
+      <DealClosingChecklist dealId={deal.id} dealType={dealType} companyId={deal.company_id} />
+
       {/* Activity feed & Change history tabs */}
       <Tabs defaultValue="activities" className="w-full">
         <TabsList className="w-full">
@@ -454,6 +466,7 @@ export default function SalesDealDetail() {
 
       {/* Sheets & Dialogs */}
       <EditDealSheet open={showEdit} onOpenChange={setShowEdit} deal={deal} />
+      <OfferGeneratorModal open={showOfferGenerator} onOpenChange={setShowOfferGenerator} deal={deal} />
       {closeMode && (
         <CloseDealDialog
           open={!!closeMode}

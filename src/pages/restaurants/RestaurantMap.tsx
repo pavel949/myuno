@@ -81,8 +81,11 @@ export default function RestaurantMap() {
         <div className="flex-1 w-full relative">
           {noKey && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+              <MapPin className="w-8 h-8 text-muted-foreground" />
               <p className="text-muted-foreground">
-                {language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set'}
+                {loadError?.message?.includes('auth')
+                  ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : 'Google Maps auth error')
+                  : (language === 'ru' ? 'Карта недоступна' : 'Map unavailable')}
               </p>
               <a
                 href="https://www.google.com/maps"

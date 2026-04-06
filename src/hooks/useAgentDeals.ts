@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
+import { toast } from 'sonner';
 
 export const DEAL_STAGES = [
   'new', 'contacted', 'showing', 'negotiation', 'contract', 'closed_won', 'closed_lost',
@@ -251,8 +253,20 @@ export function useCreateDeal() {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
       if (data?.id) {
         qc.setQueryData(['agent-deal', data.id], data as unknown as AgentDeal);
+        // Fire workflow trigger for deal creation
+        const d = data as Record<string, unknown>;
+        if (d.company_id) {
+          fireCrmWorkflowTrigger({
+            trigger_type: 'deal_created',
+            company_id: d.company_id as string,
+            entity_id: d.id as string,
+            entity_type: 'deal',
+            metadata: { deal_type: d.deal_type, stage: d.stage },
+          });
+        }
       }
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to create deal'); },
   });
 }
 
@@ -261,6 +275,17 @@ export function useUpdateDeal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: AgentDealUpdate & { id: string }) => {
+      // Fetch current deal to detect stage changes
+      let previousStage: string | undefined;
+      if (updates.stage) {
+        const { data: current } = await supabase
+          .from('agent_deals')
+          .select('stage, company_id')
+          .eq('id', id)
+          .single();
+        previousStage = (current as Record<string, unknown>)?.stage as string;
+      }
+
       const { data, error } = await supabase
         .from('agent_deals')
         .update(updates as any)
@@ -268,12 +293,28 @@ export function useUpdateDeal() {
         .select()
         .single();
       if (error) throw error;
+
+      // Fire appropriate workflow triggers
+      const d = data as Record<string, unknown>;
+      if (d.company_id && updates.stage && previousStage && updates.stage !== previousStage) {
+        fireCrmWorkflowTrigger({
+          trigger_type: updates.stage === 'closed_won' ? 'deal_won'
+            : updates.stage === 'closed_lost' ? 'deal_lost'
+            : 'deal_stage_changed',
+          company_id: d.company_id as string,
+          entity_id: id,
+          entity_type: 'deal',
+          metadata: { stage_from: previousStage, stage_to: updates.stage },
+        });
+      }
+
       return data;
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
       qc.invalidateQueries({ queryKey: ['agent-deal', vars.id] });
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to update deal'); },
   });
 }
 
@@ -288,6 +329,7 @@ export function useDeleteDeal() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['agent-deals'] });
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to delete deal'); },
   });
 }
 

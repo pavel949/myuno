@@ -352,7 +352,12 @@ export default function PropertyDetail() {
                    (isRu ? 'Жильё целиком' : 'Entire place')}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {property.bedrooms || 0} {isRu ? 'спал.' : 'bed'} · {property.bathrooms || 0} {isRu ? 'ванн.' : 'bath'} · {property.area_sqm || 0} м² · {property.max_guests || rentalTerms?.max_guests || 0} {isRu ? 'гостей' : 'guests'}
+                  {[
+                    property.bedrooms ? `${property.bedrooms} ${isRu ? 'спал.' : 'bed'}` : null,
+                    property.bathrooms ? `${property.bathrooms} ${isRu ? 'ванн.' : 'bath'}` : null,
+                    property.area_sqm ? `${property.area_sqm} м²` : null,
+                    (property.max_guests || rentalTerms?.max_guests) ? `${property.max_guests || rentalTerms?.max_guests} ${isRu ? 'гостей' : 'guests'}` : null,
+                  ].filter(Boolean).join(' · ')}
                 </p>
               </div>
             </div>
@@ -417,7 +422,7 @@ export default function PropertyDetail() {
               { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },
               { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
               { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
-            ].map((spec, i) => (
+            ].filter(spec => spec.value > 0).map((spec, i) => (
               <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-xl bg-muted/50">
                 <spec.icon className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground mb-1" />
                 <span className="text-lg lg:text-xl font-bold">{spec.value}</span>

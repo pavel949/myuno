@@ -7,6 +7,7 @@
  import { Button } from '@/components/ui/button';
  import { Badge } from '@/components/ui/badge';
  import { supabase } from '@/integrations/supabase/client';
+ import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
  
  interface OrderDetails {
    order_number: string;
@@ -174,6 +175,8 @@
              : 'Driver will meet you with a sign at the terminal exit.'}
          </p>
          
+         <CrossSellRecommendations orderType="transport" className="mt-4" />
+
          <div className="flex gap-3">
             <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
               {language === 'ru' ? 'К транспорту' : 'Browse More'}

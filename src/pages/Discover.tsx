@@ -23,15 +23,16 @@ import { SectionHeader } from '@/components/ds';
 import { LifeSituationsGrid } from '@/components/discover/LifeSituationsGrid';
 import { AllServicesGrid } from '@/components/discover/AllServicesGrid';
 import { ContextualRecommendations } from '@/components/discover/ContextualRecommendations';
+import { AudienceFilterTabs, type AudienceFilter } from '@/components/discover/AudienceFilterTabs';
 
 // ── Search data ───────────────────────────────────
 const LIFE_CONTEXTS_SEARCH = [
   { code: 'arrival', titleEn: 'Arrival & First Days', titleRu: 'Прибытие и первые дни', route: '/life/arrival' },
   { code: 'living', titleEn: 'Daily Life', titleRu: 'Повседневная жизнь', route: '/life/living' },
-  { code: 'leisure', titleEn: 'Leisure & Experiences', titleRu: 'Отдых и впечатления', route: '/life/leisure' },
-  { code: 'health', titleEn: 'Health & Safety', titleRu: 'Здоровье и безопасность', route: '/life/health' },
+  { code: 'leisure', titleEn: 'Leisure & Activities', titleRu: 'Отдых и впечатления', route: '/life/leisure' },
+  { code: 'health', titleEn: 'Health', titleRu: 'Здоровье', route: '/life/health' },
   { code: 'family', titleEn: 'Family & Kids', titleRu: 'Семья и дети', route: '/life/family' },
-  { code: 'property', titleEn: 'Property & Investment', titleRu: 'Недвижимость', route: '/life/property' },
+  { code: 'property', titleEn: 'Property', titleRu: 'Недвижимость', route: '/life/property' },
   { code: 'relocation', titleEn: 'Relocation & Legals', titleRu: 'Переезд и документы', route: '/life/relocation' },
   { code: 'business', titleEn: 'Business & Work', titleRu: 'Бизнес и работа', route: '/life/business' },
   { code: 'sports', titleEn: 'Sports & Fitness', titleRu: 'Спорт и фитнес', route: '/life/sports' },
@@ -51,6 +52,7 @@ export default function Discover() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const [searchQuery, setSearchQuery] = useState('');
+  const [audienceFilter, setAudienceFilter] = useState<AudienceFilter>('all');
 
   const handleNav = useCallback((path: string) => {
     triggerHaptic('light');
@@ -159,8 +161,11 @@ export default function Discover() {
           {/* Separator */}
           <div className="h-px bg-border/50" />
 
+          {/* Audience filter for services */}
+          <AudienceFilterTabs value={audienceFilter} onChange={setAudienceFilter} language={language} />
+
           {/* All Services Grid */}
-          <AllServicesGrid />
+          <AllServicesGrid audienceFilter={audienceFilter} />
 
           {/* Separator */}
           <div className="h-px bg-border/50" />

@@ -46,7 +46,9 @@ export function ExpenseTemplates({ propertyId, onApplied }: ExpenseTemplatesProp
       });
       toast.success(isRu ? `Расход "${template.labelRu}" добавлен` : `Expense "${template.labelEn}" added`);
       onApplied?.();
-    } catch {} finally { setApplied(null); }
+    } catch {
+      // ignored — mutation error is handled by react-query and displayed by toast
+    } finally { setApplied(null); }
   };
 
   return (

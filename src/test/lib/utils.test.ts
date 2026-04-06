@@ -8,8 +8,10 @@ describe('utils', () => {
     });
 
     it('handles conditional classes', () => {
-      expect(cn('base', true && 'conditional')).toBe('base conditional');
-      expect(cn('base', false && 'conditional')).toBe('base');
+      const isTrue = true as boolean;
+      const isFalse = false as boolean;
+      expect(cn('base', isTrue && 'conditional')).toBe('base conditional');
+      expect(cn('base', isFalse && 'conditional')).toBe('base');
     });
 
     it('handles undefined and null values', () => {
@@ -31,10 +33,12 @@ describe('utils', () => {
     });
 
     it('handles complex combinations', () => {
+      const condTrue = true as boolean;
+      const condFalse = false as boolean;
       const result = cn(
         'base-class',
-        true && 'conditional-true',
-        false && 'conditional-false',
+        condTrue && 'conditional-true',
+        condFalse && 'conditional-false',
         { 'object-true': true, 'object-false': false },
         ['array-class']
       );

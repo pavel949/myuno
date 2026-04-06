@@ -68,6 +68,7 @@ import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
 import { AirbnbStyleImageUpload } from '@/components/upload/AirbnbStyleImageUpload';
 import { AIIntakeDialog } from '@/components/admin/intake/AIIntakeDialog';
+import { ProjectUnitsTab } from '@/components/admin/projects/ProjectUnitsTab';
 import { PHUKET_DISTRICTS, ALL_AMENITIES } from '@/lib/taxonomies';
 
 const PROJECT_STATUS_OPTIONS: { value: ProjectStatus; label: string; labelRu: string; icon: React.ReactNode }[] = [
@@ -515,9 +516,12 @@ export default function AdminProjects() {
             </SheetHeader>
 
             <Tabs defaultValue="basic" className="p-6 pt-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="basic">
                   {isRu ? 'Основное' : 'Basic'}
+                </TabsTrigger>
+                <TabsTrigger value="units">
+                  {isRu ? 'Юниты' : 'Units'}
                 </TabsTrigger>
                 <TabsTrigger value="media">
                   {isRu ? 'Медиа' : 'Media'}
@@ -526,7 +530,7 @@ export default function AdminProjects() {
                   {isRu ? 'Удобства' : 'Amenities'}
                 </TabsTrigger>
                 <TabsTrigger value="juristic">
-                  {isRu ? 'УК' : 'Management'}
+                  {isRu ? 'УК' : 'Mgmt'}
                 </TabsTrigger>
               </TabsList>
 
@@ -624,6 +628,17 @@ export default function AdminProjects() {
                     placeholder="https://youtube.com/..."
                   />
                 </div>
+              </TabsContent>
+
+              {/* Units Tab */}
+              <TabsContent value="units" className="mt-4">
+                {editingProject ? (
+                  <ProjectUnitsTab projectId={editingProject.id} />
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {isRu ? 'Сначала сохраните проект' : 'Save the project first'}
+                  </p>
+                )}
               </TabsContent>
 
               {/* Media Tab */}

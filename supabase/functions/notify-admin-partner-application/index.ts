@@ -4,13 +4,12 @@
  */
 import { Resend } from "npm:resend@2.0.0";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { getAdminEmails } from "../_shared/admin-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const ADMIN_EMAILS = ["pavel@ignatevestate.com", "pi@myuno.app"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -102,6 +101,7 @@ Deno.serve(async (req) => {
       </html>
     `;
 
+    const ADMIN_EMAILS = await getAdminEmails();
     await resend.emails.send({
       from: "myUNO Partners <noreply@resend.dev>",
       to: ADMIN_EMAILS,

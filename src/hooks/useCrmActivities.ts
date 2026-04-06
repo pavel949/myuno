@@ -4,6 +4,7 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { typedFrom } from '@/lib/untypedTables';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
 
 export interface CrmActivity {
   id: string;
@@ -73,8 +74,21 @@ export function useLogActivity() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-activities'] });
+      const d = data as Record<string, unknown>;
+      if (d?.company_id && d?.id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'activity_logged',
+          company_id: d.company_id as string,
+          entity_id: d.id as string,
+          entity_type: 'activity',
+          metadata: { activity_type: d.activity_type, contact_id: d.contact_id, deal_id: d.deal_id },
+        });
+      }
+    },
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to log activity'));
     },
   });
 }

@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { fireCrmWorkflowTrigger } from '@/lib/crmWorkflowTrigger';
+import { toast } from 'sonner';
 
 export interface CrmContact {
   id: string;
@@ -282,9 +284,20 @@ export function useCreateContact() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['crm-contacts'] });
+      const d = data as Record<string, unknown>;
+      if (d.company_id && d.id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'contact_created',
+          company_id: d.company_id as string,
+          entity_id: d.id as string,
+          entity_type: 'contact',
+          metadata: { contact_type: d.contact_type, source: d.source },
+        });
+      }
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to create contact'); },
   });
 }
 
@@ -301,10 +314,20 @@ export function useUpdateContact() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, vars) => {
+    onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ['crm-contacts'] });
       qc.invalidateQueries({ queryKey: ['crm-contact', vars.id] });
+      const d = data as Record<string, unknown>;
+      if (d.company_id) {
+        fireCrmWorkflowTrigger({
+          trigger_type: 'contact_updated',
+          company_id: d.company_id as string,
+          entity_id: vars.id,
+          entity_type: 'contact',
+        });
+      }
     },
+    onError: (err: Error) => { toast.error(err.message || 'Failed to update contact'); },
   });
 }
 

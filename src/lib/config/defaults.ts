@@ -25,8 +25,6 @@ export const DEFAULT_IMAGES = {
   placeholder: '/placeholder.svg',
 } as const;
 
-// Flag to indicate mock/demo data (for development)
-export const IS_DEMO_MODE = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE === 'true';
 
 // Default pagination settings
 export const PAGINATION_DEFAULTS = {

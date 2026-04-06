@@ -48,6 +48,9 @@ export function useCreateMeeting() {
       return data as CrmMeeting;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-meetings'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create meeting'));
+    },
   });
 }
 
@@ -59,6 +62,9 @@ export function useUpdateMeeting() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-meetings'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update meeting'));
+    },
   });
 }
 
@@ -70,5 +76,8 @@ export function useDeleteMeeting() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-meetings'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete meeting'));
+    },
   });
 }

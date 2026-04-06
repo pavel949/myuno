@@ -101,6 +101,9 @@ export function useCreateSequence() {
       return data as CrmSequence;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to create sequence'));
+    },
   });
 }
 
@@ -112,6 +115,9 @@ export function useUpdateSequence() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update sequence'));
+    },
   });
 }
 
@@ -123,6 +129,9 @@ export function useDeleteSequence() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to delete sequence'));
+    },
   });
 }
 
@@ -130,13 +139,20 @@ export function useUpsertSequenceSteps() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ sequenceId, steps }: { sequenceId: string; steps: Omit<CrmSequenceStep, 'id'>[] }) => {
-      await typedFrom('crm_sequence_steps').delete().eq('sequence_id', sequenceId);
+      const { error: delErr } = await typedFrom('crm_sequence_steps')
+        .delete()
+        .eq('sequence_id', sequenceId);
+      if (delErr) throw new Error(`Failed to clear old steps: ${delErr.message}`);
+
       if (steps.length > 0) {
         const { error } = await typedFrom('crm_sequence_steps').insert(steps);
-        if (error) throw error;
+        if (error) throw new Error(`Failed to save new steps: ${error.message}`);
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to update sequence steps'));
+    },
   });
 }
 
@@ -149,6 +165,9 @@ export function useEnrollInSequence() {
       return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['crm-sequences'] }),
+    onError: (err: Error) => {
+      import('sonner').then(({ toast }) => toast.error(err.message || 'Failed to enroll in sequence'));
+    },
   });
 }
 

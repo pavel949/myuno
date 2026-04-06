@@ -281,7 +281,7 @@ export function useCleaningServices(serviceType?: string) {
   const query = useQuery({
     queryKey: ['cleaning-services-full', serviceType],
     queryFn: async (): Promise<CleaningServiceFull[]> => {
-      let queryBuilder = supabase
+      const queryBuilder = supabase
         .from('services')
         .select('*')
         .eq('is_active', true)

@@ -27,6 +27,7 @@ import { ActiveSituationBanner } from '@/components/life-os/ActiveSituationBanne
 import { PreBookingClarity } from '@/components/trust/PreBookingClarity';
 import { cn } from '@/lib/utils';
 import { NextStepNudge } from '@/components/hints/NextStepNudge';
+import { toast } from 'sonner';
 
 // ────────────────────────────────────
 // TYPES
@@ -160,14 +161,18 @@ export function BookingWizard({
         contact: contactData,
         paymentMethod,
       });
-      if (result) {
+      if (result?.bookingId) {
         setBookingResult(result);
         setCurrentStep(totalSteps - 1); // go to confirmation
+      } else {
+        toast.error(isRu ? 'Не удалось создать бронирование' : 'Failed to create booking');
       }
+    } catch (error) {
+      toast.error(isRu ? 'Ошибка при бронировании. Попробуйте ещё раз.' : 'Booking error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  }, [callbacks, contactData, paymentMethod, totalSteps]);
+  }, [callbacks, contactData, paymentMethod, totalSteps, isRu]);
 
   // ── Confirmation screen ──
   if (bookingResult) {

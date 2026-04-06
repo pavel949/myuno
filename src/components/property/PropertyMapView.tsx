@@ -6,6 +6,7 @@
 import React, { useRef, useCallback, useState, useMemo } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
@@ -72,12 +73,17 @@ export function PropertyMapView({
     return (
       <div
         className={cn(
-          'w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden border flex items-center justify-center bg-muted/30',
+          'w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden border flex flex-col items-center justify-center bg-muted/30 gap-2 p-4',
           className
         )}
       >
-        <p className="text-sm text-muted-foreground">
-          {language === 'ru' ? 'Задайте VITE_GOOGLE_MAPS_API_KEY' : 'Set VITE_GOOGLE_MAPS_API_KEY'}
+        <MapPin className="w-8 h-8 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground text-center">
+          {loadError?.message?.includes('auth')
+            ? (language === 'ru'
+              ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа в Google Cloud Console.'
+              : 'Google Maps auth error. Check API key restrictions in Google Cloud Console.')
+            : (language === 'ru' ? 'Карта недоступна' : 'Map unavailable')}
         </p>
       </div>
     );

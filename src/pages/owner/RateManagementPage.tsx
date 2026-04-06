@@ -424,7 +424,7 @@ function PropertyPriceRow({
             entity_id: propertyId,
             details: { old_value: pricePerNight, new_value: num } as any,
           });
-        } catch {}
+        } catch { /* ignored */ }
       }
 
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });

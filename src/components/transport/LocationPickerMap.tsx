@@ -231,13 +231,11 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       <div className="absolute inset-0 pt-28">
         {noKey ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
+            <MapPin className="w-8 h-8 text-muted-foreground" />
             <p className="text-muted-foreground">
-              {language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set'}
-            </p>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              {language === 'ru'
-                ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env и включите Maps JavaScript API в Google Cloud.'
-                : 'Set VITE_GOOGLE_MAPS_API_KEY in .env and enable Maps JavaScript API in Google Cloud.'}
+              {loadError?.message?.includes('auth')
+                ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : 'Google Maps auth error')
+                : (language === 'ru' ? 'Карта недоступна' : 'Map unavailable')}
             </p>
             <a
               href="https://www.google.com/maps/search/?api=1&query=7.8804,98.3923"

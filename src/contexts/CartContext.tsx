@@ -190,15 +190,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, user, isLoading, saveLocalCart]);
 
   const addItem = async (newItem: Omit<CartItem, 'quantity'>) => {
-    const existingItem = items.find(item => item.id === newItem.id);
-    
-    // Optimistic update
-    const previousItems = [...items];
+    // Capture fresh state via functional updater to avoid stale closure
+    let previousItems: CartItem[] = [];
+    let existingQuantity = 0;
+
     setItems(prev => {
+      previousItems = prev;
       const existingIndex = prev.findIndex(item => item.id === newItem.id);
       if (existingIndex >= 0) {
+        existingQuantity = prev[existingIndex].quantity;
         const updated = [...prev];
-        updated[existingIndex] = { ...updated[existingIndex], quantity: updated[existingIndex].quantity + 1 };
+        updated[existingIndex] = { ...updated[existingIndex], quantity: existingQuantity + 1 };
         return updated;
       }
       return [...prev, { ...newItem, quantity: 1 }];
@@ -206,10 +208,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       try {
-        if (existingItem) {
+        if (existingQuantity > 0) {
           const { error } = await supabase
             .from('cart_items')
-            .update({ quantity: existingItem.quantity + 1 })
+            .update({ quantity: existingQuantity + 1 })
             .eq('user_id', user.id)
             .eq('item_id', newItem.id);
           if (error) throw error;

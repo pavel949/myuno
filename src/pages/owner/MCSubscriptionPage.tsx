@@ -203,9 +203,75 @@ export default function MCSubscriptionPage() {
         {/* Success / Cancel alerts */}
         {success && (
           <Card className="border-primary/50 bg-primary/5">
-            <CardContent className="flex items-center gap-3 py-4">
-              <CheckCircle className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-sm">{isRu ? 'Подписка успешно оформлена! Активируйте объекты ниже.' : 'Subscription activated! Enable your properties below.'}</span>
+            <CardContent className="py-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">
+                    {isRu ? 'Подписка успешно оформлена!' : 'Subscription activated!'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu ? 'Следуйте этим шагам, чтобы начать' : 'Follow these steps to get started'}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  {
+                    step: 1,
+                    titleRu: 'Активируйте объекты',
+                    titleEn: 'Enable your properties',
+                    descRu: 'Включите нужные объекты в списке ниже',
+                    descEn: 'Toggle on properties in the list below',
+                    done: usedSlots > 0,
+                  },
+                  {
+                    step: 2,
+                    titleRu: 'Настройте календарь',
+                    titleEn: 'Set up your calendar',
+                    descRu: 'Укажите даты доступности и цены',
+                    descEn: 'Set availability dates and pricing',
+                    done: false,
+                    path: '/owner/calendar',
+                  },
+                  {
+                    step: 3,
+                    titleRu: 'Добавьте фото и описания',
+                    titleEn: 'Add photos & descriptions',
+                    descRu: 'Создайте привлекательные листинги',
+                    descEn: 'Create attractive property listings',
+                    done: false,
+                    path: '/owner/properties',
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.step}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-lg transition-colors",
+                      item.done ? "bg-primary/5" : "bg-background hover:bg-muted/50",
+                      item.path && !item.done && "cursor-pointer"
+                    )}
+                    onClick={() => item.path && !item.done && window.location.assign(item.path)}
+                  >
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
+                      item.done ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    )}>
+                      {item.done ? '✓' : item.step}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-medium", item.done && "line-through text-muted-foreground")}>
+                        {isRu ? item.titleRu : item.titleEn}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isRu ? item.descRu : item.descEn}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}

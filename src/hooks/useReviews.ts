@@ -81,6 +81,7 @@ export const useReviews = ({ itemType, itemId }: UseReviewsOptions) => {
         setStats({ average, total, distribution });
       }
     } catch {
+      // ignored — UI shows empty reviews list on fetch failure
     } finally {
       if (checkMounted()) setIsLoading(false);
     }
@@ -130,11 +131,9 @@ export const useCreateReview = () => {
         cons: data.cons,
         visit_date: data.visitDate,
       });
-      
+
       if (error) throw error;
       return { success: true };
-    } catch (err) {
-      throw err;
     } finally {
       if (isMountedRef.current) setIsSubmitting(false);
     }
@@ -174,6 +173,7 @@ export const useTrustBadges = (providerId?: string) => {
           if (isMounted) setBadges(data || []);
         }
       } catch {
+        // ignored — UI shows empty badges list on fetch failure
       } finally {
         if (isMounted) setIsLoading(false);
       }

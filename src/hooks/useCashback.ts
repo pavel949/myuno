@@ -24,6 +24,7 @@ export function useCashback() {
       if (error) throw error;
       if (checkMounted()) setSettings(data || []);
     } catch {
+      // ignored — UI shows empty state when settings are unavailable
     } finally {
       if (checkMounted()) setIsLoading(false);
     }

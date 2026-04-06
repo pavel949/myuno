@@ -12,7 +12,7 @@ import {
   Sparkles, Car, GraduationCap, Briefcase, Banknote,
   Calendar, Wrench, Building2, Building, Key, Droplets, TrendingUp,
   Users, BarChart3, ClipboardList, Lock, ChevronRight,
-  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint
+  Baby, Heart, Music, Dumbbell, Laptop, Wifi, PawPrint, Calculator
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas, UserPersona } from '@/hooks/useUserPersonas';
@@ -73,9 +73,11 @@ const INVESTOR_ACTIONS: QuickAction[] = [
   { id: 'invest', icon: TrendingUp, label: 'Investment', labelRu: 'Инвестиции', path: '/invest', accentColor: '#00D68F' },
   { id: 'offplan', icon: Building2, label: 'Off-Plan', labelRu: 'Новостройки', path: '/offplan', accentColor: '#06B6D4' },
   { id: 'property-buy', icon: Building, label: 'Buy Property', labelRu: 'Купить', path: '/property?mode=buy', accentColor: '#A855F7' },
-  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Юрист', path: '/legal', accentColor: '#F59E0B' },
+  { id: 'legal', icon: Scale, label: 'Legal', labelRu: 'Право', path: '/legal', accentColor: '#F59E0B' },
   { id: 'banking', icon: Briefcase, label: 'Banking', labelRu: 'Банкинг', path: '/banking', accentColor: '#4E7BFF' },
   { id: 'insurance', icon: Shield, label: 'Insurance', labelRu: 'Страховка', path: '/insurance', accentColor: '#06B6D4' },
+  { id: 'market-data', icon: BarChart3, label: 'Market Data', labelRu: 'Рынок', path: '/invest', accentColor: '#F43F5E' },
+  { id: 'roi-calc', icon: Calculator, label: 'ROI Calc', labelRu: 'ROI', path: '/property?tab=roi', accentColor: '#00D68F' },
 ];
 
 const FAMILY_ACTIONS: QuickAction[] = [
@@ -325,7 +327,7 @@ export const QuickActionsGrid = memo(function QuickActionsGrid({
                   </div>
                 )}
               </div>
-              <span className="text-[13px] font-semibold text-center leading-tight text-foreground">{label}</span>
+              <span className="text-[11px] font-semibold text-center leading-tight text-foreground line-clamp-2 w-full">{label}</span>
             </motion.button>
           ) : (
             <button

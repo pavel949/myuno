@@ -16,7 +16,7 @@ export const MODULES = [
 
 export type ModuleKey = typeof MODULES[number]['key'];
 
-export interface TeamPermission extends TeamMemberPermissionRow {}
+export type TeamPermission = TeamMemberPermissionRow;
 
 const permissionsTable = () => typedFrom('team_member_permissions');
 

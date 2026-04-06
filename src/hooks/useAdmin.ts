@@ -201,7 +201,7 @@ export function useAdminServices(providerId?: string) {
   return { services, isLoading, createService, updateService, deleteService, refetch: fetchServices };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function useAdminCategories() {
   const [categories, setCategories] = useState<Record<string, any>[]>([]);
   const [isLoading, setIsLoading] = useState(true);

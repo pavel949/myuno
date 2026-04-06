@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Settings, Globe, FileText, Database, ExternalLink, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleMapsStatusCard } from '@/components/admin/GoogleMapsStatusCard';
+import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 
 const systemSections = [
   { key: 'cities', label: 'Cities', labelRu: 'Города', icon: Globe, path: '/admin/cities' },
@@ -21,6 +22,7 @@ export function ControlSystemTab() {
 
   return (
     <div className="space-y-4">
+      <NotificationSettings />
       <GoogleMapsStatusCard />
       <Card>
         <CardHeader>

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 
 interface OrderDetails {
   id: string;
@@ -253,10 +254,12 @@ const FlowersSuccess = () => {
             )}
           </div>
 
+          <CrossSellRecommendations orderType="flowers" className="mt-4" />
+
           {/* Actions */}
           <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
-            <Button 
-              onClick={() => navigate('/bookings')} 
+            <Button
+              onClick={() => navigate('/bookings')}
               className="w-full gap-2"
             >
               {isRu ? 'Мои заказы' : 'My Orders'}

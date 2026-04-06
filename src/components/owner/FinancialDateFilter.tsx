@@ -54,19 +54,22 @@ export function FinancialDateFilter({
     switch (presetValue) {
       case 'this_month':
         return { from: startOfMonth(now), to: endOfMonth(now) };
-      case 'last_month':
+      case 'last_month': {
         const lastMonth = subMonths(now, 1);
         return { from: startOfMonth(lastMonth), to: endOfMonth(lastMonth) };
+      }
       case 'this_quarter':
         return { from: startOfQuarter(now), to: endOfQuarter(now) };
-      case 'last_quarter':
+      case 'last_quarter': {
         const lastQuarter = subQuarters(now, 1);
         return { from: startOfQuarter(lastQuarter), to: endOfQuarter(lastQuarter) };
+      }
       case 'this_year':
         return { from: startOfYear(now), to: endOfYear(now) };
-      case 'last_year':
+      case 'last_year': {
         const lastYear = subYears(now, 1);
         return { from: startOfYear(lastYear), to: endOfYear(lastYear) };
+      }
       case 'all_time':
         return { from: undefined, to: undefined };
       case 'custom':

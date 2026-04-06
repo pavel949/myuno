@@ -36,8 +36,8 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const isDesktop = useIsDesktop();
     // Activate global behavioral tracking
     useUserTracking();
-    // Desktop: always show header and footer for consistent navigation
-    const finalShowHeader = isDesktop ? true : showHeader;
+    // Desktop: show header/footer unless explicitly disabled
+    const finalShowHeader = showHeader === false ? false : (isDesktop ? true : showHeader);
     const finalShowFooter = isDesktop ? true : showFooter;
 
     return (
