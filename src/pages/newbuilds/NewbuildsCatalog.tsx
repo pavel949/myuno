@@ -3,7 +3,6 @@
  */
 import React, { useState, useMemo } from 'react';
 import { Filter, Grid3X3, List } from 'lucide-react';
-import { Filter, Grid3X3, List } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NbProjectCard } from '@/components/newbuilds/NbProjectCard';
 import { useNewbuildProjects, useNewbuildLocations, type NewbuildFilters } from '@/hooks/useNewbuildProjects';
