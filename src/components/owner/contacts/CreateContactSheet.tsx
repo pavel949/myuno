@@ -61,7 +61,7 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
       });
       toast({ title: isRu ? 'Контакт создан' : 'Contact created' });
       onOpenChange(false);
-      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', crm_role: 'other' as const, source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
+      setForm({ first_name: '', last_name: '', phone: '', email: '', whatsapp: '', telegram: '', contact_type: 'buyer', source: 'website', nationality: '', notes: '', budget_min: '', budget_max: '', currency: 'THB', bedrooms_min: '', preferred_types: [], preferred_districts: [], tags: [] });
     } catch {
       toast({ title: isRu ? 'Ошибка' : 'Failed', variant: 'destructive' });
     }
