@@ -52,7 +52,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold truncate">{title}</h1>
+              <h1 className="text-lg font-bold font-display truncate">{title}</h1>
               {badge}
             </div>
             {subtitle && (
