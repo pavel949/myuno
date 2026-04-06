@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
-import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
+
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
