@@ -2,13 +2,14 @@
  * /newbuilds/projects — Full Project Catalog with filters
  */
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { Filter, Grid3X3, List, ChevronLeft } from 'lucide-react';
+import { Filter, Grid3X3, List } from 'lucide-react';
+import { Filter, Grid3X3, List } from 'lucide-react';
 import NewbuildsLayout from '@/components/newbuilds/NewbuildsLayout';
 import { NbProjectCard } from '@/components/newbuilds/NbProjectCard';
 import { useNewbuildProjects, useNewbuildLocations, type NewbuildFilters } from '@/hooks/useNewbuildProjects';
 import { Skeleton } from '@/components/ui/skeleton';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { BackButton } from '@/components/uno/BackButton';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Все статусы' },
@@ -55,10 +56,8 @@ export default function NewbuildsCatalog() {
     <NewbuildsLayout>
       {/* Mini hero */}
       <section className="relative px-4 pt-20 pb-12 nb-blueprint nb-grain overflow-hidden">
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <Link to={APP_ROUTES.NEWBUILDS} className="inline-flex items-center gap-1 text-sm mb-4 hover:opacity-80 transition" style={{ color: 'hsl(var(--nb-gold))' }}>
-            <ChevronLeft className="w-4 h-4" /> Новостройки
-          </Link>
+        <div className="relative z-10 max-w-[1536px] mx-auto">
+          <BackButton fallbackPath={APP_ROUTES.NEWBUILDS} variant="overlay" size="sm" className="mb-4" />
           <h1 className="nb-display text-3xl md:text-5xl" style={{ color: 'hsl(var(--nb-gold))' }}>
             Каталог проектов
           </h1>
