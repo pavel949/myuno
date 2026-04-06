@@ -21,7 +21,7 @@ interface GooglePlacesAutocompleteProps {
 }
 
 /**
- * Google Places Autocomplete input using the Places API.
+ * Google Places Autocomplete input using the new Places API.
  * Falls back to a plain text input if Google Maps is not loaded.
  */
 export function GooglePlacesAutocomplete({
@@ -33,26 +33,20 @@ export function GooglePlacesAutocomplete({
   disabled,
 }: GooglePlacesAutocompleteProps) {
   const { isLoaded, hasKey } = useGoogleMaps();
-  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([]);
+  const [predictions, setPredictions] = useState<google.maps.places.PlacePrediction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
-  const placesService = useRef<google.maps.places.PlacesService | null>(null);
-  const dummyDiv = useRef<HTMLDivElement | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
 
-  // Initialize services
   useEffect(() => {
     if (!isLoaded || !window.google?.maps?.places) return;
-    autocompleteService.current = new google.maps.places.AutocompleteService();
-    if (!dummyDiv.current) {
-      dummyDiv.current = document.createElement('div');
+    if (!sessionTokenRef.current) {
+      sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
     }
-    placesService.current = new google.maps.places.PlacesService(dummyDiv.current);
   }, [isLoaded]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -63,64 +57,91 @@ export function GooglePlacesAutocomplete({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const fetchPredictions = useCallback((input: string) => {
-    if (!autocompleteService.current || input.length < 2) {
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const fetchPredictions = useCallback(async (input: string) => {
+    if (!window.google?.maps?.places || input.trim().length < 2) {
       setPredictions([]);
+      setIsOpen(false);
       return;
     }
-    setLoading(true);
-    autocompleteService.current.getPlacePredictions(
-      {
-        input,
-        componentRestrictions: { country: 'th' },
-        types: ['address', 'establishment', 'geocode'],
-      },
-      (results, status) => {
-        setLoading(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(results);
-          setIsOpen(true);
-        } else {
-          setPredictions([]);
-        }
+
+    try {
+      setLoading(true);
+
+      const { AutocompleteSuggestion } = await google.maps.importLibrary('places') as google.maps.PlacesLibrary;
+
+      if (!sessionTokenRef.current) {
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
       }
-    );
+
+      const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+        input,
+        includedRegionCodes: ['th'],
+        includedPrimaryTypes: ['premise', 'subpremise', 'street_address', 'route', 'establishment'],
+        sessionToken: sessionTokenRef.current,
+      });
+
+      const nextPredictions = (suggestions || [])
+        .map((suggestion) => suggestion.placePrediction)
+        .filter((prediction): prediction is google.maps.places.PlacePrediction => Boolean(prediction));
+
+      setPredictions(nextPredictions);
+      setIsOpen(nextPredictions.length > 0);
+    } catch {
+      setPredictions([]);
+      setIsOpen(false);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const handleInputChange = (val: string) => {
     onChange(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchPredictions(val), 300);
+    debounceRef.current = setTimeout(() => {
+      void fetchPredictions(val);
+    }, 300);
   };
 
-  const handleSelect = (prediction: google.maps.places.AutocompletePrediction) => {
-    if (!placesService.current) return;
-    setIsOpen(false);
-    onChange(prediction.description);
+  const handleSelect = async (prediction: google.maps.places.PlacePrediction) => {
+    try {
+      setIsOpen(false);
+      onChange(prediction.text.toString());
 
-    placesService.current.getDetails(
-      { placeId: prediction.place_id, fields: ['geometry', 'formatted_address', 'address_components'] },
-      (place, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          const address = place.formatted_address || prediction.description;
+      const place = prediction.toPlace();
+      const { place: hydratedPlace } = await place.fetchFields({
+        fields: ['location', 'formattedAddress', 'addressComponents'],
+      });
 
-          // Extract district from address_components
-          let district: string | undefined;
-          const sublocality = place.address_components?.find(c =>
-            c.types.includes('sublocality') || c.types.includes('sublocality_level_1')
-          );
-          const locality = place.address_components?.find(c => c.types.includes('locality'));
-          district = sublocality?.long_name || locality?.long_name;
+      const lat = hydratedPlace.location?.lat();
+      const lng = hydratedPlace.location?.lng();
+      const address = hydratedPlace.formattedAddress || prediction.text.toString();
 
-          onPlaceSelect({ address, lat, lng, district });
-        }
+      const sublocality = hydratedPlace.addressComponents?.find((component) =>
+        component.types.includes('sublocality') || component.types.includes('sublocality_level_1')
+      );
+      const locality = hydratedPlace.addressComponents?.find((component) =>
+        component.types.includes('locality')
+      );
+      const administrativeArea = hydratedPlace.addressComponents?.find((component) =>
+        component.types.includes('administrative_area_level_2')
+      );
+      const district = sublocality?.longText || locality?.longText || administrativeArea?.longText;
+
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        onPlaceSelect({ address, lat, lng, district });
+        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
       }
-    );
+    } catch {
+      // silent fallback: keep text input value only
+    }
   };
 
-  // Fallback for no Google Maps
   if (!hasKey || !isLoaded) {
     return (
       <Input
@@ -142,8 +163,9 @@ export function GooglePlacesAutocomplete({
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => predictions.length > 0 && setIsOpen(true)}
           placeholder={placeholder}
-          className={cn("pl-9 pr-8", className)}
+          className={cn('pl-9 pr-8', className)}
           disabled={disabled}
+          autoComplete="off"
         />
         {loading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
@@ -154,17 +176,18 @@ export function GooglePlacesAutocomplete({
         <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
           {predictions.map((prediction) => (
             <button
-              key={prediction.place_id}
-              onClick={() => handleSelect(prediction)}
+              key={prediction.placeId}
+              type="button"
+              onClick={() => void handleSelect(prediction)}
               className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors text-sm"
             >
               <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="font-medium truncate">
-                  {prediction.structured_formatting.main_text}
+                  {prediction.mainText?.toString() || prediction.text.toString()}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {prediction.structured_formatting.secondary_text}
+                  {prediction.secondaryText?.toString() || ''}
                 </p>
               </div>
             </button>
