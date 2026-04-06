@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UserListing, UserListingDraft, ItemCondition } from '@/types/userListing';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export function useUserListings() {
   const [listings, setListings] = useState<UserListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
 
   const fetchListings = useCallback(async () => {
     try {
@@ -44,11 +43,7 @@ export function useUserListings() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast({
-          title: 'Authentication required',
-          description: 'Please sign in to create a listing',
-          variant: 'destructive',
-        });
+        toast.error('Authentication required', { description: 'Please sign in to create a listing' });
         return null;
       }
 
@@ -80,171 +75,8 @@ export function useUserListings() {
 
       if (insertError) throw insertError;
 
-      toast({
-        title: 'Listing created',
-        description: 'Your listing has been saved as a draft',
-      });
-
-      await fetchListings();
-      return data as UserListing;
-    } catch (err) {
-      toast({
-        title: 'Error creating listing',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
-
-  const updateListing = async (id: string, updates: Partial<UserListingDraft>): Promise<boolean> => {
-    try {
-      // Always set updated_at timestamp
-      const { error: updateError } = await supabase
-        .from('user_listings')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-
-      await fetchListings();
-      return true;
-    } catch (err) {
-      toast({
-        title: 'Error updating listing',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const publishListing = async (id: string): Promise<boolean> => {
-    try {
-      const { error: updateError } = await supabase
-        .from('user_listings')
-        .update({
-          status: 'pending',
-          published_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: 'Listing submitted',
-        description: 'Your listing is now pending review',
-      });
-
-      await fetchListings();
-      return true;
-    } catch (err) {
-      toast({
-        title: 'Error publishing listing',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const deleteListing = async (id: string): Promise<boolean> => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('user_listings')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
-
-      toast({
-        title: 'Listing deleted',
-        description: 'Your listing has been removed',
-      });
-
-      await fetchListings();
-      return true;
-    } catch (err) {
-      toast({
-        title: 'Error deleting listing',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const markAsSold = async (id: string): Promise<boolean> => {
-    try {
-      const { error: updateError } = await supabase
-        .from('user_listings')
-        .update({
-          status: 'sold',
-          sold_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: 'Marked as sold',
-        description: 'Congratulations on your sale!',
-      });
-
-      await fetchListings();
-      return true;
-    } catch (err) {
-      toast({
-        title: 'Error updating listing',
-        description: err instanceof Error ? err.message : 'Unknown error',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  return {
-    listings,
-    isLoading,
-    error,
-    createListing,
-    updateListing,
-    publishListing,
-    deleteListing,
-    markAsSold,
-    refetch: fetchListings,
-  };
-}
-
-// Hook to fetch active public listings (for browsing)
-export function usePublicListings(options: {
-  category?: string;
-  search?: string;
-  condition?: ItemCondition;
-  limit?: number;
-} = {}) {
-  const [listings, setListings] = useState<UserListing[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Stabilize options to prevent infinite loops
-  const { category, search, condition, limit } = options;
-
-  useEffect(() => {
-    const fetchPublicListings = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Include both 'active' status AND 'pending' with approved moderation
-        // This ensures listings are visible after vendor publishes them
-        let query = supabase
-          .from('user_listings')
-          .select('*')
-          .eq('moderation_status', 'approved')
-          .in('status', ['active', 'pending']) // Fix: include pending approved listings
-          .order('created_at', { ascending: false });
+      toast('Listing created', { description: 'Your listing has been saved as a draft' });
+      // Error handled;
 
         if (category) {
           query = query.eq('category_slug', category);

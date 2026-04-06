@@ -8,10 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import browserImageCompression from 'browser-image-compression';
+import { toast } from 'sonner';
 
 interface ExtractedData {
   company_name?: string;
@@ -67,7 +67,6 @@ const VERTICALS = [
 
 export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -104,11 +103,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       reader.readAsDataURL(compressed);
     } catch (err) {
       console.error('Error processing file:', err);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Не удалось обработать изображение' : 'Failed to process image',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [isRu, toast]);
 
@@ -126,11 +121,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       }
     } catch (err) {
       console.error('Camera access error:', err);
-      toast({
-        title: isRu ? 'Ошибка камеры' : 'Camera Error',
-        description: isRu ? 'Не удалось получить доступ к камере' : 'Failed to access camera',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   }, [isRu, toast]);
 
@@ -178,19 +169,10 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
       setExtractedData(data);
       setEditedData(data);
 
-      toast({
-        title: isRu ? 'Карточка распознана' : 'Card Scanned',
-        description: isRu 
-          ? `Уверенность: ${data.confidence}%` 
-          : `Confidence: ${data.confidence}%`,
-      });
+      toast(isRu ? 'Готово' : 'Done');
     } catch (err) {
       console.error('Scan error:', err);
-      toast({
-        title: isRu ? 'Ошибка сканирования' : 'Scan Error',
-        description: isRu ? 'Не удалось распознать карточку' : 'Failed to scan card',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsProcessing(false);
     }
@@ -199,11 +181,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
   // Create provider from extracted data
   const createProvider = useCallback(async () => {
     if (!editedData?.company_name) {
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Название компании обязательно' : 'Company name is required',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -236,10 +214,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
       if (error) throw error;
 
-      toast({
-        title: isRu ? 'Провайдер создан' : 'Provider Created',
-        description: editedData.company_name,
-      });
+      toast(isRu ? 'Готово' : 'Done');
 
       onProviderCreated?.(data.id);
 
@@ -250,11 +225,7 @@ export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerPr
 
     } catch (err) {
       console.error('Create provider error:', err);
-      toast({
-        title: isRu ? 'Ошибка создания' : 'Creation Error',
-        description: isRu ? 'Не удалось создать провайдера' : 'Failed to create provider',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsCreating(false);
     }

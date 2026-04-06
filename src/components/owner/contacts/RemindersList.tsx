@@ -20,8 +20,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -32,7 +32,6 @@ export function RemindersList({ contactId, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
   const { user } = useAuth();
 
   const { data: reminders = [], isLoading } = useContactReminders(contactId);
@@ -54,69 +53,64 @@ export function RemindersList({ contactId, companyId }: Props) {
         note: note.trim() || undefined,
         createdBy: user?.id,
       });
-      toast({ title: isRu ? 'Напоминание создано' : 'Reminder created' });
-      setDialogOpen(false);
+      toast(isRu ? 'Напоминание создано' : 'Reminder created');
       setReminderAt('');
       setNote('');
+      setDialogOpen(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDismiss = async (id: string) => {
     try {
-      await dismissMutation.mutateAsync({ id, contactId });
-      toast({ title: isRu ? 'Выполнено' : 'Done' });
+      await dismissMutation.mutateAsync(id);
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteMutation.mutateAsync({ id, contactId });
-      toast({ title: isRu ? 'Удалено' : 'Deleted' });
+      await deleteMutation.mutateAsync(id);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
+  const activeReminders = reminders.filter(r => !r.is_dismissed);
+
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold flex items-center gap-2">
-          <Bell className="h-4 w-4 text-muted-foreground" />
+        <h4 className="text-sm font-medium flex items-center gap-1.5">
+          <Bell className="h-4 w-4 text-warning" />
           {isRu ? 'Напоминания' : 'Reminders'}
-        </p>
+          {activeReminders.length > 0 && (
+            <span className="text-xs text-warning">({activeReminders.length})</span>
+          )}
+        </h4>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="ghost" size="icon" className="h-7 w-7">
               <Plus className="h-3.5 w-3.5" />
-              {isRu ? 'Добавить' : 'Add'}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{isRu ? 'Новое напоминание' : 'New reminder'}</DialogTitle>
+              <DialogTitle>{isRu ? 'Новое напоминание' : 'New Reminder'}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-2">
+            <div className="space-y-3">
               <div>
-                <Label>{isRu ? 'Дата и время' : 'Date & time'}</Label>
-                <Input
-                  type="datetime-local"
-                  value={reminderAt}
-                  onChange={(e) => setReminderAt(e.target.value)}
-                />
+                <Label>{isRu ? 'Дата и время' : 'Date & Time'}</Label>
+                <Input type="datetime-local" value={reminderAt} onChange={e => setReminderAt(e.target.value)} />
               </div>
               <div>
                 <Label>{isRu ? 'Заметка' : 'Note'}</Label>
-                <Input
-                  placeholder={isRu ? 'Напр. Позвонить' : 'e.g. Call back'}
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
+                <Input value={note} onChange={e => setNote(e.target.value)} placeholder={isRu ? 'Позвонить клиенту' : 'Call client'} />
               </div>
-              <Button onClick={handleCreate} disabled={!reminderAt || createMutation.isPending} className="w-full">
+              <Button onClick={handleCreate} disabled={createMutation.isPending} className="w-full">
                 {isRu ? 'Создать' : 'Create'}
               </Button>
             </div>
@@ -125,22 +119,16 @@ export function RemindersList({ contactId, companyId }: Props) {
       </div>
 
       {isLoading ? (
-        <div className="text-sm text-muted-foreground">{isRu ? 'Загрузка...' : 'Loading...'}</div>
-      ) : reminders.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          <Bell className="h-16 w-16 mx-auto opacity-30 mb-2" />
-          {isRu ? 'Нет напоминаний' : 'No reminders'}
-        </div>
+        <p className="text-xs text-muted-foreground">{isRu ? 'Загрузка...' : 'Loading...'}</p>
+      ) : activeReminders.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{isRu ? 'Нет напоминаний' : 'No reminders'}</p>
       ) : (
-        <div className="space-y-2">
-          {reminders.map((r) => (
-            <div
-              key={r.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-background/50 hover:bg-muted/30 transition-colors group"
-            >
-              <div>
-                <p className="text-sm font-medium">
-                  {format(new Date(r.reminder_at), 'd MMM yyyy, HH:mm', { locale })}
+        <div className="space-y-1">
+          {activeReminders.map(r => (
+            <div key={r.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 group">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium">
+                  {format(new Date(r.reminder_at), 'dd MMM HH:mm', { locale })}
                 </p>
                 {r.note && <p className="text-xs text-muted-foreground mt-0.5">{r.note}</p>}
               </div>

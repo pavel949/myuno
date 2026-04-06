@@ -15,8 +15,8 @@ import { useUpdateContact } from '@/hooks/useCrmContacts';
 import type { KeyDateEntry } from '@/types/contact';
 import { format, isPast } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -27,7 +27,6 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
   const updateContact = useUpdateContact();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -43,12 +42,12 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
         id: contactId,
         key_dates: updated,
       } as { id: string; key_dates: KeyDateEntry[] });
-      toast({ title: isRu ? 'Дата добавлена' : 'Date added' });
-      setDialogOpen(false);
+      toast(isRu ? 'Дата добавлена' : 'Date added');
       setNewLabel('');
       setNewDate('');
+      setDialogOpen(false);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -59,44 +58,39 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
         id: contactId,
         key_dates: updated,
       } as { id: string; key_dates: KeyDateEntry[] });
-      toast({ title: isRu ? 'Дата удалена' : 'Date removed' });
+      toast(isRu ? 'Дата удалена' : 'Date removed');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          {isRu ? 'Важные даты' : 'Key dates'}
-        </p>
+        <h4 className="text-sm font-medium flex items-center gap-1.5">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          {isRu ? 'Ключевые даты' : 'Key Dates'}
+        </h4>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="ghost" size="icon" className="h-7 w-7">
               <Plus className="h-3.5 w-3.5" />
-              {isRu ? 'Добавить' : 'Add'}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{isRu ? 'Добавить дату' : 'Add key date'}</DialogTitle>
+              <DialogTitle>{isRu ? 'Добавить дату' : 'Add Key Date'}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-2">
+            <div className="space-y-3">
               <div>
                 <Label>{isRu ? 'Название' : 'Label'}</Label>
-                <Input
-                  placeholder={isRu ? 'Напр. Начало аренды, Виза истекает' : 'e.g. Lease start, Visa expiry'}
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                />
+                <Input value={newLabel} onChange={e => setNewLabel(e.target.value)} placeholder={isRu ? 'День рождения' : 'Birthday'} />
               </div>
               <div>
                 <Label>{isRu ? 'Дата' : 'Date'}</Label>
-                <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+                <Input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
               </div>
-              <Button onClick={handleAdd} disabled={!newLabel.trim() || !newDate || updateContact.isPending} className="w-full">
+              <Button onClick={handleAdd} disabled={updateContact.isPending} className="w-full">
                 {isRu ? 'Добавить' : 'Add'}
               </Button>
             </div>
@@ -105,24 +99,15 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
       </div>
 
       {keyDates.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground text-sm">
-          <CalendarDays className="h-16 w-16 mx-auto opacity-30 mb-2" />
-          {isRu ? 'Нет важных дат' : 'No key dates'}
-        </div>
+        <p className="text-xs text-muted-foreground">{isRu ? 'Нет дат' : 'No dates'}</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1">
           {keyDates.map((entry, i) => (
-            <div
-              key={i}
-              className={cn(
-                'flex items-center justify-between p-3 rounded-lg border',
-                isPast(new Date(entry.date)) ? 'bg-muted/30' : 'bg-background/50'
-              )}
-            >
+            <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 group">
               <div>
-                <p className="text-sm font-medium">{entry.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(entry.date), 'd MMMM yyyy', { locale })}
+                <p className="text-xs font-medium">{entry.label}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {format(new Date(entry.date), 'dd MMM yyyy', { locale })}
                   {isPast(new Date(entry.date)) && (
                     <span className="ml-1 text-muted-foreground/70">({isRu ? 'прошло' : 'past'})</span>
                   )}

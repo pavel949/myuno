@@ -21,7 +21,7 @@ import {
   Home, Wrench, Shield, UserCheck, FileText, Calendar, Plus, Clock
 } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const EVENT_TYPES = [
   { value: 'purchase', labelEn: 'Purchase', labelRu: 'Покупка', icon: Home, color: 'text-info' },
@@ -83,10 +83,10 @@ export function PropertyTimeline({ propertyId }: { propertyId: string }) {
       qc.invalidateQueries({ queryKey: ['passport-events', propertyId] });
       setDialogOpen(false);
       setForm({ event_type: 'other', event_date: '', title: '', description: '' });
-      toast({ title: isRu ? 'Событие добавлено' : 'Event added' });
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (err: any) => {
-      toast({ title: isRu ? 'Ошибка' : 'Error', description: err.message, variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     },
   });
 

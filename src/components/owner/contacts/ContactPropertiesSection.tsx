@@ -29,8 +29,8 @@ import {
 } from '@/hooks/useContactProperties';
 import { Home, Plus, Trash2, ChevronRight } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -41,7 +41,6 @@ export function ContactPropertiesSection({ contactId, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const { data: links = [], isLoading } = useContactProperties(contactId);
   const { data: properties = [] } = useMcPropertiesForLink(companyId);
@@ -61,21 +60,21 @@ export function ContactPropertiesSection({ contactId, companyId }: Props) {
         relationshipType: selectedRole,
         companyId,
       });
-      toast({ title: isRu ? 'Связь добавлена' : 'Link added' });
+      toast(isRu ? 'Готово' : 'Done');
       setLinkDialogOpen(false);
       setSelectedPropertyId('');
       setSelectedRole('owner');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleUnlink = async (linkId: string) => {
     try {
       await unlinkMutation.mutateAsync(linkId);
-      toast({ title: isRu ? 'Связь удалена' : 'Link removed' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

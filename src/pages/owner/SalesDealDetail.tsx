@@ -20,13 +20,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ArrowLeft, Phone, Mail, MessageCircle, Clock, User, FileText, Pencil, Trophy, X, Trash2, ContactRound, Pause, Archive, Play, History, MoreHorizontal, SendHorizonal, Crown } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { getDealTypeEmptyNote, getDealTypeEyebrow, getDealTypeFacts } from '@/components/owner/sales/dealTypePresentation';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { toast } from 'sonner';
 
 const activityIcons: Record<string, React.ElementType> = {
   call: Phone,
@@ -53,7 +53,6 @@ export default function SalesDealDetail() {
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const { data: deal, isLoading, isError: dealError, refetch: refetchDeal } = useAgentDeal(id);
   const { data: activities = [] } = useDealActivities(id);
@@ -113,9 +112,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STAGE_LABELS[deal.stage].en} → ${DEAL_STAGE_LABELS[newStage].en}`,
         stage_from: deal.stage, stage_to: newStage,
       });
-      toast({ title: isRu ? 'Этап обновлён' : 'Stage updated' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -130,9 +129,9 @@ export default function SalesDealDetail() {
         description: `${DEAL_STATUS_LABELS[oldStatus as DealStatus]?.en || oldStatus} → ${DEAL_STATUS_LABELS[newStatus].en}`,
         stage_from: null, stage_to: null,
       });
-      toast({ title: isRu ? 'Статус обновлён' : 'Status updated' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -144,19 +143,19 @@ export default function SalesDealDetail() {
         description: activityText.trim(), stage_from: null, stage_to: null,
       });
       setActivityText('');
-      toast({ title: isRu ? 'Добавлено' : 'Added' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteDeal.mutateAsync(deal.id);
-      toast({ title: isRu ? 'Сделка удалена' : 'Deal deleted' });
+      toast(isRu ? 'Готово' : 'Done');
       navigate(APP_ROUTES.MC_SALES);
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

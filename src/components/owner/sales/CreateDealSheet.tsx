@@ -12,11 +12,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -37,7 +37,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const createDeal = useCreateDeal();
   const createContact = useCreateContact();
@@ -124,7 +123,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -157,11 +156,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
           });
           contactId = (newContact as any)?.id || null;
         } catch (contactError: any) {
-          toast({
-            title: isRu ? 'Не удалось создать контакт' : 'Failed to create contact',
-            description: contactError?.message || String(contactError),
-            variant: 'destructive',
-          });
+          toast.error(isRu ? 'Ошибка' : 'Error');
         }
       }
 
@@ -189,10 +184,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         closed_at: null, lost_reason: null,
         ...(contactId ? { contact_id: contactId } : {}),
       } as any);
-      toast({
-        title: isRu ? 'Сделка создана' : 'Deal created',
-        description: isRu ? 'Запись сохранена и открыта в CRM.' : 'The record was saved and opened in CRM.',
-      });
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
       setSelectedContact(null);
       setErrors({});
@@ -201,11 +193,7 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
         navigate(`${APP_ROUTES.MC_SALES}/${createdDeal.id}`);
       }
     } catch (dealError: any) {
-      toast({
-        title: isRu ? 'Ошибка при создании сделки' : 'Failed to create deal',
-        description: dealError?.message || String(dealError),
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

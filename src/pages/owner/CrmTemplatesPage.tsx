@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, FileText, Trash2, Copy, Mail, MessageCircle, MessageSquare, Send } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const channelIcons: Record<string, React.ElementType> = {
   email: Mail,
@@ -32,7 +32,6 @@ export default function CrmTemplatesPage() {
   const { data: templates = [], isLoading, isError: templatesError, refetch: refetchTemplates } = useCrmTemplates(companyId, channelFilter === 'all' ? undefined : channelFilter);
   const createTemplate = useCreateTemplate();
   const deleteTemplate = useDeleteTemplate();
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', channel: 'email', subject: '', body: '', language: 'en' });
 
@@ -51,9 +50,9 @@ export default function CrmTemplatesPage() {
       });
       setOpen(false);
       setForm({ name: '', channel: 'email', subject: '', body: '', language: 'en' });
-      toast({ title: isRu ? 'Шаблон создан' : 'Template created' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch {
-      toast({ title: isRu ? 'Ошибка' : 'Error', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 

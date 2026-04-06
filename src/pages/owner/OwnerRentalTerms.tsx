@@ -13,11 +13,11 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
 import { CancellationPolicySelector } from '@/components/property/CancellationPolicySelector';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { OwnerProperty } from '@/types/property';
 import { 
+import { toast } from 'sonner';
   Loader2, DollarSign, Clock, Users, FileText, Shield, Zap, Droplets, 
   Sparkles, Car, PawPrint, Baby, Phone, Percent, CalendarDays, Key,
   Plane, Volume2, PartyPopper, Wifi
@@ -225,7 +225,6 @@ export default function OwnerRentalTerms() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   const errorLog = createErrorHandler('OwnerRentalTerms');
 
@@ -381,10 +380,7 @@ export default function OwnerRentalTerms() {
         host_languages: formData.host_languages,
       } as Partial<OwnerProperty> & { id: string });
 
-      toast({
-        title: isRu ? 'Сохранено!' : 'Saved!',
-        description: isRu ? 'Условия аренды обновлены' : 'Rental terms updated',
-      });
+      toast(isRu ? 'Готово' : 'Done');
 
       navigate(`/mc/properties/${id}`);
     } catch (error) {

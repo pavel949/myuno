@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, Zap, Users, Trash2, Play, Pause } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { SequenceBuilder } from '@/components/owner/sequences/SequenceBuilder';
+import { toast } from 'sonner';
 
 export default function CrmSequencesPage() {
   const { language } = useLanguage();
@@ -23,7 +23,6 @@ export default function CrmSequencesPage() {
   const { data: sequences = [], isLoading, isError, error, refetch } = useCrmSequences(companyId);
   const createSequence = useCreateSequence();
   const deleteSequence = useDeleteSequence();
-  const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '' });
@@ -31,7 +30,7 @@ export default function CrmSequencesPage() {
   const handleCreate = async () => {
     if (!companyId || !user) return;
     if (!form.name.trim()) {
-      toast({ title: isRu ? 'Введите название' : 'Please enter a name', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -45,13 +44,9 @@ export default function CrmSequencesPage() {
       setCreateOpen(false);
       setForm({ name: '', description: '' });
       setSelectedId(seq.id);
-      toast({ title: isRu ? 'Последовательность создана' : 'Sequence created' });
+      toast(isRu ? 'Готово' : 'Done');
     } catch (createError: any) {
-      toast({
-        title: isRu ? 'Ошибка создания последовательности' : 'Failed to create sequence',
-        description: createError?.message || String(createError),
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
@@ -148,14 +143,10 @@ export default function CrmSequencesPage() {
                       if (confirm(isRu ? 'Удалить последовательность?' : 'Delete sequence?')) {
                         deleteSequence.mutate(seq.id, {
                           onSuccess: () => {
-                            toast({ title: isRu ? 'Последовательность удалена' : 'Sequence deleted' });
+                            toast(isRu ? 'Готово' : 'Done');
                           },
                           onError: (deleteError: any) => {
-                            toast({
-                              title: isRu ? 'Не удалось удалить последовательность' : 'Failed to delete sequence',
-                              description: deleteError?.message || String(deleteError),
-                              variant: 'destructive',
-                            });
+                            toast.error(isRu ? 'Ошибка' : 'Error');
                           },
                         });
                         if (selectedId === seq.id) setSelectedId(null);

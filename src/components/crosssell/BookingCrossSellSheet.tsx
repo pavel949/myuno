@@ -10,7 +10,6 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
 import {
   Plane, Car, ShoppingCart, Flower2, Sparkles, UtensilsCrossed,
   Baby, Ship, Compass, Check, X, ArrowRight

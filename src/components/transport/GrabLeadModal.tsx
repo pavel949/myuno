@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface GrabLeadModalProps {
   isOpen: boolean;
@@ -19,7 +19,6 @@ interface GrabLeadModalProps {
 export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddress }: GrabLeadModalProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const [step, setStep] = useState<'form' | 'transition'>('form');
@@ -35,10 +34,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
     e.preventDefault();
     
     if (!formData.phone || !formData.pickup) {
-      toast({
-        title: isRu ? 'Заполните обязательные поля' : 'Fill required fields',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
 
@@ -78,11 +74,7 @@ export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddre
 
     } catch (error) {
       console.error('Error saving lead:', error);
-      toast({
-        title: isRu ? 'Ошибка' : 'Error',
-        description: isRu ? 'Попробуйте ещё раз' : 'Please try again',
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     } finally {
       setIsSubmitting(false);
     }

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { cn } from '@/lib/utils';
 import { 
@@ -32,6 +31,7 @@ import { PropertyManageRulesSection } from '@/components/owner/property-manage/R
 import { PropertyManageInvestmentSection } from '@/components/owner/property-manage/InvestmentSection';
 import { PropertyManageMarketingSection } from '@/components/owner/marketing';
 import { StaysSubscriptionCard } from '@/components/owner/property-manage/StaysSubscriptionCard';
+import { toast } from 'sonner';
 
 interface MenuSection {
   id: string;
@@ -61,7 +61,6 @@ export default function PropertyManage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   const errorLog = createErrorHandler('PropertyManage');
   const activeSection = searchParams.get('section') || 'listing';
@@ -184,10 +183,7 @@ export default function PropertyManage() {
         await syncAvailability(localAvailability);
       }
 
-      toast({
-        title: isRu ? 'Сохранено' : 'Saved',
-        description: isRu ? 'Все изменения сохранены' : 'All changes saved successfully',
-      });
+      toast(isRu ? 'Готово' : 'Done');
       
       setHasChanges(false);
       setFormInitialized(false); // Allow re-sync from server after save

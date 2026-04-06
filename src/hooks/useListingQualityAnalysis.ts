@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 type ContentType = 'review' | 'photo' | 'listing' | 'comment';
 
 export interface QualityIssue {
@@ -61,7 +61,6 @@ export interface AnalysisResult {
 export function useListingQualityAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<Record<string, QualityArtifact>>({});
-  const { toast } = useToast();
 
   // Analyze a single listing
   const analyzeListing = useCallback(async (
@@ -80,11 +79,7 @@ export function useListingQualityAnalysis() {
       });
 
       if (error) {
-        toast({
-          title: 'Analysis Failed',
-          description: error.message || 'Could not analyze listing',
-          variant: 'destructive',
-        });
+        toast.error('Analysis Failed', { description: error.message || 'Could not analyze listing' });
         return null;
       }
 
@@ -113,11 +108,7 @@ export function useListingQualityAnalysis() {
 
       return data as AnalysisResult;
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to analyze listing quality',
-        variant: 'destructive',
-      });
+      toast.error('Error', { description: 'Failed to analyze listing quality' });
       return null;
     } finally {
       setIsAnalyzing(false);
@@ -145,10 +136,7 @@ export function useListingQualityAnalysis() {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
-      toast({
-        title: 'Batch Analysis Complete',
-        description: `Analyzed ${successful} listings successfully${failed > 0 ? `, ${failed} failed` : ''}`,
-      });
+      toast('Batch Analysis Complete', { description: `Analyzed ${successful} listings successfully${failed > 0 ? ` });
 
       return { successful, failed };
     } finally {
@@ -247,18 +235,11 @@ export function useListingQualityAnalysis() {
         .eq('id', artifactId);
 
       if (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to update artifact',
-          variant: 'destructive',
-        });
+        toast.error('Error', { description: 'Failed to update artifact' });
         return false;
       }
 
-      toast({
-        title: 'Updated',
-        description: `AI insight ${action}`,
-      });
+      toast('Updated', { description: `AI insight ${action}` });
 
       return true;
     } catch {

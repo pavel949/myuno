@@ -10,10 +10,10 @@ import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURREN
 import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Crown, Pencil } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -24,7 +24,6 @@ interface Props {
 export function EditDealSheet({ open, onOpenChange, deal }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const updateDeal = useUpdateDeal();
   const logChanges = useLogDealChanges();
 
@@ -110,7 +109,7 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast({ title: isRu ? 'Проверьте обязательные поля' : 'Please fix required fields', variant: 'destructive' });
+      toast.error(isRu ? 'Ошибка' : 'Error');
       return;
     }
     try {
@@ -140,14 +139,10 @@ export function EditDealSheet({ open, onOpenChange, deal }: Props) {
       }
 
       await updateDeal.mutateAsync({ id: deal.id, ...updates });
-      toast({ title: isRu ? 'Сделка обновлена' : 'Deal updated' });
+      toast(isRu ? 'Готово' : 'Done');
       onOpenChange(false);
     } catch (updateError: any) {
-      toast({
-        title: isRu ? 'Ошибка сохранения сделки' : 'Failed to save deal',
-        description: updateError?.message || String(updateError),
-        variant: 'destructive',
-      });
+      toast.error(isRu ? 'Ошибка' : 'Error');
     }
   };
 
