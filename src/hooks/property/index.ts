@@ -9,7 +9,7 @@ export { usePropertyAvailabilityManagement } from '../usePropertyAvailabilityMan
 export { usePropertyBookings } from '../usePropertyBookings';
 export { usePropertyBudgets } from '../usePropertyBudgets';
 export { useOwnerProperties, useOwnerProperty } from '../usePropertyCare';
-export type { PropertyCareStats } from '../usePropertyCare';
+export { usePropertyCareStats } from '../usePropertyCare';
 export { usePropertyChat } from '../usePropertyChat';
 export { usePropertyComplexes } from '../usePropertyComplexes';
 export { usePropertyDelegates } from '../usePropertyDelegates';
