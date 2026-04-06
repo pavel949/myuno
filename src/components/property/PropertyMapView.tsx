@@ -136,6 +136,6 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
       </GoogleMap>
     </div>
   );
-}
+});
 
 export default PropertyMapView;
