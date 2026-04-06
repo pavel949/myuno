@@ -25,9 +25,9 @@ import { useMcContactsForLink } from '@/hooks/useContactProperties';
 import { CONTACT_RELATIONSHIP_TYPES, CONTACT_RELATIONSHIP_LABELS } from '@/types/contact';
 import { Users, Plus, Trash2, ChevronRight } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -38,7 +38,6 @@ export function ContactRelationshipsCard({ contactId, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const { data: relationships = [], isLoading } = useContactRelationships(contactId);
   const { data: contacts = [] } = useMcContactsForLink(companyId);

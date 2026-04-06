@@ -16,9 +16,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
+import { toast } from 'sonner';
   Users, Settings, Shield, Plus, Check, X, 
   Pencil, Trash2, Send, Eye, UserPlus, Search, Mail
 } from 'lucide-react';
@@ -32,7 +32,6 @@ export default function AdminUnoTeam() {
   const [addEmail, setAddEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleAddMember = async () => {

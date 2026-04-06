@@ -3,10 +3,10 @@ import { RefreshCw, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import type { Order } from '@/hooks/useOrders';
+import { toast } from 'sonner';
 
 interface ReorderButtonProps {
   order: Order;
@@ -25,7 +25,6 @@ export function ReorderButton({
 }: ReorderButtonProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(false);
   const isRu = language === 'ru';

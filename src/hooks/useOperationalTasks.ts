@@ -3,9 +3,9 @@ import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
-import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { startOfDay, endOfDay, addDays, format, isToday } from 'date-fns';
+import { toast } from 'sonner';
 
 export interface OperationalTask {
   id: string;

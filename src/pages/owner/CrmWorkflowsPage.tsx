@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Workflow, Trash2, Play, Pause, ArrowRight, Clock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function CrmWorkflowsPage() {
   const { language } = useLanguage();
@@ -26,7 +26,6 @@ export default function CrmWorkflowsPage() {
   const createWorkflow = useCreateWorkflow();
   const deleteWorkflow = useDeleteWorkflow();
   const updateWorkflow = useUpdateWorkflow();
-  const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ name: '', trigger_type: 'deal_created' });
 

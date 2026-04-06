@@ -9,9 +9,9 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { useOrders, CreateOrderInput, PaymentMethod } from '@/hooks/useOrders';
 import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 type BookingType = Database['public']['Enums']['booking_type'];
 
@@ -132,7 +132,6 @@ export function useBooking() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const { createOrder, cancelOrder, isCreating } = useOrders();
 
   const t = useCallback((key: string) => {

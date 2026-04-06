@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -12,6 +11,7 @@ import { format, eachDayOfInterval, isWithinInterval, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Lock, Unlock, AlertTriangle } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 
 interface BlockDatesDialogProps {
   open: boolean;
@@ -31,7 +31,6 @@ export function BlockDatesDialog({
   onSuccess,
 }: BlockDatesDialogProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);

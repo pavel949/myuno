@@ -10,10 +10,10 @@ import { useUpdateDeal, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURREN
 import { useLogDealChanges, diffDealFields, TRACKED_DEAL_FIELDS } from '@/hooks/useDealFieldChanges';
 import { DealPriorityStars } from '@/components/owner/sales/DealPriorityStars';
 import { DealTagsInput } from '@/components/owner/sales/DealTagsInput';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Crown, Pencil } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -24,7 +24,6 @@ interface Props {
 export function EditDealSheet({ open, onOpenChange, deal }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const updateDeal = useUpdateDeal();
   const logChanges = useLogDealChanges();
 

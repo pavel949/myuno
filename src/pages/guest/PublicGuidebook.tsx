@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+import { toast } from 'sonner';
   Wifi, Key, Phone, MapPin, Utensils, Coffee, Palmtree, ShoppingBag, Camera, Car,
   Trash2, ParkingCircle, LogOut, Copy, Check, Play, Loader2, AlertCircle, Book,
   Navigation, Clock, Home, ExternalLink, ChevronRight
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 const categoryIcons: Record<string, React.ElementType> = {
   restaurant: Utensils, cafe: Coffee, beach: Palmtree, shopping: ShoppingBag,

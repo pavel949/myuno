@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from './useTickets';
+import { toast } from 'sonner';
 
 export interface TicketStats {
   total: number;
@@ -25,7 +25,6 @@ export interface TicketFilters {
 }
 
 export function useAdminTickets() {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<TicketFilters>({ status: 'all', priority: 'all' });
 

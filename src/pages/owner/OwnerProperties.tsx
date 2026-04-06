@@ -19,7 +19,6 @@ import {
   ChevronDown, ChevronRight, Archive,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -33,6 +32,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
@@ -107,7 +107,6 @@ export default function OwnerProperties() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 

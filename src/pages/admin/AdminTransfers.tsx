@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Plane, MapPin, Phone, Calendar, Car } from 'lucide-react';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -24,7 +24,6 @@ const statusColors: Record<string, string> = {
 export default function AdminTransfers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
 

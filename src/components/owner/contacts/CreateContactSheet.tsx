@@ -10,11 +10,11 @@ import { useCreateContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 import { UserPlus } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -26,7 +26,6 @@ export function CreateContactSheet({ open, onOpenChange, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
   const createContact = useCreateContact();
   const { data: contactTypes = [] } = useCrmOptions(companyId, 'contact_type');
   const { data: leadSources = [] } = useCrmOptions(companyId, 'lead_source');

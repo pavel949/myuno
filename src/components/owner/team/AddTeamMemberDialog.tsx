@@ -3,7 +3,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserPlus, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ROLES = [
   { value: 'director', labelEn: 'Director', labelRu: 'Директор' },

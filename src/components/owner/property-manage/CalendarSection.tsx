@@ -10,7 +10,7 @@ import type { Json } from '@/integrations/supabase/types';
 import type { SeasonalPricingRule } from '@/lib/pricingEngine';
 import { useExternalCalendars } from '@/hooks/useExternalCalendars';
 import { useStaysUnifiedCalendar } from '@/hooks/useStaysUnifiedCalendar';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface CalendarSectionProps {
   availability: AvailabilityEntry[];
@@ -31,7 +31,6 @@ export function PropertyManageCalendarSection({
 }: CalendarSectionProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const { calendars, syncAllCalendars, isSyncing } = useExternalCalendars(propertyId);

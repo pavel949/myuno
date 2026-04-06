@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
 import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
 import { PriceDisplay } from '@/components/uno/PriceDisplay';
@@ -19,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { addDays, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // ─── Validation ───
 const LATIN_REGEX = /^[a-zA-Z\s\-'.]+$/;
@@ -59,7 +59,6 @@ export default function AirportFastTrackPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const isRu = language === 'ru';
 
   // White-label: fetch ALL services (no supplier filter), supplier routing is internal

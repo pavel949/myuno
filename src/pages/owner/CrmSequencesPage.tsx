@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Plus, Zap, Users, Trash2, Play, Pause } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { SequenceBuilder } from '@/components/owner/sequences/SequenceBuilder';
+import { toast } from 'sonner';
 
 export default function CrmSequencesPage() {
   const { language } = useLanguage();
@@ -23,7 +23,6 @@ export default function CrmSequencesPage() {
   const { data: sequences = [], isLoading, isError, error, refetch } = useCrmSequences(companyId);
   const createSequence = useCreateSequence();
   const deleteSequence = useDeleteSequence();
-  const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '' });

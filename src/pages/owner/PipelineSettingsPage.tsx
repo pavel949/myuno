@@ -11,9 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Plus, GripVertical, Trash2, Save, Pencil, X, Check, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
+import { toast } from 'sonner';
 
 // ─── Reusable option list editor ───
 
@@ -30,7 +30,6 @@ function OptionListEditor({
   const createOption = useCreateCrmOption();
   const updateOption = useUpdateCrmOption();
   const deleteOption = useDeleteCrmOption();
-  const { toast } = useToast();
 
   const [showAdd, setShowAdd] = useState(false);
   const [newItem, setNewItem] = useState({ value: '', label_en: '', label_ru: '', color: '#3b82f6' });
@@ -189,7 +188,6 @@ function StagesEditor({ companyId, isRu }: { companyId: string; isRu: boolean })
   const { data: stages = [], isLoading } = useAllPipelineStages(companyId);
   const createStage = useCreatePipelineStage();
   const deleteStage = useDeletePipelineStage();
-  const { toast } = useToast();
 
   const [selectedType, setSelectedType] = useState<DealType>('sale');
   const [showAdd, setShowAdd] = useState(false);

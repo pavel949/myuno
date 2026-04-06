@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import browserImageCompression from 'browser-image-compression';
+import { toast } from 'sonner';
 
 export interface ScannedProviderData {
   name: string;
@@ -37,7 +37,6 @@ export function BusinessCardScanButton({
   className,
 }: BusinessCardScanButtonProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const [isOpen, setIsOpen] = useState(false);

@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('useStaffProfile');
 
 import { getStoredLang as getLang } from '@/lib/languageConfig';
+import { toast } from 'sonner';
 
 export interface StaffProfile {
   id: string;

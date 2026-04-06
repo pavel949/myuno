@@ -40,11 +40,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface PartnerApplication {
   id: string;
@@ -115,7 +115,6 @@ const categoryLabels: Record<string, { ru: string; en: string }> = {
 export default function PartnerApplicationsAdmin() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   
   const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);

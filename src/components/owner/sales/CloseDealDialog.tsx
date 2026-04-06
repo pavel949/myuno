@@ -8,9 +8,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useUpdateDeal, DealStage, useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useAddDealActivity } from '@/hooks/useAgentDealActivities';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -24,7 +24,6 @@ export function CloseDealDialog({ open, onOpenChange, dealId, currentStage, mode
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
   const updateDeal = useUpdateDeal();
   const addActivity = useAddDealActivity();
   const { data: membership } = useMyCompanyId();

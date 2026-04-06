@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface GrabLeadModalProps {
   isOpen: boolean;
@@ -19,7 +19,6 @@ interface GrabLeadModalProps {
 export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddress }: GrabLeadModalProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const isRu = language === 'ru';
 
   const [step, setStep] = useState<'form' | 'transition'>('form');

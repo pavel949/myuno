@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Phone, Mail, Users, FileText, MessageCircle, MessageSquare, Eye, Send, ClipboardList, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const iconMap: Record<string, React.ElementType> = {
   Phone, Mail, MailOpen: Mail, Users, FileText, MessageCircle, MessageSquare,
@@ -29,7 +29,6 @@ export function ActivityTimeline({ companyId, contactId, dealId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
   const { data: activities = [], isLoading } = useCrmActivities(contactId, dealId);
   const logActivity = useLogActivity();
   const [open, setOpen] = useState(false);

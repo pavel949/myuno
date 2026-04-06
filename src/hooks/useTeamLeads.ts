@@ -2,8 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { toast } from 'sonner';
 
 export type LeadStatus = 'pending' | 'contacted' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 export type LeadRequestType = 'vacation_rental' | 'property_consultation' | 'property_tour' | 'full_management' | 'investment_advice';
@@ -50,7 +50,6 @@ export interface LeadFilters {
 
 export function useTeamLeads(filters?: LeadFilters) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading, refetch } = useQuery({

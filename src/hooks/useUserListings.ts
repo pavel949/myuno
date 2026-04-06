@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UserListing, UserListingDraft, ItemCondition } from '@/types/userListing';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export function useUserListings() {
   const [listings, setListings] = useState<UserListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
 
   const fetchListings = useCallback(async () => {
     try {

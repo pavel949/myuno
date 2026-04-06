@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 type SupportTicketInsert = Database['public']['Tables']['support_tickets']['Insert'];
 
@@ -72,7 +72,6 @@ export interface CreateTicketInput {
 
 export function useTickets() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Main tickets query with React Query

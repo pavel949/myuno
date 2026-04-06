@@ -2,13 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { useUserContext } from '@/hooks/useUserContext';
 import { openWhatsApp } from '@/hooks/useChat';
 import { format } from 'date-fns';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { getLocalizedRpcError, isRpcError } from '@/lib/rpcErrorMessages';
 import type { Database } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 const errorLog = createErrorHandler('useOrders');
 
@@ -146,7 +146,6 @@ export interface CreateOrderResult {
 export function useOrders() {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const t = (key: string) => {

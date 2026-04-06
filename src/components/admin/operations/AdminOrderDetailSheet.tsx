@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { toast } from '@/hooks/use-toast';
 import { ORDER_STATUS_CONFIG } from '@/types/orders';
 import type { OrderStatus } from '@/types/orders';
 import {
@@ -15,6 +14,7 @@ import {
   MessageSquare, CheckCircle, XCircle, Truck, Clock, FileText,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface AdminOrderDetailSheetProps {
   orderId: string | null;

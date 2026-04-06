@@ -11,7 +11,7 @@ import { X, Plus, Tag, Settings2, Trash2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useContactTags, useCreateContactTag, useDeleteContactTag, ContactTag, TAG_COLOR_PALETTE } from '@/hooks/useContactTags';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface ContactTagPickerProps {
   companyId: string | undefined;
@@ -27,7 +27,6 @@ export function ContactTagPicker({ companyId, selectedTags, onToggle, readonly, 
   const { data: tags = [] } = useContactTags(companyId);
   const createTag = useCreateContactTag();
   const deleteTag = useDeleteContactTag();
-  const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
   const [newTagName, setNewTagName] = useState('');

@@ -12,11 +12,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCreateDeal, useDuplicateCheck, CLIENT_SOURCES, PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES, DEAL_TYPES, DEAL_TYPE_LABELS } from '@/hooks/useAgentDeals';
 import { useCreateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { ContactSearchInput } from '@/components/owner/contacts/ContactSearchInput';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -37,7 +37,6 @@ export function CreateDealSheet({ open, onOpenChange, companyId, prefilledContac
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const createDeal = useCreateDeal();
   const createContact = useCreateContact();

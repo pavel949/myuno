@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 type ContentType = 'review' | 'photo' | 'listing' | 'comment';
 
 export interface QualityIssue {
@@ -61,7 +61,6 @@ export interface AnalysisResult {
 export function useListingQualityAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<Record<string, QualityArtifact>>({});
-  const { toast } = useToast();
 
   // Analyze a single listing
   const analyzeListing = useCallback(async (

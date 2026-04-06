@@ -13,7 +13,6 @@ import { DealTagsDisplay } from '@/components/owner/sales/DealTagsInput';
 import { Phone, Calendar, MessageCircle, Clock, Star, User, Plus, CheckCircle2, AlertTriangle, Crown } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { getDealTypeEyebrow, getDealTypeFacts, getDealTypePresentation } from '@/components/owner/sales/dealTypePresentation';
 import {
@@ -27,6 +26,7 @@ import {
   useDroppable,
 } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
+import { toast } from 'sonner';
 
 const dealTypeBadgeColors: Record<string, string> = {
   sale: 'bg-primary/15 text-primary border-primary/30',
@@ -260,7 +260,6 @@ interface Props {
 
 export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }: Props) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const updateDeal = useUpdateDeal();

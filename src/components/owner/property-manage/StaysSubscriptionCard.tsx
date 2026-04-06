@@ -11,13 +11,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import {
   useStaysTiers,
   usePropertyStaysSubscription,
   useStaysSubscribeCheckout,
 } from '@/hooks/useStaysSubscription';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface StaysSubscriptionCardProps {
   propertyId: string;
@@ -27,7 +27,6 @@ interface StaysSubscriptionCardProps {
 const ACTIVE_LIKE = new Set(['active', 'trialing', 'past_due']);
 
 export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCardProps) {
-  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTierCode, setSelectedTierCode] = useState<string>('starter');

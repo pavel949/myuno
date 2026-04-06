@@ -15,8 +15,8 @@ import { useUpdateContact } from '@/hooks/useCrmContacts';
 import type { KeyDateEntry } from '@/types/contact';
 import { format, isPast } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -27,7 +27,6 @@ export function KeyDatesCard({ contactId, keyDates = [] }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
   const updateContact = useUpdateContact();
 
   const [dialogOpen, setDialogOpen] = useState(false);

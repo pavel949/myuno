@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol, formatCurrencyAmount } from '@/lib/config/currencies';
+import { toast } from 'sonner';
 
 // Helper to maintain backward compatibility with formatPriceWithSymbol calls
 const formatPriceWithSymbol = (amount: number, currency: string = 'THB') => 
@@ -65,7 +65,6 @@ export function AddBookingFromCalendarDialog({
   onSuccess,
 }: AddBookingFromCalendarDialogProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   
   const [checkIn, setCheckIn] = useState<Date | undefined>(initialDate);

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { 
+import { toast } from 'sonner';
   Wifi, 
   Key, 
   Home, 
@@ -34,7 +35,6 @@ import {
   AlertCircle,
   Book
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 const categoryIcons: Record<string, React.ElementType> = {
   restaurant: Utensils,

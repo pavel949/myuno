@@ -20,8 +20,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Props {
   contactId: string;
@@ -32,7 +32,6 @@ export function RemindersList({ contactId, companyId }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
-  const { toast } = useToast();
   const { user } = useAuth();
 
   const { data: reminders = [], isLoading } = useContactReminders(contactId);

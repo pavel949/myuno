@@ -39,7 +39,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface LifeOSAIPanelProps {
   situationCode?: string;
@@ -56,7 +56,6 @@ const ANALYSIS_MODES: AnalysisMode[] = [
 
 export function LifeOSAIPanel({ situationCode, entityType, className }: LifeOSAIPanelProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   
   const [selectedMode, setSelectedMode] = useState<AnalysisMode>('scenario_gaps');

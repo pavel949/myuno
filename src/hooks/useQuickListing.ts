@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 const errorLog = createErrorHandler('useQuickListing');
 
 import { getStoredLang as getLang } from '@/lib/languageConfig';
+import { toast } from 'sonner';
 
 export interface QuickListingData {
   category: string;

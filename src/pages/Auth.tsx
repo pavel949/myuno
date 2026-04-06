@@ -9,10 +9,10 @@ import { PremiumButton } from '@/components/uno/PremiumButton';
 import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
 import { ThemeSwitcher } from '@/components/uno/ThemeSwitcher';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthIndicator';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 // Validation schemas
 const emailSchema = z.string().email();
@@ -40,7 +40,6 @@ export default function Auth() {
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const isRu = language === 'ru';

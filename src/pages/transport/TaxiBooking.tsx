@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { useBooking } from '@/hooks/useBooking';
 import { useVehicleTypes, VehicleType } from '@/hooks/useTransportConfig';
 import { useGoogleGeocode } from '@/hooks/useGoogleGeocode';
@@ -18,6 +17,7 @@ import LocationPickerMap from '@/components/transport/LocationPickerMap';
 import { BackButton } from '@/components/uno/BackButton';
 import { supabase } from '@/integrations/supabase/client';
 import { GrabTransitionCard } from '@/components/transport/GrabTransitionCard';
+import { toast } from 'sonner';
 
 // Time options generator
 const getTimeOptions = (language: string) => {
@@ -67,7 +67,6 @@ export default function TaxiBooking() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { toast } = useToast();
   const { vehicleTypes, isLoading: isLoadingVehicles } = useVehicleTypes('taxi');
   const { createBooking, isSubmitting } = useBooking();
   const googleGeocode = useGoogleGeocode(language);

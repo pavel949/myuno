@@ -21,7 +21,7 @@ import {
   Home, Wrench, Shield, UserCheck, FileText, Calendar, Plus, Clock
 } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const EVENT_TYPES = [
   { value: 'purchase', labelEn: 'Purchase', labelRu: 'Покупка', icon: Home, color: 'text-info' },

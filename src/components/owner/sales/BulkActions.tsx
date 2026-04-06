@@ -4,7 +4,7 @@ import { DEAL_STAGES, DEAL_STAGE_LABELS, DealStage, useBulkUpdateStage, useBulkD
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, ArrowRight, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface Props {
   selectedIds: string[];
@@ -14,7 +14,6 @@ interface Props {
 export function BulkActions({ selectedIds, onClear }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const bulkStage = useBulkUpdateStage();
   const bulkDelete = useBulkDeleteDeals();
   const [targetStage, setTargetStage] = useState<string>('');

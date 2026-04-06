@@ -15,9 +15,9 @@ import {
   Send, Bot, Copy, MessageSquare, UserPlus,
   Sparkles, Loader2, Facebook
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface VendorProspectDetailProps {
   prospect: VendorProspect;
@@ -28,7 +28,6 @@ interface VendorProspectDetailProps {
 export function VendorProspectDetail({ prospect, open, onClose }: VendorProspectDetailProps) {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const { toast } = useToast();
   
   const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();

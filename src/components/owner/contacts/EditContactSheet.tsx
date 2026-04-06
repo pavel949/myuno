@@ -10,12 +10,12 @@ import { useUpdateContact, CrmContact } from '@/hooks/useCrmContacts';
 import { useCrmOptions } from '@/hooks/useCrmSettings';
 import { PHUKET_DISTRICTS, PROPERTY_TYPES, CURRENCIES } from '@/hooks/useAgentDeals';
 import { CRM_ROLES, CRM_ROLE_LABELS } from '@/types/contact';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { X, UserCog } from 'lucide-react';
 import { ContactTagPicker } from '@/components/owner/contacts/ContactTagPicker';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { toast } from 'sonner';
 
 const COMMON_INTERESTS = [
   'golf', 'diving', 'yoga', 'fitness', 'sailing', 'travel', 'wine', 'cooking',
@@ -31,7 +31,6 @@ interface Props {
 export function EditContactSheet({ open, onOpenChange, contact }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   const updateContact = useUpdateContact();
   const { data: contactTypes = [] } = useCrmOptions(contact.company_id, 'contact_type');
   const { data: leadSources = [] } = useCrmOptions(contact.company_id, 'lead_source');

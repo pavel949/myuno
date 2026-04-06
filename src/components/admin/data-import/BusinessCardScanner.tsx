@@ -8,10 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import browserImageCompression from 'browser-image-compression';
+import { toast } from 'sonner';
 
 interface ExtractedData {
   company_name?: string;
@@ -67,7 +67,6 @@ const VERTICALS = [
 
 export function BusinessCardScanner({ onProviderCreated }: BusinessCardScannerProps) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   
   const [imagePreview, setImagePreview] = useState<string | null>(null);

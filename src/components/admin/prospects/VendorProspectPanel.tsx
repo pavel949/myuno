@@ -19,9 +19,9 @@ import {
   MapPin, Phone, Mail, Globe, Instagram, Star,
   MessageSquare, Sparkles, Loader2, Facebook, Send
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface VendorProspectPanelProps {
   prospect: VendorProspect;
@@ -30,7 +30,6 @@ interface VendorProspectPanelProps {
 export function VendorProspectPanel({ prospect }: VendorProspectPanelProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { toast } = useToast();
   
   const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();

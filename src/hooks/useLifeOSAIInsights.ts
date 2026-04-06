@@ -6,8 +6,8 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 export type AnalysisMode = 
   | 'scenario_gaps'
@@ -44,7 +44,6 @@ interface UseLifeOSAIInsightsOptions {
 
 export function useLifeOSAIInsights(options: UseLifeOSAIInsightsOptions = {}) {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const isRu = language === 'ru';
   const [isLoading, setIsLoading] = useState(false);
   const [isFixing, setIsFixing] = useState<string | null>(null); // tracks which suggestion index is being fixed

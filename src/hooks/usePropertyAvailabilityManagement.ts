@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { format } from 'date-fns';
 import { AvailabilityEntry } from '@/components/property/PropertyCalendar';
+import { toast } from 'sonner';
 
 interface PropertyAvailabilityRow {
   id: string;
@@ -19,7 +19,6 @@ interface PropertyAvailabilityRow {
 }
 
 export function usePropertyAvailabilityManagement(propertyId?: string) {
-  const { toast } = useToast();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
