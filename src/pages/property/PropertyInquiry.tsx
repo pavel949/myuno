@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, CalendarIcon, Edit2, Shield, ScrollText, CreditCard, User, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
