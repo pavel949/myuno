@@ -32,13 +32,13 @@ function shortPrice(price: number): string {
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
-export function PropertyMapView({
+export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(function PropertyMapView({
   properties,
   hoveredProperty,
   onHover,
   mode = 'rent',
   className,
-}: PropertyMapViewProps) {
+}, ref) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
