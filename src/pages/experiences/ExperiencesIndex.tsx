@@ -163,7 +163,7 @@ export default function ExperiencesIndex() {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {[1,2,3,4,5,6].map(i => (
             <div key={i} className="space-y-2">
               <Skeleton className="aspect-[4/3] rounded-xl" />
@@ -179,7 +179,7 @@ export default function ExperiencesIndex() {
           description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {sorted.map(exp => (
             <CatalogCard key={exp.id} {...mapExperienceToCatalogCard(exp, language, navigate)} />
           ))}
