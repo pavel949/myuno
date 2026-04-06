@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -221,8 +222,18 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
 
             <TabsContent value="location" className="space-y-4 mt-0">
               <div className="space-y-1.5">
-                <Label>{isRu ? 'Адрес' : 'Address'}</Label>
-                <Input value={form.address || ''} onChange={e => setField('address', e.target.value)} placeholder="123/45 Moo 5, Choeng Thale" />
+                <Label>{isRu ? 'Поиск адреса' : 'Search Address'}</Label>
+                <GooglePlacesAutocomplete
+                  value={form.address || ''}
+                  onChange={(val) => setField('address', val)}
+                  onPlaceSelect={(place) => {
+                    setField('address', place.address);
+                    if (place.lat) setField('lat', place.lat);
+                    if (place.lng) setField('lng', place.lng);
+                    if (place.district) setField('district', place.district);
+                  }}
+                  placeholder={isRu ? 'Введите адрес для поиска...' : 'Type address to search...'}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>{isRu ? 'Район' : 'District'}</Label>
