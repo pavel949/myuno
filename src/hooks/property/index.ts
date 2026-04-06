@@ -1,29 +1,31 @@
 /**
  * Property hooks barrel export
  * 
- * Usage: import { usePropertyBookings, usePropertyFinancials } from '@/hooks/property';
+ * Usage: import { usePropertyBookings, usePropertyFinancialsFull } from '@/hooks/property';
  */
 export { usePropertyAIChat } from '../usePropertyAIChat';
 export { usePropertyAvailability } from '../usePropertyAvailability';
 export { usePropertyAvailabilityManagement } from '../usePropertyAvailabilityManagement';
 export { usePropertyBookings } from '../usePropertyBookings';
 export { usePropertyBudgets } from '../usePropertyBudgets';
-export { usePropertyCare } from '../usePropertyCare';
+export { useOwnerProperties, useOwnerProperty } from '../usePropertyCare';
+export type { PropertyCareStats } from '../usePropertyCare';
 export { usePropertyChat } from '../usePropertyChat';
 export { usePropertyComplexes } from '../usePropertyComplexes';
 export { usePropertyDelegates } from '../usePropertyDelegates';
 export { usePropertyDocuments } from '../usePropertyDocuments';
 export { usePropertyFilterOptions } from '../usePropertyFilterOptions';
-export { usePropertyFinancials } from '../usePropertyFinancials';
+export { usePropertyFinancialsFull } from '../usePropertyFinancials';
+export type { PropertyFinancialFull, FinancialStats } from '../usePropertyFinancials';
 export { usePropertyFormOptions } from '../usePropertyFormOptions';
 export { usePropertyGuidebook } from '../usePropertyGuidebook';
 export { usePropertyInventory } from '../usePropertyInventory';
 export { usePropertyKeys } from '../usePropertyKeys';
 export { usePropertyManagementTerms } from '../usePropertyManagementTerms';
-export { usePropertyMarketing } from '../usePropertyMarketing';
+export * from '../usePropertyMarketing';
 export { usePropertyMeters } from '../usePropertyMeters';
 export { usePropertyNotes } from '../usePropertyNotes';
-export { usePropertyOwnership } from '../usePropertyOwnership';
+export { usePropertyOwnershipInvites, useSendOwnershipInvite } from '../usePropertyOwnership';
 export { usePropertyPriceOffers } from '../usePropertyPriceOffers';
 export { usePropertyProjects } from '../usePropertyProjects';
 export { usePropertyProjectsWithStats } from '../usePropertyProjectsWithStats';

@@ -1,10 +1,10 @@
 /**
  * Vendor hooks barrel export
  * 
- * Usage: import { useVendor, useVendorFlowers } from '@/hooks/vendor';
+ * Usage: import { useVendorFlowers, useVendorYachts } from '@/hooks/vendor';
  */
-export { useVendor } from '../useVendor';
-export { useVendorAcquisition } from '../useVendorAcquisition';
+export * from '../useVendor';
+export * from '../useVendorAcquisition';
 export { useVendorActivities } from '../useVendorActivities';
 export { useVendorBabysitters } from '../useVendorBabysitters';
 export { useVendorCleaning } from '../useVendorCleaning';
