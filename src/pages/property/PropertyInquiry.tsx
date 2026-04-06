@@ -526,6 +526,26 @@ export default function PropertyInquiry() {
                 if (isSubmitting) return;
                 setIsSubmitting(true);
                 try {
+                  // 1. Save to property_inquiries for owner dashboard visibility
+                  const { error: inquiryError } = await supabase
+                    .from('property_inquiries')
+                    .insert({
+                      property_id: id!,
+                      user_id: user!.id,
+                      check_in: format(checkIn!, 'yyyy-MM-dd'),
+                      check_out: format(checkOut!, 'yyyy-MM-dd'),
+                      guests,
+                      name: formData.name,
+                      email: formData.email || null,
+                      phone: formData.phone || null,
+                      message: formData.message || null,
+                      status: 'pending',
+                    });
+                  if (inquiryError) {
+                    console.error('[PropertyInquiry] inquiry insert error:', inquiryError);
+                  }
+
+                  // 2. Create order for booking tracking
                   const result = await createOrder({
                     order_type: 'property',
                     provider_org_id: (property as any)?.provider_id || undefined,
