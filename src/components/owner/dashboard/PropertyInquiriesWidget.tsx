@@ -55,7 +55,7 @@ export function PropertyInquiriesWidget() {
         .from('orders')
         .select('*')
         .eq('order_type', 'property')
-        .in('status', ['pending', 'confirmed', 'processing'])
+        .in('status', ['pending', 'confirmed', 'in_progress'])
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
