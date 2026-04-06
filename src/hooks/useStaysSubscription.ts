@@ -1,18 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 
-export type StaysTier = Database['public']['Tables']['stays_subscription_tiers']['Row'];
-export type PropertyStaysSubscription =
-  Database['public']['Tables']['property_stays_subscriptions']['Row'] & {
-    stays_subscription_tiers?: StaysTier | null;
-  };
+export interface StaysTier {
+  id: string;
+  code: string;
+  name_en: string;
+  name_ru: string;
+  price_thb_monthly: number;
+  features: string[] | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type PropertyStaysSubscription = {
+  id: string;
+  property_id: string;
+  tier_code: string;
+  status: string;
+  created_at: string;
+  stays_subscription_tiers?: StaysTier | null;
+};
 
 export function useStaysTiers() {
   return useQuery({
     queryKey: ['stays-subscription-tiers'],
     queryFn: async (): Promise<StaysTier[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('stays_subscription_tiers')
         .select('*')
         .order('price_thb_monthly', { ascending: true });
@@ -28,7 +41,7 @@ export function usePropertyStaysSubscription(propertyId: string | undefined) {
     queryKey: ['property-stays-subscription', propertyId],
     queryFn: async (): Promise<PropertyStaysSubscription | null> => {
       if (!propertyId) return null;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('property_stays_subscriptions')
         .select('*, stays_subscription_tiers(*)')
         .eq('property_id', propertyId)
