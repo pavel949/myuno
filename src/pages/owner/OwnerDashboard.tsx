@@ -26,6 +26,7 @@ import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreetin
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { ChannelSyncWidget } from '@/components/owner/dashboard/ChannelSyncWidget';
 import { UnifiedInboxWidget } from '@/components/owner/dashboard/UnifiedInboxWidget';
+import { PropertyInquiriesWidget } from '@/components/owner/dashboard/PropertyInquiriesWidget';
 import { AIAgentStatusWidget } from '@/components/owner/dashboard/AIAgentStatusWidget';
 import { FounderQuickActions } from '@/components/owner/dashboard/FounderQuickActions';
 import { FounderInboxWidget } from '@/components/owner/dashboard/FounderInboxWidget';
@@ -149,6 +150,9 @@ function DashboardWidget({ widgetKey, role }: { widgetKey: DashboardWidgetKey; r
       return (
         <Suspense fallback={skeleton}>
           <UnifiedInboxWidget />
+          <div className="mt-4">
+            <PropertyInquiriesWidget />
+          </div>
         </Suspense>
       );
     case 'invites':
