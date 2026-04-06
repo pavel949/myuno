@@ -1,129 +1,136 @@
 
 
-# Аудит дизайн-системы myUNO DS2.0: несоответствия и план исправлений
+# Аудит дизайна приложений myUNO — Layout, Filters, Typography, Headers
 
-## Текущая архитектура DS
+## Обнаруженные проблемы
 
-myUNO имеет зрелую дизайн-систему (DS2.0) с:
-- **`designTokens.ts`** — токены для elevation, radius, typography, motion, cards, badges
-- **UI primitives** — `Card` (4 варианта), `Badge` (7 вариантов), `Button` (6 вариантов), `Surface` (6 вариантов)
-- **`tokens.css`** — CSS-переменные для теней, цветов
-- **`tailwind.config.ts`** — семантические цвета (success, warning, info, cluster-*)
-- **DS components** (`src/components/ds/`) — `SectionHeader`, `PromoBanner`, `CheckoutPanel` и др.
+### 1. ТРИ разных Layout-архитектуры для каталогов (критично)
 
-## Выявленные нарушения
+Каталоги используют **3 несовместимых подхода** к Layout + Header:
 
-### 1. Hardcoded Tailwind-цвета вместо семантических токенов
-**Масштаб**: 36 файлов с `bg-green-*`, `bg-blue-*`, `bg-red-*` и 47 файлов с `text-green-*`, `text-blue-*` и т.д. (~790 вхождений)
+| Подход | Файлы | Header | Filter | Grid |
+|--------|-------|--------|--------|------|
+| **MiniAppLayout** (стандарт) | Yachts, Flowers, Restaurants, Beauty, Fitness, Events, Cleaning, Education, Pets, Pharmacy, Experiences, Medical | `UnifiedHeader` | `UniversalFilter` + `FilterChip` | `grid-cols-2 sm:3 lg:4` |
+| **AppLayout + CatalogHeader** | Insurance, Classifieds | `CatalogHeader` (другой компонент) | Кастомные фильтры | `grid-cols-1` / `grid-cols-2` |
+| **NewbuildsLayout** | NewbuildsCatalog | Полностью кастомный (nb-theme) | inline `<select>` + manual state | `grid-cols-1 md:2 lg:3` |
+| **AppLayout + PageHeader** | Delivery | `PageHeader` (третий вариант) | Нет | Кастомный layout |
 
-**Проблема**: DS2.0 определяет `success`, `warning`, `destructive`, `info` как семантические цвета, но большинство компонентов используют raw Tailwind-цвета (`text-green-500`, `bg-blue-600`), которые:
-- Не адаптируются к dark mode автоматически
-- Не следуют единой палитре
-- Требуют ручного дублирования `dark:` классов
+**Insurance и Classifieds** — не используют `MiniAppLayout`, что ломает визуальную согласованность (другой header, другая навигация, другой ribbon).
 
-**Файлы-нарушители** (топ по критичности):
-- `AccountActivitySection.tsx` — статусные точки через `bg-yellow-500`, `bg-blue-500`
-- `WhatsAppConciergeBlock.tsx` — `bg-green-600` вместо `bg-success`
-- `TrustScoreCard.tsx` — 6 разных hardcoded цветов
-- `EmailVerificationBadge.tsx` — `text-green-500`, `bg-green-50`
-- `CancellationPolicySelector.tsx` (2 файла) — целые colorMap объекты с raw цветами
-- `LoyaltyWidget.tsx` — hardcoded тиерные цвета
-- `PropertyCalendar.tsx` — `ring-red-500` вместо `ring-destructive`
+**Delivery** — полностью кастомный layout без единого паттерна (использует `AppLayout` + `PageContainer` + `PageHeader`).
 
-### 2. Тени: `shadow-md/lg/xl` вместо elevation-переменных
-**Масштаб**: 194 файла, ~1442 вхождений `shadow-sm/md/lg/xl`
+### 2. Inconsistent Grid Columns (medium)
 
-**Проблема**: DS2.0 определяет `--shadow-elevation-1..5` с premium glow-эффектами, но подавляющее большинство компонентов используют стандартные Tailwind-тени, которые выглядят generic и не имеют фирменного свечения.
+| Vertical | Grid | Gap |
+|----------|------|-----|
+| Yachts, Experiences, Restaurants | `grid-cols-2 sm:3 lg:4 gap-x-4 gap-y-6` | Разный gap |
+| Flowers, Beauty, Cleaning, Education, Fitness, Pets | `grid-cols-2 sm:3 lg:4 gap-4` | Единый gap-4 |
+| Market | `grid-cols-2 sm:2 md:3 lg:4 xl:5 gap-4 md:gap-5` | 5 колонок на xl |
+| Classifieds | `grid-cols-2 gap-3` | Нет responsive breakpoints |
+| Insurance | `grid-cols-1` | Вообще нет grid |
 
-**Примеры**: `AirbnbSearchBar` (`shadow-lg`, `shadow-2xl`), `PromoCarousel` (`shadow-lg`), `ActivityBlock` (`hover:shadow-md`)
+**Проблема**: Market использует 5 колонок и `max-w-[1800px]` вместо стандартных `max-w-[1536px]`. Classifieds не масштабируется на desktop.
 
-### 3. Дизайн-токены почти не импортируются
-**Масштаб**: Только **3 файла** из 400+ компонентов используют `designTokens.ts`
+### 3. Filter-система: 3 параллельных реализации
 
-- `ProductCard.tsx` — `BADGE_STYLES`
-- `ExperienceCard.tsx` — `BADGE_SYSTEM`, `CARD_STYLES`
-- `ProjectCard.tsx` — `BADGE_SYSTEM`
+- **UniversalFilter** (Sheet/Drawer) — используется в Flowers, Yachts (через MiniAppLayout)
+- **CatalogHeader categories** — Classifieds, Insurance (ribbon внутри другого компонента)
+- **Inline custom selects** — Newbuilds (native `<select>` с кастомным стилем)
+- **Кастомные FilterChip** — Restaurants (area filter через raw `<button>`)
 
-Все остальные компоненты пишут стили inline, дублируя значения из токенов.
+При этом `showFilter={false}` стоит на **12 из 14** вертикалей, что означает: большинство каталогов вообще не имеют фильтрации, хотя `UniversalFilter` + `FilterConfig` уже реализованы. Только **Flowers** полноценно использует фильтры (по цвету, стилю, типу цветов, цене).
 
-### 4. `Surface` компонент недоиспользован
-**Масштаб**: 15 файлов используют `Surface`, но сотни компонентов пишут `bg-card rounded-xl border border-border/60` вручную — то, что `Surface` делает автоматически.
+### 4. Typography: font-display не применяется в каталогах
 
-### 5. Несогласованность `border-radius`
-**Масштаб**: 403 файла с разными radius-паттернами
+- `font-display` (Syne) используется только в home screen и landing pages
+- **Ни один** каталог Index не использует `font-display` для заголовков
+- `UnifiedHeader` использует `text-lg font-bold` без `font-display`
+- `CatalogHeader` тоже использует generic font
+- **Newbuilds** использует `nb-display` (Cormorant Garamond) — свой отдельный шрифт
 
-- Buttons определены как `rounded-xl` в base, но `size.sm` и `size.lg` переключают на `rounded-md`
-- Cards — `rounded-xl` в DS, но многие компоненты используют `rounded-2xl` или `rounded-3xl`
-- Нет единого правила: одни кнопки `rounded-xl`, другие `rounded-full`
+### 5. Newbuilds — полная изоляция от DS2.0
 
-### 6. Типографика: `font-display` применяется непоследовательно
-- Заголовки в ~29 файлах используют `font-display` (Syne)
-- Остальные заголовки используют default sans (DM Sans)
-- `TYPOGRAPHY` токены из `designTokens.ts` **нигде не импортируются**
+NewbuildsCatalog использует:
+- `nb-theme` CSS class с собственными переменными (`--nb-gold`, `--nb-surface`, `--nb-text`)
+- inline `style={{ color: 'hsl(var(--nb-gold))' }}` вместо Tailwind-классов
+- native HTML `<select>` вместо `UniversalFilter`
+- `max-w-7xl` (1280px) вместо `max-w-[1536px]`
+- Нет `UnifiedHeader`, нет `BackButton` (кастомный Link с ChevronLeft)
 
-### 7. Hardcoded hex-цвет
-- `ReviewsManagementPage.tsx` — `bg-[#FF5A5F]` (Airbnb), `bg-[#003580]` (Booking), `bg-[#4285F4]` (Google)
-- Допустимо для brand-цветов платформ, но должно быть вынесено в константы
+**Это архитектурно допустимо** (editorial luxury theme), но нарушает навигационные паттерны (нет стандартного BackButton, нет sticky header).
+
+### 6. Professional Layouts: согласованы
+
+Admin, MC, Vendor layouts **все 3** используют идентичный паттерн:
+- `SidebarProvider` + `SidebarInset`
+- Ctrl+B shortcut для toggle sidebar
+- `min-h-screen flex w-full bg-background`
+- Mobile bottom nav
+
+Это **единственная** зона, где architecture полностью согласована.
+
+### 7. Монетизация: отсутствие conversion-элементов
+
+- **0 из 14** каталогов имеют CTA "Request a call" или "Get a quote" для high-ticket services
+- **Yachts** (high-margin) — нет sticky CTA, нет "Instant Book" filter visible by default
+- **Insurance** — нет price comparison table, нет "Get Quote" button per plan
+- **Newbuilds** — нет "Schedule Viewing" CTA на уровне каталога
+- **Cross-sell**: только Yachts, Restaurants, Flowers используют `CrossSellSection`
+
+---
 
 ## План исправлений
 
-### Phase 1: Семантические цвета (Наибольший визуальный эффект)
+### Phase 1: Унификация Layout (Critical — 4 файла)
 
-Создать маппинг-утилиту для статусных цветов и заменить hardcoded цвета в ключевых компонентах:
+1. **Мигрировать Insurance** на `MiniAppLayout` + `CatalogCard`
+2. **Мигрировать Classifieds** на `MiniAppLayout` (с FAB поверх)
+3. **Мигрировать Delivery** на `MiniAppLayout`
+4. **Newbuilds** — оставить `NewbuildsLayout`, но добавить стандартный `BackButton` и sticky header pattern
 
-| Raw Tailwind | Семантический токен |
-|---|---|
-| `green-500/600` | `success` |
-| `red-500/600` | `destructive` |
-| `yellow-500/600` | `warning` |
-| `blue-500/600` | `info` |
-| `purple-500/600` | `accent-purple` |
+### Phase 2: Стандартизация Grid (8 файлов)
 
-**Файлы для изменения** (~15 самых заметных):
-- `AccountActivitySection.tsx`
-- `WhatsAppConciergeBlock.tsx`
-- `TrustScoreCard.tsx`
-- `EmailVerificationBadge.tsx`
-- `UploadProgress.tsx`
-- `CancellationPolicySelector.tsx` (оба файла)
-- `LoyaltyWidget.tsx`
-- `PropertyCalendar.tsx`
-- `DosDontsCard.tsx`
-- `HomeServiceProviderCard.tsx`
-- `LifeOSAuditTab.tsx`
-- `PropertyOwnershipBadge.tsx`
-- `ProviderQRCard.tsx`
+Единый grid-стандарт для всех каталогов:
+```
+grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5
+```
+- Исправить: Yachts, Experiences, Restaurants (gap-x/gap-y → gap-4)
+- Исправить: Market (убрать xl:5, выровнять max-w)
+- Исправить: Classifieds (добавить sm:3 lg:4)
 
-### Phase 2: Elevation shadows
+### Phase 3: Активировать фильтры (5 файлов)
 
-Заменить `shadow-md/lg/xl` на `[box-shadow:var(--shadow-elevation-N)]` в интерактивных элементах:
-- Cards с hover → `elevation-2` base, `elevation-3` hover
-- Floating elements (FAB, modals) → `elevation-4/5`
-- Subtle containers → `elevation-1`
+Включить `UniversalFilter` (уже готов!) на вертикалях с высоким intent:
+- **Yachts**: по цене, capacity, booking_flow (instant/request)
+- **Restaurants**: по price_level, delivery/dine-in, rating
+- **Experiences**: по duration, price, difficulty
+- **Medical**: по specialty, language, 24h, insurance accepted
+- **Events**: по date range, event type, price
 
-**Приоритетные файлы** (~10):
-- `AirbnbSearchBar.tsx`
-- `PromoCarousel.tsx`
-- `AIChatbot.tsx`
-- `AchievementsCard.tsx`
-- `DomainTabs.tsx`
+### Phase 4: Typography (1 файл)
 
-### Phase 3: Расширить использование Surface и Card variants
+Обновить `UnifiedHeader` — добавить `font-display` для title:
+```
+<h1 className="text-lg font-bold font-display truncate">
+```
+Это автоматически применит Syne ко всем 14+ каталогам через единую точку.
 
-Создать линтинг-правило (или чеклист) и мигрировать паттерн `bg-card rounded-xl border border-border/60` → `<Surface>` или `<Card variant="content">` в компонентах, которые не используют CardHeader/CardContent.
+### Phase 5: Conversion CTA (3 файла)
 
-### Phase 4: Typography consistency
-
-Создать DS-компоненты `Heading` и `Text` из `TYPOGRAPHY` токенов и постепенно заменить inline typography-классы.
+Добавить monetization-элементы на high-ticket вертикали:
+- **Yachts**: sticky "Book Now" bar снизу (аналог StickyCartBar)
+- **Newbuilds**: "Schedule Viewing" CTA на каждой карточке
+- **Insurance**: "Get Free Quote" button per provider card
 
 ### Порядок реализации
 
-| Phase | Файлов | Effort | Impact |
-|-------|--------|--------|--------|
-| 1. Семантические цвета | ~15 | 3h | High — dark mode, consistency |
-| 2. Elevation shadows | ~10 | 2h | Medium — premium feel |
-| 3. Surface migration | ~20 | 3h | Medium — maintainability |
-| 4. Typography components | ~30 | 4h | Low — long-term consistency |
+| Phase | Файлов | Impact |
+|-------|--------|--------|
+| 1. Layout унификация | 4 | Critical — навигация и UX consistency |
+| 2. Grid стандартизация | 8 | High — визуальная гармония |
+| 3. Фильтры | 5 | High — conversion + UX |
+| 4. Typography | 1 | Medium — brand identity |
+| 5. Conversion CTA | 3 | High — монетизация |
 
-Рекомендую начать с Phase 1 + Phase 2 — они дают максимальный визуальный эффект при минимальном риске regression.
+Рекомендую начать с **Phase 1 + 4** (максимальный системный эффект при минимуме изменений), затем Phase 2 + 3.
 
