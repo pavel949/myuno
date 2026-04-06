@@ -1,51 +1,43 @@
 
 
-# Добавление Комплексов и Проектов в панель УК
+# Проблемы с Google картой — диагностика и план
 
-## Проблема
+## Обнаружено две проблемы
 
-В панели УК (`/mc`) отсутствуют пункты навигации к **Жилым комплексам** и **Проектам (новостройкам)**:
+### 1. RefererNotAllowedMapError (основная — карта не рендерится)
 
-1. **OwnerDashboardMenu** (основное меню-сетка) — секция "Properties" содержит только Properties, Inventory, Vendors. Нет "Complexes" и "Projects".
-2. **Маршрут `/mc/projects`** — не существует вообще. Есть `/newbuilds/projects` (публичный каталог), но нет MC-маршрута для управления своими проектами.
-3. **Quick Actions** — кнопки "Комплексы" уже есть в `FounderQuickActions` и `RoleQuickActions`, но это мелкие кнопки, которые легко не заметить.
+Из консоли:
+```
+Google Maps JavaScript API error: RefererNotAllowedMapError
+Your site URL to be authorized: https://dcc2b024-7627-4ad9-a915-a3df3dd839f0.lovableproject.com
+```
 
-## План
+**Причина:** В Google Cloud Console в настройках API-ключа домен `*.lovableproject.com` не добавлен в разрешённые HTTP referrers. Карта блокируется Google на уровне API.
 
-### 1. Добавить пункты в OwnerDashboardMenu (1 файл)
+**Решение:** Это нельзя исправить кодом — нужно в Google Cloud Console → Credentials → ваш API-ключ → Website restrictions добавить:
+- `https://*.lovableproject.com/*`
+- `https://*.lovable.app/*`
 
-**`src/components/owner/dashboard/OwnerDashboardMenu.tsx`**
+Без этого карта не будет работать в preview и на опубликованном сайте.
 
-В секцию "Properties" добавить два новых пункта:
-- **Complexes** → `/mc/complexes` (иконка `Building2` или `Landmark`)
-- **Projects** → `/mc/projects` (иконка `Crane` / `HardHat`)
+### 2. «Function components cannot be given refs» (предупреждение в консоли)
 
-Итоговая секция: Properties, Complexes, Projects, Inventory, Vendors.
+`OwnerProperties` пытается передать ref в `PropertyMapView`, но компонент не обёрнут в `React.forwardRef()`.
 
-### 2. Создать страницу управления проектами MC (1 новый файл)
+**Решение (код):** Обернуть `PropertyMapView` в `forwardRef` — простое изменение в одном файле `src/components/property/PropertyMapView.tsx`.
 
-**`src/pages/owner/MCProjectsPage.tsx`**
+---
 
-Страница-обёртка для управления проектами (новостройками), созданными текущим пользователем. Использует существующий хук `useMyPropertyProjects()` из `usePropertyProjects.ts`. Включает:
-- Список проектов с поиском
-- Кнопку "Добавить проект"
-- Карточки проектов с переходом на редактирование
+## Что можно сделать на стороне кода
 
-### 3. Добавить маршрут `/mc/projects` (2 файла)
+| Шаг | Файл | Описание |
+|-----|------|----------|
+| 1 | `PropertyMapView.tsx` | Обернуть компонент в `forwardRef` для устранения предупреждения |
 
-- **`src/lib/config/routes.ts`** — добавить `MC_PROJECTS: '/mc/projects'`
-- **`src/components/layout/AnimatedRoutes.tsx`** — добавить `<Route path="projects" element={<MCProjectsPage />} />`
+## Что нужно сделать вручную
 
-### 4. Обновить lazy imports (1 файл)
-
-Зарегистрировать `MCProjectsPage` в lazy-imports в `AnimatedRoutes.tsx`.
-
-### Порядок
-
-| Шаг | Файлы | Описание |
-|-----|-------|----------|
-| 1 | `routes.ts` | Добавить `MC_PROJECTS` |
-| 2 | `MCProjectsPage.tsx` | Новая страница управления проектами |
-| 3 | `AnimatedRoutes.tsx` | Маршрут + lazy import |
-| 4 | `OwnerDashboardMenu.tsx` | Пункты "Комплексы" и "Проекты" в меню |
+Добавить домены в Google Cloud Console (Credentials → API Key → HTTP referrers):
+- `https://*.lovableproject.com/*`
+- `https://*.lovable.app/*`
+- `https://myuno.app/*` (если ещё нет)
 
