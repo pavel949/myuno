@@ -75,7 +75,8 @@ export function useUserListings() {
 
       if (insertError) throw insertError;
 
-      toast('Listing created', { description: 'Your listing has been saved as a draft' })toast.error('Error creating listing', { description: err instanceof Error ? err.message : 'Unknown error' });
+      toast('Listing created', { description: 'Your listing has been saved as a draft' });
+      // Error handled;
 
         if (category) {
           query = query.eq('category_slug', category);

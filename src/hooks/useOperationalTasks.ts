@@ -180,7 +180,7 @@ export function useOperationalTasks(options?: {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
-      toast(t, { description: t('The task has been added' });
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (error: Error) => {
       toast.error(t, { description: error.message });

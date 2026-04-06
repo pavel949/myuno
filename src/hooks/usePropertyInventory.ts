@@ -154,7 +154,7 @@ export function usePropertyInventory(propertyId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-inventory', propertyId] });
-      toast(t, { description: t('Inventory item has been added' });
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (error: Error) => {
       toast.error(t, { description: error.message });

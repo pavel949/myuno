@@ -75,7 +75,7 @@ export function AddTeamMemberDialog({ open, onOpenChange, onSuccess }: Props) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast(t, { description: t( });
+      toast(isRu ? 'Готово' : 'Done');
 
       // Reset form
       setFullName('');

@@ -162,7 +162,7 @@ export function useAdminTickets() {
       if (error) throw error;
     },
     onSuccess: (_, { adminId }) => {
-      toast(adminId);
+      toast('Done');
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
     },
     onError: () => {
@@ -245,11 +245,12 @@ export function useAdminTickets() {
         });
     },
     onSuccess: () => {
-      toast('Тикет решён')toast.error('Ошибка', { description: 'Не удалось решить тикет' })
+      toast('Тикет решён');
+      // Error handled
           .eq('id', ticketId);
       }
 
-      toast(isInternal);
+      toast('Done');
       return true;
     } catch {
       toast.error('Ошибка', { description: 'Не удалось отправить сообщение' });

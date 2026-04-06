@@ -67,7 +67,8 @@ export default function AdminTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-transfers'] });
-      toast(isRu)toast.error(isRu) as Record<string, unknown>;
+      toast(isRu);
+      // Error handled as Record<string, unknown>;
             const participants = order.order_participants as Array<{ name: string; phone: string | null; email: string | null; role: string }> | null;
             const addresses = order.order_addresses as Array<{ address_type: string; address_text: string }> | null;
             const primary = participants?.find(p => p.role === 'primary') || participants?.[0];

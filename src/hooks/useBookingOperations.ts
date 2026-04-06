@@ -185,7 +185,7 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
-      toast(t, { description: t('Guest has been checked in successfully' });
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (error: Error) => {
       toast.error(t, { description: error.message });
@@ -244,7 +244,7 @@ export function useBookingOperations(bookingId?: string) {
       queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings'] });
-      toast(t, { description: t('Guest has been checked out successfully' });
+      toast(isRu ? 'Готово' : 'Done');
     },
     onError: (error: Error) => {
       toast.error(t, { description: error.message });

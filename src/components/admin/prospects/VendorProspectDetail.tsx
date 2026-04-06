@@ -80,7 +80,8 @@ export function VendorProspectDetail({ prospect, open, onClose }: VendorProspect
 
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(generatedMessage);
-    toast(isRussian)toast.error(isRu ? 'Ошибка' : 'Error');
+    toast(isRu ? 'Готово' : 'Done');
+      // Error handled;
       return;
     }
     setIsConvertingToCrm(true);

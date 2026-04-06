@@ -228,7 +228,8 @@ export function useBooking() {
       };
 
     } catch (error) {
-      toast.error(t)toast(t);
+      toast.error(t);
+      toast(t);
       }
       return result;
     } catch (error) {

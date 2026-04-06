@@ -189,7 +189,8 @@ export function useOrders() {
   const createOrderMutation = useMutation({
     mutationFn: async (input: CreateOrderInput): Promise<CreateOrderResult> => {
       if (!user?.id) {
-        toast.error(t)toast(language)),
+        toast.error(t);
+      toast(language)),
           scheduled_at: startAt,
           notes: input.notes,
           provider_name: input.providerName,

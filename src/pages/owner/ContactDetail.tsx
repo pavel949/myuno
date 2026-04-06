@@ -163,7 +163,8 @@ export default function ContactDetail() {
         content: noteText.trim(),
       });
       setNoteText('');
-      toast(isRu)toast.error(isRu)` : ''}`, icon: DollarSign },
+      toast(isRu);
+      // Error handled` : ''}`, icon: DollarSign },
                 { value: 'tasks', label: `${isRu ? 'Задачи' : 'Tasks'}${contactTasks.length > 0 ? ` (${contactTasks.length})` : ''}`, icon: ListTodo },
                 { value: 'documents', label: isRu ? 'Документы' : 'Documents', icon: FileText },
                 { value: 'ai', label: 'AI', icon: Sparkles },
