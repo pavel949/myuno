@@ -66,7 +66,7 @@ export default function NewbuildsCatalog() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-[1536px] mx-auto px-4 py-8">
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <button onClick={() => setShowFilters(!showFilters)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm nb-glass">
