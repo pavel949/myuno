@@ -8,6 +8,8 @@ import {
   BarChart3,
   Users,
   Building2,
+  Landmark,
+  HardHat,
   Package,
   Wrench,
   DollarSign,
@@ -44,6 +46,8 @@ const MENU_SECTIONS: MenuSection[] = [
     titleRu: 'Объекты',
     items: [
       { path: APP_ROUTES.MC_PROPERTIES, icon: Building2, labelEn: 'Properties', labelRu: 'Объекты', tint: 'bg-info/15 text-info' },
+      { path: APP_ROUTES.MC_COMPLEXES, icon: Landmark, labelEn: 'Complexes', labelRu: 'Комплексы', tint: 'bg-accent-cyan/15 text-accent-cyan' },
+      { path: APP_ROUTES.MC_PROJECTS, icon: HardHat, labelEn: 'Projects', labelRu: 'Проекты', tint: 'bg-accent-purple/15 text-accent-purple' },
       { path: APP_ROUTES.MC_INVENTORY, icon: Package, labelEn: 'Inventory', labelRu: 'Инвентарь', tint: 'bg-accent-amber/15 text-accent-amber' },
       { path: APP_ROUTES.MC_VENDORS, icon: Wrench, labelEn: 'Vendors', labelRu: 'Поставщики', tint: 'bg-warning/15 text-warning' },
     ],

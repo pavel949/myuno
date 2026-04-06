@@ -401,6 +401,7 @@ export const VendorSettingsPage = lazy(() => import('@/pages/vendor/VendorSettin
 export const OwnerDashboard = lazy(() => import('@/pages/owner/OwnerDashboard'));
 export const OwnerProperties = lazy(() => import('@/pages/owner/OwnerProperties'));
 export const ComplexesPage = lazy(() => import('@/pages/owner/ComplexesPage'));
+export const MCProjectsPage = lazy(() => import('@/pages/owner/MCProjectsPage'));
 export const OwnerPropertyDetail = lazy(() => import('@/pages/owner/OwnerPropertyDetail'));
 export const OwnerCalendar = lazy(() => import('@/pages/owner/OwnerCalendar'));
 export const OwnerFinancials = lazy(() => import('@/pages/owner/OwnerFinancials'));
