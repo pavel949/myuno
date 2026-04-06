@@ -1,103 +1,87 @@
-import { useState, useEffect, useCallback } from 'react';
+/**
+ * @module useAdmin
+ * @description Admin data hooks for providers, services, and categories.
+ * 
+ * useAdminCheck is re-exported from useIsAdmin (single source of truth).
+ * Data hooks use React Query for caching and consistency.
+ */
+import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { createErrorHandler } from '@/lib/errorHandler';
+import type { Database } from '@/integrations/supabase/types';
+
+// Re-export the canonical admin check hook
+export { useIsAdmin as useAdminCheck } from '@/hooks/useIsAdmin';
 
 const errorLog = createErrorHandler('useAdmin');
 
-// Flexible types to match DB schema - admin tools handle display logic
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Provider = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Service = Record<string, any>;
+// ============= Typed aliases from Supabase schema =============
+export type Provider = Database['public']['Tables']['providers']['Row'];
+type ProviderInsert = Database['public']['Tables']['providers']['Insert'];
+type ProviderUpdate = Database['public']['Tables']['providers']['Update'];
 
-export function useAdminCheck() {
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export type Service = Database['public']['Tables']['services']['Row'];
+type ServiceInsert = Database['public']['Tables']['services']['Insert'];
+type ServiceUpdate = Database['public']['Tables']['services']['Update'];
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const checkAdmin = async () => {
-      if (!user) {
-        if (isMounted) {
-          setIsAdmin(false);
-          setIsLoading(false);
-        }
-        return;
-      }
+type Category = Database['public']['Tables']['categories']['Row'];
 
-      try {
-        const { data, error } = await supabase
-          .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+// ============= Query Keys =============
+const QUERY_KEYS = {
+  providers: ['admin', 'providers'] as const,
+  services: (providerId?: string) => ['admin', 'services', providerId] as const,
+  categories: ['admin', 'categories'] as const,
+};
 
-        if (error) throw error;
-        if (isMounted) setIsAdmin(data === true);
-      } catch (err) {
-        errorLog.silent(err, 'check_admin_role');
-        if (isMounted) setIsAdmin(false);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    checkAdmin();
-    return () => { isMounted = false; };
-  }, [user]);
-
-  return { isAdmin, isLoading };
-}
-
+// ============= useAdminProviders =============
 export function useAdminProviders() {
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchProviders = useCallback(async (isMounted?: () => boolean) => {
-    const checkMounted = isMounted || (() => true);
-    try {
-      if (checkMounted()) setIsLoading(true);
+  const { data: providers = [], isLoading } = useQuery({
+    queryKey: QUERY_KEYS.providers,
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('providers')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      if (checkMounted()) setProviders(data || []);
-    } catch (err) {
-      errorLog.silent(err, 'fetch_providers');
-    } finally {
-      if (checkMounted()) setIsLoading(false);
-    }
-  }, []);
+      if (error) {
+        errorLog.silent(error, 'fetch_providers');
+        throw error;
+      }
+      return data as Provider[];
+    },
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-    fetchProviders(() => isMounted);
-    return () => { isMounted = false; };
-  }, [fetchProviders]);
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.providers });
+  }, [queryClient]);
 
-  const createProvider = async (providerData: Partial<Provider>) => {
+  const createProvider = useCallback(async (providerData: Partial<ProviderInsert>) => {
+    const insertData: ProviderInsert = {
+      name: providerData.name ?? '',
+      ...providerData,
+      is_active: providerData.is_active ?? true,
+      is_verified: true,
+      approval_status: 'approved',
+      created_by_uno_team: true,
+      rating: 0,
+      review_count: 0,
+      pending_payout: 0,
+    };
+
     const { data, error } = await supabase
       .from('providers')
-      .insert({
-        ...providerData,
-        is_active: providerData.is_active ?? true,
-        is_verified: true, // Admin-created providers are auto-verified
-        approval_status: 'approved', // Auto-approved
-        created_by_uno_team: true,
-        rating: 0,
-        review_count: 0,
-        pending_payout: 0,
-      } as any)
+      .insert(insertData)
       .select()
       .single();
 
-    if (!error) await fetchProviders();
+    if (!error) invalidate();
     return { data, error };
-  };
+  }, [invalidate]);
 
-  const updateProvider = async (providerId: string, updates: Partial<Provider>) => {
+  const updateProvider = useCallback(async (providerId: string, updates: ProviderUpdate) => {
     const { data, error } = await supabase
       .from('providers')
       .update(updates)
@@ -105,31 +89,30 @@ export function useAdminProviders() {
       .select()
       .single();
 
-    if (!error) await fetchProviders();
+    if (!error) invalidate();
     return { data, error };
-  };
+  }, [invalidate]);
 
-  const deleteProvider = async (providerId: string) => {
+  const deleteProvider = useCallback(async (providerId: string) => {
     const { error } = await supabase
       .from('providers')
       .delete()
       .eq('id', providerId);
 
-    if (!error) await fetchProviders();
+    if (!error) invalidate();
     return { error };
-  };
+  }, [invalidate]);
 
-  return { providers, isLoading, createProvider, updateProvider, deleteProvider, refetch: fetchProviders };
+  return { providers, isLoading, createProvider, updateProvider, deleteProvider, refetch: invalidate };
 }
 
+// ============= useAdminServices =============
 export function useAdminServices(providerId?: string) {
-  const [services, setServices] = useState<Service[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchServices = useCallback(async (isMounted?: () => boolean) => {
-    const checkMounted = isMounted || (() => true);
-    try {
-      if (checkMounted()) setIsLoading(true);
+  const { data: services = [], isLoading } = useQuery({
+    queryKey: QUERY_KEYS.services(providerId),
+    queryFn: async () => {
       let query = supabase
         .from('services')
         .select('*')
@@ -141,42 +124,42 @@ export function useAdminServices(providerId?: string) {
 
       const { data, error } = await query;
 
-      if (error) throw error;
-      if (checkMounted()) setServices(data || []);
-    } catch (err) {
-      errorLog.silent(err, 'fetch_services');
-    } finally {
-      if (checkMounted()) setIsLoading(false);
-    }
-  }, [providerId]);
+      if (error) {
+        errorLog.silent(error, 'fetch_services');
+        throw error;
+      }
+      return data as Service[];
+    },
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-    fetchServices(() => isMounted);
-    return () => { isMounted = false; };
-  }, [fetchServices]);
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.services(providerId) });
+  }, [queryClient, providerId]);
 
-  const createService = async (serviceData: Partial<Service>) => {
+  const createService = useCallback(async (serviceData: Partial<ServiceInsert>) => {
+    const insertData: ServiceInsert = {
+      name_en: serviceData.name_en ?? '',
+      name_ru: serviceData.name_ru ?? '',
+      provider_id: serviceData.provider_id ?? '',
+      ...serviceData,
+      currency: serviceData.currency || 'THB',
+      is_active: serviceData.is_active ?? true,
+      is_verified: true,
+      approval_status: 'approved',
+      created_by_uno_team: true,
+    };
+
     const { data, error } = await supabase
       .from('services')
-      .insert({
-        ...serviceData,
-        currency: serviceData.currency || 'THB',
-        max_capacity: serviceData.max_capacity || 1,
-        is_active: serviceData.is_active ?? true,
-        is_featured: serviceData.is_featured ?? false,
-        is_verified: true, // Admin-created services are auto-verified
-        approval_status: 'approved', // Auto-approved
-        created_by_uno_team: true,
-      } as any)
+      .insert(insertData)
       .select()
       .single();
 
-    if (!error) await fetchServices();
+    if (!error) invalidate();
     return { data, error };
-  };
+  }, [invalidate]);
 
-  const updateService = async (serviceId: string, updates: Partial<Service>) => {
+  const updateService = useCallback(async (serviceId: string, updates: ServiceUpdate) => {
     const { data, error } = await supabase
       .from('services')
       .update(updates)
@@ -184,51 +167,41 @@ export function useAdminServices(providerId?: string) {
       .select()
       .single();
 
-    if (!error) await fetchServices();
+    if (!error) invalidate();
     return { data, error };
-  };
+  }, [invalidate]);
 
-  const deleteService = async (serviceId: string) => {
+  const deleteService = useCallback(async (serviceId: string) => {
     const { error } = await supabase
       .from('services')
       .delete()
       .eq('id', serviceId);
 
-    if (!error) await fetchServices();
+    if (!error) invalidate();
     return { error };
-  };
+  }, [invalidate]);
 
-  return { services, isLoading, createService, updateService, deleteService, refetch: fetchServices };
+  return { services, isLoading, createService, updateService, deleteService, refetch: invalidate };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// ============= useAdminCategories =============
 export function useAdminCategories() {
-  const [categories, setCategories] = useState<Record<string, any>[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: categories = [], isLoading } = useQuery({
+    queryKey: QUERY_KEYS.categories,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order');
-
-        if (error) throw error;
-        if (isMounted) setCategories(data || []);
-      } catch (err) {
-        errorLog.silent(err, 'fetch_categories');
-      } finally {
-        if (isMounted) setIsLoading(false);
+      if (error) {
+        errorLog.silent(error, 'fetch_categories');
+        throw error;
       }
-    };
-
-    fetchCategories();
-    return () => { isMounted = false; };
-  }, []);
+      return data as Category[];
+    },
+  });
 
   return { categories, isLoading };
 }

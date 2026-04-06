@@ -1,12 +1,15 @@
 /**
  * useIsAdmin - Centralized admin check hook
- * Used across the platform to determine if current user has admin privileges
+ * ★ SINGLE SOURCE OF TRUTH for admin role verification ★
+ * 
+ * ALL admin checks MUST use this hook. Do NOT create parallel admin-check hooks.
+ * useAdminCheck() in useAdmin.ts re-exports this hook for backward compatibility.
  */
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface UseIsAdminResult {
+export interface UseIsAdminResult {
   isAdmin: boolean;
   isLoading: boolean;
 }
@@ -70,3 +73,8 @@ export function useIsAdmin(): UseIsAdminResult {
 export function clearAdminCache() {
   adminCache.clear();
 }
+
+/**
+ * @deprecated Use useIsAdmin() directly. This alias exists for backward compatibility.
+ */
+export const useAdminCheck = useIsAdmin;

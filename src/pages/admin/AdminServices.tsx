@@ -164,10 +164,10 @@ export default function AdminServices() {
       description_ru: service.description_ru || '',
       price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes?.toString() || '',
-      max_capacity: service.max_capacity?.toString() || '1',
+      max_capacity: (service as Record<string, unknown>).max_capacity?.toString() || '1',
       images: service.images || [],
       is_active: service.is_active ?? true,
-      is_featured: service.is_featured ?? false,
+      is_featured: ((service as Record<string, unknown>).is_featured as boolean) ?? false,
     });
     setIsDialogOpen(true);
   };
@@ -423,7 +423,7 @@ export default function AdminServices() {
                         <h3 className="font-medium">
                           {isRussian ? (service.name_ru || service.name_en) : service.name_en}
                         </h3>
-                        {service.is_featured && (
+                        {(service as Record<string, unknown>).is_featured && (
                           <Star className="h-4 w-4 text-warning fill-warning" />
                         )}
                       </div>

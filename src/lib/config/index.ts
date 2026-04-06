@@ -7,7 +7,7 @@ export * from './contacts';
 export * from './geography';
 export * from './defaults';
 export * from './investorData';
-export * from './homeServicesTaxonomy';
+// homeServicesTaxonomy: canonical export is via '@/lib/taxonomies' hub
 export * from './routes';
 export * from './currencies';
 export * from './entityTypes';
