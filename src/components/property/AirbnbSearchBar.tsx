@@ -623,14 +623,14 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
         </AnimatePresence>
 
         <motion.div
-          className={cn("relative z-50 flex items-center bg-card rounded-full border shadow-lg transition-shadow", activeField && "shadow-2xl")}
+          className={cn("relative z-50 flex items-center bg-card rounded-full border [box-shadow:var(--shadow-elevation-2)] transition-shadow", activeField && "[box-shadow:var(--shadow-elevation-4)]")}
           animate={{ scale: activeField ? 1.02 : 1 }}
           transition={{ duration: 0.2 }}
         >
           {/* Type */}
           <Popover open={activeField === 'type'} onOpenChange={(open) => setActiveField(open ? 'type' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("flex-1 px-6 py-4 text-left rounded-l-full transition-all", activeField === 'type' ? "bg-card shadow-lg" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+              <button className={cn("flex-1 px-6 py-4 text-left rounded-l-full transition-all", activeField === 'type' ? "bg-card [box-shadow:var(--shadow-elevation-2)]" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
                 <p className="text-xs font-semibold">{isRu ? 'Тип' : 'Type'}</p>
                 <p className={cn("text-sm", selectedPropertyTypes.length === 0 ? "text-muted-foreground" : "font-medium")}>
                   {selectedPropertyTypes.length === 0
@@ -660,7 +660,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           {/* Beach / Area */}
           <Popover open={activeField === 'beach'} onOpenChange={(open) => setActiveField(open ? 'beach' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("flex-1 px-6 py-4 text-left transition-all", activeField === 'beach' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+              <button className={cn("flex-1 px-6 py-4 text-left transition-all", activeField === 'beach' ? "bg-card [box-shadow:var(--shadow-elevation-2)] rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
                 <p className="text-xs font-semibold">{isRu ? 'Пляж' : 'Beach'}</p>
                 <p className={cn("text-sm", selectedLocations.length === 0 ? "text-muted-foreground" : "font-medium")}>{locationLabel}</p>
               </button>
@@ -687,7 +687,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           {/* Check In */}
           <Popover open={activeField === 'checkin'} onOpenChange={(open) => setActiveField(open ? 'checkin' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("px-6 py-4 text-left transition-all", activeField === 'checkin' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+              <button className={cn("px-6 py-4 text-left transition-all", activeField === 'checkin' ? "bg-card [box-shadow:var(--shadow-elevation-2)] rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
                 <p className="text-xs font-semibold">{isRu ? 'Заезд' : 'Check in'}</p>
                 <p className={cn("text-sm", !checkIn ? "text-muted-foreground" : "font-medium")}>{checkIn ? formatDateShort(checkIn) : (isRu ? 'Добавить' : 'Add dates')}</p>
               </button>
@@ -716,7 +716,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           {/* Check Out */}
           <Popover open={activeField === 'checkout'} onOpenChange={(open) => setActiveField(open ? 'checkout' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("px-6 py-4 text-left transition-all", activeField === 'checkout' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+              <button className={cn("px-6 py-4 text-left transition-all", activeField === 'checkout' ? "bg-card [box-shadow:var(--shadow-elevation-2)] rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
                 <p className="text-xs font-semibold">{isRu ? 'Выезд' : 'Check out'}</p>
                 <p className={cn("text-sm", !checkOut ? "text-muted-foreground" : "font-medium")}>
                   {checkOut ? `${formatDateShort(checkOut)}${nights > 0 ? ` · ${nights} ${isRu ? (nights === 1 ? 'ночь' : nights < 5 ? 'ночи' : 'ноч.') : 'n.'}` : ''}` : (isRu ? 'Добавить' : 'Add dates')}
@@ -740,7 +740,7 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
           {/* Details (Desktop) */}
           <Popover open={activeField === 'details'} onOpenChange={(open) => setActiveField(open ? 'details' : null)}>
             <PopoverTrigger asChild>
-              <button className={cn("px-5 py-4 text-left transition-all", activeField === 'details' ? "bg-card shadow-lg rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
+              <button className={cn("px-5 py-4 text-left transition-all", activeField === 'details' ? "bg-card [box-shadow:var(--shadow-elevation-2)] rounded-full" : activeField ? "bg-muted/30 hover:bg-muted/50" : "hover:bg-muted/50")}>
                 <p className="text-xs font-semibold">{isRu ? 'Детали' : 'Details'}</p>
                 <p className={cn("text-sm", detailsFilterCount === 0 ? "text-muted-foreground" : "font-medium")}>
                   {detailsFilterCount === 0
