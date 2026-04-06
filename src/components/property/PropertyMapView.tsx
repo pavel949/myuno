@@ -3,7 +3,7 @@
  * Uses Google Maps (Maps JavaScript API). Requires VITE_GOOGLE_MAPS_API_KEY.
  */
 
-import React, { useRef, useCallback, useState, useMemo } from 'react';
+import React, { useRef, useCallback, useState, useMemo, forwardRef } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -32,13 +32,13 @@ function shortPrice(price: number): string {
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
 
-export function PropertyMapView({
+export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(function PropertyMapView({
   properties,
   hoveredProperty,
   onHover,
   mode = 'rent',
   className,
-}: PropertyMapViewProps) {
+}, ref) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
@@ -136,6 +136,6 @@ export function PropertyMapView({
       </GoogleMap>
     </div>
   );
-}
+});
 
 export default PropertyMapView;
