@@ -69,7 +69,7 @@ export const DeveloperBadge = forwardRef<HTMLDivElement, DeveloperBadgeProps>(
 
   if (showLink && developerId) {
     return (
-      <Link to={`/developers/${developerId}`} className="inline-flex">
+      <Link to={`/property/developers/${developerId}`} className="inline-flex">
         {content}
       </Link>
     );

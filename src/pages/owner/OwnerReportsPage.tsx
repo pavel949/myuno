@@ -99,7 +99,8 @@ export default function OwnerReportsPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!report) return;
-      const { error } = await supabase.from('owner_reports').insert({
+      // Canonical table: property_reports (used by monthly-owner-statements cron)
+      const { error } = await supabase.from('property_reports').insert({
         owner_id: user!.id,
         property_id: selectedProperty !== 'all' ? selectedProperty : null,
         company_id: companyId || null,
@@ -132,7 +133,7 @@ export default function OwnerReportsPage() {
     queryKey: ['owner-reports-history', user?.id],
     queryFn: async () => {
       const { data } = await supabase
-        .from('owner_reports')
+        .from('property_reports')
         .select('id, title, period_start, period_end, status, created_at')
         .eq('owner_id', user!.id)
         .order('period_start', { ascending: false })

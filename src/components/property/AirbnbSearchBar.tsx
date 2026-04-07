@@ -21,6 +21,7 @@ import type { DateRange } from 'react-day-picker';
 interface AirbnbSearchBarProps {
   onSearch: (params: SearchParams) => void;
   className?: string;
+  mode?: 'rent' | 'buy';
 }
 
 export interface SearchParams {
@@ -74,7 +75,8 @@ const POPULAR_BEACHES = [
   'nai-yang', 'mai-khao', 'rawai', 'chalong'
 ];
 
-export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
+export function AirbnbSearchBar({ onSearch, className, mode = 'rent' }: AirbnbSearchBarProps) {
+  const isBuyMode = mode === 'buy';
   const { language } = useLanguage();
   const { districts: dbDistricts } = usePropertyQuickFilters();
   const { propertyTypes } = usePropertyFilterOptions();
@@ -364,9 +366,9 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       </Button>
                     </div>
 
-                    {/* Tab Navigation — Type | Beach | Dates | Details */}
+                    {/* Tab Navigation — Type | Beach | Dates | Details (dates/details hidden in buy mode) */}
                     <div className="flex px-4 gap-1">
-                      {(['type', 'beach', 'dates', 'details'] as MobileTab[]).map((tab) => (
+                      {(isBuyMode ? ['type', 'beach'] as MobileTab[] : ['type', 'beach', 'dates', 'details'] as MobileTab[]).map((tab) => (
                         <button
                           key={tab}
                           className={cn(
@@ -530,8 +532,8 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
                       </div>
                     )}
 
-                    {/* Dates Tab */}
-                    {mobileTab === 'dates' && (
+                    {/* Dates Tab (hidden in buy mode) */}
+                    {!isBuyMode && mobileTab === 'dates' && (
                       <div className="p-4 space-y-4">
                         <h3 className="text-xl font-bold">{isRu ? 'Когда поездка?' : 'When is your trip?'}</h3>
                         <div className="flex gap-2 overflow-x-auto pb-2">

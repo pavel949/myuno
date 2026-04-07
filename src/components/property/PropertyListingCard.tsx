@@ -13,7 +13,7 @@ import { PropertyImageCarousel } from './PropertyImageCarousel';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { getDistrictLabel, getPropertyTypeLabel } from '@/lib/taxonomies';
-import { cn } from '@/lib/utils';
+import { cn, pluralRu } from '@/lib/utils';
 import type { Property } from '@/hooks/useProperties';
 
 interface PropertyListingCardProps {
@@ -149,10 +149,10 @@ export function PropertyListingCard({
             ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
             : title}
           {property.bedrooms != null && property.bedrooms > 0 && (
-            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
+            <> · {property.bedrooms} {isRu ? pluralRu(property.bedrooms, 'спальня', 'спальни', 'спален') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
           )}
           {property.bathrooms != null && property.bathrooms > 0 && (
-            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
+            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? pluralRu(property.bathrooms, 'ванная', 'ванные', 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
           )}
           {property.max_guests != null && property.max_guests > 0 && (
             <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
@@ -164,7 +164,7 @@ export function PropertyListingCard({
           <p className="text-xs sm:text-[15px] text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
-                {formatPrice((property as any).sale_price || property.price || 0)}
+                {formatPrice(property.sale_price || property.price || 0)}
               </span>
             ) : (
               <>

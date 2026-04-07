@@ -173,7 +173,7 @@ export default function PropertyIndex() {
             <div className="flex items-center gap-2">
               <BackButton fallbackPath="/" variant="ghost" size="sm" className="shrink-0 -ml-1" />
               <div className="flex-1">
-                <AirbnbSearchBar onSearch={handleSearch} />
+                <AirbnbSearchBar onSearch={handleSearch} mode={propertyMode} />
               </div>
               {/* Rent/Buy toggle removed — handled by PropertyHub tabs */}
             </div>

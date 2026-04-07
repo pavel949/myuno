@@ -56,7 +56,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { title: 'Dashboard', titleRu: 'Обзор', path: '/my-stay', icon: Home },
       { title: 'My Bookings', titleRu: 'Мои бронирования', path: '/bookings', icon: CalendarCheck },
-      { title: 'Messages', titleRu: 'Сообщения', path: '/guest/messages', icon: MessageCircle },
+      { title: 'Messages', titleRu: 'Сообщения', path: '/messages', icon: MessageCircle },
     ],
   },
   {
@@ -75,8 +75,8 @@ const navigationGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { title: 'Guidebook', titleRu: 'Гайдбук', path: '/guest/guidebook', icon: BookOpen },
-      { title: 'Area Guide', titleRu: 'Район', path: '/guest/area', icon: MapPin },
-      { title: 'House Rules', titleRu: 'Правила', path: '/guest/rules', icon: ClipboardList },
+      { title: 'Area Guide', titleRu: 'Район', path: '/guest/area-guide', icon: MapPin },
+      { title: 'House Rules', titleRu: 'Правила', path: '/guest/house-rules', icon: ClipboardList },
     ],
   },
   {

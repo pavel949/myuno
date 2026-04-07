@@ -2,10 +2,10 @@
  * ResaleDetail — detail page for a secondary market property
  */
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   MapPin, BedDouble, Bath, Maximize2, Calendar, ArrowRightLeft,
-  TrendingUp, Shield, ChevronLeft, Share2, Phone
+  TrendingUp, Shield, ChevronLeft, ChevronRight, Share2, Phone
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
@@ -90,6 +90,13 @@ export default function ResaleDetail() {
             {isRu ? 'Переуступка' : 'Assignment'}
           </Badge>
         )}
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1 text-xs text-muted-foreground px-4 pt-2">
+        <Link to="/property/resale" className="hover:text-foreground">{isRu ? 'Вторичка' : 'Resale'}</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground truncate max-w-[200px]">{title}</span>
       </div>
 
       <div className="px-4 py-4 space-y-5">

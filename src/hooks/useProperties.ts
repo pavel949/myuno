@@ -59,6 +59,11 @@ export interface Property {
   negotiation_enabled?: boolean;
   price_per_night?: number;
   seasonal_pricing?: Record<string, unknown>;
+  // Sale fields
+  sale_price?: number;
+  ownership_form?: string;
+  listing_modes?: string[];
+  management_company_id?: string;
 }
 
 export interface PropertyProject {

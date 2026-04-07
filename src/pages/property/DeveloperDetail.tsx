@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   Building2, 
   CheckCircle2, 
@@ -13,7 +13,8 @@ import {
   Globe,
   Calendar,
   Users,
-  TrendingUp
+  TrendingUp,
+  ChevronRight
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -72,6 +73,13 @@ export default function DeveloperDetail() {
       {/* Cover */}
       <div className="relative h-32 bg-gradient-to-br from-primary/20 to-primary/5">
         <BackButton fallbackPath={APP_ROUTES.DEVELOPERS} className="absolute top-4 left-4" />
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1 text-xs text-muted-foreground px-4 pt-2">
+        <Link to="/property/developers" className="hover:text-foreground">{isRu ? 'Застройщики' : 'Developers'}</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground truncate max-w-[200px]">{name}</span>
       </div>
 
       {/* Profile card */}

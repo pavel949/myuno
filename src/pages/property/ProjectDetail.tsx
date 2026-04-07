@@ -4,11 +4,11 @@
  */
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
-  Building2, MapPin, Calendar, Users, 
-  Phone, Mail, Globe, Info
+  Building2, MapPin, Calendar, Users,
+  Phone, Mail, Globe, Info, ChevronRight
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -87,6 +87,13 @@ export default function ProjectDetail() {
             </div>
           </div>
         </header>
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 text-xs text-muted-foreground px-4 pt-2 max-w-4xl mx-auto">
+          <Link to="/property/projects" className="hover:text-foreground">{isRu ? 'Комплексы' : 'Complexes'}</Link>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-foreground truncate max-w-[200px]">{name}</span>
+        </div>
 
         <main className="max-w-4xl mx-auto">
           {/* Hero Media */}

@@ -264,7 +264,7 @@ export default function PropertySearchPage() {
             <div className="flex items-center gap-2">
               <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
               <div className="flex-1">
-                <AirbnbSearchBar onSearch={handleSearchUpdate} />
+                <AirbnbSearchBar onSearch={handleSearchUpdate} mode={propertyMode} />
               </div>
             </div>
           </div>

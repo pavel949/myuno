@@ -35,7 +35,7 @@ export function GuestMessagesBlock({ unreadCount = 0, loading }: GuestMessagesBl
         "p-3 cursor-pointer transition-colors hover:bg-muted/50",
         hasUnread && "border-primary/30"
       )}
-      onClick={() => navigate('/guest/chat')}
+      onClick={() => navigate('/messages')}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1">

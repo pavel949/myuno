@@ -321,6 +321,16 @@ export default function PropertyDetail() {
               <span className="text-muted-foreground">
                 · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
               </span>
+              {/* Listing type badge */}
+              {property.listing_type === 'sale' ? (
+                <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                  {isRu ? 'Продажа' : 'For Sale'}
+                </Badge>
+              ) : property.listing_type === 'rent' ? (
+                <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">
+                  {isRu ? 'Аренда' : 'For Rent'}
+                </Badge>
+              ) : null}
             </div>
           </div>
 
@@ -460,7 +470,9 @@ export default function PropertyDetail() {
           {/* Description */}
           <div>
             <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
-              {isRu ? 'Об этом жилье' : 'About this place'}
+              {property.listing_type === 'sale'
+                ? (isRu ? 'Об этом объекте' : 'About this property')
+                : (isRu ? 'Об этом жилье' : 'About this place')}
             </h2>
             <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
               {isRu ? property.description_ru : property.description_en}
@@ -659,6 +671,10 @@ export default function PropertyDetail() {
                 pricePerNight={pricePerNight}
                 rentalTerms={rentalTerms}
                 currency="THB"
+                listingType={property.listing_type}
+                salePrice={property.sale_price}
+                ownershipForm={property.ownership_form}
+                areaSqm={property.area_sqm}
                 earlyBookingDiscount={property?.early_booking_discount ?? undefined}
                 earlyBookingDays={property?.early_booking_days ?? undefined}
                 lastMinuteDiscount={property?.last_minute_discount ?? undefined}

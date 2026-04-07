@@ -581,8 +581,51 @@ export default function PropertyInquiry() {
                     serviceName: propertyTitle || 'Property',
                   });
                   if (result.success && result.order_id) {
-                    toast.success(isRu 
-                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.' 
+                    // 3. Auto-create CRM contact (fire and forget — should not block booking)
+                    try {
+                      const nameParts = formData.name.trim().split(/\s+/);
+                      const companyId = (property as any)?.management_company_id || (property as any)?.provider_id || null;
+                      if (companyId) {
+                        const { data: existingContact } = await supabase
+                          .from('crm_contacts')
+                          .select('id')
+                          .eq('company_id', companyId)
+                          .or(`email.eq.${formData.email || ''},phone.eq.${formData.phone || ''}`)
+                          .maybeSingle();
+
+                        if (!existingContact && (formData.email || formData.phone)) {
+                          const { data: newContact } = await supabase
+                            .from('crm_contacts')
+                            .insert({
+                              company_id: companyId,
+                              first_name: nameParts[0] || formData.name,
+                              last_name: nameParts.slice(1).join(' ') || null,
+                              phone: formData.phone || null,
+                              email: formData.email || null,
+                              source: 'website',
+                              contact_type: 'tenant',
+                              lifecycle_stage: 'lead',
+                              notes: `Property inquiry: ${propertyTitle}`,
+                            })
+                            .select('id')
+                            .maybeSingle();
+
+                          if (newContact?.id) {
+                            await supabase.from('contact_properties').insert({
+                              contact_id: newContact.id,
+                              property_id: id!,
+                              relationship_type: 'interested',
+                              company_id: companyId,
+                            }).then(() => {});
+                          }
+                        }
+                      }
+                    } catch (crmErr) {
+                      console.error('[PropertyInquiry] CRM auto-create error (non-blocking):', crmErr);
+                    }
+
+                    toast.success(isRu
+                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.'
                       : 'Request sent! The host will respond within 24 hours.');
                     navigate(`/bookings/${result.order_id}`, { replace: true });
                   }

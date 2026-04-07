@@ -78,8 +78,9 @@ Deno.serve(async (req: Request) => {
           .lte("check_in", periodEndStr)
           .in("status", ["confirmed", "completed"]);
 
-        // Group by property
+        // Group by property — each property wrapped in try/catch so one failure doesn't stop others
         for (const prop of properties) {
+          try {
           const propFinancials = (financials || []).filter(
             (f: any) => f.property_id === prop.id
           );
@@ -127,7 +128,7 @@ Deno.serve(async (req: Request) => {
 
           // Get property owner
           const { data: ownerProp } = await supabase
-            .from("owner_properties")
+            .from("properties")
             .select("owner_id")
             .eq("id", prop.id)
             .maybeSingle();
@@ -187,6 +188,10 @@ Deno.serve(async (req: Request) => {
           }
 
           generated++;
+          } catch (propErr) {
+            console.error(`Error processing property ${prop.id}:`, propErr);
+            errors++;
+          }
         }
       } catch (mcErr) {
         console.error(`Error processing MC ${mc.id}:`, mcErr);

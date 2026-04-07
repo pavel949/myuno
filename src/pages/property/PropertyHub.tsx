@@ -91,7 +91,7 @@ export function PropertyHubTabs() {
 
   // Don't show tabs on detail pages
   const isDetailPage = /^\/property\/[a-f0-9-]{36}/.test(location.pathname) ||
-    /^\/property\/(offplan|developers|invest)\/[a-f0-9-]/.test(location.pathname) ||
+    /^\/property\/(offplan|developers|invest|resale)\/[a-f0-9-]/.test(location.pathname) ||
     /^\/property\/project\//.test(location.pathname) ||
     /^\/property\/deposit-success/.test(location.pathname);
 
@@ -99,27 +99,59 @@ export function PropertyHubTabs() {
 
   const visibleTabs = TABS.filter(tab => !tab.authOnly || user);
 
+  // New Build sub-tabs
+  const newBuildSubTabs = [
+    { id: 'projects', labelEn: 'Projects', labelRu: 'Проекты', path: '/property/offplan' },
+    { id: 'complexes', labelEn: 'Complexes', labelRu: 'Комплексы', path: '/property/projects' },
+    { id: 'developers', labelEn: 'Developers', labelRu: 'Застройщики', path: '/property/developers' },
+  ];
+
+  const activeSubTab = location.pathname.startsWith('/property/developers') ? 'developers'
+    : location.pathname.startsWith('/property/projects') ? 'complexes'
+    : 'projects';
+
   return (
-    <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2 bg-background/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-30">
-      {visibleTabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => navigate(tab.path)}
-            className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
-              isActive
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            <Icon className="w-4 h-4" />
-            {isRu ? tab.labelRu : tab.labelEn}
-          </button>
-        );
+    <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50">
+      <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-2">
+        {visibleTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => navigate(tab.path)}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              {isRu ? tab.labelRu : tab.labelEn}
+            </button>
+          );
       })}
+      </div>
+      {/* New Build sub-tabs */}
+      {activeTab === 'newbuild' && (
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide px-4 py-1.5 border-t border-border/30">
+          {newBuildSubTabs.map((sub) => (
+            <button
+              key={sub.id}
+              onClick={() => navigate(sub.path)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                activeSubTab === sub.id
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {isRu ? sub.labelRu : sub.labelEn}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

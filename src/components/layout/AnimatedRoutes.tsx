@@ -560,6 +560,9 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/guest/check-in/:bookingId" element={<Pages.GuestCheckIn />} />
           <Route path="/guest/guidebook/:propertyId" element={<Pages.GuestGuidebook />} />
           <Route path="/guest/profile" element={<Pages.GuestProfile />} />
+          <Route path="/guest/house-rules" element={<Pages.GuestHouseRules />} />
+          <Route path="/guest/area-guide" element={<Pages.GuestAreaGuide />} />
+          <Route path="/guest/reviews" element={<Pages.GuestReviews />} />
         </Route>
         
         {/* Welcome Flow — public, no auth required */}

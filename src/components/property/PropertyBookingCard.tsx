@@ -37,6 +37,10 @@ interface PropertyBookingCardProps {
   customLengthDiscounts?: Array<{ min_nights: number; discount_percent: number }>;
   negotiationEnabled?: boolean;
   seasonalPricing?: SeasonalPricingRule[];
+  listingType?: string;
+  salePrice?: number;
+  ownershipForm?: string;
+  areaSqm?: number;
 }
 
 export function PropertyBookingCard({
@@ -56,6 +60,10 @@ export function PropertyBookingCard({
   customLengthDiscounts,
   negotiationEnabled,
   seasonalPricing,
+  listingType,
+  salePrice,
+  ownershipForm,
+  areaSqm,
 }: PropertyBookingCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -153,49 +161,82 @@ export function PropertyBookingCard({
     return errors;
   }, [nights, guests, rentalTerms, isRu]);
   
+  const isSaleMode = listingType === 'sale';
+
   const handleReserve = () => {
     const params = new URLSearchParams();
-    if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
-    if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
-    params.set('guests', guests.toString());
+    if (isSaleMode) {
+      params.set('type', 'sale');
+    } else {
+      if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
+      if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
+      params.set('guests', guests.toString());
+    }
     navigate(`/property/${propertyId}/inquiry?${params.toString()}`);
   };
 
-  // Trust signals
+  // Trust signals — different for sale vs rent
   const trustSignals = useMemo(() => {
     const signals: Array<{ icon: React.ReactNode; text: string }> = [];
-    if (rentalTerms?.instant_booking) {
-      signals.push({ icon: <Zap className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Мгновенное подтверждение' : 'Instant confirmation' });
+    if (isSaleMode) {
+      signals.push({ icon: <Shield className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Проверенный объект' : 'Verified property' });
+      signals.push({ icon: <Award className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Юридическое сопровождение' : 'Legal support included' });
+    } else {
+      if (rentalTerms?.instant_booking) {
+        signals.push({ icon: <Zap className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Мгновенное подтверждение' : 'Instant confirmation' });
+      }
+      if (rentalTerms?.cancellation_policy === 'flexible' || rentalTerms?.cancellation_policy === 'moderate') {
+        signals.push({ icon: <Shield className="w-3.5 h-3.5 text-success" />, text: isRu ? 'Бесплатная отмена' : 'Free cancellation' });
+      }
+      signals.push({ icon: <Award className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Гарантия лучшей цены' : 'Best price guarantee' });
     }
-    if (rentalTerms?.cancellation_policy === 'flexible' || rentalTerms?.cancellation_policy === 'moderate') {
-      signals.push({ icon: <Shield className="w-3.5 h-3.5 text-success" />, text: isRu ? 'Бесплатная отмена' : 'Free cancellation' });
-    }
-    signals.push({ icon: <Award className="w-3.5 h-3.5 text-primary" />, text: isRu ? 'Гарантия лучшей цены' : 'Best price guarantee' });
     return signals;
-  }, [rentalTerms, isRu]);
+  }, [rentalTerms, isRu, isSaleMode]);
   
   return (
     <Card variant="elevated" className={cn("sticky top-20", className)}>
       <CardContent className="p-6 space-y-5">
         {/* Price Header — prominent and clear */}
         <div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
-              {formatPrice(pricePerNight)}
-            </span>
-            <span className="text-base text-muted-foreground font-medium">
-              /{isRu ? 'ночь' : 'night'}
-            </span>
-          </div>
-          {rentalTerms?.weekly_discount && rentalTerms.weekly_discount > 0 && (
-            <p className="text-xs text-success font-medium mt-1">
-              {isRu ? `Скидка ${rentalTerms.weekly_discount}% от 7 ночей` : `${rentalTerms.weekly_discount}% off for 7+ nights`}
-            </p>
+          {isSaleMode ? (
+            <>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
+                  {formatPrice(salePrice || pricePerNight)}
+                </span>
+              </div>
+              {areaSqm && areaSqm > 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formatPrice(Math.round((salePrice || pricePerNight) / areaSqm))}/{isRu ? 'м²' : 'sqm'}
+                </p>
+              )}
+              {ownershipForm && (
+                <Badge variant="outline" className="mt-2 text-xs">
+                  {ownershipForm === 'freehold' ? 'Freehold' : ownershipForm === 'leasehold' ? 'Leasehold' : ownershipForm === 'company' ? (isRu ? 'Через компанию' : 'Company structure') : ownershipForm}
+                </Badge>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[1.75rem] font-display font-bold tracking-tight text-foreground">
+                  {formatPrice(pricePerNight)}
+                </span>
+                <span className="text-base text-muted-foreground font-medium">
+                  /{isRu ? 'ночь' : 'night'}
+                </span>
+              </div>
+              {rentalTerms?.weekly_discount && rentalTerms.weekly_discount > 0 && (
+                <p className="text-xs text-success font-medium mt-1">
+                  {isRu ? `Скидка ${rentalTerms.weekly_discount}% от 7 ночей` : `${rentalTerms.weekly_discount}% off for 7+ nights`}
+                </p>
+              )}
+            </>
           )}
         </div>
         
-        {/* Date Selection — Airbnb-style split input */}
-        <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+        {/* Date Selection — Airbnb-style split input (rent only) */}
+        {!isSaleMode && <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <button
               className={cn(
@@ -273,10 +314,10 @@ export function PropertyBookingCard({
               </div>
             </div>
           </PopoverContent>
-        </Popover>
-        
-        {/* Guests Selection — matching style */}
-        <Popover>
+        </Popover>}
+
+        {/* Guests Selection — matching style (rent only) */}
+        {!isSaleMode && <Popover>
           <PopoverTrigger asChild>
             <button
               className={cn(
@@ -311,8 +352,8 @@ export function PropertyBookingCard({
               </p>
             )}
           </PopoverContent>
-        </Popover>
-        
+        </Popover>}
+
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
           <div className="text-sm text-destructive flex items-start gap-2 p-3 bg-destructive/10 rounded-xl border border-destructive/20">
@@ -321,20 +362,22 @@ export function PropertyBookingCard({
           </div>
         )}
         
-        {/* Reserve Button — gradient CTA */}
-        <Button 
-          size="lg" 
+        {/* CTA Button — gradient */}
+        <Button
+          size="lg"
           className={cn(
             "w-full text-base font-semibold h-12 rounded-xl",
             "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
             "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
             "transition-all duration-200 hover:shadow-[0_6px_20px_-3px_hsl(var(--primary)/0.5)] hover:-translate-y-0.5",
-            rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
+            !isSaleMode && rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
           )}
           onClick={handleReserve}
-          disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+          disabled={!isSaleMode && (!dateRange?.from || !dateRange?.to || validationErrors.length > 0)}
         >
-          {!dateRange?.from || !dateRange?.to ? (
+          {isSaleMode ? (
+            isRu ? 'Запросить просмотр' : 'Request Viewing'
+          ) : !dateRange?.from || !dateRange?.to ? (
             <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Проверить наличие' : 'Check availability'}</>
           ) : rentalTerms?.instant_booking ? (
             <><Zap className="w-4 h-4 mr-2" />{isRu ? 'Мгновенное бронирование' : 'Book instantly'}</>
@@ -353,7 +396,7 @@ export function PropertyBookingCard({
           ))}
         </div>
 
-        {!nights ? (
+        {isSaleMode ? null : !nights ? (
           <p className="text-center text-sm text-muted-foreground">
             {isRu ? 'Выберите даты для расчёта стоимости' : 'Select dates to see total price'}
           </p>

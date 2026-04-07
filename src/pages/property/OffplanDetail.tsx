@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   HardHat,
   ChevronLeft,
+  ChevronRight,
   Share2,
   Heart,
   Phone,
@@ -169,6 +170,13 @@ export default function OffplanDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1 text-xs text-muted-foreground px-4 pt-2">
+        <Link to="/property/offplan" className="hover:text-foreground">{isRu ? 'Новостройки' : 'New Build'}</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground truncate max-w-[200px]">{name}</span>
       </div>
 
       <div className="px-4 py-4 pb-32 space-y-6">

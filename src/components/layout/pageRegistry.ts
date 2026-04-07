@@ -85,6 +85,9 @@ export const GuestGuidebook = lazy(() => import('@/pages/guest/GuestGuidebook'))
 export const PublicGuidebook = lazy(() => import('@/pages/guest/PublicGuidebook'));
 export const WelcomeFlow = lazy(() => import('@/pages/guest/WelcomeFlow'));
 export const GuestProfile = lazy(() => import('@/pages/guest/GuestProfile'));
+export const GuestHouseRules = lazy(() => import('@/pages/guest/GuestHouseRules'));
+export const GuestAreaGuide = lazy(() => import('@/pages/guest/GuestAreaGuide'));
+export const GuestReviews = lazy(() => import('@/pages/guest/GuestReviews'));
 
 // ── Restaurants ──
 export const RestaurantsIndex = lazy(() => import('@/pages/restaurants/RestaurantsIndex'));
