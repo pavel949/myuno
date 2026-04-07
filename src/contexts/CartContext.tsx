@@ -113,33 +113,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   // Sync local cart to database when user logs in
-  const syncLocalCartToDatabase = useCallback(async (localItems: CartItem[]) => {
-    if (!user || localItems.length === 0) return;
+  const syncLocalCartToDatabase = useCallback(async (localItems: CartItem[]): Promise<boolean> => {
+    if (!user || localItems.length === 0) return true;
 
     try {
-      for (const item of localItems) {
-        await supabase.from('cart_items').upsert({
-          user_id: user.id,
-          item_id: item.id,
-          item_type: item.type,
-          name: item.name,
-          name_ru: item.nameRu,
-          price: item.price,
-          currency: item.currency,
-          quantity: item.quantity,
-          image: item.image,
-          provider_id: item.providerId,
-          provider_name: item.providerName,
-          provider_name_ru: item.providerNameRu,
-          options: item.options,
-        }, {
-          onConflict: 'user_id,item_id',
-        });
-      }
-      // Clear local storage after sync
+      const rows = localItems.map(item => ({
+        user_id: user.id,
+        item_id: item.id,
+        item_type: item.type,
+        name: item.name,
+        name_ru: item.nameRu,
+        price: item.price,
+        currency: item.currency,
+        quantity: item.quantity,
+        image: item.image,
+        provider_id: item.providerId,
+        provider_name: item.providerName,
+        provider_name_ru: item.providerNameRu,
+        options: item.options,
+      }));
+
+      // Upsert all items in a single batch call to avoid race conditions
+      const { error } = await supabase.from('cart_items').upsert(rows, {
+        onConflict: 'user_id,item_id',
+      });
+
+      if (error) throw error;
+
+      // Clear local storage only after successful sync
       localStorage.removeItem(CART_STORAGE_KEY);
+      return true;
     } catch (error) {
-      errorLog.silent(error, 'sync_cart_to_database');
+      errorLog.error(error, 'sync_cart_to_database');
+      return false;
     }
   }, [user]);
 
@@ -153,22 +159,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (user) {
         // User is logged in - load from database
         const localItems = loadLocalCart();
-        const dbItems = await loadDatabaseCart();
-        
+
         if (!isMounted) return;
-        
-        // If there are local items, sync them to database
+
+        // If there are local items, sync them to database first
         if (localItems.length > 0) {
           setIsSyncing(true);
-          await syncLocalCartToDatabase(localItems);
-          // Reload from database after sync
-          const updatedItems = await loadDatabaseCart();
-          if (isMounted) {
-            setItems(updatedItems);
-            setIsSyncing(false);
+          const syncOk = await syncLocalCartToDatabase(localItems);
+          if (!isMounted) return;
+          setIsSyncing(false);
+
+          if (!syncOk) {
+            // Sync failed — use local items as fallback so nothing is lost
+            setItems(localItems);
+          } else {
+            // Reload from database after confirmed sync
+            const updatedItems = await loadDatabaseCart();
+            if (isMounted) setItems(updatedItems);
           }
         } else {
-          setItems(dbItems);
+          const dbItems = await loadDatabaseCart();
+          if (isMounted) setItems(dbItems);
         }
       } else {
         // Guest user - load from localStorage

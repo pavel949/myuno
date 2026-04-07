@@ -97,5 +97,6 @@ export function useProfile() {
     updateProfile: updateProfileMutation.mutate,
     updateProfileAsync: updateProfileMutation.mutateAsync,
     isUpdating: updateProfileMutation.isPending,
+    updateError: updateProfileMutation.error,
   };
 }

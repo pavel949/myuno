@@ -1,3 +1,8 @@
+/**
+ * @deprecated Radix toast primitives — unused. The app uses Sonner (see sonner.tsx).
+ * Kept to avoid breaking any stale deep imports. Safe to delete if no imports remain.
+ */
+
 import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";

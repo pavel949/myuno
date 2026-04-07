@@ -567,9 +567,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
         {/* ── Provider/Vendor ── */}
-        <Route path="/provider/onboarding" element={<LazyPage><Pages.ProviderOnboarding /></LazyPage>} />
+        <Route path="/provider/onboarding" element={<LazyPage><AuthGuard><Pages.ProviderOnboarding /></AuthGuard></LazyPage>} />
         <Route path="/vendor/join" element={<LazyPage><Pages.VendorLanding /></LazyPage>} />
-        <Route path="/vendor/onboarding" element={<LazyPage><Pages.VendorOnboarding /></LazyPage>} />
+        <Route path="/vendor/onboarding" element={<LazyPage><AuthGuard><Pages.VendorOnboarding /></AuthGuard></LazyPage>} />
         
         <Route element={<VendorRouteLayout />}>
           <Route path="/vendor" element={<Pages.VendorDashboard />} />
@@ -605,7 +605,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── MC Onboarding (outside MCGuard, but requires auth) ── */}
         <Route path="/mc/onboarding" element={<LazyPage><AuthGuard><Pages.MCOnboarding /></AuthGuard></LazyPage>} />
-        <Route path="/mc/register" element={<LazyPage><Pages.MCRegistrationPage /></LazyPage>} />
+        <Route path="/mc/register" element={<LazyPage><AuthGuard><Pages.MCRegistrationPage /></AuthGuard></LazyPage>} />
         
         {/* ── MC (Management Company) Workspace ── */}
         <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><MCLayout /></MCGuard></ActiveCompanyProvider>}>

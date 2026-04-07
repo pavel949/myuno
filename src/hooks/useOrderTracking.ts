@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,6 +68,12 @@ export function useOrderTracking(orderId: string | undefined) {
     fetchTimeline();
   }, [fetchTimeline]);
 
+  // Keep stable refs for callbacks to avoid re-subscribing on every render
+  const refetchRef = useRef(refetch);
+  refetchRef.current = refetch;
+  const fetchTimelineRef = useRef(fetchTimeline);
+  fetchTimelineRef.current = fetchTimeline;
+
   // Real-time subscription for order updates
   useEffect(() => {
     if (!orderId || !user) return;
@@ -83,7 +89,7 @@ export function useOrderTracking(orderId: string | undefined) {
           filter: `id=eq.${orderId}`,
         },
         () => {
-          refetch();
+          refetchRef.current();
         }
       )
       .on(
@@ -95,7 +101,7 @@ export function useOrderTracking(orderId: string | undefined) {
           filter: `order_id=eq.${orderId}`,
         },
         () => {
-          fetchTimeline();
+          fetchTimelineRef.current();
         }
       )
       .subscribe();
@@ -103,7 +109,7 @@ export function useOrderTracking(orderId: string | undefined) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [orderId, user, refetch, fetchTimeline]);
+  }, [orderId, user]);
 
   // Calculate progress percentage
   const getProgressPercentage = useCallback((status: OrderStatus): number => {

@@ -67,11 +67,11 @@ export const createMapPopupHtml = (params: {
       ? escapeHtml(params.image)
       : '';
 
-  return `
+  const html = `
     <div class="p-2 min-w-[180px] max-w-[220px]">
       ${safeImageUrl ? `
-        <img 
-          src="${safeImageUrl}" 
+        <img
+          src="${safeImageUrl}"
           alt="${escapedName}"
           class="w-full h-24 object-cover rounded-lg mb-2"
           onerror="this.style.display='none'"
@@ -87,4 +87,10 @@ export const createMapPopupHtml = (params: {
       ${params.description ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${escapedDescription}</p>` : ''}
     </div>
   `;
+
+  // Final sanitization pass on the assembled HTML
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['div', 'img', 'h3', 'span', 'p'],
+    ALLOWED_ATTR: ['class', 'src', 'alt', 'onerror'],
+  });
 };

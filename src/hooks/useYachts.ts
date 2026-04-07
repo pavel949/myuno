@@ -131,22 +131,22 @@ async function fetchYachtById(id: string): Promise<Yacht | null> {
 }
 
 export function useYachts(yachtType?: string) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['yachts', yachtType || 'all'],
     queryFn: () => fetchYachts(yachtType),
     ...CACHE_PROFILES.SEMI_STATIC,
   });
 
-  return { yachts: data || [], isLoading };
+  return { yachts: data || [], isLoading, error, refetch };
 }
 
 export function useYacht(id: string) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['yacht', id],
     queryFn: () => fetchYachtById(id),
     enabled: !!id,
     ...CACHE_PROFILES.SEMI_STATIC,
   });
 
-  return { yacht: data ?? null, isLoading };
+  return { yacht: data ?? null, isLoading, error, refetch };
 }

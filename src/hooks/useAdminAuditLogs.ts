@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 
@@ -78,29 +79,34 @@ export function useAdminAuditLogs(limit: number = 10) {
 
 // Hook for real-time subscription to new audit logs
 export function useAdminAuditLogsRealtime(onNewLog?: (log: AuditLogEntry) => void) {
-  return useQuery({
-    queryKey: ['admin-audit-logs-subscription'],
-    queryFn: async () => {
-      // This is just for setting up the subscription
-      const channel = supabase
-        .channel('admin-audit-logs-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'admin_audit_logs',
-          },
-          (payload) => {
-            if (onNewLog && payload.new) {
-              onNewLog(payload.new as AuditLogEntry);
-            }
-          }
-        )
-        .subscribe();
+  const queryClient = useQueryClient();
+  const callbackRef = useRef(onNewLog);
+  callbackRef.current = onNewLog;
 
-      return { channel };
-    },
-    enabled: !!onNewLog,
-  });
+  useEffect(() => {
+    if (!callbackRef.current) return;
+
+    const channel = supabase
+      .channel('admin-audit-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'admin_audit_logs',
+        },
+        (payload) => {
+          if (callbackRef.current && payload.new) {
+            callbackRef.current(payload.new as AuditLogEntry);
+          }
+          // Also invalidate the audit logs query so the list refreshes
+          queryClient.invalidateQueries({ queryKey: ['admin-audit-logs'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 }

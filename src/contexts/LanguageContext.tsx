@@ -44,7 +44,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Load translations from DB with caching
   useEffect(() => {
-    const loadTranslations = async () => {
+    const loadTranslations = async (): Promise<boolean> => {
       // Check cache first
       const cachedTimestamp = localStorage.getItem(TRANSLATIONS_CACHE_TIMESTAMP);
       const cachedData = localStorage.getItem(TRANSLATIONS_CACHE_KEY);
@@ -55,7 +55,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           try {
             setCustomTranslations(JSON.parse(cachedData));
             setIsLoadingTranslations(false);
-            return;
+            return true;
           } catch (e) {
             // Invalid cache, continue to fetch
           }
@@ -83,33 +83,38 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         // Cache the results
         localStorage.setItem(TRANSLATIONS_CACHE_KEY, JSON.stringify(map));
         localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
+        return true;
       } catch (err) {
         console.error('Failed to load translations from DB:', err);
         // Fallback to static translations (already in the component)
+        return false;
       } finally {
         setIsLoadingTranslations(false);
       }
     };
 
-    loadTranslations();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    // Subscribe to realtime changes
-    const channel = supabase
-      .channel('translations_realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'translations' },
-        () => {
-          // Invalidate cache and reload
-          localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
-          localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
-          loadTranslations();
-        }
-      )
-      .subscribe();
+    loadTranslations().then((success) => {
+      if (!success) return;
+      // Only subscribe to realtime changes after initial load succeeds
+      channel = supabase
+        .channel('translations_realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'translations' },
+          () => {
+            // Invalidate cache and reload
+            localStorage.removeItem(TRANSLATIONS_CACHE_KEY);
+            localStorage.removeItem(TRANSLATIONS_CACHE_TIMESTAMP);
+            loadTranslations();
+          }
+        )
+        .subscribe();
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 

@@ -1,11 +1,10 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePinAuth } from './usePinAuth';
+import { usePinAuth, storeRefreshToken } from './usePinAuth';
 
 const PIN_USER_KEY = 'uno_pin_user_id';
 const PIN_EMAIL_KEY = 'uno_pin_email';
-const PIN_REFRESH_TOKEN_KEY = 'uno_pin_refresh_token';
 
 export function usePinManagement() {
   const { user, session } = useAuth();
@@ -42,7 +41,7 @@ export function usePinManagement() {
       // Save user info and refresh token for PIN login
       localStorage.setItem(PIN_USER_KEY, user.id);
       localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-      localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+      storeRefreshToken(session.refresh_token);
       
       await checkHasPin();
       return { success: true };
@@ -81,7 +80,7 @@ export function usePinManagement() {
 
       // Update stored refresh token
       if (session?.refresh_token) {
-        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
+        storeRefreshToken(session.refresh_token);
       }
 
       return { success: true };
@@ -124,7 +123,7 @@ export function usePinManagement() {
       if (sessionData.session?.refresh_token) {
         localStorage.setItem(PIN_USER_KEY, user.id);
         localStorage.setItem(PIN_EMAIL_KEY, user.email || '');
-        localStorage.setItem(PIN_REFRESH_TOKEN_KEY, sessionData.session.refresh_token);
+        storeRefreshToken(sessionData.session.refresh_token);
       }
 
       await checkHasPin();
