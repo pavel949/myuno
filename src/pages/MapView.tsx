@@ -132,11 +132,6 @@ export default function MapView() {
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    if (filteredMarkers.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      filteredMarkers.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
-      map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
-    }
   }, []);
 
   const onMapUnmount = useCallback(() => {

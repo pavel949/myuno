@@ -52,7 +52,7 @@ Factual snapshot of the platform as it exists today. No recommendations or audit
 
 - No custom CI/CD or Docker files found in the described structure.  
 - Standard Vite build: `npm run build` → static output; preview via `npm run preview`.  
-- Supabase project is referenced by `VITE_SUPABASE_URL` / `VITE_SUPABASE_PROJECT_ID` (e.g. `kakkwibljrjsawxgnupk.supabase.co`).
+- Supabase project is referenced by `VITE_SUPABASE_URL` / `VITE_SUPABASE_PROJECT_ID` (e.g. `erfwtoavipwjqmylpizt.supabase.co`).
 
 ### Environment Variables
 

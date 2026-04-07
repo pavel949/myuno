@@ -1,6 +1,2 @@
-/**
- * @deprecated Use `import { useToast, toast } from '@/hooks/use-toast'` directly.
- * This re-export exists only for backward compatibility.
- */
-import { useToast, toast } from "@/hooks/use-toast";
-export { useToast, toast };
+// Re-exports from centralized hook — prefer importing from '@/hooks/use-toast' directly
+export { useToast, toast } from '@/hooks/use-toast';

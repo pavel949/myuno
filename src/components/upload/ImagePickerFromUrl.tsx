@@ -33,7 +33,7 @@ interface ImagePickerFromUrlProps {
 
 // Generate proxy URL for Yandex Disk previews
 function getProxiedUrl(url: string): string {
-  return `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(url)}`;
+  return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
 export function ImagePickerFromUrl({

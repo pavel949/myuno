@@ -25,6 +25,7 @@ export default function DeveloperPortalLayout() {
 
   if (authLoading || devLoading) return <NewbuildsLayout><LoadingState /></NewbuildsLayout>;
   if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  if (!developer) return <Navigate to={APP_ROUTES.NEWBUILDS} replace />;
 
   return (
     <NewbuildsLayout>

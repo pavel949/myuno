@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserContext, type AppRole } from '@/hooks/useUserContext';
+import { type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { AccessDenied } from './AccessDenied';
@@ -30,11 +30,10 @@ export function RoleGuard({
 }: RoleGuardProps) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { hasRole, isLoading: contextLoading } = useUserContext();
-  const { context, isLoading: resolvedLoading } = useResolvedContext();
+  const { context, isLoading: resolvedLoading, permissions } = useResolvedContext();
 
   // Show loading while checking auth/context
-  if (authLoading || contextLoading || resolvedLoading) {
+  if (authLoading || resolvedLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <LoadingSpinner size="lg" />
@@ -52,8 +51,16 @@ export function RoleGuard({
     return <>{children}</>;
   }
 
-  // Check if user has any of the allowed roles (Airbnb-style: check ownership, not active role)
-  const hasAllowedRole = allowedRoles.some(role => hasRole(role));
+  // Check if user's server-resolved role matches any allowed role.
+  // Also grant access when the user holds the wildcard permission ('*') or
+  // a permission matching an allowed role name, so MC members with broad
+  // permissions can navigate freely.
+  const serverRole = context?.role;
+  const hasAllowedRole = allowedRoles.some(role =>
+    role === serverRole ||
+    permissions.includes('*') ||
+    permissions.includes(role)
+  );
 
   if (!hasAllowedRole) {
     // Show informative access denied page instead of redirect

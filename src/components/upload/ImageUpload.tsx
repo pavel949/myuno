@@ -343,7 +343,7 @@ export function MultiImageUpload({
         
         // For Yandex Disk images, fetch via proxy
         const fetchUrl = img.isYandexDisk 
-          ? `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
+          ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
           : img.originalUrl;
         
         try {

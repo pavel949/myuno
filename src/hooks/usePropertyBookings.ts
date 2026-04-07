@@ -90,7 +90,7 @@ export function usePropertyBookings(propertyId?: string) {
   const activeCompanyId = activeCompany?.company_id ?? null;
   const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['property-bookings', user?.id, activeCompanyId, propertyId],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -489,6 +489,8 @@ export function usePropertyBookings(propertyId?: string) {
   return {
     bookings,
     isLoading,
+    error,
+    refetch,
     createBooking: createBooking.mutateAsync,
     updateBooking: updateBooking.mutateAsync,
     deleteBooking: deleteBooking.mutateAsync,
@@ -507,7 +509,7 @@ export function useAllPropertyBookings() {
   const { activeCompany } = useActiveCompany();
   const activeCompanyId = activeCompany?.company_id ?? null;
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['all-property-bookings', user?.id, activeCompanyId],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -596,6 +598,8 @@ export function useAllPropertyBookings() {
     upcomingBookings,
     activeBookings,
     isLoading,
+    error,
+    refetch,
   };
 }
 
@@ -603,7 +607,7 @@ export function useAllPropertyBookings() {
 export function useGuestPropertyBookings() {
   const { user } = useAuth();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['guest-property-bookings', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -689,5 +693,7 @@ export function useGuestPropertyBookings() {
     activeBookings,
     pastBookings,
     isLoading,
+    error,
+    refetch,
   };
 }

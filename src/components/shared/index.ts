@@ -21,3 +21,14 @@ export { TrustBadge, TrustSignalsRow, SocialProofBadge } from './TrustSignalsBad
 // Provider input validation hints
 export { ProviderFieldHints, ProviderFormValidationSummary, useFormValidationHints } from './ProviderFieldHints';
 export { ProviderFieldHint } from './ProviderFieldHint';
+
+// AI-powered components
+export { AIDescriptionGenerator } from './AIDescriptionGenerator';
+export { AISmartFieldMapper } from './AISmartFieldMapper';
+
+// Catalog and navigation
+export { CatalogHeader } from './CatalogHeader';
+export { ExploreVerticalsSheet } from './ExploreVerticalsSheet';
+
+// Google Places autocomplete
+export { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
