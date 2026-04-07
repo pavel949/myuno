@@ -1,25 +1,28 @@
 # myUNO — SuperApp for Phuket
 
-myUNO is a comprehensive SuperApp platform providing 18+ service verticals for residents and tourists in Phuket, Thailand. It covers real estate, transport, restaurants, beauty, healthcare, education, events, yachts, and many more — all in one unified application.
+> Home is where myUNO is. Your life abroad, simplified.
+
+myUNO is a comprehensive SuperApp platform providing 18+ service verticals for residents, tourists, and investors in Phuket, Thailand. Real estate, transport, restaurants, beauty, healthcare, education, events, yachts, and more — all in one unified application.
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
-- **UI:** shadcn/ui + Radix UI + Tailwind CSS (semantic tokens)
-- **State:** React Context (9 providers) + TanStack React Query
-- **Backend:** Lovable Cloud (Supabase) — 60+ Edge Functions, PostgreSQL with RLS
-- **Payments:** Stripe (checkout sessions, webhooks, vendor subscriptions)
-- **Maps:** Mapbox GL
-- **Notifications:** Resend (email), WhatsApp integrations
-- **AI:** Lovable AI (descriptions, search, translations, moderation)
-- **PWA:** vite-plugin-pwa with offline support
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 18 + TypeScript 5.8 + Vite 5 |
+| **UI** | shadcn/ui + Radix UI + Tailwind CSS (semantic HSL tokens) |
+| **State** | React Context (12 providers) + TanStack React Query |
+| **Backend** | Supabase — 134 Edge Functions, PostgreSQL with RLS |
+| **Payments** | Stripe (checkout sessions, webhooks, vendor subscriptions) |
+| **Maps** | Google Maps (`@react-google-maps/api`) |
+| **Notifications** | Resend (email), WhatsApp integrations |
+| **PWA** | vite-plugin-pwa with offline support |
 
 ## Quick Start
 
 ```bash
 # 1. Clone the repository
-git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
+git clone https://github.com/pavel949/myuno.git
+cd myuno
 
 # 2. Install dependencies
 npm install
@@ -43,38 +46,44 @@ See [`.env.example`](.env.example) for the complete list. Key variables:
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key |
 | `VITE_SUPABASE_PROJECT_ID` | Supabase project ID |
+| `VITE_GOOGLE_MAPS_API_KEY` | Google Maps API key |
 
-Edge functions also require secrets configured in the backend: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `MAPBOX_PUBLIC_TOKEN`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`, `LOVABLE_API_KEY`.
+Edge functions also require secrets configured in the Supabase dashboard: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `FIRECRAWL_API_KEY`.
 
 ## Project Structure
 
 ```
 src/
-  components/    — UI components organized by domain (60+ folders)
-  pages/         — Route pages (40+ verticals)
-  hooks/         — Business logic hooks (230+)
+  components/    — UI components organized by domain (75+ folders)
+  pages/         — Route pages (78 files across 18+ verticals)
+  hooks/         — Business logic hooks (370+)
   contexts/      — Global providers (Auth, Cart, Language, Currency, Theme, etc.)
   lib/           — Utilities, configs, taxonomies, adapters
   types/         — TypeScript type definitions
-  integrations/  — Auto-generated files (DO NOT EDIT)
+  integrations/  — Auto-generated Supabase types (DO NOT EDIT)
 
 supabase/
-  functions/     — Edge Functions (60+)
+  functions/     — Edge Functions (134)
   migrations/    — SQL migrations (DO NOT EDIT)
 
-docs/            — Developer documentation
+docs/
+  architecture/  — Project structure, patterns, and key abstractions
+  conventions/   — Coding standards and naming conventions
+  reference/     — Database schema, Edge Functions reference
+  guides/        — Setup and deployment guides
+  audits/        — Audit reports and fix plans
 ```
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Project structure, patterns, and key abstractions |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Coding standards and naming conventions |
-| [`docs/EDGE_FUNCTIONS.md`](docs/EDGE_FUNCTIONS.md) | Reference for all 60+ backend functions |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | Database schema, tables, and RLS policies |
-| [`docs/MCC_ARCHITECTURE.md`](docs/MCC_ARCHITECTURE.md) | Management company business logic |
-| [`docs/UX_CONTRACT.md`](docs/UX_CONTRACT.md) | UX patterns and contracts |
+| [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) | Project structure, patterns, and key abstractions |
+| [`docs/conventions/CONVENTIONS.md`](docs/conventions/CONVENTIONS.md) | Coding standards and naming conventions |
+| [`docs/reference/EDGE_FUNCTIONS.md`](docs/reference/EDGE_FUNCTIONS.md) | Reference for all 134 backend functions |
+| [`docs/reference/DATABASE.md`](docs/reference/DATABASE.md) | Database schema, tables, and RLS policies |
+| [`docs/architecture/MCC_ARCHITECTURE.md`](docs/architecture/MCC_ARCHITECTURE.md) | Management company business logic |
+| [`docs/conventions/UX_CONTRACT.md`](docs/conventions/UX_CONTRACT.md) | UX patterns and contracts |
 
 ## Key Concepts
 
@@ -101,4 +110,10 @@ docs/            — Developer documentation
 
 ## Deployment
 
-The app is deployed via Lovable. Frontend changes require clicking "Update" in the publish dialog. Backend changes (Edge Functions, migrations) deploy automatically.
+The app is deployed via [Vercel](https://vercel.com). Push to `main` triggers automatic deployment. See `vercel.json` for configuration.
+
+Backend Edge Functions deploy via Supabase CLI:
+
+```bash
+npm run supabase:deploy
+```
