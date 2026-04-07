@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
 
-    // Build Stripe line items — separate deposit and cleaning fee
+    // Build Stripe line items — single deposit covering full amount (incl. cleaning fee)
     const lineItems: Array<{
       price_data: {
         currency: string;
@@ -241,11 +241,6 @@ Deno.serve(async (req) => {
       quantity: number;
     }> = [];
 
-    // Calculate how much of the deposit covers each component
-    const cleaningFeeAmount = cleaning_fee && cleaning_fee > 0 ? cleaning_fee : 0;
-    const rentalDeposit = deposit_amount - Math.round(cleaningFeeAmount * 0.1);
-
-    // Main rental deposit line
     lineItems.push({
       price_data: {
         currency: "thb",
@@ -253,25 +248,10 @@ Deno.serve(async (req) => {
           name: `Deposit: ${property_title}`,
           description: `10% deposit for ${nights} nights (${check_in} – ${check_out})`,
         },
-        unit_amount: Math.round((cleaningFeeAmount > 0 ? rentalDeposit : deposit_amount) * 100),
+        unit_amount: Math.round(deposit_amount * 100),
       },
       quantity: 1,
     });
-
-    // Cleaning fee line (10% of cleaning fee as part of deposit)
-    if (cleaningFeeAmount > 0) {
-      lineItems.push({
-        price_data: {
-          currency: "thb",
-          product_data: {
-            name: "Cleaning Fee (10% deposit)",
-            description: `Cleaning fee deposit portion`,
-          },
-          unit_amount: Math.round(cleaningFeeAmount * 0.1 * 100),
-        },
-        quantity: 1,
-      });
-    }
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

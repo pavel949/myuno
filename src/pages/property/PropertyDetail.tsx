@@ -49,19 +49,8 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
 // Demo fallback removed — only real DB data is used
 
-// Import centralized taxonomy for amenities
-import { getAmenityIcon, getAmenityLabel, normalizeAmenityId } from '@/lib/taxonomies';
-
-// View type labels
-const viewTypeLabels: Record<string, { en: string; ru: string }> = {
-  'sea': { en: 'Sea View', ru: 'Вид на море' },
-  'ocean': { en: 'Ocean View', ru: 'Вид на океан' },
-  'pool': { en: 'Pool View', ru: 'Вид на бассейн' },
-  'garden': { en: 'Garden View', ru: 'Вид на сад' },
-  'city': { en: 'City View', ru: 'Вид на город' },
-  'mountain': { en: 'Mountain View', ru: 'Вид на горы' },
-  'lagoon': { en: 'Lagoon View', ru: 'Вид на лагуну' },
-};
+// Import centralized taxonomy for amenities and view types
+import { getAmenityIcon, getAmenityLabel, normalizeAmenityId, getViewTypeLabel } from '@/lib/taxonomies';
 
 export default function PropertyDetail() {
   const { id } = useParams();
@@ -140,8 +129,7 @@ export default function PropertyDetail() {
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   const viewTypes = normalizeViewTypes(property.view_type);
   const viewLabels = viewTypes
-    .map((viewType) => viewTypeLabels[viewType])
-    .filter(Boolean);
+    .map((vt) => ({ en: getViewTypeLabel(vt, 'en'), ru: getViewTypeLabel(vt, 'ru') }));
 
   const propertyTitle = isRu ? (property.title_ru || property.title_en) : (property.title_en || property.title_ru);
   const propertyDesc = isRu ? (property.description_ru || property.description_en || '') : (property.description_en || property.description_ru || '');
@@ -205,9 +193,9 @@ export default function PropertyDetail() {
               ...property,
               price_per_night: rentalTerms?.price_per_night,
             }} />
-            <FavoriteButton
+            {id && <FavoriteButton
               itemType="property"
-              itemId={id || 'prop-1'}
+              itemId={id}
               itemData={{
                 title_en: property.title_en,
                 title_ru: property.title_ru,
@@ -216,7 +204,7 @@ export default function PropertyDetail() {
                 location: property.district,
               }}
               variant="ghost"
-            />
+            />}
           </div>
         </div>
 

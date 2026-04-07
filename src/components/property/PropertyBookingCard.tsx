@@ -11,7 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
-import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
+import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
 import { GuestPriceProposal } from './GuestPriceProposal';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -36,7 +36,7 @@ interface PropertyBookingCardProps {
   depositCurrency?: string;
   customLengthDiscounts?: Array<{ min_nights: number; discount_percent: number }>;
   negotiationEnabled?: boolean;
-  seasonalPricing?: any[];
+  seasonalPricing?: SeasonalPricingRule[];
 }
 
 export function PropertyBookingCard({

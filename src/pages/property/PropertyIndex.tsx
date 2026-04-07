@@ -18,7 +18,7 @@ import { matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
 import { AirbnbCategoryRibbon } from '@/components/property/PropertyCategoryIcons.ribbon';
 import { CrossSellSection } from '@/components/crosssell';
-import { cn } from '@/lib/utils';
+import { cn, pluralRu } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
@@ -49,7 +49,7 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
       </div>
       <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
       <p className="text-[11px] text-muted-foreground">
-        {item.bedrooms} {isRu ? 'кроват' : 'bed'}{item.bedrooms !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
+        {item.bedrooms} {isRu ? pluralRu(item.bedrooms, 'кровать', 'кровати', 'кроватей') : item.bedrooms === 1 ? 'bed' : 'beds'}
         {item.rating != null && item.rating > 0 && (<> · <Star className="w-2.5 h-2.5 inline fill-current" /> {item.rating.toFixed(1)}</>)}
       </p>
     </button>
@@ -214,7 +214,7 @@ export default function PropertyIndex() {
         {(selectedCategories.length > 0 || activeFilterCount > 0) && (
           <div className="px-4 pt-2 flex items-center gap-2">
             <p className="text-xs text-muted-foreground">
-              {filteredProperties.length} {isRu ? 'объектов' : 'places'}
+              {filteredProperties.length} {isRu ? pluralRu(filteredProperties.length, 'объект', 'объекта', 'объектов') : 'places'}
             </p>
             <button
               onClick={() => {
@@ -285,9 +285,21 @@ export default function PropertyIndex() {
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
               </p>
-              <Button variant="outline" size="sm" onClick={() => setSelectedCategories([])}>
+              <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); }}>
                 {isRu ? 'Сбросить фильтры' : 'Clear filters'}
               </Button>
+            </div>
+          )}
+
+          {!isLoading && allProperties.length === 0 && (
+            <div className="text-center py-16 px-4">
+              <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">
+                {isRu ? 'Объекты скоро появятся' : 'Listings coming soon'}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {isRu ? 'Мы добавляем новые объекты каждый день' : 'We add new listings every day'}
+              </p>
             </div>
           )}
 

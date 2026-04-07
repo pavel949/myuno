@@ -68,9 +68,14 @@ export function PropertyListingCard({
 
   // Use price_per_night as primary, fallback to price
   const unitPrice = property.price_per_night || property.price || 0;
-  const totalPrice = nights && nights > 0 && (property.price_period === 'night' || !property.price_period)
-    ? unitPrice * nights
-    : null;
+  const totalPrice = (() => {
+    if (!nights || nights <= 0) return null;
+    const period = property.price_period || 'night';
+    if (period === 'night') return unitPrice * nights;
+    if (period === 'week') return unitPrice * Math.ceil(nights / 7);
+    if (period === 'month') return unitPrice * Math.ceil(nights / 30);
+    return null;
+  })();
 
   return (
     <div

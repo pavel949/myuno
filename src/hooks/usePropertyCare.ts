@@ -421,6 +421,10 @@ export function useCreateInspection() {
       queryClient.invalidateQueries({ queryKey: ['property-inspections'] });
       toast.success('Инспекция запланирована!');
     },
+    onError: (error: Error) => {
+      toast.error('Не удалось создать инспекцию');
+      errorLog.silent(error, 'create_inspection');
+    },
   });
 }
 
@@ -484,6 +488,10 @@ export function useCreateServiceRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-service-requests'] });
       toast.success('Заявка создана!');
+    },
+    onError: (error: Error) => {
+      toast.error('Не удалось создать заявку');
+      errorLog.silent(error, 'create_service_request');
     },
   });
 }

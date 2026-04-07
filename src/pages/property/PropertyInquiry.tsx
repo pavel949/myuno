@@ -22,16 +22,11 @@ import { DepositPaymentOptions } from '@/components/property/DepositPaymentOptio
 import { useOrders } from '@/hooks/useOrders';
 import { differenceInDays, format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, pluralRu } from '@/lib/utils';
 
-// Russian pluralization helper for nights
 function pluralizeNights(n: number, isRu: boolean): string {
   if (!isRu) return n === 1 ? 'night' : 'nights';
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'ночь';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'ночи';
-  return 'ночей';
+  return pluralRu(n, 'ночь', 'ночи', 'ночей');
 }
 
 export default function PropertyInquiry() {

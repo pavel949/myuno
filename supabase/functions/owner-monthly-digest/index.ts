@@ -36,8 +36,9 @@ Deno.serve(async (req) => {
 
     // Get all properties with owners
     const { data: properties, error: propErr } = await supabase
-      .from("owner_properties")
-      .select("id, title, title_ru, owner_id");
+      .from("properties")
+      .select("id, title, title_ru, owner_id")
+      .not("owner_id", "is", null);
 
     if (propErr || !properties?.length) {
       return new Response(JSON.stringify({ message: "No properties found", error: propErr }), {
@@ -79,8 +80,8 @@ Deno.serve(async (req) => {
         .from("property_bookings")
         .select("id")
         .in("property_id", propIds)
-        .gte("check_in_date", lastMonthStart)
-        .lte("check_in_date", lastMonthEnd);
+        .gte("check_in", lastMonthStart)
+        .lte("check_in", lastMonthEnd);
 
       const bookingCount = bookings?.length || 0;
 
