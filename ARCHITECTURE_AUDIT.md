@@ -71,9 +71,81 @@ The `.env` file contains Supabase credentials and is committed to the repository
 
 ---
 
+### 5. Unprotected Developer Portal — Privilege Escalation
+
+**File:** `src/components/layout/AnimatedRoutes.tsx:261-268`, `src/pages/developer-portal/DeveloperPortalLayout.tsx`
+
+The `/developer-portal` route has **no route-level auth guard**. `DeveloperPortalLayout` checks if the user is authenticated but does **not** redirect when `useDeveloperProfile()` returns `null` (i.e., user is not a developer). The layout and all nested routes (`/projects`, `/leads`, `/analytics`) still render.
+
+```tsx
+// AnimatedRoutes.tsx:261 — no guard wrapping this route
+<Route path="/developer-portal" element={<Suspense><Pages.DeveloperPortalLayout /></Suspense>}>
+  <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
+  ...
+</Route>
+
+// DeveloperPortalLayout.tsx
+if (!user) return <Navigate to="/auth" />;
+// MISSING: if (!developer) return <Navigate to="/" />;
+return <NewbuildsLayout>...</NewbuildsLayout>; // renders even if developer is null
+```
+
+**Impact:** Any authenticated user can access developer portal pages.
+
+**Fix:** Add `if (!developer) return <Navigate to="/" />;` after the auth check, or wrap the route with a `DeveloperGuard`.
+
+---
+
+### 6. RoleGuard Uses Two Conflicting Permission Sources
+
+**File:** `src/components/auth/RoleGuard.tsx:33-56`
+
+`RoleGuard` uses **server-side** `useResolvedContext()` for admin bypass (line 51) but **client-side** `useUserContext().hasRole()` for all other role checks (line 56). The codebase documents `useResolvedContext` as the "SINGLE SOURCE OF TRUTH" for permissions, yet the actual permission gate uses the client-side derivation.
+
+```tsx
+const { hasRole } = useUserContext();           // CLIENT-SIDE role derivation
+const { context } = useResolvedContext();        // SERVER-SIDE role resolution
+
+if (context?.role === 'admin') return children;  // server source for admins
+const hasAllowedRole = allowedRoles.some(r => hasRole(r)); // client source for everyone else
+```
+
+**Impact:** If server and client role logic diverge, regular users could be granted or denied access incorrectly. Admins are checked differently than other roles.
+
+**Fix:** Use `useResolvedContext()` exclusively for all role checks.
+
+---
+
 ## HIGH Priority Issues
 
-### 5. Duplicate Supabase Client in Error Handler
+### 7. Unprotected MC Registration Route
+
+**File:** `src/components/layout/AnimatedRoutes.tsx:608`
+
+`/mc/register` has no `AuthGuard`, while the adjacent `/mc/onboarding` (line 607) does. `MCRegistrationPage` checks auth internally via client-side redirect, but unauthenticated users briefly see the page contents before being redirected.
+
+```tsx
+// Line 607 — has guard
+<Route path="/mc/onboarding" element={<AuthGuard><Pages.MCOnboarding /></AuthGuard>} />
+// Line 608 — no guard
+<Route path="/mc/register" element={<Pages.MCRegistrationPage />} />
+```
+
+**Fix:** Wrap with `<AuthGuard>` for consistency.
+
+---
+
+### 8. Inconsistent Auth Guard Patterns Across Routes
+
+**File:** `src/components/layout/AnimatedRoutes.tsx:570-572, 607-608`
+
+Similar onboarding/registration routes use different protection patterns. Vendor onboarding (line 571) has no guard, MC onboarding (line 607) has `AuthGuard`, MC registration (line 608) has none. This inconsistency creates security blind spots.
+
+**Fix:** Establish and enforce a consistent guard pattern for all protected route categories.
+
+---
+
+### 9. Duplicate Supabase Client in Error Handler
 
 **File:** `src/lib/errorHandler.ts:105-118`
 
@@ -91,7 +163,7 @@ await fetch(`${supabaseUrl}/rest/v1/analytics_events`, {
 
 ---
 
-### 6. Wide-Open CORS on All Edge Functions
+### 10. Wide-Open CORS on All Edge Functions
 
 **Files:** 15+ files in `supabase/functions/*/index.ts`
 
@@ -101,7 +173,7 @@ Every edge function returns `Access-Control-Allow-Origin: "*"`, including sensit
 
 ---
 
-### 7. Refresh Tokens Stored in localStorage
+### 11. Refresh Tokens Stored in localStorage
 
 **Files:** `src/hooks/usePinManagement.ts:34,64,74,114`, `src/hooks/usePinAuth.ts`
 
@@ -115,7 +187,7 @@ localStorage.setItem(PIN_REFRESH_TOKEN_KEY, session.refresh_token);
 
 ---
 
-### 8. No Content Security Policy (CSP)
+### 12. No Content Security Policy (CSP)
 
 **File:** `index.html`
 
@@ -125,7 +197,7 @@ No `Content-Security-Policy` meta tag or header exists. The app is vulnerable to
 
 ---
 
-### 9. Missing Error Exposure in Query Hooks (Widespread)
+### 13. Missing Error Exposure in Query Hooks (Widespread)
 
 **Files:** `src/hooks/useYachts.ts:140`, `src/hooks/usePropertyBookings.ts:93`, `src/hooks/useProfile.ts:80-91`, and many others.
 
@@ -144,7 +216,7 @@ return { yachts: data || [], isLoading }; // error is invisible to consumers
 
 ## MEDIUM Priority Issues
 
-### 10. Dual Toast System (250 + 82 import sites)
+### 14. Dual Toast System (250 + 82 import sites)
 
 **Files:** `src/hooks/use-toast.ts` (adapter), every file using `toast()`
 
@@ -156,7 +228,7 @@ Some files call `toast.success("msg")` (sonner API), others call `toast({ title,
 
 ---
 
-### 11. 649 `as any` Type Casts Across 244 Files
+### 15. 649 `as any` Type Casts Across 244 Files
 
 **Files:** Concentrated in `src/hooks/useAdminContent.ts` (36 casts), `src/hooks/useDayBriefing.ts` (16 casts), `src/hooks/useProfileDetails.ts` (12 casts), `src/utils/generateReportPdf.ts` (12 casts), `src/lib/adapters/contentAdapters.ts` (12 casts)
 
@@ -168,7 +240,7 @@ Excessive use of `as any` defeats TypeScript's purpose and masks real type error
 
 ---
 
-### 12. Unstable useEffect Dependencies in Realtime Hooks
+### 16. Unstable useEffect Dependencies in Realtime Hooks
 
 **File:** `src/hooks/useOrderTracking.ts:72-106`
 
@@ -185,7 +257,7 @@ useEffect(() => {
 
 ---
 
-### 13. Silent Cart Mutation Failures
+### 17. Silent Cart Mutation Failures
 
 **File:** `src/contexts/CartContext.tsx:210-254`
 
@@ -195,7 +267,7 @@ Cart operations (add/update/remove) catch Supabase errors but only log them — 
 
 ---
 
-### 14. XSS Risk — `dangerouslySetInnerHTML` Without Final Sanitization
+### 18. XSS Risk — `dangerouslySetInnerHTML` Without Final Sanitization
 
 **Files:** `src/pages/MapView.tsx:250-260`, `src/components/map/SalonMap.tsx:143-154`
 
@@ -205,7 +277,7 @@ Cart operations (add/update/remove) catch Supabase errors but only log them — 
 
 ---
 
-### 15. Hardcoded Supabase Project ID in Source Code
+### 19. Hardcoded Supabase Project ID in Source Code
 
 **File:** `src/components/ui/optimized-image.tsx:27`
 
@@ -217,7 +289,7 @@ Hardcoded in compiled JS bundles. Should derive from `VITE_SUPABASE_URL` env var
 
 ---
 
-### 16. Dead Radix Toast Components Still in Codebase
+### 20. Dead Radix Toast Components Still in Codebase
 
 **Files:** `src/components/ui/toast.tsx`, `src/components/ui/toaster.tsx`, `src/components/ui/use-toast.ts`
 
@@ -227,7 +299,7 @@ The Radix UI toast system (ToastProvider, ToastViewport, Toast, ToastAction, etc
 
 ---
 
-### 17. Incomplete Barrel Exports in `src/components/shared/index.ts`
+### 21. Incomplete Barrel Exports in `src/components/shared/index.ts`
 
 **File:** `src/components/shared/index.ts`
 
@@ -237,7 +309,7 @@ Only 9 of 14+ shared components are exported. Missing: `AIDescriptionGenerator`,
 
 ---
 
-### 18. Duplicated Filter Configuration Schema
+### 22. Duplicated Filter Configuration Schema
 
 **Files:** `src/lib/filterConfigs/restaurantFiltersKlook.ts`, `transportFiltersKlook.ts`, `yachtFiltersKlook.ts`
 
@@ -247,7 +319,7 @@ Each implements the same structure (showDateFilters, pricePresets, sortOptions, 
 
 ---
 
-### 19. Scattered Sanitization Utilities
+### 23. Scattered Sanitization Utilities
 
 **Files:** `src/lib/sanitize.ts`, `src/lib/sanitizePayload.ts`, `src/lib/sanitizeSearch.ts`
 
@@ -259,31 +331,31 @@ Three separate files for sanitization with no unified export. Some are re-export
 
 ## LOW Priority / Architectural Notes
 
-### 20. Inconsistent Cache Strategy
+### 24. Inconsistent Cache Strategy
 
 Some hooks use centralized `CACHE_PROFILES` from `src/lib/queryConfig.ts`, others hardcode `staleTime`/`gcTime` or omit them entirely (defaulting to React Query's 0ms stale time). This leads to unpredictable data freshness.
 
-### 21. Missing `queryClient.invalidateQueries` After Cart Operations
+### 25. Missing `queryClient.invalidateQueries` After Cart Operations
 
 `CartContext` manages cart state independently of React Query. If any component also queries cart data via React Query, it won't be notified of changes.
 
-### 22. Subscription Channel Name Collisions
+### 26. Subscription Channel Name Collisions
 
 Generic channel names like `'notifications-realtime'` can collide if multiple component instances subscribe. Prefer including user IDs: `'notifications-${userId}'`.
 
-### 23. Language Context Subscription Created Regardless of Initial Load Failure
+### 27. Language Context Subscription Created Regardless of Initial Load Failure
 
 **File:** `src/contexts/LanguageContext.tsx:96-114`
 
 If the initial translations fetch fails, the realtime subscription is still created, attempting to process updates for data that was never loaded.
 
-### 24. No Barrel Export for UI Components
+### 28. No Barrel Export for UI Components
 
 **File:** `src/components/ui/` (67 files, no `index.ts`)
 
 Every consumer must import individual files. A barrel export would standardize the import surface and make dead code easier to identify.
 
-### 25. Inconsistent Data Fetching Patterns
+### 29. Inconsistent Data Fetching Patterns
 
 Components mix three patterns with no convention: (A) `useState + useEffect` with manual fetch, (B) custom hooks wrapping `useQuery`, (C) direct React Query usage. All three appear within the same feature modules.
 
@@ -297,24 +369,28 @@ Components mix three patterns with no convention: (A) `useState + useEffect` wit
 | 2 | Cart sync race condition on login | CRITICAL | Data Loss |
 | 3 | Profiles table readable by all users | CRITICAL | Privacy |
 | 4 | `.env` committed to git | CRITICAL | Security |
-| 5 | Duplicate Supabase client in errorHandler | HIGH | Architecture |
-| 6 | Wide-open CORS on edge functions | HIGH | Security |
-| 7 | Refresh tokens in localStorage | HIGH | Security |
-| 8 | No Content Security Policy | HIGH | Security |
-| 9 | Query hooks swallow errors | HIGH | UX / Reliability |
-| 10 | Dual toast system (332 call sites) | MEDIUM | Consistency |
-| 11 | 649 `as any` casts | MEDIUM | Type Safety |
-| 12 | Unstable useEffect deps in realtime | MEDIUM | Performance |
-| 13 | Silent cart mutation failures | MEDIUM | UX |
-| 14 | XSS risk in map popups | MEDIUM | Security |
-| 15 | Hardcoded Supabase project ID | MEDIUM | Config |
-| 16 | Dead Radix toast components | MEDIUM | Dead Code |
-| 17 | Incomplete barrel exports in shared/ | MEDIUM | Consistency |
-| 18 | Duplicated filter config schema | MEDIUM | Duplication |
-| 19 | Scattered sanitization utilities | MEDIUM | Organization |
-| 20 | Inconsistent cache strategy | LOW | Performance |
-| 21 | Cart state not synced with React Query | LOW | Architecture |
-| 22 | Channel name collisions | LOW | Reliability |
-| 23 | Translations subscription after failure | LOW | Reliability |
-| 24 | No barrel export for UI components | LOW | Organization |
-| 25 | Inconsistent data fetching patterns | LOW | Consistency |
+| 5 | Developer portal accessible to any auth user | CRITICAL | Auth / Privilege Escalation |
+| 6 | RoleGuard uses two conflicting permission sources | CRITICAL | Auth / Consistency |
+| 7 | Unprotected MC registration route | HIGH | Auth |
+| 8 | Inconsistent auth guard patterns across routes | HIGH | Auth |
+| 9 | Duplicate Supabase client in errorHandler | HIGH | Architecture |
+| 10 | Wide-open CORS on edge functions | HIGH | Security |
+| 11 | Refresh tokens in localStorage | HIGH | Security |
+| 12 | No Content Security Policy | HIGH | Security |
+| 13 | Query hooks swallow errors | HIGH | UX / Reliability |
+| 14 | Dual toast system (332 call sites) | MEDIUM | Consistency |
+| 15 | 649 `as any` casts | MEDIUM | Type Safety |
+| 16 | Unstable useEffect deps in realtime | MEDIUM | Performance |
+| 17 | Silent cart mutation failures | MEDIUM | UX |
+| 18 | XSS risk in map popups | MEDIUM | Security |
+| 19 | Hardcoded Supabase project ID | MEDIUM | Config |
+| 20 | Dead Radix toast components | MEDIUM | Dead Code |
+| 21 | Incomplete barrel exports in shared/ | MEDIUM | Consistency |
+| 22 | Duplicated filter config schema | MEDIUM | Duplication |
+| 23 | Scattered sanitization utilities | MEDIUM | Organization |
+| 24 | Inconsistent cache strategy | LOW | Performance |
+| 25 | Cart state not synced with React Query | LOW | Architecture |
+| 26 | Channel name collisions | LOW | Reliability |
+| 27 | Translations subscription after failure | LOW | Reliability |
+| 28 | No barrel export for UI components | LOW | Organization |
+| 29 | Inconsistent data fetching patterns | LOW | Consistency |
