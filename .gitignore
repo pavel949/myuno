@@ -31,3 +31,15 @@ tmp/
 *.sln
 *.sw?
 supabase/.temp/
+
+# Bun lock files (standardized on npm)
+bun.lock
+bun.lockb
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# Claude Code
+.claude/
