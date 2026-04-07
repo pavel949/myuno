@@ -3,7 +3,7 @@
  * @description Provides storefront context for private MC branded links (/b/:slug).
  * When active, catalogs filter to only show properties of that MC.
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 
 export interface StorefrontData {
   id: string;
@@ -46,22 +46,26 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const setStorefront = (data: StorefrontData | null) => {
+  const setStorefront = useCallback((data: StorefrontData | null) => {
     setStorefrontState(data);
     if (data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  };
+  }, []);
 
-  const clearStorefront = () => setStorefront(null);
+  const clearStorefront = useCallback(() => setStorefront(null), [setStorefront]);
 
   const isStorefrontMode = !!storefront;
   const isPrivateMode = storefront?.mode === 'private';
 
+  const value = useMemo(() => ({
+    storefront, isStorefrontMode, isPrivateMode, setStorefront, clearStorefront,
+  }), [storefront, isStorefrontMode, isPrivateMode, setStorefront, clearStorefront]);
+
   return (
-    <StorefrontContext.Provider value={{ storefront, isStorefrontMode, isPrivateMode, setStorefront, clearStorefront }}>
+    <StorefrontContext.Provider value={value}>
       {children}
     </StorefrontContext.Provider>
   );

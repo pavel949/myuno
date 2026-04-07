@@ -5,7 +5,7 @@
  * Static translations are imported from src/i18n/ (modular files per language).
  * DB translations override static ones and are cached for 1 hour.
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { translations, type Language } from '@/i18n';
 
@@ -37,13 +37,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('myuno-language', lang);
-  };
+  }, []);
 
   // Load translations from DB with caching
   useEffect(() => {
+    let cancelled = false;
+
     const loadTranslations = async (): Promise<boolean> => {
       // Check cache first
       const cachedTimestamp = localStorage.getItem(TRANSLATIONS_CACHE_TIMESTAMP);
@@ -78,8 +80,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           };
         });
 
-        setCustomTranslations(map);
-        
+        if (!cancelled) setCustomTranslations(map);
+
         // Cache the results
         localStorage.setItem(TRANSLATIONS_CACHE_KEY, JSON.stringify(map));
         localStorage.setItem(TRANSLATIONS_CACHE_TIMESTAMP, Date.now().toString());
@@ -114,6 +116,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
   }, []);
@@ -132,8 +135,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translations[language][key] || translations['en'][key] || key;
   }, [language, customTranslations]);
 
+  const value = useMemo(() => ({
+    language, setLanguage, t, isLoadingTranslations,
+  }), [language, setLanguage, t, isLoadingTranslations]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, isLoadingTranslations }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

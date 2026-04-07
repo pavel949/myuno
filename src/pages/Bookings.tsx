@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell } from 'lucide-react';
+import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface BookingItem {
   id: string;
@@ -94,11 +95,13 @@ export default function Bookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const loadBookings = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
+    setLoadError(false);
     try {
       // Load ALL bookings from unified table only
       const { data: allBookingsData, error } = await supabase
@@ -127,6 +130,8 @@ export default function Bookings() {
       setBookings(formattedBookings);
     } catch (error) {
       console.error('Error loading bookings:', error);
+      setLoadError(true);
+      toast.error(language === 'ru' ? 'Не удалось загрузить бронирования' : 'Failed to load bookings');
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +180,18 @@ export default function Bookings() {
         <PageContainer>
           <PageHeader title={t('nav.bookings')} />
           
-          {bookings.length === 0 ? (
+          {loadError ? (
+            <EmptyState
+              icon={AlertCircle}
+              title={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
+              description={language === 'ru' ? 'Потяните вниз, чтобы повторить' : 'Pull down to retry'}
+              action={
+                <PremiumButton onClick={loadBookings}>
+                  {language === 'ru' ? 'Повторить' : 'Retry'}
+                </PremiumButton>
+              }
+            />
+          ) : bookings.length === 0 ? (
             <EmptyState
               icon={Calendar}
               title={t('booking.noBookings')}

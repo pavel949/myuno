@@ -18,12 +18,13 @@ export function usePlacesDetails() {
   const [error, setError] = useState<Error | null>(null);
   const { reverseGeocode } = useGoogleGeocode();
 
-  const getDetailsByPlaceId = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
+  const getDetailsByPlaceId = useCallback(async (placeId: string, signal?: AbortSignal): Promise<PlaceDetails | null> => {
     const key = getGoogleMapsKey();
     if (!key) return null;
     try {
       const res = await fetch(
-        `https://places.googleapis.com/v1/places/${placeId}?fields=formattedAddress,rating,photos&key=${key}`
+        `https://places.googleapis.com/v1/places/${placeId}?fields=formattedAddress,rating,photos&key=${key}`,
+        { signal }
       );
       if (!res.ok) return null;
       const data = await res.json();

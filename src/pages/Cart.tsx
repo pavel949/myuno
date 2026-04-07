@@ -264,22 +264,24 @@ const Cart = () => {
                           triggerRipple(e);
                           removeItem(item.id);
                         }}
+                        aria-label={language === 'ru' ? 'Удалить' : 'Remove item'}
                         className="p-1 text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                      
-                      <div className="flex items-center gap-2 bg-secondary rounded-lg p-1">
+
+                      <div className="flex items-center gap-2 bg-secondary rounded-lg p-1" role="group" aria-label={language === 'ru' ? 'Количество' : 'Quantity'}>
                         <button
                           onClick={(e) => {
                             triggerRipple(e);
                             updateQuantity(item.id, item.quantity - 1);
                           }}
+                          aria-label={language === 'ru' ? 'Уменьшить количество' : 'Decrease quantity'}
                           className="w-6 h-6 rounded flex items-center justify-center hover:bg-background transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="w-6 text-center text-sm font-medium">
+                        <span className="w-6 text-center text-sm font-medium" aria-live="polite">
                           {item.quantity}
                         </span>
                         <button
@@ -287,6 +289,7 @@ const Cart = () => {
                             triggerRipple(e);
                             updateQuantity(item.id, item.quantity + 1);
                           }}
+                          aria-label={language === 'ru' ? 'Увеличить количество' : 'Increase quantity'}
                           className="w-6 h-6 rounded flex items-center justify-center hover:bg-background transition-colors"
                         >
                           <Plus className="w-3 h-3" />

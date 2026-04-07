@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -119,17 +119,12 @@ export function PWAInstallProvider({ children }: { children: ReactNode }) {
     }
   }, [deferredPrompt]);
 
+  const value = useMemo(() => ({
+    isInstalled, isIOS, isAndroid, isMobile, canInstall, install,
+  }), [isInstalled, isIOS, isAndroid, isMobile, canInstall, install]);
+
   return (
-    <PWAInstallContext.Provider
-      value={{
-        isInstalled,
-        isIOS,
-        isAndroid,
-        isMobile,
-        canInstall,
-        install,
-      }}
-    >
+    <PWAInstallContext.Provider value={value}>
       {children}
     </PWAInstallContext.Provider>
   );
