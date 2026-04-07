@@ -652,10 +652,10 @@ Ranked by (Severity × Impact) ÷ Effort (approximate).
 |---|-----|--------|--------|
 | 1 | Finance tab: real commission/payout from orders | ✅ Done | ControlFinanceTab uses useAdminFinance(30); shows GMV, platform revenue, vendor payouts, order count. |
 | 2 | Dashboard GMV/revenue fallback when platform_metrics empty | ✅ Done | useAdminAnalytics: orders fallback query when metrics empty or zero; summary uses it for totalGMV/totalRevenue. |
-| 3 | Admin Edge Function auth | 📄 Doc | See docs/ADMIN_VS_MC_AND_EDGE_AUTH.md; admin-manage-user is reference; checklist for other admin functions. |
+| 3 | Admin Edge Function auth | 📄 Doc | See docs/audits/ADMIN_VS_MC_AND_EDGE_AUTH.md; admin-manage-user is reference; checklist for other admin functions. |
 | 10 | Realtime subscription cleanup | ✅ Done | useAdminAuditLogsRealtime refactored to useEffect with removeChannel in cleanup; no longer useQuery. |
 | 9 | Destructive action confirmations | ✅ Done | AdminLookups: native confirm() replaced with AlertDialog. AdminLifeSituations: AlertDialog before delete mapping. |
 | — | Breadcrumbs | ✅ Already present | AdminHeader and MCHeader already render breadcrumbs for depth ≥ 2. |
-| — | Admin vs MC clarity | ✅ Doc | docs/ADMIN_VS_MC_AND_EDGE_AUTH.md: division of responsibilities and Edge Function auth checklist. |
+| — | Admin vs MC clarity | ✅ Doc | docs/audits/ADMIN_VS_MC_AND_EDGE_AUTH.md: division of responsibilities and Edge Function auth checklist. |
 
 *MyUNO Deep Audit v1.0 | Ignatev Group | Confidential*

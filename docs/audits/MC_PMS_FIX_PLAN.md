@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-26  
 **Status:** Plan only. No code changes.  
-**Based on:** `docs/AUDIT_MC_PMS.md`
+**Based on:** `docs/audits/AUDIT_MC_PMS.md`
 
 ---
 

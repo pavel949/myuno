@@ -107,4 +107,4 @@ Audit of the contact import code identified and fixed several issues that could 
 
 - `src/pages/owner/ContactImportPage.tsx` — Select sentinel, loading/error states.  
 - `src/components/owner/contacts/ContactImportSheet.tsx` — Filter clarity, empty-batch guard, safe `String()` on cell values.  
-- `docs/CONTACT_IMPORT_AUDIT.md` — This audit.
+- `docs/audits/CONTACT_IMPORT_AUDIT.md` — This audit.

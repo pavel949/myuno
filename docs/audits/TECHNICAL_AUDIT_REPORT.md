@@ -95,9 +95,9 @@
 | P1-T4 | Добавлен `src/lib/logger.ts` (в проде не логирует log/warn/debug/info); в webVitals используется logger. |
 | P1-A1 | В `AnimatedRoutes.tsx` основные маршруты переведены на `APP_ROUTES` (Core, User, Beauty, Property, редиректы). |
 | P1-A2 | В `Auth.tsx` навигация и ссылки переведены на `APP_ROUTES` (HOME, AUTH_FORGOT_PASSWORD, TERMS, PRIVACY). |
-| P1-T1/T2 | ESLint: `@typescript-eslint/no-explicit-any: "warn"`. Документ `docs/TYPESCRIPT_POLICY.md` — политика по strict/any. |
-| P1-S2 | Документ `docs/EDGE_FUNCTIONS_JWT.md` — перечень функций с `verify_jwt = false` и обоснование. |
-| P1-R1 | Документ `docs/BUILD_AND_CI.md` — рекомендации по предупреждениям сборки и лимитам чанков в CI. |
+| P1-T1/T2 | ESLint: `@typescript-eslint/no-explicit-any: "warn"`. Документ `docs/conventions/TYPESCRIPT_POLICY.md` — политика по strict/any. |
+| P1-S2 | Документ `docs/reference/EDGE_FUNCTIONS_JWT.md` — перечень функций с `verify_jwt = false` и обоснование. |
+| P1-R1 | Документ `docs/guides/BUILD_AND_CI.md` — рекомендации по предупреждениям сборки и лимитам чанков в CI. |
 
 ### Дополнительные исправления (второй проход)
 
