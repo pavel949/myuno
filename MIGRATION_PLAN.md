@@ -2,7 +2,7 @@
 ## Lovable Hosted DB → Own Supabase Instance
 
 **Date:** 2026-04-07
-**Current state:** 417 tables, 514 migrations, Lovable-hosted Supabase project `kakkwibljrjsawxgnupk`
+**Current state:** 417 tables, 514 migrations, Lovable-hosted Supabase project `erfwtoavipwjqmylpizt`
 
 ---
 
@@ -109,13 +109,13 @@
 ```bash
 # Dump schema from Lovable project
 pg_dump --schema-only --no-owner --no-privileges \
-  -h db.kakkwibljrjsawxgnupk.supabase.co \
+  -h db.erfwtoavipwjqmylpizt.supabase.co \
   -U postgres -d postgres > schema_full.sql
 
 # Dump data
 pg_dump --data-only --no-owner --no-privileges \
   --disable-triggers \
-  -h db.kakkwibljrjsawxgnupk.supabase.co \
+  -h db.erfwtoavipwjqmylpizt.supabase.co \
   -U postgres -d postgres > data_full.sql
 ```
 

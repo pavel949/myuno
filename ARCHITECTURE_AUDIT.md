@@ -282,7 +282,7 @@ Cart operations (add/update/remove) catch Supabase errors but only log them — 
 **File:** `src/components/ui/optimized-image.tsx:27`
 
 ```ts
-const SUPABASE_PROJECT_ID = 'kakkwibljrjsawxgnupk';
+const SUPABASE_PROJECT_ID = 'erfwtoavipwjqmylpizt';
 ```
 
 Hardcoded in compiled JS bundles. Should derive from `VITE_SUPABASE_URL` env var.

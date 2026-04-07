@@ -467,7 +467,7 @@ export function AirbnbStyleImageUpload({
       
       try {
         const fetchUrl = img.isYandexDisk 
-          ? `https://kakkwibljrjsawxgnupk.supabase.co/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
+          ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-image?url=${encodeURIComponent(img.originalUrl)}`
           : img.originalUrl;
         
         const response = await fetch(fetchUrl);
