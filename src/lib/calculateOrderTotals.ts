@@ -14,6 +14,8 @@ export interface OrderTotals {
   vendorAmount: number;
   serviceFee: number;
   totalCustomerPays: number;
+  /** True when the RPC failed and a local fallback was used */
+  isFallback?: boolean;
 }
 
 /**
@@ -35,8 +37,7 @@ export async function calculateOrderTotals(
     });
 
     if (error) {
-      errorLog.silent(error, 'rpc_calculate_order_totals');
-      // Fallback to simple calculation
+      errorLog.error(error, 'rpc_calculate_order_totals');
       return fallbackCalculation(baseAmount);
     }
 
@@ -56,9 +57,10 @@ export async function calculateOrderTotals(
       vendorAmount: result.vendor_amount,
       serviceFee: result.service_fee,
       totalCustomerPays: result.total_customer_pays,
+      isFallback: false,
     };
   } catch (error) {
-    errorLog.silent(error, 'calculate_totals');
+    errorLog.error(error, 'calculate_totals');
     return fallbackCalculation(baseAmount);
   }
 }
@@ -73,14 +75,16 @@ function fallbackCalculation(baseAmount: number): OrderTotals {
   const commissionRate = DEFAULT_PLATFORM_FEE_PERCENT;
   const platformFee = Math.round(baseAmount * commissionRate * 100) / 100;
   const vendorAmount = baseAmount - platformFee;
-  
+  const serviceFee = 0;
+
   return {
     baseAmount,
     commissionRate,
     platformFee,
     vendorAmount,
-    serviceFee: 0,
-    totalCustomerPays: baseAmount,
+    serviceFee,
+    totalCustomerPays: baseAmount + serviceFee,
+    isFallback: true,
   };
 }
 

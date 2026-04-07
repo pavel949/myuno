@@ -196,9 +196,25 @@ async function executeAction(
 ) {
   const config = action.action_config || {};
 
-  // If action has a delay, we just log it (real delay would need a scheduler)
+  // If action has a delay, defer it by creating a scheduled task instead of
+  // executing immediately.  A future cron function can pick up deferred tasks
+  // by querying crm_tasks with status = 'deferred'.
   if (action.delay_minutes > 0) {
-    console.log(`[EXECUTE-CRM-WORKFLOW] Action ${action.id} has ${action.delay_minutes}min delay — executing immediately (scheduler TODO)`);
+    const executeAt = new Date(Date.now() + action.delay_minutes * 60_000).toISOString();
+    await supabase.from("crm_tasks").insert({
+      company_id: context.company_id,
+      contact_id: context.entity_type === "contact" ? context.entity_id : null,
+      deal_id: context.entity_type === "deal" ? context.entity_id : null,
+      title: `Deferred workflow action: ${action.action_type}`,
+      description: JSON.stringify({ action_id: action.id, action_type: action.action_type, action_config: action.action_config, workflow_id: context.workflow_id }),
+      assigned_to: context.created_by,
+      due_date: executeAt,
+      priority: "medium",
+      status: "deferred",
+      created_by: context.created_by,
+    });
+    console.log(`[EXECUTE-CRM-WORKFLOW] Action ${action.id} deferred until ${executeAt} (${action.delay_minutes}min delay)`);
+    return;
   }
 
   switch (action.action_type) {

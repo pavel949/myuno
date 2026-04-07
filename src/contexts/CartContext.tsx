@@ -173,9 +173,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
             // Sync failed — use local items as fallback so nothing is lost
             setItems(localItems);
           } else {
-            // Reload from database after confirmed sync
-            const updatedItems = await loadDatabaseCart();
-            if (isMounted) setItems(updatedItems);
+            // Reload from database after confirmed sync.
+            // Guard against replication lag: if DB returns fewer items
+            // than we just synced, merge local items as safety net.
+            const dbItems = await loadDatabaseCart();
+            if (!isMounted) return;
+
+            if (dbItems.length >= localItems.length) {
+              setItems(dbItems);
+            } else {
+              // DB may not yet reflect all upserted rows — merge
+              const dbIds = new Set(dbItems.map(i => i.id));
+              const missing = localItems.filter(i => !dbIds.has(i.id));
+              setItems([...dbItems, ...missing]);
+            }
           }
         } else {
           const dbItems = await loadDatabaseCart();

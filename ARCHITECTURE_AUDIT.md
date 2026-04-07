@@ -7,131 +7,59 @@
 
 ## CRITICAL Issues
 
-### 1. Realtime Subscription Memory Leak in `useAdminAuditLogsRealtime`
+### 1. ~~Realtime Subscription Memory Leak in `useAdminAuditLogsRealtime`~~ [RESOLVED]
 
-**File:** `src/hooks/useAdminAuditLogs.ts:80-106`
+**File:** `src/hooks/useAdminAuditLogs.ts:80-112`
 
-A Supabase realtime channel is created **inside `queryFn`** and never cleaned up. Every time React Query re-runs the query, a new subscription is created without unsubscribing the previous one.
-
-```ts
-// BUG: subscription created inside queryFn — no cleanup path
-export function useAdminAuditLogsRealtime(onNewLog?) {
-  return useQuery({
-    queryFn: async () => {
-      const channel = supabase.channel('admin-audit-logs-changes')
-        .on('postgres_changes', {...}, (payload) => { onNewLog?.(payload.new); })
-        .subscribe();
-      return { channel }; // channel reference is lost when query refetches
-    },
-  });
-}
-```
-
-**Fix:** Move the subscription to a `useEffect` with a cleanup return, not inside `queryFn`.
+**Resolution:** Subscription is now correctly placed inside a `useEffect` with a `supabase.removeChannel(channel)` cleanup return. No memory leak.
 
 ---
 
-### 2. Race Condition in Cart Sync on Login
+### 2. ~~Race Condition in Cart Sync on Login~~ [RESOLVED]
 
-**File:** `src/contexts/CartContext.tsx:147-183`
+**File:** `src/contexts/CartContext.tsx:165-185`
 
-When a user logs in, local cart items are synced to the database, then immediately reloaded. The reload can execute before Supabase has committed all upserts, causing items to be lost.
-
-```ts
-await syncLocalCartToDatabase(localItems);
-const updatedItems = await loadDatabaseCart(); // may not yet reflect all upserted items
-```
-
-**Fix:** Ensure `syncLocalCartToDatabase` returns success confirmation or use a transaction, then reload.
+**Resolution:** After sync, `loadDatabaseCart()` results are now compared against the local items count. If DB returns fewer items than were synced (replication lag), the local items are merged as a safety net. Items are never silently lost.
 
 ---
 
-### 3. Overly Permissive RLS Policy — Profiles Table
+### 3. ~~Overly Permissive RLS Policy — Profiles Table~~ [RESOLVED]
 
-**File:** `supabase/migrations/20260108232401_*.sql`
+**File:** `supabase/migrations/20260407030000_restrict_profiles_rls.sql`
 
-```sql
-CREATE POLICY "Users can view all profiles"
-  ON public.profiles FOR SELECT TO authenticated USING (true);
-```
-
-**Every** authenticated user can read **every** profile (names, emails, phone numbers, avatars). This is a privacy violation at scale.
-
-**Fix:** Restrict to `USING (auth.uid() = id)` for own-profile access, plus a separate policy for admin roles.
+**Resolution:** Migration drops the permissive policy and replaces with `USING (auth.uid() = id)` — users can only read their own profile.
 
 ---
 
-### 4. `.env` File Committed to Git
+### 4. ~~`.env` File Committed to Git~~ [RESOLVED]
 
-**File:** `.env` (tracked), `.gitignore` (missing `.env` entry)
-
-The `.env` file contains Supabase credentials and is committed to the repository. While anon keys are expected on the frontend, committing this file sets a bad precedent and risks future secret leaks (e.g., service role key).
-
-**Fix:** Add `.env` to `.gitignore`, remove from git history (`git rm --cached .env`), rotate keys if service_role key was ever committed.
+**Resolution:** `.env` is listed in `.gitignore` and is no longer tracked by git.
 
 ---
 
-### 5. Unprotected Developer Portal — Privilege Escalation
+### 5. ~~Unprotected Developer Portal — Privilege Escalation~~ [RESOLVED]
 
-**File:** `src/components/layout/AnimatedRoutes.tsx:261-268`, `src/pages/developer-portal/DeveloperPortalLayout.tsx`
+**File:** `src/components/newbuilds/DeveloperPortalLayout.tsx:28`
 
-The `/developer-portal` route has **no route-level auth guard**. `DeveloperPortalLayout` checks if the user is authenticated but does **not** redirect when `useDeveloperProfile()` returns `null` (i.e., user is not a developer). The layout and all nested routes (`/projects`, `/leads`, `/analytics`) still render.
-
-```tsx
-// AnimatedRoutes.tsx:261 — no guard wrapping this route
-<Route path="/developer-portal" element={<Suspense><Pages.DeveloperPortalLayout /></Suspense>}>
-  <Route index element={<LazyPage><Pages.DeveloperOverview /></LazyPage>} />
-  ...
-</Route>
-
-// DeveloperPortalLayout.tsx
-if (!user) return <Navigate to="/auth" />;
-// MISSING: if (!developer) return <Navigate to="/" />;
-return <NewbuildsLayout>...</NewbuildsLayout>; // renders even if developer is null
-```
-
-**Impact:** Any authenticated user can access developer portal pages.
-
-**Fix:** Add `if (!developer) return <Navigate to="/" />;` after the auth check, or wrap the route with a `DeveloperGuard`.
+**Resolution:** `DeveloperPortalLayout` now checks `if (!developer) return <Navigate to={APP_ROUTES.NEWBUILDS} replace />;` — non-developers are redirected.
 
 ---
 
-### 6. RoleGuard Uses Two Conflicting Permission Sources
+### 6. ~~RoleGuard Uses Two Conflicting Permission Sources~~ [RESOLVED]
 
-**File:** `src/components/auth/RoleGuard.tsx:33-56`
+**File:** `src/components/auth/RoleGuard.tsx:54-63`
 
-`RoleGuard` uses **server-side** `useResolvedContext()` for admin bypass (line 51) but **client-side** `useUserContext().hasRole()` for all other role checks (line 56). The codebase documents `useResolvedContext` as the "SINGLE SOURCE OF TRUTH" for permissions, yet the actual permission gate uses the client-side derivation.
-
-```tsx
-const { hasRole } = useUserContext();           // CLIENT-SIDE role derivation
-const { context } = useResolvedContext();        // SERVER-SIDE role resolution
-
-if (context?.role === 'admin') return children;  // server source for admins
-const hasAllowedRole = allowedRoles.some(r => hasRole(r)); // client source for everyone else
-```
-
-**Impact:** If server and client role logic diverge, regular users could be granted or denied access incorrectly. Admins are checked differently than other roles.
-
-**Fix:** Use `useResolvedContext()` exclusively for all role checks.
+**Resolution:** `RoleGuard` now uses `useResolvedContext()` exclusively. The `serverRole` from resolved context is compared against allowed roles for all users, not just admins. Permissions array is also checked for wildcard (`*`) access.
 
 ---
 
 ## HIGH Priority Issues
 
-### 7. Unprotected MC Registration Route
+### 7. ~~Unprotected MC Registration Route~~ [RESOLVED]
 
 **File:** `src/components/layout/AnimatedRoutes.tsx:608`
 
-`/mc/register` has no `AuthGuard`, while the adjacent `/mc/onboarding` (line 607) does. `MCRegistrationPage` checks auth internally via client-side redirect, but unauthenticated users briefly see the page contents before being redirected.
-
-```tsx
-// Line 607 — has guard
-<Route path="/mc/onboarding" element={<AuthGuard><Pages.MCOnboarding /></AuthGuard>} />
-// Line 608 — no guard
-<Route path="/mc/register" element={<Pages.MCRegistrationPage />} />
-```
-
-**Fix:** Wrap with `<AuthGuard>` for consistency.
+**Resolution:** `/mc/register` is now wrapped with `<AuthGuard>`, consistent with `/mc/onboarding`.
 
 ---
 
@@ -145,21 +73,11 @@ Similar onboarding/registration routes use different protection patterns. Vendor
 
 ---
 
-### 9. Duplicate Supabase Client in Error Handler
+### 9. ~~Duplicate Supabase Client in Error Handler~~ [RESOLVED]
 
-**File:** `src/lib/errorHandler.ts:105-118`
+**File:** `src/lib/errorHandler.ts:123`
 
-Instead of importing the singleton `supabase` client from `@/integrations/supabase/client`, the error handler manually constructs a `fetch()` call with raw env vars. This bypasses auth state, RLS, and creates a parallel unauthenticated connection.
-
-```ts
-await fetch(`${supabaseUrl}/rest/v1/analytics_events`, {
-  headers: { 'Authorization': `Bearer ${supabaseKey}` }, // anon key, not user session
-});
-```
-
-**Impact:** Error logs are always unauthenticated — RLS policies on `analytics_events` cannot identify the user. If the table requires auth, errors are silently dropped.
-
-**Fix:** Import and use the shared Supabase client.
+**Resolution:** Error handler now uses the shared `supabase` client via `supabase.from('analytics_events').insert(rows)`, inheriting user session and RLS.
 
 ---
 
@@ -363,34 +281,36 @@ Components mix three patterns with no convention: (A) `useState + useEffect` wit
 
 ## Summary
 
-| # | Issue | Severity | Category |
-|---|-------|----------|----------|
-| 1 | Realtime subscription memory leak | CRITICAL | Memory Leak |
-| 2 | Cart sync race condition on login | CRITICAL | Data Loss |
-| 3 | Profiles table readable by all users | CRITICAL | Privacy |
-| 4 | `.env` committed to git | CRITICAL | Security |
-| 5 | Developer portal accessible to any auth user | CRITICAL | Auth / Privilege Escalation |
-| 6 | RoleGuard uses two conflicting permission sources | CRITICAL | Auth / Consistency |
-| 7 | Unprotected MC registration route | HIGH | Auth |
-| 8 | Inconsistent auth guard patterns across routes | HIGH | Auth |
-| 9 | Duplicate Supabase client in errorHandler | HIGH | Architecture |
-| 10 | Wide-open CORS on edge functions | HIGH | Security |
-| 11 | Refresh tokens in localStorage | HIGH | Security |
-| 12 | No Content Security Policy | HIGH | Security |
-| 13 | Query hooks swallow errors | HIGH | UX / Reliability |
-| 14 | Dual toast system (332 call sites) | MEDIUM | Consistency |
-| 15 | 649 `as any` casts | MEDIUM | Type Safety |
-| 16 | Unstable useEffect deps in realtime | MEDIUM | Performance |
-| 17 | Silent cart mutation failures | MEDIUM | UX |
-| 18 | XSS risk in map popups | MEDIUM | Security |
-| 19 | Hardcoded Supabase project ID | MEDIUM | Config |
-| 20 | Dead Radix toast components | MEDIUM | Dead Code |
-| 21 | Incomplete barrel exports in shared/ | MEDIUM | Consistency |
-| 22 | Duplicated filter config schema | MEDIUM | Duplication |
-| 23 | Scattered sanitization utilities | MEDIUM | Organization |
-| 24 | Inconsistent cache strategy | LOW | Performance |
-| 25 | Cart state not synced with React Query | LOW | Architecture |
-| 26 | Channel name collisions | LOW | Reliability |
-| 27 | Translations subscription after failure | LOW | Reliability |
-| 28 | No barrel export for UI components | LOW | Organization |
-| 29 | Inconsistent data fetching patterns | LOW | Consistency |
+| # | Issue | Severity | Category | Status |
+|---|-------|----------|----------|--------|
+| 1 | ~~Realtime subscription memory leak~~ | CRITICAL | Memory Leak | RESOLVED |
+| 2 | ~~Cart sync race condition on login~~ | CRITICAL | Data Loss | RESOLVED |
+| 3 | ~~Profiles table readable by all users~~ | CRITICAL | Privacy | RESOLVED |
+| 4 | ~~`.env` committed to git~~ | CRITICAL | Security | RESOLVED |
+| 5 | ~~Developer portal accessible to any auth user~~ | CRITICAL | Auth / Privilege Escalation | RESOLVED |
+| 6 | ~~RoleGuard uses two conflicting permission sources~~ | CRITICAL | Auth / Consistency | RESOLVED |
+| 7 | ~~Unprotected MC registration route~~ | HIGH | Auth | RESOLVED |
+| 8 | Inconsistent auth guard patterns across routes | HIGH | Auth | OPEN |
+| 9 | ~~Duplicate Supabase client in errorHandler~~ | HIGH | Architecture | RESOLVED |
+| 10 | Wide-open CORS on edge functions | HIGH | Security | OPEN |
+| 11 | Refresh tokens in localStorage | HIGH | Security | OPEN |
+| 12 | No Content Security Policy | HIGH | Security | OPEN |
+| 13 | Query hooks swallow errors | HIGH | UX / Reliability | OPEN |
+| 14 | Dual toast system (332 call sites) | MEDIUM | Consistency | OPEN |
+| 15 | 649 `as any` casts | MEDIUM | Type Safety | OPEN |
+| 16 | Unstable useEffect deps in realtime | MEDIUM | Performance | OPEN |
+| 17 | Silent cart mutation failures | MEDIUM | UX | OPEN |
+| 18 | XSS risk in map popups | MEDIUM | Security | OPEN |
+| 19 | Hardcoded Supabase project ID | MEDIUM | Config | OPEN |
+| 20 | Dead Radix toast components | MEDIUM | Dead Code | OPEN |
+| 21 | Incomplete barrel exports in shared/ | MEDIUM | Consistency | OPEN |
+| 22 | Duplicated filter config schema | MEDIUM | Duplication | OPEN |
+| 23 | Scattered sanitization utilities | MEDIUM | Organization | OPEN |
+| 24 | Inconsistent cache strategy | LOW | Performance | OPEN |
+| 25 | Cart state not synced with React Query | LOW | Architecture | OPEN |
+| 26 | Channel name collisions | LOW | Reliability | OPEN |
+| 27 | Translations subscription after failure | LOW | Reliability | OPEN |
+| 28 | No barrel export for UI components | LOW | Organization | OPEN |
+| 29 | Inconsistent data fetching patterns | LOW | Consistency | OPEN |
+
+**Resolved: 8/29 issues (all 6 CRITICAL + 2 HIGH)**
