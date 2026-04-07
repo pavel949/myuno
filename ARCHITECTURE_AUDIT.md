@@ -217,25 +217,75 @@ Hardcoded in compiled JS bundles. Should derive from `VITE_SUPABASE_URL` env var
 
 ---
 
+### 16. Dead Radix Toast Components Still in Codebase
+
+**Files:** `src/components/ui/toast.tsx`, `src/components/ui/toaster.tsx`, `src/components/ui/use-toast.ts`
+
+The Radix UI toast system (ToastProvider, ToastViewport, Toast, ToastAction, etc.) is fully dead code. `App.tsx` only mounts `<Sonner />`, never `<Toaster />`. The `@radix-ui/react-toast` package is still in `package.json` adding bundle weight for zero benefit.
+
+**Fix:** Remove `src/components/ui/toast.tsx`, `toaster.tsx`, `use-toast.ts`, and uninstall `@radix-ui/react-toast`.
+
+---
+
+### 17. Incomplete Barrel Exports in `src/components/shared/index.ts`
+
+**File:** `src/components/shared/index.ts`
+
+Only 9 of 14+ shared components are exported. Missing: `AIDescriptionGenerator`, `AISmartFieldMapper`, `CatalogHeader`, `ExploreVerticalsSheet`, `GooglePlacesAutocomplete`. Components are imported via direct file paths elsewhere, creating inconsistent import patterns.
+
+**Fix:** Export all public shared components from the barrel file.
+
+---
+
+### 18. Duplicated Filter Configuration Schema
+
+**Files:** `src/lib/filterConfigs/restaurantFiltersKlook.ts`, `transportFiltersKlook.ts`, `yachtFiltersKlook.ts`
+
+Each implements the same structure (showDateFilters, pricePresets, sortOptions, chipSections) with copy-pasted boilerplate. No shared base type or factory function.
+
+**Fix:** Create a shared `FilterConfig` type and factory, with per-vertical overrides.
+
+---
+
+### 19. Scattered Sanitization Utilities
+
+**Files:** `src/lib/sanitize.ts`, `src/lib/sanitizePayload.ts`, `src/lib/sanitizeSearch.ts`
+
+Three separate files for sanitization with no unified export. Some are re-exported from `src/lib/index.ts`, others require direct imports.
+
+**Fix:** Consolidate into a single `src/lib/sanitize/index.ts` module.
+
+---
+
 ## LOW Priority / Architectural Notes
 
-### 16. Inconsistent Cache Strategy
+### 20. Inconsistent Cache Strategy
 
 Some hooks use centralized `CACHE_PROFILES` from `src/lib/queryConfig.ts`, others hardcode `staleTime`/`gcTime` or omit them entirely (defaulting to React Query's 0ms stale time). This leads to unpredictable data freshness.
 
-### 17. Missing `queryClient.invalidateQueries` After Cart Operations
+### 21. Missing `queryClient.invalidateQueries` After Cart Operations
 
 `CartContext` manages cart state independently of React Query. If any component also queries cart data via React Query, it won't be notified of changes.
 
-### 18. Subscription Channel Name Collisions
+### 22. Subscription Channel Name Collisions
 
 Generic channel names like `'notifications-realtime'` can collide if multiple component instances subscribe. Prefer including user IDs: `'notifications-${userId}'`.
 
-### 19. Language Context Subscription Created Regardless of Initial Load Failure
+### 23. Language Context Subscription Created Regardless of Initial Load Failure
 
 **File:** `src/contexts/LanguageContext.tsx:96-114`
 
 If the initial translations fetch fails, the realtime subscription is still created, attempting to process updates for data that was never loaded.
+
+### 24. No Barrel Export for UI Components
+
+**File:** `src/components/ui/` (67 files, no `index.ts`)
+
+Every consumer must import individual files. A barrel export would standardize the import surface and make dead code easier to identify.
+
+### 25. Inconsistent Data Fetching Patterns
+
+Components mix three patterns with no convention: (A) `useState + useEffect` with manual fetch, (B) custom hooks wrapping `useQuery`, (C) direct React Query usage. All three appear within the same feature modules.
 
 ---
 
@@ -258,7 +308,13 @@ If the initial translations fetch fails, the realtime subscription is still crea
 | 13 | Silent cart mutation failures | MEDIUM | UX |
 | 14 | XSS risk in map popups | MEDIUM | Security |
 | 15 | Hardcoded Supabase project ID | MEDIUM | Config |
-| 16 | Inconsistent cache strategy | LOW | Performance |
-| 17 | Cart state not synced with React Query | LOW | Architecture |
-| 18 | Channel name collisions | LOW | Reliability |
-| 19 | Translations subscription after failure | LOW | Reliability |
+| 16 | Dead Radix toast components | MEDIUM | Dead Code |
+| 17 | Incomplete barrel exports in shared/ | MEDIUM | Consistency |
+| 18 | Duplicated filter config schema | MEDIUM | Duplication |
+| 19 | Scattered sanitization utilities | MEDIUM | Organization |
+| 20 | Inconsistent cache strategy | LOW | Performance |
+| 21 | Cart state not synced with React Query | LOW | Architecture |
+| 22 | Channel name collisions | LOW | Reliability |
+| 23 | Translations subscription after failure | LOW | Reliability |
+| 24 | No barrel export for UI components | LOW | Organization |
+| 25 | Inconsistent data fetching patterns | LOW | Consistency |
