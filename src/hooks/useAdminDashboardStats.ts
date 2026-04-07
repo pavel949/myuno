@@ -35,6 +35,8 @@ export interface DashboardStats {
   // Moderation
   pendingProperties: number;
   pendingContent: number;
+  // Support
+  openTickets: number;
 }
 
 export function useAdminDashboardStats() {
@@ -91,9 +93,10 @@ export function useAdminDashboardStats() {
       ]);
 
       // Pending moderation
-      const [pendingPropertiesRes, pendingListingsRes] = await Promise.all([
+      const [pendingPropertiesRes, pendingListingsRes, openTicketsRes] = await Promise.all([
         supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('listings').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        supabase.from('support_tickets').select('id', countOptions).in('status', ['open', 'in_progress']).limit(1),
       ]);
 
       // Active/pending providers
@@ -140,6 +143,7 @@ export function useAdminDashboardStats() {
         pendingBookings: pendingBookingsRes.count || 0,
         pendingProperties,
         pendingContent: totalPendingContent,
+        openTickets: openTicketsRes.count || 0,
       };
     },
     ...CACHE_PROFILES.ADMIN,
