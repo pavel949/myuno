@@ -684,6 +684,10 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="insurance" element={<LazyPage><Pages.DocumentsInsurancePage /></LazyPage>} />
           <Route path="owners" element={<LazyPage><Pages.OwnerOwnersPage /></LazyPage>} />
           <Route path="owners/:id" element={<LazyPage><Pages.OwnerDetailPage /></LazyPage>} />
+          <Route path="performance" element={<LazyPage><Pages.OwnerPerformance /></LazyPage>} />
+          <Route path="trends" element={<LazyPage><Pages.OwnerTrendsAndTips /></LazyPage>} />
+          <Route path="account-settings" element={<LazyPage><Pages.OwnerAccountSettings /></LazyPage>} />
+          <Route path="superhost" element={<LazyPage><Pages.OwnerSuperhost /></LazyPage>} />
           {/* Pages moved from /owner */}
           <Route path="portfolio" element={<LazyPage><Pages.OwnerPortfolio /></LazyPage>} />
           <Route path="guide" element={<LazyPage><Pages.OwnerGuidePage /></LazyPage>} />
