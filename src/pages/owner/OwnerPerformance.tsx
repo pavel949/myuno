@@ -55,6 +55,7 @@ export default function OwnerPerformance() {
   }
 
   const kpis = data?.kpis ?? { bookedNights: 0, bookingValue: 0, fiveStarPercent: 100 };
+  const chartData = data?.chartData ?? [];
   const quality = data?.quality ?? { averageRating: 0, fiveStarCount: 0, belowFiveCount: 0, totalReviews: 0, recentIssues: 0 };
   const occupancy = data?.occupancy ?? { occupancyRate: 0, cancellationRate: 0, avgStayDays: 0, pricePerNight: 0 };
   const conversion = data?.conversion ?? { bookingConversion: 0, bookingToArrivalDays: 0, repeatGuestPercent: 0, wishlistAdds: 0 };
@@ -162,22 +163,7 @@ export default function OwnerPerformance() {
           <h2 className="text-lg font-bold mb-4">{isRu ? 'Динамика выручки' : 'Revenue Trend'}</h2>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={(() => {
-                // Generate chart data from period
-                const days = period === '7d' ? 7 : period === '30d' ? 30 : 12;
-                const isMonthly = period === '365d';
-                return Array.from({ length: days }, (_, i) => {
-                  const baseValue = (kpis.bookingValue / days) * (0.5 + Math.random());
-                  const date = new Date();
-                  if (isMonthly) {
-                    date.setMonth(date.getMonth() - (days - 1 - i));
-                    return { name: date.toLocaleDateString(isRu ? 'ru' : 'en', { month: 'short' }), value: Math.round(baseValue) };
-                  } else {
-                    date.setDate(date.getDate() - (days - 1 - i));
-                    return { name: date.toLocaleDateString(isRu ? 'ru' : 'en', { day: 'numeric', month: 'short' }), value: Math.round(baseValue) };
-                  }
-                });
-              })()}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />

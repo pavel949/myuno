@@ -14,7 +14,11 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { User, Sparkles, Car, ShoppingBag, Wrench, Star } from 'lucide-react';
+import { User, Sparkles, Car, ShoppingBag, Wrench, Star, Calendar, MapPin, ChevronRight, History } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import {
   GuestStayBlock,
   GuestOrdersBlock,
@@ -44,7 +48,7 @@ export default function MyStay() {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
 
-  const { activeBookings, isLoading: bookingsLoading } = useGuestPropertyBookings();
+  const { activeBookings, pastBookings, upcomingBookings, isLoading: bookingsLoading } = useGuestPropertyBookings();
   const {
     activeOrders,
     isLoading: ordersLoading,
@@ -138,6 +142,49 @@ export default function MyStay() {
 
       {/* Row 3: Messages */}
       <GuestMessagesBlock unreadCount={0} loading={isLoading} />
+
+      {/* Past Trips */}
+      {pastBookings && pastBookings.length > 0 && (
+        <div>
+          <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
+            <History className="w-4 h-4 text-muted-foreground" />
+            {isRu ? 'Прошлые поездки' : 'Past Trips'}
+          </h3>
+          <div className="space-y-2">
+            {pastBookings.slice(0, 5).map((b: any) => {
+              const checkIn = new Date(b.check_in);
+              const checkOut = new Date(b.check_out);
+              const nights = differenceInDays(checkOut, checkIn);
+              return (
+                <Card
+                  key={b.id}
+                  className="cursor-pointer hover:shadow-sm transition-shadow"
+                  onClick={() => navigate(`/trip/${b.id}`)}
+                >
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">
+                        {(b as any).owner_properties?.title || (isRu ? 'Поездка' : 'Trip')}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(checkIn, 'dd MMM', { locale: isRu ? ru : undefined })}
+                        {' → '}
+                        {format(checkOut, 'dd MMM yyyy', { locale: isRu ? ru : undefined })}
+                        <span className="ml-1">· {nights} {isRu ? 'н.' : 'n.'}</span>
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
+                      {isRu ? 'Завершена' : 'Completed'}
+                    </Badge>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Order Dialog */}
       <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>

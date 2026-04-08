@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
+import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,6 +62,7 @@ export default function MCBookingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('check_in');
   const [sortAsc, setSortAsc] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
 
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -85,12 +87,16 @@ export default function MCBookingsPage() {
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(b =>
-        b.guest_name?.toLowerCase().includes(q) ||
-        b.guest_email?.toLowerCase().includes(q) ||
-        b.guest_phone?.includes(q) ||
-        b.id.includes(q)
-      );
+      filtered = filtered.filter(b => {
+        const propTitle = (b as any).owner_properties?.title?.toLowerCase() || '';
+        return (
+          b.guest_name?.toLowerCase().includes(q) ||
+          b.guest_email?.toLowerCase().includes(q) ||
+          b.guest_phone?.includes(q) ||
+          propTitle.includes(q) ||
+          b.id.includes(q)
+        );
+      });
     }
 
     // Sort
@@ -266,7 +272,7 @@ export default function MCBookingsPage() {
               <Card
                 key={booking.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate(`/mc/calendar?booking=${booking.id}`)}
+                onClick={() => setSelectedBooking(booking)}
               >
                 <CardContent className="p-4">
                   {/* Top row: Guest + Status */}
@@ -320,7 +326,9 @@ export default function MCBookingsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground flex items-center gap-1 truncate flex-1 mr-2">
                       <Building2 className="w-3 h-3 flex-shrink-0" />
-                      {booking.property_id?.slice(0, 8)}...
+                      {(booking as any).owner_properties?.title
+                        || (booking as any).owner_properties?.address
+                        || booking.property_id?.slice(0, 8)}
                     </span>
                     {booking.source && booking.source !== 'manual' && (
                       <Badge variant="outline" className="text-xs mr-2">
@@ -337,6 +345,14 @@ export default function MCBookingsPage() {
           })}
         </div>
       )}
+
+      {/* Booking Detail Sheet */}
+      <BookingDetailSheet
+        open={!!selectedBooking}
+        onOpenChange={(open) => { if (!open) setSelectedBooking(null); }}
+        booking={selectedBooking}
+        propertyTitle={(selectedBooking as any)?.owner_properties?.title}
+      />
     </PageContainer>
   );
 }

@@ -109,12 +109,22 @@ export default function StaysSearchPage() {
   const sortedResults = useMemo(() => {
     let filtered = [...results];
 
-    // Guest count filter (client-side since max_guests may not be in search query)
+    // Guest count filter
     if (guestsCount) {
       const gc = parseInt(guestsCount, 10);
       if (gc > 0) {
-        filtered = filtered.filter((r: any) => !r.max_guests || r.max_guests >= gc);
+        filtered = filtered.filter(r => !r.max_guests || r.max_guests >= gc);
       }
+    }
+
+    // Amenity filter (match all selected amenities against property amenities array)
+    if (selectedAmenities.length > 0) {
+      filtered = filtered.filter(r => {
+        const propAmenities = (r.amenities || []).map((a: string) => a.toLowerCase());
+        return selectedAmenities.every(sa =>
+          propAmenities.some((pa: string) => pa.includes(sa))
+        );
+      });
     }
 
     // Sort

@@ -37,6 +37,7 @@ import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { HostProfileSection } from '@/components/property/HostProfileSection';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
+import { SimilarProperties } from '@/components/property/SimilarProperties';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -673,6 +674,15 @@ export default function PropertyDetail() {
             lng={property.lng}
             district={property.district}
             address={property.address}
+          />
+
+          {/* Similar Properties */}
+          <Separator />
+          <SimilarProperties
+            propertyId={id || ''}
+            district={property.district}
+            propertyType={property.property_type}
+            bedrooms={property.bedrooms}
           />
             </div>
 

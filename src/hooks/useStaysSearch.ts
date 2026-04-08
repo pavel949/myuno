@@ -39,12 +39,14 @@ export interface StaysListingRow {
   cover_image: string | null;
   images: string[] | null;
   bedrooms: number | null;
+  max_guests: number | null;
   property_type: string | null;
   price_per_night: number | null;
   price: number | null;
   currency: string | null;
   min_stay_nights: number | null;
   listing_modes?: string[] | null;
+  amenities?: string[] | null;
 }
 
 function buildDistrictOrFilter(zones: StaysZone[]): string {
@@ -81,7 +83,7 @@ async function fetchCandidateProperties(
   let q = supabase
     .from('properties')
     .select(
-      'id, title_ru, title_en, district, cover_image, images, bedrooms, property_type, price_per_night, price, currency, min_stay_nights, listing_modes',
+      'id, title_ru, title_en, district, cover_image, images, bedrooms, max_guests, property_type, price_per_night, price, currency, min_stay_nights, listing_modes, amenities',
     )
     .eq('is_active', true)
     .eq('approval_status', 'approved');
